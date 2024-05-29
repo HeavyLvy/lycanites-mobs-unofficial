@@ -4,29 +4,17 @@ import com.google.common.collect.ImmutableSet;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.block.fluid.BaseFluidBlock;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.Pose;
-import net.minecraft.pathfinding.GroundPathNavigator;
-import net.minecraft.pathfinding.Path;
-import net.minecraft.pathfinding.PathFinder;
-import net.minecraft.pathfinding.PathNodeType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.PathFinder;
 
-public class CreaturePathNavigator extends GroundPathNavigator {
+public class CreaturePathNavigator extends GroundPathNavigation {
 
     public BaseCreatureEntity entityCreature;
     protected BlockPos climbTargetPos;
 
-    public CreaturePathNavigator(BaseCreatureEntity entityCreature, World world) {
+    public CreaturePathNavigator(BaseCreatureEntity entityCreature, Level world) {
         super(entityCreature, world);
         this.entityCreature = entityCreature;
     }

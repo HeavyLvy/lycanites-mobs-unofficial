@@ -34,8 +34,10 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -2157,13 +2159,13 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     // ========== Get New Navigator ==========
     /** Called when this entity is constructed for initial navigator. **/
     @Override
-    protected PathNavigator createNavigation(World world) {
+    protected PathNavigation createNavigation(Level world) {
         return new CreaturePathNavigator(this, world);
     }
 
     // ========== Get New Move Helper ==========
     /** Called when this entity is constructed for initial move helper. **/
-    protected MovementController createMoveController() {
+    protected MoveControl createMoveController() {
         return new CreatureMoveController(this);
     }
 
@@ -2175,7 +2177,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     // ========== Get Move Helper ==========
     /** Returns the movement helper that this entity should use. **/
-    public MovementController getMoveControl() {
+    public MoveControl getMoveControl() {
         return super.getMoveControl();
     }
     

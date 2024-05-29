@@ -1,12 +1,16 @@
 package com.lycanitesmobs.core.util;
 
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 
-public class LycaniteMobsHelperClass {
+public class LMHelperClass {
     public static Object convertObjectToDesired(Object input, String outputType) {
         return switch (outputType.toLowerCase()) {
             case "integer" -> convertToInteger(input);
@@ -14,10 +18,22 @@ public class LycaniteMobsHelperClass {
             case "float" -> convertToFloat(input);
             case "boolean" -> convertToBoolean(input);
             case "resourcelocation" -> convertToResourceLocation(input);
+            case "vec3i" -> convertToVec3i(input);
             default -> input;
         };
     }
-    private static ResourceLocation convertToResourceLocation(Object input) {
+    public static Vec3i convertToVec3i(Object input) {
+        if (input instanceof Vec3 v) {
+
+            return new Vec3i(convertToInteger(v.x), convertToInteger(v.y), convertToInteger(v.z));
+        }else if (input instanceof Vector3f v) {
+            return new Vec3i(convertToInteger(v.x), convertToInteger(v.y), convertToInteger(v.z));
+        }else if (input instanceof Vector3d v) {
+            return new Vec3i(convertToInteger(v.x), convertToInteger(v.y), convertToInteger(v.z));
+        }
+        return null;
+    }
+    public static ResourceLocation convertToResourceLocation(Object input) {
         if (input instanceof ResourceLocation) {
             return (ResourceLocation) input;
         } else if (input instanceof String) {
@@ -31,7 +47,7 @@ public class LycaniteMobsHelperClass {
         }
         return null;
     }
-    private static Boolean convertToBoolean(Object input) {
+    public static Boolean convertToBoolean(Object input) {
         if (input instanceof Boolean) {
             return (Boolean) input;
         } else if (input instanceof String) {
@@ -46,7 +62,7 @@ public class LycaniteMobsHelperClass {
     }
 
 
-    private static Integer convertToInteger(Object input) {
+    public static Integer convertToInteger(Object input) {
         if (input instanceof Integer) {
             return (Integer) input;
         } else if (input instanceof Double || input instanceof Float) {
@@ -56,7 +72,7 @@ public class LycaniteMobsHelperClass {
         }
     }
 
-    private static Double convertToDouble(Object input) {
+    public static Double convertToDouble(Object input) {
         if (input instanceof Double) {
             return (Double) input;
         } else if (input instanceof Integer || input instanceof Float) {
@@ -66,7 +82,7 @@ public class LycaniteMobsHelperClass {
         }
     }
 
-    private static Float convertToFloat(Object input) {
+    public static Float convertToFloat(Object input) {
         if (input instanceof Float) {
             return (Float) input;
         } else if (input instanceof Integer || input instanceof Double) {

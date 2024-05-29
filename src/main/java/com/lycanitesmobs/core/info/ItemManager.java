@@ -18,7 +18,7 @@ import com.lycanitesmobs.core.item.special.ItemSoulgazer;
 import com.lycanitesmobs.core.item.special.ItemSoulkey;
 import com.lycanitesmobs.core.item.special.ItemSoulstone;
 import com.lycanitesmobs.core.item.summoningstaff.*;
-import com.lycanitesmobs.core.util.LycaniteMobsHelperClass;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -276,7 +276,7 @@ public class ItemManager extends JSONLoader {
 		}
 
 		Item item = itemStack.getItem();
-		Object locationObj = LycaniteMobsHelperClass.convertObjectToDesired(item, "resourcelocation");
+		Object locationObj = LMHelperClass.convertObjectToDesired(item, "resourcelocation");
 		if (locationObj instanceof ResourceLocation location) {
 			for (String itemId : ItemConfig.lowEquipmentSharpnessItems) {
 				if (new ResourceLocation(itemId).equals(location)) {
@@ -313,7 +313,7 @@ public class ItemManager extends JSONLoader {
 		}
 
 		Item item = itemStack.getItem();
-		Object locationObj = LycaniteMobsHelperClass.convertObjectToDesired(item, "resourcelocation");
+		Object locationObj = LMHelperClass.convertObjectToDesired(item, "resourcelocation");
 		if (locationObj instanceof ResourceLocation location) {
 			if (item instanceof ChargeItem) {
 				return ItemConfig.highEquipmentRepairAmount;
