@@ -27,9 +27,12 @@ import com.lycanitesmobs.core.network.MessageCreature;
 import com.lycanitesmobs.core.pets.PetEntry;
 import com.lycanitesmobs.core.spawner.SpawnerEventListener;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.*;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -37,9 +40,17 @@ import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -385,22 +396,22 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
         // Path On Fire or In Lava:
         if(!this.canBurn()) {
-            this.setPathfindingMalus(PathNodeType.DANGER_FIRE, 0.0F);
+            this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 0.0F);
             if(this.canBreatheUnderlava()) {
-                this.setPathfindingMalus(PathNodeType.LAVA, 1.0F);
+                this.setPathfindingMalus(BlockPathTypes.LAVA, 1.0F);
                 if(!this.canBreatheAir()) {
-                    this.setPathfindingMalus(PathNodeType.LAVA, 8.0F);
+                    this.setPathfindingMalus(BlockPathTypes.LAVA, 8.0F);
                 }
             }
         }
 
         // Path In Water:
         if(this.waterDamage())
-            this.setPathfindingMalus(PathNodeType.WATER, -1.0F);
+            this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
         else if(this.canBreatheUnderwater()) {
-            this.setPathfindingMalus(PathNodeType.WATER, 1.0F);
+            this.setPathfindingMalus(BlockPathTypes.WATER, 1.0F);
             if(!this.canBreatheAir())
-                this.setPathfindingMalus(PathNodeType.WATER, 8.0F);
+                this.setPathfindingMalus(BlockPathTypes.WATER, 8.0F);
         }
 
         // Swimming:
@@ -2132,7 +2143,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		this.updateLimbSwing();
 	}
 
-	public void travelSwimming(Vector3d direction) {
+	public void travelSwimming(Vec3 direction) {
 		super.moveRelative(0.1F, direction);
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
@@ -2145,15 +2156,14 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     /** Updates limb swing animation, used when flying or swimming as their movements don't update it like the standard walking movement. **/
     public void updateLimbSwing() {
-        this.animationSpeedOld = this.animationSpeed;
+		this.calculateEntityAnimation(true);
         double distanceX = this.position().x() - this.xo;
         double distanceZ = this.position().z() - this.zo;
-        float distance = MathHelper.sqrt(distanceX * distanceX + distanceZ * distanceZ) * 4.0F;
+        float distance = LMHelperClass.convertToFloat(Math.sqrt(distanceX * distanceX + distanceZ * distanceZ) * 4.0F);
         if (distance > 1.0F) {
             distance = 1.0F;
         }
-        this.animationSpeed += (distance - this.animationSpeed) * 0.4F;
-        this.animationPosition += this.animationSpeed;
+		this.walkAnimation.setSpeed((distance - this.walkAnimation.speed()) * 0.4F);
     }
 
     // ========== Get New Navigator ==========
@@ -2217,7 +2227,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             if(!this.leashAIActive) {
                 this.goalSelector.addGoal(2, this.leashMoveTowardsRestrictionAI); // Main Goals
                 if (!this.isStrongSwimmer())
-                    this.setPathfindingMalus(PathNodeType.WATER, 0.0F);
+                    this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
                 this.leashAIActive = true;
             }
 
@@ -2238,7 +2248,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             this.leashAIActive = false;
             this.goalSelector.removeGoal(this.leashMoveTowardsRestrictionAI); // Main Goals
             if (!this.isStrongSwimmer())
-                this.setPathfindingMalus(PathNodeType.WATER, PathNodeType.WATER.getMalus());
+                this.setPathfindingMalus(BlockPathTypes.WATER, BlockPathTypes.WATER.getMalus());
             this.hasRestriction();
         }
     }
@@ -2318,8 +2328,8 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     	if(!this.isFlying()) {
     		this.playJumpSound();
 		}
-    	double yaw = this.yRot;
-		double pitch = this.xRot;
+    	double yaw = this.yRotO;
+		double pitch = this.xRotO;
     	double angle = Math.toRadians(yaw);
         double xAmount = -Math.sin(angle);
         double yAmount = leapHeight;
@@ -2372,7 +2382,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 			if(zDist == 0) {
 				zDist = 0.05D;
 			}
-			double xzDist = MathHelper.sqrt(xDist * xDist + zDist * zDist);
+			double xzDist = Math.sqrt(xDist * xDist + zDist * zDist);
             /*this.motionX = xDist / xzDist * 0.5D * 0.8D + this.motionX * 0.2D;
             this.motionZ = zDist / xzDist * 0.5D * 0.8D + this.motionZ * 0.2D;
             this.motionY = leapHeight;*/
@@ -2946,7 +2956,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		Vector3d facing = this.getFacingPositionDouble(this.position().x(), this.position().y(), this.position().z(), range, angle);
 		double distanceX = facing.x - this.position().x();
 		double distanceZ = facing.z - this.position().z();
-		double distanceXZ = MathHelper.sqrt(distanceX * distanceX + distanceZ * distanceZ) * 0.1D;
+		double distanceXZ = Math.sqrt(distanceX * distanceX + distanceZ * distanceZ) * 0.1D;
 		double distanceY = distanceXZ;
 		if(target != null) {
 			double targetX = target.position().x() - this.position().x();
@@ -3033,7 +3043,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         // After Successful Attack:
         if(attackSuccess) {
             if(enchantmentKnockback > 0) {
-            	target.push((double)(-MathHelper.sin(this.yRot * (float)Math.PI / 180.0F) * (float)enchantmentKnockback * 0.5F), 0.1D, (double)(MathHelper.cos(this.yRot * (float)Math.PI / 180.0F) * (float)enchantmentKnockback * 0.5F));
+            	target.push((double)(-Math.sin(this.yRot * (float)Math.PI / 180.0F) * (float)enchantmentKnockback * 0.5F), 0.1D, (double)(Math.cos(this.yRotO * (float)Math.PI / 180.0F) * (float)enchantmentKnockback * 0.5F));
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.6D, 1, 0.6D));
             }
 
@@ -3065,18 +3075,18 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 	public boolean canTargetBlockDamageSource(LivingEntity target, DamageSource damageSource) {
 		Entity entity = damageSource.getDirectEntity();
 		boolean arrowPierce = false;
-		if (entity instanceof AbstractArrowEntity) {
-			AbstractArrowEntity abstractarrowentity = (AbstractArrowEntity)entity;
+		if (entity instanceof AbstractArrow) {
+			AbstractArrow abstractarrowentity = (AbstractArrow)entity;
 			if (abstractarrowentity.getPierceLevel() > 0) {
 				arrowPierce = true;
 			}
 		}
-		if (!damageSource.isBypassArmor() && target.isBlocking() && !arrowPierce) {
-			Vector3d vector3d2 = damageSource.getSourcePosition();
+		if (damageSource != target.level().damageSources() && target.isBlocking() && !arrowPierce) {
+			Vec3 vector3d2 = damageSource.getSourcePosition();
 			if (vector3d2 != null) {
-				Vector3d vector3d = target.getViewVector(1.0F);
-				Vector3d vector3d1 = vector3d2.vectorTo(target.position()).normalize();
-				vector3d1 = new Vector3d(vector3d1.x, 0.0D, vector3d1.z);
+				Vec3 vector3d = target.getViewVector(1.0F);
+				Vec3 vector3d1 = vector3d2.vectorTo(target.position()).normalize();
+				vector3d1 = new Vec3(vector3d1.x, 0.0D, vector3d1.z);
 				if (vector3d1.dot(vector3d) < 0.0D) {
 					return true;
 				}
@@ -3099,10 +3109,10 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * @param nestedDamageSource This can be null or can be a passed damage source for all kinds of use, mainly for minion damage sources. This will override the damage source for EntityBase+Ageable.
      * @return The damage source to use.
      */
-     public DamageSource getDamageSource(EntityDamageSource nestedDamageSource) {
+     public DamageSource getDamageSource(DamageSource nestedDamageSource) {
          if(nestedDamageSource != null)
              return nestedDamageSource;
-        return DamageSource.mobAttack(this);
+        return this.level().damageSources().mobAttack(this);
     }
 
 	/**
@@ -3181,8 +3191,8 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 			}
 
             Entity entity = damageSrc.getDirectEntity();
-            if(entity instanceof ThrowableEntity) {
-				entity = ((ThrowableEntity) entity).getOwner();
+            if(entity instanceof ThrowableProjectile) {
+				entity = ((ThrowableProjectile) entity).getOwner();
 			}
 
             // Damaged by Living Entity:

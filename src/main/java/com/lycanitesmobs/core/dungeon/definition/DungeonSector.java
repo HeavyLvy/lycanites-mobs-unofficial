@@ -3,7 +3,7 @@ package com.lycanitesmobs.core.dungeon.definition;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.helpers.JSONHelper;
-import net.minecraft.util.math.vector.Vector3i;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,11 +87,11 @@ public class DungeonSector {
 		}
 
 		this.padding = JSONHelper.getVector3i(json, "padding");
-		if(this.padding.getX() <= 0) {
-			this.padding = new Vector3i(this.wall.padding, this.padding.getY(), this.padding.getZ());
+		if(this.padding.x() <= 0) {
+			this.padding = new Vector3i(this.wall.padding, this.padding.y(), this.padding.z());
 		}
-		if(this.padding.getZ() <= 0) {
-			this.padding = new Vector3i(this.padding.getX(), this.padding.getY(), this.wall.padding);
+		if(this.padding.z() <= 0) {
+			this.padding = new Vector3i(this.padding.x(), this.padding.y(), this.wall.padding);
 		}
 	}
 
@@ -102,15 +102,15 @@ public class DungeonSector {
 	 * @return A random size to use.
 	 */
 	public Vector3i getRandomSize(Random random) {
-		int x = this.sizeMin.getX();
-		if(this.sizeMax.getX() > x)
-			x += random.nextInt(this.sizeMax.getX() - x + 1);
-		int y = this.sizeMin.getY();
-		if(this.sizeMax.getY() > y)
-			y += random.nextInt(this.sizeMax.getY() - y + 1);
-		int z = this.sizeMin.getZ();
-		if(this.sizeMax.getZ() > z)
-			z += random.nextInt(this.sizeMax.getZ() - z + 1);
+		int x = this.sizeMin.x();
+		if(this.sizeMax.x() > x)
+			x += random.nextInt(this.sizeMax.x() - x + 1);
+		int y = this.sizeMin.y();
+		if(this.sizeMax.y() > y)
+			y += random.nextInt(this.sizeMax.y() - y + 1);
+		int z = this.sizeMin.y();
+		if(this.sizeMax.z() > z)
+			z += random.nextInt(this.sizeMax.z() - z + 1);
 		return new Vector3i(x, y, z);
 	}
 }

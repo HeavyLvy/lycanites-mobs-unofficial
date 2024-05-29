@@ -1,20 +1,21 @@
 package com.lycanitesmobs.core.helpers;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.Item;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.biome.Biome;
-import net.minecraftforge.common.BiomeDictionary;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import com.lycanitesmobs.core.util.Material;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraftforge.common.BiomeManager;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.joml.Vector3d;
+import org.joml.Vector3i;
 
 import java.util.*;
 
@@ -72,7 +73,7 @@ public class JSONHelper {
 		List<Block> blocks = new ArrayList<>();
 		Iterator<JsonElement> jsonIterator = jsonArray.iterator();
 		while (jsonIterator.hasNext()) {
-			Block block = GameRegistry.findRegistry(Block.class).getValue(new ResourceLocation(jsonIterator.next().getAsString()));
+			Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(jsonIterator.next().getAsString()));
 			if(block != null) {
 				blocks.add(block);
 			}
@@ -84,7 +85,7 @@ public class JSONHelper {
 		List<Item> items = new ArrayList<>();
 		Iterator<JsonElement> jsonIterator = jsonArray.iterator();
 		while (jsonIterator.hasNext()) {
-			Item item = GameRegistry.findRegistry(Item.class).getValue(new ResourceLocation(jsonIterator.next().getAsString()));
+			Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(jsonIterator.next().getAsString()));
 			if(item != null) {
 				items.add(item);
 			}
@@ -92,13 +93,13 @@ public class JSONHelper {
 		return items;
 	}
 
-	public static List<Material> getJsonMaterials(JsonObject json) {
-		List<Material> materials = new ArrayList<>();
+	public static List<BlockBehaviour.Properties> getJsonMaterials(JsonObject json) {
+		List<BlockBehaviour.Properties> materials = new ArrayList<>();
 		if(json.has("materials")) {
 			JsonArray jsonArray = json.get("materials").getAsJsonArray();
 			Iterator<JsonElement> jsonIterator = jsonArray.iterator();
 			while (jsonIterator.hasNext()) {
-				Material material = null;
+				BlockBehaviour.Properties material = null;
 				String materialName = jsonIterator.next().getAsString();
 
 				if("air".equalsIgnoreCase(materialName)) {
@@ -185,10 +186,10 @@ public class JSONHelper {
 
 			List<Biome> selectedBiomes = new ArrayList<>();
 			if ("ALL".equalsIgnoreCase(biomeEntry)) {
-				for (BiomeDictionary.Type biomeType : BiomeDictionary.Type.getAll()) {
-					Set<RegistryKey<Biome>> selectedBiomesSet = BiomeDictionary.getBiomes(biomeType);
-					for (RegistryKey<Biome> selectedBiomesKey : selectedBiomesSet) {
-						Biome biome = ForgeRegistries.BIOMES.getValue(selectedBiomesKey.location());
+				for (BiomeManager.BiomeType biomeType : BiomeManager.BiomeType.values()) {
+					ImmutableList<BiomeManager.BiomeEntry> selectedBiomesSet = BiomeManager.getBiomes(biomeType);
+					for (BiomeManager.BiomeEntry selectedBiomesKey : selectedBiomesSet) {
+						Biome biome = ForgeRegistries.BIOMES.getValue(selectedBiomesKey.getKey().registry());
 						if(biome != null) {
 							selectedBiomes.add(biome);
 						}
@@ -196,16 +197,16 @@ public class JSONHelper {
 				}
 			}
 			else if (!"NONE".equalsIgnoreCase(biomeEntry)) {
-				BiomeDictionary.Type biomeType = null;
+				BiomeManager.BiomeType biomeType = null;
 				try {
-					biomeType = BiomeDictionary.Type.getType(biomeEntry.toUpperCase(Locale.ENGLISH));
+					biomeType = BiomeManager.BiomeType.valueOf(biomeEntry.toUpperCase(Locale.ENGLISH));
 				} catch (Exception e) {
 					LycanitesMobs.logWarning("", "[Spawning] Unknown biome type " + biomeEntry + " this will be ignored and treated as NONE.");
 				}
 				if (biomeType != null) {
-					Set<RegistryKey<Biome>> selectedBiomesSet = BiomeDictionary.getBiomes(biomeType);
-					for (RegistryKey<Biome> selectedBiomesKey : selectedBiomesSet) {
-						Biome biome = ForgeRegistries.BIOMES.getValue(selectedBiomesKey.location());
+					ImmutableList<BiomeManager.BiomeEntry> selectedBiomesSet = BiomeManager.getBiomes(biomeType);
+					for (BiomeManager.BiomeEntry selectedBiomesKey : selectedBiomesSet) {
+						Biome biome = ForgeRegistries.BIOMES.getValue(selectedBiomesKey.getKey().registry());
 						if(biome != null) {
 							selectedBiomes.add(biome);
 						}
@@ -215,11 +216,11 @@ public class JSONHelper {
 
 			for (Biome biome : selectedBiomes) {
 				if (additive) {
-					if (!biomeList.contains(biome.getRegistryName().toString())) {
-						biomeList.add(biome.getRegistryName().toString());
+					if (!biomeList.contains(biome.toString())) {
+						biomeList.add(String.valueOf(ForgeRegistries.BIOMES.getKey(biome)));
 					}
 				} else {
-					biomeList.remove(biome.getRegistryName().toString());
+					biomeList.remove(String.valueOf(ForgeRegistries.BIOMES.getKey(biome)));
 				}
 			}
 		}
@@ -230,7 +231,7 @@ public class JSONHelper {
 	public static List<Biome> getBiomes(List<String> biomeIds) {
 		List<Biome> biomes = new ArrayList<>();
 		for(String biomeId : biomeIds) {
-			Biome biome = GameRegistry.findRegistry(Biome.class).getValue(new ResourceLocation(biomeId));
+			Biome biome = ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeId));
 			if(biome != null) {
 				biomes.add(biome);
 			}

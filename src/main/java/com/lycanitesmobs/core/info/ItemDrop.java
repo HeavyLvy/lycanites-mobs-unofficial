@@ -2,14 +2,14 @@ package com.lycanitesmobs.core.info;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -103,7 +103,7 @@ public class ItemDrop {
 		this.chance = chance;
 	}
 
-	public ItemDrop(CompoundNBT nbtTagCompound) {
+	public ItemDrop(CompoundTag nbtTagCompound) {
 		this.read(nbtTagCompound);
 	}
 
@@ -149,17 +149,17 @@ public class ItemDrop {
    	//                     Properties
    	// ==================================================
 	public ItemDrop setDrop(ItemStack itemStack) {
-		this.itemId = itemStack.getItem().getRegistryName().toString();
+		this.itemId = itemStack.getItem().getDescriptionId();
 		return this;
 	}
 
 	public ItemDrop setBurningDrop(ItemStack itemStack) {
-		this.burningItemId = itemStack.getItem().getRegistryName().toString();
+		this.burningItemId = itemStack.getItem().getDescriptionId();
 		return this;
 	}
 
 	public ItemDrop setEffectDrop(int effectID, ItemStack itemStack) {
-		this.effectItemIds.put(effectID, itemStack.getItem().getRegistryName().toString());
+		this.effectItemIds.put(effectID, itemStack.getItem().getDescriptionId());
 		return this;
 	}
 
@@ -228,7 +228,7 @@ public class ItemDrop {
 			return ItemStack.EMPTY;
 		}
 
-		Item item = GameRegistry.findRegistry(Item.class).getValue(new ResourceLocation(this.itemId));
+		Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.itemId));
 		if(item != null) {
 			return new ItemStack(item, 1);
 		}
@@ -246,7 +246,7 @@ public class ItemDrop {
 			return this.getItemStack();
 		}
 
-		Item item = GameRegistry.findRegistry(Item.class).getValue(new ResourceLocation(this.burningItemId));
+		Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.burningItemId));
 		if(item != null) {
 			return new ItemStack(item, 1);
 		}
@@ -263,7 +263,7 @@ public class ItemDrop {
 		if(!this.effectItemIds.containsKey(effectId)) {
 			return ItemStack.EMPTY;
 		}
-		Item item = GameRegistry.findRegistry(Item.class).getValue(new ResourceLocation(this.effectItemIds.get(effectId)));
+		Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.effectItemIds.get(effectId)));
 		if(item != null) {
 			return new ItemStack(item, 1);
 		}
@@ -280,8 +280,8 @@ public class ItemDrop {
 			}
 
 			for(Object potionEffect : entity.getActiveEffects()) {
-				if(potionEffect instanceof EffectInstance) {
-					int effectId = Effect.getId(((EffectInstance) potionEffect).getEffect());
+				if(potionEffect instanceof MobEffectInstance) {
+					int effectId = MobEffect.getId(((MobEffectInstance) potionEffect).getEffect());
 					ItemStack effectStack = this.getEffectItemStack(effectId);
 					if(!effectStack.isEmpty())
 						itemStack = effectStack;
@@ -298,7 +298,7 @@ public class ItemDrop {
 	 * Reads this Item Drop from NBT.
 	 * @param nbtTagCompound The NBT to load values from.
 	 */
-	public void read(CompoundNBT nbtTagCompound) {
+	public void read(CompoundTag nbtTagCompound) {
 		if(nbtTagCompound.contains("ItemId"))
 			this.itemId = nbtTagCompound.getString("ItemId");
 		this.minAmount = nbtTagCompound.getInt("MinAmount");
@@ -322,7 +322,7 @@ public class ItemDrop {
 	 * @param nbtTagCompound The NBT to write to.
 	 * @return True on success or false on fail (this happens if this drop is missing an item id, etc).
 	 */
-	public boolean writeToNBT(CompoundNBT nbtTagCompound) {
+	public boolean writeToNBT(CompoundTag nbtTagCompound) {
 		if(this.itemId == null) {
 			return false;
 		}

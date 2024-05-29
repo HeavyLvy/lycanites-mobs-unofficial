@@ -22,6 +22,17 @@ public class LMHelperClass {
             default -> input;
         };
     }
+    public static Vector3d convertToVec3d(Object input) {
+        if (input instanceof Vec3 v) {
+
+            return new Vector3d(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
+        }else if (input instanceof Vector3f v) {
+            return new Vector3d(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
+        }else if (input instanceof Vector3d v) {
+            return new Vector3d(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
+        }
+        return null;
+    }
     public static Vec3i convertToVec3i(Object input) {
         if (input instanceof Vec3 v) {
 

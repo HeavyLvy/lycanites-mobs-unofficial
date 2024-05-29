@@ -4,10 +4,23 @@ import com.google.common.collect.ImmutableSet;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.block.fluid.BaseFluidBlock;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 
 public class CreaturePathNavigator extends GroundPathNavigation {
 
@@ -35,13 +48,13 @@ public class CreaturePathNavigator extends GroundPathNavigation {
         if(this.entityCreature.isInWater()) {
             return this.entityCreature.canWade() || this.entityCreature.isStrongSwimmer();
         }
-        return this.mob.isOnGround() || this.mob.isPassenger();
+        return this.mob.onGround() || this.mob.isPassenger();
     }
 
     /** Return the position to path from. **/
     @Override
-    protected Vector3d getTempMobPos() {
-        return new Vector3d(this.mob.position().x(), this.getSurfaceY(), this.mob.position().z());
+    protected Vec3 getTempMobPos() {
+        return new Vec3(this.mob.position().x(), this.getSurfaceY(), this.mob.position().z());
     }
 
     /** Returns a new path from starting path position to the provided target position. **/
@@ -64,13 +77,13 @@ public class CreaturePathNavigator extends GroundPathNavigation {
 
             // Slow swimmers (water bobbing):
             if(this.entityCreature.shouldFloat() && !this.entityCreature.shouldDive()) {
-                int posY = MathHelper.floor(this.mob.getY());
-                Block block = this.level.getBlockState(new BlockPos(this.mob.getX(), posY, this.mob.getZ())).getBlock();
+                int posY = (int) Math.floor(this.mob.getY());
+                Block block = this.level.getBlockState(new BlockPos((int) Math.floor(this.mob.getX()), posY, (int) Math.floor(this.mob.getZ()))).getBlock();
                 int searchCount = 0;
 
                 while (this.isSwimmableBlock(block)) { // Search up for surface.
                     ++posY;
-                    block = this.level.getBlockState(new BlockPos(MathHelper.floor(this.mob.position().x()), posY, MathHelper.floor(this.mob.position().z()))).getBlock();
+                    block = this.level.getBlockState(new BlockPos((int) Math.floor(this.mob.position().x()), posY, (int) Math.floor(this.mob.position().z()))).getBlock();
                     ++searchCount;
                     if (searchCount > 16) {
                         return (int)this.mob.getBoundingBox().minY;
@@ -81,7 +94,7 @@ public class CreaturePathNavigator extends GroundPathNavigation {
         }
 
         // Path From Current Y Pos:
-        return MathHelper.floor(this.mob.getY() + 0.5D);
+        return (int) Math.floor(this.mob.getY() + 0.5D);
     }
 
     /** Trims path data from the end to the first sun covered block. Copied from GroundPathNavigator. **/
@@ -93,19 +106,15 @@ public class CreaturePathNavigator extends GroundPathNavigation {
 
     /** Returns true if the path is a straight unblocked line, walking mobs also check for hazards along the line. **/
     @Override
-    protected boolean canMoveDirectly(Vector3d startVec, Vector3d endVec, int sizeX, int sizeY, int sizeZ) {
+    protected boolean canMoveDirectly(Vec3 startVec, Vec3 endVec) {
         // Flight/Swimming:
         if(this.entityCreature.isFlying() || this.entityCreature.isUnderWater()) {
-            Vector3d vec3d = new Vector3d(endVec.x, endVec.y + (double)this.mob.getBbHeight() * 0.5D, endVec.z);
-            RayTraceResult.Type directTraceType =  this.level.clip(new RayTraceContext(startVec, vec3d, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this.mob)).getType();
-            return directTraceType == RayTraceResult.Type.MISS;
+            Vec3 vec3d = new Vec3(endVec.x, endVec.y + (double)this.mob.getBbHeight() * 0.5D, endVec.z);
+            HitResult.Type directTraceType =  this.level.clip(new ClipContext(startVec, vec3d, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.mob)).getType();
+            return directTraceType == HitResult.Type.MISS;
         }
 
-        // Performance Size Cap:
-        sizeX = Math.min(sizeX, 2);
-        sizeY = Math.min(sizeY, 3);
-        sizeZ = Math.min(sizeZ, 2);
-        return super.canMoveDirectly(startVec, endVec, sizeX, sizeY, sizeZ);
+        return super.canMoveDirectly(startVec, endVec);
     }
 
     /** Starts pathing to target entity. **/
@@ -171,23 +180,21 @@ public class CreaturePathNavigator extends GroundPathNavigation {
 
         // Flight/Swimming:
         if(this.entityCreature.isFlying() || (this.entityCreature.isUnderWater() && this.entityCreature.isStrongSwimmer())) {
-            if(blockState.getMaterial().isLiquid()) {
+            if(blockState.getBlock() instanceof LiquidBlock) {
             	return this.entityCreature.isStrongSwimmer();
 			}
-            return !blockState.getMaterial().isSolid();
+            return !blockState.isSolid();
         }
 
         // Standing on Fluids:
-        if (blockState.getBlock() instanceof FlowingFluidBlock) {
-            FlowingFluidBlock fluidBlock = (FlowingFluidBlock) blockState.getBlock();
+        if (blockState.getBlock() instanceof LiquidBlock fluidBlock) {
             boolean safeFluid = true;
-            if (fluidBlock instanceof BaseFluidBlock) {
-                BaseFluidBlock baseFluidBlock = (BaseFluidBlock)fluidBlock;
+            if (fluidBlock instanceof BaseFluidBlock baseFluidBlock) {
                 if (!this.entityCreature.hasElement(baseFluidBlock.getElement())) {
                     safeFluid = false;
                 }
             }
-            if (safeFluid && this.entityCreature.canStandOnFluid(fluidBlock.getFluid())) {
+            if (safeFluid && this.entityCreature.canStandOnFluid(fluidBlock.getFluidState(blockState))) {
                 if (blockState.is(Blocks.WATER) && !this.entityCreature.waterDamage()) {
                     return true;
                 }
@@ -207,13 +214,13 @@ public class CreaturePathNavigator extends GroundPathNavigation {
 
     /** Checks if the given Path Node Type is valid for ground pathing. **/
     @Override
-    protected boolean hasValidPathType(PathNodeType pathNodeType) {
-        if (pathNodeType == PathNodeType.WATER) {
+    protected boolean hasValidPathType(BlockPathTypes pathNodeType) {
+        if (pathNodeType == BlockPathTypes.WATER) {
             return this.entityCreature.canWade() || this.entityCreature.isStrongSwimmer();
-        } else if (pathNodeType == PathNodeType.LAVA) {
+        } else if (pathNodeType == BlockPathTypes.LAVA) {
             return this.entityCreature.isLavaCreature;
         } else {
-            return pathNodeType != PathNodeType.OPEN;
+            return pathNodeType != BlockPathTypes.OPEN;
         }
     }
 
@@ -221,8 +228,7 @@ public class CreaturePathNavigator extends GroundPathNavigation {
     @Override
     protected void followThePath() {
         float entityWidth = this.mob.getDimensions(Pose.STANDING).width;
-        Vector3d currentPos = this.getTempMobPos();
-
+        Vec3 currentPos = this.getTempMobPos();
         // Flight:
         if(this.entityCreature.isFlying() || this.entityCreature.isUnderWater()) {
             float entitySize = entityWidth * entityWidth;
@@ -233,9 +239,8 @@ public class CreaturePathNavigator extends GroundPathNavigation {
 
             int pathIndexRange = 6;
             for (int pathIndex = Math.min(this.path.getNextNodeIndex() + pathIndexRange, this.path.getNodeCount() - 1); pathIndex > this.path.getNextNodeIndex(); --pathIndex) {
-                Vector3d pathVector = this.path.getEntityPosAtNode(this.mob, pathIndex);
-
-                if (pathVector.distanceToSqr(currentPos) <= 36.0D && this.canMoveDirectly(currentPos, pathVector, 0, 0, 0)) {
+                Vec3 pathVector = this.path.getEntityPosAtNode(this.mob, pathIndex);
+                if (pathVector.distanceToSqr(currentPos) <= 36.0D && this.canMoveDirectly(currentPos, pathVector)) {
                     this.path.setNextNodeIndex(pathIndex);
                     break;
                 }
@@ -256,7 +261,7 @@ public class CreaturePathNavigator extends GroundPathNavigation {
         // Climbing Tick:
         if (this.isDone() && this.entityCreature.canClimb() && this.climbTargetPos != null) {
             double entitySize = this.mob.getDimensions(Pose.STANDING).width * this.mob.getDimensions(Pose.STANDING).width;
-            if (this.mob.distanceToSqr(Vector3d.atLowerCornerOf(this.climbTargetPos)) >= entitySize && (this.mob.position().y() <= (double)this.climbTargetPos.getY() || this.mob.distanceToSqr(new Vector3d(this.climbTargetPos.getX(), MathHelper.floor(this.mob.position().y()), this.climbTargetPos.getZ())) >= entitySize)) {
+            if (this.mob.distanceToSqr(this.climbTargetPos.getCenter()) >= entitySize && (this.mob.position().y() <= (double)this.climbTargetPos.getY() || this.mob.distanceToSqr(new Vec3(this.climbTargetPos.getX(), Math.floor(this.mob.position().y()), this.climbTargetPos.getZ())) >= entitySize)) {
                 this.mob.getMoveControl().setWantedPosition((double)this.climbTargetPos.getX(), (double)this.climbTargetPos.getY(), (double)this.climbTargetPos.getZ(), this.speedModifier);
             }
             else {

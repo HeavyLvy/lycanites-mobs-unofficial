@@ -8,19 +8,11 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.core.entity.*;
 import com.lycanitesmobs.core.helpers.JSONHelper;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -192,7 +184,7 @@ public class CreatureInfo {
 		// Entity Class:
 		try {
 			this.entityClass = (Class<? extends BaseCreatureEntity>) Class.forName(json.get("entityClass").getAsString());
-			this.entityConstructor = this.entityClass.getConstructor(EntityType.class, World.class);
+			this.entityConstructor = this.entityClass.getConstructor(EntityType.class, Level.class);
 		}
 		catch(Exception e) {
 			LycanitesMobs.logError("[Creature] Unable to find the Java Entity Class: " + json.get("entityClass").getAsString() + " for " + this.getName());
@@ -835,7 +827,7 @@ public class CreatureInfo {
 	 * @param world The world to create the entity in.
 	 * @return The created entity.
 	 */
-	public LivingEntity createEntity(World world) {
+	public LivingEntity createEntity(Level world) {
 		try {
 			if(this.entityClass == null)
 				return null;

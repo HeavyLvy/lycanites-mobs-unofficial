@@ -11,31 +11,21 @@ import com.lycanitesmobs.core.pets.PetEntry;
 import com.lycanitesmobs.core.pets.PetManager;
 import com.lycanitesmobs.core.pets.PlayerFamiliars;
 import com.lycanitesmobs.core.pets.SummonSet;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class ExtendedPlayer implements IExtendedPlayer {
-    public static Map<PlayerEntity, ExtendedPlayer> clientExtendedPlayers = new HashMap<>();
-	public static Map<PlayerEntity, ExtendedPlayer> serverExtendedPlayers = new HashMap<>();
-	public static Map<UUID, CompoundNBT> backupNBTTags = new HashMap<>();
+    public static Map<Player, ExtendedPlayer> clientExtendedPlayers = new HashMap<>();
+	public static Map<Player, ExtendedPlayer> serverExtendedPlayers = new HashMap<>();
+	public static Map<UUID, CompoundTag> backupNBTTags = new HashMap<>();
 	
 	// Player Info and Containers:
-	public PlayerEntity player;
+	public Player player;
 	public Beastiary beastiary;
 	public PetManager petManager;
 	public long timePlayed = 0;
@@ -89,9 +79,9 @@ public class ExtendedPlayer implements IExtendedPlayer {
 	// ==================================================
     //                   Get for Player
     // ==================================================
-	public static ExtendedPlayer getForPlayer(PlayerEntity player) {
+	public static ExtendedPlayer getForPlayer(Player player) {
 		if(player == null) {
-			//LycanitesMobs.logWarning("", "Tried to access an ExtendedPlayer from a null PlayerEntity.");
+			//LycanitesMobs.logWarning("", "Tried to access an ExtendedPlayer from a null Player.");
 			return null;
 		}
 
@@ -140,14 +130,14 @@ public class ExtendedPlayer implements IExtendedPlayer {
     /** Called when the player entity is being cloned, backups all data so that it can be loaded into a new ExtendedPlayer for the clone. **/
     public void backupPlayer() {
         if(this.player != null && !this.player.getCommandSenderWorld().isClientSide()) {
-            CompoundNBT nbtTagCompound = new CompoundNBT();
+            CompoundTag nbtTagCompound = new CompoundTag();
             this.writeNBT(nbtTagCompound);
             backupNBTTags.put(this.player.getUUID(), nbtTagCompound);
         }
     }
 
     /** Initially sets the player entity and loads any backup data, if the entity is being cloned from another call backupPlayer() instead so that the clone's ExtendedPlayer can load it. **/
-	public void setPlayer(PlayerEntity player) {
+	public void setPlayer(Player player) {
         this.player = player;
         this.petManager.host = player;
 		this.player.getCommandSenderWorld();
@@ -159,7 +149,7 @@ public class ExtendedPlayer implements IExtendedPlayer {
         }
 	}
 
-    public PlayerEntity getPlayer() {
+    public Player getPlayer() {
         return this.player;
     }
 
@@ -243,7 +233,7 @@ public class ExtendedPlayer implements IExtendedPlayer {
 		if(!this.player.getCommandSenderWorld().isClientSide) {
 			if(sync) {
 				MessagePlayerStats message = new MessagePlayerStats(this);
-				LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayerEntity)this.player);
+				LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayer)this.player);
 			}
 		}
 
@@ -273,7 +263,7 @@ public class ExtendedPlayer implements IExtendedPlayer {
 			this.beastiary.sendAllToClient();
 			this.sendAllSummonSetsToPlayer();
 			MessageSummonSetSelection message = new MessageSummonSetSelection(this);
-			LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayerEntity) this.player);
+			LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayer) this.player);
 			this.sendPetEntriesToPlayer("");
 		}
 
@@ -437,7 +427,7 @@ public class ExtendedPlayer implements IExtendedPlayer {
 		for(PetEntry petEntry : this.petManager.entries.values()) {
             if(entryType.equals(petEntry.getType()) || "".equals(entryType)) {
                 MessagePetEntry message = new MessagePetEntry(this, petEntry);
-                LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayerEntity) this.player);
+                LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayer) this.player);
             }
 		}
 	}
@@ -445,13 +435,13 @@ public class ExtendedPlayer implements IExtendedPlayer {
     public void sendPetEntryToPlayer(PetEntry petEntry) {
         if(this.player.getCommandSenderWorld().isClientSide) return;
         MessagePetEntry message = new MessagePetEntry(this, petEntry);
-        LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayerEntity)this.player);
+        LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayer)this.player);
     }
 
 	public void sendPetEntryRemoveToPlayer(PetEntry petEntry) {
 		if(this.player.getCommandSenderWorld().isClientSide) return;
 		MessagePetEntryRemove message = new MessagePetEntryRemove(this, petEntry);
-		LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayerEntity)this.player);
+		LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayer)this.player);
 	}
 
 	public void sendPetEntryToServer(PetEntry petEntry) {
@@ -471,7 +461,7 @@ public class ExtendedPlayer implements IExtendedPlayer {
         if(this.player.getCommandSenderWorld().isClientSide) return;
         for(byte setID = 1; setID <= this.summonSetMax; setID++) {
             MessageSummonSet message = new MessageSummonSet(this, setID);
-            LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayerEntity)this.player);
+            LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayer)this.player);
         }
     }
 
@@ -498,11 +488,11 @@ public class ExtendedPlayer implements IExtendedPlayer {
     //                      Utility
     // ==================================================
 	public void sendOverlayMessage(ITextComponent messageComponent) {
-		if(this.player.getCommandSenderWorld().isClientSide || !(this.player instanceof ServerPlayerEntity)) {
+		if(this.player.getCommandSenderWorld().isClientSide || !(this.player instanceof ServerPlayer)) {
 			return;
 		}
 		MessageOverlayMessage message = new MessageOverlayMessage(messageComponent);
-		LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayerEntity)this.player);
+		LycanitesMobs.packetHandler.sendToPlayer(message, (ServerPlayer)this.player);
 	}
 
 
@@ -511,8 +501,8 @@ public class ExtendedPlayer implements IExtendedPlayer {
     // ==================================================
    	// ========== Read ===========
     /** Reads a list of Creature Knowledge from a player's NBTTag. **/
-    public void readNBT(CompoundNBT nbtTagCompound) {
-		CompoundNBT extTagCompound = nbtTagCompound.getCompound("LycanitesMobsPlayer");
+    public void readNBT(CompoundTag nbtTagCompound) {
+		CompoundTag extTagCompound = nbtTagCompound.getCompound("LycanitesMobsPlayer");
 
     	this.beastiary.readFromNBT(extTagCompound);
         this.petManager.readFromNBT(extTagCompound);
@@ -530,9 +520,9 @@ public class ExtendedPlayer implements IExtendedPlayer {
 			this.selectedSummonSet = extTagCompound.getInt("SelectedSummonSet");
 
 		if(extTagCompound.contains("SummonSets")) {
-			ListNBT nbtSummonSets = extTagCompound.getList("SummonSets", 10);
+			ListTag nbtSummonSets = extTagCompound.getList("SummonSets", 10);
 			for(int setID = 0; setID < this.summonSetMax; setID++) {
-				CompoundNBT nbtSummonSet = (CompoundNBT)nbtSummonSets.get(setID);
+				CompoundTag nbtSummonSet = (CompoundTag)nbtSummonSets.get(setID);
 				SummonSet summonSet = new SummonSet(this);
 				summonSet.read(nbtSummonSet);
 				this.summonSets.put(setID + 1, summonSet);
@@ -545,8 +535,8 @@ public class ExtendedPlayer implements IExtendedPlayer {
 
     // ========== Write ==========
     /** Writes a list of Creature Knowledge to a player's NBTTag. **/
-    public void writeNBT(CompoundNBT nbtTagCompound) {
-		CompoundNBT extTagCompound = new CompoundNBT();
+    public void writeNBT(CompoundTag nbtTagCompound) {
+		CompoundTag extTagCompound = new CompoundTag();
 
     	this.beastiary.writeToNBT(extTagCompound);
 		this.petManager.writeToNBT(extTagCompound);
@@ -557,9 +547,9 @@ public class ExtendedPlayer implements IExtendedPlayer {
 		extTagCompound.putInt("SelectedSummonSet", this.selectedSummonSet);
 		extTagCompound.putLong("TimePlayed", this.timePlayed);
 
-		ListNBT nbtSummonSets = new ListNBT();
+		ListTag nbtSummonSets = new ListTag();
 		for(int setID = 0; setID < this.summonSetMax; setID++) {
-			CompoundNBT nbtSummonSet = new CompoundNBT();
+			CompoundTag nbtSummonSet = new CompoundTag();
 			SummonSet summonSet = this.getSummonSet(setID + 1);
 			summonSet.write(nbtSummonSet);
 			nbtSummonSets.add(nbtSummonSet);
