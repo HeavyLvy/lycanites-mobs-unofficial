@@ -3,14 +3,13 @@ package com.lycanitesmobs.core.container;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.RideableCreatureEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.common.extensions.IForgeContainerType;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraftforge.common.extensions.IForgeMenuType;
 
 public class CreatureContainer extends BaseContainer {
-	public static final ContainerType<CreatureContainer> TYPE = (ContainerType<CreatureContainer>)IForgeContainerType.create(CreatureContainer::new).setRegistryName(LycanitesMobs.MODID, "creature");
+	public static final MenuType<CreatureContainer> TYPE = (MenuType<CreatureContainer>) IForgeMenuType.create(CreatureContainer::new).setRegistryName(LycanitesMobs.MODID, "creature");
 	public BaseCreatureEntity creature;
 
 	/**
@@ -19,7 +18,7 @@ public class CreatureContainer extends BaseContainer {
 	 * @param playerInventory The accessing player's inventory.
 	 * @param extraData A packet sent from the server to create the Container from.
 	 */
-	public CreatureContainer(int windowId, PlayerInventory playerInventory, PacketBuffer extraData) {
+	public CreatureContainer(int windowId, Inventory playerInventory, FriendlyByteBuf extraData) {
 		this(windowId, playerInventory, (BaseCreatureEntity)playerInventory.player.getCommandSenderWorld().getEntity(extraData.readInt()));
 	}
 

@@ -1,18 +1,17 @@
 package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import net.minecraft.entity.ai.RandomPositionGenerator;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.pathfinding.PathNavigator;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 
 import java.util.EnumSet;
 import java.util.Random;
 
-import net.minecraft.entity.ai.goal.Goal.Flag;
 
 public class MoveVillageGoal extends Goal {
 	// Targets:
@@ -52,20 +51,20 @@ public class MoveVillageGoal extends Goal {
     public boolean canUse() {
         if (this.host.isVehicle()) {
             return false;
-        } else if (this.isNocturnal && this.host.level.isDay()) {
+        } else if (this.isNocturnal && this.host.level().isDay()) {
             return false;
         } else if (this.host.getRandom().nextInt(this.frequency) != 0) {
             return false;
         } else {
-            ServerWorld serverWorld = (ServerWorld)this.host.level;
+            ServerLevel serverWorld = (ServerLevel)this.host.level;
             BlockPos blockPos = new BlockPos(this.host.blockPosition());
             if (!serverWorld.isCloseToVillage(blockPos, 6)) {
                 return false;
             } else {
-                Vector3d lvt_3_1_ = RandomPositionGenerator.getLandPos(this.host, 15, 7, (p_220755_1_) -> {
-                    return (double)(-serverWorld.getBlockFloorHeight(p_220755_1_));
+                Vec3i lvt_3_1_ = LandRandomPos.getPos(this.host, 15, 7, (p_220755_1_) -> {
+                    return (-serverWorld.getBlockFloorHeight(p_220755_1_));
                 });
-                this.blockPos = lvt_3_1_ == null ? null : new BlockPos(lvt_3_1_);
+                this.blockPos = lvt_3_1_ == null ? null : new BlockPos(lvt_3_1_.x, lvt_3_1_.y, lvt_3_1_.z);
                 return this.blockPos != null;
             }
         }

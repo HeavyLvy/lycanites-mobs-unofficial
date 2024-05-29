@@ -3,7 +3,11 @@ package com.lycanitesmobs.core.item;
 import com.google.common.collect.Multimap;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.info.ModInfo;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,9 +24,6 @@ public class BaseItem extends Item {
     	super(properties);
     }
 
-    public void setup() {
-        this.setRegistryName(this.modInfo.modid, this.itemName);
-    }
 
     @Override
 	@Nonnull
@@ -31,20 +32,30 @@ public class BaseItem extends Item {
 	}
 
 	@Override
-	public ITextComponent getName(ItemStack stack) {
-		return new TranslationTextComponent(this.getDescriptionId(stack));
+	public Component getName(ItemStack stack) {
+		return Component.translatable(this.getDescriptionId(stack));
 	}
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flag) {
-		ITextComponent description = this.getDescription(stack, worldIn, tooltip, flag);
+    public void appendHoverText(ItemStack p_41421_, @org.jetbrains.annotations.Nullable Level p_41422_, List<Component> p_41423_, TooltipFlag p_41424_) {
+        super.appendHoverText(p_41421_, p_41422_, p_41423_, p_41424_);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, ITooltipFlag flag) {
+        Component description = this.getDescription(stack, worldIn, tooltip, flag);
     	if(!"".equalsIgnoreCase(description.getString())) {
 			tooltip.add(description);
     	}
     	super.appendHoverText(stack, worldIn, tooltip, flag);
     }
 
-    public ITextComponent getDescription(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flag) {
+    @Override
+    public Component getDescription() {
+        return super.getDescription();
+    }
+
+    public Component getDescription(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flag) {
     	return new TranslationTextComponent(this.getDescriptionId() + ".description").withStyle(TextFormatting.GREEN);
     }
 

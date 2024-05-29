@@ -11,12 +11,8 @@ import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.CreatureType;
 import com.lycanitesmobs.core.item.ItemColorCustomSpawnEgg;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.resources.IReloadableResourceManager;
-import net.minecraft.resources.IResourceManager;
-import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -83,7 +79,7 @@ public class ClientManager {
 	 * Returns the client player entity.
 	 * @return Client player entity.
 	 */
-	public PlayerEntity getClientPlayer() {
+	public Player getClientPlayer() {
 		return Minecraft.getInstance().player;
 	}
 
@@ -100,7 +96,7 @@ public class ClientManager {
 	 * Returns the Font Renderer used by Lycanites Mobs.
 	 * @return A sexy Font Renderer, thanks for the heads up CedKilleur!
 	 */
-    public FontRenderer getFontRenderer() {
+    public Font getFontRenderer() {
     	return Minecraft.getInstance().font;
 		/*if(this.fontRenderer == null) {
 			ResourceLocation fontResource = new ResourceLocation(LycanitesMobs.MODID, "fonts/diavlo_light.otf");

@@ -16,8 +16,5 @@ public class ItemMobToken extends BaseItem {
         this.setup();
     }
 
-    @Override
-    public void setup() {
-        this.setRegistryName(this.modInfo.modid, this.itemName);
-    }
+
 }

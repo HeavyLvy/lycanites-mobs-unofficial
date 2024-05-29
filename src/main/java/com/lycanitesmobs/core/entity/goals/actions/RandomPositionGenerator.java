@@ -1,11 +1,11 @@
 package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import net.minecraft.pathfinding.PathNavigator;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.gen.Heightmap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.levelgen.Heightmap;
+import org.joml.Vector3d;
 
 import java.util.Random;
 
@@ -37,14 +37,14 @@ public class RandomPositionGenerator {
         return findRandomTargetAwayFrom(entity, range, height, avoidTarget, 0);
     }
     public static Vector3d findRandomTargetAwayFrom(BaseCreatureEntity entity, int range, int height, Vector3d avoidTarget, int heightLevel) {
-        staticVector = new Vector3d(entity.position().x(), entity.position().y(), entity.position().z()).subtract(avoidTarget);
+        staticVector = new Vector3d(entity.position().x(), entity.position().y(), entity.position().z()).sub(avoidTarget);
         return getTargetBlock(entity, range, height, staticVector, heightLevel);
     }
 
     // ========== Get Target Block ==========
     private static Vector3d getTargetBlock(BaseCreatureEntity entity, int range, int height, Vector3d target, int heightLevel) {
-        PathNavigator pathNavigate = entity.getNavigation();
-        Random random = entity.getRandom();
+        PathNavigation pathNavigate = entity.getNavigation();
+        RandomSource random = entity.getRandom();
         boolean validTarget = false;
         int targetX = 0;
         int targetY = 0;
@@ -67,16 +67,16 @@ public class RandomPositionGenerator {
 
             // Random Height:
             if(entity.isFlying() || (entity.isStrongSwimmer() && entity.isInWater())) {
-	            if(entity.position().y() > entity.getCommandSenderWorld().getHeightmapPos(Heightmap.Type.OCEAN_FLOOR, entity.blockPosition()).getY() + (heightLevel * 1.25))
+	            if(entity.position().y() > entity.getCommandSenderWorld().getHeightmapPos(Heightmap.Types.OCEAN_FLOOR, entity.blockPosition()).getY() + (heightLevel * 1.25))
 	        		possibleY = random.nextInt(2 * height) - height * 3 / 2;
-	            else if(entity.position().y() < entity.getCommandSenderWorld().getHeightmapPos(Heightmap.Type.OCEAN_FLOOR, entity.blockPosition()).getY() + heightLevel)
+	            else if(entity.position().y() < entity.getCommandSenderWorld().getHeightmapPos(Heightmap.Types.OCEAN_FLOOR, entity.blockPosition()).getY() + heightLevel)
 	            	possibleY = random.nextInt(2 * height) - height / 2;
             }
 
             if(target == null || (double)possibleX * target.x + (double)possibleZ * target.z >= 0.0D) {
-            	possibleX += MathHelper.floor(entity.position().x());
-            	possibleY += MathHelper.floor(entity.position().y());
-            	possibleZ += MathHelper.floor(entity.position().z());
+            	possibleX += (int) Math.floor(entity.position().x());
+            	possibleY += (int) Math.floor(entity.position().y());
+            	possibleZ += (int) Math.floor(entity.position().z());
                 BlockPos possiblePos = new BlockPos(possibleX, possibleY, possibleZ);
 
                 if((!pastHome || entity.positionNearHome(possibleX, possibleY, possibleZ)) && (entity.useDirectNavigator() || pathNavigate.isStableDestination(possiblePos))) {
