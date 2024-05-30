@@ -14,10 +14,21 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class EquipmentInfuserTileEntity extends TileEntityBase {
 	/** A list of item stacks in the infuser. **/
 	protected NonNullList<ItemStack> itemStacks = NonNullList.withSize(2, ItemStack.EMPTY);
+
+	/**
+	 * Constructor
+	 *
+	 * @param pos
+	 * @param state
+	 */
+	public EquipmentInfuserTileEntity(BlockPos pos, BlockState state) {
+		super(pos, state);
+	}
 
 	public Component getName() {
 		return Component.translatable("block.lycanitesmobs.equipment_infuser");
@@ -38,15 +49,15 @@ public class EquipmentInfuserTileEntity extends TileEntityBase {
 		super.setRemoved();
 	}
 
-	@Override
+	/*@Override
 	public void tick() {
 		super.tick();
-	}
+	}*/
 
-	@Override
+	/*@Override
 	public BlockPos getPos() {
 		return this.getBlockPos();
-	}
+	}*/
 
 	@Override
 	public boolean isEmpty() {

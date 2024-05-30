@@ -1,19 +1,22 @@
 package com.lycanitesmobs.core.container;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.item.ChargeItem;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.tileentity.EquipmentInfuserTileEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.*;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.extensions.IForgeContainerType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraftforge.common.extensions.IForgeMenuType;
 
 public class EquipmentInfuserContainer extends BaseContainer {
-	public static final ContainerType<EquipmentInfuserContainer> TYPE = (ContainerType<EquipmentInfuserContainer>)IForgeContainerType.create(EquipmentInfuserContainer::new).setRegistryName(LycanitesMobs.MODID, "equipment_infuser");
+	public static final MenuType<EquipmentInfuserContainer> TYPE = IForgeMenuType.create(EquipmentInfuserContainer::new);
+
 	public EquipmentInfuserTileEntity equipmentInfuser;
 	EquipmentInfuserPartSlot partSlot;
 	EquipmentInfuserChargeSlot chargeSlot;
@@ -24,7 +27,7 @@ public class EquipmentInfuserContainer extends BaseContainer {
 	 * @param playerInventory The accessing player's inventory.
 	 * @param extraData A packet sent from the server to create the Container from.
 	 */
-	public EquipmentInfuserContainer(int windowId, PlayerInventory playerInventory, PacketBuffer extraData) {
+	public EquipmentInfuserContainer(int windowId, Inventory playerInventory, FriendlyByteBuf extraData) {
 		this(windowId, playerInventory, (EquipmentInfuserTileEntity)playerInventory.player.getCommandSenderWorld().getBlockEntity(BlockPos.of(extraData.readLong())));
 	}
 
@@ -33,7 +36,7 @@ public class EquipmentInfuserContainer extends BaseContainer {
 	 * @param equipmentInfuser The Equipment Forge Tile Entity.
 	 * @param playerInventory The Inventory of the accessing player.
 	 */
-	public EquipmentInfuserContainer(int windowId, PlayerInventory playerInventory, EquipmentInfuserTileEntity equipmentInfuser) {
+	public EquipmentInfuserContainer(int windowId, Inventory playerInventory, EquipmentInfuserTileEntity equipmentInfuser) {
 		super(TYPE, windowId);
 		this.equipmentInfuser = equipmentInfuser;
 
@@ -56,7 +59,7 @@ public class EquipmentInfuserContainer extends BaseContainer {
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		if(this.equipmentInfuser == null || !this.equipmentInfuser.stillValid(player)) {
 			return false;
 		}
@@ -116,7 +119,7 @@ public class EquipmentInfuserContainer extends BaseContainer {
 	 * Disabled until fixed later.
 	 */
 	@Override
-	public ItemStack quickMoveStack(PlayerEntity player, int slotID) {
+	public ItemStack quickMoveStack(Player player, int slotID) {
 		return ItemStack.EMPTY;
 	}
 }

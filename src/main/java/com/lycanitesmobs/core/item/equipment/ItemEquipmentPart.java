@@ -13,17 +13,19 @@ import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.item.BaseItem;
 import com.lycanitesmobs.core.item.ChargeItem;
 import com.lycanitesmobs.core.item.equipment.features.EquipmentFeature;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.*;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector3d;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -118,59 +120,57 @@ public class ItemEquipmentPart extends BaseItem {
 		}
 		this.sortFeatures();
 
-		this.setup();
-
 		TextureManager.addTexture(this.itemName, this.modInfo, "textures/equipment/" + this.itemName + ".png");
 	}
 
 	@Override
-	public ITextComponent getName(ItemStack itemStack) {
-		TextComponent displayName = new TranslationTextComponent(this.getDescriptionId(itemStack).replace("equipmentpart_", ""));
+	public Component getName(ItemStack itemStack) {
+		MutableComponent displayName = Component.translatable(this.getDescriptionId(itemStack).replace("equipmentpart_", ""));
 		displayName.append(" ")
-			.append(new TranslationTextComponent("equipment.level"))
+			.append(Component.translatable("equipment.level"))
 			.append(" " + this.getPartLevel(itemStack));
 		return displayName;
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag tooltipFlag) {
+	public void appendHoverText(ItemStack itemStack, @Nullable Level world, List<Component> tooltip, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, world, tooltip, tooltipFlag);
-		for(ITextComponent description : this.getAdditionalDescriptions(itemStack, world, tooltipFlag)) {
+		for(Component description : this.getAdditionalDescriptions(itemStack, world, tooltipFlag)) {
 			tooltip.add(description);
 		}
 	}
 
 	@Override
-	public ITextComponent getDescription(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-		return new TranslationTextComponent("item.lycanitesmobs.equipmentpart.description").withStyle(TextFormatting.DARK_GREEN);
+	public Component getDescription() {
+		return Component.translatable("item.lycanitesmobs.equipmentpart.description").withStyle(ChatFormatting.DARK_GREEN);
 	}
 
-	public List<ITextComponent> getAdditionalDescriptions(ItemStack itemStack, @Nullable World world, ITooltipFlag tooltipFlag) {
-		List<ITextComponent> descriptions = new ArrayList<>();
+	public List<Component> getAdditionalDescriptions(ItemStack itemStack, @Nullable Level world, TooltipFlag tooltipFlag) {
+		List<Component> descriptions = new ArrayList<>();
 		int level = this.getPartLevel(itemStack);
 		int experience = this.getExperience(itemStack);
 		int experienceMax = this.getExperienceForNextLevel(itemStack);
 
 		// Condition:
-		descriptions.add(new StringTextComponent("-------------------"));
-		descriptions.add(new TranslationTextComponent("equipment.sharpness").append(" " + this.getSharpness(itemStack) + "/" + ItemEquipment.SHARPNESS_MAX).withStyle(TextFormatting.BLUE));
-		descriptions.add(new TranslationTextComponent("equipment.mana").append(" " + this.getMana(itemStack) + "/" + ItemEquipment.MANA_MAX).withStyle(TextFormatting.BLUE));
+		descriptions.add(Component.literal("-------------------"));
+		descriptions.add(Component.translatable("equipment.sharpness").append(" " + this.getSharpness(itemStack) + "/" + ItemEquipment.SHARPNESS_MAX).withStyle(ChatFormatting.BLUE));
+		descriptions.add(Component.translatable("equipment.mana").append(" " + this.getMana(itemStack) + "/" + ItemEquipment.MANA_MAX).withStyle(ChatFormatting.BLUE));
 
 		// Base Stats:
-		descriptions.add(new StringTextComponent("-------------------"));
-		descriptions.add(new TranslationTextComponent("equipment.slottype").append(" ").append(new TranslationTextComponent("equipment.slot." + this.slotType)).withStyle(TextFormatting.GOLD));
-		descriptions.add(new TranslationTextComponent("equipment.level").append(" " + level + "/" + this.levelMax).withStyle(TextFormatting.GOLD));
+		descriptions.add(Component.literal("-------------------"));
+		descriptions.add(Component.translatable("equipment.slottype").append(" ").append(Component.translatable("equipment.slot." + this.slotType)).withStyle(ChatFormatting.GOLD));
+		descriptions.add(Component.translatable("equipment.level").append(" " + level + "/" + this.levelMax).withStyle(ChatFormatting.GOLD));
 		if(level < this.levelMax) {
-			descriptions.add(new TranslationTextComponent("entity.experience").append(": " + experience + "/" + experienceMax).withStyle(TextFormatting.GOLD));
+			descriptions.add(Component.translatable("entity.experience").append(": " + experience + "/" + experienceMax).withStyle(ChatFormatting.GOLD));
 		}
 		if(!this.elements.isEmpty()) {
-			descriptions.add(new TranslationTextComponent("equipment.element").append(" ").append(this.getElementNames()).withStyle(TextFormatting.DARK_AQUA));
+			descriptions.add(Component.translatable("equipment.element").append(" ").append(this.getElementNames()).withStyle(ChatFormatting.DARK_AQUA));
 		}
-		descriptions.add(new StringTextComponent("-------------------"));
+		descriptions.add(Component.literal("-------------------"));
 
 
 		for(EquipmentFeature feature : this.features) {
-			ITextComponent featureDescription = feature.getDescription(itemStack, level);
+			Component featureDescription = feature.getDescription(itemStack, level);
 			if(featureDescription != null && !"".equals(featureDescription.getString())) {
 				descriptions.add(featureDescription);
 			}
@@ -178,15 +178,15 @@ public class ItemEquipmentPart extends BaseItem {
 		return descriptions;
 	}
 
-	@OnlyIn(Dist.CLIENT)
+	/*@OnlyIn(Dist.CLIENT)
 	@Nullable
 	@Override
 	public net.minecraft.client.gui.FontRenderer getFontRenderer(ItemStack stack) {
 		return ClientManager.getInstance().getFontRenderer();
-	}
+	}*/
 
 	/** Sets up this equipment part, this is called when the provided stack is dropped and needs to have its level randomized, etc. **/
-	public void randomizeLevel(World world, ItemStack itemStack) {
+	public void randomizeLevel(Level world, ItemStack itemStack) {
 		int level = this.levelMax;
 		if(this.levelMin < this.levelMax) {
 			level = this.levelMin + world.random.nextInt(this.levelMax - this.levelMin + 1);
@@ -219,14 +219,14 @@ public class ItemEquipmentPart extends BaseItem {
 
 	/** Sets the level of the provided Equipment Item Stack. **/
 	public void setLevel(ItemStack itemStack, int level) {
-		CompoundNBT nbt = this.getTagCompound(itemStack);
+		CompoundTag nbt = this.getTagCompound(itemStack);
 		nbt.putInt("equipmentLevel", level);
 		itemStack.setTag(nbt);
 	}
 
 	/** Returns an Equipment Part Level for the provided ItemStack. **/
 	public int getPartLevel(ItemStack itemStack) {
-		CompoundNBT nbt = this.getTagCompound(itemStack);
+		CompoundTag nbt = this.getTagCompound(itemStack);
 		int level = 1;
 		if(nbt.contains("equipmentLevel")) {
 			level = nbt.getInt("equipmentLevel");
@@ -236,7 +236,7 @@ public class ItemEquipmentPart extends BaseItem {
 
 	/** Sets the experience of the provided Equipment Item Stack. **/
 	public void setExperience(ItemStack itemStack, int experience) {
-		CompoundNBT nbt = this.getTagCompound(itemStack);
+		CompoundTag nbt = this.getTagCompound(itemStack);
 		nbt.putInt("equipmentExperience", experience);
 		itemStack.setTag(nbt);
 	}
@@ -258,7 +258,7 @@ public class ItemEquipmentPart extends BaseItem {
 
 	/** Returns the Equipment Part Experience for the provided ItemStack. **/
 	public int getExperience(ItemStack itemStack) {
-		CompoundNBT nbt = this.getTagCompound(itemStack);
+		CompoundTag nbt = this.getTagCompound(itemStack);
 		int experience = 0;
 		if(nbt.contains("equipmentExperience")) {
 			experience = nbt.getInt("equipmentExperience");
@@ -311,7 +311,7 @@ public class ItemEquipmentPart extends BaseItem {
 
 	/** Returns the Equipment Part Sharpness for the provided ItemStack. **/
 	public int getSharpness(ItemStack itemStack) {
-		CompoundNBT nbt = this.getTagCompound(itemStack);
+		CompoundTag nbt = this.getTagCompound(itemStack);
 		int sharpness = ItemEquipment.SHARPNESS_MAX;
 		if(nbt.contains("equipmentSharpness")) {
 			sharpness = nbt.getInt("equipmentSharpness");
@@ -321,7 +321,7 @@ public class ItemEquipmentPart extends BaseItem {
 
 	/** Sets the sharpness of the provided Equipment Item Stack. **/
 	public void setSharpness(ItemStack itemStack, int sharpness) {
-		CompoundNBT nbt = this.getTagCompound(itemStack);
+		CompoundTag nbt = this.getTagCompound(itemStack);
 		nbt.putInt("equipmentSharpness", Math.max(Math.min(sharpness, ItemEquipment.SHARPNESS_MAX), 0));
 		itemStack.setTag(nbt);
 	}
@@ -348,7 +348,7 @@ public class ItemEquipmentPart extends BaseItem {
 
 	/** Returns the Equipment Part Mana for the provided ItemStack. **/
 	public int getMana(ItemStack itemStack) {
-		CompoundNBT nbt = this.getTagCompound(itemStack);
+		CompoundTag nbt = this.getTagCompound(itemStack);
 		int mana = ItemEquipment.MANA_MAX;
 		if(nbt.contains("equipmentMana")) {
 			mana = nbt.getInt("equipmentMana");
@@ -358,7 +358,7 @@ public class ItemEquipmentPart extends BaseItem {
 
 	/** Sets the mana of the provided Equipment Item Stack. **/
 	public void setMana(ItemStack itemStack, int mana) {
-		CompoundNBT nbt = this.getTagCompound(itemStack);
+		CompoundTag nbt = this.getTagCompound(itemStack);
 		nbt.putInt("equipmentMana", Math.max(Math.min(mana, ItemEquipment.MANA_MAX), 0));
 		itemStack.setTag(nbt);
 	}
@@ -385,7 +385,7 @@ public class ItemEquipmentPart extends BaseItem {
 
 	/** Returns the dyed color for the provided ItemStack. **/
 	public Vector3d getColor(ItemStack itemStack) {
-		CompoundNBT nbt = this.getTagCompound(itemStack);
+		CompoundTag nbt = this.getTagCompound(itemStack);
 		double r = 1;
 		double g = 1;
 		double b = 1;
@@ -403,15 +403,15 @@ public class ItemEquipmentPart extends BaseItem {
 
 	/** Set the dyed color for the provided ItemStack. **/
 	public void setColor(ItemStack itemStack, float red, float green, float blue) {
-		CompoundNBT nbt = this.getTagCompound(itemStack);
+		CompoundTag nbt = this.getTagCompound(itemStack);
 		nbt.putFloat("equipmentColorR", red);
 		nbt.putFloat("equipmentColorG", green);
 		nbt.putFloat("equipmentColorB", blue);
 		itemStack.setTag(nbt);
 	}
 
-	@Override
-	public void fillItemCategory(ItemGroup tab, NonNullList<ItemStack> items) {
+	/*@Override
+	public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
 		if(!this.allowdedIn(tab)) {
 			return;
 		}
@@ -421,7 +421,7 @@ public class ItemEquipmentPart extends BaseItem {
 			this.setLevel(itemStack, level);
 			items.add(itemStack);
 		}
-	}
+	}*/
 
 	/**
 	 * Returns if this Part has the provided element.
@@ -436,8 +436,8 @@ public class ItemEquipmentPart extends BaseItem {
 	 * Returns a comma separated list of Elements used by this Part.
 	 * @return The Elements used by this Part.
 	 */
-	public ITextComponent getElementNames() {
-		TextComponent elementNames = new StringTextComponent("");
+	public Component getElementNames() {
+		MutableComponent elementNames = Component.literal("");
 		boolean firstElement = true;
 		for(ElementInfo element : this.elements) {
 			if(!firstElement) {

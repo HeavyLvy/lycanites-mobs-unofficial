@@ -17,6 +17,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -32,8 +34,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BlockBase extends BaseEntityBlock {
-	
+public class BlockBase extends Block {
+
 	// Properties:
 	public ModInfo group;
 	public String blockName = "block_base";
@@ -52,11 +54,11 @@ public class BlockBase extends BaseEntityBlock {
 	/** If true, this block cannot be broken or even hit like a solid block. **/
 	public boolean noBreakCollision = false;
 
-	@org.jetbrains.annotations.Nullable
+	/*@org.jetbrains.annotations.Nullable
 	@Override
 	public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
 		return null;
-	}
+	}*/
 
 	// Rendering:
 	public static enum RENDER_TYPE {

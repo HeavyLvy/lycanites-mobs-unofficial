@@ -1,23 +1,24 @@
 package com.lycanitesmobs.core.tileentity;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.TickingBlockEntity;
+import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
-public abstract class TileEntityBase extends BlockEntity implements Container {
+public abstract class TileEntityBase extends BlockEntity implements WorldlyContainer {
     /**
      * Constructor
      */
@@ -35,24 +36,12 @@ public abstract class TileEntityBase extends BlockEntity implements Container {
         return super.getType();
     }
 
-    public BlockEntityType<?> getBlockEntityType() {
-        return super.getType();
-    }
 
     /**
      * The main update called every tick.
      */
+    public void tick()  {}
 
-    public void tick() {}
-
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(BlockEntityType.CHEST,type,  this::tick);
-    }
-    @Nullable
-    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> type, BlockEntityType<E> type2, BlockEntityTicker<? super E> ticker) {
-        return type2 == type ? (BlockEntityTicker<A>)ticker : null;
-    }
     @Override
     public boolean stillValid(Player player) {
         if (this.isRemoved()) {
@@ -127,7 +116,7 @@ public abstract class TileEntityBase extends BlockEntity implements Container {
         super.saveAdditional(nbtTagCompound);
     }
 
-    
+
 
     @Override
     public int[] getSlotsForFace(Direction side) {
@@ -138,6 +127,9 @@ public abstract class TileEntityBase extends BlockEntity implements Container {
     public boolean canPlaceItemThroughFace(int index, ItemStack itemStackIn, @Nullable Direction direction) {
         return false;
     }
+
+
+
 
     @Override
     public boolean canTakeItemThroughFace(int index, ItemStack stack, Direction direction) {
