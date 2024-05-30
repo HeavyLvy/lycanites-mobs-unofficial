@@ -17,6 +17,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class TileEntityEquipmentForge extends TileEntityBase {
 	/** A list of item stacks in the forge. **/
@@ -26,7 +27,7 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 	protected int forgeLevel = 1;
 
 	@Override
-	public TileEntityType<?> getType() {
+	public BlockEntityType<?> getType() {
 		return ObjectManager.tileEntityTypes.get(this.getClass());
 	}
 

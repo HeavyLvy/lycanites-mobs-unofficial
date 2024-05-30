@@ -8,11 +8,21 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.core.entity.*;
 import com.lycanitesmobs.core.helpers.JSONHelper;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.joml.Vector3d;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -465,14 +475,14 @@ public class CreatureInfo {
 	@Nonnull
 	public EntityType<? extends LivingEntity> getEntityType() {
 		if(this.entityType == null) {
-			EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), this.peaceful ? EntityClassification.CREATURE : EntityClassification.MONSTER);
+			EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), this.peaceful ? MobCategory.CREATURE : MobCategory.MONSTER);
 //			entityTypeBuilder.setCustomClientFactory(EntityFactory.getInstance().createOnClientFunction); // Was created when experimenting with custom spawn packets, not in use currently but may be needed in the future.
 			entityTypeBuilder.setTrackingRange(this.isBoss() ? 32 : 10);
 			entityTypeBuilder.setUpdateInterval(3);
 			entityTypeBuilder.setShouldReceiveVelocityUpdates(false);
 			entityTypeBuilder.sized((float)this.width, (float)this.height);
 			this.entityType = entityTypeBuilder.build(this.getName());
-			this.entityType.setRegistryName(LycanitesMobs.MODID, this.getName());
+			//this.entityType.setRegistryName(LycanitesMobs.MODID, this.getName());
 			EntityFactory.getInstance().addEntityType(this.entityType, this.entityConstructor, this.getName());
 		}
 		return this.entityType;
@@ -501,8 +511,8 @@ public class CreatureInfo {
 	 * Returns a translated title for this creature. Ex: Lurker
 	 * @return The display name of this creature.
 	 */
-	public ITextComponent getTitle() {
-		return new TranslationTextComponent("entity." + this.getLocalisationKey());
+	public Component getTitle() {
+		return Component.translatable("entity." + this.getLocalisationKey());
 	}
 
 
@@ -510,8 +520,8 @@ public class CreatureInfo {
 	 * Returns a translated description of this creature.
 	 * @return The creature description.
 	 */
-	public ITextComponent getDescription() {
-		return new TranslationTextComponent("entity." + this.getLocalisationKey() + ".description");
+	public Component getDescription() {
+		return Component.translatable("entity." + this.getLocalisationKey() + ".description");
 	}
 
 
@@ -519,8 +529,8 @@ public class CreatureInfo {
 	 * Returns a translated description of this creature.
 	 * @return The creature description.
 	 */
-	public ITextComponent getHabitatDescription() {
-		return new TranslationTextComponent("entity." + this.getLocalisationKey() + ".habitat");
+	public Component getHabitatDescription() {
+		return Component.translatable("entity." + this.getLocalisationKey() + ".habitat");
 	}
 
 
@@ -528,8 +538,8 @@ public class CreatureInfo {
 	 * Returns a translated description of this creature.
 	 * @return The creature description.
 	 */
-	public ITextComponent getCombatDescription() {
-		return new TranslationTextComponent("entity." + this.getLocalisationKey() + ".combat");
+	public Component getCombatDescription() {
+		return Component.translatable("entity." + this.getLocalisationKey() + ".combat");
 	}
 
 
@@ -537,15 +547,15 @@ public class CreatureInfo {
 	 * Returns a comma separated list of Elements used by this Creature.
 	 * @return The Elements used by this Creature.
 	 */
-	public ITextComponent getElementNames(Subspecies subspecies) {
+	public MutableComponent getElementNames(Subspecies subspecies) {
 		List<ElementInfo> elements = this.elements;
 		if(subspecies != null && !subspecies.elements.isEmpty()) {
 			elements = subspecies.elements;
 		}
 		if(elements.isEmpty()) {
-			return new TranslationTextComponent("common.none");
+			return Component.translatable("common.none");
 		}
-		StringTextComponent elementNames = new StringTextComponent("");
+		MutableComponent elementNames = Component.literal("");
 		boolean firstElement = true;
 		for(ElementInfo element : elements) {
 			if(!firstElement) {
@@ -562,18 +572,18 @@ public class CreatureInfo {
 	 * Returns a comma separated list of Diets used by this Creature.
 	 * @return The Diets used by this Creature.
 	 */
-	public ITextComponent getDietNames() {
+	public Component getDietNames() {
 		if(this.diets.isEmpty()) {
-			return new TranslationTextComponent("common.none");
+			return Component.translatable("common.none");
 		}
-		StringTextComponent dietNames = new StringTextComponent("");
+		Component dietNames = Component.literal("");
 		boolean firstDiet = true;
 		for(String diet : this.diets) {
 			if(!firstDiet) {
 				dietNames.append(", ");
 			}
 			firstDiet = false;
-			dietNames.append(new TranslationTextComponent("diet." + diet));
+			dietNames.append(Component.translatable("diet." + diet));
 		}
 		return dietNames;
 	}
@@ -583,23 +593,23 @@ public class CreatureInfo {
 	 * Returns a comma separated list of Biomes native for this Creature.
 	 * @return The Biomes native for this Creature.
 	 */
-	public ITextComponent getBiomeNames() {
+	public Component getBiomeNames() {
 		List<String> biomeIds = new ArrayList<>();
 		if(this.creatureSpawn.biomesFromTags != null)
 			biomeIds.addAll(this.creatureSpawn.biomesFromTags);
 		if(this.creatureSpawn.biomeIds != null)
 			biomeIds.addAll(this.creatureSpawn.biomeIds);
 		if(biomeIds.isEmpty()) {
-			return new TranslationTextComponent("gui.beastiary.biomes.none");
+			return Component.translatable("gui.beastiary.biomes.none");
 		}
-		StringTextComponent biomeNames = new StringTextComponent("");
+		Component biomeNames = Component.literal("");
 		boolean firstBiome = true;
 		for(String biomeId : biomeIds) {
 			if(!firstBiome) {
 				biomeNames.append(", ");
 			}
 			firstBiome = false;
-			biomeNames.append(new StringTextComponent(biomeId)); // TODO Figure out how to get biome display names now.
+			biomeNames.append(Component.literal(biomeId)); // TODO Figure out how to get biome display names now.
 		}
 		return biomeNames;
 	}
@@ -609,11 +619,11 @@ public class CreatureInfo {
 	 * Returns a comma separated list of items dropped by this Creature.
 	 * @return The items dropped by this Creature.
 	 */
-	public ITextComponent getDropNames() {
+	public Component getDropNames() {
 		if(this.drops.isEmpty()) {
-			return new StringTextComponent("");
+			return Component.literal("");
 		}
-		StringTextComponent dropNames = new StringTextComponent("");
+		MutableComponent dropNames = Component.literal("");
 		boolean firstDrop = true;
 		for(ItemDrop drop : this.drops) {
 			if(!firstDrop) {
@@ -643,7 +653,7 @@ public class CreatureInfo {
 				dropNames.append(" ");
 				Variant variant = subspecies.getVariant(drop.variantIndex);
 				if(variant == null) {
-					dropNames.append(new TranslationTextComponent("subspecies.normal"));
+					dropNames.append(Component.translatable("subspecies.normal"));
 				}
 				else {
 					dropNames.append(variant.getTitle());
@@ -810,12 +820,12 @@ public class CreatureInfo {
 		}
 		for(String diet : this.diets) {
 			ResourceLocation dietTagId = new ResourceLocation(LycanitesMobs.MODID, "diet_" + diet);
-			ITag<Item> dietTag = ItemTags.getAllTags().getTag(dietTagId);
+			TagKey<Item> dietTag = TagKey.create(Registries.ITEM, dietTagId);
 			if(dietTag == null) {
 				LycanitesMobs.logWarning("", "[Creature] Cannot find diet: " + dietTagId);
 				return false;
 			}
-			if(itemStack.getItem().is(dietTag)) {
+			if(itemStack.is(dietTag)) {
 				return true;
 			}
 		}

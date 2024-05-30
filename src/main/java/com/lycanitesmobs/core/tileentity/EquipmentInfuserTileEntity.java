@@ -2,29 +2,29 @@ package com.lycanitesmobs.core.tileentity;
 
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.CustomItemEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class EquipmentInfuserTileEntity extends TileEntityBase {
 	/** A list of item stacks in the infuser. **/
 	protected NonNullList<ItemStack> itemStacks = NonNullList.withSize(2, ItemStack.EMPTY);
 
-	public ITextComponent getName() {
-		return new TranslationTextComponent("block.lycanitesmobs.equipment_infuser");
+	public Component getName() {
+		return Component.translatable("block.lycanitesmobs.equipment_infuser");
 	}
 
 	@Override
-	public TileEntityType<?> getType() {
+	public BlockEntityType<?> getType() {
 		return ObjectManager.tileEntityTypes.get(this.getClass());
 	}
 
@@ -41,6 +41,11 @@ public class EquipmentInfuserTileEntity extends TileEntityBase {
 	@Override
 	public void tick() {
 		super.tick();
+	}
+
+	@Override
+	public BlockPos getPos() {
+		return this.getBlockPos();
 	}
 
 	@Override
@@ -66,7 +71,7 @@ public class EquipmentInfuserTileEntity extends TileEntityBase {
 	 */
 	@Override
 	public ItemStack removeItem(int index, int count) {
-		return ItemStackHelper.removeItem(this.itemStacks, index, count);
+		return ContainerHelper.removeItem(this.itemStacks, index, count);
 	}
 
 	/**
@@ -74,7 +79,7 @@ public class EquipmentInfuserTileEntity extends TileEntityBase {
 	 */
 	@Override
 	public ItemStack removeItemNoUpdate(int index) {
-		return ItemStackHelper.takeItem(this.itemStacks, index);
+		return ContainerHelper.takeItem(this.itemStacks, index);
 	}
 
 	/**
@@ -102,12 +107,17 @@ public class EquipmentInfuserTileEntity extends TileEntityBase {
 	}
 
 	@Override
-	public void startOpen(PlayerEntity player) {
+	public boolean stillValid(Player p_18946_) {
+		return super.stillValid(p_18946_);
+	}
+
+	@Override
+	public void startOpen(Player player) {
 
 	}
 
 	@Override
-	public void stopOpen(PlayerEntity player) {
+	public void stopOpen(Player player) {
 
 	}
 
@@ -132,13 +142,14 @@ public class EquipmentInfuserTileEntity extends TileEntityBase {
 	}
 
 	@Override
-	public SUpdateTileEntityPacket getUpdatePacket() {
-		CompoundNBT syncData = new CompoundNBT();
-		return new SUpdateTileEntityPacket(this.getBlockPos(), 1, syncData);
+	public Packet<ClientGamePacketListener> getUpdatePacket() {
+		
+		CompoundTag syncData = new CompoundTag();
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
 		super.onDataPacket(net, packet);
 	}
 
@@ -148,16 +159,15 @@ public class EquipmentInfuserTileEntity extends TileEntityBase {
 	}
 
 	@Override
-	public void load(BlockState blockState, CompoundNBT nbtTagCompound) {
-		super.load(blockState, nbtTagCompound);
+	public void load(CompoundTag nbtTagCompound) {
+		super.load(nbtTagCompound);
 		if(nbtTagCompound.contains("Items")) {
-			ItemStackHelper.loadAllItems(nbtTagCompound, this.itemStacks);
+			ContainerHelper.loadAllItems(nbtTagCompound, this.itemStacks);
 		}
 	}
-
 	@Override
-	public CompoundNBT save(CompoundNBT nbtTagCompound) {
-		ItemStackHelper.saveAllItems(nbtTagCompound, this.itemStacks);
-		return super.save(nbtTagCompound);
+	public void saveAdditional(CompoundTag nbtTagCompound) {
+		ContainerHelper.saveAllItems(nbtTagCompound, this.itemStacks);
+		super.saveAdditional(nbtTagCompound);
 	}
 }

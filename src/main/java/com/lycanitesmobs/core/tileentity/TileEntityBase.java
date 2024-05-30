@@ -1,45 +1,60 @@
 package com.lycanitesmobs.core.tileentity;
-
-import com.lycanitesmobs.LycanitesMobs;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
-public abstract class TileEntityBase extends TileEntity implements ITickableTileEntity, ISidedInventory {
+public abstract class TileEntityBase extends BlockEntity implements Container {
     /**
      * Constructor
      */
-    public TileEntityBase() {
-        super(TileEntityType.CHEST);
+    public TileEntityBase(BlockPos pos, BlockState state) {
+        super(BlockEntityType.CHEST, pos, state);
     }
 
     /**
      * Gets the Tile Entity Type used by this Tile Entity. Should be overridden.
+     *
      * @return The Tile Entity Type.
      */
-    public TileEntityType<?> getType() {
+    @Override
+    public BlockEntityType<?> getType() {
+        return super.getType();
+    }
+
+    public BlockEntityType<?> getBlockEntityType() {
         return super.getType();
     }
 
     /**
      * The main update called every tick.
      */
-    @Override
+
     public void tick() {}
 
     @Override
-    public boolean stillValid(PlayerEntity player) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return createTickerHelper(BlockEntityType.CHEST,type,  this::tick);
+    }
+    @Nullable
+    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> type, BlockEntityType<E> type2, BlockEntityTicker<? super E> ticker) {
+        return type2 == type ? (BlockEntityTicker<A>)ticker : null;
+    }
+    @Override
+    public boolean stillValid(Player player) {
         if (this.isRemoved()) {
             return false;
         }
@@ -71,7 +86,7 @@ public abstract class TileEntityBase extends TileEntity implements ITickableTile
      */
     @Override
     @Nullable
-    public SUpdateTileEntityPacket getUpdatePacket() {
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
         return super.getUpdatePacket();
     }
 
@@ -81,7 +96,7 @@ public abstract class TileEntityBase extends TileEntity implements ITickableTile
      * @param pkt The packet received.
      */
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
         super.onDataPacket(net, pkt);
     }
 
@@ -96,9 +111,11 @@ public abstract class TileEntityBase extends TileEntity implements ITickableTile
      * @param nbtTagCompound The NBT to read from.
      */
     @Override
-    public void load(BlockState blockState, CompoundNBT nbtTagCompound) {
-        super.load(blockState, nbtTagCompound);
+    public void load(CompoundTag nbtTagCompound) {
+        super.load(nbtTagCompound);
     }
+
+   
 
     /**
      * Writes to NBT data.
@@ -106,9 +123,11 @@ public abstract class TileEntityBase extends TileEntity implements ITickableTile
      * @return The written to NBT data.
      */
     @Override
-    public CompoundNBT save(CompoundNBT nbtTagCompound) {
-        return super.save(nbtTagCompound);
+    public void saveAdditional(CompoundTag nbtTagCompound) {
+        super.saveAdditional(nbtTagCompound);
     }
+
+    
 
     @Override
     public int[] getSlotsForFace(Direction side) {

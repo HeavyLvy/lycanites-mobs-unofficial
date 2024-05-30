@@ -3,14 +3,11 @@ package com.lycanitesmobs.core.network;
 import com.lycanitesmobs.client.ClientManager;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -43,8 +40,8 @@ public class MessageSummoningPedestalStats {
 			return;
 
 		ctx.get().enqueueWork(() -> {
-			PlayerEntity player = ClientManager.getInstance().getClientPlayer();
-			TileEntity tileEntity = player.getCommandSenderWorld().getBlockEntity(new BlockPos(message.x, message.y, message.z));
+			Player player = ClientManager.getInstance().getClientPlayer();
+			BlockEntity tileEntity = player.getCommandSenderWorld().getBlockEntity(new BlockPos(message.x, message.y, message.z));
 			TileEntitySummoningPedestal summoningPedestal = null;
 			if(tileEntity instanceof TileEntitySummoningPedestal)
 				summoningPedestal = (TileEntitySummoningPedestal)tileEntity;

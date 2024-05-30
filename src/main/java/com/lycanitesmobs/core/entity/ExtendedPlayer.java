@@ -11,9 +11,16 @@ import com.lycanitesmobs.core.pets.PetEntry;
 import com.lycanitesmobs.core.pets.PetManager;
 import com.lycanitesmobs.core.pets.PlayerFamiliars;
 import com.lycanitesmobs.core.pets.SummonSet;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -180,7 +187,7 @@ public class ExtendedPlayer implements IExtendedPlayer {
         if(!this.hasAttacked && !this.player.getMainHandItem().isEmpty() && this.canMeleeBigEntity(targetEntity)) {
             this.player.attack(targetEntity);
             this.player.resetAttackStrengthTicker();
-            this.player.swing(Hand.MAIN_HAND);
+            this.player.swing(InteractionHand.MAIN_HAND);
         }
     }
 
@@ -192,7 +199,7 @@ public class ExtendedPlayer implements IExtendedPlayer {
 	public void onUpdate() {
 		this.timePlayed++;
         this.hasAttacked = false;
-		boolean creative = this.player.abilities.instabuild;
+		boolean creative = this.player.getAbilities().instabuild;
 
 		// Stats:
 		boolean sync = false;
@@ -250,8 +257,8 @@ public class ExtendedPlayer implements IExtendedPlayer {
 				VersionChecker.VersionInfo latestVersion = VersionChecker.INSTANCE.getLatestVersion();
 				VersionChecker.INSTANCE.enabled = ConfigExtra.INSTANCE.versionCheckerEnabled.get();
 				if (latestVersion != null && latestVersion.isNewer && VersionChecker.INSTANCE.enabled) {
-					String versionText = new TranslationTextComponent("lyc.version.newer").getString().replace("{current}", LycanitesMobs.versionNumber).replace("{latest}", latestVersion.versionNumber);
-					this.player.sendMessage(new StringTextComponent(versionText), Util.NIL_UUID);
+					String versionText = Component.translatable("lyc.version.newer").getString().replace("{current}", LycanitesMobs.versionNumber).replace("{latest}", latestVersion.versionNumber);
+					this.player.displayClientMessage(Component.literal(versionText), false);
 				}
 			}
 
@@ -360,14 +367,14 @@ public class ExtendedPlayer implements IExtendedPlayer {
 	public boolean studyCreature(LivingEntity entity, int experience, boolean useCooldown, boolean alwaysShowMessage) {
 		if (!(entity instanceof BaseCreatureEntity)) {
 			if (useCooldown && !this.player.getCommandSenderWorld().isClientSide()) {
-				this.sendOverlayMessage(new TranslationTextComponent("message.beastiary.unknown"));
+				this.sendOverlayMessage(Component.translatable("message.beastiary.unknown"));
 			}
 			return false;
 		}
 
 		if (useCooldown && this.creatureStudyCooldown > 0) {
 			if (!this.player.getCommandSenderWorld().isClientSide()) {
-				this.sendOverlayMessage(new TranslationTextComponent("message.beastiary.study.recharging"));
+				this.sendOverlayMessage(Component.translatable("message.beastiary.study.recharging"));
 			}
 			return false;
 		}
@@ -384,7 +391,7 @@ public class ExtendedPlayer implements IExtendedPlayer {
 			}
 			if (!this.player.getCommandSenderWorld().isClientSide()) {
 				if (newKnowledge.getMaxExperience() == 0) {
-					this.sendOverlayMessage(new TranslationTextComponent("message.beastiary.study.full").append(" ").append(creature.creatureInfo.getTitle()));
+					this.sendOverlayMessage(Component.translatable("message.beastiary.study.full").append(" ").append(creature.creatureInfo.getTitle()));
 				}
 				else if (experience > 0) {
 					boolean showMessage = alwaysShowMessage;
@@ -395,7 +402,7 @@ public class ExtendedPlayer implements IExtendedPlayer {
 						showMessage = wrappedExperience + experience >= messageThreshold;
 					}
 					if (showMessage) {
-						this.sendOverlayMessage(new TranslationTextComponent("message.beastiary.study")
+						this.sendOverlayMessage(Component.translatable("message.beastiary.study")
 								.append(" ").append(newKnowledge.getCreatureInfo().getTitle())
 								.append(" " + newKnowledge.experience + "/" + newKnowledge.getMaxExperience() + " (+" + experience + ")"));
 					}
@@ -405,7 +412,7 @@ public class ExtendedPlayer implements IExtendedPlayer {
 		}
 
 		if (useCooldown && !this.player.getCommandSenderWorld().isClientSide()) {
-			this.sendOverlayMessage(new TranslationTextComponent("message.beastiary.study.full").append(" ").append(creature.creatureInfo.getTitle()));
+			this.sendOverlayMessage(Component.translatable("message.beastiary.study.full").append(" ").append(creature.creatureInfo.getTitle()));
 		}
 		return false;
 	}

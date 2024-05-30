@@ -1,9 +1,14 @@
 package com.lycanitesmobs.core.util;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -101,5 +106,13 @@ public class LMHelperClass {
         } else {
             return null;
         }
+    }
+    public static DamageSource damageSourceFromResourceKey(Level level, ResourceKey<DamageType> damageTypeResourceKey) {
+        var damagetype = ResourceKey.createRegistryKey(new ResourceLocation("damage_type"));
+        ResourceKey<?> key = damageTypeResourceKey;
+        var holder = level.registryAccess().registryOrThrow(damagetype).getHolderOrThrow((ResourceKey<Object>) key);
+        DamageType type = (DamageType) holder.get();
+        Holder<DamageType> holder1 = Holder.direct(type);
+        return new DamageSource(holder1);
     }
 }

@@ -14,30 +14,14 @@ import com.lycanitesmobs.core.info.ElementInfo;
 import com.lycanitesmobs.core.item.ChargeItem;
 import com.lycanitesmobs.core.item.consumable.CreatureTreatItem;
 import com.lycanitesmobs.core.item.special.ItemSoulstone;
-import net.minecraft.entity.*;
-import net.minecraft.entity.item.LeashKnotEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ThrowableEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -181,7 +165,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
   	// ==================================================
     // ========== Can leash ==========
     @Override
-    public boolean canBeLeashed(PlayerEntity player) {
+    public boolean canBeLeashed(Player player) {
 	    if(this.isTamed() && player == this.getPlayerOwner())
 	        return true;
 	    return super.canBeLeashed(player);
@@ -285,7 +269,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     // ==================================================
     // ========== Get Interact Commands ==========
     @Override
-    public HashMap<Integer, String> getInteractCommands(PlayerEntity player, @Nonnull ItemStack itemStack) {
+    public HashMap<Integer, String> getInteractCommands(Player player, @Nonnull ItemStack itemStack) {
     	HashMap<Integer, String> commands = new HashMap<>();
     	commands.putAll(super.getInteractCommands(player, itemStack));
 
@@ -343,7 +327,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     
     // ========== Perform Command ==========
     @Override
-    public boolean performCommand(String command, PlayerEntity player, ItemStack itemStack) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack) {
     	// Open GUI:
     	if(command.equals("GUI")) {
     		this.playTameSound();
@@ -424,7 +408,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     
     // ========== Can Name Tag ==========
     @Override
-    public boolean canNameTag(PlayerEntity player) {
+    public boolean canNameTag(Player player) {
     	if(!this.isTamed())
     		return super.canNameTag(player);
     	else if(player == this.getPlayerOwner())
@@ -434,7 +418,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     
     // ========== Perform GUI Command ==========
     @Override
-    public void performGUICommand(PlayerEntity player, int guiCommandID) {
+    public void performGUICommand(Player player, int guiCommandID) {
     	if(!this.petControlsEnabled())
     		return;
     	if(player != this.getOwner())
@@ -517,7 +501,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
                 return true;
 
             // Check Player PvP:
-			if(target instanceof PlayerEntity && (!this.getCommandSenderWorld().getServer().isPvpAllowed() || !this.isPVP())) {
+			if(target instanceof Player && (!this.getCommandSenderWorld().getServer().isPvpAllowed() || !this.isPVP())) {
 				return true;
 			}
 
@@ -557,19 +541,19 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
         }
         return super.isAlliedTo(target);
     }
-    
-    
+
+
     // ==================================================
     //                       Attacks
     // ==================================================
 	@Override
-	public boolean doRangedDamage(Entity target, ThrowableEntity projectile, float damage, boolean noPierce) {
+	public boolean doRangedDamage(Entity target, ThrowableProjectile projectile, float damage, boolean noPierce) {
 		float totalDamage = damage * ((float)this.creatureStats.getDamage() / 2);
 
 		// Owner Credit:
-		if (target instanceof MobEntity) {
-			MobEntity mobTarget = (MobEntity)target;
-			if (this.getOwner() instanceof PlayerEntity && mobTarget.getHealth() > 0 && mobTarget.getHealth() - totalDamage <= 0) {
+		if (target instanceof Mob) {
+			Mob mobTarget = (Mob)target;
+			if (this.getOwner() instanceof Player && mobTarget.getHealth() > 0 && mobTarget.getHealth() - totalDamage <= 0) {
 				DamageSource creditSource = new MinionEntityDamageSource(this.getDamageSource(null), this.getOwner());
 				creditSource.bypassArmor().bypassMagic();
 				return target.hurt(creditSource, totalDamage);
@@ -591,11 +575,11 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 		float totalDamage = this.getAttackDamage(damageScale);
 
 		// Owner Credit:
-		if (target instanceof MobEntity) {
-			MobEntity mobTarget = (MobEntity)target;
-			if (this.getOwner() instanceof PlayerEntity && mobTarget.getHealth() > 0 && mobTarget.getHealth() - totalDamage <= 0) {
+		if (target instanceof Mob) {
+			Mob mobTarget = (Mob)target;
+			if (this.getOwner() instanceof Player && mobTarget.getHealth() > 0 && mobTarget.getHealth() - totalDamage <= 0) {
 				DamageSource creditSource = new MinionEntityDamageSource(this.getDamageSource(null), this.getOwner());
-				creditSource.bypassArmor().bypassMagic();
+				creditSource.is(DamageTypes.MAGIC);
 				return target.hurt(creditSource, totalDamage);
 			}
 		}
@@ -622,7 +606,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
                 return false;
             if(!this.getCommandSenderWorld().isClientSide) {
                 boolean canPVP = this.getCommandSenderWorld().getServer().isPvpAllowed() && this.isPVP();
-                if(targetEntity instanceof PlayerEntity && !canPVP)
+                if(targetEntity instanceof Player && !canPVP)
                     return false;
                 if(targetEntity instanceof TameableCreatureEntity) {
                     TameableCreatureEntity targetTameable = (TameableCreatureEntity)targetEntity;
@@ -646,7 +630,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
      * @return
      */
     @Override
-    public DamageSource getDamageSource(EntityDamageSource nestedDamageSource) {
+    public DamageSource getDamageSource(DamageSource nestedDamageSource) {
 //        if(this.isTamed() && this.getOwner() != null) {
 //            if(nestedDamageSource == null)
 //                nestedDamageSource = (EntityDamageSource)DamageSource.mobAttack(this);
@@ -665,8 +649,8 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
             	this.setSitting(false);
 
             Entity entity = damageSrc.getDirectEntity();
-            if(entity instanceof ThrowableEntity)
-            	entity = ((ThrowableEntity)entity).getOwner();
+            if(entity instanceof ThrowableProjectile)
+            	entity = ((ThrowableProjectile)entity).getOwner();
             
             if(this.isTamed() && this.getOwner() == entity)
             	return false;
@@ -684,7 +668,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 	public boolean isVulnerableTo(String type, DamageSource source, float damage) {
 		if(this.isTamed()) {
 			Entity entity = source.getEntity();
-			if(entity instanceof PlayerEntity && this.getCommandSenderWorld().getServer() != null && !this.getCommandSenderWorld().getServer().isPvpAllowed()) {
+			if(entity instanceof Player && this.getCommandSenderWorld().getServer() != null && !this.getCommandSenderWorld().getServer().isPvpAllowed()) {
 				return false;
 			}
 			if(entity == this.getPlayerOwner()) {
@@ -699,7 +683,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 	@Override
 	public boolean isVulnerableTo(Entity entity) {
 		if(this.isTamed()) {
-			if(entity instanceof PlayerEntity && this.getCommandSenderWorld().getServer() != null && !this.getCommandSenderWorld().getServer().isPvpAllowed()) {
+			if(entity instanceof Player && this.getCommandSenderWorld().getServer() != null && !this.getCommandSenderWorld().getServer().isPvpAllowed()) {
 				return false;
 			}
 			if(entity == this.getPlayerOwner()) {
@@ -736,7 +720,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 	 * Sets the owner of this entity to the provided player entity. Also updates the tamed status of this entity.
 	 * @param player The player to become the owner.
 	 */
-	public void setPlayerOwner(PlayerEntity player) {
+	public void setPlayerOwner(Player player) {
 		this.setOwnerId(player.getUUID());
 	}
 
@@ -754,11 +738,11 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 	 * Returns the owner of this entity as a player or null if there is no player owner. This is separated from getOwner and getOwnerId as they behave inconsistently when built.
 	 * @return The player owner.
 	 */
-	public PlayerEntity getPlayerOwner() {
+	public Player getPlayerOwner() {
 		if(this.getCommandSenderWorld().isClientSide) {
 			Entity owner = this.getOwner();
-			if(owner instanceof PlayerEntity) {
-				return (PlayerEntity)owner;
+			if(owner instanceof Player) {
+				return (Player)owner;
 			}
 			return null;
 		}
@@ -827,7 +811,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 	 * @param player The player taming this entity.
 	 * @return True if the entity is tamed, false on failure.
 	 */
-    public boolean tame(PlayerEntity player) {
+    public boolean tame(Player player) {
     	if(this.getCommandSenderWorld().isClientSide || this.isRareVariant() || this.isBoss()) {
 			return super.isTamed();
 		}
@@ -901,11 +885,11 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 
 	@Override
 	public void onCreateBaby(AgeableCreatureEntity partner, AgeableCreatureEntity baby) {
-		if(this.isTamed() && this.getOwner() instanceof PlayerEntity && partner instanceof TameableCreatureEntity && baby instanceof TameableCreatureEntity) {
+		if(this.isTamed() && this.getOwner() instanceof Player && partner instanceof TameableCreatureEntity && baby instanceof TameableCreatureEntity) {
 			TameableCreatureEntity partnerTameable = (TameableCreatureEntity)partner;
 			TameableCreatureEntity babyTameable = (TameableCreatureEntity)baby;
 			if(partnerTameable.getPlayerOwner() == this.getPlayerOwner()) {
-				babyTameable.setPlayerOwner((PlayerEntity)this.getOwner());
+				babyTameable.setPlayerOwner((Player)this.getOwner());
 			}
 		}
 		super.onCreateBaby(partner, baby);
@@ -1253,7 +1237,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
      * @param player The player to check for when coloring, this is to stop players from dying other players pets. If provided with null it should return if this creature can be dyed in general.
      */
     @Override
-    public boolean canBeColored(PlayerEntity player) {
+    public boolean canBeColored(Player player) {
     	if(player == null) return true;
     	return this.isTamed() && player == this.getPlayerOwner();
     }

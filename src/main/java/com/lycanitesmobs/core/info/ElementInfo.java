@@ -2,13 +2,12 @@ package com.lycanitesmobs.core.info;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.helpers.JSONHelper;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,8 +113,8 @@ public class ElementInfo {
 	 * Returns the display title of this element.
 	 * @return The title text.
 	 */
-	public ITextComponent getTitle() {
-		return new TranslationTextComponent("element." + this.name);
+	public Component getTitle() {
+		return Component.translatable("element." + this.name);
 	}
 
 
@@ -123,8 +122,8 @@ public class ElementInfo {
 	 * Returns the description of this element.
 	 * @return The description text.
 	 */
-	public ITextComponent getDescription() {
-		return new TranslationTextComponent("element." + this.name + ".description");
+	public Component getDescription() {
+		return Component.translatable("element." + this.name + ".description");
 	}
 
 
@@ -140,9 +139,9 @@ public class ElementInfo {
 		}
 		duration = Math.round((float)duration * (float)this.buffDurationMultiplier);
 		for(String buff : this.buffs) {
-			Effect effect = GameRegistry.findRegistry(Effect.class).getValue(new ResourceLocation(buff));
+			MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(buff));
 			if(effect != null) {
-				targetEntity.addEffect(new EffectInstance(effect, duration, amplifier));
+				targetEntity.addEffect(new MobEffectInstance(effect, duration, amplifier));
 			}
 		}
 	}
@@ -164,9 +163,9 @@ public class ElementInfo {
 				targetEntity.setSecondsOnFire(duration / 20);
 				continue;
 			}
-			Effect effect = GameRegistry.findRegistry(Effect.class).getValue(new ResourceLocation(debuff));
+			MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(debuff));
 			if(effect != null) {
-				targetEntity.addEffect(new EffectInstance(effect, duration, amplifier));
+				targetEntity.addEffect(new MobEffectInstance(effect, duration, amplifier));
 			}
 		}
 	}
@@ -177,14 +176,14 @@ public class ElementInfo {
 	 * @param effect The effect to check.
 	 * @return True if the effect can be applied.
 	 */
-	public boolean isEffectApplicable(EffectInstance effect) {
-		if(effect == null || effect.getEffect() == null || effect.getEffect().getRegistryName() == null) {
+	public boolean isEffectApplicable(MobEffectInstance effect) {
+		if(effect == null || effect.getEffect() == null || effect.getEffect().getDescriptionId() == null) {
 			return false;
 		}
-		if(this.debuffs.contains(effect.getEffect().getRegistryName().toString())) {
+		if(this.debuffs.contains(effect.getEffect().getDescriptionId())) {
 			return false;
 		}
-		if(this.immunities.contains(effect.getEffect().getRegistryName().toString())) {
+		if(this.immunities.contains(effect.getEffect().getDescriptionId())) {
 			return false;
 		}
 		/*for(ElementInfo element : this.components) {

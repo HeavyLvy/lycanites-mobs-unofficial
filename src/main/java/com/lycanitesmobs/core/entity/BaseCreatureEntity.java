@@ -29,10 +29,14 @@ import com.lycanitesmobs.core.spawner.SpawnerEventListener;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -260,7 +264,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     /** An extra animation boolean. **/
     public boolean extraAnimation01 = false;
     /** Holds Information for this mobs boss health should it be displayed in the boss health bar. Used by bosses and rare subspecies. **/
-    public ServerBossInfo bossInfo;
+    public ServerBossEvent bossInfo;
     /** If positive, this creature entity is only being used for rendering in a GUI, etc and should play animation based off of this instead. **/
     public float onlyRenderTicks = -1;
 
@@ -602,7 +606,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     // ========== Name ==========
     /** Returns the display name of this entity. Use this when displaying its name. **/
     @Override
-    public ITextComponent getName() {
+    public Component getName() {
     	if (this.hasCustomName())
     		return this.getCustomName();
     	else
@@ -610,15 +614,15 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     /** Returns the display title of this entity. **/
-    public ITextComponent getFullName() {
-		String nameFormatting = new TranslationTextComponent("entity.lycanitesmobs.creature.name.format").getString();
+    public Component getFullName() {
+		String nameFormatting = Component.translatable("entity.lycanitesmobs.creature.name.format").getString();
 		String[] nameParts = nameFormatting.split("\\|");
 		if (nameParts.length < 4 || nameFormatting.equals("entity.lycanitesmobs.creature.name.format")) {
 			nameParts = new String[]{"age", "variant", "subspecies", "species", "level"};
 		}
 
-		TextComponent name = new StringTextComponent("");
-		List<ITextComponent> nameComponents = new ArrayList<>();
+		MutableComponent name = Component.literal("");
+		List<Component> nameComponents = new ArrayList<>();
 		for (String namePart : nameParts) {
 			switch (namePart) {
 				case "age":
@@ -640,7 +644,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		}
 
 		boolean first = true;
-		for (ITextComponent nameComponent : nameComponents) {
+		for (Component nameComponent : nameComponents) {
 			if (nameComponent.getString().isEmpty()) {
 				continue;
 			}
@@ -655,37 +659,37 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
     
     /** Returns the species name of this entity. **/
-    public ITextComponent getSpeciesName() {
+    public Component getSpeciesName() {
     	return this.creatureInfo.getTitle();
     }
 
 	/** Gets the name of this entity relative to its age, more useful for EntityCreatureAgeable. **/
-	public TextComponent getAgeName() {
-		return new StringTextComponent("");
+	public Component getAgeName() {
+		return Component.literal("");
 	}
 
 	/** Returns the variant name (translated) of this entity, returns a blank string if this is a base species mob. **/
-	public ITextComponent getVariantName() {
+	public Component getVariantName() {
 		if(this.getVariant() != null) {
 			return this.getVariant().getTitle();
 		}
-		return new StringTextComponent("");
+		return Component.literal("");
 	}
 
     /** Returns the subspecies title (translated name) of this entity, returns a blank string if this is a base species mob. **/
-    public ITextComponent getSubspeciesName() {
+    public Component getSubspeciesName() {
 		if(this.getSubspecies() != null) {
 			return this.getSubspecies().getTitle();
 		}
-		return new StringTextComponent("");
+		return Component.literal("");
     }
 
 	/** Returns a mobs level to append to the name if above level 1. **/
-	public TextComponent getLevelName() {
+	public Component getLevelName() {
 		if(this.getMobLevel() < 2) {
-			return new StringTextComponent("");
+			return Component.literal("");
 		}
-		return (TextComponent) new TranslationTextComponent("entity.level").append(" " + this.getMobLevel());
+		return Component.translatable("entity.level").append(" " + this.getMobLevel());
 	}
 
 
@@ -1130,12 +1134,12 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         return !this.isBoss();
     }
 
-    public void createBossInfo(BossInfo.Color color, boolean darkenSky) {
-		TextComponent name = (TextComponent)this.getName();
+    public void createBossInfo(BossEvent.BossBarColor color, boolean darkenSky) {
+		Component name = (Component)this.getName();
         if(this.isBossAlways()) {
-			name.append(" (").append(new TranslationTextComponent("entity.phase")).append(" " + (this.getBattlePhase() + 1) + ")");
+			name.append(" (").append(Component.translatable("entity.phase")).append(" " + (this.getBattlePhase() + 1) + ")");
 		}
-        this.bossInfo = (ServerBossInfo)(new ServerBossInfo(name, color, BossInfo.Overlay.PROGRESS)).setDarkenScreen(darkenSky);
+        this.bossInfo = (ServerBossEvent)(new ServerBossEvent(name, color, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(darkenSky);
     }
 
     public BossInfo getBossInfo() {
@@ -1153,7 +1157,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if(this.bossInfo != null) {
 			TextComponent name = (TextComponent)this.getFullName();
 			if(this.isBossAlways()) {
-				name.append(" (").append(new TranslationTextComponent("entity.phase")).append(" " + (this.getBattlePhase() + 1) + ")");
+				name.append(" (").append(Component.translatable("entity.phase")).append(" " + (this.getBattlePhase() + 1) + ")");
 			}
             this.bossInfo.setName(name);
         }
@@ -2866,7 +2870,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 	 * @param noPierce If true, this creature's piercing stat will be ignored, used for when blocked by a shield, etc.
 	 * @return True if damage is dealt.
 	 */
-	public boolean doRangedDamage(Entity target, ThrowableEntity projectile, float damage, boolean noPierce) {
+	public boolean doRangedDamage(Entity target, ThrowableProjectile projectile, float damage, boolean noPierce) {
 		damage *= this.creatureStats.getDamage() / 2;
 		double pierceDamage = noPierce ? 0 : this.creatureStats.getPierce();
 
@@ -4579,7 +4583,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
                 return false;
             if(this.distanceTo(entity) > this.bossRange) {
             	if(entity instanceof Player) {
-					((Player)entity).displayClientMessage(new TranslationTextComponent("boss.damage.protection.range"), true);
+					((Player)entity).displayClientMessage(Component.translatable("boss.damage.protection.range"), true);
 				}
             	return false;
 			}
@@ -4603,7 +4607,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     /** Returns whether or not the specified potion effect can be applied to this entity. **/
     @Override
-    public boolean canBeAffected(EffectInstance effectInstance) {
+    public boolean canBeAffected(MobEffectInstance effectInstance) {
 		for(ElementInfo element : getElements()) {
 			if(!element.isEffectApplicable(effectInstance)) {
 				return false;

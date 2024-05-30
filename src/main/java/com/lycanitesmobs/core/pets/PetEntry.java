@@ -7,16 +7,14 @@ import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.Subspecies;
 import com.lycanitesmobs.core.info.Variant;
-import net.minecraft.crash.ReportedException;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import java.util.UUID;
 
@@ -52,7 +50,7 @@ public class PetEntry {
     /** The current entity instance that this entry is using. **/
     public Entity entity;
     /** The current entity NBT data. **/
-    public CompoundNBT entityNBT;
+    public CompoundTag entityNBT;
     /** Entity update tick, this counts up each tick as the entity is spawned and active and is paused when the entity is inactive. **/
     public int entityTick = 0;
     /** Entity Health **/
@@ -87,7 +85,7 @@ public class PetEntry {
     //                 Create from Entity
     // ==================================================
     /** Returns a new PetEntry based off the provided entity for the provided player. **/
-    public static PetEntry createFromEntity(PlayerEntity player, BaseCreatureEntity entity, String petType) {
+    public static PetEntry createFromEntity(Player player, BaseCreatureEntity entity, String petType) {
         CreatureInfo creatureInfo = entity.creatureInfo;
         PetEntry petEntry = new PetEntry(UUID.randomUUID(), petType, player, creatureInfo.getName());
         if (entity.hasCustomName()) {
@@ -110,8 +108,8 @@ public class PetEntry {
         this.host = host;
 
         ExtendedPlayer playerExt = null;
-        if (host instanceof PlayerEntity)
-            playerExt = ExtendedPlayer.getForPlayer((PlayerEntity)host);
+        if (host instanceof Player)
+            playerExt = ExtendedPlayer.getForPlayer((Player)host);
         this.summonSet = new SummonSet(playerExt);
         this.summonSet.summonableOnly = false;
         this.summonSet.setSummonType(summonType);
@@ -148,8 +146,8 @@ public class PetEntry {
 
     public PetEntry setOwner(LivingEntity owner) {
         this.host = owner;
-        if (host != null && host instanceof PlayerEntity) {
-            ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer((PlayerEntity) host);
+        if (host != null && host instanceof Player) {
+            ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer((Player) host);
             this.summonSet.playerExt = playerExt;
         }
         return this;
@@ -245,13 +243,13 @@ public class PetEntry {
     // ==================================================
     //                       Name
     // ==================================================
-    public ITextComponent getDisplayName() {
+    public Component getDisplayName() {
         if (this.summonSet == null || this.summonSet.getCreatureInfo() == null) {
-            return new StringTextComponent("");
+            return Component.literal("");
         }
-        ITextComponent displayName = this.summonSet.getCreatureInfo().getTitle();
+        Component displayName = this.summonSet.getCreatureInfo().getTitle();
         if (this.entityName != null && !"".equals(this.entityName)) {
-            displayName = new StringTextComponent(this.entityName + " (")
+            displayName = Component.literal(this.entityName + " (")
                     .append(displayName)
                     .append(")");
         }
@@ -286,7 +284,7 @@ public class PetEntry {
     //                       Update
     // ==================================================
 	/** Called by the PetManager, runs any logic for this entry. This is normally called from an entity update. **/
-	public void onUpdate(World world) {
+	public void onUpdate(Level world) {
         // Client Side Update:
         if (world.isClientSide) {
             if (this.isRespawning && this.respawnTime > 0) {
@@ -310,7 +308,7 @@ public class PetEntry {
         // Active Spawning:
         if (this.spawningActive) {
             // Dead Check:
-            if (this.entity != null && !this.entity.isAlive() && this.entity instanceof MobEntity && ((MobEntity)this.entity).getHealth() <= 0) {
+            if (this.entity != null && !this.entity.isAlive() && this.entity instanceof Mob && ((Mob)this.entity).getHealth() <= 0) {
                 this.saveEntityNBT();
                 this.entity = null;
                 this.isRespawning = true;
@@ -370,7 +368,7 @@ public class PetEntry {
             // Remove Entity If Spawned:
             if (this.entity != null) {
                 this.saveEntityNBT();
-                this.entity.remove();
+                this.entity.remove(Entity.RemovalReason.DISCARDED);
                 this.entity = null;
             }
 
@@ -426,7 +424,7 @@ public class PetEntry {
         this.loadEntityNBT();
 
         // Spawn Location:
-        this.entity.moveTo(this.host.position().x(), this.host.position().y(), this.host.position().z(), this.host.yRot, 0.0F);
+        this.entity.moveTo(this.host.position().x(), this.host.position().y(), this.host.position().z(), this.host.yRotO, 0.0F);
 
         if (this.entity instanceof BaseCreatureEntity) {
             BaseCreatureEntity entityCreature = (BaseCreatureEntity)this.entity;
@@ -446,11 +444,11 @@ public class PetEntry {
                 randomAngle = -randomAngle;
             BlockPos spawnPos = entityCreature.getFacingPosition(this.host, -1, randomAngle);
             if (this.entity.getCommandSenderWorld().getBlockState(spawnPos).isValidSpawn(this.entity.getCommandSenderWorld(), spawnPos, this.entity.getType()))
-                this.entity.moveTo(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), this.host.yRot, 0.0F);
+                this.entity.moveTo(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), this.host.yRotO, 0.0F);
             else {
                 spawnPos = entityCreature.getFacingPosition(this.host, -1, -randomAngle);
                 if (this.entity.getCommandSenderWorld().getBlockState(spawnPos).isValidSpawn(this.entity.getCommandSenderWorld(), spawnPos, this.entity.getType()))
-                    this.entity.moveTo(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), this.host.yRot, 0.0F);
+                    this.entity.moveTo(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), this.host.yRotO, 0.0F);
             }
 
             // Temporary:
@@ -459,16 +457,16 @@ public class PetEntry {
 
             // Entity Name and Appearance:
             if (this.entityName != null && !"".equals(this.entityName)) {
-				entityCreature.setCustomName(new StringTextComponent(this.entityName));
+				entityCreature.setCustomName(Component.literal(this.entityName));
 			}
             entityCreature.setSizeScale(this.entitySize);
             entityCreature.setSubspecies(this.subspeciesIndex);
             entityCreature.applyVariant(this.variantIndex);
 
             // Tamed Behaviour:
-            if (entityCreature instanceof TameableCreatureEntity && this.host instanceof PlayerEntity) {
+            if (entityCreature instanceof TameableCreatureEntity && this.host instanceof Player) {
                 TameableCreatureEntity entityTameable = (TameableCreatureEntity)entityCreature;
-                entityTameable.setPlayerOwner((PlayerEntity)this.host);
+                entityTameable.setPlayerOwner((Player)this.host);
                 this.summonSet.applyBehaviour(entityTameable);
             }
         }
@@ -536,7 +534,7 @@ public class PetEntry {
                 entityCreature.setTemporary(this.temporaryDuration);
 
             if (this.entityName != null && !"".equals(this.entityName))
-                entityCreature.setCustomName(new StringTextComponent(this.entityName));
+                entityCreature.setCustomName(Component.literal(this.entityName));
             entityCreature.setSizeScale(this.entitySize);
             entityCreature.setSubspecies(this.subspeciesIndex);
             entityCreature.applyVariant(this.variantIndex);
@@ -578,7 +576,7 @@ public class PetEntry {
     // ==================================================
     // ========== Read ===========
     /** Reads pet entry from NBTTag. Should be called by PetManagers or other classes that store PetEntries and NBT Data for them. **/
-    public void readFromNBT(CompoundNBT nbtTagCompound) {
+    public void readFromNBT(CompoundTag nbtTagCompound) {
         if (nbtTagCompound.hasUUID("UUID"))
             this.petEntryID = nbtTagCompound.getUUID("UUID");
         if (nbtTagCompound.contains("Type"))
@@ -619,7 +617,7 @@ public class PetEntry {
 
     // ========== Write ==========
     /** Writes pet entry to NBTTag. **/
-    public void writeToNBT(CompoundNBT nbtTagCompound) {
+    public void writeToNBT(CompoundTag nbtTagCompound) {
         nbtTagCompound.putUUID("UUID", this.petEntryID);
         nbtTagCompound.putString("Type", this.getType());
 
@@ -645,7 +643,7 @@ public class PetEntry {
     /** If this PetEntry currently has an active entity, this will save that entity's NBT data to this PetEntry's record of it. **/
     public void saveEntityNBT() {
         if (this.entityNBT == null) {
-            this.entityNBT = new CompoundNBT();
+            this.entityNBT = new CompoundTag();
         }
 
         this.entityNBT.putInt("MobLevel", this.getLevel());

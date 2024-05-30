@@ -14,6 +14,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class EquipmentStationTileEntity extends TileEntityBase {
 	/** A list of item stacks in the station. **/
@@ -24,7 +25,7 @@ public class EquipmentStationTileEntity extends TileEntityBase {
 	}
 
 	@Override
-	public TileEntityType<?> getType() {
+	public BlockEntityType<?> getType() {
 		return ObjectManager.tileEntityTypes.get(this.getClass());
 	}
 

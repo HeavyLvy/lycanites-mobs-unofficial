@@ -2,31 +2,33 @@ package com.lycanitesmobs.core;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.TextureManager;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.DisplayEffectsScreen;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.EffectType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ScreenEvent;
 
-public class EffectBase extends Effect {
+public class EffectBase extends MobEffect {
 	public String name;
 	
 	// ==================================================
 	//                    Constructor
 	// ==================================================
 	public EffectBase(String name, boolean badEffect, int color) {
-		super(badEffect ? EffectType.HARMFUL : EffectType.BENEFICIAL, color);
+		super(badEffect ? MobEffectCategory.HARMFUL : MobEffectCategory.BENEFICIAL, color);
 		this.name = name;
-		this.setRegistryName(LycanitesMobs.MODID, name);
+		//this.setRegistryName(LycanitesMobs.MODID, name);
 		TextureManager.addTexture("effect." + name, LycanitesMobs.modInfo, "textures/mob_effect/" + name + ".png");
 	}
-	
-	
+
+
+
+
 	// ==================================================
 	//                    Effects
 	// ==================================================
@@ -35,19 +37,22 @@ public class EffectBase extends Effect {
         return false;
     }
 	
-	
+
 	// ==================================================
 	//                    Visuals
 	// ==================================================
-	@OnlyIn(Dist.CLIENT)
+	/**
+	 * IForgeMobEffect no longer has these methods, im assuming they're set elsewhere
+	 */
+	/*@OnlyIn(Dist.CLIENT)
 	@Override
-	public void renderInventoryEffect(EffectInstance effect, DisplayEffectsScreen<?> gui, MatrixStack mStack, int x, int y, float z) {
+	public void renderInventoryEffect(MobEffectInstance effect, EffectRenderingInventoryScreen<?> gui, PoseStack mStack, int x, int y, float z) {
 		ResourceLocation texture = TextureManager.getTexture("effect." + this.name);
 		if(texture == null) {
 			return;
 		}
 
-		Minecraft.getInstance().getTextureManager().bind(texture);
+		Minecraft.getInstance().getTextureManager().bindForSetup(texture);
 		gui.blit(mStack, x + 6, y + 7, 0, 0, 18, 18, 18, 18);
 		super.renderInventoryEffect(effect, gui, mStack, x, y, z);
 	}
@@ -62,5 +67,5 @@ public class EffectBase extends Effect {
 
 		Minecraft.getInstance().getTextureManager().bind(texture);
 		gui.blit(mStack, x + 3, y + 3, 0, 0, 18, 18, 18, 18);
-	}
+	}*/
 }

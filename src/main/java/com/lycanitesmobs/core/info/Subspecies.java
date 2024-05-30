@@ -7,13 +7,12 @@ import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.helpers.JSONHelper;
 import com.lycanitesmobs.core.spawner.condition.SpawnCondition;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import org.joml.Vector3d;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -135,11 +134,11 @@ public class Subspecies {
 	 * Gets the display name of this Subspecies.
 	 * @return The Subspecies title.
 	 */
-	public ITextComponent getTitle() {
+	public Component getTitle() {
 		if(this.name != null) {
-			return new TranslationTextComponent("subspecies." + this.name);
+			return Component.translatable("subspecies." + this.name);
 		}
-		return new StringTextComponent("");
+		return Component.literal("");
     }
 
 
@@ -149,11 +148,11 @@ public class Subspecies {
 	 */
 	public boolean canSpawn(LivingEntity entityLiving) {
 		if(entityLiving != null) {
-			World world = entityLiving.getCommandSenderWorld();
+			Level world = entityLiving.getCommandSenderWorld();
 
 			// Check Conditions:
 			for(SpawnCondition condition : this.spawnConditions) {
-				if(!condition.isMet(world, null, new BlockPos(entityLiving.position()))) {
+				if(!condition.isMet(world, null, new BlockPos(LMHelperClass.convertToVec3i(entityLiving.position())))) {
 					return false;
 				}
 			}

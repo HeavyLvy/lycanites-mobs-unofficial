@@ -10,12 +10,16 @@ import com.lycanitesmobs.core.tileentity.EquipmentInfuserTileEntity;
 import com.lycanitesmobs.core.tileentity.EquipmentStationTileEntity;
 import com.lycanitesmobs.core.tileentity.TileEntityEquipmentForge;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 
@@ -46,7 +50,7 @@ public class ObjectManager {
 	public static Map<String, Class<? extends Entity>> specialEntities = new HashMap<>();
 	public static Map<Class<? extends Entity>, Constructor<? extends Entity>> specialEntityConstructors = new HashMap<>();
 	public static Map<Class<? extends Entity>, EntityType<? extends Entity>> specialEntityTypes = new HashMap<>();
-	public static Map<Class<? extends TileEntity>, TileEntityType<? extends TileEntity>> tileEntityTypes = new HashMap<>();
+	public static Map<Class<? extends BlockEntity>, BlockEntityType<? extends BlockEntity>> tileEntityTypes = new HashMap<>();
 
     public static Map<String, DamageSource> damageSources = new HashMap<>();
 
@@ -129,7 +133,7 @@ public class ObjectManager {
 		name = name.toLowerCase();
 		ResourceLocation resourceLocation = new ResourceLocation(modInfo.modid, path);
 		SoundEvent soundEvent = new SoundEvent(resourceLocation);
-		soundEvent.setRegistryName(resourceLocation);
+		//soundEvent.setRegistryName(resourceLocation);
 		sounds.put(name, soundEvent);
 	}
 	
