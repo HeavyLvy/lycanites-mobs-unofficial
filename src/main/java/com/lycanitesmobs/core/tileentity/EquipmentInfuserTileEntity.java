@@ -154,9 +154,8 @@ public class EquipmentInfuserTileEntity extends TileEntityBase {
 
 	@Override
 	public Packet<ClientGamePacketListener> getUpdatePacket() {
-		
 		CompoundTag syncData = new CompoundTag();
-		return ClientboundBlockEntityDataPacket.create(this);
+		return ClientboundBlockEntityDataPacket.create(this, be -> syncData);
 	}
 
 	@Override

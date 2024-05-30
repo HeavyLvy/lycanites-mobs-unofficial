@@ -8,19 +8,19 @@ import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.ItemDrop;
 import com.lycanitesmobs.core.info.Variant;
 import com.lycanitesmobs.core.item.ItemCustomSpawnEgg;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -47,13 +47,13 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
     public boolean hasBeenFarmed = false;
 
     // Datawatcher:
-    protected static final DataParameter<Integer> AGE = EntityDataManager.defineId(AgeableCreatureEntity.class, DataSerializers.INT);
-    protected static final DataParameter<Integer> LOVE = EntityDataManager.defineId(AgeableCreatureEntity.class, DataSerializers.INT);
+    protected static final EntityDataAccessor<Integer> AGE = SynchedEntityData.defineId(AgeableCreatureEntity.class, EntityDataSerializers.INT);
+    protected static final EntityDataAccessor<Integer> LOVE = SynchedEntityData.defineId(AgeableCreatureEntity.class, EntityDataSerializers.INT);
     
 	// ==================================================
   	//                    Constructor
   	// ==================================================
-	protected AgeableCreatureEntity(EntityType<? extends AgeableCreatureEntity> entityType, World world) {
+	protected AgeableCreatureEntity(EntityType<? extends AgeableCreatureEntity> entityType, Level world) {
 		super(entityType, world);
 	}
 
@@ -90,14 +90,15 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
     
     // ========== Name ==========
     @Override
-    public TextComponent getAgeName() {
+    public Component getAgeName() {
     	if(this.isBaby())
-    		return new TranslationTextComponent("entity.baby");
+    		return Component.translatable("entity.baby");
     	else
     		return super.getAgeName();
     }
-	
-	// ==================================================
+
+
+    // ==================================================
   	//                       Spawning
   	// ==================================================
     @Override
@@ -165,7 +166,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
         	this.setFarmed();
             --this.loveTime;
             if(this.getCommandSenderWorld().isClientSide) {
-	            IParticleData particle = ParticleTypes.HEART;
+	            ParticleOptions particle = ParticleTypes.HEART;
 	            if(this.loveTime % 10 == 0) {
 	                double d0 = this.random.nextGaussian() * 0.02D;
 	                double d1 = this.random.nextGaussian() * 0.02D;
@@ -198,7 +199,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
   	// ==================================================
     // ========== Get Interact Commands ==========
     @Override
-    public HashMap<Integer, String> getInteractCommands(PlayerEntity player, @Nonnull ItemStack itemStack) {
+    public HashMap<Integer, String> getInteractCommands(Player player, @Nonnull ItemStack itemStack) {
     	HashMap<Integer, String> commands = new HashMap<>();
     	commands.putAll(super.getInteractCommands(player, itemStack));
     	
@@ -222,7 +223,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
     
     // ========== Perform Command ==========
     @Override
-    public boolean performCommand(String command, PlayerEntity player, ItemStack itemStack) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack) {
     	
     	// Spawn Baby:
     	if(command.equals("Spawn Baby") && !this.getCommandSenderWorld().isClientSide && itemStack.getItem() instanceof ItemCustomSpawnEgg) {
@@ -378,7 +379,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
 			baby.setSubspecies(this.getSubspeciesIndex());
 			Variant babyVariant = this.getSubspecies().getChildVariant(this, this.getVariant(), partner.getVariant());
             baby.applyVariant(babyVariant != null ? babyVariant.index : 0);
-            baby.moveTo(this.position().x(), this.position().y(), this.position().z(), this.yRot, this.xRot);
+            baby.moveTo(this.position().x(), this.position().y(), this.position().z(), this.yRotO, this.xRotO);
 
             for(int i = 0; i < 7; ++i) {
                 double d0 = this.random.nextGaussian() * 0.02D;
@@ -391,7 +392,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
 
             this.getCommandSenderWorld().addFreshEntity(baby);
 
-			for(PlayerEntity player : this.getCommandSenderWorld().players()) {
+			for(Player player : this.getCommandSenderWorld().players()) {
 				if(this.distanceTo(player) <= 10) {
 					ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(player);
 					if(extendedPlayer != null) {
@@ -418,7 +419,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
   	// ==================================================
 	// ========== Read ==========
     @Override
-	public void readAdditionalSaveData(CompoundNBT nbt) {
+	public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
         if(nbt.contains("Age")) {
         	this.setGrowingAge(nbt.getInt("Age"));
@@ -443,10 +444,12 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
 	
 	// ========== Write ==========
     @Override
-	public void addAdditionalSaveData(CompoundNBT nbt) {
+	public void addAdditionalSaveData(CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.putInt("Age", this.getGrowingAge());
         nbt.putInt("InLove", this.loveTime);
         nbt.putBoolean("HasBeenFarmed", this.hasBeenFarmed);
     }
+
+
 }

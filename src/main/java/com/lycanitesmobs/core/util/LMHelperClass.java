@@ -119,11 +119,13 @@ public class LMHelperClass {
         if (lvt_2_1_ >= 180.0) {
             lvt_2_1_ -= 360.0;
         }
-
         if (lvt_2_1_ < -180.0) {
             lvt_2_1_ += 360.0;
         }
-
         return lvt_2_1_;
+    }
+    public static String getItemId(Item item) {
+        ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
+        return itemId.toString();
     }
 }

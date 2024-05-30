@@ -5,19 +5,20 @@ import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.navigate.CreaturePathNavigator;
 import com.lycanitesmobs.core.info.ObjectLists;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.GroundPathNavigator;
-import net.minecraft.pathfinding.PathNavigator;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
+import java.nio.file.Path;
 import java.util.EnumSet;
 
 public class TemptGoal extends Goal {
     // Targets:
     private BaseCreatureEntity host;
-    private PlayerEntity player;
+    private Player player;
     
     // Properties:
     private double speed = 1.0D;
@@ -182,7 +183,7 @@ public class TemptGoal extends Goal {
             if(this.host.distanceTo(this.player) < 36.0D) {
                 if(this.player.distanceToSqr(this.targetX, this.targetY, this.targetZ) > 0.010000000000000002D)
                     return false;
-                if(Math.abs((double)this.player.xRot - this.targetPitch) > 5.0D || Math.abs((double)this.player.yRot - this.targetYaw) > 5.0D)
+                if(Math.abs((double)this.player.xRotO - this.targetPitch) > 5.0D || Math.abs((double)this.player.yRotO - this.targetYaw) > 5.0D)
                     return false;
             }
             else {
@@ -191,8 +192,8 @@ public class TemptGoal extends Goal {
                 this.targetZ = this.player.position().z();
             }
 
-            this.targetPitch = (double)this.player.xRot;
-            this.targetYaw = (double)this.player.yRot;
+            this.targetPitch = (double)this.player.xRotO;
+            this.targetYaw = (double)this.player.yRotO;
         }
         return this.canUse();
     }
@@ -208,8 +209,8 @@ public class TemptGoal extends Goal {
         this.targetY = this.player.position().y();
         this.targetZ = this.player.position().z();
         this.isRunning = true;
-        if (this.host.getNavigation() instanceof GroundPathNavigator || this.host.getNavigation() instanceof CreaturePathNavigator) {
-            PathNavigator navigateGround = this.host.getNavigation();
+        if (this.host.getNavigation() instanceof GroundPathNavigation || this.host.getNavigation() instanceof CreaturePathNavigator) {
+            PathNavigation navigateGround = this.host.getNavigation();
             this.canSwim = !navigateGround.canFloat();
             navigateGround.setCanFloat(true);
         }
@@ -234,8 +235,8 @@ public class TemptGoal extends Goal {
             }
         }
         this.isRunning = false;
-        if (this.host.getNavigation() instanceof GroundPathNavigator || this.host.getNavigation() instanceof CreaturePathNavigator) {
-            PathNavigator navigateGround = this.host.getNavigation();
+        if (this.host.getNavigation() instanceof GroundPathNavigation || this.host.getNavigation() instanceof CreaturePathNavigator) {
+            PathNavigation navigateGround = this.host.getNavigation();
             navigateGround.setCanFloat(this.canSwim);
         }
     }

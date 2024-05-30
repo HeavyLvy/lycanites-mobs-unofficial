@@ -14,14 +14,23 @@ import com.lycanitesmobs.core.info.ElementInfo;
 import com.lycanitesmobs.core.item.ChargeItem;
 import com.lycanitesmobs.core.item.consumable.CreatureTreatItem;
 import com.lycanitesmobs.core.item.special.ItemSoulstone;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -41,13 +50,17 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 	public UUID ownerUUID;
 
     // Datawatcher:
-    protected static final DataParameter<Byte> TAMED = EntityDataManager.defineId(TameableCreatureEntity.class, DataSerializers.BYTE); // TODO Tame Type IDs.
-    protected static final DataParameter<Optional<UUID>> OWNER_ID = EntityDataManager.defineId(TameableCreatureEntity.class, DataSerializers.OPTIONAL_UUID);
-    protected static final DataParameter<Float> HUNGER = EntityDataManager.defineId(TameableCreatureEntity.class, DataSerializers.FLOAT);
-    protected static final DataParameter<Float> STAMINA = EntityDataManager.defineId(TameableCreatureEntity.class, DataSerializers.FLOAT);
-	protected static final DataParameter<Integer> LOYALTY = EntityDataManager.defineId(TameableCreatureEntity.class, DataSerializers.INT);
+    protected static final EntityDataAccessor<Byte> TAMED = SynchedEntityData.defineId(TameableCreatureEntity.class, EntityDataSerializers.BYTE); // TODO Tame Type IDs.
+    protected static final EntityDataAccessor<Optional<UUID>> OWNER_ID = SynchedEntityData.defineId(TameableCreatureEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    protected static final EntityDataAccessor<Float> HUNGER = SynchedEntityData.defineId(TameableCreatureEntity.class, EntityDataSerializers.FLOAT);
+    protected static final EntityDataAccessor<Float> STAMINA = SynchedEntityData.defineId(TameableCreatureEntity.class, EntityDataSerializers.FLOAT);
+	protected static final EntityDataAccessor<Integer> LOYALTY = SynchedEntityData.defineId(TameableCreatureEntity.class, EntityDataSerializers.INT);
 
-    /** Used for the TAMED WATCHER_ID, this holds a series of booleans that describe the tamed status as well as instructed behaviour. **/
+	protected TameableCreatureEntity(EntityType<? extends AgeableCreatureEntity> entityType, Level world) {
+		super(entityType, world);
+	}
+
+	/** Used for the TAMED WATCHER_ID, this holds a series of booleans that describe the tamed status as well as instructed behaviour. **/
 	public static enum TAMED_ID {
 		IS_TAMED((byte)1), MOVE_SIT((byte)2), MOVE_FOLLOW((byte)4),
 		STANCE_PASSIVE((byte)8), STANCE_AGGRESSIVE((byte)16), STANCE_ASSIST((byte)32), PVP((byte)64);
@@ -59,10 +72,10 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 	// ==================================================
   	//                    Constructor
   	// ==================================================
-	protected TameableCreatureEntity(EntityType<? extends TameableCreatureEntity> entityType, World world) {
+	/*protected TameableCreatureEntity(EntityType<? extends TameableCreatureEntity> entityType, Level world) {
 		super(entityType, world);
 	}
-	
+	*/
 	// ========== Init ==========
     @Override
     protected void defineSynchedData() {
@@ -301,7 +314,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 					commands.put(COMMAND_PIORITIES.ITEM_USE.id, "Charge");
 				}
 				else {
-					player.sendMessage(new TranslationTextComponent("item.lycanitesmobs.charge.creature.invalid"), Util.NIL_UUID);
+					player.displayClientMessage(Component.translatable("item.lycanitesmobs.charge.creature.invalid"), false);
 				}
 			}
     		
@@ -756,12 +769,12 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 	 * Gets the display name of the entity that owns this entity or an empty string if none. TODO Maybe this hack is no longer needed now.
 	 * @return The owner display name.
 	 */
-	public ITextComponent getOwnerName() {
+	public Component getOwnerName() {
 		Entity owner = this.getOwner();
 		if(owner != null) {
 			return owner.getDisplayName();
 		}
-		return new StringTextComponent("");
+		return Component.literal("");
 	}
     
     
@@ -831,12 +844,12 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 		// Require Knowledge Rank 2:
 		CreatureKnowledge creatureKnowledge = extendedPlayer.getBeastiary().getCreatureKnowledge(this.creatureInfo.getName());
 		if (creatureKnowledge == null || creatureKnowledge.rank < 2) {
-//			ITextComponent tameMessage = new TranslationTextComponent("message.pet.tamefail.knowledge.prefix")
+//			ITextComponent tameMessage = Component.translatable("message.pet.tamefail.knowledge.prefix")
 //					.append(" ")
 //					.append(this.getSpeciesName())
 //					.append(" ")
-//					.append(new TranslationTextComponent("message.pet.tamefail.knowledge.suffix"));
-//			player.sendMessage(tameMessage, Util.NIL_UUID);
+//					.append(Component.translatable("message.pet.tamefail.knowledge.suffix"));
+//			player.displayClientMessage(tameMessage, false);
 			return this.isTamed();
 		}
 
@@ -850,12 +863,12 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 			this.setPlayerOwner(player);
 			this.onTamedByPlayer();
 			this.unsetTemporary();
-			ITextComponent tameMessage = new TranslationTextComponent("message.pet.tamed.prefix")
+			MutableComponent tameMessage = Component.translatable("message.pet.tamed.prefix")
 					.append(" ")
 					.append(this.getSpeciesName())
 					.append(" ")
-					.append(new TranslationTextComponent("message.pet.tamed.suffix"));
-			player.sendMessage(tameMessage, Util.NIL_UUID);
+					.append(Component.translatable("message.pet.tamed.suffix"));
+			player.displayClientMessage(tameMessage, false);
 			this.playTameEffect(this.isTamed());
 			//player.addStat(ObjectManager.getStat(this.creatureInfo.getName() + ".tame"), 1); TODO Player Stats
 			if (this.portalTime > this.getDimensionChangingDelay()) {
@@ -1009,7 +1022,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     public boolean isFollowing() {
     	if(!this.isTamed())
     		return false;
-    	if(this.getLeashHolder() instanceof LeashKnotEntity)
+    	if(this.getLeashHolder() instanceof LeashFenceKnotEntity)
     		return false;
         return (this.getByteFromDataManager(TAMED) & TAMED_ID.MOVE_FOLLOW.id) != 0;
     }
@@ -1215,7 +1228,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     //                       Client
     // ==================================================
     protected void playTameEffect(boolean success) {
-        IParticleData particle = ParticleTypes.HEART;
+        ParticleOptions particle = ParticleTypes.HEART;
         if(!success)
         	particle = ParticleTypes.SMOKE;
 
@@ -1256,7 +1269,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     // ==================================================
    	// ========== Read ===========
     @Override
-    public void readAdditionalSaveData(CompoundNBT nbt) {
+    public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
 
 		// UUID NBT:
@@ -1316,7 +1329,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     
     // ========== Write ==========
     @Override
-    public void addAdditionalSaveData(CompoundNBT nbt) {
+    public void addAdditionalSaveData(CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
         if(this.getOwnerId() != null) {
             nbt.putUUID("OwnerId", this.getOwnerId());
@@ -1349,8 +1362,10 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     		sound = "_beg";
     	return ObjectManager.getSound(this.getSoundName() + sound);
     }
-    
-    // ========== Tame ==========
+
+
+
+	// ========== Tame ==========
     public void playTameSound() {
     	this.playSound(ObjectManager.getSound(this.getSoundName() + "_tame"), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
     }

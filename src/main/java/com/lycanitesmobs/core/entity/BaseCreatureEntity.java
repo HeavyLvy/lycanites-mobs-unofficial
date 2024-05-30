@@ -30,6 +30,7 @@ import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
 import com.lycanitesmobs.core.util.DamageSourceHelper;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -37,14 +38,14 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.attributes.RangedAttribute;
+import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -54,10 +55,14 @@ import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 
@@ -487,14 +492,15 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 	 * Returns Registers attributes and returns an attribute map for assigning to an EntityType.
 	 * @return Returns a mutable AttributeModifierMap.
 	 */
-	public static AttributeModifierMap.MutableAttribute registerCustomAttributes() {
-		return CreatureEntity.createLivingAttributes()
+	public static AttributeSupplier.Builder registerCustomAttributes() {
+		return PathfinderMob.createMobAttributes()
 				.add(DEFENSE)
 				.add(Attributes.ATTACK_DAMAGE)
 				.add(Attributes.ATTACK_SPEED)
 				.add(RANGED_SPEED)
 				.add(Attributes.FOLLOW_RANGE);
 	}
+
 
 	/**
 	 * Loads this entity's dynamic attributes.
@@ -564,14 +570,14 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 	 */
     public void setupMob() {
         // Stats:
-        this.maxUpStep = 0.5F;
+        this.setMaxUpStep(0.5F);
         this.inventory = new CreatureInventory(this.getName().getString(), this);
 
         // Drops:
         this.loadItemDrops();
 		if(ItemEquipmentPart.MOB_PART_DROPS.containsKey(this.creatureInfo.getEntityId())) {
 			for(ItemEquipmentPart itemEquipmentPart : ItemEquipmentPart.MOB_PART_DROPS.get(this.creatureInfo.getEntityId())) {
-				ItemDrop partDrop = new ItemDrop(itemEquipmentPart.getRegistryName().toString(), itemEquipmentPart.dropChance).setMaxAmount(1);
+				ItemDrop partDrop = new ItemDrop(LMHelperClass.getItemId(itemEquipmentPart), itemEquipmentPart.dropChance).setMaxAmount(1);
 				partDrop.bonusAmount = false;
 				partDrop.amountMultiplier = false;
 				this.drops.add(partDrop);
@@ -596,7 +602,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 	}
 
 	@Override
-	public int getExperienceReward(Player player) {
+	public int getExperienceReward() {
 		float scaledExp = this.creatureInfo.experience;
 		if(this.getVariant() != null) {
 			if ("uncommon".equals(this.getVariant().rarity))
@@ -820,10 +826,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     // ========== Can Spawn Here ==========
     /** Checks if the creature is able to spawn at it's initial position. **/
     @Override
-    public boolean checkSpawnRules(IWorld world, SpawnReason spawnReason) {
+    public boolean checkSpawnRules(LevelAccessor world, MobSpawnType spawnReason) {
 	    return this.checkSpawnVanilla(this.getCommandSenderWorld(), spawnReason, this.blockPosition());
     }
-
     @Override
     public int getMaxSpawnClusterSize() {
         return this.creatureInfo.creatureSpawn.spawnGroupMax;
@@ -1402,10 +1407,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		return (float)this.sizeScale * (float)this.creatureInfo.sizeScale;
 	}
 
-	@Override
-	public AxisAlignedBB getBoundingBox() {
-		return super.getBoundingBox();
-	}
+
 
 	/** Returns the level of this mob, higher levels have higher stats. **/
 	public int getMobLevel() {
@@ -1670,7 +1672,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if(this.despawnCheck()) {
             if(!this.isBoundPet() || this.isTemporary)
         	    this.inventory.dropInventory();
-        	this.remove();
+        	this.remove(RemovalReason.DISCARDED);
         }
 
         // Fire Immunity Override:
@@ -1686,7 +1688,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         // Climbing/Flying:
         if(!this.getCommandSenderWorld().isClientSide || this.isControlledByLocalInstance()) {
         	this.setBesideClimbableBlock(this.horizontalCollision);
-        	if(!this.onGround && this.flySoundSpeed > 0 && this.tickCount % 20 == 0)
+        	if(!this.onGround() && this.flySoundSpeed > 0 && this.tickCount % 20 == 0)
         		this.playFlySound();
         }
         if(!this.getCommandSenderWorld().isClientSide && this.isFlying() && this.hasAttackTarget() && this.updateTick % 40 == 0) {
@@ -1701,7 +1703,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 				Vector3d perchPosition = perchEntityExt.getPerchPosition();
 				this.setPos(perchPosition.x, perchPosition.y, perchPosition.z);
 				this.setDeltaMovement(perchTarget.getDeltaMovement());
-				this.yRot = perchTarget.yRot;
+				this.yRotO = perchTarget.yRotO;
 			}
 			if(perchTarget instanceof Player) {
 				ExtendedPlayer perchPlayerExt = ExtendedPlayer.getForPlayer((Player) perchTarget);
@@ -5323,12 +5325,17 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     // ========== Fall ==========
-    @Override
+    /*@Override
     protected SoundEvent getFallDamageSound(int height) {
-        return height > 4 ? SoundEvents.HOSTILE_BIG_FALL : SoundEvents.HOSTILE_SMALL_FALL;
-    }
 
-    // ========== Swim ==========
+    }*/
+
+	@Override
+	public Fallsounds getFallSounds() {
+		return new Fallsounds(SoundEvents.HOSTILE_BIG_FALL,SoundEvents.HOSTILE_SMALL_FALL);
+	}
+
+	// ========== Swim ==========
     @Override
     protected SoundEvent getSwimSound()
     {
@@ -5383,7 +5390,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     // ==================================================
     //                  Group Data
     // ==================================================
-    public class GroupData implements ILivingEntityData {
+    public class GroupData implements SpawnGroupData {
         public boolean isChild;
 
         public GroupData(boolean child) {

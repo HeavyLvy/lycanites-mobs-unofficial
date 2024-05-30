@@ -6,10 +6,32 @@ import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import net.minecraft.world.entity.Entity;
+import com.lycanitesmobs.core.util.DamageSourceHelper;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.TallGrassBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.network.NetworkHooks;
+import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 
@@ -48,26 +70,26 @@ public class BaseProjectileEntity extends ThrowableProjectile {
     public float rollSpeed = 0;
 
     // Data Manager:
-    protected static final DataParameter<Float> SCALE = EntityDataManager.defineId(BaseProjectileEntity.class, DataSerializers.FLOAT);
+    protected static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(BaseProjectileEntity.class, EntityDataSerializers.FLOAT);
 
 
 	// ==================================================
  	//			    Constructors
  	// ==================================================
-    public BaseProjectileEntity(EntityType<? extends BaseProjectileEntity> entityType, World world) {
+    public BaseProjectileEntity(EntityType<? extends BaseProjectileEntity> entityType, Level world) {
 	   super(entityType, world);
 	   this.setup();
     }
 
-    public BaseProjectileEntity(EntityType<? extends BaseProjectileEntity> entityType, World world, LivingEntity entityLiving) {
+    public BaseProjectileEntity(EntityType<? extends BaseProjectileEntity> entityType, Level world, LivingEntity entityLiving) {
 	   this(entityType, world);
 	   this.setPos(entityLiving.position().x(), entityLiving.position().y() + entityLiving.getEyeHeight(), entityLiving.position().z());
-	   this.shootFromRotation(entityLiving, entityLiving.xRot, entityLiving.yRot, 0.0F, 1.1F, 1.0F); // Shoot from entity
+	   this.shootFromRotation(entityLiving, entityLiving.xRotO, entityLiving.yRotO, 0.0F, 1.1F, 1.0F); // Shoot from entity
 	   this.setOwner(entityLiving);
 	   this.setup();
     }
 
-    public BaseProjectileEntity(EntityType<? extends BaseProjectileEntity> entityType, World world, double x, double y, double z) {
+    public BaseProjectileEntity(EntityType<? extends BaseProjectileEntity> entityType, Level world, double x, double y, double z) {
 	   this(entityType, world);
 	   this.setPos(x, y, z);
 	   this.setup();
@@ -82,16 +104,18 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public IPacket<?> getAddEntityPacket() {
+	public Packet<ClientGamePacketListener> getAddEntityPacket() {
 		return NetworkHooks.getEntitySpawningPacket(this);
 	}
-    
-    // ========== Setup Projectile ==========
+
+
+
+	// ========== Setup Projectile ==========
     public void setup() {
 
     }
 
-	public String getStringFromDataManager(DataParameter<String> key) {
+	public String getStringFromDataManager(EntityDataAccessor<String> key) {
 		try {
 			return this.getEntityData().get(key);
 		}
@@ -132,7 +156,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 		this.updateTick++;
 
 	   if(!this.movement) {
-		  this.onGround = false;
+		  this.setOnGround(false);
 		  this.portalTime = this.getDimensionChangingDelay();
 	   }
 	   double initX = this.position().x();
@@ -150,15 +174,15 @@ public class BaseProjectileEntity extends ThrowableProjectile {
     	// Terrain Destruction
     	if(!this.getCommandSenderWorld().isClientSide || this.clientOnly) {
     		if(!this.waterProof && this.isInWater())
-    			this.remove();
+    			this.remove(RemovalReason.DISCARDED);
     		else if(!this.lavaProof && this.isInLava())
-    			this.remove();
+    			this.remove(RemovalReason.DISCARDED);
     	}
 
     	// Life Timeout:
 	   if(!this.getCommandSenderWorld().isClientSide || this.clientOnly) {
 		  if(this.projectileLife-- <= 0) {
-				this.remove();
+				this.remove(RemovalReason.DISCARDED);
 			}
 		}
 
@@ -212,19 +236,19 @@ public class BaseProjectileEntity extends ThrowableProjectile {
   	//                     Impact
   	// ==================================================
 	@Override
-	protected void onHit(RayTraceResult rayTraceResult) {
+	protected void onHit(HitResult rayTraceResult) {
 		if(this.getCommandSenderWorld().isClientSide)
 			return;
 		boolean collided = false;
 	    boolean entityCollision = false;
 		boolean doDamage = true;
 		boolean blockCollision = false;
-		BlockPos impactPos = new BlockPos(this.position());
+		BlockPos impactPos = new BlockPos(LMHelperClass.convertToVec3i(this.position()));
 
 		// Entity Hit:
 		Entity entityHit = null;
-		if(rayTraceResult.getType() == RayTraceResult.Type.ENTITY && rayTraceResult instanceof EntityRayTraceResult) {
-			entityHit = ((EntityRayTraceResult)rayTraceResult).getEntity();
+		if(rayTraceResult.getType() == HitResult.Type.ENTITY && rayTraceResult instanceof EntityHitResult) {
+			entityHit = ((EntityHitResult)rayTraceResult).getEntity();
 		}
 		if(entityHit != null) {
 			if(this.getOwner() != null) {
@@ -270,13 +294,13 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 						else {
 							double pierceDamage = this.pierce;
 							if (damage <= pierceDamage)
-								attackSuccess = target.hurt(DamageSource.thrown(this, this.getOwner()).bypassArmor().bypassMagic(), damage);
+								attackSuccess = target.hurt(DamageSourceHelper.MAGIC, damage);
 							else {
 								int hurtResistantTimeBefore = target.invulnerableTime;
-								target.hurt(DamageSource.thrown(this, this.getOwner()).bypassArmor().bypassMagic(), (float) pierceDamage);
+								target.hurt(DamageSourceHelper.MAGIC, (float) pierceDamage);
 								target.invulnerableTime = hurtResistantTimeBefore;
 								damage -= pierceDamage;
-								attackSuccess = target.hurt(DamageSource.thrown(this, this.getOwner()), damage);
+								attackSuccess = target.hurt(this.level().damageSources().thrown(this, this.getOwner()), damage);
 							}
 						}
 
@@ -304,21 +328,20 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 		}
 		
 		// Block Hit:
-		else if(rayTraceResult.getType() == RayTraceResult.Type.BLOCK && rayTraceResult instanceof BlockRayTraceResult) {
-			BlockRayTraceResult blockRayTraceResult = (BlockRayTraceResult)rayTraceResult;
-			impactPos = blockRayTraceResult.getBlockPos();
+		else if(rayTraceResult.getType() == HitResult.Type.BLOCK && rayTraceResult instanceof BlockHitResult blockRayTraceResult) {
+            impactPos = blockRayTraceResult.getBlockPos();
 			BlockState blockState = this.getCommandSenderWorld().getBlockState(impactPos);
 			if (blockState.getBlock() instanceof TallGrassBlock || blockState.getBlock() == Blocks.TALL_GRASS) {
 				if (this.cutsGrass) {
-					level.destroyBlock(impactPos, false);
+					level().destroyBlock(impactPos, false);
 				}
 			}
 			else {
-				collided = blockState.getMaterial().isSolid();
-				if (!this.waterProof && blockState.getMaterial() == Material.WATER) {
+				collided = blockState.isSolid();
+				if (!this.waterProof && blockState.getBlock() == Blocks.WATER) {
 					collided = true;
 				}
-				if (!this.lavaProof && blockState.getMaterial() == Material.LAVA) {
+				if (!this.lavaProof && blockState.getBlock() == Blocks.LAVA) {
 					collided = true;
 				}
 			}
@@ -367,7 +390,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 		  boolean entityPierced = this.ripper && entityCollision;
 		  boolean blockPierced = this.pierceBlocks && blockCollision;
 		  if((!this.getCommandSenderWorld().isClientSide || this.clientOnly) && !entityPierced && !blockPierced) {
- 			  this.remove();
+ 			  this.remove(RemovalReason.DISCARDED);
 				if(this.getImpactSound() != null) {
 					this.playSound(this.getImpactSound(), 1.0F, 1.0F / (this.getCommandSenderWorld().random.nextFloat() * 0.4F + 0.8F));
 				}
@@ -385,20 +408,20 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 			return false;
 		}
 		LivingEntity targetLiving = (LivingEntity)targetEntity;
-		if (!targetLiving.isBlocking() || !targetLiving.getUseItem().isShield(targetLiving)) {
+		if (!targetLiving.isBlocking()) {
 			return false;
 		}
 
 		// Check Player Blocking Angle:
-		if (targetLiving instanceof PlayerEntity) {
-			Vector3d targetViewVector = targetLiving.getViewVector(1.0F).normalize();
-			Vector3d distance = new Vector3d(this.getX() - targetLiving.getX(), this.getEyeY() - targetLiving.getEyeY(), this.getZ() - targetLiving.getZ());
+		if (targetLiving instanceof Player) {
+			Vec3 targetViewVector = targetLiving.getViewVector(1.0F).normalize();
+			Vec3 distance = new Vec3(this.getX() - targetLiving.getX(), this.getEyeY() - targetLiving.getEyeY(), this.getZ() - targetLiving.getZ());
 			double distanceStraight = distance.length();
 			distance = distance.normalize();
 			double lookDistance = targetViewVector.dot(distance);
 			double lookRange = 1.5D;
 			double comparison = 1.0D - (lookRange / distanceStraight);
-			return lookDistance > comparison && targetLiving.canSee(this);
+			return lookDistance > comparison && targetLiving.hasLineOfSight(this);
 		}
 
 		return true;
@@ -419,8 +442,8 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 			}
 
 			// Player Damage Event:
-			if(owner instanceof PlayerEntity) {
-				if(MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((PlayerEntity)owner, targetEntity))) {
+			if(owner instanceof Player) {
+				if(MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((Player)owner, targetEntity))) {
 					return false;
 				}
 				if(targetEntity instanceof TameableCreatureEntity) {
@@ -432,8 +455,8 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 
 			// Player PVP:
 			if(!this.getCommandSenderWorld().getServer().isPvpAllowed()) {
-				if(owner instanceof PlayerEntity) {
-					if(targetEntity instanceof PlayerEntity) {
+				if(owner instanceof Player) {
+					if(targetEntity instanceof Player) {
 						return false;
 					}
 					if(targetEntity instanceof TameableCreatureEntity) {
@@ -477,7 +500,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 	}
 	
 	//========== Place Block ==========
-	public void placeBlock(World world, BlockPos pos) {
+	public void placeBlock(Level world, BlockPos pos) {
     	 //world.setBlock(pos, ObjectManager.getBlock("BlockName").blockID);
 	}
 	
@@ -529,13 +552,13 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 
 	@Override
 	@Nonnull
-	public EntitySize getDimensions(Pose pose) {
+	public EntityDimensions getDimensions(Pose pose) {
 		return this.getType().getDimensions().scale(this.getProjectileScale());
 	}
 
 	@Override
-	public AxisAlignedBB getBoundingBox() {
-		return super.getBoundingBox();
+	public AABB getBoundingBoxForCulling() {
+		return super.getBoundingBoxForCulling();
 	}
 
 	public float getTextureOffsetY() {
@@ -554,7 +577,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 		float damage = (float)this.damage + this.bonusDamage;
 		if(this.getOwner() != null) {
 			// 20% Extra Damage From Players vs Entities
-			if((this.getOwner() instanceof PlayerEntity  || this.getOwner().getControllingPassenger() instanceof PlayerEntity) && !(entity instanceof PlayerEntity))
+			if((this.getOwner() instanceof Player  || this.getOwner().getControllingPassenger() instanceof Player) && !(entity instanceof Player))
 				damage *= 1.2f;
 		}
 		return damage;
@@ -605,7 +628,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 
     /** Returns the XYZ coordinate in front or behind the provided entity with the given distance and angle offset (in degrees), use a negative distance for behind. **/
     public double[] getFacingPosition(Entity entity, double distance, double angleOffset) {
-	   double angle = Math.toRadians(entity.yRot) + angleOffset;
+	   double angle = Math.toRadians(entity.yRotO) + angleOffset;
 	   double xAmount = -Math.sin(angle);
 	   double zAmount = Math.cos(angle);
 	   double[] coords = new double[3];
@@ -620,7 +643,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 	//				   NBT
 	// ==================================================
 	@Override
-	public void addAdditionalSaveData(CompoundNBT compound) {
+	public void addAdditionalSaveData(CompoundTag compound) {
 		super.addAdditionalSaveData(compound);
 
 		compound.putFloat("ProjectileScale", this.projectileScale);
@@ -628,7 +651,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundNBT compound) {
+	public void readAdditionalSaveData(CompoundTag compound) {
 		super.readAdditionalSaveData(compound);
 
 		if(compound.contains("ProjectileScale")) {
