@@ -2,23 +2,31 @@ package com.lycanitesmobs.core.block.effect;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
+import com.lycanitesmobs.core.block.BlockBase;
 import com.lycanitesmobs.core.block.BlockFireBase;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.info.ItemManager;
+import com.lycanitesmobs.core.util.DamageSourceHelper;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -49,22 +57,24 @@ public class BlockFrostfire extends BlockFireBase {
     }*/
 
     @Override
-    public boolean canCatchFire(IBlockReader world, BlockPos pos, Direction face) {
+    public boolean canCatchFire(BlockGetter world, BlockPos pos, Direction face) {
         Block block = world.getBlockState(pos).getBlock();
         if(block ==  Blocks.ICE || block == Blocks.PACKED_ICE)
             return true;
         return false;
     }
 
+
+
     @Override
-    public boolean isBlockFireSource(BlockState state, IWorldReader world, BlockPos pos, Direction side) {
+    public boolean isBlockFireSource(BlockState state, LevelAccessor world, BlockPos pos, Direction side) {
         if(state.getBlock() == Blocks.PACKED_ICE || state.getBlock() == Blocks.SNOW_BLOCK)
             return true;
         return false;
     }
 
     @Override
-    public int getBlockFlammability(IBlockReader world, BlockPos pos, Direction face) {
+    public int getBlockFlammability(BlockGetter world, BlockPos pos, Direction face) {
         Block block = world.getBlockState(pos).getBlock();
         if(block ==  Blocks.ICE)
             return 20;
@@ -72,12 +82,12 @@ public class BlockFrostfire extends BlockFireBase {
     }
 
     @Override
-    protected boolean canDie(World world, BlockPos pos) {
+    protected boolean canDie(Level world, BlockPos pos) {
         return false;
     }
 
     @Override
-    public void burnBlockReplace(World world, BlockPos pos, int newFireAge) {
+    public void burnBlockReplace(Level world, BlockPos pos, int newFireAge) {
         if(world.getBlockState(pos).getBlock() == Blocks.ICE) {
             world.setBlock(pos, Blocks.PACKED_ICE.defaultBlockState(), 3);
             return;
@@ -86,7 +96,7 @@ public class BlockFrostfire extends BlockFireBase {
     }
 
     @Override
-    public void burnBlockDestroy(World world, BlockPos pos) {
+    public void burnBlockDestroy(Level world, BlockPos pos) {
         if(world.getBlockState(pos).getBlock() == Blocks.ICE) {
             world.setBlock(pos, Blocks.PACKED_ICE.defaultBlockState(), 3);
             return;
@@ -95,11 +105,11 @@ public class BlockFrostfire extends BlockFireBase {
     }
 
     @Override
-    public void entityInside(BlockState blockState, World world, BlockPos pos, Entity entity) {
+    public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
         super.entityInside(blockState, world, pos, entity);
 
         if(entity instanceof LivingEntity) {
-            EffectInstance effect = new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 3 * 20, 0);
+            MobEffectInstance effect = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 3 * 20, 0);
             LivingEntity entityLiving = (LivingEntity)entity;
             if(entityLiving.canBeAffected(effect))
                 entityLiving.addEffect(effect);
@@ -109,13 +119,12 @@ public class BlockFrostfire extends BlockFireBase {
 
         if(entity instanceof ItemEntity)
             return;
-
-        entity.hurt(DamageSource.MAGIC, 2);
+        entity.hurt(DamageSourceHelper.MAGIC, 2);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, World world, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
         double x = pos.getX();
         double y = pos.getY();
         double z = pos.getZ();

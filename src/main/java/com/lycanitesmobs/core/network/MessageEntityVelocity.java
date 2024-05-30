@@ -1,14 +1,15 @@
 package com.lycanitesmobs.core.network;
 
 import com.lycanitesmobs.client.ClientManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
+
 
 public class MessageEntityVelocity {
     public int entityID;
@@ -57,8 +58,8 @@ public class MessageEntityVelocity {
 		if(ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
 			return;
 
-		PlayerEntity player = ClientManager.getInstance().getClientPlayer();
-		World world = player.getCommandSenderWorld();
+		Player player = ClientManager.getInstance().getClientPlayer();
+		Level world = player.getCommandSenderWorld();
 		Entity entity = world.getEntity(message.entityID);
 		entity.setDeltaMovement(entity.getDeltaMovement().add((double)message.motionX / 8000.0D, (double)message.motionY / 8000.0D, (double)message.motionZ / 8000.0D));
 	}
@@ -66,7 +67,7 @@ public class MessageEntityVelocity {
 	/**
 	 * Reads the message from bytes.
 	 */
-	public static MessageEntityVelocity decode(PacketBuffer packet) {
+	public static MessageEntityVelocity decode(FriendlyByteBuf packet) {
 		MessageEntityVelocity message = new MessageEntityVelocity();
 		message.entityID = packet.readVarInt();
 		message.motionX = packet.readShort();
@@ -78,7 +79,7 @@ public class MessageEntityVelocity {
 	/**
 	 * Writes the message into bytes.
 	 */
-	public static void encode(MessageEntityVelocity message, PacketBuffer packet) {
+	public static void encode(MessageEntityVelocity message, FriendlyByteBuf packet) {
 		packet.writeVarInt(message.entityID);
 		packet.writeShort(message.motionX);
 		packet.writeShort(message.motionY);

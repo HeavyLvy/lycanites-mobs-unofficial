@@ -4,6 +4,7 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.creature.EntityRahovart;
+import com.lycanitesmobs.core.util.DamageSourceHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
@@ -62,7 +63,7 @@ public class EntityHellfireOrb extends BaseProjectileEntity {
     //========== Entity Living Collision ==========
     @Override
     public boolean onEntityLivingDamage(LivingEntity entityLiving) {
-    	if(!entityLiving.isInvulnerableTo(DamageSource.ON_FIRE))
+    	if(!entityLiving.isInvulnerableTo(DamageSourceHelper.ON_FIRE))
     		entityLiving.setSecondsOnFire(this.getEffectDuration(10) / 20);
     	return true;
     }

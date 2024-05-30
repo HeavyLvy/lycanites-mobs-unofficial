@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.item.summoningstaff;
 
+import com.lycanitesmobs.core.util.DamageSourceHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -47,7 +48,7 @@ public class ItemStaffBlood extends ItemStaffSummoning {
     public boolean getAdditionalCosts(PlayerEntity player) {
     	if(player.getHealth() <= 7)
     		return false;
-		player.hurt(DamageSource.MAGIC, 6);
+		player.hurt(DamageSourceHelper.MAGIC, 6);
     	return true;
     }
     

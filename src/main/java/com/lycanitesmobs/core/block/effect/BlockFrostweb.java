@@ -1,18 +1,35 @@
 package com.lycanitesmobs.core.block.effect;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.block.BlockBase;
+import com.lycanitesmobs.core.block.BlockFireBase;
 import com.lycanitesmobs.core.info.ItemManager;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.state.StateContainer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector3d;
 
 import java.util.Random;
 
@@ -35,14 +52,14 @@ public class BlockFrostweb extends BlockBase {
 
 		this.noBreakCollision = false;
 
-		this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
+		//this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
 		this.registerDefaultState(this.getStateDefinition().any().setValue(AGE, 0));
 
 		ItemManager.getInstance().cutoutBlocks.add(this);
 	}
 
 	@Override
-	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(AGE);
 	}
 
@@ -70,9 +87,9 @@ public class BlockFrostweb extends BlockBase {
 	//                Collision Effects
 	// ==================================================
 	@Override
-	public void entityInside(BlockState blockState, World world, BlockPos pos, Entity entity) {
+	public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
 		super.entityInside(blockState, world, pos, entity);
-		entity.makeStuckInBlock(blockState, new Vector3d(0.25D, (double)0.05F, 0.25D));
+		entity.makeStuckInBlock(blockState, new Vec3(0.25D, (double)0.05F, 0.25D));
 	}
     
     
@@ -81,7 +98,7 @@ public class BlockFrostweb extends BlockBase {
 	// ==================================================
     @Override
 	@OnlyIn(Dist.CLIENT)
-	public void animateTick(BlockState state, World world, BlockPos pos, Random random) {
+	public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
 		double x = pos.getX();
 		double y = pos.getY();
 		double z = pos.getZ();

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity;
 
+import com.lycanitesmobs.core.util.DamageSourceHelper;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
@@ -30,8 +31,7 @@ public class CustomItemEntity extends ItemEntity {
    	//                   Taking Damage
    	// ==================================================
     public boolean hurt(DamageSource damageSource, float damageAmount) {
-		DamageSource fireDamage = LMHelperClass.damageSourceFromResourceKey(this.level(),DamageTypes.ON_FIRE);
-    	if(this.isInvulnerableTo(fireDamage) || !this.canBurn) {
+    	if(this.isInvulnerableTo(DamageSourceHelper.ON_FIRE) || !this.canBurn) {
     		if(this.level().damageSources().onFire() == damageSource ||
 					this.level().damageSources().inFire() == damageSource) {
     			return false;
@@ -55,8 +55,7 @@ public class CustomItemEntity extends ItemEntity {
    	//                  Network Flags
    	// ==================================================
     protected void setSharedFlag(int flagID, boolean value) {
-		DamageSource fireDamage = LMHelperClass.damageSourceFromResourceKey(this.level(),DamageTypes.ON_FIRE);
-		if(flagID == 0 && this.isInvulnerableTo(fireDamage))
+		if(flagID == 0 && this.isInvulnerableTo(DamageSourceHelper.ON_FIRE))
     		value = false;
         super.setSharedFlag(flagID, value);
     }

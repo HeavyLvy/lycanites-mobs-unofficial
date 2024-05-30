@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.util;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -108,11 +109,21 @@ public class LMHelperClass {
         }
     }
     public static DamageSource damageSourceFromResourceKey(Level level, ResourceKey<DamageType> damageTypeResourceKey) {
-        var damagetype = ResourceKey.createRegistryKey(new ResourceLocation("damage_type"));
-        ResourceKey<?> key = damageTypeResourceKey;
-        var holder = level.registryAccess().registryOrThrow(damagetype).getHolderOrThrow((ResourceKey<Object>) key);
-        DamageType type = (DamageType) holder.get();
-        Holder<DamageType> holder1 = Holder.direct(type);
-        return new DamageSource(holder1);
+        ResourceKey<Registry<DamageType>> damageTypeRegistryKey = ResourceKey.createRegistryKey(new ResourceLocation("damage_type"));
+        Registry<DamageType> damageTypeRegistry = level.registryAccess().registryOrThrow(damageTypeRegistryKey);
+        Holder<DamageType> holder = damageTypeRegistry.getHolderOrThrow(damageTypeResourceKey);
+        return new DamageSource(holder);
+    }
+    public static double wrapDegrees(double p_76138_0_) {
+        double lvt_2_1_ = p_76138_0_ % 360.0;
+        if (lvt_2_1_ >= 180.0) {
+            lvt_2_1_ -= 360.0;
+        }
+
+        if (lvt_2_1_ < -180.0) {
+            lvt_2_1_ += 360.0;
+        }
+
+        return lvt_2_1_;
     }
 }

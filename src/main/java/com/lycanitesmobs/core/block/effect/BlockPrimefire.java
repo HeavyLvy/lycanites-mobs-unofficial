@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.block.effect;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.block.BlockFireBase;
+import com.lycanitesmobs.core.util.DamageSourceHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FireBlock;
@@ -65,10 +66,10 @@ public class BlockPrimefire extends BlockFireBase {
             if(((ItemEntity)entity).getItem().getItem() == ObjectManager.getItem("primeembercharge"))
                 return;
 
-        if(entity.isInvulnerableTo(DamageSource.IN_FIRE))
+        if(entity.isInvulnerableTo(DamageSourceHelper.IN_FIRE))
             return;
 
-        entity.hurt(DamageSource.IN_FIRE, 2);
+        entity.hurt(DamageSourceHelper.IN_FIRE, 2);
         entity.setSecondsOnFire(5);
     }
 

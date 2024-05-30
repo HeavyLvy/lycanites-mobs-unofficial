@@ -9,6 +9,7 @@ import com.lycanitesmobs.core.entity.ExtendedEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.item.BaseItem;
 import com.lycanitesmobs.core.item.equipment.features.*;
+import com.lycanitesmobs.core.util.DamageSourceHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -751,7 +752,7 @@ public class ItemEquipment extends BaseItem {
 					}
 
 					targets.add(possibleTarget);
-					DamageSource sweepSource = DamageSource.GENERIC;
+					DamageSource sweepSource = DamageSourceHelper.GENERIC;
 					if (attacker instanceof PlayerEntity) {
 						sweepSource = DamageSource.playerAttack((PlayerEntity) attacker);
 					}

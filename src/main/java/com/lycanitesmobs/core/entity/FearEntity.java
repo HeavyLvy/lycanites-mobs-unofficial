@@ -2,17 +2,9 @@ package com.lycanitesmobs.core.entity;
 
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.inventory.CreatureInventory;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.FlyingEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -22,7 +14,7 @@ public class FearEntity extends BaseCreatureEntity {
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public FearEntity(EntityType<? extends FearEntity> entityType, World world) {
+    public FearEntity(EntityType<? extends FearEntity> entityType, Level world) {
         super(entityType, world);
         
         // Setup:

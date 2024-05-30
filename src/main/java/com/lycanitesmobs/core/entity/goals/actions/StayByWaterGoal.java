@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import com.lycanitesmobs.core.util.DamageSourceHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -164,7 +165,7 @@ public class StayByWaterGoal extends Goal {
             if(this.host.getCommandSenderWorld().getBlockState(pos).getMaterial() == Material.WATER)
                 return true;
         }
-        if(this.host.isInvulnerableTo(DamageSource.ON_FIRE) || this.host.isLavaCreature) {
+        if(this.host.isInvulnerableTo(DamageSourceHelper.ON_FIRE) || this.host.isLavaCreature) {
             if(this.host.getCommandSenderWorld().getBlockState(pos).getMaterial() == Material.LAVA)
                 return true;
         }

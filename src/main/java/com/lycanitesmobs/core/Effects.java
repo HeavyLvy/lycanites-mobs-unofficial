@@ -11,26 +11,19 @@ import com.lycanitesmobs.core.entity.FearEntity;
 import com.lycanitesmobs.core.info.CreatureGroup;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.network.MessageEntityVelocity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SEntityVelocityPacket;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.MathHelper;
+import com.lycanitesmobs.core.util.DamageSourceHelper;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import net.minecraftforge.event.entity.living.LivingHealEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -94,8 +87,8 @@ public class Effects {
 	//                   Entity Update
 	// ==================================================
 	@SubscribeEvent
-	public void onEntityUpdate(LivingUpdateEvent event) {
-		LivingEntity entity = event.getEntityLiving();
+	public void onEntityUpdate(LivingEvent.LivingTickEvent event) {
+		LivingEntity entity = event.getEntity();
 		if(entity == null) {
 			return;
 		}
@@ -109,23 +102,23 @@ public class Effects {
 		}
 		
 		// Night Vision Stops Blindness:
-		if(entity.hasEffect(net.minecraft.potion.Effects.BLINDNESS) && entity.hasEffect(net.minecraft.potion.Effects.NIGHT_VISION)) {
-			entity.removeEffect(net.minecraft.potion.Effects.BLINDNESS);
+		if(entity.hasEffect(MobEffects.BLINDNESS) && entity.hasEffect(MobEffects.NIGHT_VISION)) {
+			entity.removeEffect(MobEffects.BLINDNESS);
 		}
 
 
 		// Disable Nausea:
 		this.disableNausea = ConfigExtra.INSTANCE.disableNausea.get();
-		if(this.disableNausea && event.getEntityLiving() instanceof PlayerEntity) {
-			if(entity.hasEffect(net.minecraft.potion.Effects.CONFUSION)) {
-				entity.removeEffect(net.minecraft.potion.Effects.CONFUSION);
+		if(this.disableNausea && event.getEntity() instanceof Player) {
+			if(entity.hasEffect(MobEffects.CONFUSION)) {
+				entity.removeEffect(MobEffects.CONFUSION);
 			}
 		}
 
 		// Immunity:
 		boolean invulnerable = false;
-		if(entity instanceof PlayerEntity) {
-			PlayerEntity player = (PlayerEntity)entity;
+		if(entity instanceof Player) {
+			Player player = (Player)entity;
 			invulnerable = player.isCreative() || player.isSpectator();
 		}
 
@@ -143,7 +136,7 @@ public class Effects {
 		// Weight
 		EffectBase weight = ObjectManager.getEffect("weight");
 		if(weight != null) {
-			if(!invulnerable && entity.hasEffect(weight) && !entity.hasEffect(net.minecraft.potion.Effects.DAMAGE_BOOST)) {
+			if(!invulnerable && entity.hasEffect(weight) && !entity.hasEffect(MobEffects.DAMAGE_BOOST)) {
 				if(entity.getDeltaMovement().y() > -0.2D)
 					entity.setDeltaMovement(entity.getDeltaMovement().add(0, -0.2D, 0));
 			}
@@ -175,9 +168,9 @@ public class Effects {
 					double motionZ = strength * (entity.getCommandSenderWorld().random.nextDouble() - 0.5D);
 					entity.setDeltaMovement(entity.getDeltaMovement().add(motionX, motionY, motionZ));
 					try {
-						if (entity instanceof ServerPlayerEntity) {
-							ServerPlayerEntity player = (ServerPlayerEntity) entity;
-							player.connection.send(new SEntityVelocityPacket(entity));
+						if (entity instanceof ServerPlayer) {
+							ServerPlayer player = (ServerPlayer) entity;
+							player.connection.send(new ClientboundSetEntityMotionPacket(entity));
 							MessageEntityVelocity messageEntityVelocity = new MessageEntityVelocity(
 									player,
 									strength * (entity.getCommandSenderWorld().random.nextDouble() - 0.5D),
@@ -203,11 +196,11 @@ public class Effects {
 				// Poison:
 				int poisonAmplifier = entity.getEffect(plague).getAmplifier();
 				int poisonDuration = entity.getEffect(plague).getDuration();
-				if(entity.hasEffect(net.minecraft.potion.Effects.POISON)) {
-					poisonAmplifier = Math.max(poisonAmplifier, entity.getEffect(net.minecraft.potion.Effects.POISON).getAmplifier());
-					poisonDuration = Math.max(poisonDuration, entity.getEffect(net.minecraft.potion.Effects.POISON).getDuration());
+				if(entity.hasEffect(MobEffects.POISON)) {
+					poisonAmplifier = Math.max(poisonAmplifier, entity.getEffect(MobEffects.POISON).getAmplifier());
+					poisonDuration = Math.max(poisonDuration, entity.getEffect(MobEffects.POISON).getDuration());
 				}
-				entity.addEffect(new EffectInstance(net.minecraft.potion.Effects.POISON, poisonDuration, poisonAmplifier));
+				entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonDuration, poisonAmplifier));
 
 				// Spread:
 				if(entity.getCommandSenderWorld().getGameTime() % 20 == 0) {
@@ -215,16 +208,16 @@ public class Effects {
 					for(Object entityObj : aoeTargets) {
 						LivingEntity target = (LivingEntity)entityObj;
 						if(target != entity && !entity.isAlliedTo(target)) {
-							if(target instanceof PlayerEntity && !entity.canSee(target)) {
+							if(target instanceof Player && !entity.hasLineOfSight(target)) {
 								continue;
 							}
 							int amplifier = entity.getEffect(plague).getAmplifier();
 							int duration = entity.getEffect(plague).getDuration();
 							if(amplifier > 0) {
-								target.addEffect(new EffectInstance(plague, duration, amplifier - 1));
+								target.addEffect(new MobEffectInstance(plague, duration, amplifier - 1));
 							}
 							else {
-								target.addEffect(new EffectInstance(net.minecraft.potion.Effects.POISON, duration, amplifier));
+								target.addEffect(new MobEffectInstance(MobEffects.POISON, duration, amplifier));
 							}
 						}
 					}
@@ -248,7 +241,7 @@ public class Effects {
 		if(bleed != null && !entity.getCommandSenderWorld().isClientSide) {
 			if(!invulnerable && entity.hasEffect(bleed) && entity.getCommandSenderWorld().getGameTime() % 20 == 0 && entity.getVehicle() == null) {
 				if(entity.walkDistO != entity.walkDist) {
-					entity.hurt(DamageSource.MAGIC, entity.getEffect(bleed).getAmplifier() + 1);
+					entity.hurt(DamageSourceHelper.MAGIC, entity.getEffect(bleed).getAmplifier() + 1);
 				}
 			}
 		}
@@ -265,8 +258,8 @@ public class Effects {
 		// ========== Buffs ==========
 		// Swiftswimming
 		EffectBase swiftswimming = ObjectManager.getEffect("swiftswimming");
-		if(swiftswimming != null && entity instanceof PlayerEntity) {
-			PlayerEntity player = (PlayerEntity)entity;
+		if(swiftswimming != null && entity instanceof Player) {
+			Player player = (Player)entity;
 			ModifiableAttributeInstance movement = entity.getAttribute(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get());
 			int amplifier = -1;
 			if(entity.hasEffect(swiftswimming)) {
@@ -302,17 +295,17 @@ public class Effects {
 		EffectBase immunization = ObjectManager.getEffect("immunization");
 		if(immunization != null && !entity.getCommandSenderWorld().isClientSide) {
 			if(entity.hasEffect(ObjectManager.getEffect("immunization"))) {
-				if(entity.hasEffect(net.minecraft.potion.Effects.POISON)) {
-					entity.removeEffect(net.minecraft.potion.Effects.POISON);
+				if(entity.hasEffect(MobEffects.POISON)) {
+					entity.removeEffect(MobEffects.POISON);
 				}
-				if(entity.hasEffect(net.minecraft.potion.Effects.HUNGER)) {
-					entity.removeEffect(net.minecraft.potion.Effects.HUNGER);
+				if(entity.hasEffect(MobEffects.HUNGER)) {
+					entity.removeEffect(MobEffects.HUNGER);
 				}
-				if(entity.hasEffect(net.minecraft.potion.Effects.WEAKNESS)) {
-					entity.removeEffect(net.minecraft.potion.Effects.WEAKNESS);
+				if(entity.hasEffect(MobEffects.WEAKNESS)) {
+					entity.removeEffect(MobEffects.WEAKNESS);
 				}
-				if(entity.hasEffect(net.minecraft.potion.Effects.CONFUSION)) {
-					entity.removeEffect(net.minecraft.potion.Effects.CONFUSION);
+				if(entity.hasEffect(MobEffects.CONFUSION)) {
+					entity.removeEffect(MobEffects.CONFUSION);
 				}
 				if(ObjectManager.getEffect("paralysis") != null) {
 					if(entity.hasEffect(ObjectManager.getEffect("paralysis"))) {
@@ -326,11 +319,11 @@ public class Effects {
 		EffectBase cleansed = ObjectManager.getEffect("cleansed");
 		if(ObjectManager.getEffect("cleansed") != null && !entity.getCommandSenderWorld().isClientSide) {
 			if(entity.hasEffect(ObjectManager.getEffect("cleansed"))) {
-				if(entity.hasEffect(net.minecraft.potion.Effects.WITHER)) {
-					entity.removeEffect(net.minecraft.potion.Effects.WITHER);
+				if(entity.hasEffect(MobEffects.WITHER)) {
+					entity.removeEffect(MobEffects.WITHER);
 				}
-				if(entity.hasEffect(net.minecraft.potion.Effects.UNLUCK)) {
-					entity.removeEffect(net.minecraft.potion.Effects.UNLUCK);
+				if(entity.hasEffect(MobEffects.UNLUCK)) {
+					entity.removeEffect(MobEffects.UNLUCK);
 				}
 				if(ObjectManager.getEffect("fear") != null) {
 					if(entity.hasEffect(ObjectManager.getEffect("fear"))) {
@@ -352,13 +345,13 @@ public class Effects {
 	// ==================================================
 	@SubscribeEvent
 	public void onEntityJump(LivingJumpEvent event) {
-		LivingEntity entity = event.getEntityLiving();
+		LivingEntity entity = event.getEntity();
 		if(entity == null)
 			return;
 
 		boolean invulnerable = false;
-		if(entity instanceof PlayerEntity) {
-			PlayerEntity player = (PlayerEntity)entity;
+		if(entity instanceof Player) {
+			Player player = (Player)entity;
 			invulnerable = player.abilities.invulnerable;
 		}
 		if(invulnerable) {
@@ -390,10 +383,10 @@ public class Effects {
 		if(event.isCancelable() && event.isCanceled())
 			return;
 
-		if(event.getEntityLiving() == null)
+		if(event.getEntity() == null)
 			return;
 
-		LivingEntity target = event.getEntityLiving();
+		LivingEntity target = event.getEntity();
 		LivingEntity attacker = null;
 		if(event.getSource().getEntity() != null && event.getSource().getEntity() instanceof LivingEntity) {
 			attacker = (LivingEntity) event.getSource().getEntity();
@@ -405,7 +398,7 @@ public class Effects {
 		// ========== Debuffs ==========
 		// Lifeleak
 		EffectBase lifeleak = ObjectManager.getEffect("lifeleak");
-		if(lifeleak != null && !event.getEntityLiving().getCommandSenderWorld().isClientSide) {
+		if(lifeleak != null && !event.getEntity().getCommandSenderWorld().isClientSide) {
 			if(attacker.hasEffect(lifeleak)) {
 				if (event.isCancelable()) {
 					event.setCanceled(true);
@@ -424,9 +417,9 @@ public class Effects {
         if(event.isCancelable() && event.isCanceled())
             return;
 
-        if(event.getEntityLiving() == null)
+        if(event.getEntity() == null)
             return;
-		LivingEntity target = event.getEntityLiving();
+		LivingEntity target = event.getEntity();
 		Entity attacker = event.getSource().getEntity();
 
 
@@ -434,7 +427,7 @@ public class Effects {
         // Fall Resistance
 		EffectBase fallresist = ObjectManager.getEffect("fallresist");
 		if(fallresist != null) {
-            if(event.getEntityLiving().hasEffect(fallresist)) {
+            if(event.getEntity().hasEffect(fallresist)) {
                 if("fall".equals(event.getSource().msgId)) {
                     event.setAmount(0);
                     event.setCanceled(true);
@@ -445,9 +438,9 @@ public class Effects {
 		// Penetration
 		EffectBase penetration = ObjectManager.getEffect("penetration");
 		if(penetration != null) {
-			if(event.getEntityLiving().hasEffect(penetration)) {
+			if(event.getEntity().hasEffect(penetration)) {
 				float damage = event.getAmount();
-				float multiplier = 0.25F * (event.getEntityLiving().getEffect(penetration).getAmplifier() + 1);
+				float multiplier = 0.25F * (event.getEntity().getEffect(penetration).getAmplifier() + 1);
 				event.setAmount(damage + (damage * multiplier));
 			}
 		}
@@ -455,7 +448,7 @@ public class Effects {
 		// Fear
 		EffectBase fear = ObjectManager.getEffect("fear");
 		if(fear != null) {
-			if(event.getEntityLiving().hasEffect(fear)) {
+			if(event.getEntity().hasEffect(fear)) {
 				if("inWall".equals(event.getSource().msgId)) {
 					event.setAmount(0);
 					event.setCanceled(true);
@@ -511,7 +504,7 @@ public class Effects {
 	// ==================================================
 	@SubscribeEvent
 	public void onEntityHeal(LivingHealEvent event) {
-		LivingEntity entity = event.getEntityLiving();
+		LivingEntity entity = event.getEntity();
 		if(entity == null)
 			return;
 
@@ -539,14 +532,14 @@ public class Effects {
 	/** This uses the player sleep in bed event to spawn mobs. **/
 	@SubscribeEvent
 	public void onSleep(PlayerSleepInBedEvent event) {
-		PlayerEntity player = event.getPlayer();
+		Player player = event.getPlayer();
 		if(player == null || player.getCommandSenderWorld().isClientSide || event.isCanceled())
 			return;
 
 		// Insomnia:
 		EffectBase insomnia = ObjectManager.getEffect("insomnia");
 		if(insomnia != null && player.hasEffect(insomnia)) {
-			event.setResult(PlayerEntity.SleepResult.NOT_SAFE);
+			event.setResult(Player.SleepResult.NOT_SAFE);
 		}
 	}
 
@@ -559,14 +552,14 @@ public class Effects {
 		if(event.isCancelable() && event.isCanceled())
 			return;
 
-		if(event.getEntityLiving() == null)
+		if(event.getEntity() == null)
 			return;
 
 		// ========== Debuffs ==========
 		// Aphagia
 		EffectBase aphagia = ObjectManager.getEffect("aphagia");
-		if(aphagia != null && !event.getEntityLiving().getCommandSenderWorld().isClientSide) {
-			if(event.getEntityLiving().hasEffect(aphagia)) {
+		if(aphagia != null && !event.getEntity().getCommandSenderWorld().isClientSide) {
+			if(event.getEntity().hasEffect(aphagia)) {
 				if(event.isCancelable()) {
 					event.setCanceled(true);
 				}

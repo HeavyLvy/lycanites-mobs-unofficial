@@ -8,9 +8,10 @@ import com.lycanitesmobs.core.item.equipment.CreatureSaddleItem;
 import com.lycanitesmobs.core.item.consumable.CreatureTreatItem;
 import com.lycanitesmobs.core.item.special.ItemSoulstone;
 import com.lycanitesmobs.core.item.special.ItemSoulstoneFilled;
-import net.minecraft.item.Item;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.Item;
+import org.spongepowered.asm.mixin.Mutable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,8 +85,8 @@ public class CreatureType {
 	 * Returns a translated title for this creature type. Ex: Beast
 	 * @return The display name of this creature type.
 	 */
-	public ITextComponent getTitle() {
-		return new TranslationTextComponent("creaturetype." + this.getName());
+	public MutableComponent getTitle() {
+		return Component.translatable("creaturetype." + this.getName());
 	}
 
 	/**
@@ -173,14 +174,13 @@ public class CreatureType {
 	 */
 	public void createItems() {
 		Item.Properties standardItemProperties = new Item.Properties();
-		standardItemProperties.tab(ItemManager.getInstance().itemsGroup);
+		// TODO: create creative tabs
+		//.tab(ItemManager.getInstance().itemsGroup)
 
 		Item.Properties smallStackItemProperties = new Item.Properties();
-		smallStackItemProperties.tab(ItemManager.getInstance().itemsGroup);
 		smallStackItemProperties.stacksTo(16);
 
 		Item.Properties spawnEggProperties = new Item.Properties();
-		spawnEggProperties.tab(ItemManager.getInstance().creaturesGroups);
 
 		// Treat:
 		this.treat = new CreatureTreatItem(smallStackItemProperties, this);

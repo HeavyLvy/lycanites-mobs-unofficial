@@ -27,10 +27,14 @@ import com.lycanitesmobs.core.network.MessageCreature;
 import com.lycanitesmobs.core.pets.PetEntry;
 import com.lycanitesmobs.core.spawner.SpawnerEventListener;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
+import com.lycanitesmobs.core.util.DamageSourceHelper;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -55,6 +59,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -270,49 +275,49 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
 	// Data Manager:
 	/** Used to sync what targets this creature has. **/
-    protected static final DataParameter<Byte> TARGET = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.BYTE);
+    protected static final EntityDataAccessor<Byte> TARGET = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.BYTE);
     /** Used to sync which attack phase this creature is in. **/
-	protected static final DataParameter<Byte> ATTACK_PHASE = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.BYTE);
+	protected static final EntityDataAccessor<Byte> ATTACK_PHASE = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.BYTE);
 	/** Used to sync what animation states this creature is in. **/
-	protected static final DataParameter<Byte> ANIMATION_STATE = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.BYTE);
+	protected static final EntityDataAccessor<Byte> ANIMATION_STATE = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.BYTE);
 	/** Used to sync the current attack cooldown animation, useful for when creature attack cooldowns change dynamically. **/
-	protected static final DataParameter<Integer> ANIMATION_ATTACK_COOLDOWN_MAX = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.INT);
+	protected static final EntityDataAccessor<Integer> ANIMATION_ATTACK_COOLDOWN_MAX = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.INT);
 
 	/** Used to sync if this creature is climbing or not. TODO Perhaps move this into ANIMATION_STATE_BITS. **/
-	protected static final DataParameter<Byte> CLIMBING = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.BYTE);
+	protected static final EntityDataAccessor<Byte> CLIMBING = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.BYTE);
 	/** Used to sync the stealth percentage of this creature. Where 0.0 is unstealthed and 1.0 is fully stealthed, see burrowing Crusks for an example. **/
-	protected static final DataParameter<Float> STEALTH = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.FLOAT);
+	protected static final EntityDataAccessor<Float> STEALTH = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.FLOAT);
 
 	/** Used to sync the baby status of this creature. **/
-	protected static final DataParameter<Boolean> BABY = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.BOOLEAN);
+	protected static final EntityDataAccessor<Boolean> BABY = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.BOOLEAN);
 	/** Used to sync the dyed coloring of this creature. This will go towards colorable pet collars or saddles, etc in the future. **/
-	protected static final DataParameter<Byte> COLOR = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.BYTE);
+	protected static final EntityDataAccessor<Byte> COLOR = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.BYTE);
 	/** Used to sync the size scale of this creature. **/
-	protected static final DataParameter<Float> SIZE = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.FLOAT);
+	protected static final EntityDataAccessor<Float> SIZE = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.FLOAT);
 	/** Used to sync the stat level of this creature. **/
-	protected static final DataParameter<Integer> LEVEL = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.INT);
+	protected static final EntityDataAccessor<Integer> LEVEL = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.INT);
 	/** Used to sync the experience of this creature. **/
-	protected static final DataParameter<Integer> EXPERIENCE = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.INT);
+	protected static final EntityDataAccessor<Integer> EXPERIENCE = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.INT);
 	/** Used to sync the subspecies used by this creature. **/
-	protected static final DataParameter<Byte> SUBSPECIES = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.BYTE);
+	protected static final EntityDataAccessor<Byte> SUBSPECIES = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.BYTE);
 	/** Used to sync the variant used by this creature. **/
-	protected static final DataParameter<Byte> VARIANT = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.BYTE);
+	protected static final EntityDataAccessor<Byte> VARIANT = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.BYTE);
 
 	/** Used to sync the central arena position that this creature is using if any. See Asmodeus jumping for an example. **/
-	protected static final DataParameter<Optional<BlockPos>> ARENA = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.OPTIONAL_BLOCK_POS);
+	protected static final EntityDataAccessor<Optional<BlockPos>> ARENA = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
 
 	/** Used to sync the Head Equipment slot of this creature. Currently unused. **/
-	public static final DataParameter<ItemStack> EQUIPMENT_HEAD = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.ITEM_STACK);
+	public static final EntityDataAccessor<ItemStack> EQUIPMENT_HEAD = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.ITEM_STACK);
 	/** Used to sync the Chest Equipment slot of this creature. Used by Pet (Horse) Armor. **/
-	public static final DataParameter<ItemStack> EQUIPMENT_CHEST = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.ITEM_STACK);
+	public static final EntityDataAccessor<ItemStack> EQUIPMENT_CHEST = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.ITEM_STACK);
 	/** Used to sync the Legs Equipment slot of this creature. Currently unused. **/
-	public static final DataParameter<ItemStack> EQUIPMENT_LEGS = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.ITEM_STACK);
+	public static final EntityDataAccessor<ItemStack> EQUIPMENT_LEGS = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.ITEM_STACK);
 	/** Used to sync the Feet Equipment slot of this creature. Currently unused. **/
-	public static final DataParameter<ItemStack> EQUIPMENT_FEET = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.ITEM_STACK);
+	public static final EntityDataAccessor<ItemStack> EQUIPMENT_FEET = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.ITEM_STACK);
 	/** Used to sync the Bag Equipment slot of this creature. **/
-	public static final DataParameter<ItemStack> EQUIPMENT_BAG = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.ITEM_STACK);
+	public static final EntityDataAccessor<ItemStack> EQUIPMENT_BAG = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.ITEM_STACK);
 	/** Used to sync the Saddle Equipment slot of this creature. **/
-	public static final DataParameter<ItemStack> EQUIPMENT_SADDLE = EntityDataManager.defineId(BaseCreatureEntity.class, DataSerializers.ITEM_STACK);
+	public static final EntityDataAccessor<ItemStack> EQUIPMENT_SADDLE = SynchedEntityData.defineId(BaseCreatureEntity.class, EntityDataSerializers.ITEM_STACK);
 
 	protected void onKillEntity(LivingEntity entityLivingBase) {
 	}
@@ -389,7 +394,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 	 * @param entityType The Entity Type.
 	 * @param world The world the entity is in.
 	 */
-	protected BaseCreatureEntity(EntityType<? extends BaseCreatureEntity> entityType, World world) {
+	protected BaseCreatureEntity(EntityType<? extends BaseCreatureEntity> entityType, Level world) {
         super(entityType, world);
 
         // Init Dynamic Attributes:
@@ -731,12 +736,12 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 	}
 
 	@Override
-	public void onSyncedDataUpdated(DataParameter<?> key) {
+	public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
     	// TODO Move data manager sync to here and remove these getters.
     	super.onSyncedDataUpdated(key);
 	}
 
-    public boolean getBoolFromDataManager(DataParameter<Boolean> key) {
+    public boolean getBoolFromDataManager(EntityDataAccessor<Boolean> key) {
         try {
             return this.getEntityData().get(key);
         }
@@ -745,7 +750,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
     }
 
-    public byte getByteFromDataManager(DataParameter<Byte> key) {
+    public byte getByteFromDataManager(EntityDataAccessor<Byte> key) {
         try {
             return this.getEntityData().get(key);
         }
@@ -754,7 +759,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
     }
 
-    public int getIntFromDataManager(DataParameter<Integer> key) {
+    public int getIntFromDataManager(EntityDataAccessor<Integer> key) {
         try {
             return this.getEntityData().get(key);
         }
@@ -763,7 +768,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
     }
 
-    public float getFloatFromDataManager(DataParameter<Float> key) {
+    public float getFloatFromDataManager(EntityDataAccessor<Float> key) {
         try {
             return this.getEntityData().get(key);
         }
@@ -772,7 +777,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
     }
 
-    public String getStringFromDataManager(DataParameter<String> key) {
+    public String getStringFromDataManager(EntityDataAccessor<String> key) {
         try {
             return this.getEntityData().get(key);
         }
@@ -781,7 +786,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
     }
 
-	public Optional<UUID> getUUIDFromDataManager(DataParameter<Optional<UUID>> key) {
+	public Optional<UUID> getUUIDFromDataManager(EntityDataAccessor<Optional<UUID>> key) {
 		try {
 			return this.getEntityData().get(key);
 		}
@@ -790,7 +795,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		}
 	}
 
-    public ItemStack getItemStackFromDataManager(DataParameter<ItemStack> key) {
+    public ItemStack getItemStackFromDataManager(EntityDataAccessor<ItemStack> key) {
         try {
             return this.getEntityData().get(key);
         }
@@ -799,7 +804,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
     }
 
-    public Optional<BlockPos> getBlockPosFromDataManager(DataParameter<Optional<BlockPos>> key) {
+    public Optional<BlockPos> getBlockPosFromDataManager(EntityDataAccessor<Optional<BlockPos>> key) {
         try {
             return this.getEntityData().get(key);
         }
@@ -1856,7 +1861,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
         // Water Damage:
         if(!this.getCommandSenderWorld().isClientSide && this.waterDamage() && this.isInWaterOrRain() && !this.isInLava()) {
-            this.hurt(DamageSource.DROWN, 1.0F);
+            this.hurt(DamageSourceHelper.DROWN, 1.0F);
         }
 
         // Suffocation:
@@ -1864,7 +1869,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         	this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
 			if(this.getAirSupply() <= -200) {
 				this.setAirSupply(-160);
-				this.hurt(DamageSource.DROWN, 1.0F);
+				this.hurt(DamageSourceHelper.DROWN, 1.0F);
 			}
         }
 
@@ -4536,7 +4541,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		}
 
 		// Falling Damage:
-		if(source == DamageSource.FALL) {
+		if(source == DamageSourceHelper.FALL) {
 			return this.getFallResistance() >= 100;
 		}
 

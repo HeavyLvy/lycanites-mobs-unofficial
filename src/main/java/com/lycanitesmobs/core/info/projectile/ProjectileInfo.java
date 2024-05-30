@@ -18,22 +18,8 @@ import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.info.projectile.behaviours.ProjectileBehaviour;
 import com.lycanitesmobs.core.item.ChargeItem;
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.particles.BasicParticleType;
-import net.minecraft.particles.ParticleType;
-import net.minecraft.particles.RedstoneParticleData;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.RegistryManager;
 
 import javax.annotation.Nonnull;
@@ -404,7 +390,7 @@ public class ProjectileInfo {
 	 * @param y The y position of the projectile.
 	 * @param z The z position of the projectile.
 	 */
-	public BaseProjectileEntity createProjectile(World world, double x, double y, double z) {
+	public BaseProjectileEntity createProjectile(Level world, double x, double y, double z) {
 		return new CustomProjectileEntity(this.getEntityType(), world, x, y, z, this);
 	}
 

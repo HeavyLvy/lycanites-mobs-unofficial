@@ -4,20 +4,18 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.dispenser.IPosition;
-import net.minecraft.dispenser.ProjectileDispenseBehavior;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockSource;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
+import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
 
 import java.util.Random;
 
-public class BaseProjectileDispenseBehaviour extends ProjectileDispenseBehavior {
+public class BaseProjectileDispenseBehaviour extends AbstractProjectileDispenseBehavior {
 	protected ProjectileInfo projectileInfo;
 
 	protected String oldProjectileName;
@@ -41,12 +39,12 @@ public class BaseProjectileDispenseBehaviour extends ProjectileDispenseBehavior 
 	//                      Dispense
 	// ==================================================
 	@Override
-    public ItemStack execute(IBlockSource blockSource, ItemStack stack) {
-        World world = blockSource.getLevel();
-        IPosition position = DispenserBlock.getDispensePosition(blockSource);
+    public ItemStack execute(BlockSource blockSource, ItemStack stack) {
+        Level world = blockSource.getLevel();
+        Position position = DispenserBlock.getDispensePosition(blockSource);
         Direction facing = blockSource.getBlockState().getValue(DispenserBlock.FACING);
 
-		ProjectileEntity projectile = this.getProjectile(world, position, stack);
+		Projectile projectile = this.getProjectile(world, position, stack);
         if(projectile == null)
         	return stack;
         
@@ -58,7 +56,7 @@ public class BaseProjectileDispenseBehaviour extends ProjectileDispenseBehavior 
     }
     
 	@Override
-    protected ProjectileEntity getProjectile(World world, IPosition pos, ItemStack stack) {
+    protected Projectile getProjectile(Level world, Position pos, ItemStack stack) {
 		if(this.projectileInfo != null) {
 			return this.projectileInfo.createProjectile(world, pos.x(), pos.y(), pos.z());
 		}
