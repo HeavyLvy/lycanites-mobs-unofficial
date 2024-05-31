@@ -124,6 +124,13 @@ public class LMHelperClass {
         }
         return lvt_2_1_;
     }
+    public static double clamp(double p_151237_0_, double p_151237_2_, double p_151237_4_) {
+        if (p_151237_0_ < p_151237_2_) {
+            return p_151237_2_;
+        } else {
+            return p_151237_0_ > p_151237_4_ ? p_151237_4_ : p_151237_0_;
+        }
+    }
     public static String getItemId(Item item) {
         ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
         return itemId.toString();

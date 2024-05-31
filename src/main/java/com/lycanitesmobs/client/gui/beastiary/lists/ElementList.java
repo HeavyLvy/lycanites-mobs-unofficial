@@ -6,6 +6,7 @@ import com.lycanitesmobs.client.gui.widgets.BaseListEntry;
 import com.lycanitesmobs.core.info.ElementInfo;
 import com.lycanitesmobs.core.info.ElementManager;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.IGuiEventListener;
 
 import javax.annotation.Nullable;
@@ -61,7 +62,7 @@ public class ElementList extends BaseList<ElementsBeastiaryScreen> {
 		}
 
 		@Override
-		public void render(MatrixStack matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
+		public void render(GuiGraphics matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
 			ElementInfo elementInfo = ElementManager.getInstance().getElement(elementName);
 			if(elementInfo == null) {
 				return;
@@ -79,9 +80,6 @@ public class ElementList extends BaseList<ElementsBeastiaryScreen> {
 			this.parentList.setSelected(this);
 		}
 
-		@Override
-		public List<? extends IGuiEventListener> children() {
-			return null;
-		}
+
 	}
 }

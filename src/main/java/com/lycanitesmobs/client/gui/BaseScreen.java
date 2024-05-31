@@ -2,39 +2,36 @@ package com.lycanitesmobs.client.gui;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.gui.buttons.ButtonBase;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.MainWindow;
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.net.URI;
 
-public abstract class BaseScreen extends Screen implements Button.IPressable {
+public abstract class BaseScreen extends Screen implements Button.OnPress {
 	public DrawHelper drawHelper;
-	public MainWindow scaledResolution;
+	public Window scaledResolution;
 	public float zLevel = 0;
 
-	public BaseScreen(ITextComponent screenName) {
+	public BaseScreen(MutableComponent screenName) {
         super(screenName);
     }
-
-    @Override
-	public void init(Minecraft minecraft, int width, int height) {
-		this.drawHelper = new DrawHelper(minecraft, minecraft.font);
-    	this.minecraft = minecraft;
-    	super.init(minecraft, width, height);
-		this.initWidgets();
-	}
 
 	/**
 	 * Secondary init method called by main init method.
 	 */
 	@Override
-	protected void init() {
+	public void init() {
 		super.init();
+		this.drawHelper = new DrawHelper(minecraft, minecraft.font);
+		this.minecraft = minecraft;
+		super.init(minecraft, width, height);
+		this.initWidgets();
 	}
 
 	/**
@@ -44,17 +41,17 @@ public abstract class BaseScreen extends Screen implements Button.IPressable {
 
 	/**
 	 * Draws and updates the GUI.
-	 * @param matrixStack The matrix stack to draw with.
+	 * @param guiGraphics The matrix stack to draw with.
 	 * @param mouseX The x position of the mouse cursor.
 	 * @param mouseY The y position of the mouse cursor.
 	 * @param partialTicks Ticks for animation.
 	 */
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		this.renderBackground(matrixStack, mouseX, mouseY, partialTicks);
-		this.renderWidgets(matrixStack, mouseX, mouseY, partialTicks);
-		super.render(matrixStack, mouseX, mouseY, partialTicks); // Renders buttons.
-		this.renderForeground(matrixStack, mouseX, mouseY, partialTicks);
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
+		this.renderWidgets(guiGraphics, mouseX, mouseY, partialTicks);
+		super.render(guiGraphics, mouseX, mouseY, partialTicks); // Renders buttons.
+		this.renderForeground(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 
 	/**
@@ -64,7 +61,7 @@ public abstract class BaseScreen extends Screen implements Button.IPressable {
 	 * @param mouseY The y position of the mouse cursor.
 	 * @param partialTicks Ticks for animation.
 	 */
-	protected abstract void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks);
+	protected abstract void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks);
 
 	/**
 	 * Updates widgets like buttons and other controls for this screen. Super renders the button list, called after this.
@@ -73,7 +70,7 @@ public abstract class BaseScreen extends Screen implements Button.IPressable {
 	 * @param mouseY The y position of the mouse cursor.
 	 * @param partialTicks Ticks for animation.
 	 */
-	protected void renderWidgets(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {}
+	protected void renderWidgets(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {}
 
 	/**
 	 * Draws foreground elements.
@@ -82,7 +79,7 @@ public abstract class BaseScreen extends Screen implements Button.IPressable {
 	 * @param mouseY The y position of the mouse cursor.
 	 * @param partialTicks Ticks for animation.
 	 */
-	protected abstract void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks);
+	protected abstract void renderForeground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks);
 
 	@Override
 	public void onPress(Button guiButton) {

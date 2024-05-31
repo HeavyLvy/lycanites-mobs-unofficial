@@ -6,11 +6,11 @@ import com.lycanitesmobs.client.gui.widgets.BaseListEntry;
 import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.Subspecies;
 import com.lycanitesmobs.core.info.Variant;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -102,7 +102,7 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 	}
 
 	@Override
-	protected void renderBackground(MatrixStack stack) {
+	protected void renderBackground(GuiGraphics stack) {
 		if(!this.summoning) {
 			if(this.creature != this.screen.playerExt.selectedCreature) {
 				this.refreshList();
@@ -132,21 +132,21 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 		}
 
 		@Override
-		public void render(MatrixStack matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
+		public void render(GuiGraphics guiGraphics, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
 			Subspecies subspecies = this.parentList.creature.getSubspecies(this.subspeciesIndex);
-			ITextComponent subspeciesName = new StringTextComponent("");
+			MutableComponent subspeciesName = Component.literal("");
 			if(subspecies.name != null) {
-				subspeciesName = new StringTextComponent(" ").append(subspecies.getTitle());
+				subspeciesName = Component.literal(" ").append(subspecies.getTitle());
 			}
 
 			Variant variant = subspecies.getVariant(this.variantIndex);
-			TextComponent variantName = new StringTextComponent("Normal");
+			MutableComponent variantName = Component.literal("Normal");
 			if(variant != null) {
 				variantName = variant.getTitle();
 			}
 
 			int nameY = top + 6;
-			this.parentList.screen.drawHelper.drawString(matrixStack, variantName.append(subspeciesName).getString(), left + 10, nameY, 0xFFFFFF);
+			this.parentList.screen.drawHelper.drawString(guiGraphics, variantName.append(subspeciesName).getString(), left + 10, nameY, 0xFFFFFF);
 		}
 
 		@Override
@@ -154,9 +154,6 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 			this.parentList.setSelected(this);
 		}
 
-		@Override
-		public List<? extends IGuiEventListener> children() {
-			return null;
-		}
+		
 	}
 }

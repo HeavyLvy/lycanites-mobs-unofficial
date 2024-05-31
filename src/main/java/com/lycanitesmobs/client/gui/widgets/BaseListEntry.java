@@ -1,26 +1,29 @@
 package com.lycanitesmobs.client.gui.widgets;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.widget.list.AbstractOptionList;
+
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseListEntry extends AbstractOptionList.Entry<BaseListEntry> {
+public abstract class BaseListEntry extends AbstractSelectionList.Entry<BaseListEntry> {
 	public int index;
 
 	@Override
-	public void render(MatrixStack matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean p_render_8_, float partialTicks) {}
+	public void render(GuiGraphics guiGraphics, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean p_render_8_, float partialTicks) {}
 
 	/**
 	 * Returns a list of child GUI elements such as buttons that should receive input events, etc.
 	 * @return A list of child GUI elements.
 	 */
-	@Override
-	public List<? extends IGuiEventListener> children() {
+	//Disabled because its not inherited anymore and all overrides make this null anyways, if it breaks something we'll
+	//Change it.
+	/*@Override
+	public List<? extends GuiEventListener> children() {
 		return new ArrayList<>();
-	}
+	}*/
 
 	/**
 	 * Called when the mouse is clicked on this entry.

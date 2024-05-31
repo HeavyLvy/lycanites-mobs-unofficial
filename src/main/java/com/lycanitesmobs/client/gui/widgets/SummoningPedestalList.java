@@ -5,8 +5,7 @@ import com.lycanitesmobs.client.gui.SummoningPedestalScreen;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -48,7 +47,7 @@ public class SummoningPedestalList extends BaseList<SummoningPedestalScreen> {
 		}
 
 		@Override
-		public void render(MatrixStack matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
+		public void render(GuiGraphics matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
 			CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(this.minionName);
 
 			// Summon Level:
@@ -60,14 +59,8 @@ public class SummoningPedestalList extends BaseList<SummoningPedestalScreen> {
 			if(level <= 10) {
 				this.parentGUI.screen.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetLevel"), levelBarX, levelBarY, 0, levelBarWidth, levelBarHeight, level, 10);
 			}
-
-			this.parentGUI.screen.drawHelper.getFontRenderer().draw(matrixStack, creatureInfo.getTitle().getString(), left + 20 , top + 4, 0xFFFFFF);
+			this.parentGUI.screen.drawHelper.draw(matrixStack, creatureInfo.getTitle().getString(), left + 20 , top + 4, 0xFFFFFF);
 			this.parentGUI.screen.drawHelper.drawTexture(matrixStack, creatureInfo.getIcon(), left + 2, top + 4, 0, 1, 1, 16, 16);
-		}
-
-		@Override
-		public List<? extends IGuiEventListener> children() {
-			return null;
 		}
 
 		@Override

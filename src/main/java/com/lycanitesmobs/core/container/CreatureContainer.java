@@ -5,11 +5,12 @@ import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.RideableCreatureEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 
 public class CreatureContainer extends BaseContainer {
-	public static final MenuType<CreatureContainer> TYPE = (MenuType<CreatureContainer>) IForgeMenuType.create(CreatureContainer::new).setRegistryName(LycanitesMobs.MODID, "creature");
+	public static final MenuType<CreatureContainer> TYPE = (MenuType<CreatureContainer>) IForgeMenuType.create(CreatureContainer::new)/*.setRegistryName(LycanitesMobs.MODID, "creature")*/;
 	public BaseCreatureEntity creature;
 
 	/**
@@ -28,7 +29,7 @@ public class CreatureContainer extends BaseContainer {
 	 * @param playerInventory The accessing player's inventory.
 	 * @param creature The creature to access.
 	 */
-	public CreatureContainer(int windowId, PlayerInventory playerInventory, BaseCreatureEntity creature) {
+	public CreatureContainer(int windowId, Inventory playerInventory, BaseCreatureEntity creature) {
 		super(TYPE, windowId);
 		this.creature = creature;
 
@@ -88,7 +89,7 @@ public class CreatureContainer extends BaseContainer {
   	//                  Container Closed
   	// ==================================================
 	@Override
-	public void removed(PlayerEntity player) {
+	public void removed(Player player) {
 		super.removed(player);
 	}
 }

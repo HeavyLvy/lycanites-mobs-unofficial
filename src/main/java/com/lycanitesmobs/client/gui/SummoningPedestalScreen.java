@@ -9,23 +9,28 @@ import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.pets.SummonSet;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.list.ExtendedList;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import org.lwjgl.opengl.GL11;
 
+import java.util.AbstractCollection;
+import java.util.AbstractList;
+import java.util.List;
+
 public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedestalContainer> {
-    public PlayerEntity player;
+    public Player player;
     public ExtendedPlayer playerExt;
     public TileEntitySummoningPedestal summoningPedestal;
     public SummonSet summonSet;
 
-    public ExtendedList list;
+    public AbstractSelectionList list;
 
     public int centerX;
     public int centerY;
@@ -38,7 +43,7 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
 
     public static int TAB_BUTTON_ID = 55555;
 
-    public SummoningPedestalScreen(SummoningPedestalContainer container, PlayerInventory playerInventory, ITextComponent name) {
+    public SummoningPedestalScreen(SummoningPedestalContainer container, Inventory playerInventory, MutableComponent name) {
         super(container, playerInventory, name);
         this.summoningPedestal = container.summoningPedestal;
         this.player = playerInventory.player;
@@ -55,7 +60,7 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
     public void init() {
         super.init();
 
-        this.buttons.clear();
+        this.renderables.clear();
         this.windowWidth = 256;
         this.windowHeight = 166;
         this.halfX = this.windowWidth / 2;
@@ -83,16 +88,16 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
 
         // Sitting and Following:
         buttonY += buttonHeight + (buttonSpacing * 2);
-        this.addButton(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.SITTING.id, buttonX, buttonY, buttonWidth * 2, buttonHeight, new TranslationTextComponent("..."), this));
+        this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.SITTING.id, buttonX, buttonY, buttonWidth * 2, buttonHeight, Component.translatable("..."), this));
 
         // Passive and Stance:
         buttonY += buttonHeight + (buttonSpacing * 2);
-        this.addButton(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.PASSIVE.id, buttonX, buttonY, buttonWidth, buttonHeight, new TranslationTextComponent("..."), this));
-        this.addButton(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.STANCE.id, buttonXRight, buttonY, buttonWidth, buttonHeight, new TranslationTextComponent("..."), this));
+        this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.PASSIVE.id, buttonX, buttonY, buttonWidth, buttonHeight, Component.translatable("..."), this));
+        this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.STANCE.id, buttonXRight, buttonY, buttonWidth, buttonHeight, Component.translatable("..."), this));
 
         // PVP:
         buttonY += buttonHeight + (buttonSpacing * 2);
-        this.addButton(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.PVP.id, buttonX, buttonY, buttonWidth * 2, buttonHeight, new TranslationTextComponent("..."), this));
+        this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.PVP.id, buttonX, buttonY, buttonWidth * 2, buttonHeight, Component.translatable("..."), this));
 
         // List:
         if(this.hasPets() && this.summoningPedestal.summonSet != null) {
@@ -104,13 +109,17 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
         int listBottom = listTop + listHeight;
         int listX = this.windowX + (buttonSpacing * 2);
         this.list = new SummoningPedestalList(this, this.playerExt, listWidth, listHeight, listTop, listBottom, listX);
-        this.children.add(this.list);
+        this.children().add(this.list);
+
     }
 
+
+
     @Override
-    protected void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    protected void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
+
         GL11.glColor4f(255, 255, 255, 1.0F);
-        Minecraft.getInstance().getTextureManager().bind(this.getTexture());
+        Minecraft.getInstance().getTextureManager().bindForSetup(this.getTexture());
 
         this.drawHelper.drawTexturedModalRect(matrixStack, this.windowX, this.windowY, 0, 0, this.windowWidth, this.windowHeight);
         this.drawHelper.drawTexturedModalRect(matrixStack, this.windowX + 40, this.windowY + this.windowHeight, 40, 224, this.windowWidth - 80, 29);
@@ -125,8 +134,8 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
     }
 
     @Override
-    public void renderWidgets(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        for(Object buttonObj : this.buttons) {
+    public void renderWidgets(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
+        for(Object buttonObj : this.renderables) {
             if(buttonObj instanceof ButtonBase) {
                 ButtonBase button = (ButtonBase)buttonObj;
 
@@ -146,16 +155,16 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
 
                 // Behaviour Buttons:
                 if (button.buttonId == BaseCreatureEntity.GUI_COMMAND.SITTING.id)
-                    button.setMessage(new TranslationTextComponent(new TranslationTextComponent("gui.pet.sit").getString() + ": " + (this.summonSet.getSitting() ? new TranslationTextComponent("common.yes").getString() : new TranslationTextComponent("common.no").getString())));
+                    button.setMessage(Component.translatable(Component.translatable("gui.pet.sit").getString() + ": " + (this.summonSet.getSitting() ? Component.translatable("common.yes").getString() : Component.translatable("common.no").getString())));
 
                 if (button.buttonId == BaseCreatureEntity.GUI_COMMAND.PASSIVE.id)
-                    button.setMessage(new TranslationTextComponent(new TranslationTextComponent("gui.pet.passive").getString() + ": " + (this.summonSet.getPassive() ? new TranslationTextComponent("common.yes").getString() : new TranslationTextComponent("common.no").getString())));
+                    button.setMessage(Component.translatable(Component.translatable("gui.pet.passive").getString() + ": " + (this.summonSet.getPassive() ? Component.translatable("common.yes").getString() : Component.translatable("common.no").getString())));
 
                 if (button.buttonId == BaseCreatureEntity.GUI_COMMAND.STANCE.id)
-                    button.setMessage(new TranslationTextComponent((this.summonSet.getAggressive() ? new TranslationTextComponent("gui.pet.aggressive").getString() : new TranslationTextComponent("gui.pet.defensive").getString())));
+                    button.setMessage(Component.translatable((this.summonSet.getAggressive() ? Component.translatable("gui.pet.aggressive").getString() : Component.translatable("gui.pet.defensive").getString())));
 
                 if (button.buttonId == BaseCreatureEntity.GUI_COMMAND.PVP.id)
-                    button.setMessage(new TranslationTextComponent(new TranslationTextComponent("gui.pet.pvp").getString() + ": " + (this.summonSet.getPVP() ? new TranslationTextComponent("common.yes").getString() : new TranslationTextComponent("common.no").getString())));
+                    button.setMessage(Component.translatable(Component.translatable("gui.pet.pvp").getString() + ": " + (this.summonSet.getPVP() ? Component.translatable("common.yes").getString() : Component.translatable("common.no").getString())));
             }
         }
 
@@ -168,22 +177,22 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
     }
 
     @Override
-    protected void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    protected void renderForeground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         GL11.glColor4f(255, 255, 255, 1.0F);
-        Minecraft.getInstance().getTextureManager().bind(this.getTexture());
+        Minecraft.getInstance().getTextureManager().bindForSetup(this.getTexture());
 
         // No Pets:
         if (!this.hasPets()) {
-            this.drawHelper.drawString(matrixStack, new TranslationTextComponent("gui.beastiary.summoning.empty.title").getString(), this.centerX - 96, this.windowY + 6, 0xFFFFFF);
-            this.drawHelper.drawStringWrapped(matrixStack, new TranslationTextComponent("gui.beastiary.summoning.empty.info").getString(), this.windowX + 16, this.windowY + 30, this.windowWidth - 32, 0xFFFFFF, false);
+            this.drawHelper.drawString(guiGraphics, Component.translatable("gui.beastiary.summoning.empty.title").getString(), this.centerX - 96, this.windowY + 6, 0xFFFFFF);
+            this.drawHelper.drawStringWrapped(guiGraphics, Component.translatable("gui.beastiary.summoning.empty.info").getString(), this.windowX + 16, this.windowY + 30, this.windowWidth - 32, 0xFFFFFF, false);
             return;
         }
 
         // Title:
-        this.drawHelper.drawStringCentered(matrixStack, this.getTitle().getString(), this.centerX, this.windowY + 6, 0xFFFFFF, false);
+        this.drawHelper.drawStringCentered(guiGraphics, this.getTitle().getString(), this.centerX, this.windowY + 6, 0xFFFFFF, false);
 
         // Spirit Title:
-        this.drawHelper.drawString(matrixStack, this.getEnergyTitle().getString(), this.windowX + 16, this.windowY + 20, 0xFFFFFF);
+        this.drawHelper.drawString(guiGraphics, this.getEnergyTitle().getString(), this.windowX + 16, this.windowY + 20, 0xFFFFFF);
     }
 
     @Override
@@ -217,15 +226,15 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
         super.keyTyped(par1, par2);
     }*/
 
-    public ITextComponent getTitle() {
-        return new TranslationTextComponent("gui." + "summoningpedestal");
+    public MutableComponent getTitle() {
+        return Component.translatable("gui." + "summoningpedestal");
     }
 
-    public ITextComponent getEnergyTitle() {
-        return new TranslationTextComponent("stat.portal");
+    public MutableComponent getEnergyTitle() {
+        return Component.translatable("stat.portal");
     }
 
-    public void drawFuel(MatrixStack matrixStack) {
+    public void drawFuel(GuiGraphics matrixStack) {
         int fuelX = this.windowX + 132;
         int fuelY = this.windowY + 42;
         this.drawHelper.drawTexturedModalRect(matrixStack, fuelX, fuelY, 47, 170, 18, 18);
@@ -242,26 +251,26 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
         this.drawHelper.drawTexturedModalRect(matrixStack, barX, barY, barU, barV, barWidth, barHeight);
     }
 
-    public void drawCapacityBar(MatrixStack matrixStack) {
+    public void drawCapacityBar(GuiGraphics guiGraphics) {
         int energyBarWidth = 9;
         int energyBarHeight = 9;
         int energyBarX = this.windowX + 16;
         int energyBarY = this.windowY + 40 - energyBarHeight;
-        this.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetSpiritEmpty"), energyBarX, energyBarY, 0, energyBarWidth, energyBarHeight, 10, 10);
-        this.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetSpirit"), energyBarX, energyBarY, 0, energyBarWidth, energyBarHeight, this.summoningPedestal.capacity / this.summoningPedestal.capacityCharge, 10);
+        this.drawHelper.drawBar(guiGraphics, TextureManager.getTexture("GUIPetSpiritEmpty"), energyBarX, energyBarY, 0, energyBarWidth, energyBarHeight, 10, 10);
+        this.drawHelper.drawBar(guiGraphics, TextureManager.getTexture("GUIPetSpirit"), energyBarX, energyBarY, 0, energyBarWidth, energyBarHeight, this.summoningPedestal.capacity / this.summoningPedestal.capacityCharge, 10);
     }
 
-    public void drawProgressBar(MatrixStack matrixStack) {
+    public void drawProgressBar(GuiGraphics guiGraphics) {
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
         int barWidth = (256 / 4) + 16;
         int barHeight = (32 / 4) + 2;
         int barX = this.centerX + 2;
         int barY = this.windowY + 26;
-        this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIPetBarEmpty"), barX, barY, 0, 1, 1, barWidth, barHeight);
+        this.drawHelper.drawTexture(guiGraphics, TextureManager.getTexture("GUIPetBarEmpty"), barX, barY, 0, 1, 1, barWidth, barHeight);
 
         float respawnNormal = ((float)this.summoningPedestal.summonProgress / this.summoningPedestal.summonProgressMax);
-        this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIPetBarRespawn"), barX, barY, 0, respawnNormal, 1, barWidth * respawnNormal, barHeight);
+        this.drawHelper.drawTexture(guiGraphics, TextureManager.getTexture("GUIPetBarRespawn"), barX, barY, 0, respawnNormal, 1, barWidth * respawnNormal, barHeight);
     }
 
     public void sendCommandsToServer() {

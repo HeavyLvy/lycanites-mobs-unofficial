@@ -3,17 +3,17 @@ package com.lycanitesmobs.client.gui.buttons;
 import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.info.CreatureInfo;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.MutableComponent;
 import org.lwjgl.opengl.GL11;
 
 public class CreatureButton extends ButtonBase {
 	public CreatureInfo creatureInfo;
 	public int summonSetId = 0;
 	
-	public CreatureButton(int buttonID, int x, int y, int w, int h, ITextComponent text, int summonSetId, CreatureInfo creatureInfo, Button.IPressable pressable) {
+	public CreatureButton(int buttonID, int x, int y, int w, int h, MutableComponent text, int summonSetId, CreatureInfo creatureInfo, Button.OnPress pressable) {
         super(buttonID, x, y, w, h, text, pressable);
         this.summonSetId = summonSetId;
         this.creatureInfo = creatureInfo;
@@ -21,18 +21,18 @@ public class CreatureButton extends ButtonBase {
 	
 
 	@Override
-	public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void renderWidget(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
         if(!this.visible) {
 			return;
 		}
-        super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
+        super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
 
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+		this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
 
-		int buttonX = this.x;
-		int buttonY = this.y;
-		Minecraft.getInstance().getTextureManager().bind(TextureManager.getTexture("GUIInventoryCreature"));
+		int buttonX = this.getX();
+		int buttonY = this.getY();
+		Minecraft.getInstance().getTextureManager().bindForSetup(TextureManager.getTexture("GUIInventoryCreature"));
 		int stateVOffset = 0;
 		if(this.isHovered()) {
 			stateVOffset = 64;
@@ -43,7 +43,7 @@ public class CreatureButton extends ButtonBase {
 		}
 		this.drawHelper.drawTexturedModalRect(matrixStack, buttonX, buttonY, 193, 187 -stateVOffset, this.width, this.height);
 		if(this.creatureInfo != null) {
-			Minecraft.getInstance().getTextureManager().bind(creatureInfo.getIcon());
+			Minecraft.getInstance().getTextureManager().bindForSetup(creatureInfo.getIcon());
 			this.drawHelper.drawTexturedModalRect(matrixStack, buttonX + 8, buttonY + 8, 0, 0, 16, 16, 16);
 		}
 
@@ -57,6 +57,6 @@ public class CreatureButton extends ButtonBase {
 			textColor = 16777120;
 		}
 
-		this.drawCenteredString(matrixStack, this.drawHelper.getFontRenderer(), this.getMessage(), buttonX + 5, buttonY + 2, textColor);
+		this.drawHelper.drawCenteredString(matrixStack, this.drawHelper.getFontRenderer(), this.getMessage(), buttonX + 5, buttonY + 2, textColor);
     }
 }

@@ -64,10 +64,7 @@ public class ElementDescriptionList extends BaseList {
 		@Override
 		protected void onClicked() {}
 
-		@Override
-		public List<? extends IGuiEventListener> children() {
-			return null;
-		}
+
 	}
 
 	public String getContent() {

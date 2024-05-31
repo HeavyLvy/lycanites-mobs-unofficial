@@ -3,18 +3,17 @@ package com.lycanitesmobs.client.gui.beastiary;
 import com.lycanitesmobs.client.gui.beastiary.lists.ElementDescriptionList;
 import com.lycanitesmobs.client.gui.beastiary.lists.ElementList;
 import com.lycanitesmobs.core.info.ElementInfo;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.player.Player;
 
 public class ElementsBeastiaryScreen extends BeastiaryScreen {
 	public ElementInfo elementInfo;
 	protected ElementList elementList;
 	protected ElementDescriptionList descriptionList;
 
-	public ElementsBeastiaryScreen(PlayerEntity player) {
+	public ElementsBeastiaryScreen(Player player) {
 		super(player);
 	}
 
@@ -23,20 +22,20 @@ public class ElementsBeastiaryScreen extends BeastiaryScreen {
 		super.initWidgets();
 
 		this.elementList = new ElementList(this, this.colLeftWidth, this.colLeftHeight, this.colLeftY,this.colLeftY + this.colLeftHeight, this.colLeftX);
-		this.children.add(this.elementList);
+		this.children().add(this.elementList);
 
 		int descriptionListY = this.colRightY;
 		this.descriptionList = new ElementDescriptionList(this, this.colRightWidth, this.colRightHeight, descriptionListY, this.colRightY + this.colRightHeight, this.colRightX);
-		this.children.add(this.descriptionList);
+		this.children().add(this.descriptionList);
 	}
 
 	@Override
-	public void renderBackground(MatrixStack matrixStack, int x, int y, float partialTicks) {
+	public void renderBackground(GuiGraphics matrixStack, int x, int y, float partialTicks) {
 		super.renderBackground(matrixStack, x, y, partialTicks);
 	}
 
 	@Override
-	protected void renderWidgets(MatrixStack matrixStack, int x, int y, float partialTicks) {
+	protected void renderWidgets(GuiGraphics matrixStack, int x, int y, float partialTicks) {
 		this.elementList.render(matrixStack, x, y, partialTicks);
 
 		if(this.elementInfo != null) {
@@ -46,20 +45,20 @@ public class ElementsBeastiaryScreen extends BeastiaryScreen {
 	}
 
 	@Override
-	public void renderForeground(MatrixStack matrixStack, int x, int y, float partialTicks) {
+	public void renderForeground(GuiGraphics matrixStack, int x, int y, float partialTicks) {
 		super.renderForeground(matrixStack, x, y, partialTicks);
 
 		if(this.elementInfo == null) {
-			String info = new TranslationTextComponent("gui.beastiary.elements.about").getString();
+			String info = Component.translatable("gui.beastiary.elements.about").getString();
 			this.drawHelper.drawStringWrapped(matrixStack, info, colRightX + 1, colRightY + 12 + 1, colRightWidth, 0xFFFFFF, true);
 		}
 	}
 
 	@Override
-	public ITextComponent getTitle() {
+	public MutableComponent getTitle() {
 		if(this.elementInfo != null) {
-			return new StringTextComponent("");
+			return Component.literal("");
 		}
-		return new TranslationTextComponent("gui.beastiary.elements");
+		return Component.translatable("gui.beastiary.elements");
 	}
 }

@@ -83,9 +83,6 @@ public class CreatureTypeList extends CreatureFilterList {
 			this.parentList.screen.drawHelper.drawString(matrixStack, this.creatureType.getTitle().getString(), left + 4, top + 2, 0xFFFFFF);
 		}
 
-		@Override
-		public List<? extends IGuiEventListener> children() {
-			return null;
-		}
+
 	}
 }

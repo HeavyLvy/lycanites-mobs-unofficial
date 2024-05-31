@@ -7,6 +7,7 @@ import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.Subspecies;
 import com.lycanitesmobs.core.info.Variant;
+import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -500,7 +501,7 @@ public class PetEntry {
             return;
         this.onDespawnEntity(this.entity);
         this.saveEntityNBT();
-        this.entity.remove();
+        this.entity.remove(Entity.RemovalReason.DISCARDED);
         this.entity = null;
     }
 

@@ -1,34 +1,35 @@
 package com.lycanitesmobs.client.gui;
 
 import com.lycanitesmobs.client.gui.buttons.ButtonBase;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
-public abstract class BaseContainerScreen<T extends Container> extends ContainerScreen<T> implements Button.IPressable {
+public abstract class BaseContainerScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> implements Button.OnPress {
     public DrawHelper drawHelper;
 
-    public BaseContainerScreen(T container, PlayerInventory playerInventory, ITextComponent name) {
+    public BaseContainerScreen(T container, Inventory playerInventory, Component name) {
         super(container, playerInventory, name);
+
     }
 
-    @Override
-    public void init(Minecraft minecraft, int width, int height) {
-        this.drawHelper = new DrawHelper(minecraft, minecraft.font);
-        this.minecraft = minecraft;
-        super.init(minecraft, width, height);
-        this.initWidgets();
-    }
+
 
     /**
      * Secondary init method called by main init method.
      */
     protected void init() {
         super.init();
+        this.drawHelper = new DrawHelper(minecraft, minecraft.font);
+        this.minecraft = minecraft;
+        super.init(minecraft, width, height);
+        this.initWidgets();
     }
 
     /**
@@ -43,13 +44,14 @@ public abstract class BaseContainerScreen<T extends Container> extends Container
      * @param partialTicks Ticks for animation.
      */
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(matrixStack, mouseX, mouseY, partialTicks);
-        this.renderWidgets(matrixStack, mouseX, mouseY, partialTicks); // Renders buttons.
-        super.render(matrixStack, mouseX, mouseY, partialTicks); // Renders slots.
-        this.renderForeground(matrixStack, mouseX, mouseY, partialTicks);
-        this.renderTooltip(matrixStack, mouseX, mouseY);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
+        this.renderWidgets(guiGraphics, mouseX, mouseY, partialTicks); // Renders buttons.
+        super.render(guiGraphics, mouseX, mouseY, partialTicks); // Renders slots.
+        this.renderForeground(guiGraphics, mouseX, mouseY, partialTicks);
+        this.renderTooltip(guiGraphics, mouseX, mouseY);
     }
+
 
     /**
      * Draws the background image.
@@ -57,8 +59,9 @@ public abstract class BaseContainerScreen<T extends Container> extends Container
      * @param mouseY The y position of the mouse cursor.
      * @param partialTicks Ticks for animation.
      */
-    protected abstract void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks);
-    protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {} // Overridden as required but ignored.
+    protected abstract void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks);
+    @Override
+    protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {} // Overridden as required but ignored.
 
     /**
      * Updates widgets like buttons and other controls for this screen. Super renders the button list, called after this.
@@ -66,9 +69,9 @@ public abstract class BaseContainerScreen<T extends Container> extends Container
      * @param mouseY The y position of the mouse cursor.
      * @param partialTicks Ticks for animation.
      */
-    protected void renderWidgets(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        for(int i = 0; i < this.buttons.size(); ++i) {
-            this.buttons.get(i).render(matrixStack, mouseX, mouseY, partialTicks);
+    protected void renderWidgets(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        for(int i = 0; i < this.renderables.size(); ++i) {
+            this.renderables.get(i).render(guiGraphics, mouseX, mouseY, partialTicks);
         }
     }
 
@@ -78,7 +81,7 @@ public abstract class BaseContainerScreen<T extends Container> extends Container
      * @param mouseY The y position of the mouse cursor.
      * @param partialTicks Ticks for animation.
      */
-    protected abstract void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks);
+    protected abstract void renderForeground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks);
 
     @Override
     public void onPress(Button guiButton) {
