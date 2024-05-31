@@ -10,9 +10,13 @@ import com.lycanitesmobs.core.container.*;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.CreatureType;
 import com.lycanitesmobs.core.item.ItemColorCustomSpawnEgg;
+import com.mojang.blaze3d.platform.ScreenManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -31,7 +35,7 @@ public class ClientManager {
 		return INSTANCE;
 	}
 
-	protected FontRenderer fontRenderer;
+	protected Font fontRenderer;
 
 	/**
 	 * Sets up the Language Manager used for additional language files.
@@ -59,9 +63,9 @@ public class ClientManager {
 		MinecraftForge.EVENT_BUS.register(new KeyHandler(Minecraft.getInstance()));
 		MinecraftForge.EVENT_BUS.register(new BaseOverlay(Minecraft.getInstance()));
 		MinecraftForge.EVENT_BUS.register(new ClientEventListener());
-		IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-		if(resourceManager instanceof IReloadableResourceManager) {
-			((IReloadableResourceManager)resourceManager).registerReloadListener(LanguageLoader.getInstance());
+		ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+		if(resourceManager instanceof ReloadableResourceManager) {
+			((ReloadableResourceManager)resourceManager).registerReloadListener(LanguageLoader.getInstance());
 		}
 	}
 
@@ -86,7 +90,7 @@ public class ClientManager {
 	/**
 	 * Displays a Screen GUI on the client.
 	 */
-	public void displayGuiScreen(String screenName, PlayerEntity player) {
+	public void displayGuiScreen(String screenName, Player player) {
 		if("beastiary".equals(screenName)) {
 			Minecraft.getInstance().setScreen(new SummoningBeastiaryScreen(player));
 		}
@@ -109,7 +113,7 @@ public class ClientManager {
 	 * Registers Colored Items
 	 */
 	@SubscribeEvent
-	public void registerItemColors(ColorHandlerEvent.Item event) {
+	public void registerItemColors(RegisterColorHandlersEvent.Item event) {
 		for(CreatureType creatureType : CreatureManager.getInstance().creatureTypes.values()) {
 			if(creatureType.spawnEgg != null) {
 				event.getItemColors().register(new ItemColorCustomSpawnEgg(), creatureType.spawnEgg);

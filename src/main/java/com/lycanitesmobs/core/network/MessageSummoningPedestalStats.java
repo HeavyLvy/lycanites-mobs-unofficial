@@ -4,6 +4,7 @@ import com.lycanitesmobs.client.ClientManager;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkDirection;
@@ -57,7 +58,7 @@ public class MessageSummoningPedestalStats {
 	/**
 	 * Reads the message from bytes.
 	 */
-	public static MessageSummoningPedestalStats decode(PacketBuffer packet) {
+	public static MessageSummoningPedestalStats decode(FriendlyByteBuf packet) {
 		MessageSummoningPedestalStats message = new MessageSummoningPedestalStats();
         message.x = packet.readInt();
         message.y = packet.readInt();
@@ -72,7 +73,7 @@ public class MessageSummoningPedestalStats {
 	/**
 	 * Writes the message into bytes.
 	 */
-	public static void encode(MessageSummoningPedestalStats message, PacketBuffer packet) {
+	public static void encode(MessageSummoningPedestalStats message, FriendlyByteBuf packet) {
         packet.writeInt(message.x);
         packet.writeInt(message.y);
         packet.writeInt(message.z);

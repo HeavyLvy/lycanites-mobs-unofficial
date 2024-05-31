@@ -29,8 +29,10 @@ import com.lycanitesmobs.core.spawner.SpawnerEventListener;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
 import com.lycanitesmobs.core.util.DamageSourceHelper;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -56,6 +58,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.SpawnData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
@@ -943,16 +949,16 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     // ========== Spawn Dimension Check ==========
-    public boolean isNativeDimension(World world) {
+    public boolean isNativeDimension(Level world) {
         return this.creatureInfo.creatureSpawn.isAllowedDimension(world);
     }
 
 	// ========== Collision Spawn Check ==========
 	/** Returns true if there is no collision stopping this mob from spawning. **/
-	public boolean checkSpawnCollision(World world, BlockPos pos) {
+	public boolean checkSpawnCollision(Level world, BlockPos pos) {
 		double radius = this.creatureInfo.width;
 		double height = this.creatureInfo.height;
-		AxisAlignedBB spawnBoundries = new AxisAlignedBB(pos.getX() - radius, pos.getY(), pos.getZ() - radius, pos.getX() + radius, pos.getY() + height, pos.getZ() + radius);
+		AABB spawnBoundries = new AABB(pos.getX() - radius, pos.getY(), pos.getZ() - radius, pos.getX() + radius, pos.getY() + height, pos.getZ() + radius);
 		if(!this.spawnsInBlock && !world.noCollision(spawnBoundries)) {
 			return false;
 		}
@@ -961,7 +967,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
 	// ========== Light Level Spawn Check ==========
 	/** Returns true if the light level is valid for spawning. **/
-	public boolean checkSpawnLightLevel(World world, BlockPos pos) {
+	public boolean checkSpawnLightLevel(Level world, BlockPos pos) {
 		if(this.creatureInfo.creatureSpawn.spawnsInDark && this.creatureInfo.creatureSpawn.spawnsInLight) {
 			return true;
 		}
@@ -983,7 +989,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
 	// ========== Group Limit Spawn Check ==========
 	/** Checks for nearby entities of this type, mobs use this so that too many don't spawn in the same area. Returns true if the mob should spawn. **/
-	public boolean checkSpawnGroupLimit(World world, BlockPos pos, double range) {
+	public boolean checkSpawnGroupLimit(Level world, BlockPos pos, double range) {
 		if(range <= 0) {
 			return true;
 		}
@@ -1022,7 +1028,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
 	// ========== Boss Spawn Check ==========
 	/** Checks for nearby bosses, mobs usually shouldn't randomly spawn near a boss. **/
-	public boolean checkSpawnBoss(World world, BlockPos pos) {
+	public boolean checkSpawnBoss(Level world, BlockPos pos) {
 		CreatureGroup bossGroup = CreatureManager.getInstance().getCreatureGroup("boss");
 		if(bossGroup == null)
 			return true;
@@ -1033,12 +1039,13 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     // ========== Egg Spawn ==========
     /** Called once this mob is initially spawned. **/
     @Override
-    public ILivingEntityData finalizeSpawn(IServerWorld world, DifficultyInstance difficultyInstance, SpawnReason spawnReason, @Nullable ILivingEntityData livingEntityData, @Nullable CompoundNBT compoundNBT) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficultyInstance, MobSpawnType spawnReason, @Nullable SpawnGroupData livingEntityData, @Nullable CompoundTag compoundNBT) {
 		livingEntityData = super.finalizeSpawn(world, difficultyInstance, spawnReason, livingEntityData, compoundNBT);
         return livingEntityData;
     }
 
-    // ========== Despawning ==========
+
+	// ========== Despawning ==========
 	@Override
 	public boolean isPersistenceRequired() {
     	if(!this.canDespawnNaturally()) {
@@ -1118,8 +1125,8 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     	if(this.getCommandSenderWorld().canSeeSkyFromBelowWater(new BlockPos(x, y, z)))
     		return false;
     	for(int j = y; j < this.getCommandSenderWorld().getMaxBuildHeight(); j++) {
-    		Material blockMaterial = this.getCommandSenderWorld().getBlockState(new BlockPos(x, j, z)).getMaterial();
-    		if(blockMaterial != Material.AIR
+    		Block blockMaterial = this.getCommandSenderWorld().getBlockState(new BlockPos(x, j, z)).getBlock();
+    		if(blockMaterial != Blocks.AIR
     				&& blockMaterial != Material.LEAVES
     				&& blockMaterial != Material.PLANT
     				&& blockMaterial != Material.REPLACEABLE_PLANT)

@@ -1,11 +1,7 @@
 package com.lycanitesmobs.core.info;
 
 import com.lycanitesmobs.core.config.ConfigCreatureSpawning;
-import net.minecraft.world.World;
-import org.apache.commons.lang3.math.NumberUtils;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.minecraft.world.level.Level;
 
 public class CreatureSpawnConfig {
 	public int typeSpawnLimit = 64;
@@ -47,7 +43,7 @@ public class CreatureSpawnConfig {
 		this.dungeonSpawnerWeightScale = ConfigCreatureSpawning.INSTANCE.dungeonSpawnerWeightScale.get();
 	}
 
-	public boolean isAllowedGlobal(World world) {
+	public boolean isAllowedGlobal(Level world) {
 		if(this.disableAllSpawning) {
 			return false;
 		}

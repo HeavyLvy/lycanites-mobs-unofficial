@@ -5,8 +5,7 @@ import com.lycanitesmobs.client.gui.widgets.BaseListEntry;
 import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.CreatureType;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.GuiGraphics;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ public class CreatureTypeList extends CreatureFilterList {
 		}
 
 		@Override
-		public void render(MatrixStack matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
+		public void render(GuiGraphics matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
 			this.parentList.screen.drawHelper.drawString(matrixStack, this.creatureType.getTitle().getString(), left + 4, top + 2, 0xFFFFFF);
 		}
 

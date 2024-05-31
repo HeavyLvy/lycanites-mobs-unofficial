@@ -10,16 +10,18 @@ import com.lycanitesmobs.client.gui.buttons.TabManager;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.network.MessagePlayerAttack;
 import com.lycanitesmobs.core.network.MessagePlayerControl;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.InventoryScreen;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyHandler {
@@ -28,34 +30,37 @@ public class KeyHandler {
 	
 	public boolean inventoryOpen = false;
 	
-	public KeyBinding dismount = new KeyBinding("key.mount.dismount", GLFW.GLFW_KEY_V, "Lycanites Mobs");
-	public KeyBinding descend = new KeyBinding("key.mount.descend", GLFW.GLFW_KEY_LEFT_ALT, "Lycanites Mobs");
-	public KeyBinding mountAbility = new KeyBinding("key.mount.ability", GLFW.GLFW_KEY_G, "Lycanites Mobs");
-	public KeyBinding mountInventory = new KeyBinding("key.mount.inventory", GLFW.GLFW_KEY_K, "Lycanites Mobs");
+	public static KeyMapping dismount = new KeyMapping("key.mount.dismount", GLFW.GLFW_KEY_V, "Lycanites Mobs");
+	public static KeyMapping descend = new KeyMapping("key.mount.descend", GLFW.GLFW_KEY_LEFT_ALT, "Lycanites Mobs");
+	public static KeyMapping mountAbility = new KeyMapping("key.mount.ability", GLFW.GLFW_KEY_G, "Lycanites Mobs");
+	public static KeyMapping mountInventory = new KeyMapping("key.mount.inventory", GLFW.GLFW_KEY_K, "Lycanites Mobs");
 
-	public KeyBinding beastiary = new KeyBinding("key.beastiary", GLFW.GLFW_KEY_UNKNOWN, "Lycanites Mobs");
-	public KeyBinding index = new KeyBinding("key.index", GLFW.GLFW_KEY_B, "Lycanites Mobs");
-	public KeyBinding pets = new KeyBinding("key.pets", GLFW.GLFW_KEY_UNKNOWN, "Lycanites Mobs");
-	public KeyBinding summoning = new KeyBinding("key.summoning", GLFW.GLFW_KEY_UNKNOWN, "Lycanites Mobs");
-	public KeyBinding minionSelection = new KeyBinding("key.minions", GLFW.GLFW_KEY_R, "Lycanites Mobs");
+	public static KeyMapping beastiary = new KeyMapping("key.beastiary", GLFW.GLFW_KEY_UNKNOWN, "Lycanites Mobs");
+	public static KeyMapping index = new KeyMapping("key.index", GLFW.GLFW_KEY_B, "Lycanites Mobs");
+	public static KeyMapping pets = new KeyMapping("key.pets", GLFW.GLFW_KEY_UNKNOWN, "Lycanites Mobs");
+	public static KeyMapping summoning = new KeyMapping("key.summoning", GLFW.GLFW_KEY_UNKNOWN, "Lycanites Mobs");
+	public static KeyMapping minionSelection = new KeyMapping("key.minions", GLFW.GLFW_KEY_R, "Lycanites Mobs");
 
 
 	public KeyHandler(Minecraft mc) {
 		this.mc = mc;
 		instance = this;
-		
-		// Register Keys:
-		ClientRegistry.registerKeyBinding(this.dismount);
-		ClientRegistry.registerKeyBinding(this.descend);
-		ClientRegistry.registerKeyBinding(this.mountAbility);
-		ClientRegistry.registerKeyBinding(this.mountInventory);
-		ClientRegistry.registerKeyBinding(this.index);
-		ClientRegistry.registerKeyBinding(this.beastiary);
-		ClientRegistry.registerKeyBinding(this.pets);
-		ClientRegistry.registerKeyBinding(this.summoning);
-		ClientRegistry.registerKeyBinding(this.minionSelection);
 	}
-
+	@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+	public static class ClientModBusEvents {
+		@SubscribeEvent
+		public static void onKeyRegister(RegisterKeyMappingsEvent event) {
+			event.register(dismount);
+			event.register(descend);
+			event.register(mountAbility);
+			event.register(mountInventory);
+			event.register(index);
+			event.register(beastiary);
+			event.register(pets);
+			event.register(summoning);
+			event.register(minionSelection);
+		}
+	}
 
 	@SubscribeEvent
 	public void onPlayerTick(TickEvent.ClientTickEvent event) {
@@ -69,11 +74,11 @@ public class KeyHandler {
 		
 		// ========== GUI Keys ==========
 		// Player Inventory: Adds extra buttons to the GUI.
-		if(!this.inventoryOpen && mc.screen != null && mc.screen.getClass() == InventoryScreen.class) {
+		if(!this.inventoryOpen && mc.screen != null && mc.screen.getClass() == Screen.class) {
 			TabManager.addTabsToInventory(mc.screen);
 			this.inventoryOpen = true;
 		}
-		if(this.inventoryOpen && (mc.screen == null || mc.screen.getClass() != InventoryScreen.class)) {
+		if(this.inventoryOpen && (mc.screen == null || mc.screen.getClass() != Screen.class)) {
 			this.inventoryOpen = false;
 		}
 		
@@ -145,7 +150,7 @@ public class KeyHandler {
 
 	/** Player keyboard events. **/
 	@SubscribeEvent
-	public void onKeyboardEvent(InputEvent.KeyInputEvent event) {
+	public void onKeyboardEvent(InputEvent.Key event) {
 		if(this.mc.player == null)
 			return;
 
@@ -160,7 +165,7 @@ public class KeyHandler {
 
     /** Player 'mouse' events, these are actually events based on attack or item use actions and are still triggered if the key binding is no longer a mouse click. **/
     @SubscribeEvent
-    public void onMouseEvent(InputEvent.MouseInputEvent event) {
+    public void onMouseEvent(InputEvent.MouseButton event) {
         ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(this.mc.player);
         if(this.mc.player == null || playerExt == null || this.mc.hitResult == null)
             return;
@@ -169,7 +174,7 @@ public class KeyHandler {
         if(event.getButton() == 0) {
             // Disable attack for large entity reach override:
             if(!this.mc.player.isSpectator() && !this.mc.player.isHandsBusy() && this.mc.hitResult.getType() == RayTraceResult.Type.ENTITY) {
-                Entity entityHit = ((EntityRayTraceResult)this.mc.hitResult).getEntity();
+                Entity entityHit = ((EntityHitResult)this.mc.hitResult).getEntity();
                 if(playerExt.canMeleeBigEntity(entityHit)) {
                     MessagePlayerAttack message = new MessagePlayerAttack(entityHit);
                     LycanitesMobs.packetHandler.sendToServer(message);

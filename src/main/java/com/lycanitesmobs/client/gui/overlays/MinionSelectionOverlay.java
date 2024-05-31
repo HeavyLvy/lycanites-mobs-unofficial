@@ -7,14 +7,15 @@ import com.lycanitesmobs.client.gui.buttons.CreatureButton;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.network.MessageSummonSetSelection;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import org.lwjgl.opengl.GL11;
 
 public class MinionSelectionOverlay extends BaseScreen {
-	public PlayerEntity player;
+	public Player player;
 	public ExtendedPlayer playerExt;
 	
 	int centerX;
@@ -28,8 +29,8 @@ public class MinionSelectionOverlay extends BaseScreen {
 	 * Constructor
 	 * @param player The player opening this Screen.
 	 */
-    public MinionSelectionOverlay(PlayerEntity player) {
-		super(new TranslationTextComponent("gui.minion.selection"));
+    public MinionSelectionOverlay(Player player) {
+		super(Component.translatable("gui.minion.selection"));
 		this.player = player;
 		this.playerExt = ExtendedPlayer.getForPlayer(player);
 	}
@@ -62,32 +63,32 @@ public class MinionSelectionOverlay extends BaseScreen {
 		int offset = 32;
 
 		creatureInfo = this.playerExt.getSummonSet(1).getCreatureInfo();
-		button = new CreatureButton(1, buttonX, buttonY - Math.round(offset * 2), buttonWidth, buttonHeight, new TranslationTextComponent("1"), 1, creatureInfo, this);
-		this.addButton(button);
+		button = new CreatureButton(1, buttonX, buttonY - Math.round(offset * 2), buttonWidth, buttonHeight, Component.translatable("1"), 1, creatureInfo, this);
+		this.addWidget(button);
 
 		creatureInfo = this.playerExt.getSummonSet(2).getCreatureInfo();
-		button = new CreatureButton(2, buttonX + Math.round(offset * 2), buttonY - Math.round(offset * 0.5F), buttonWidth, buttonHeight, new TranslationTextComponent("2"), 2, creatureInfo, this);
-		this.addButton(button);
+		button = new CreatureButton(2, buttonX + Math.round(offset * 2), buttonY - Math.round(offset * 0.5F), buttonWidth, buttonHeight, Component.translatable("2"), 2, creatureInfo, this);
+		this.addWidget(button);
 
 		creatureInfo = this.playerExt.getSummonSet(3).getCreatureInfo();
-		button = new CreatureButton(3, buttonX + Math.round(offset), buttonY +  Math.round(offset * 1.75F), buttonWidth, buttonHeight, new TranslationTextComponent("3"), 3, creatureInfo, this);
-		this.addButton(button);
+		button = new CreatureButton(3, buttonX + Math.round(offset), buttonY +  Math.round(offset * 1.75F), buttonWidth, buttonHeight, Component.translatable("3"), 3, creatureInfo, this);
+		this.addWidget(button);
 
 		creatureInfo = this.playerExt.getSummonSet(4).getCreatureInfo();
-		button = new CreatureButton(4, buttonX - Math.round(offset), buttonY +  Math.round(offset * 1.75F), buttonWidth, buttonHeight, new TranslationTextComponent("4"), 4, creatureInfo, this);
-		this.addButton(button);
+		button = new CreatureButton(4, buttonX - Math.round(offset), buttonY +  Math.round(offset * 1.75F), buttonWidth, buttonHeight, Component.translatable("4"), 4, creatureInfo, this);
+		this.addWidget(button);
 
 		creatureInfo = this.playerExt.getSummonSet(5).getCreatureInfo();
-		button = new CreatureButton(5, buttonX - Math.round(offset * 2), buttonY - Math.round(offset * 0.5F), buttonWidth, buttonHeight, new TranslationTextComponent("5"), 5, creatureInfo, this);
-		this.addButton(button);
+		button = new CreatureButton(5, buttonX - Math.round(offset * 2), buttonY - Math.round(offset * 0.5F), buttonWidth, buttonHeight, Component.translatable("5"), 5, creatureInfo, this);
+		this.addWidget(button);
 	}
 
 	@Override
-	protected void renderForeground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {}
+	protected void renderForeground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {}
 
 	@Override
-	protected void renderWidgets(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		for(Object buttonObj : this.buttons) {
+	protected void renderWidgets(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
+		for(Renderable buttonObj : this.renderables) {
 			if(buttonObj instanceof ButtonBase) {
 				ButtonBase button = (ButtonBase)buttonObj;
 				button.visible = this.playerExt.getSummonSet(button.buttonId).isUseable();
@@ -97,7 +98,7 @@ public class MinionSelectionOverlay extends BaseScreen {
 	}
 
 	@Override
-	protected void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	protected void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 	

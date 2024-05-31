@@ -122,7 +122,7 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
 			this.onClose();
 		}
 
-        this.drawHelper.drawString(matrixStack, this.inventory.getName().getString(), this.leftPos + 8, this.topPos + this.imageHeight - 96 + 2, 4210752);
+        this.drawHelper.drawString(matrixStack, this.playerInventoryTitle.getString(), this.leftPos + 8, this.topPos + this.imageHeight - 96 + 2, 4210752);
 		int backX = (this.width - this.imageWidth) / 2;
 		int backY = (this.height - this.imageHeight) / 2;
 		this.drawBars(matrixStack, backX, backY);

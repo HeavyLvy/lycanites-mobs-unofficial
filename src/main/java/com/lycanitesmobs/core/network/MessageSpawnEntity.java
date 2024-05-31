@@ -6,11 +6,12 @@ import com.lycanitesmobs.core.entity.CustomProjectileEntity;
 import com.lycanitesmobs.core.entity.EntityFactory;
 import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
+
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -33,8 +34,8 @@ public class MessageSpawnEntity {
 			}
 			this.entityId = serverEntity.getId();
 			this.uuid = serverEntity.getUUID();
-			this.pitch = serverEntity.xRot;
-			this.yaw = serverEntity.yRot;
+			this.pitch = serverEntity.xRotO;
+			this.yaw = serverEntity.yRotO;
 			this.x = serverEntity.position().x();
 			this.y = serverEntity.position().y();
 			this.z = serverEntity.position().z();
@@ -61,8 +62,8 @@ public class MessageSpawnEntity {
 				return;
 			}
 			entity.setPos(message.x, message.y, message.z);
-			entity.xRot = message.pitch;
-			entity.yRot = message.yaw;
+			entity.xRotO = message.pitch;
+			entity.yRotO = message.yaw;
 			entity.setId(message.entityId);
 			entity.setUUID(message.uuid);
 
@@ -85,7 +86,7 @@ public class MessageSpawnEntity {
 	/**
 	 * Reads the message from bytes.
 	 */
-	public static MessageSpawnEntity decode(PacketBuffer packet) {
+	public static MessageSpawnEntity decode(FriendlyByteBuf packet) {
 		MessageSpawnEntity message = new MessageSpawnEntity();
 		message.entityTypeName = packet.readUtf();
         message.entityId = packet.readInt();
@@ -101,7 +102,7 @@ public class MessageSpawnEntity {
 	/**
 	 * Writes the message into bytes.
 	 */
-	public static void encode(MessageSpawnEntity message, PacketBuffer packet) {
+	public static void encode(MessageSpawnEntity message, FriendlyByteBuf packet) {
 		packet.writeUtf(message.entityTypeName);
         packet.writeInt(message.entityId);
 		packet.writeUUID(message.uuid);

@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.util.Material;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -21,7 +22,7 @@ import java.util.*;
 
 public class JSONHelper {
 
-	public static Vector3i getVector3i(JsonObject json, String memberName) {
+	public static Vec3i getVector3i(JsonObject json, String memberName) {
 		if(json.has(memberName)) {
 			JsonArray jsonArray = json.get(memberName).getAsJsonArray();
 			Iterator<JsonElement> jsonIterator = jsonArray.iterator();
@@ -31,9 +32,9 @@ public class JSONHelper {
 				coords[i] = jsonIterator.next().getAsInt();
 				i++;
 			}
-			return new Vector3i(coords[0], coords[1], coords[2]);
+			return new Vec3i(coords[0], coords[1], coords[2]);
 		}
-		return new Vector3i(0, 0, 0);
+		return new Vec3i(0, 0, 0);
 	}
 
 	public static Vector3d getVector3d(JsonObject json, String memberName, Vector3d defaultVec) {

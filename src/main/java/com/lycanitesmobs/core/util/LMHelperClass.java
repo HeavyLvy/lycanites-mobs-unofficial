@@ -10,6 +10,7 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -134,5 +135,13 @@ public class LMHelperClass {
     public static String getItemId(Item item) {
         ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
         return itemId.toString();
+    }
+    public static String getBiomeId(Biome biome) {
+        ResourceLocation biomeId = ForgeRegistries.BIOMES.getKey(biome);
+        return biomeId.toString();
+    }
+    public static String getBlockId(Block block) {
+        ResourceLocation blockId = ForgeRegistries.BLOCKS.getKey(block);
+        return blockId.toString();
     }
 }

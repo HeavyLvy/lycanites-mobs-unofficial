@@ -1,12 +1,15 @@
 package com.lycanitesmobs.core.network;
 
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Hand;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
+import com.lycanitesmobs.core.entity.TameableCreatureEntity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -22,10 +25,10 @@ public class MessagePlayerLeftClick {
 			return;
 
 		ctx.get().enqueueWork(() -> {
-			PlayerEntity player = ctx.get().getSender();
+			Player player = ctx.get().getSender();
 
 			// Equipment:
-			Hand activeHand = player.getUsedItemHand();
+			InteractionHand activeHand = player.getUsedItemHand();
 			ItemStack activeStack = player.getItemInHand(activeHand);
 			if(activeStack.getItem() instanceof ItemEquipment) {
 				((ItemEquipment)activeStack.getItem()).onItemLeftClick(player.getCommandSenderWorld(), player, activeHand);
@@ -36,7 +39,7 @@ public class MessagePlayerLeftClick {
 	/**
 	 * Reads the message from bytes.
 	 */
-	public static MessagePlayerLeftClick decode(PacketBuffer packet) {
+	public static MessagePlayerLeftClick decode(FriendlyByteBuf packet) {
 		MessagePlayerLeftClick message = new MessagePlayerLeftClick();
 		return message;
 	}
@@ -44,7 +47,7 @@ public class MessagePlayerLeftClick {
 	/**
 	 * Writes the message into bytes.
 	 */
-	public static void encode(MessagePlayerLeftClick message, PacketBuffer packet) {
+	public static void encode(MessagePlayerLeftClick message, FriendlyByteBuf packet) {
 
 	}
 	

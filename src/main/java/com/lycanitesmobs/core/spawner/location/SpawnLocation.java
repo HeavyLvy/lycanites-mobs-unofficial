@@ -4,10 +4,12 @@ import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.helpers.JSONHelper;
 import com.lycanitesmobs.core.spawner.CoordSorterFurthest;
 import com.lycanitesmobs.core.spawner.CoordSorterNearest;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,10 +20,10 @@ public class SpawnLocation {
     /** Spawn Locations define where spawns will take place, how these work can vary based on the type of Spawn Trigger. **/
 
     /** The minimum xyz distances in blocks from the central spawn position to spawn from. Required. **/
-    public Vector3i rangeMin = new Vector3i(0, 0, 0);
+    public Vec3i rangeMin = new Vec3i(0, 0, 0);
 
     /** The maximum xyz distances in blocks from the central spawn position to spawn from. Required. **/
-    public Vector3i rangeMax = new Vector3i(0, 0, 0);
+    public Vec3i rangeMax = new Vec3i(0, 0, 0);
 
     /** The minimum allowed y height. **/
     public int yMin = -1;
@@ -77,14 +79,14 @@ public class SpawnLocation {
 
 
     /** Returns a list of positions to spawn at. **/
-    public List<BlockPos> getSpawnPositions(World world, PlayerEntity player, BlockPos triggerPos) {
+    public List<BlockPos> getSpawnPositions(Level world, Player player, BlockPos triggerPos) {
         List<BlockPos> spawnPositions = new ArrayList<>();
         int yPos = this.getOffset(world.random, this.rangeMin.getY(), this.rangeMax.getY());
 		if((this.yMax < 0 || yPos <= this.yMax) && (this.yMin < 0 || yPos >= this.yMin)) {
-			Vector3i offset = new Vector3i(
+			Vec3i offset = new Vec3i(
 					this.getOffset(world.random, this.rangeMin.getX(), this.rangeMax.getX()),
 					yPos,
-					this.getOffset(world.random, this.rangeMin.getZ(), this.rangeMax.getZ())
+					this.getOffset(world.random, this.rangeMin.getY(), this.rangeMax.getY())
 			);
 			spawnPositions.add(triggerPos.offset(offset));
 		}
@@ -94,7 +96,7 @@ public class SpawnLocation {
 
 
     /** Returns a random offset from the provided min and max values. **/
-    public int getOffset(Random random, int min, int max) {
+    public int getOffset(RandomSource random, int min, int max) {
         if(max <= min) {
             return 0;
         }
@@ -107,7 +109,7 @@ public class SpawnLocation {
 
 
 	/** Sorts a list of spawning positions. **/
-	public List<BlockPos> sortSpawnPositions(List<BlockPos> spawnPositions, World world, BlockPos triggerPos) {
+	public List<BlockPos> sortSpawnPositions(List<BlockPos> spawnPositions, Level world, BlockPos triggerPos) {
 		String sorting = this.sorting;
 
 		if("difficulty".equalsIgnoreCase(this.sorting)) {

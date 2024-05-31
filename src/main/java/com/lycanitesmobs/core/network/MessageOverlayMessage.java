@@ -1,18 +1,20 @@
 package com.lycanitesmobs.core.network;
 
 import com.lycanitesmobs.LycanitesMobs;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
+import org.spongepowered.asm.mixin.Mutable;
 
 import java.util.function.Supplier;
 
 public class MessageOverlayMessage {
-	public ITextComponent message;
+	public Component message;
 
 	public MessageOverlayMessage() {}
-	public MessageOverlayMessage(ITextComponent message) {
+	public MessageOverlayMessage(MutableComponent message) {
 		this.message = message;
 	}
 	
@@ -31,7 +33,7 @@ public class MessageOverlayMessage {
 	/**
 	 * Reads the message from bytes.
 	 */
-	public static MessageOverlayMessage decode(PacketBuffer packet) {
+	public static MessageOverlayMessage decode(FriendlyByteBuf packet) {
 		MessageOverlayMessage message = new MessageOverlayMessage();
 		message.message = packet.readComponent();
 		return message;
@@ -40,7 +42,7 @@ public class MessageOverlayMessage {
 	/**
 	 * Writes the message into bytes.
 	 */
-	public static void encode(MessageOverlayMessage message, PacketBuffer packet) {
+	public static void encode(MessageOverlayMessage message, FriendlyByteBuf packet) {
 		packet.writeComponent(message.message);
 	}
 	

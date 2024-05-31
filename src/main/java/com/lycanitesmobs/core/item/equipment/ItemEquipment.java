@@ -32,6 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.*;
 import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
@@ -529,7 +530,7 @@ public class ItemEquipment extends BaseItem {
 	 * @param player The player using the equipment.
 	 * @param hand The active hand.
 	 */
-	public void onItemLeftClick(World world, PlayerEntity player, Hand hand) {
+	public void onItemLeftClick(Level world, PlayerEntity player, Hand hand) {
 		ItemStack itemStack = player.getItemInHand(hand);
 		if(this.getMana(itemStack) <= 0) {
 			return;
