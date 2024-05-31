@@ -8,16 +8,9 @@ import com.lycanitesmobs.client.gui.overlays.BaseOverlay;
 import com.lycanitesmobs.core.MobEventSound;
 import com.lycanitesmobs.core.mobevent.MobEvent;
 import com.lycanitesmobs.core.mobevent.MobEventPlayerServer;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL11;
@@ -29,8 +22,8 @@ public class MobEventPlayerClient {
 
     // Properties:
     public int ticks = 0;
-    public World world;
-    public SimpleSound sound;
+    public Level world;
+    public SimpleSoundInstance sound;
 
     /** True if the started event was already running and show display as 'Event Extended' in chat. **/
     public boolean extended = false;
@@ -39,7 +32,7 @@ public class MobEventPlayerClient {
 	// ==================================================
     //                     Constructor
     // ==================================================
-	public MobEventPlayerClient(MobEvent mobEvent, World world) {
+	public MobEventPlayerClient(MobEvent mobEvent, Level world) {
 		this.mobEvent = mobEvent;
         this.world = world;
         if(!world.isClientSide)

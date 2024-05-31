@@ -24,6 +24,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 
@@ -130,12 +131,12 @@ public class ItemManager extends JSONLoader {
 
 
 		// Utilities:
-		ObjectManager.addBlock("summoningpedestal", new BlockSummoningPedestal(Block.Properties.of(Material.METAL).strength(5, 10).sound(SoundType.METAL), modInfo));
-		ObjectManager.addBlock("equipmentforge_lesser", new BlockEquipmentForge(Block.Properties.of(Material.WOOD).strength(5, 10).sound(SoundType.WOOD), modInfo, 1));
-		ObjectManager.addBlock("equipmentforge_greater", new BlockEquipmentForge(Block.Properties.of(Material.STONE).strength(5, 20).sound(SoundType.STONE), modInfo, 2));
-		ObjectManager.addBlock("equipmentforge_master", new BlockEquipmentForge(Block.Properties.of(Material.METAL).strength(5, 1000).sound(SoundType.METAL), modInfo, 3));
-		ObjectManager.addBlock("equipment_infuser", new EquipmentInfuserBlock(Block.Properties.of(Material.METAL).strength(5, 1000).sound(SoundType.METAL), modInfo));
-		ObjectManager.addBlock("equipment_station", new EquipmentStationBlock(Block.Properties.of(Material.METAL).strength(5, 1000).sound(SoundType.METAL), modInfo));
+		ObjectManager.addBlock("summoningpedestal", new BlockSummoningPedestal(Block.Properties.of().sound(SoundType.METAL).strength(5, 10), modInfo));
+		ObjectManager.addBlock("equipmentforge_lesser", new BlockEquipmentForge(Block.Properties.of().sound(SoundType.WOOD).strength(5, 10), modInfo, 1));
+		ObjectManager.addBlock("equipmentforge_greater", new BlockEquipmentForge(Block.Properties.of().sound(SoundType.STONE).strength(5, 20), modInfo, 2));
+		ObjectManager.addBlock("equipmentforge_master", new BlockEquipmentForge(Block.Properties.of().sound(SoundType.METAL).strength(5, 1000), modInfo, 3));
+		ObjectManager.addBlock("equipment_infuser", new EquipmentInfuserBlock(Block.Properties.of().sound(SoundType.METAL).strength(5, 1000), modInfo));
+		ObjectManager.addBlock("equipment_station", new EquipmentStationBlock(Block.Properties.of().sound(SoundType.METAL).strength(5, 1000), modInfo));
 
 
 		// Buff Items:

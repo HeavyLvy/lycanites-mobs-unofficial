@@ -4,22 +4,12 @@ import com.lycanitesmobs.core.container.SummoningPedestalContainerProvider;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public class BlockSummoningPedestal extends BlockBase {
     public enum EnumSummoningPedestal {
@@ -48,7 +38,6 @@ public class BlockSummoningPedestal extends BlockBase {
 
         this.group = group;
         this.blockName = "summoningpedestal";
-        this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
         this.registerDefaultState(this.getStateDefinition().any().setValue(PROPERTY_OWNER, EnumSummoningPedestal.NONE.ownerId));
     }
 

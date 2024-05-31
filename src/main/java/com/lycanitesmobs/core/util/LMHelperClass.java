@@ -1,18 +1,24 @@
 package com.lycanitesmobs.core.util;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -143,5 +149,27 @@ public class LMHelperClass {
     public static String getBlockId(Block block) {
         ResourceLocation blockId = ForgeRegistries.BLOCKS.getKey(block);
         return blockId.toString();
+    }
+    public static boolean hasTag(Object obj, Object tag) {
+        if (obj instanceof BlockState block) {
+            if (tag instanceof TagKey<?> tagKey) {
+                return block.getTags().anyMatch(blockTagKey -> blockTagKey == tagKey);
+            }else if (tag instanceof String string){
+                return block.getTags().anyMatch(blockTagKey -> blockTagKey.location().equals(new ResourceLocation(string)));
+            }
+        }
+        return false;
+    }
+    public static boolean isPlant(BlockState block) {
+       return block.getBlock() instanceof IPlantable;
+    }
+    public static float getBrightness(Entity entity) {
+        BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos(entity.getX(), 0.0, entity.getZ());
+        if (entity.level().hasChunkAt(blockpos$mutable)) {
+            blockpos$mutable.setY((int) Math.floor(entity.getEyeY()));
+            return entity.level().getBrightness(LightLayer.BLOCK,blockpos$mutable);
+        } else {
+            return 0.0F;
+        }
     }
 }

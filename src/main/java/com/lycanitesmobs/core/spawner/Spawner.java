@@ -18,6 +18,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -526,8 +528,8 @@ public class Spawner {
 
 			// Forge Can Spawn Event:
 			Event.Result canSpawn = Event.Result.ALLOW;
-			if(entityLiving instanceof MobEntity) {
-				canSpawn = ForgeEventFactory.canEntitySpawn((MobEntity)entityLiving, world, (float) spawnPos.getX() + 0.5F, (float) spawnPos.getY(), (float) spawnPos.getZ() + 0.5F, null, SpawnReason.NATURAL);
+			if(entityLiving instanceof Mob) {
+				canSpawn = ForgeEventFactory.canEntitySpawn((Mob)entityLiving, world, (float) spawnPos.getX() + 0.5F, (float) spawnPos.getY(), (float) spawnPos.getZ() + 0.5F, null, SpawnReason.NATURAL);
 				if (canSpawn == Event.Result.DENY && !this.ignoreForgeCanSpawnEvent && !mobSpawn.ignoreForgeCanSpawnEvent) {
 					LycanitesMobs.logDebug("JSONSpawner", "Spawn Check Failed! Spawning blocked by Forge Can Spawn Event, this is caused by another mod.");
 					continue;
@@ -544,9 +546,9 @@ public class Spawner {
 			this.spawnEntity(world, worldExt, entityLiving, level, mobSpawn, player, chain);
 
 			// Call Entity's Initial Spawn:
-			if (entityLiving instanceof MobEntity) {
-				if (!ForgeEventFactory.doSpecialSpawn((MobEntity)entityLiving, world, (float) spawnPos.getX() + 0.5F, (float) spawnPos.getY(), (float) spawnPos.getZ() + 0.5F, null, SpawnReason.NATURAL)) {
-					((MobEntity)entityLiving).finalizeSpawn((IServerWorld) world, world.getCurrentDifficultyAt(spawnPos), SpawnReason.NATURAL, null, null);
+			if (entityLiving instanceof Mob) {
+				if (!ForgeEventFactory.doSpecialSpawn((Mob)entityLiving, world, (float) spawnPos.getX() + 0.5F, (float) spawnPos.getY(), (float) spawnPos.getZ() + 0.5F, null, SpawnReason.NATURAL)) {
+					((Mob)entityLiving).finalizeSpawn((IServerWorld) world, world.getCurrentDifficultyAt(spawnPos), SpawnReason.NATURAL, null, null);
 				}
 			}
 
@@ -752,9 +754,9 @@ public class Spawner {
 		}
 
 		// Vanilla or Other Mod Mob:
-		if(!mobSpawn.ignoreMobInstanceConditions && entityLiving instanceof MobEntity) {
+		if(!mobSpawn.ignoreMobInstanceConditions && entityLiving instanceof Mob) {
 			LycanitesMobs.logDebug("JSONSpawner", "None Lycanites Mobs Checks...");
-			return ((MobEntity)entityLiving).checkSpawnRules(world, SpawnReason.NATURAL);
+			return ((Mob)entityLiving).checkSpawnRules(world, MobSpawnType.NATURAL);
 		}
 		LycanitesMobs.logDebug("JSONSpawner", "All Mob Instance Checks Ignored");
 		return true;
@@ -765,7 +767,7 @@ public class Spawner {
 	 * @param world The world to spawn in.
 	 * @param entityLiving The entity to spawn.
 	 */
-	public void spawnEntity(World world, ExtendedWorld worldExt, LivingEntity entityLiving, int level, MobSpawn mobSpawn, Player player, int chain) {
+	public void spawnEntity(Level world, ExtendedWorld worldExt, LivingEntity entityLiving, int level, MobSpawn mobSpawn, Player player, int chain) {
 		// Before Spawn:
 		entityLiving.setPortalCooldown(); // Start Portal Cooldown
 
