@@ -5,19 +5,21 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.CustomItemEntity;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 public class TileEntityEquipmentForge extends TileEntityBase {
 	/** A list of item stacks in the forge. **/
@@ -25,6 +27,16 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 
 	/** The level of the forge. **/
 	protected int forgeLevel = 1;
+
+	/**
+	 * Constructor
+	 *
+	 * @param pos
+	 * @param state
+	 */
+	public TileEntityEquipmentForge(BlockPos pos, BlockState state) {
+		super(pos, state);
+	}
 
 	@Override
 	public BlockEntityType<?> getType() {
@@ -76,7 +88,7 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 	 */
 	@Override
 	public ItemStack removeItem(int index, int count) {
-		return ItemStackHelper.removeItem(this.itemStacks, index, count);
+		return ContainerHelper.removeItem(this.itemStacks, index, count);
 	}
 
 	/**
@@ -84,7 +96,7 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 	 */
 	@Override
 	public ItemStack removeItemNoUpdate(int index) {
-		return ItemStackHelper.takeItem(this.itemStacks, index);
+		return ContainerHelper.takeItem(this.itemStacks, index);
 	}
 
 	/**
@@ -113,12 +125,12 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 	}
 
 	@Override
-	public void startOpen(PlayerEntity player) {
+	public void startOpen(Player player) {
 
 	}
 
 	@Override
-	public void stopOpen(PlayerEntity player) {
+	public void stopOpen(Player player) {
 
 	}
 
@@ -154,24 +166,29 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 	// ========================================
 	//             Network Packets
 	// ========================================
+
+	
+	
 	@Override
-	public SUpdateTileEntityPacket getUpdatePacket() {
-		CompoundNBT syncData = new CompoundNBT();
+	public Packet<ClientGamePacketListener> getUpdatePacket() {
+		CompoundTag syncData = new CompoundTag();
 
 		// Server to Client:
 		if(!this.getLevel().isClientSide) {
 			syncData.putInt("ForgeLevel", this.forgeLevel);
 		}
 
-		return new SUpdateTileEntityPacket(this.getBlockPos(), 1, syncData);
+		return ClientboundBlockEntityDataPacket.create(this, be -> syncData);
 	}
 
+
+
 	@Override
-	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
 		if(!this.getLevel().isClientSide)
 			return;
 
-		CompoundNBT syncData = packet.getTag();
+		CompoundTag syncData = packet.getTag();
 		if(syncData.contains("ForgeLevel"))
 			this.forgeLevel = syncData.getInt("ForgeLevel");
 	}
@@ -185,22 +202,23 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 	// ========================================
 	//                 NBT Data
 	// ========================================
+
 	@Override
-	public void load(BlockState blockState, CompoundNBT nbtTagCompound) {
-		super.load(blockState, nbtTagCompound);
+	public void load(CompoundTag nbtTagCompound) {
+		super.load(nbtTagCompound);
 		if(nbtTagCompound.contains("ForgeLevel")) {
 			this.forgeLevel = nbtTagCompound.getInt("ForgeLevel");
 		}
 		if(nbtTagCompound.contains("Items")) {
-			ItemStackHelper.loadAllItems(nbtTagCompound, this.itemStacks);
+			ContainerHelper.loadAllItems(nbtTagCompound, this.itemStacks);
 		}
 	}
 
 	@Override
-	public CompoundNBT save(CompoundNBT nbtTagCompound) {
+	public void saveAdditional(CompoundTag nbtTagCompound) {
 		nbtTagCompound.putInt("ForgeLevel", this.forgeLevel);
-		ItemStackHelper.saveAllItems(nbtTagCompound, this.itemStacks);
-		return super.save(nbtTagCompound);
+		ContainerHelper.saveAllItems(nbtTagCompound, this.itemStacks);
+		super.saveAdditional(nbtTagCompound);
 	}
 
 
@@ -225,7 +243,7 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 	/**
 	 * Gets the name of this Equipment Forge.
 	 */
-	public ITextComponent getName() {
+	public MutableComponent getName() {
 		String levelName = "lesser";
 		if(this.forgeLevel == 2) {
 			levelName = "greater";
@@ -233,6 +251,6 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 		else if(this.forgeLevel >= 3) {
 			levelName = "master";
 		}
-		return new TranslationTextComponent("block.lycanitesmobs.equipmentforge_" + levelName);
+		return Component.translatable("block.lycanitesmobs.equipmentforge_" + levelName);
 	}
 }

@@ -65,7 +65,7 @@ public class BlockDoomfire extends BlockFireBase {
         if(entity.isInvulnerableTo(DamageSourceHelper.IN_FIRE))
             return;
 
-        entity.hurt(source, 1);
+        entity.hurt(DamageSourceHelper.IN_FIRE, 1);
         entity.setSecondsOnFire(5);
     }
 

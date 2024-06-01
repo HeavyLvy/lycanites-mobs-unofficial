@@ -9,6 +9,7 @@ import com.lycanitesmobs.core.util.DamageSourceHelper;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -79,22 +80,24 @@ public class BlockHellfire extends BlockFireBase {
     }
 
     @Override
-    public boolean isBlockFireSource(BlockState state, IWorldReader world, BlockPos pos, Direction side) {
+    public boolean isBlockFireSource(BlockState state, LevelAccessor world, BlockPos pos, Direction side) {
         if(state.getBlock() == Blocks.OBSIDIAN)
             return true;
         return false;
     }
 
+
+
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, World world, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
         double x = pos.getX();
         double y = pos.getY();
         double z = pos.getZ();
         if (random.nextInt(100) == 0) {
             x = pos.getX() + random.nextFloat();
             z = pos.getZ() + random.nextFloat();
-            world.addParticle(RedstoneParticleData.REDSTONE, x, y, z, 0.0D, 0.0D, 0.0D);
+            world.addParticle(DustParticleOptions.REDSTONE, x, y, z, 0.0D, 0.0D, 0.0D);
         }
         super.animateTick(state, world, pos, random);
     }

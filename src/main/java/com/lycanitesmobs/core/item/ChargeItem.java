@@ -5,9 +5,23 @@ import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.info.ElementInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
+import javax.tools.Tool;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,37 +43,37 @@ public class ChargeItem extends BaseItem {
         if(this.projectileInfo != null) {
             this.itemName = projectileInfo.chargeItemName;
             LycanitesMobs.logDebug("Projectile", "Created Charge Item: " + projectileInfo.chargeItemName);
-            this.setup();
+            //this.setup();
         }
     }
 
     @Override
-    public ITextComponent getName(ItemStack itemStack) {
-        return this.getProjectileName().append(" ").append(new TranslationTextComponent("item.lycanitesmobs.charge"));
+    public MutableComponent getName(ItemStack itemStack) {
+        return this.getProjectileName().copy().append(" ").append(Component.translatable("item.lycanitesmobs.charge"));
     }
 
     @Override
-    public void appendHoverText(ItemStack itemStack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag tooltipFlag) {
-        super.appendHoverText(itemStack, world, tooltip, tooltipFlag);
-        FontRenderer fontRenderer = Minecraft.getInstance().font;
-        for(ITextComponent description : this.getAdditionalDescriptions(itemStack, world, tooltipFlag)) {
+    public void appendHoverText(ItemStack stack, Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, worldIn, tooltip, flag);
+        for(MutableComponent description : this.getAdditionalDescriptions(stack, worldIn, flag)) {
             tooltip.add(description);
         }
     }
-
+   
     @Override
-    public ITextComponent getDescription(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        return new TranslationTextComponent("item.lycanitesmobs.charge.description").withStyle(TextFormatting.GREEN);
+    public Component getDescription(ItemStack stack, @org.jetbrains.annotations.Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+        return Component.translatable("item.lycanitesmobs.charge.description").withStyle(ChatFormatting.GREEN);
+
     }
 
-    public List<ITextComponent> getAdditionalDescriptions(ItemStack itemStack, @Nullable World world, ITooltipFlag tooltipFlag) {
-        List<ITextComponent> descriptions = new ArrayList<>();
+    public List<MutableComponent> getAdditionalDescriptions(ItemStack itemStack, @Nullable Level world, TooltipFlag tooltipFlag) {
+        List<MutableComponent> descriptions = new ArrayList<>();
 
-        descriptions.add(new TranslationTextComponent("item.lycanitesmobs.charge.projectile").withStyle(TextFormatting.GOLD)
+        descriptions.add(Component.translatable("item.lycanitesmobs.charge.projectile").withStyle(ChatFormatting.GOLD)
                 .append(" ").append(this.getProjectileName()));
 
         if(!this.getElements().isEmpty()) {
-            descriptions.add(new TranslationTextComponent("item.lycanitesmobs.charge.elements").withStyle(TextFormatting.DARK_AQUA)
+            descriptions.add(Component.translatable("item.lycanitesmobs.charge.elements").withStyle(ChatFormatting.DARK_AQUA)
                     .append(" ").append(this.getElementNames()));
         }
 
@@ -67,29 +81,29 @@ public class ChargeItem extends BaseItem {
     }
 
     @Override
-    public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
 
         if(!world.isClientSide && player.isShiftKeyDown()) { // isSneaking()
             BaseProjectileEntity projectile = this.createProjectile(itemStack, world, player);
             if(projectile == null) {
                 LycanitesMobs.logWarning("", "Failed to create projectile from Charge Item: " + this.itemName);
-                return new ActionResult<>(ActionResultType.FAIL, itemStack);
+                return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
             }
             world.addFreshEntity(projectile);
-            if(!player.abilities.instabuild) {
+            if(!player.getAbilities().instabuild) {
                 itemStack.setCount(Math.max(0, itemStack.getCount() - 1));
             }
-            this.playSound(world, player.blockPosition(), projectile.getLaunchSound(), SoundCategory.NEUTRAL, 0.5F, 0.4F / (player.getRandom().nextFloat() * 0.4F + 0.8F));
+            this.playSound(world, player.blockPosition(), projectile.getLaunchSound(), SoundSource.NEUTRAL, 0.5F, 0.4F / (player.getRandom().nextFloat() * 0.4F + 0.8F));
         }
 
-        return new ActionResult<>(ActionResultType.SUCCESS, itemStack);
+        return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
     }
 
     @Override
-    public ActionResultType interactLivingEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
+    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity entity, InteractionHand hand) {
         if(entity instanceof TameableCreatureEntity && ((TameableCreatureEntity)entity).getPlayerOwner() == player) {
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
         return super.interactLivingEntity(stack, player, entity, hand);
     }
@@ -101,7 +115,7 @@ public class ChargeItem extends BaseItem {
      * @param entityPlayer The player using the charge.
      * @return A projectile instance.
      */
-    public BaseProjectileEntity createProjectile(ItemStack itemStack, World world, PlayerEntity entityPlayer) {
+    public BaseProjectileEntity createProjectile(ItemStack itemStack, Level world, Player entityPlayer) {
         if(this.projectileInfo != null) {
             return this.projectileInfo.createProjectile(world, entityPlayer);
         }
@@ -123,8 +137,8 @@ public class ChargeItem extends BaseItem {
      * Returns a comma separated list of Elements this Charge contains.
      * @return The Elements this Charge contains.
      */
-    public ITextComponent getElementNames() {
-        TextComponent elementNames = new StringTextComponent("");
+    public MutableComponent getElementNames() {
+        MutableComponent elementNames = Component.literal("");
         boolean firstElement = true;
         for(ElementInfo element : this.getElements()) {
             if(!firstElement) {
@@ -140,10 +154,10 @@ public class ChargeItem extends BaseItem {
      * Returns the display name of the projectile fired by this Charge.
      * @return The Projectile this Charge fires.
      */
-    public TextComponent getProjectileName() {
+    public Component getProjectileName() {
         if(this.projectileInfo != null) {
             return this.projectileInfo.getTitle();
         }
-        return new TranslationTextComponent("item.lycanitesmobs.charge");
+        return Component.translatable("item.lycanitesmobs.charge");
     }
 }

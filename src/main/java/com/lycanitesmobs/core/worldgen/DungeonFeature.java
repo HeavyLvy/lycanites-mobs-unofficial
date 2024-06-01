@@ -5,13 +5,10 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.config.ConfigDungeons;
 import com.lycanitesmobs.core.dungeon.instance.DungeonInstance;
 import com.mojang.serialization.Codec;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.ISeedReader;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.NoFeatureConfig;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 
 import java.util.List;
 import java.util.Random;
@@ -27,7 +24,7 @@ public class DungeonFeature extends Feature<NoFeatureConfig> {
 		boolean enabled = ConfigDungeons.INSTANCE.dungeonsEnabled.get();
 		int dungeonDistance = ConfigDungeons.INSTANCE.dungeonDistance.get();
 
-		World world = reader.getLevel();
+		Level world = reader.getLevel();
 		ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(world);
 		if(!enabled || extendedWorld == null) {
 			return false;

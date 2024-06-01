@@ -48,9 +48,9 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
 			this.hardDifficultyRangeScale = json.get("hardDifficultyRangeScale").getAsDouble();
 
 		this.listType = "whitelist";
-		this.blockIds.add(LMHelperClass.getBlockId(Blocks.AIR));
-		this.blockIds.add(LMHelperClass.getBlockId(Blocks.CAVE_AIR));
-		this.blockIds.add(LMHelperClass.getBlockId(Blocks.TALL_GRASS));
+		this.blockIds.add(LMHelperClass.convertToResourceLocation(Blocks.AIR).toString());
+		this.blockIds.add(LMHelperClass.convertToResourceLocation(Blocks.CAVE_AIR).toString());
+		this.blockIds.add(LMHelperClass.convertToResourceLocation(Blocks.TALL_GRASS).toString());
 		super.loadFromJSON(json);
     }
 

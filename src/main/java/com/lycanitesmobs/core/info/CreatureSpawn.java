@@ -236,7 +236,7 @@ public class CreatureSpawn {
 			return true;
 		}
 
-		String biomeId = LMHelperClass.getBiomeId(biome);
+		String biomeId = LMHelperClass.convertToResourceLocation(biome).toString();
 
 		// Biome Tags:
 		if(!this.biomeTags.isEmpty()) {

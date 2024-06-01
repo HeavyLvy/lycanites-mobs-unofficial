@@ -1,19 +1,21 @@
 package com.lycanitesmobs.core.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.StairsBlock;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.*;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BlockStairsCustom extends StairsBlock {
+public class BlockStairsCustom extends StairBlock {
 	public String blockName = "BlockBase";
 
 	// ==================================================
@@ -21,21 +23,21 @@ public class BlockStairsCustom extends StairsBlock {
 	// ==================================================
 	public BlockStairsCustom(Block.Properties properties, BlockBase block) {
 		super(block.defaultBlockState(), properties);
-        this.setRegistryName(new ResourceLocation(block.group.modid, block.blockName + "_stairs"));
+        //this.setRegistryName(new ResourceLocation(block.group.modid, block.blockName + "_stairs"));
 	}
 
 	@Override
-	public IFormattableTextComponent getName() {
-		return new TranslationTextComponent(this.getDescriptionId());
+	public MutableComponent getName() {
+		return Component.translatable(this.getDescriptionId());
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void appendHoverText(ItemStack stack, @Nullable IBlockReader world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+	public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag flag) {
 		tooltip.add(this.getDescription(stack, world));
 	}
 
-	public ITextComponent getDescription(ItemStack itemStack, @Nullable IBlockReader world) {
-		return new TranslationTextComponent(this.getDescriptionId() + ".description").withStyle(TextFormatting.GREEN);
+	public MutableComponent getDescription(ItemStack itemStack, @Nullable BlockGetter world) {
+		return Component.translatable(this.getDescriptionId() + ".description").withStyle(ChatFormatting.GREEN);
 	}
 }

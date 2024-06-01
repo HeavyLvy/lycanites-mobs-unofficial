@@ -661,7 +661,9 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 			this.projectileLife = compound.getInt("ProjectileLife");
 		}
 	}
-	
+	public float getBrightness() {
+		return LMHelperClass.getBrightness(this);
+	}
 	
 	// ==================================================
 	//				  Visuals

@@ -3,18 +3,20 @@ package com.lycanitesmobs.core.block.fluid;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.info.ElementInfo;
-import net.minecraft.block.*;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.fluid.FlowingFluid;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -27,17 +29,17 @@ public class OozeFluidBlock extends BaseFluidBlock {
 	}
 
     @Override
-    public boolean shouldSpreadLiquid(World world, BlockPos neighborBlockPos, BlockState blockState) {
+    public boolean shouldSpreadLiquid(Level world, BlockPos neighborBlockPos, BlockState blockState) {
         BlockState neighborBlockState = world.getBlockState(neighborBlockPos);
 
         // Freeze Water:
-        if (neighborBlockState.getMaterial() == Material.WATER) {
+        if (neighborBlockState.getBlock() == Blocks.WATER) {
             world.setBlock(neighborBlockPos, Blocks.PACKED_ICE.defaultBlockState(), 4);
             return false;
         }
 
         // Freeze Lava:
-        if (neighborBlockState.getMaterial() == Material.LAVA) {
+        if (neighborBlockState.getBlock() == Blocks.LAVA) {
             world.setBlock(neighborBlockPos, Blocks.OBSIDIAN.defaultBlockState(), 4);
             return false;
         }
@@ -46,9 +48,9 @@ public class OozeFluidBlock extends BaseFluidBlock {
     }
 
     @Override
-    public void entityInside(BlockState blockState, World world, BlockPos pos, Entity entity) {
+    public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
         // Damage:
-        if (!(entity instanceof ItemEntity) && !(entity instanceof ExperienceOrbEntity)) {
+        if (!(entity instanceof ItemEntity) && !(entity instanceof ExperienceOrb)) {
             entity.hurt(ObjectManager.getDamageSource("ooze"), 1F);
         }
 
@@ -58,14 +60,14 @@ public class OozeFluidBlock extends BaseFluidBlock {
 
         // Effects:
         if(entity instanceof LivingEntity) {
-            ((LivingEntity)entity).addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 5 * 20, 0));
+            ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 5 * 20, 0));
         }
 
         super.entityInside(blockState, world, pos, entity);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, World world, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
         float f; 
         float f1;
         float f2;

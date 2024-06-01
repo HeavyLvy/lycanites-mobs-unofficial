@@ -5,11 +5,22 @@ import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.Nullable;
 
 public class BlockSummoningPedestal extends BlockBase {
     public enum EnumSummoningPedestal {
@@ -42,18 +53,18 @@ public class BlockSummoningPedestal extends BlockBase {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(PROPERTY_OWNER);
     }
 
     @Override
-    public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-        TileEntity tileentity = worldIn.getBlockEntity(pos);
+    public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        BlockEntity tileentity = worldIn.getBlockEntity(pos);
         if(tileentity instanceof TileEntitySummoningPedestal) {
             TileEntitySummoningPedestal tileEntitySummoningPedestal = (TileEntitySummoningPedestal)tileentity;
             tileEntitySummoningPedestal.setOwner(placer);
-            if(placer instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity)placer;
+            if(placer instanceof Player) {
+                Player player = (Player)placer;
                 ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
                 if(playerExt != null) {
                     tileEntitySummoningPedestal.setSummonSet(playerExt.getSelectedSummonSet());
@@ -63,41 +74,37 @@ public class BlockSummoningPedestal extends BlockBase {
     }
 
     @Override
-    public boolean hasTileEntity(BlockState blockState) {
-	    return true;
+    public @Nullable BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
+        return new TileEntitySummoningPedestal(p_153215_,p_153216_);
     }
 
-    @Override
-    public TileEntity createTileEntity(BlockState blockState, IBlockReader world) {
-        return new TileEntitySummoningPedestal();
-    }
 
-    public static void setState(EnumSummoningPedestal owner, World worldIn, BlockPos pos) {
+    public static void setState(EnumSummoningPedestal owner, Level worldIn, BlockPos pos) {
         BlockState blockState = worldIn.getBlockState(pos);
-        TileEntity tileentity = worldIn.getBlockEntity(pos);
+        BlockEntity tileentity = worldIn.getBlockEntity(pos);
         worldIn.setBlock(pos, blockState.getBlock().defaultBlockState().setValue(PROPERTY_OWNER, owner.getOwnerId()), 3);
 
         if (tileentity != null) {
             tileentity.clearRemoved();
-            worldIn.setBlockEntity(pos, tileentity);
+            worldIn.setBlockEntity(tileentity);
         }
     }
 
     @Override //onBlockActivated()
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        if(!world.isClientSide() && player instanceof ServerPlayerEntity) {
-            TileEntity tileEntity = world.getBlockEntity(pos);
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+        if(!world.isClientSide() && player instanceof ServerPlayer) {
+            BlockEntity tileEntity = world.getBlockEntity(pos);
             if(tileEntity instanceof TileEntitySummoningPedestal) {
-                ((ServerPlayerEntity)player).connection.send(tileEntity.getUpdatePacket());
-                NetworkHooks.openGui((ServerPlayerEntity)player, new SummoningPedestalContainerProvider((TileEntitySummoningPedestal)tileEntity), buf -> buf.writeBlockPos(pos));
+                ((ServerPlayer)player).connection.send(tileEntity.getUpdatePacket());
+                NetworkHooks.openScreen((ServerPlayer)player, new SummoningPedestalContainerProvider((TileEntitySummoningPedestal)tileEntity), buf -> buf.writeBlockPos(pos));
             }
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public boolean triggerEvent(BlockState state, World worldIn, BlockPos pos, int eventID, int eventParam) {
-        TileEntity tileEntity = worldIn.getBlockEntity(pos);
+    public boolean triggerEvent(BlockState state, Level worldIn, BlockPos pos, int eventID, int eventParam) {
+        BlockEntity tileEntity = worldIn.getBlockEntity(pos);
         return tileEntity != null && tileEntity.triggerEvent(eventID, eventParam);
     }
 }

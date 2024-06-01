@@ -2,18 +2,17 @@ package com.lycanitesmobs.core.block.fluid;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.info.ElementInfo;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.fluid.FlowingFluid;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.DamageSourceHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -27,11 +26,11 @@ public class MoglavaFluidBlock extends BaseFluidBlock {
 	}
 
 	@Override
-	public boolean shouldSpreadLiquid(World world, BlockPos neighborBlockPos, BlockState blockState) {
+	public boolean shouldSpreadLiquid(Level world, BlockPos neighborBlockPos, BlockState blockState) {
 		BlockState neighborBlockState = world.getBlockState(neighborBlockPos);
 
         // Water Cobblestone:
-		if (neighborBlockState.getMaterial() == Material.WATER) {
+		if (neighborBlockState.getBlock() == Blocks.WATER) {
 			world.setBlock(neighborBlockPos, Blocks.STONE.defaultBlockState(), 2);
 			return false;
         }
@@ -40,15 +39,15 @@ public class MoglavaFluidBlock extends BaseFluidBlock {
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, World world, BlockPos pos, Entity entity) {
+	public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
 		if(entity instanceof ItemEntity)
-			entity.hurt(DamageSource.LAVA, 10F);
+			entity.hurt(DamageSourceHelper.LAVA, 10F);
 		super.entityInside(blockState, world, pos, entity);
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void animateTick(BlockState state, World world, BlockPos pos, Random random) {
+	public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
 		float f;
 		float f1;
 		float f2;

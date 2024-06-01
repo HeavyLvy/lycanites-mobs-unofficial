@@ -162,10 +162,10 @@ public class BlockSpawnLocation extends SpawnLocation {
 		}
 		Block block = world.getBlockState(blockPos).getBlock();
 		if ("blacklist".equalsIgnoreCase(this.listType)) {
-			return !this.blockIds.contains(LMHelperClass.getBlockId(block));
+			return !this.blockIds.contains(LMHelperClass.convertToResourceLocation(block).toString());
 		}
 		else {
-			return this.blockIds.contains(LMHelperClass.getBlockId(block));
+			return this.blockIds.contains(LMHelperClass.convertToResourceLocation(block).toString());
 		}
 	}
 }

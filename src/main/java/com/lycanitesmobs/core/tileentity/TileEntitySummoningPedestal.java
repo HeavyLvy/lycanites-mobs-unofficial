@@ -16,6 +16,8 @@ import com.lycanitesmobs.core.pets.SummonSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
@@ -24,6 +26,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +36,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -210,7 +214,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         // Sync To Client:
         if(this.updateTick % 20 == 0) {
             MessageSummoningPedestalStats message = new MessageSummoningPedestalStats(this.capacity, this.summonProgress, this.summoningFuel, this.summoningFuelMax, this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ());
-            LycanitesMobs.packetHandler.sendToAllAround(message, this.getLevel(), Vector3d.atLowerCornerOf(this.getBlockPos()), 5);
+            LycanitesMobs.packetHandler.sendToAllAround(message, this.getLevel(), Vec3.atLowerCornerOf(this.getBlockPos()), 5);
         }
 
         this.updateTick++;
@@ -432,8 +436,10 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         return ClientboundBlockEntityDataPacket.create(this, (blockEntity) -> syncData);
     }
 
+
+
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
         if(!this.getLevel().isClientSide)
             return;
 
@@ -459,8 +465,8 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
     // ========================================
     /** Reads from saved NBT data. **/
     @Override
-    public void load(BlockState blockState, CompoundTag nbtTagCompound) {
-        super.load(blockState, nbtTagCompound);
+    public void load(CompoundTag nbtTagCompound) {
+        super.load(nbtTagCompound);
 
         if(nbtTagCompound.contains("OwnerUUID")) {
             String uuidString = nbtTagCompound.getString("OwnerUUID");
@@ -484,7 +490,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
 		}
 
         if(nbtTagCompound.contains("MinionIDs")) {
-            ListNBT minionIDs = nbtTagCompound.getList("MinionIDs", 10);
+            ListTag minionIDs = nbtTagCompound.getList("MinionIDs", 10);
             this.loadMinionIDs = new String[minionIDs.size()];
             for(int i = 0; i < minionIDs.size(); i++) {
                 CompoundTag minionID = minionIDs.getCompound(i);
@@ -503,7 +509,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
 		}
 		if(nbtTagCompound.contains("Items")) {
 			NonNullList<ItemStack> itemStacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-			ItemStackHelper.loadAllItems(nbtTagCompound, itemStacks); // Reads ItemStack into a List from "Items" tag.
+			ContainerHelper.loadAllItems(nbtTagCompound, itemStacks); // Reads ItemStack into a List from "Items" tag.
 
 			for(int i = 0; i < itemStacks.size(); ++i) {
 				if(i < this.getContainerSize()) {
@@ -517,13 +523,13 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
 			}
 		}
 
-		super.load(blockState, nbtTagCompound);
+		super.load(nbtTagCompound);
     }
 
     /** Writes to NBT data. **/
     @Override
-    public CompoundTag save(CompoundTag nbtTagCompound) {
-        super.save(nbtTagCompound);
+    public void saveAdditional(CompoundTag nbtTagCompound) {
+        super.saveAdditional(nbtTagCompound);
 
         if(this.ownerUUID == null) {
             nbtTagCompound.putString("OwnerUUID", "");
@@ -539,7 +545,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         }
 
         if(this.minions.size() > 0) {
-            ListNBT minionIDs = new ListNBT();
+            ListTag minionIDs = new ListTag();
             for(LivingEntity minion : this.minions) {
                 CompoundTag minionID = new CompoundTag();
                 minionID.putString("ID", minion.getUUID().toString());
@@ -551,8 +557,6 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         // Fuel:
 		nbtTagCompound.putInt("Fuel", this.summoningFuel);
 		nbtTagCompound.putInt("FuelMax", this.summoningFuelMax);
-		ItemStackHelper.saveAllItems(nbtTagCompound, this.itemStacks);
-
-        return nbtTagCompound;
+		ContainerHelper.saveAllItems(nbtTagCompound, this.itemStacks);
     }
 }

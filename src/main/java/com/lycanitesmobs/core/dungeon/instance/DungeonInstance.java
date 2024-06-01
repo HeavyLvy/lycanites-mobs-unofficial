@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.common.extensions.IForgeLevel;
 
 import java.util.ArrayList;
@@ -151,7 +152,7 @@ public class DungeonInstance {
 	 * @param world The world being built in. This cannot be used for placement during WorldGen.
 	 * @param chunkPos The chunk position to build within.
 	 */
-	public void buildChunk(IForgeLevel worldWriter, Level world, ChunkPos chunkPos, Random random) {
+	public void buildChunk(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, Random random) {
 		if(this.complete || this.layout == null || !this.layout.sectorChunkMap.containsKey(chunkPos)) {
 			return;
 		}

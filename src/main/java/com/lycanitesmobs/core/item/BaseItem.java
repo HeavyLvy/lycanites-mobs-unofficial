@@ -51,7 +51,7 @@ public class BaseItem extends Item {
 
 
     @Override
-    public void appendHoverText(ItemStack stack, @org.jetbrains.annotations.Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Level worldIn, List<Component> tooltip, TooltipFlag flag) {
         Component description = this.getDescription(stack, worldIn, tooltip, flag);
         if(!"".equalsIgnoreCase(description.getString())) {
             tooltip.add(description);

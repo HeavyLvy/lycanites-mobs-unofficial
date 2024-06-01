@@ -3,10 +3,11 @@ package com.lycanitesmobs.core.block;
 
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.info.ModInfo;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
+import com.lycanitesmobs.core.util.Material;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.MapColor;
 
 public class BlockMaker {
     // ==================================================
@@ -17,8 +18,8 @@ public class BlockMaker {
      * @param stoneName The name of the stone block, such as "demon" or "shadow", etc. (stone and crystal are appended).
      * **/
     public static void addDungeonBlocks(ModInfo group, String stoneName) {
-        Block.Properties properties = Block.Properties.of(Material.STONE).sound(SoundType.STONE).strength(2F, 1200.0F);
-        Block.Properties crystalProperties = Block.Properties.of(Material.GLASS).sound(SoundType.GLASS).strength(0.5F, 1200.0F).lightLevel((BlockState blockState) -> { return 15; });
+        Block.Properties properties = Block.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE).strength(2F, 1200.0F);
+        Block.Properties crystalProperties = Block.Properties.of().mapColor(MapColor.NONE).sound(SoundType.GLASS).strength(0.5F, 1200.0F).lightLevel((BlockState blockState) -> { return 15; });
 
         BlockBase stoneBlock = new BlockBase(properties, group, stoneName + "stone");
         ObjectManager.addBlock(stoneName + "stone", stoneBlock);

@@ -588,7 +588,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         this.loadItemDrops();
 		if(ItemEquipmentPart.MOB_PART_DROPS.containsKey(this.creatureInfo.getEntityId())) {
 			for(ItemEquipmentPart itemEquipmentPart : ItemEquipmentPart.MOB_PART_DROPS.get(this.creatureInfo.getEntityId())) {
-				ItemDrop partDrop = new ItemDrop(LMHelperClass.getItemId(itemEquipmentPart), itemEquipmentPart.dropChance).setMaxAmount(1);
+				ItemDrop partDrop = new ItemDrop(LMHelperClass.convertToResourceLocation(itemEquipmentPart).toString(), itemEquipmentPart.dropChance).setMaxAmount(1);
 				partDrop.bonusAmount = false;
 				partDrop.amountMultiplier = false;
 				this.drops.add(partDrop);
@@ -1135,7 +1135,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 			boolean replaceablePlant = LMHelperClass.hasTag(blockState, BlockTags.REPLACEABLE);
 			if(blockState.getBlock() != Blocks.AIR
     				&& !isLeaves
-    				&& LMHelperClass.isPlant(blockState)
+    				&& LMHelperClass.Materials.isPlant(blockState.getBlock())
     				&& !replaceablePlant)
     			return true;
     	}

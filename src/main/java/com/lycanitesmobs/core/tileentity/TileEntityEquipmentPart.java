@@ -1,11 +1,12 @@
 package com.lycanitesmobs.core.tileentity;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class TileEntityEquipmentPart extends TileEntity {
-
-	public TileEntityEquipmentPart(TileEntityType<?> p_i48289_1_) {
-		super(p_i48289_1_);
+public class TileEntityEquipmentPart extends BlockEntity {
+	public TileEntityEquipmentPart(BlockEntityType<?> p_155228_, BlockPos p_155229_, BlockState p_155230_) {
+		super(p_155228_, p_155229_, p_155230_);
 	}
 }

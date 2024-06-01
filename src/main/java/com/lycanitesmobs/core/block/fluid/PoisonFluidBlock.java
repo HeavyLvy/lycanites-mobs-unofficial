@@ -3,43 +3,39 @@ package com.lycanitesmobs.core.block.fluid;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.info.ElementInfo;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.fluid.FlowingFluid;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Random;
 import java.util.function.Supplier;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public class PoisonFluidBlock extends BaseFluidBlock {
 	public PoisonFluidBlock(Supplier<? extends FlowingFluid> fluidSupplier, Properties properties, String name, ElementInfo element, boolean destroyItems) {
         super(fluidSupplier, properties, name, element, destroyItems);
 	}
 
-    public boolean shouldSpreadLiquid(World world, BlockPos neighborBlockPos, BlockState blockState) {
+    public boolean shouldSpreadLiquid(Level world, BlockPos neighborBlockPos, BlockState blockState) {
         BlockState neighborBlockState = world.getBlockState(neighborBlockPos);
 
         // Freeze Water:
-        if (neighborBlockState.getMaterial() == Material.WATER) {
+        if (neighborBlockState.getBlock() == Blocks.WATER) {
             world.setBlock(neighborBlockPos, Blocks.ANDESITE.defaultBlockState(), 4);
             return false;
         }
 
         // Freeze Lava:
-        if (neighborBlockState.getMaterial() == Material.LAVA) {
+        if (neighborBlockState.getBlock() == Blocks.LAVA) {
             world.setBlock(neighborBlockPos, Blocks.GRANITE.defaultBlockState(), 4);
             return false;
         }
@@ -48,16 +44,16 @@ public class PoisonFluidBlock extends BaseFluidBlock {
     }
 
     @Override
-    public void entityInside(BlockState blockState, World world, BlockPos pos, Entity entity) {
+    public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
         // Extinguish:
         if(entity.isOnFire())
             entity.clearFire();
 
         // Effects:
         if(entity instanceof LivingEntity) {
-            Effect effect = ObjectManager.getEffect("plague");
+            MobEffect effect = ObjectManager.getEffect("plague");
             if(effect != null) {
-                ((LivingEntity) entity).addEffect(new EffectInstance(effect, 5 * 20, 0));
+                ((LivingEntity) entity).addEffect(new MobEffectInstance(effect, 5 * 20, 0));
             }
         }
 
@@ -65,7 +61,7 @@ public class PoisonFluidBlock extends BaseFluidBlock {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, World world, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
         float f; 
         float f1;
         float f2;

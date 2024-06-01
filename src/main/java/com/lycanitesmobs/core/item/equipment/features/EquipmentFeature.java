@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.item.equipment.features;
 
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
@@ -84,7 +85,7 @@ public class EquipmentFeature {
 	}
 
 	/** Returns a description of this feature. Returns null if the feature is not active. **/
-	public Component getSummary(ItemStack itemStack, int level) {
+	public MutableComponent getSummary(ItemStack itemStack, int level) {
 		if(!this.isActive(itemStack, level)) {
 			return null;
 		}

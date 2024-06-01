@@ -34,7 +34,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BlockBase extends Block {
+public class BlockBase extends BaseEntityBlock {
 
 	// Properties:
 	public ModInfo group;
@@ -53,6 +53,12 @@ public class BlockBase extends Block {
 
 	/** If true, this block cannot be broken or even hit like a solid block. **/
 	public boolean noBreakCollision = false;
+
+	@org.jetbrains.annotations.Nullable
+	@Override
+	public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
+		return null;
+	}
 
 	/*@org.jetbrains.annotations.Nullable
 	@Override
