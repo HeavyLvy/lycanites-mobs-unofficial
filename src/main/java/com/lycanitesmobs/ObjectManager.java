@@ -132,7 +132,7 @@ public class ObjectManager {
 	public static void addSound(String name, ModInfo modInfo, String path) {
 		name = name.toLowerCase();
 		ResourceLocation resourceLocation = new ResourceLocation(modInfo.modid, path);
-		SoundEvent soundEvent = new SoundEvent(resourceLocation);
+		SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
 		//soundEvent.setRegistryName(resourceLocation);
 		sounds.put(name, soundEvent);
 	}

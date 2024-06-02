@@ -1,12 +1,16 @@
 package com.lycanitesmobs.client.obj;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL21;
 
 import com.lycanitesmobs.client.renderer.CustomRenderStates;
 
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.math.vector.Vector3f;
+import java.nio.ByteBuffer;
+
 
 public class Mesh {
 
@@ -30,27 +34,63 @@ public class Mesh {
 				}
 			}
 
-			Tessellator tesselator = Tessellator.getInstance();
+			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
 
 			bufferBuilder.begin(GL21.GL_TRIANGLES, CustomRenderStates.POS_TEX_NORMAL);
 			for (int i = 0; i < this.indices.length; i++) {
 				Vertex vertex = this.vertices[this.indices[i]];
 				Vector3f normal = this.normals[i];
-				bufferBuilder.vertex(vertex.getPos().x(), vertex.getPos().y(), vertex.getPos().z());
-				bufferBuilder.uv(vertex.getTexCoords().x, 1.0F - vertex.getTexCoords().y);
-				bufferBuilder.normal(normal.x(), normal.y(), normal.z());
-				bufferBuilder.endVertex();
+				bufferBuilder.vertex(vertex.getPos().x(), vertex.getPos().y(), vertex.getPos().z())
+						.uv(vertex.getTexCoords().x, 1.0F - vertex.getTexCoords().y)
+						.normal(normal.x(), normal.y(), normal.z())
+						.endVertex();
 			}
 			bufferBuilder.end();
 
 			this.vbo = GL21.glGenBuffers();
 			GL21.glBindBuffer(GL21.GL_ARRAY_BUFFER, vbo);
-			GL21.glBufferData(GL21.GL_ARRAY_BUFFER, bufferBuilder.popNextBuffer().getSecond(), GL21.GL_STATIC_DRAW);
+			GL21.glBufferData(GL21.GL_ARRAY_BUFFER, bufferBuilder.end().vertexBuffer().slice(), GL21.GL_STATIC_DRAW);
 			GL21.glBindBuffer(GL21.GL_ARRAY_BUFFER, 0);
 		}
 
 		return this.vbo;
+	}
+	/**
+	 * Extracts and returns the ByteBuffer slice for the next buffer.
+	 * @return ByteBuffer slice containing the vertex data.
+	 */
+	public ByteBuffer getNextBufferSlice(BufferBuilder bufferBuilder) {
+		if (bufferBuilder.currentIndex >= vertexStates.size()) {
+			return null; // Or throw an exception depending on your needs.
+		}
+
+		BufferBuilder.DrawState drawState = this.vertexStates.get(this.currentIndex++);
+		this.byteBuffer.position(this.uploadedBytes);
+		this.uploadedBytes += drawState.getVertexCount() * drawState.getFormat().getVertexSize();
+		this.byteBuffer.limit(this.uploadedBytes);
+		if (this.currentIndex == this.vertexStates.size() && this.vertexCount == 0) {
+			this.clearBuffer();
+		}
+
+		ByteBuffer slicedBuffer = this.byteBuffer.slice();
+		slicedBuffer.order(this.byteBuffer.order());
+		this.byteBuffer.clear();
+		return slicedBuffer;
+	}
+	public Pair<BufferBuilder.DrawState, ByteBuffer> popNextBuffer(BufferBuilder bufferBuilder, BufferBuilder.DrawState dS) {
+		BufferBuilder.DrawState drawState = dS.vertexCount().get(this.lastRenderedCountIndex++);
+		this.buffer.position(this.totalUploadedBytes);
+		this.totalUploadedBytes += drawState.vertexCount() * drawState.format().getVertexSize();
+		this.buffer.limit(this.totalUploadedBytes);
+		if (this.lastRenderedCountIndex == this.vertexCounts.size() && this.vertices == 0) {
+			this.clear();
+		}
+
+		ByteBuffer byteBuffer = this.buffer.slice();
+		byteBuffer.order(this.buffer.order());
+		this.buffer.clear();
+		return Pair.of(drawState, byteBuffer);
 	}
 
 	private static Vector3f calcNormal(Vector3f v1, Vector3f v2, Vector3f v3) {

@@ -1,14 +1,14 @@
 package com.lycanitesmobs.core.entity;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.dungeon.definition.DungeonTheme;
 import com.lycanitesmobs.core.dungeon.definition.ThemeBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.BlockPos;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.Material;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fluids.IFluidBlock;
 
 import javax.annotation.Nullable;
@@ -225,16 +225,16 @@ public class CreatureStructure {
 		if (this.owner.getCommandSenderWorld().getBlockEntity(pos) != null) {
 			return false;
 		}
-		if (targetState.getMaterial() == Material.WATER || targetState.getMaterial() == Material.LAVA) {
+		if (Material.WATER.contains(targetBlock) || Material.LAVA.contains(targetBlock)) {
 			return true;
 		}
-		if (targetState.getMaterial() == Material.PLANT
-				|| targetState.getMaterial() == Material.DIRT
-				|| targetState.getMaterial() == Material.GRASS
-				|| targetState.getMaterial() == Material.LEAVES
-				|| targetState.getMaterial() == Material.VEGETABLE
-				|| targetState.getMaterial() == Material.REPLACEABLE_PLANT
-				|| targetState.getMaterial() == Material.WOOD
+		if (LMHelperClass.Materials.isPlant(targetBlock)
+				|| Material.DIRT.contains(targetBlock)
+				|| Material.GRASS.contains(targetBlock)
+				|| Material.LEAVES.contains(targetBlock)
+				|| LMHelperClass.Materials.isCrop(targetBlock)
+				|| LMHelperClass.Materials.isReplaceablePlant(targetBlock)
+				|| Material.WOOD.contains(targetBlock)
 		) {
 			return true;
 		}

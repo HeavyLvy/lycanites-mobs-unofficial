@@ -1,7 +1,8 @@
 package com.lycanitesmobs.client.obj;
 
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3f;
+
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 public class Vertex {
     private Vector3f pos;

@@ -2,11 +2,11 @@ package com.lycanitesmobs.core.dungeon.definition;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ThemeBlock {
 	/** Dungeon Theme Blocks define a block to be used in the theme along with other information. **/
@@ -38,7 +38,7 @@ public class ThemeBlock {
 
 	public Block getBlock() {
 		if(this.block == null) {
-			this.block = GameRegistry.findRegistry(Block.class).getValue(new ResourceLocation(this.blockId));
+			this.block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(this.blockId));
 		}
 		if(this.block == null) {
 			return Blocks.CAVE_AIR;

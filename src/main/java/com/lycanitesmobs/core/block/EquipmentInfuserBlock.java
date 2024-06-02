@@ -86,10 +86,10 @@ public class EquipmentInfuserBlock extends BlockBase {
 		super.setPlacedBy(world, pos, state, entity, itemStack);
 	}
 
-	@Override
+	/*@Override
 	public boolean hasTileEntity(BlockState blockState) {
 		return true;
-	}
+	}*/
 	
 
 	
@@ -102,12 +102,13 @@ public class EquipmentInfuserBlock extends BlockBase {
 				NetworkHooks.openScreen((ServerPlayer) player, new EquipmentInfuserContainerProvider((EquipmentInfuserTileEntity)tileEntity), buf -> buf.writeBlockPos(pos));
 			}
 		}
-		return ActionResultType.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 
-    @Override
-    public boolean triggerEvent(BlockState state, World worldIn, BlockPos pos, int eventID, int eventParam) {
-        TileEntity tileEntity = worldIn.getBlockEntity(pos);
+
+	@Override
+    public boolean triggerEvent(BlockState state, Level worldIn, BlockPos pos, int eventID, int eventParam) {
+        BlockEntity tileEntity = worldIn.getBlockEntity(pos);
         return tileEntity != null && tileEntity.triggerEvent(eventID, eventParam);
     }
 }

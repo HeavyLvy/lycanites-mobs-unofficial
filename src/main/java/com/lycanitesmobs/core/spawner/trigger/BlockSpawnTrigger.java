@@ -38,7 +38,7 @@ public class BlockSpawnTrigger extends SpawnTrigger {
 	public String blocksListType = "whitelist";
 
 	/** A list of Block Materials that match this Trigger. **/
-	public List<Material> blockMaterials = new ArrayList<>();
+	public List<Block> blockMaterials = new ArrayList<>();
 
 	/** Determines if the block materials list is a blacklist or whitelist. **/
 	public String blockMaterialsListType = "whitelist";
@@ -159,15 +159,15 @@ public class BlockSpawnTrigger extends SpawnTrigger {
 
 	/** Returns true if the provided block is a match for this trigger. **/
 	public boolean isTriggerBlock(BlockState blockState, Level world, BlockPos blockPos, int fortune, @Nullable LivingEntity entity) {
-		if(this.blocks.size() > 0) {
+		if(!this.blocks.isEmpty()) {
 			Block block = blockState.getBlock();
 			if (this.blocks.contains(block)) {
 				return !"blacklist".equalsIgnoreCase(this.blocksListType);
 			}
 		}
 
-		if(this.blockMaterials.size() > 0) {
-			Material material = blockState.getProperties().stream().anyMatch(blockMaterials -> blockMaterialsListType == blockMaterials.getName());
+		if(!this.blockMaterials.isEmpty()) {
+			Block material = blockState.getBlock();
 			if (this.blockMaterials.contains(material)) {
 				return !"blacklist".equalsIgnoreCase(this.blockMaterialsListType);
 			}

@@ -19,6 +19,8 @@ import com.lycanitesmobs.core.item.special.ItemSoulkey;
 import com.lycanitesmobs.core.item.special.ItemSoulstone;
 import com.lycanitesmobs.core.item.summoningstaff.*;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -27,6 +29,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -37,10 +43,12 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class ItemManager extends JSONLoader {
+	public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LycanitesMobs.MODID);
+	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, LycanitesMobs.MODID);
 	public static ItemManager INSTANCE;
 //	public static final DeferredRegister<Fluid> FLUIDS = new DeferredRegister<>(ForgeRegistries.FLUIDS, LycanitesMobs.MODID); TODO Probably moved to a reg event finally...
 
-	public Map<String, ItemInfo> items = new HashMap<>();
+	public static Map<String, ItemInfo> items = new HashMap<>();
 
 	/** A list of blocks that need to use the cutout renderer. **/
 	public List<Block> cutoutBlocks = new ArrayList<>();
@@ -53,15 +61,48 @@ public class ItemManager extends JSONLoader {
 
 	/** Handles all global item general config settings. **/
 	public ItemConfig config;
-
 	// Creative Tabs:
-	public final CreativeModeTab itemsGroup = new LMItemsGroup(LycanitesMobs.MODID + ".items");
-	public final CreativeModeTab blocksGroup = new LMBlocksGroup(LycanitesMobs.MODID + ".blocks");
-	public final CreativeModeTab creaturesGroups = new LMCreaturesGroup(LycanitesMobs.MODID + ".creatures");
-	public final CreativeModeTab chargesGroup = new LMChargesGroup(LycanitesMobs.MODID + ".charges");
-	public final CreativeModeTab equipmentPartsGroup = new LMEquipmentPartsGroup(LycanitesMobs.MODID + ".equipmentparts");
+	public  final CreativeModeTab.Builder itemsGroup = LMItemsGroup.getBuilder();
+	public static final RegistryObject<CreativeModeTab> itemTab = TABS.register(LycanitesMobs.MODID + ".items", itemsGroup::build);
+	public  final CreativeModeTab.Builder blocksGroup = LMBlocksGroup.getBuilder();
+	public static final RegistryObject<CreativeModeTab> blockTab = TABS.register(LycanitesMobs.MODID + ".blocks", blocksGroup::build);
+	public  final CreativeModeTab.Builder creaturesGroups = LMCreaturesGroup.getBuilder();
+	public static final RegistryObject<CreativeModeTab> creaturesTab = TABS.register(LycanitesMobs.MODID + ".creatures", creaturesGroups::build);
+	public  final CreativeModeTab.Builder chargesGroup = LMChargesGroup.getBuilder();
+	public static final RegistryObject<CreativeModeTab> chargesTab = TABS.register(LycanitesMobs.MODID + ".charges", chargesGroup::build);
+	public  final CreativeModeTab.Builder equipmentPartsGroup = LMEquipmentPartsGroup.getBuilder();
+	public static final RegistryObject<CreativeModeTab> equipmentPartsTab = TABS.register(LycanitesMobs.MODID + ".equipmentparts", equipmentPartsGroup::build);
 
 
+/**
+ * Creative Tab Registration
+ */
+
+public static final RegistryObject<CreativeModeTab> GECKOLIB_TAB = TABS.register(LycanitesMobs.MODID + ".items", () -> CreativeModeTab.builder()
+		.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".items"))
+		.icon(() -> new ItemStack(ItemRegistry.JACK_IN_THE_BOX.get()))
+		.displayItems((enabledFeatures, entries) -> {
+			entries.accept(ItemRegistry.JACK_IN_THE_BOX.get());
+			entries.accept(ItemRegistry.GECKO_ARMOR_HELMET.get());
+			entries.accept(ItemRegistry.GECKO_ARMOR_CHESTPLATE.get());
+			entries.accept(ItemRegistry.GECKO_ARMOR_LEGGINGS.get());
+			entries.accept(ItemRegistry.GECKO_ARMOR_BOOTS.get());
+			entries.accept(ItemRegistry.WOLF_ARMOR_HELMET.get());
+			entries.accept(ItemRegistry.WOLF_ARMOR_CHESTPLATE.get());
+			entries.accept(ItemRegistry.WOLF_ARMOR_LEGGINGS.get());
+			entries.accept(ItemRegistry.WOLF_ARMOR_BOOTS.get());
+			entries.accept(ItemRegistry.GECKO_HABITAT.get());
+			entries.accept(ItemRegistry.FERTILIZER.get());
+			entries.accept(ItemRegistry.BAT_SPAWN_EGG.get());
+			entries.accept(ItemRegistry.BIKE_SPAWN_EGG.get());
+			entries.accept(ItemRegistry.RACE_CAR_SPAWN_EGG.get());
+			entries.accept(ItemRegistry.PARASITE_SPAWN_EGG.get());
+			entries.accept(ItemRegistry.MUTANT_ZOMBIE_SPAWN_EGG.get());
+			entries.accept(ItemRegistry.GREMLIN_SPAWN_EGG.get());
+			entries.accept(ItemRegistry.FAKE_GLASS_SPAWN_EGG.get());
+			entries.accept(ItemRegistry.COOL_KID_SPAWN_EGG.get());
+		})
+		.build());
 	/** Returns the main Item Manager instance or creates it and returns it. **/
 	public static ItemManager getInstance() {
 		if(INSTANCE == null) {
@@ -97,10 +138,10 @@ public class ItemManager extends JSONLoader {
 	}
 
 	@SubscribeEvent
-	public void registerItems(RegistryEvent.Register<Item> event) {
+	public void registerItems(RegisterEvent event) {
 		for(ItemInfo itemInfo : items.values()) {
 			LycanitesMobs.logDebug("Item", "Registering item: " + itemInfo.getName());
-			event.getRegistry().register(itemInfo.getItem());
+			event.register(itemInfo.getItem());
 		}
 	}
 

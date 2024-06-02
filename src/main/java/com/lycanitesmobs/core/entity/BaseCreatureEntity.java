@@ -61,6 +61,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.*;
@@ -884,7 +885,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		}
         
     	// Mob Spawner Check:
-        if(spawnReason == SpawnReason.SPAWNER) {
+        if(spawnReason == MobSpawnType.SPAWNER) {
         	LycanitesMobs.logDebug("MobSpawns", "Spawned from Mob Spawner, skipping other checks.");
         	LycanitesMobs.logDebug("MobSpawns", "Vanilla Spawn Check Passed!");
         	return true;

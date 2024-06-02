@@ -6,9 +6,10 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.FileLoader;
 import com.lycanitesmobs.core.JSONLoader;
 import com.lycanitesmobs.core.StreamLoader;
+import com.lycanitesmobs.core.info.ItemInfo;
 import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.info.ModInfo;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +44,8 @@ public class EquipmentPartManager extends JSONLoader {
 
 	@Override
 	public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
-		Item.Properties properties = new Item.Properties().stacksTo(1).setNoRepair().tab(ItemManager.getInstance().equipmentPartsGroup).setISTER(() -> com.lycanitesmobs.client.renderer.EquipmentPartRenderer::new);
+
+		Item.Properties properties = new Item.Properties().stacksTo(1).setNoRepair().setISTER(() -> com.lycanitesmobs.client.renderer.EquipmentPartRenderer::new);
 		ItemEquipmentPart equipmentPart = new ItemEquipmentPart(properties, modInfo);
 		equipmentPart.loadFromJSON(json);
 		if(this.equipmentParts.containsKey(equipmentPart.itemName)) {
@@ -55,6 +57,10 @@ public class EquipmentPartManager extends JSONLoader {
 			throw new RuntimeException("[Equipment] Tried to add a Equipment Part that is already added: " + equipmentPart.itemName);
 		}
 		this.equipmentParts.put(equipmentPart.itemName, equipmentPart);
+		/* Creative Tab Builder **/
+		ItemManager.getInstance().equipmentPartsGroup.displayItems((enabledFeatures, entries) -> {
+			entries.accept(equipmentPart);
+		});
 		ObjectManager.addItem(equipmentPart.itemName, equipmentPart);
 	}
 

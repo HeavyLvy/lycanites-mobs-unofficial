@@ -94,82 +94,82 @@ public class JSONHelper {
 		return items;
 	}
 
-	public static List<BlockBehaviour.Properties> getJsonMaterials(JsonObject json) {
-		List<BlockBehaviour.Properties> materials = new ArrayList<>();
-		if(json.has("materials")) {
+	public static List<Block> getJsonMaterials(JsonObject json) {
+		List<Block> blocks = new ArrayList<>();
+
+		if (json.has("materials")) {
 			JsonArray jsonArray = json.get("materials").getAsJsonArray();
 			Iterator<JsonElement> jsonIterator = jsonArray.iterator();
+
 			while (jsonIterator.hasNext()) {
-				BlockBehaviour.Properties material = null;
 				String materialName = jsonIterator.next().getAsString();
+				List<Block> materialBlocks = null;
 
-				if("air".equalsIgnoreCase(materialName)) {
-					material = Material.AIR;
-				}
-				else if("lava".equalsIgnoreCase(materialName)) {
-					material = Material.LAVA;
-				}
-				else if("fire".equalsIgnoreCase(materialName)) {
-					material = Material.FIRE;
-				}
-				else if("water".equalsIgnoreCase(materialName)) {
-					material = Material.WATER;
-				}
-				else if("ground".equalsIgnoreCase(materialName)) {
-					material = Material.DIRT;
-				}
-				else if("earth".equalsIgnoreCase(materialName)) {
-					material = Material.DIRT;
-				}
-				else if("sand".equalsIgnoreCase(materialName)) {
-					material = Material.SAND;
-				}
-				else if("claw".equalsIgnoreCase(materialName)) {
-					material = Material.CLAY;
-				}
-				else if("wood".equalsIgnoreCase(materialName)) {
-					material = Material.WOOD;
-				}
-				else if("rock".equalsIgnoreCase(materialName)) {
-					material = Material.STONE;
-				}
-				else if("grass".equalsIgnoreCase(materialName)) {
-					material = Material.REPLACEABLE_PLANT;
-				}
-				else if("tallplants".equalsIgnoreCase(materialName)) {
-					material = Material.REPLACEABLE_PLANT;
-				}
-				else if("vine".equalsIgnoreCase(materialName)) {
-					material = Material.REPLACEABLE_PLANT;
-				}
-				else if("plants".equalsIgnoreCase(materialName)) {
-					material = Material.PLANT;
-				}
-				else if("leaves".equalsIgnoreCase(materialName)) {
-					material = Material.LEAVES;
-				}
-				else if("cactus".equalsIgnoreCase(materialName)) {
-					material = Material.CACTUS;
-				}
-				else if("snow".equalsIgnoreCase(materialName)) {
-					material = Material.TOP_SNOW;
-				}
-				else if("ice".equalsIgnoreCase(materialName)) {
-					material = Material.ICE;
-				}
-				else if("iron".equalsIgnoreCase(materialName)) {
-					material = Material.METAL;
-				}
-				else if("web".equalsIgnoreCase(materialName)) {
-					material = Material.WEB;
+				switch (materialName.toLowerCase()) {
+					case "air":
+						materialBlocks = Material.AIR;
+						break;
+					case "lava":
+						materialBlocks = Material.LAVA;
+						break;
+					case "fire":
+						materialBlocks = Material.FIRE;
+						break;
+					case "water":
+						materialBlocks = Material.WATER;
+						break;
+					case "ground":
+					case "earth":
+						materialBlocks = Material.DIRT;
+						break;
+					case "sand":
+						materialBlocks = Material.SAND;
+						break;
+					case "clay":
+						materialBlocks = Material.CLAY;
+						break;
+					case "wood":
+						materialBlocks = Material.WOOD;
+						break;
+					case "rock":
+						materialBlocks = Material.STONE;
+						break;
+					case "grass":
+						materialBlocks = Material.GRASS;
+						break;
+					case "tallplants":
+					case "vine":
+						materialBlocks = Material.REPLACEABLE_PLANT;
+						break;
+					case "plants":
+						materialBlocks = Material.PLANT;
+						break;
+					case "leaves":
+						materialBlocks = Material.LEAVES;
+						break;
+					case "cactus":
+						materialBlocks = Material.CACTUS;
+						break;
+					case "snow":
+						materialBlocks = Material.SNOW;
+						break;
+					case "ice":
+						materialBlocks = Material.ICE;
+						break;
+					case "iron":
+						materialBlocks = Material.METAL;
+						break;
+					case "web":
+						materialBlocks = Material.WEB;
+						break;
 				}
 
-				if(material != null) {
-					materials.add(material);
+				if (materialBlocks != null) {
+					blocks.addAll(materialBlocks);
 				}
 			}
 		}
-		return materials;
+		return blocks;
 	}
 
 	public static List<String> getBiomesFromTags(List<String> biomeTags) {
