@@ -6,6 +6,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -29,14 +30,23 @@ import java.util.List;
 
 public class BaseItem extends Item {
 	public static int DESCRIPTION_WIDTH = 200;
-	
+	public ResourceLocation registryName = null;
 	public String itemName = "unamed_item";
 	public ModInfo modInfo = LycanitesMobs.modInfo;
 
     public BaseItem(Properties properties) {
     	super(properties);
+        setup();
     }
-
+    public ResourceLocation getRegistryName() {
+        return registryName;
+    }
+    public ResourceLocation setRegistryName(String modID, String itemName) {
+        return registryName = new ResourceLocation(modID, itemName);
+    }
+    public void setup() {
+        this.setRegistryName(this.modInfo.modid, this.itemName);
+    }
 
     @Override
 	@Nonnull
@@ -72,6 +82,7 @@ public class BaseItem extends Item {
     public ItemStack getContainerItem(ItemStack itemStack) {
         return !this.hasContainerItem(itemStack) ? ItemStack.EMPTY : new ItemStack(this.getCraftingRemainingItem());
     }
+
 	@Override
 	public boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {
 		return super.onEntityItemUpdate(stack, entity);

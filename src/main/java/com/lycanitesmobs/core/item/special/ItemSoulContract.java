@@ -28,6 +28,7 @@ public class ItemSoulContract extends BaseItem {
 		super(properties);
 		this.modInfo = LycanitesMobs.modInfo;
         this.itemName = "soul_contract";
+		this.setup();
     }
 
 	/** Returns the owner uuid. **/

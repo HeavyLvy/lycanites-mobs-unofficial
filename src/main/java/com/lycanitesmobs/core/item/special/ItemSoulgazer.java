@@ -17,6 +17,7 @@ public class ItemSoulgazer extends BaseItem {
     public ItemSoulgazer(Item.Properties properties) {
         super(properties);
 		this.itemName = "soulgazer";
+		this.setup();
     }
 
 	@Override

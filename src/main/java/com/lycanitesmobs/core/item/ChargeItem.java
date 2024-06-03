@@ -43,8 +43,8 @@ public class ChargeItem extends BaseItem {
         if(this.projectileInfo != null) {
             this.itemName = projectileInfo.chargeItemName;
             LycanitesMobs.logDebug("Projectile", "Created Charge Item: " + projectileInfo.chargeItemName);
-            //this.setup();
         }
+        setup();
     }
 
     @Override

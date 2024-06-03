@@ -1,8 +1,10 @@
 package com.lycanitesmobs.core.item.summoningstaff;
 
 import com.lycanitesmobs.core.util.DamageSourceHelper;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class ItemStaffBlood extends ItemStaffSummoning {
 	
@@ -42,7 +44,7 @@ public class ItemStaffBlood extends ItemStaffSummoning {
     
     // ========== Additional Costs ==========
     @Override
-    public boolean getAdditionalCosts(PlayerEntity player) {
+    public boolean getAdditionalCosts(Player player) {
     	if(player.getHealth() <= 7)
     		return false;
 		player.hurt(DamageSourceHelper.MAGIC, 6);

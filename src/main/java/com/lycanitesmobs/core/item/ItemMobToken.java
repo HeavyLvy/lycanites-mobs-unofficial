@@ -13,7 +13,10 @@ public class ItemMobToken extends BaseItem {
         super(properties);
 		this.itemName = "mobtoken";
 		this.modInfo = group;
+        this.setup();
     }
-
-
+    @Override
+    public void setup() {
+        this.setRegistryName(this.modInfo.modid, this.itemName);
+    }
 }

@@ -21,13 +21,14 @@ public class LMItemsGroup {
 		return new LMItemsGroup().builder;
 	}
 	public void init() {
-			builder = builder.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".items"))
-				.icon(this::getIconItem)
-				.displayItems((enabledFeatures, entries) -> {
-					for(ItemInfo info : ItemManager.items.values()) {
-						entries.accept(info.item);
-					}
-				});
+			builder = builder
+					.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".items"))
+					.icon(this::getIconItem)
+					.displayItems((enabledFeatures, entries) -> {
+						for(ItemInfo info : ItemManager.items.values()) {
+							entries.accept(info.item);
+						}
+					});
 	}
 	// ========== Tab Icon ==========
 	@OnlyIn(Dist.CLIENT)

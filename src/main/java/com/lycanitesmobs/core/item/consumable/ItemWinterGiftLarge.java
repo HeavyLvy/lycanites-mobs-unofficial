@@ -5,16 +5,18 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.info.ObjectLists;
 import com.lycanitesmobs.core.item.BaseItem;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.*;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -36,9 +38,9 @@ public class ItemWinterGiftLarge extends BaseItem {
  	//                    Item Use
  	// ==================================================
     @Override
-    public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-         if(!player.abilities.instabuild) {
+         if(!player.getAbilities().instabuild) {
              itemStack.setCount(Math.max(0, itemStack.getCount() - 1));
          }
          
@@ -46,17 +48,17 @@ public class ItemWinterGiftLarge extends BaseItem {
          	this.open(itemStack, world, player);
          }
 
-        return new ActionResult(ActionResultType.SUCCESS, itemStack);
+        return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
      }
     
     
     // ==================================================
   	//                       Open
   	// ==================================================
-    public void open(ItemStack itemStack, World world, PlayerEntity player) {
-        ITextComponent message = new TranslationTextComponent("item.lycanitesmobs." + this.itemName + ".bad");
-		player.sendMessage(message, Util.NIL_UUID);
-        this.playSound(world, player.blockPosition(), ObjectManager.getSound(this.itemName + "_bad"), SoundCategory.AMBIENT, 5.0F, 1.0F);
+    public void open(ItemStack itemStack, Level world, Player player) {
+        MutableComponent message = Component.translatable("item.lycanitesmobs." + this.itemName + ".bad");
+		player.displayClientMessage(message, false);
+        this.playSound(world, player.blockPosition(), ObjectManager.getSound(this.itemName + "_bad"), SoundSource.AMBIENT, 5.0F, 1.0F);
 		
 		// Lots of Random Tricks:
         List<EntityType> entityTypes = ObjectLists.getEntites("winter_tricks");
@@ -66,24 +68,24 @@ public class ItemWinterGiftLarge extends BaseItem {
         if(entityType != null) {
             Entity entity = entityType.create(world);
             if (entity != null) {
-                entity.moveTo(player.position().x(), player.position().y(), player.position().z(), player.yRot, player.xRot);
+                entity.moveTo(player.position().x(), player.position().y(), player.position().z(), player.yRotO, player.xRotO);
 
                 // Themed Names:
                 if (entity instanceof BaseCreatureEntity) {
                     BaseCreatureEntity entityCreature = (BaseCreatureEntity) entity;
                     entityCreature.addLevel(world.random.nextInt(10));
                     if (entityCreature.creatureInfo.getName().equals("wildkin"))
-                        entityCreature.setCustomName(new StringTextComponent("Gooderness"));
+                        entityCreature.setCustomName(Component.literal("Gooderness"));
                     else if (entityCreature.creatureInfo.getName().equals("jabberwock"))
-                        entityCreature.setCustomName(new StringTextComponent("Rudolph"));
+                        entityCreature.setCustomName(Component.literal("Rudolph"));
                     else if (entityCreature.creatureInfo.getName().equals("ent"))
-                        entityCreature.setCustomName(new StringTextComponent("Salty Tree"));
+                        entityCreature.setCustomName(Component.literal("Salty Tree"));
                     else if (entityCreature.creatureInfo.getName().equals("treant"))
-                        entityCreature.setCustomName(new StringTextComponent("Salty Tree"));
+                        entityCreature.setCustomName(Component.literal("Salty Tree"));
                     else if (entityCreature.creatureInfo.getName().equals("reaper"))
-                        entityCreature.setCustomName(new StringTextComponent("Satan Claws"));
+                        entityCreature.setCustomName(Component.literal("Satan Claws"));
                     else if(entityCreature.creatureInfo.getName().equals("behemoth"))
-                        entityCreature.setCustomName(new StringTextComponent("Krampus"));
+                        entityCreature.setCustomName(Component.literal("Krampus"));
                 }
 
                 world.addFreshEntity(entity);

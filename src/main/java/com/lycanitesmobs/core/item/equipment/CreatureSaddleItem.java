@@ -9,5 +9,6 @@ public class CreatureSaddleItem extends CreatureTypeItem {
     public CreatureSaddleItem(Properties properties, CreatureType creatureType) {
 		super(properties, creatureType.getSaddleName(), creatureType);
 		this.setup();
+        setup();
     }
 }

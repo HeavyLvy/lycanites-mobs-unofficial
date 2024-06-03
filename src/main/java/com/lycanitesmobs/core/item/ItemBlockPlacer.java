@@ -20,6 +20,7 @@ public class ItemBlockPlacer extends BaseItem {
 		this.modInfo = LycanitesMobs.modInfo;
 		this.itemName = itemName;
 		this.placedBlockName = placedBlockName;
+		this.setup();
 	}
 
 	@Override

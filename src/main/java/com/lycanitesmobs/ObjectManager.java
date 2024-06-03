@@ -10,6 +10,7 @@ import com.lycanitesmobs.core.tileentity.EquipmentInfuserTileEntity;
 import com.lycanitesmobs.core.tileentity.EquipmentStationTileEntity;
 import com.lycanitesmobs.core.tileentity.TileEntityEquipmentForge;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 
 import java.lang.reflect.Constructor;
@@ -203,10 +205,15 @@ public class ObjectManager {
 	@SubscribeEvent
     public void registerBlocks(RegisterEvent event) {
 		for(Block block : blocks.values()) {
-			LycanitesMobs.logDebug("Item", "Registering block: " + block.getRegistryName());
-            if(block.getRegistryName() == null) {
-                LycanitesMobs.logWarning("", "Block: " + block + " has no Registry Name!");
+			LycanitesMobs.logDebug("Item", "Registering block: " + block);
+            if(LMHelperClass.convertToResourceLocation(block) == null) {
+                LycanitesMobs.logWarning("", "Block: " + LMHelperClass.convertToResourceLocation(block) + " has no Registry Name!");
             }
+			event.register(ForgeRegistries.Keys.BLOCKS,
+					helper -> {
+						helper.register(block.getName()., block);
+					}
+			);
 			event.getRegistry().register(block);
         }
     }

@@ -28,6 +28,7 @@ public class ItemSoulstone extends CreatureTypeItem {
         if(creatureType != null) {
         	this.itemName += creatureType.getName();
 		}
+		this.setup();
     }
 
 	@Override

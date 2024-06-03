@@ -26,6 +26,7 @@ public class ItemSoulkey extends BaseItem {
         super(properties);
         this.itemName = itemName;
         this.variant = variant;
+        this.setup();
     }
     
     

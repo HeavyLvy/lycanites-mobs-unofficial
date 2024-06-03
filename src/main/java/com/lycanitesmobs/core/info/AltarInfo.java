@@ -4,6 +4,7 @@ import com.lycanitesmobs.core.config.ConfigMobEvent;
 import com.lycanitesmobs.core.info.altar.*;
 import com.lycanitesmobs.core.mobevent.effects.StructureBuilder;
 import com.lycanitesmobs.core.mobevent.trigger.AltarMobEventTrigger;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import com.lycanitesmobs.core.worldgen.mobevents.AmalgalichStructureBuilder;
 import com.lycanitesmobs.core.worldgen.mobevents.AsmodeusStructureBuilder;
 import com.lycanitesmobs.core.worldgen.mobevents.RahovartStructureBuilder;
@@ -153,9 +154,9 @@ public class AltarInfo {
         double xAmount = -Math.sin(Math.toRadians(angle));
         double zAmount = Math.cos(Math.toRadians(angle));
         BlockPos facingPos = new BlockPos(
-            Math.round((double)pos.getX() + (distance * xAmount)),
+            LMHelperClass.convertToInteger(Math.round((double)pos.getX() + (distance * xAmount))),
             pos.getY(),
-            Math.round((double) pos.getZ() + (distance * zAmount))
+                LMHelperClass.convertToInteger(Math.round((double) pos.getZ() + (distance * zAmount)))
         );
         return facingPos;
     }
