@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.registries.RegisterEvent;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -200,7 +201,7 @@ public class ObjectManager {
     // ==================================================
     // ========== Blocks ==========
 	@SubscribeEvent
-    public void registerBlocks(RegistryEvent.Register<Block> event) {
+    public void registerBlocks(RegisterEvent event) {
 		for(Block block : blocks.values()) {
 			LycanitesMobs.logDebug("Item", "Registering block: " + block.getRegistryName());
             if(block.getRegistryName() == null) {

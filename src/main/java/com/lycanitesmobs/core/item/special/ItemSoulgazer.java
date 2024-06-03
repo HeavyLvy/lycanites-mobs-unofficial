@@ -4,32 +4,31 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.item.BaseItem;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class ItemSoulgazer extends BaseItem {
 
     public ItemSoulgazer(Item.Properties properties) {
         super(properties);
 		this.itemName = "soulgazer";
-		this.setup();
     }
 
 	@Override
-	public ActionResultType interactLivingEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
+	public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity entity, InteractionHand hand) {
     	ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(player);
     	if(extendedPlayer == null) {
-			return ActionResultType.FAIL;
+			return InteractionResult.FAIL;
 		}
 
     	int amount = CreatureManager.getInstance().config.creatureStudyKnowledge;
     	if (!extendedPlayer.studyCreature(entity, amount, true, true)) {
-    		return ActionResultType.FAIL;
+    		return InteractionResult.FAIL;
 		}
 
 		if(player.getCommandSenderWorld().isClientSide) {
@@ -42,10 +41,15 @@ public class ItemSoulgazer extends BaseItem {
 			}
 		}
 
-    	return ActionResultType.SUCCESS;
+    	return InteractionResult.SUCCESS;
     }
 
-    @Override
+	@Override
+	public boolean canFitInsideContainerItems() {
+		return super.canFitInsideContainerItems();
+	}
+
+	@Override
 	public boolean hasContainerItem(ItemStack itemStack) {
     	return true;
 	}
@@ -56,7 +60,7 @@ public class ItemSoulgazer extends BaseItem {
 	}
 
 	@Override
-	public boolean showDurabilityBar(ItemStack itemStack) {
+	public boolean isBarVisible(ItemStack itemStack) {
 		if (LycanitesMobs.PROXY.getClientPlayer() != null) {
 			ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(LycanitesMobs.PROXY.getClientPlayer());
 			if (extendedPlayer != null) {
@@ -67,11 +71,11 @@ public class ItemSoulgazer extends BaseItem {
 	}
 
 	@Override
-	public double getDurabilityForDisplay(ItemStack itemStack) {
+	public int getBarWidth(ItemStack itemStack) {
 		if (LycanitesMobs.PROXY.getClientPlayer() != null) {
 			ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(LycanitesMobs.PROXY.getClientPlayer());
 			if (extendedPlayer != null) {
-				return ((double)extendedPlayer.creatureStudyCooldown / extendedPlayer.creatureStudyCooldownMax);
+				return extendedPlayer.creatureStudyCooldown / extendedPlayer.creatureStudyCooldownMax;
 			}
 		}
 		return 0;

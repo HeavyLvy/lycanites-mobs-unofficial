@@ -74,35 +74,6 @@ public class ItemManager extends JSONLoader {
 	public static final RegistryObject<CreativeModeTab> equipmentPartsTab = TABS.register(LycanitesMobs.MODID + ".equipmentparts", equipmentPartsGroup::build);
 
 
-/**
- * Creative Tab Registration
- */
-
-public static final RegistryObject<CreativeModeTab> GECKOLIB_TAB = TABS.register(LycanitesMobs.MODID + ".items", () -> CreativeModeTab.builder()
-		.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".items"))
-		.icon(() -> new ItemStack(ItemRegistry.JACK_IN_THE_BOX.get()))
-		.displayItems((enabledFeatures, entries) -> {
-			entries.accept(ItemRegistry.JACK_IN_THE_BOX.get());
-			entries.accept(ItemRegistry.GECKO_ARMOR_HELMET.get());
-			entries.accept(ItemRegistry.GECKO_ARMOR_CHESTPLATE.get());
-			entries.accept(ItemRegistry.GECKO_ARMOR_LEGGINGS.get());
-			entries.accept(ItemRegistry.GECKO_ARMOR_BOOTS.get());
-			entries.accept(ItemRegistry.WOLF_ARMOR_HELMET.get());
-			entries.accept(ItemRegistry.WOLF_ARMOR_CHESTPLATE.get());
-			entries.accept(ItemRegistry.WOLF_ARMOR_LEGGINGS.get());
-			entries.accept(ItemRegistry.WOLF_ARMOR_BOOTS.get());
-			entries.accept(ItemRegistry.GECKO_HABITAT.get());
-			entries.accept(ItemRegistry.FERTILIZER.get());
-			entries.accept(ItemRegistry.BAT_SPAWN_EGG.get());
-			entries.accept(ItemRegistry.BIKE_SPAWN_EGG.get());
-			entries.accept(ItemRegistry.RACE_CAR_SPAWN_EGG.get());
-			entries.accept(ItemRegistry.PARASITE_SPAWN_EGG.get());
-			entries.accept(ItemRegistry.MUTANT_ZOMBIE_SPAWN_EGG.get());
-			entries.accept(ItemRegistry.GREMLIN_SPAWN_EGG.get());
-			entries.accept(ItemRegistry.FAKE_GLASS_SPAWN_EGG.get());
-			entries.accept(ItemRegistry.COOL_KID_SPAWN_EGG.get());
-		})
-		.build());
 	/** Returns the main Item Manager instance or creates it and returns it. **/
 	public static ItemManager getInstance() {
 		if(INSTANCE == null) {
@@ -141,7 +112,11 @@ public static final RegistryObject<CreativeModeTab> GECKOLIB_TAB = TABS.register
 	public void registerItems(RegisterEvent event) {
 		for(ItemInfo itemInfo : items.values()) {
 			LycanitesMobs.logDebug("Item", "Registering item: " + itemInfo.getName());
-			event.register(itemInfo.getItem());
+			event.register(ForgeRegistries.Keys.ITEMS,
+					helper -> {
+						helper.register(new ResourceLocation(LycanitesMobs.MODID,itemInfo.getName()), itemInfo.getItem());
+					}
+			);
 		}
 	}
 
@@ -153,14 +128,17 @@ public static final RegistryObject<CreativeModeTab> GECKOLIB_TAB = TABS.register
 	/** Called during early start up, loads all non-json items. **/
 	public void loadItems() {
 		ModInfo modInfo = LycanitesMobs.modInfo;
-		Item.Properties itemProperties = new Item.Properties().tab(this.itemsGroup);
-		Item.Properties itemPropertiesNoStack = new Item.Properties().tab(this.itemsGroup).stacksTo(1);
+		CreativeModeTab.Builder itemTab = this.itemsGroup;
+		Item.Properties itemProperties = new Item.Properties().stacksTo(1);
+		Item.Properties itemPropertiesNoStack = new Item.Properties().stacksTo(1);
 
 		ObjectManager.addItem("soulgazer", new ItemSoulgazer(itemPropertiesNoStack));
+		ObjectManager.addItem("soul_contract", new ItemSoulContract(itemPropertiesNoStack));
 		ObjectManager.addItem("mobtoken", new ItemMobToken(new Item.Properties(), modInfo));
 		ObjectManager.addItem("soulstone", new ItemSoulstone(itemProperties, null));
-		ObjectManager.addItem("soul_contract", new ItemSoulContract(itemPropertiesNoStack));
-
+		this.itemsGroup.displayItems((enabledFeatures, entries) -> {
+			entries.accept(this.item);
+		});
 		// Equipment Pieces:
 		Item.Properties equipmentProperties = new Item.Properties().stacksTo(1).setNoRepair().setISTER(() -> com.lycanitesmobs.client.renderer.EquipmentRenderer::new);
 		ObjectManager.addItem("equipment", new ItemEquipment(equipmentProperties));

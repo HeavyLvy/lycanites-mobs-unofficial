@@ -66,7 +66,12 @@ public class BaseItem extends Item {
     public Component getDescription(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
     	return Component.translatable(this.getDescriptionId() + ".description").withStyle(ChatFormatting.GREEN);
     }
-
+    public boolean hasContainerItem(ItemStack stack) {
+        return this.hasCraftingRemainingItem();
+    }
+    public ItemStack getContainerItem(ItemStack itemStack) {
+        return !this.hasContainerItem(itemStack) ? ItemStack.EMPTY : new ItemStack(this.getCraftingRemainingItem());
+    }
 	@Override
 	public boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {
 		return super.onEntityItemUpdate(stack, entity);

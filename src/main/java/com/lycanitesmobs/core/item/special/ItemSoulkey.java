@@ -3,16 +3,15 @@ package com.lycanitesmobs.core.item.special;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.info.AltarInfo;
 import com.lycanitesmobs.core.item.BaseItem;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,6 @@ public class ItemSoulkey extends BaseItem {
         super(properties);
         this.itemName = itemName;
         this.variant = variant;
-        this.setup();
     }
     
     
@@ -35,16 +33,16 @@ public class ItemSoulkey extends BaseItem {
 	//                       Use
 	// ==================================================
     @Override
-    public ActionResultType useOn(ItemUseContext context) {
-        World world = context.getLevel();
+    public InteractionResult useOn(UseOnContext context) {
+        Level world = context.getLevel();
         BlockPos pos = context.getClickedPos();
-        PlayerEntity player = context.getPlayer();
+        Player player = context.getPlayer();
         ItemStack itemStack = context.getItemInHand();
 
         if(!AltarInfo.checkAltarsEnabled() && !player.getCommandSenderWorld().isClientSide) {
-            ITextComponent message = new TranslationTextComponent("message.soulkey.disabled");
-            player.sendMessage(message, Util.NIL_UUID);
-            return ActionResultType.FAIL;
+            MutableComponent message = Component.translatable("message.soulkey.disabled");
+            player.displayClientMessage(message, false);
+            return InteractionResult.FAIL;
         }
 
         // Get Possible Altars:
@@ -57,9 +55,9 @@ public class ItemSoulkey extends BaseItem {
             }
         }
         if(possibleAltars.isEmpty()) {
-            ITextComponent message = new TranslationTextComponent("message.soulkey.none");
-            player.sendMessage(message, Util.NIL_UUID);
-            return ActionResultType.FAIL;
+            MutableComponent message = Component.translatable("message.soulkey.none");
+            player.displayClientMessage(message, false);
+            return InteractionResult.FAIL;
         }
 
         // Activate First Valid Altar:
@@ -69,25 +67,25 @@ public class ItemSoulkey extends BaseItem {
                 // Valid Altar:
                 if(!player.getCommandSenderWorld().isClientSide) {
                     if(!altarInfo.activate(player, world, pos, this.variant)) {
-                        ITextComponent message = new TranslationTextComponent("message.soulkey.badlocation");
-                        player.sendMessage(message, Util.NIL_UUID);
-                        return ActionResultType.FAIL;
+                        MutableComponent message = Component.translatable("message.soulkey.badlocation");
+                        player.displayClientMessage(message, false);
+                        return InteractionResult.FAIL;
                     }
-                    if (!player.abilities.instabuild)
+                    if (!player.getAbilities().instabuild)
                         itemStack.setCount(Math.max(0, itemStack.getCount() - 1));
                     if (itemStack.getCount() <= 0)
-                        player.inventory.setItem(player.inventory.selected, ItemStack.EMPTY);
-                    ITextComponent message = new TranslationTextComponent("message.soulkey.active");
-                    player.sendMessage(message, Util.NIL_UUID);
+                        player.getInventory().setItem(player.getInventory().selected, ItemStack.EMPTY);
+                    MutableComponent message = Component.translatable("message.soulkey.active");
+                    player.displayClientMessage(message, false);
                 }
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
         if(!player.getCommandSenderWorld().isClientSide) {
-            ITextComponent message = new TranslationTextComponent("message.soulkey.invalid");
-            player.sendMessage(message, Util.NIL_UUID);
+            MutableComponent message = Component.translatable("message.soulkey.invalid");
+            player.displayClientMessage(message, false);
         }
 
-        return ActionResultType.FAIL;
+        return InteractionResult.FAIL;
     }
 }

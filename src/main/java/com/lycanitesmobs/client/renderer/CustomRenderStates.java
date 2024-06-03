@@ -1,6 +1,7 @@
 package com.lycanitesmobs.client.renderer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -19,6 +20,62 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class CustomRenderStates extends RenderStateShard {
+	public static final TransparencyStateShard DEFAULT_ALPHA = RenderStateShard.NO_TRANSPARENCY;
+	public static final Vector4f WHITE = new Vector4f(1.0F, 1.0F, 1.0F, 1.0F);
+	public static LightmapStateShard DIFFUSE_LIGHTING = new LightmapStateShard(true);
+public static LightmapStateShard NO_DIFFUSE_LIGHTING = new LightmapStateShard(false);
+	public static VertexFormat POS_COL_TEX_LIGHT_FADE_NORMAL;
+	public static VertexFormat POS_COL_TEX_NORMAL;
+	public static final VertexFormat POS_TEX_NORMAL = new VertexFormat(ImmutableMap.<String, VertexFormatElement>builder()
+			.put("Position", DefaultVertexFormat.ELEMENT_POSITION)
+			.put("UV0", DefaultVertexFormat.ELEMENT_UV0)
+			.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL)
+			.put("Padding", DefaultVertexFormat.ELEMENT_PADDING)
+			.build());
+
+
+	public enum BLEND {
+		NORMAL(0), ADD(1), SUB(2);
+		public final int id;
+		BLEND(int value) { this.id = value; }
+		public int getValue() { return id; }
+	}
+
+	protected static final RenderStateShard.TransparencyStateShard ADDITIVE_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("lm_additive_transparency", () -> {
+		RenderSystem.enableBlend();
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+	}, () -> {
+		RenderSystem.disableBlend();
+		RenderSystem.defaultBlendFunc();
+	});
+
+	protected static final RenderStateShard.TransparencyStateShard SUBTRACTIVE_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("lm_subtractive_transparency", () -> {
+		RenderSystem.enableBlend();
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+	}, () -> {
+		RenderSystem.disableBlend();
+		RenderSystem.defaultBlendFunc();
+	});
+
+	private static final RenderType[] OBJ_RENDER_TYPES = new RenderType[BLEND.values().length * 2];
+	static {
+		for (BLEND blend : BLEND.values()) {
+			for (int glow = 0; glow < 2; glow++) {
+				OBJ_RENDER_TYPES[blend.id * 2 + glow] = RenderType.create("lm_obj_" + blend.toString() + (glow == 1 ? "_glow" : ""), POS_TEX_NORMAL, VertexFormat.Mode.TRIANGLES, 256, true, false, RenderType.CompositeState.builder()
+						.setTransparencyState(blend == BLEND.ADD ? ADDITIVE_TRANSPARENCY : (blend == BLEND.SUB ? SUBTRACTIVE_TRANSPARENCY : TRANSLUCENT_TRANSPARENCY))
+						.setLightmapState(glow == 1 ? NO_DIFFUSE_LIGHTING : DIFFUSE_LIGHTING)
+						.setTransparencyState(DEFAULT_ALPHA)
+						.setCullState(NO_CULL)
+						.setLightmapState(LIGHTMAP)
+						.setOverlayState(OVERLAY)
+						.createCompositeState(false));
+			}
+		}
+	}
+
+	/**
+	 * The lengths I go to to keep old rendering logic...
+	 */
 	@OnlyIn(Dist.CLIENT)
 	public static void assertThread(Supplier<Boolean> p_assertThread_0_) {
 		if (!(Boolean)p_assertThread_0_.get()) {
@@ -63,56 +120,11 @@ public class CustomRenderStates extends RenderStateShard {
 		assertThread(RenderSystem::isOnGameThread);
 		setupOutline();
 	}, CustomRenderStates::teardownOutline);
-	public static final TransparencyStateShard DEFAULT_ALPHA = RenderStateShard.NO_TRANSPARENCY;
-	public static final Vector4f WHITE = new Vector4f(1.0F, 1.0F, 1.0F, 1.0F);
-	public static LightmapStateShard DIFFUSE_LIGHTING = new LightmapStateShard(true);
-public static LightmapStateShard NO_DIFFUSE_LIGHTING = new LightmapStateShard(false);
-	public static VertexFormat POS_COL_TEX_LIGHT_FADE_NORMAL;
-	public static VertexFormat POS_COL_TEX_NORMAL;
-	public static final VertexFormat POS_TEX_NORMAL = new VertexFormat(ImmutableList.of(
-			DefaultVertexFormat.ELEMENT_POSITION,
-			DefaultVertexFormat.ELEMENT_UV0,
-			DefaultVertexFormat.ELEMENT_NORMAL,
-			DefaultVertexFormat.ELEMENT_PADDING));
 
-	public enum BLEND {
-		NORMAL(0), ADD(1), SUB(2);
-		public final int id;
-		BLEND(int value) { this.id = value; }
-		public int getValue() { return id; }
-	}
+	/**
+	 * End of old rendering logic, subject to be removed once I understand render states more
+	 */
 
-	protected static final RenderStateShard.TransparencyStateShard ADDITIVE_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("lm_additive_transparency", () -> {
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
-	}, () -> {
-		RenderSystem.disableBlend();
-		RenderSystem.defaultBlendFunc();
-	});
-
-	protected static final RenderStateShard.TransparencyStateShard SUBTRACTIVE_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("lm_subtractive_transparency", () -> {
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-	}, () -> {
-		RenderSystem.disableBlend();
-		RenderSystem.defaultBlendFunc();
-	});
-
-	private static final RenderType[] OBJ_RENDER_TYPES = new RenderType[BLEND.values().length * 2];
-	static {
-		for (BLEND blend : BLEND.values()) {
-			for (int glow = 0; glow < 2; glow++) {
-				OBJ_RENDER_TYPES[blend.id * 2 + glow] = RenderType.create("lm_obj_" + blend.toString() + (glow == 1 ? "_glow" : ""), POS_TEX_NORMAL, VertexFormat.Mode.TRIANGLES, 256, true, false, RenderType.CompositeState.builder()
-						.setTransparencyState(blend == BLEND.ADD ? ADDITIVE_TRANSPARENCY : (blend == BLEND.SUB ? SUBTRACTIVE_TRANSPARENCY : TRANSLUCENT_TRANSPARENCY))
-						.setLightmapState(glow == 1 ? NO_DIFFUSE_LIGHTING : DIFFUSE_LIGHTING)
-						.setTransparencyState(DEFAULT_ALPHA)
-						.setCullState(NO_CULL)
-						.setLightmapState(LIGHTMAP)
-						.setOverlayState(OVERLAY)
-						.createCompositeState(false));
-			}
-		}
-	}
 	public static final RenderType OBJ_OUTLINE_RENDER_TYPE = RenderType.create("lm_obj_outline_no_cull", POS_TEX_NORMAL, VertexFormat.Mode.TRIANGLES, 256, true, false, RenderType.CompositeState.builder()
 			.setTransparencyState(DEFAULT_ALPHA)
 			.setDepthTestState(NO_DEPTH_TEST)
@@ -130,17 +142,19 @@ public static LightmapStateShard NO_DIFFUSE_LIGHTING = new LightmapStateShard(fa
 	}
 
 	public static RenderType getObjRenderType(ResourceLocation texture, int blending, boolean glow) {
-		if(POS_COL_TEX_LIGHT_FADE_NORMAL == null) {
-			List<VertexFormatElement> vertexFormatValues = new ArrayList<>();
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_POSITION);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_COLOR);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_UV0);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_UV1);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_UV2);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_NORMAL);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_PADDING);
-			POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(ImmutableList.copyOf(vertexFormatValues));
+		if (POS_COL_TEX_LIGHT_FADE_NORMAL == null) {
+			ImmutableMap.Builder<String, VertexFormatElement> vertexFormatMapBuilder = ImmutableMap.builder();
+			vertexFormatMapBuilder.put("Position", DefaultVertexFormat.ELEMENT_POSITION);
+			vertexFormatMapBuilder.put("Color", DefaultVertexFormat.ELEMENT_COLOR);
+			vertexFormatMapBuilder.put("UV0", DefaultVertexFormat.ELEMENT_UV0);
+			vertexFormatMapBuilder.put("UV1", DefaultVertexFormat.ELEMENT_UV1);
+			vertexFormatMapBuilder.put("UV2", DefaultVertexFormat.ELEMENT_UV2);
+			vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
+			vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
+
+			POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
 		}
+
 
 		RenderStateShard.TransparencyStateShard transparencyState = TRANSLUCENT_TRANSPARENCY;
 		if(blending == BLEND.ADD.getValue()) {
@@ -164,14 +178,16 @@ public static LightmapStateShard NO_DIFFUSE_LIGHTING = new LightmapStateShard(fa
 	}
 
 	public static RenderType getObjColorOnlyRenderType(ResourceLocation texture, int blending, boolean glow) {
-		if(POS_COL_TEX_LIGHT_FADE_NORMAL == null) {
-			List<VertexFormatElement> vertexFormatValues = new ArrayList<>();
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_POSITION);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_COLOR);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_NORMAL);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_PADDING);
-			POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(ImmutableList.copyOf(vertexFormatValues));
+		if (POS_COL_TEX_LIGHT_FADE_NORMAL == null) {
+			ImmutableMap.Builder<String, VertexFormatElement> vertexFormatMapBuilder = ImmutableMap.builder();
+			vertexFormatMapBuilder.put("Position", DefaultVertexFormat.ELEMENT_POSITION);
+			vertexFormatMapBuilder.put("Color", DefaultVertexFormat.ELEMENT_COLOR);
+			vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
+			vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
+
+			POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
 		}
+
 
 		RenderStateShard.TransparencyStateShard transparencyState = TRANSLUCENT_TRANSPARENCY;
 		if(blending == BLEND.ADD.getValue()) {
@@ -195,17 +211,19 @@ public static LightmapStateShard NO_DIFFUSE_LIGHTING = new LightmapStateShard(fa
 	}
 
 	public static RenderType getObjOutlineRenderType(ResourceLocation texture) {
-		if(POS_COL_TEX_LIGHT_FADE_NORMAL == null) {
-			List<VertexFormatElement> vertexFormatValues = new ArrayList<>();
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_POSITION);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_COLOR);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_UV0);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_UV1);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_UV2);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_NORMAL);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_PADDING);
-			POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(ImmutableList.copyOf(vertexFormatValues));
+		if (POS_COL_TEX_LIGHT_FADE_NORMAL == null) {
+			ImmutableMap.Builder<String, VertexFormatElement> vertexFormatMapBuilder = ImmutableMap.builder();
+			vertexFormatMapBuilder.put("Position", DefaultVertexFormat.ELEMENT_POSITION);
+			vertexFormatMapBuilder.put("Color", DefaultVertexFormat.ELEMENT_COLOR);
+			vertexFormatMapBuilder.put("UV0", DefaultVertexFormat.ELEMENT_UV0);
+			vertexFormatMapBuilder.put("UV1", DefaultVertexFormat.ELEMENT_UV1);
+			vertexFormatMapBuilder.put("UV2", DefaultVertexFormat.ELEMENT_UV2);
+			vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
+			vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
+
+			POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
 		}
+
 
 		RenderType.CompositeState renderTypeState = RenderType.CompositeState.builder()
 				.setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
@@ -218,16 +236,16 @@ public static LightmapStateShard NO_DIFFUSE_LIGHTING = new LightmapStateShard(fa
 	}
 
 	public static RenderType getSpriteRenderType(ResourceLocation texture) {
-		if(POS_COL_TEX_NORMAL == null) {
-			List<VertexFormatElement> vertexFormatValues = new ArrayList<>();
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_POSITION);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_COLOR);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_UV0);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_NORMAL);
-			vertexFormatValues.add(DefaultVertexFormat.ELEMENT_PADDING);
-			POS_COL_TEX_NORMAL = new VertexFormat(ImmutableList.copyOf(vertexFormatValues));
-		}
+		if (POS_COL_TEX_NORMAL == null) {
+			ImmutableMap.Builder<String, VertexFormatElement> vertexFormatMapBuilder = ImmutableMap.builder();
+			vertexFormatMapBuilder.put("Position", DefaultVertexFormat.ELEMENT_POSITION);
+			vertexFormatMapBuilder.put("Color", DefaultVertexFormat.ELEMENT_COLOR);
+			vertexFormatMapBuilder.put("UV0", DefaultVertexFormat.ELEMENT_UV0);
+			vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
+			vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
 
+			POS_COL_TEX_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
+		}
 		RenderType.CompositeState renderTypeState = RenderType.CompositeState.builder()
 				.setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
 				.createCompositeState(true);
