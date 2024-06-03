@@ -50,7 +50,7 @@ public class BlockEquipmentForge extends BlockBase {
 			this.blockName = "equipmentforge_master";
 		}
 
-		//this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
+		this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
 		this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
 	}
 

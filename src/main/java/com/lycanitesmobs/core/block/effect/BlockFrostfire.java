@@ -49,6 +49,7 @@ public class BlockFrostfire extends BlockFireBase {
         this.spreadChance = 1;
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;
+
     }
 
     /*@Override

@@ -17,7 +17,7 @@ public class BlockQuickWeb extends BlockBase {
 	//                   Constructor
 	// ==================================================
 	public BlockQuickWeb(Block.Properties properties) {
-		super(properties);
+		super(properties,LycanitesMobs.modInfo,"quickweb");
 
 		this.group = LycanitesMobs.modInfo;
 		this.blockName = "quickweb";

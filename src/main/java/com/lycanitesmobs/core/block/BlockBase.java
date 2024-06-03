@@ -6,6 +6,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -40,7 +41,7 @@ public class BlockBase extends BaseEntityBlock {
 	public ModInfo group;
 	public String blockName = "block_base";
     public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
-	
+	public ResourceLocation registryName;
 	// Stats:
 	/** If set to a value above 0, the block will update on the specified number of ticks. **/
 	public int tickRate = 0;
@@ -60,12 +61,6 @@ public class BlockBase extends BaseEntityBlock {
 		return null;
 	}
 
-	/*@org.jetbrains.annotations.Nullable
-	@Override
-	public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
-		return null;
-	}*/
-
 	// Rendering:
 	public static enum RENDER_TYPE {
 		NONE(-1), NORMAL(0), CROSS(1), TORCH(2), FIRE(3), FLUID(4); // More found on RenderBlock, or use Client Proxies for custom renderers.
@@ -78,13 +73,17 @@ public class BlockBase extends BaseEntityBlock {
         super(properties);
         this.group = group;
         this.blockName = name;
-		//this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
+		this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
     }
-
-	public BlockBase(Block.Properties properties) {
-		super(properties);
+	public ResourceLocation getRegistryName() {
+		return registryName;
 	}
-
+	public ResourceLocation setRegistryName(String modID, String blockName) {
+		return registryName = new ResourceLocation(modID, blockName);
+	}
+	public void setup() {
+		this.setRegistryName(this.group.modid, this.blockName);
+	}
 	@Override
 	@Nonnull
 	public String getDescriptionId() {

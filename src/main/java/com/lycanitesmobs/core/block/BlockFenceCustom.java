@@ -1,8 +1,10 @@
 package com.lycanitesmobs.core.block;
 
+import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
@@ -16,12 +18,20 @@ import java.util.List;
 
 public class BlockFenceCustom extends FenceBlock {
 	public String blockName = "BlockBase";
-
+	public ResourceLocation registryName;
 	public BlockFenceCustom(Block.Properties properties, BlockBase block) {
 		super(properties);
-        //this.setRegistryName(new ResourceLocation(block.group.modid, block.blockName + "_fence"));
+        this.setRegistryName(block.group.modid, block.blockName + "_fence");
 	}
-
+	public ResourceLocation getRegistryName() {
+		return registryName;
+	}
+	public ResourceLocation setRegistryName(String modID, String blockName) {
+		return registryName = new ResourceLocation(modID, blockName);
+	}
+	public void setup() {
+		this.setRegistryName(LycanitesMobs.MODID, this.blockName);
+	}
 	@Override
 	public MutableComponent getName() {
 		return Component.translatable(this.getDescriptionId());

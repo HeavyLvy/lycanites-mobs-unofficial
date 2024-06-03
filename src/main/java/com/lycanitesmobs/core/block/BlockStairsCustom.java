@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block;
 
+import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -17,15 +18,24 @@ import java.util.List;
 
 public class BlockStairsCustom extends StairBlock {
 	public String blockName = "BlockBase";
+	public ResourceLocation registryName;
 
 	// ==================================================
 	//                   Constructor
 	// ==================================================
 	public BlockStairsCustom(Block.Properties properties, BlockBase block) {
 		super(block.defaultBlockState(), properties);
-        //this.setRegistryName(new ResourceLocation(block.group.modid, block.blockName + "_stairs"));
+        this.setRegistryName(block.group.modid, block.blockName + "_stairs");
 	}
-
+	public ResourceLocation getRegistryName() {
+		return registryName;
+	}
+	public ResourceLocation setRegistryName(String modID, String blockName) {
+		return registryName = new ResourceLocation(modID, blockName);
+	}
+	public void setup() {
+		this.setRegistryName(LycanitesMobs.MODID, this.blockName);
+	}
 	@Override
 	public MutableComponent getName() {
 		return Component.translatable(this.getDescriptionId());

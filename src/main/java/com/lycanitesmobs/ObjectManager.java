@@ -1,6 +1,7 @@
 package com.lycanitesmobs;
 
 import com.lycanitesmobs.core.EffectBase;
+import com.lycanitesmobs.core.block.BlockBase;
 import com.lycanitesmobs.core.container.*;
 import com.lycanitesmobs.core.entity.EntityFactory;
 import com.lycanitesmobs.core.info.ItemManager;
@@ -40,7 +41,7 @@ public class ObjectManager {
 	}
 	
 	// Maps:
-	public static Map<String, Block> blocks = new HashMap<>();
+	public static Map<String, Object> blocks = new HashMap<>();
     public static Map<String, Item> items = new HashMap<>();
     public static Map<Item, ModInfo> itemGroups = new HashMap<>();
 	public static Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
@@ -149,7 +150,7 @@ public class ObjectManager {
 		name = name.toLowerCase();
 		if(!blocks.containsKey(name))
 			return null;
-		return blocks.get(name);
+		return (Block) blocks.get(name);
 	}
 	
 	// ========== Item ==========
@@ -204,17 +205,18 @@ public class ObjectManager {
     // ========== Blocks ==========
 	@SubscribeEvent
     public void registerBlocks(RegisterEvent event) {
-		for(Block block : blocks.values()) {
-			LycanitesMobs.logDebug("Item", "Registering block: " + block);
-            if(LMHelperClass.convertToResourceLocation(block) == null) {
-                LycanitesMobs.logWarning("", "Block: " + LMHelperClass.convertToResourceLocation(block) + " has no Registry Name!");
-            }
-			event.register(ForgeRegistries.Keys.BLOCKS,
-					helper -> {
-						helper.register(block.getName()., block);
-					}
-			);
-			event.getRegistry().register(block);
+		for(Object block : blocks.values()) {
+			if (block instanceof BlockBase blockBase){
+				LycanitesMobs.logDebug("Item", "Registering block: " + blockBase.);
+				if(LMHelperClass.convertToResourceLocation(block) == null) {
+					LycanitesMobs.logWarning("", "Block: " + LMHelperClass.convertToResourceLocation(block) + " has no Registry Name!");
+				}
+				event.register(ForgeRegistries.Keys.BLOCKS,
+						helper -> {
+							helper.register(block.getName()., block);
+						}
+				);
+			}
         }
     }
 

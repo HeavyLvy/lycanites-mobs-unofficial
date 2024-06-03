@@ -62,15 +62,15 @@ public class ItemManager extends JSONLoader {
 	/** Handles all global item general config settings. **/
 	public ItemConfig config;
 	// Creative Tabs:
-	public  final CreativeModeTab.Builder itemsGroup = LMItemsGroup.getBuilder();
+	public static final CreativeModeTab.Builder itemsGroup = LMItemsGroup.getBuilder();
 	public static final RegistryObject<CreativeModeTab> itemTab = TABS.register(LycanitesMobs.MODID + ".items", itemsGroup::build);
-	public  final CreativeModeTab.Builder blocksGroup = LMBlocksGroup.getBuilder();
+	public static final CreativeModeTab.Builder blocksGroup = LMBlocksGroup.getBuilder();
 	public static final RegistryObject<CreativeModeTab> blockTab = TABS.register(LycanitesMobs.MODID + ".blocks", blocksGroup::build);
-	public  final CreativeModeTab.Builder creaturesGroups = LMCreaturesGroup.getBuilder();
+	public static final CreativeModeTab.Builder creaturesGroups = LMCreaturesGroup.getBuilder();
 	public static final RegistryObject<CreativeModeTab> creaturesTab = TABS.register(LycanitesMobs.MODID + ".creatures", creaturesGroups::build);
-	public  final CreativeModeTab.Builder chargesGroup = LMChargesGroup.getBuilder();
+	public static final CreativeModeTab.Builder chargesGroup = LMChargesGroup.getBuilder();
 	public static final RegistryObject<CreativeModeTab> chargesTab = TABS.register(LycanitesMobs.MODID + ".charges", chargesGroup::build);
-	public  final CreativeModeTab.Builder equipmentPartsGroup = LMEquipmentPartsGroup.getBuilder();
+	public static final CreativeModeTab.Builder equipmentPartsGroup = LMEquipmentPartsGroup.getBuilder();
 	public static final RegistryObject<CreativeModeTab> equipmentPartsTab = TABS.register(LycanitesMobs.MODID + ".equipmentparts", equipmentPartsGroup::build);
 
 

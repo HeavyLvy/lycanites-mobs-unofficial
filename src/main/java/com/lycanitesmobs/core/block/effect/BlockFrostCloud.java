@@ -28,7 +28,7 @@ public class BlockFrostCloud extends BlockBase {
 	//                   Constructor
 	// ==================================================
 	public BlockFrostCloud(Block.Properties properties) {
-		super(properties);
+		super(properties, LycanitesMobs.modInfo, "frostcloud");
 
 		this.group = LycanitesMobs.modInfo;
 		this.blockName = "frostcloud";
@@ -41,7 +41,7 @@ public class BlockFrostCloud extends BlockBase {
 
 		this.noBreakCollision = true;
 
-		//this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
+		this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
 		this.registerDefaultState(this.getStateDefinition().any().setValue(AGE, 0));
 
 		ItemManager.getInstance().cutoutBlocks.add(this);

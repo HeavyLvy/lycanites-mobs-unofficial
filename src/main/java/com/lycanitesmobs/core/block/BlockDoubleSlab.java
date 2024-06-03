@@ -12,6 +12,7 @@ public class BlockDoubleSlab extends BlockPillar {
 	public BlockDoubleSlab(Block.Properties properties, ModInfo group, String name, String slabName) {
 		super(properties, group, name);
         this.slabName = slabName;
+		setup();
 	}
 
 
