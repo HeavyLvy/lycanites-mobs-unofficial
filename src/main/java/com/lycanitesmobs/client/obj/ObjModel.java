@@ -1,11 +1,12 @@
 package com.lycanitesmobs.client.obj;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.*;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.joml.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +20,7 @@ public class ObjModel {
 		this.filename = resourceLocation.getPath();
         String path = resourceLocation.toString();
         try {
-			InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(resourceLocation).getInputStream();
+			InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(resourceLocation).get().open();
             String content = new String(read(inputStream), "UTF-8");
             String startPath = path.substring(0, path.lastIndexOf('/') + 1);
             HashMap<ObjPart, IndexedModel> map = new OBJLoader().loadModel(startPath, content);
@@ -71,11 +72,11 @@ public class ObjModel {
 		return output;
 	}
 
-    public void renderAll(IVertexBuilder vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, Vector4f color, Vector2f textureOffset) {
+    public void renderAll(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, Vector4f color, Vector2f textureOffset) {
         Collections.sort(this.objParts, (a, b) -> {
-			Vector3d v = Minecraft.getInstance().getCameraEntity().position();
-			double aDist = v.distanceTo(new Vector3d(a.center.x(), a.center.y(), a.center.z()));
-			double bDist = v.distanceTo(new Vector3d(b.center.x(), b.center.y(), b.center.z()));
+			Vec3 v = Minecraft.getInstance().getCameraEntity().position();
+			double aDist = v.distanceTo(new Vec3(a.center.x(), a.center.y(), a.center.z()));
+			double bDist = v.distanceTo(new Vec3(b.center.x(), b.center.y(), b.center.z()));
 			return Double.compare(aDist, bDist);
 		});
         for(ObjPart objPart : this.objParts) {
@@ -83,7 +84,7 @@ public class ObjModel {
         }
     }
 
-    public void renderPartGroup(IVertexBuilder vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, Vector4f color, Vector2f textureOffset, String group) {
+    public void renderPartGroup(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, Vector4f color, Vector2f textureOffset, String group) {
         for(ObjPart objPart : this.objParts) {
             if(objPart.getName().equals(group)) {
                 renderPart(vertexBuilder, matrix3f, matrix4f, brightness, fade, objPart, color, textureOffset);
@@ -91,7 +92,7 @@ public class ObjModel {
         }
     }
 
-    public void renderPart(IVertexBuilder vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
+    public void renderPart(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
 		// Mesh data:
 		if(objPart.mesh == null) {
 			return;

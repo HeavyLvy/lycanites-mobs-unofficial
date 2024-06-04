@@ -17,6 +17,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -207,13 +208,13 @@ public class ObjectManager {
     public void registerBlocks(RegisterEvent event) {
 		for(Object block : blocks.values()) {
 			if (block instanceof BlockBase blockBase){
-				LycanitesMobs.logDebug("Item", "Registering block: " + blockBase.);
+				LycanitesMobs.logDebug("Item", "Registering block: " + blockBase.getRegistryName());
 				if(LMHelperClass.convertToResourceLocation(block) == null) {
-					LycanitesMobs.logWarning("", "Block: " + LMHelperClass.convertToResourceLocation(block) + " has no Registry Name!");
+					LycanitesMobs.logWarning("", "Block: " + blockBase.getRegistryName() + " has no Registry Name!");
 				}
 				event.register(ForgeRegistries.Keys.BLOCKS,
 						helper -> {
-							helper.register(block.getName()., block);
+							helper.register(blockBase.getRegistryName(), blockBase);
 						}
 				);
 			}

@@ -2,12 +2,12 @@ package com.lycanitesmobs.client.renderer.layer;
 
 import com.lycanitesmobs.client.renderer.CreatureRenderer;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import net.minecraft.item.DyeableHorseArmorItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeableHorseArmorItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
 public class LayerCreatureEquipment extends LayerCreatureBase {

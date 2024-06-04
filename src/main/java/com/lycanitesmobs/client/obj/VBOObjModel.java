@@ -3,14 +3,14 @@ package com.lycanitesmobs.client.obj;
 import com.lycanitesmobs.client.renderer.CustomRenderStates;
 import com.lycanitesmobs.client.renderer.VBOBatcher;
 import com.lycanitesmobs.client.renderer.VBOBatcher.VBODrawCommand;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix3f;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 public class VBOObjModel extends ObjModel {
 
@@ -24,7 +24,7 @@ public class VBOObjModel extends ObjModel {
 	}
 
 	@Override
-	public void renderPart(IVertexBuilder vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
+	public void renderPart(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
 		if (vertexBuilder != null) {
 			super.renderPart(vertexBuilder, matrix3f, matrix4f, brightness, fade, objPart, color, textureOffset);
 			return;

@@ -9,23 +9,22 @@ import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class RenderRegister {
 
     public void registerModelLoaders() {
         //ModelLoaderRegistry.registerLoader(new ResourceLocation(LycanitesMobs.MODID), new ModelLoader()); Not needed.
     }
-
-    public void registerRenderFactories() {
+    @SubscribeEvent
+    public void registerRenderFactories(EntityRenderersEvent.RegisterRenderers event) {
 
         // Creatures:
         for(CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
             if(creatureInfo.dummy) {
-                RenderingRegistry.registerEntityRenderingHandler(creatureInfo.getEntityType(), new RenderFactoryNone<BaseProjectileEntity>(creatureInfo.entityClass));
+                event.registerEntityRenderer(creatureInfo.getEntityType(), new RenderFactoryNone<BaseProjectileEntity>(creatureInfo.entityClass));
             }
             RenderingRegistry.registerEntityRenderingHandler(creatureInfo.getEntityType(), new CreatureRenderFactory<BaseCreatureEntity>(creatureInfo));
         }

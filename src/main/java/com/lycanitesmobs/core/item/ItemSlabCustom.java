@@ -1,34 +1,43 @@
 package com.lycanitesmobs.core.item;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.Property;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
+
+import com.lycanitesmobs.LycanitesMobs;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 
 // This is a copy of ItemSlab and only altered to allow for any block to be the double slab.
 public class ItemSlabCustom extends BlockItem
 {
     private final SlabBlock singleSlab;
     private final Block doubleSlab;
+    public ResourceLocation registryName;
 
-    public ItemSlabCustom(Item.Properties properties, Block block, SlabBlock singleSlab, Block doubleSlab) {
+    public ItemSlabCustom(Item.Properties properties, Block block,String name, SlabBlock singleSlab, Block doubleSlab) {
         super(block, properties);
         this.singleSlab = singleSlab;
         this.doubleSlab = doubleSlab;
         properties.durability(0);
-        this.setRegistryName(block.getRegistryName());
+        this.setRegistryName(LycanitesMobs.MODID,name);
     }
-
+    public ResourceLocation getRegistryName() {
+        return registryName;
+    }
+    public ResourceLocation setRegistryName(String modID, String blockName) {
+        return registryName = new ResourceLocation(modID, blockName);
+    }
     /**
      * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
      * different names based on their damage or NBT.
@@ -38,14 +47,14 @@ public class ItemSlabCustom extends BlockItem
     }
 
     @Override
-    public ITextComponent getName(ItemStack stack) {
+    public MutableComponent getName(ItemStack stack) {
         return this.singleSlab.getName();
     }
 
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public ActionResultType onItemUse(PlayerEntity player, World worldIn, BlockPos pos, Hand hand, Direction facing, float hitX, float hitY, float hitZ) {
+    public InteractionResult onItemUse(Player player, Level worldIn, BlockPos pos, InteractionHand hand, Direction facing, float hitX, float hitY, float hitZ) {
         // TODO Do we still need this custom BlockItem?
         /*ItemStack itemStack = player.getHeldItem(hand);
         if (itemStack.getCount() != 0 && player.canPlayerEdit(pos.offset(facing), facing, itemStack)) {
@@ -76,11 +85,11 @@ public class ItemSlabCustom extends BlockItem
         else {
             return ActionResultType.FAIL;
         }*/
-        return ActionResultType.FAIL;
+        return InteractionResult.FAIL;
     }
 
     /*@OnlyIn(Dist.CLIENT)
-    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side, PlayerEntity player, ItemStack stack) {
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side, Player player, ItemStack stack) {
         BlockPos blockpos = pos;
         IProperty<?> iproperty = this.singleSlab.getVariantProperty();
         Comparable<?> comparable = this.singleSlab.getTypeForItem(stack);
@@ -101,7 +110,7 @@ public class ItemSlabCustom extends BlockItem
         return iblockstate1.getBlock() == this.singleSlab && comparable == iblockstate1.getValue(iproperty) ? true : super.canPlaceBlockOnSide(worldIn, blockpos, side, player, stack);
     }
 
-    private boolean tryPlace(PlayerEntity player, ItemStack itemStack, World worldIn, BlockPos pos, Object itemSlabType)
+    private boolean tryPlace(Player player, ItemStack itemStack, World worldIn, BlockPos pos, Object itemSlabType)
     {
         BlockState iblockstate = worldIn.getBlockState(pos);
 

@@ -3,18 +3,18 @@ package com.lycanitesmobs.client.renderer.layer;
 import com.lycanitesmobs.client.model.CreatureModel;
 import com.lycanitesmobs.client.renderer.CreatureRenderer;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
-public class LayerCreatureBase extends LayerRenderer<BaseCreatureEntity, CreatureModel> {
+public class LayerCreatureBase extends RenderLayer<BaseCreatureEntity, CreatureModel> {
     public CreatureRenderer renderer;
     public String name;
     public boolean glow = false;
@@ -34,7 +34,7 @@ public class LayerCreatureBase extends LayerRenderer<BaseCreatureEntity, Creatur
      * The default render call function, this is not used in favor of a different custom method.
      */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int ticks, BaseCreatureEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+    public void render(PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int ticks, BaseCreatureEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         // This isn't used by the custom renderer.
     }
 

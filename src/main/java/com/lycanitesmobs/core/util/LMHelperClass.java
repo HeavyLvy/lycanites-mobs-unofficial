@@ -220,7 +220,7 @@ public class LMHelperClass {
         if (p_151237_0_ < p_151237_2_) {
             return p_151237_2_;
         } else {
-            return p_151237_0_ > p_151237_4_ ? p_151237_4_ : p_151237_0_;
+            return Math.min(p_151237_0_, p_151237_4_);
         }
     }
     public static boolean hasTag(Object obj, Object tag) {

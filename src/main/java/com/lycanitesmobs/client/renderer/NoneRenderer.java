@@ -1,11 +1,12 @@
 package com.lycanitesmobs.client.renderer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -15,19 +16,19 @@ public class NoneRenderer extends EntityRenderer<Entity> {
     // ==================================================
     //                     Constructor
     // ==================================================
-    public NoneRenderer(EntityRendererManager renderManager) {
+    public NoneRenderer(EntityRendererProvider.Context renderManager) {
     	super(renderManager);
     }
-    
-    
+
+
+
     // ==================================================
     //                     Do Render
     // ==================================================
     @Override
-	public void render(Entity entity, float p_225623_2_, float p_225623_3_, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int p_225623_6_) {
-    	return;
+    public void render(Entity p_114485_, float p_114486_, float p_114487_, PoseStack p_114488_, MultiBufferSource p_114489_, int p_114490_) {
+        super.render(p_114485_, p_114486_, p_114487_, p_114488_, p_114489_, p_114490_);
     }
-    
     
     // ==================================================
     //                       Visuals

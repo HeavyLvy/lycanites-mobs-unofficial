@@ -8,8 +8,8 @@ import com.lycanitesmobs.client.renderer.ProjectileModelRenderer;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureEffect;
 import com.lycanitesmobs.client.renderer.layer.LayerItem;
 import com.lycanitesmobs.client.renderer.layer.LayerProjectileEffect;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector4f;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 public class TextureLayerAnimation {
 

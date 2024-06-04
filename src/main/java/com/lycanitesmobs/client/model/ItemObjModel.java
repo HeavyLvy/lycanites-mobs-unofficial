@@ -10,17 +10,19 @@ import com.lycanitesmobs.client.renderer.CustomRenderStates;
 import com.lycanitesmobs.client.renderer.IItemModelRenderer;
 import com.lycanitesmobs.client.renderer.layer.LayerItem;
 import com.lycanitesmobs.core.info.ModInfo;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 import org.apache.commons.io.IOUtils;
+import org.joml.AxisAngle4f;
+import org.joml.Quaternionf;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -49,7 +51,7 @@ public abstract class ItemObjModel implements IAnimationModel {
 	public Map<String, AnimationPart> animationParts = new HashMap<>();
 
 	// Animating:
-	public MatrixStack matrixStack;
+	public PoseStack matrixStack;
 	/** The animator INSTANCE, this is a helper class that performs actual GL11 functions, etc. **/
 	protected Animator animator;
 	/** The animation data for this model. **/
@@ -82,10 +84,10 @@ public abstract class ItemObjModel implements IAnimationModel {
 		ResourceLocation animPartsLoc = new ResourceLocation(groupInfo.modid, "models/" + path + "_parts.json");
 		try {
 			Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-			InputStream in = Minecraft.getInstance().getResourceManager().getResource(animPartsLoc).getInputStream();
+			InputStream in = Minecraft.getInstance().getResourceManager().getResource(animPartsLoc).get().open();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 			try {
-				JsonArray jsonArray = JSONUtils.fromJson(gson, reader, JsonArray.class, false);
+				JsonArray jsonArray = GsonHelper.fromJson(gson, reader, JsonArray.class, false);
 				Iterator<JsonElement> jsonIterator = jsonArray.iterator();
 				while (jsonIterator.hasNext()) {
 					JsonObject partJson = jsonIterator.next().getAsJsonObject();
@@ -112,10 +114,10 @@ public abstract class ItemObjModel implements IAnimationModel {
 		ResourceLocation animationLocation = new ResourceLocation(groupInfo.modid, "models/" + path + "_animation.json");
 		try {
 			Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-			InputStream in = Minecraft.getInstance().getResourceManager().getResource(animationLocation).getInputStream();
+			InputStream in = Minecraft.getInstance().getResourceManager().getResource(animationLocation).get().open();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 			try {
-				JsonObject json = JSONUtils.fromJson(gson, reader, JsonObject.class, false);
+				JsonObject json = GsonHelper.fromJson(gson, reader, JsonObject.class, false);
 				this.animation = new ModelAnimation();
 				this.animation.loadFromJson(json);
 			}
@@ -167,7 +169,7 @@ public abstract class ItemObjModel implements IAnimationModel {
 	 * @param loop The animation tick for looping animations, etc.
 	 * @param brightness The base brightness to render at.
 	 */
-	public void render(ItemStack itemStack, Hand hand, MatrixStack matrixStack, IVertexBuilder vertexBuilder, IItemModelRenderer renderer, AnimationPart offsetObjPart, LayerItem layer, float loop, int brightness) {
+	public void render(ItemStack itemStack, InteractionHand hand, PoseStack matrixStack, VertexConsumer vertexBuilder, IItemModelRenderer renderer, AnimationPart offsetObjPart, LayerItem layer, float loop, int brightness) {
 		if(itemStack == null) {
 			return;
 		}
@@ -313,26 +315,26 @@ public abstract class ItemObjModel implements IAnimationModel {
 			return layer.getTextureOffset(partName, itemStack, loop);
 		}
 
-		return Vector2f.ZERO;
+		return new Vector2f(0,0);
 	}
 
 	@Override
 	public void doRotate(float rotX, float rotY, float rotZ) {
 		if (rotX != 0.0F) {
-			this.matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotX));
+			this.matrixStack.mulPose(Axis.XP.rotationDegrees(rotX));
 		}
 		if (rotY != 0.0F) {
-			this.matrixStack.mulPose(Vector3f.YP.rotationDegrees(rotY));
+			this.matrixStack.mulPose(Axis.YP.rotationDegrees(rotY));
 		}
 		if (rotZ != 0.0F) {
-			this.matrixStack.mulPose(Vector3f.ZP.rotationDegrees(rotZ));
+			this.matrixStack.mulPose(Axis.ZP.rotationDegrees(rotZ));
 		}
 	}
 
 	@Override
 	public void doAngle(float rotation, float angleX, float angleY, float angleZ) {
 		if (rotation != 0.0F && (angleX != 0.0F || angleY != 0.0F || angleZ != 0.0F)) {
-			this.matrixStack.mulPose(new Vector3f(angleX, angleY, angleZ).rotationDegrees(rotation));
+			this.matrixStack.mulPose(new Quaternionf(new AxisAngle4f(rotation,angleX, angleY, angleZ)));
 		}
 	}
 

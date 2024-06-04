@@ -5,17 +5,16 @@ import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class SummonEquipmentFeature extends EquipmentFeature {
 	/** The id of the mob to summon. **/
@@ -60,12 +59,12 @@ public class SummonEquipmentFeature extends EquipmentFeature {
 	}
 
 	@Override
-	public ITextComponent getDescription(ItemStack itemStack, int level) {
+	public MutableComponent getDescription(ItemStack itemStack, int level) {
 		if(!this.isActive(itemStack, level)) {
 			return null;
 		}
-		TextComponent description = (TextComponent) new TranslationTextComponent("equipment.feature." + this.featureType)
-			.append(" ").append(new TranslationTextComponent("entity." + this.summonMobId));
+		MutableComponent description = Component.translatable("equipment.feature." + this.featureType)
+			.append(" ").append(Component.translatable("entity." + this.summonMobId));
 
 		if(this.summonCountMin != this.summonCountMax) {
 			description.append(" x" + (this.summonCountMin + " - " + this.summonCountMax));
@@ -84,11 +83,11 @@ public class SummonEquipmentFeature extends EquipmentFeature {
 	}
 
 	@Override
-	public ITextComponent getSummary(ItemStack itemStack, int level) {
+	public MutableComponent getSummary(ItemStack itemStack, int level) {
 		if(!this.isActive(itemStack, level)) {
 			return null;
 		}
-		return new TranslationTextComponent("entity." + this.summonMobId);
+		return Component.translatable("entity." + this.summonMobId);
 	}
 
 	/**
@@ -109,7 +108,7 @@ public class SummonEquipmentFeature extends EquipmentFeature {
 			entityType = creatureInfo.getEntityType();
 		}
 		else {
-			Object entityTypeObj = GameRegistry.findRegistry(EntityType.class).getValue(new ResourceLocation(this.summonMobId));
+			Object entityTypeObj = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(this.summonMobId));
 			if(entityTypeObj instanceof EntityType) {
 				entityType = (EntityType)entityTypeObj;
 			}
@@ -127,22 +126,22 @@ public class SummonEquipmentFeature extends EquipmentFeature {
 			if (attacker.getRandom().nextDouble() <= this.summonChance) {
 				try {
 					Entity entity = entityType.create(attacker.getCommandSenderWorld());
-					entity.moveTo(attacker.blockPosition().getX(), attacker.blockPosition().getY(), attacker.blockPosition().getZ(), attacker.yRot, 0.0F);
+					entity.moveTo(attacker.blockPosition().getX(), attacker.blockPosition().getY(), attacker.blockPosition().getZ(), attacker.yRotO, 0.0F);
 					if (entity instanceof BaseCreatureEntity) {
 						BaseCreatureEntity entityCreature = (BaseCreatureEntity) entity;
 						entityCreature.setMinion(true);
 						entityCreature.setTemporary(this.summonDuration * 20);
 						entityCreature.setSizeScale(this.sizeScale);
 
-						if (attacker instanceof PlayerEntity && entityCreature instanceof TameableCreatureEntity) {
+						if (attacker instanceof Player && entityCreature instanceof TameableCreatureEntity) {
 							TameableCreatureEntity entityTameable = (TameableCreatureEntity) entityCreature;
-							entityTameable.setPlayerOwner((PlayerEntity) attacker);
+							entityTameable.setPlayerOwner((Player) attacker);
 							entityTameable.setSitting(false);
 							entityTameable.setFollowing(true);
 							entityTameable.setPassive(false);
 							entityTameable.setAssist(true);
 							entityTameable.setAggressive(true);
-							entityTameable.setPVP(target instanceof PlayerEntity);
+							entityTameable.setPVP(target instanceof Player);
 						}
 
 						float randomAngle = 45F + (45F * attacker.getRandom().nextFloat());
@@ -150,7 +149,7 @@ public class SummonEquipmentFeature extends EquipmentFeature {
 							randomAngle = -randomAngle;
 						}
 						BlockPos spawnPos = entityCreature.getFacingPosition(attacker, -1, randomAngle);
-						entity.moveTo(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), attacker.yRot, 0.0F);
+						entity.moveTo(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), attacker.yRotO, 0.0F);
 						entityCreature.setTarget(target);
 						entity.getCommandSenderWorld().addFreshEntity(entity);
 						summonedCreatures++;

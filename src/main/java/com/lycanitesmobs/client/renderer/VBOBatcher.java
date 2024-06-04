@@ -1,10 +1,21 @@
 package com.lycanitesmobs.client.renderer;
 
+import java.nio.FloatBuffer;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.lycanitesmobs.core.util.LMHelperClass;
+import com.mojang.blaze3d.platform.DebugMemoryUntracker;
+import com.mojang.blaze3d.platform.GLX;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL21;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -13,11 +24,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector4f;
+import org.lwjgl.opengl.GLCapabilities;
+import org.lwjgl.system.MemoryUtil;
 
 public class VBOBatcher {
 
@@ -88,35 +96,37 @@ public class VBOBatcher {
 			this.lightOffsetY = lightOffsetY;
 			return this;
 		}
-
+		private static final FloatBuffer MATRIX_BUFFER = GLX.make(MemoryUtil.memAllocFloat(16), (p_209238_0_) -> {
+			DebugMemoryUntracker.untrack(MemoryUtil.memAddress(p_209238_0_));
+		});
 		public void draw() {
-			Minecraft.getInstance().getTextureManager().bind(texLocation);
+			Minecraft.getInstance().getTextureManager().bindForSetup(texLocation);
 
-			RenderSystem.color4f(correctedColor(red), correctedColor(green), correctedColor(blue), correctedColor(alpha));
+			GL11.glColor4f(correctedColor(red), correctedColor(green), correctedColor(blue), correctedColor(alpha));
 			if (textureOffsetX != 0.0F || textureOffsetY != 0.0F) {
-				RenderSystem.matrixMode(GL21.GL_TEXTURE);
-				RenderSystem.pushMatrix();
-				RenderSystem.translatef(textureOffsetX, textureOffsetY, 0.0F);
-				RenderSystem.matrixMode(GL21.GL_MODELVIEW);
+				GL11.glMatrixMode(GL21.GL_TEXTURE);
+				GL11.glPushMatrix();
+				GL11.glTranslatef(textureOffsetX, textureOffsetY, 0.0F);
+				GL11.glMatrixMode(GL21.GL_MODELVIEW);
 			}
-			RenderSystem.glMultiTexCoord2f(GL21.GL_TEXTURE1, overlayOffsetX, overlayOffsetY);
-			RenderSystem.glMultiTexCoord2f(GL21.GL_TEXTURE2, lightOffsetX, lightOffsetY);
+			RenderSystem.texParameter(GL21.GL_TEXTURE1, LMHelperClass.convertToInteger(overlayOffsetX), LMHelperClass.convertToInteger(overlayOffsetY));
+			RenderSystem.texParameter(GL21.GL_TEXTURE2, LMHelperClass.convertToInteger(lightOffsetX), LMHelperClass.convertToInteger(lightOffsetY));
 
-			RenderSystem.pushMatrix();
-			RenderSystem.multMatrix(matrix);
+			GL11.glPushMatrix();
+			GL11.glMultMatrixf(MATRIX_BUFFER);
 			RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> vbo);
-			format.setupBufferState(0);
+			format.setupBufferState();
 
-			RenderSystem.drawArrays(GL21.GL_TRIANGLES, 0, vertexCount);
+			GL11.glDrawArrays(GL21.GL_TRIANGLES, 0, vertexCount);
 
 			format.clearBufferState();
 			RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> 0);
-			RenderSystem.popMatrix();
+			GL11.glPopMatrix();
 
 			if (textureOffsetX != 0.0F || textureOffsetY != 0.0F) {
-				RenderSystem.matrixMode(GL21.GL_TEXTURE);
-				RenderSystem.popMatrix();
-				RenderSystem.matrixMode(GL21.GL_MODELVIEW);
+				GL11.glMatrixMode(GL21.GL_TEXTURE);
+				GL11.glPopMatrix();
+				GL11.glMatrixMode(GL21.GL_MODELVIEW);
 			}
 		}
 
@@ -144,7 +154,7 @@ public class VBOBatcher {
 			}
 
 			renderType.setupRenderState();
-			RenderSystem.enableTexture();
+			//RenderSystem.enableTexture();
 
 			for (VBODrawCommand drawCommand : drawCommands) {
 				drawCommand.draw();

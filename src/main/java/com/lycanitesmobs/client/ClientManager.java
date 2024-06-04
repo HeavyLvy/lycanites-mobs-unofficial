@@ -75,7 +75,7 @@ public class ClientManager {
 	public void initRenderRegister() {
 		RenderRegister renderRegister = new RenderRegister();
 		renderRegister.registerModelLoaders();
-		renderRegister.registerRenderFactories();
+		//renderRegister.registerRenderFactories();
 		renderRegister.registerBlockRenderLayers();
 	}
 
