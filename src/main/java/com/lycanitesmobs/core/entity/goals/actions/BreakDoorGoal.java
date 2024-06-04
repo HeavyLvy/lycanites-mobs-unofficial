@@ -1,11 +1,12 @@
 package com.lycanitesmobs.core.entity.goals.actions;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DoorBlock;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.util.math.BlockPos;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BreakDoorGoal extends DoorInteractGoal {
 	//Properties:
@@ -15,7 +16,7 @@ public class BreakDoorGoal extends DoorInteractGoal {
 	// ==================================================
  	//                    Constructor
  	// ==================================================
-    public BreakDoorGoal(MobEntity setHost) {
+    public BreakDoorGoal(Mob setHost) {
         super(setHost);
     }
 
@@ -48,14 +49,14 @@ public class BreakDoorGoal extends DoorInteractGoal {
  	// ==================================================
 	@Override
     public boolean canContinueToUse() {
-		return this.breakingTime <= 240 && !this.canDestroy() && this.doorPosition.closerThan(this.host.position(), 2.0D);
+		return this.breakingTime <= 240 && !this.canDestroy() && this.doorPosition.closerThan(LMHelperClass.convertToVec3i(this.host.position()), 2.0D);
     }
 
 	protected boolean canDestroy() {
 		if (!this.doorInteract) {
 			return false;
 		} else {
-			BlockState blockState = this.host.level.getBlockState(this.doorPosition);
+			BlockState blockState = this.host.level().getBlockState(this.doorPosition);
 			if (!(blockState.getBlock() instanceof DoorBlock)) {
 				this.doorInteract = false;
 				return false;

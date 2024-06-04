@@ -1,13 +1,11 @@
 package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
-
-import net.minecraft.entity.ai.goal.Goal.Flag;
 
 public class StayGoal extends Goal {
 	// Targets:
@@ -59,7 +57,7 @@ public class StayGoal extends Goal {
         	if(!this.host.canBreatheUnderwater())
         		return false;
 		}
-        else if(!this.host.isOnGround() && !this.host.isFlying()) {
+        else if(!this.host.onGround() && !this.host.isFlying()) {
 			return false;
 		}
 

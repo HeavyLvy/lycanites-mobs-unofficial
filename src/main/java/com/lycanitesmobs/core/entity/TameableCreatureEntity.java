@@ -25,6 +25,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.player.Player;
@@ -108,18 +110,18 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     
     // ========== Name ==========
     @Override
-    public ITextComponent getName() {
+    public MutableComponent getName() {
     	if(!this.isTamed() || !CreatureManager.getInstance().config.ownerTags) {
-			return super.getName();
+			return super.getName().copy();
 		}
 
-		TextComponent ownedName = new StringTextComponent("");
+		MutableComponent ownedName = Component.literal("");
     	boolean customName = this.hasCustomName();
 		if(customName) {
 			ownedName.append(super.getName()).append(" (");
 		}
 
-		ITextComponent ownerName = this.getOwnerName();
+		MutableComponent ownerName = this.getOwnerName().copy();
     	String ownerSuffix = "'s ";
     	String ownerFormatted = ownerName.getString();
         if(ownerFormatted.length() > 0) {
@@ -223,11 +225,11 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 	public void ownerEffects() {
 		// Protect Owner from Effects:
 		if(!this.canBurn()) {
-			this.getPlayerOwner().addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, (5 * 20) + 5, 1));
+			this.getPlayerOwner().addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, (5 * 20) + 5, 1));
 		}
 		for(Object possibleEffect : this.getPlayerOwner().getActiveEffects().toArray(new Object[0])) {
-			if(possibleEffect instanceof EffectInstance) {
-				EffectInstance effectInstance = (EffectInstance)possibleEffect;
+			if(possibleEffect instanceof MobEffectInstance) {
+				MobEffectInstance effectInstance = (MobEffectInstance)possibleEffect;
 				if(!this.canBeAffected(effectInstance))
 					this.getPlayerOwner().removeEffect(effectInstance.getEffect());
 			}
@@ -364,7 +366,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     		this.heal((float)healAmount);
             this.playEatSound();
             if(this.getCommandSenderWorld().isClientSide) {
-                IParticleData particle = ParticleTypes.HEART;
+                ParticleOptions particle = ParticleTypes.HEART;
                 double d0 = this.random.nextGaussian() * 0.02D;
                 double d1 = this.random.nextGaussian() * 0.02D;
                 double d2 = this.random.nextGaussian() * 0.02D;

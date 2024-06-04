@@ -2,10 +2,10 @@ package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.BaseGoal;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BuildAroundTargetGoal extends BaseGoal {
     // Properties:
@@ -66,7 +66,7 @@ public class BuildAroundTargetGoal extends BaseGoal {
         }
         return this.block == null || this.getTarget() != null;
     }
-    
+
     @Override
     public void start() {
         this.currentTick = 0;

@@ -140,7 +140,7 @@ public class DirectNavigator {
             this.host.travelSwimming(new Vec3(moveStrafe, 0, moveForward));
         }
         else {
-            this.host.travelFlying(new Vector3d(moveStrafe, 0, moveForward));
+            this.host.travelFlying(new Vec3(moveStrafe, 0, moveForward));
         }
         this.host.updateLimbSwing();
 	}

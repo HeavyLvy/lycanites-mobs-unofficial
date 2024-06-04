@@ -2,13 +2,10 @@ package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.creature.EntityVespidQueen;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
-
-import net.minecraft.entity.ai.goal.Goal.Flag;
 
 public class StayByHomeGoal extends Goal {
 	// Targets:

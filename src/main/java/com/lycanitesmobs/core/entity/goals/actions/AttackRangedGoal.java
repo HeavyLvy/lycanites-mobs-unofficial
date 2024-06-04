@@ -2,14 +2,13 @@ package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.RideableCreatureEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.EnumSet;
 
-import net.minecraft.entity.ai.goal.Goal.Flag;
 
 public class AttackRangedGoal extends Goal {
     // Targets:
@@ -135,7 +134,7 @@ public class AttackRangedGoal extends Goal {
 		// Mounted:
         if(!this.mountedAttacking && this.host instanceof RideableCreatureEntity) {
             RideableCreatureEntity rideableHost = (RideableCreatureEntity)this.host;
-            if(rideableHost.getControllingPassenger() instanceof PlayerEntity)
+            if(rideableHost.getControllingPassenger() instanceof Player)
                 return false;
         }
 
@@ -192,7 +191,7 @@ public class AttackRangedGoal extends Goal {
     public void tick() {
     	boolean fixated = this.host.hasFixateTarget() && this.host.getFixateTarget() == this.attackTarget;
         double distance = this.host.distanceTo(this.attackTarget) - (this.attackTarget.getDimensions(this.attackTarget.getPose()).width / 2);
-        boolean hasSight = fixated || this.host.getSensing().canSee(this.attackTarget);
+        boolean hasSight = fixated || this.host.getSensing().hasLineOfSight(this.attackTarget);
         float flyingHeightOffset = this.flyingHeight;
         
         if(hasSight && this.chaseTimeMax >= 0 && !fixated)
@@ -214,7 +213,7 @@ public class AttackRangedGoal extends Goal {
         	this.repathTime = this.repathTimeMax;
             BlockPos targetPosition = this.attackTarget.blockPosition();
             if(this.host.isFlying())
-                targetPosition = targetPosition.offset(0, flyingHeightOffset, 0);
+                targetPosition = targetPosition.offset(0, (int) Math.floor(flyingHeightOffset), 0);
             if(!this.host.useDirectNavigator())
                 this.host.getNavigation().moveTo(targetPosition.getX(), targetPosition.getY(), targetPosition.getZ(), this.speed);
             else

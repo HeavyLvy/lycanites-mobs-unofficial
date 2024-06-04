@@ -34,6 +34,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -2852,7 +2853,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		if(this.isBlocking() && !this.canAttackWhileBlocking()) {
 			return false;
 		}
-		if (target == null || !this.canSee(target)) {
+		if (target == null || !this.hasLineOfSight(target)) {
 			return false;
 		}
 
@@ -3032,7 +3033,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             return false;
         if(target == null)
             return false;
-        if(!this.canSee(target))
+        if(!this.hasLineOfSight(target))
             return false;
 
         float damage = this.getAttackDamage(damageScale);
@@ -4590,8 +4591,8 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 			return true;
 		}
 
-		// Damage Sourcce:
-		if(!this.isVulnerableTo(source.msgId, source, 1)) {
+		// Damage Source:
+		if(!this.isVulnerableTo(source.getMsgId(), source, 1)) {
 			return true;
 		}
 
@@ -4627,7 +4628,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
 	@Override
-	protected void lavaHurt() {
+	public void lavaHurt() {
 		if(!this.canBurn())
 			return;
 		super.lavaHurt();
@@ -4685,7 +4686,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     public boolean webProof() { return false; }
 
     @Override
-    public void makeStuckInBlock(BlockState blockState, Vector3d motionMultiplier) {
+    public void makeStuckInBlock(BlockState blockState, Vec3 motionMultiplier) {
     	if(blockState.getBlock() == Blocks.COBWEB && webProof()) {
     		return;
 		}
@@ -4773,9 +4774,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 	 */
 	public boolean isSwimmable(int x, int y, int z) {
         BlockState blockState = this.getCommandSenderWorld().getBlockState(new BlockPos(x, y, z));
-		if(this.isLavaCreature && Material.LAVA.equals(blockState.getMaterial()))
+		if(this.isLavaCreature && Material.LAVA.contains(blockState.getBlock()))
 			return true;
-		else if(Material.WATER.equals(blockState.getMaterial()))
+		else if(Material.WATER.contains(blockState.getBlock()))
 			return true;
 		return false;
 	}
@@ -4812,12 +4813,12 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         BlockState spawnBlockState = this.getCommandSenderWorld().getBlockState(pos);
         if(pos.getY() < 0)
             return 0;
-        if(spawnBlockState.getMaterial() == Material.WATER && CreatureManager.getInstance().spawnConfig.useSurfaceLightLevel)
+        if(Material.WATER.contains(spawnBlockState.getBlock()) && CreatureManager.getInstance().spawnConfig.useSurfaceLightLevel)
             pos = new BlockPos(pos.getX(), this.getWaterSurfaceY(pos), pos.getZ());
         else
             pos = new BlockPos(pos.getX(), this.getGroundY(pos), pos.getZ());
 
-		float brightness = this.getCommandSenderWorld().getBrightness(pos);
+		float brightness = this.getCommandSenderWorld().getBrightness(LightLayer.BLOCK,pos);
         if(brightness == 0) return 0;
         if(brightness < 0.25F) return 1;
         if(brightness < 1) return 2;
@@ -4839,7 +4840,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     // ========== Creature Attribute ==========
     /** Returns this creature's attribute. **/
    	@Override
-    public CreatureAttribute getMobType() { return this.attribute; }
+    public MobType getMobType() { return this.attribute; }
 
     // ========== Mounted Y Offset ==========
     /** An X Offset used to position the mob that is riding this mob. **/
@@ -4869,7 +4870,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     /** Get entities that are near this entity. **/
     public <T extends Entity> List<T> getNearbyEntities(Class <? extends T > clazz, Predicate<Entity> predicate, double range) {
-        return this.getCommandSenderWorld().getEntitiesOfClass(clazz, this.getBoundingBox().inflate(range, range, range), predicate);
+        return (List<T>) this.getCommandSenderWorld().getEntitiesOfClass(clazz, this.getBoundingBox().inflate(range, range, range), predicate);
     }
 
 	/** Returns how many entities of the specified Entity Type are within the specified range, used mostly for spawning, mobs that summon other mobs and group behaviours. **/
@@ -4918,7 +4919,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
    	// ========== Read ===========
     /** Used when loading this mob from a saved chunk. **/
     @Override
-    public void readAdditionalSaveData(CompoundNBT nbt) {
+    public void readAdditionalSaveData(CompoundTag nbt) {
 		if(this.creatureInfo.dummy) {
 			super.readAdditionalSaveData(nbt);
 			return;
@@ -4957,7 +4958,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if(nbt.contains("IsBoundPet")) {
             if(nbt.getBoolean("IsBoundPet")) {
                 if(!this.hasPetEntry())
-                    this.remove();
+                    this.remove(RemovalReason.DISCARDED);
             }
         }
     	
@@ -5015,9 +5016,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         this.inventory.load(nbt);
 
         if(nbt.contains("Drops")) {
-			ListNBT nbtDropList = nbt.getList("Drops", 10);
+			ListTag nbtDropList = nbt.getList("Drops", 10);
 			for(int i = 0; i < nbtDropList.size(); i++) {
-				CompoundNBT dropNBT = nbtDropList.getCompound(i);
+				CompoundTag dropNBT = nbtDropList.getCompound(i);
 				ItemDrop drop = new ItemDrop(dropNBT);
 				this.addSavedItemDrop(drop);
 			}
@@ -5044,9 +5045,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		}
 
 		if(nbt.contains("MinionIds")) {
-			ListNBT minionIds = nbt.getList("MinionIds", 10);
+			ListTag minionIds = nbt.getList("MinionIds", 10);
 			for(int i = 0; i < minionIds.size(); i++) {
-				CompoundNBT minionId = minionIds.getCompound(i);
+				CompoundTag minionId = minionIds.getCompound(i);
 				if(minionId.contains("ID")) {
 					Entity entity = this.getCommandSenderWorld().getEntity(minionId.getInt("ID"));
 					if(entity instanceof LivingEntity)
@@ -5059,7 +5060,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     // ========== Write ==========
     /** Used when saving this mob to a chunk. **/
     @Override
-    public void addAdditionalSaveData(CompoundNBT nbt) {
+    public void addAdditionalSaveData(CompoundTag nbt) {
 		if(this.creatureInfo.dummy) {
 			super.addAdditionalSaveData(nbt);
 			return;
@@ -5116,9 +5117,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         this.relationships.save(nbt);
         this.inventory.save(nbt);
 
-		ListNBT nbtDropList = new ListNBT();
+		ListTag nbtDropList = new ListTag();
         for(ItemDrop drop : this.savedDrops) {
-			CompoundNBT dropNBT = new CompoundNBT();
+			CompoundTag dropNBT = new CompoundTag();
 			if(drop.writeToNBT(dropNBT)) {
 				nbtDropList.add(dropNBT);
 			}
@@ -5126,13 +5127,13 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		nbt.put("Drops", nbtDropList);
 		nbt.putBoolean("DropsRequirePlayerDamage", this.dropsRequirePlayerDamage);
         
-        CompoundNBT extTagCompound = new CompoundNBT();
+        CompoundTag extTagCompound = new CompoundTag();
         this.extraMobBehaviour.write(extTagCompound);
         nbt.put("ExtraBehaviour", extTagCompound);
 
-		ListNBT minionIds = new ListNBT();
+		ListTag minionIds = new ListTag();
 		for(LivingEntity minion : this.minions) {
-			CompoundNBT minionId = new CompoundNBT();
+			CompoundTag minionId = new CompoundTag();
 			minionId.putInt("ID", minion.getId());
 			minionIds.add(minionId);
 		}

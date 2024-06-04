@@ -54,7 +54,7 @@ public abstract class TargetingGoal extends Goal {
             if(!TargetingGoal.this.isEntityTargetable(entity, false)) {
                 return false;
             }
-            if(this.shouldCheckSight() && !entity.isCurrentlyGlowing() && !this.host.canSee(entity)) {
+            if(this.shouldCheckSight() && !entity.isCurrentlyGlowing() && !this.host.hasLineOfSight(entity)) {
                 return false;
             }
             if(this.shouldCheckSight() && entity.distanceTo(this.host) > this.getTargetDistance() * this.host.getVisibilityPercent(entity)) {
@@ -73,7 +73,7 @@ public abstract class TargetingGoal extends Goal {
             if(!TargetingGoal.this.isAllyTarget(entity)) {
                 return false;
             }
-            if(this.shouldCheckSight() && !entity.isCurrentlyGlowing() && !this.host.canSee(entity)) {
+            if(this.shouldCheckSight() && !entity.isCurrentlyGlowing() && !this.host.hasLineOfSight(entity)) {
                 return false;
             }
             return true;

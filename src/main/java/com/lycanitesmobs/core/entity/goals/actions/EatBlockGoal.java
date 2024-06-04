@@ -2,17 +2,15 @@ package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import com.lycanitesmobs.core.util.Material;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.EnumSet;
-
-import net.minecraft.entity.ai.goal.Goal.Flag;
 
 public class EatBlockGoal extends Goal {
 	// Targets:
@@ -20,7 +18,7 @@ public class EatBlockGoal extends Goal {
     
     // Properties:
     private Block[] blocks = new Block[0];
-    private Material[] materials = new Material[0];
+    private Block[] materials = new Block[0];
     private Block replaceBlock = Blocks.AIR;
     private int eatTime = 40;
     private int eatTimeMax = 40;
@@ -36,8 +34,8 @@ public class EatBlockGoal extends Goal {
      	return this;
      }
 
-     public EatBlockGoal setMaterials(Material... setMaterials) {
-    	this.materials = setMaterials;
+     public EatBlockGoal setMaterials(Block... setBlocks) {
+    	this.materials = setBlocks;
      	return this;
      }
 
@@ -56,9 +54,9 @@ public class EatBlockGoal extends Goal {
     	 if(this.host.getRandom().nextInt(this.host.isBaby() ? 50 : 1000) != 0)
              return false;
     	 
-    	 int i = MathHelper.floor(this.host.position().x());
-         int j = MathHelper.floor(this.host.position().y());
-         int k = MathHelper.floor(this.host.position().z());
+    	 int i = Mth.floor(this.host.position().x());
+         int j = Mth.floor(this.host.position().y());
+         int k = Mth.floor(this.host.position().z());
 
          BlockState blockState = this.host.getCommandSenderWorld().getBlockState(new BlockPos(i, j - 1, k));
          return this.isValidBlock(blockState);
@@ -70,8 +68,8 @@ public class EatBlockGoal extends Goal {
         		 return true;
          }
          
-         Material material = blockState.getMaterial();
-         for(Material edibleMaterial : this.materials) {
+         Block material = blockState.getBlock();
+         for(Block edibleMaterial : this.materials) {
         	 if(edibleMaterial == material)
         		 return true;
          }
@@ -99,9 +97,9 @@ public class EatBlockGoal extends Goal {
     public void tick() {
          if(--this.eatTime != 0) return;
          
-         int i = MathHelper.floor(this.host.position().x());
-         int j = MathHelper.floor(this.host.position().y());
-         int k = MathHelper.floor(this.host.position().z());
+         int i = Mth.floor(this.host.position().x());
+         int j = Mth.floor(this.host.position().y());
+         int k = Mth.floor(this.host.position().z());
          BlockState blockState = this.host.getCommandSenderWorld().getBlockState(new BlockPos(i, j - 1, k));
          
          if(this.isValidBlock(blockState)) {
