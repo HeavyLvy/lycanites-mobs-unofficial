@@ -2,10 +2,12 @@ package com.lycanitesmobs.core.spawner.trigger;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.spawner.Spawner;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 
 public class ExplosionSpawnTrigger extends EntitySpawnTrigger {
 
@@ -35,7 +37,7 @@ public class ExplosionSpawnTrigger extends EntitySpawnTrigger {
 
 
 	/** Called every time an explosion is created. **/
-	public boolean onExplosion(World world, PlayerEntity player, Explosion explosion) {
+	public boolean onExplosion(Level world, Player player, Explosion explosion) {
 		// TODO Figure out strength/size workaround.
 
 		// Player Only:
@@ -49,12 +51,12 @@ public class ExplosionSpawnTrigger extends EntitySpawnTrigger {
 		}
 
 		// Entity Check:
-		if(!this.playerOnly && explosion.getSourceMob() != null) {
-			if(!this.isMatchingEntity(explosion.getSourceMob())) {
+		if(!this.playerOnly && explosion.getExploder() != null && explosion.getExploder() instanceof LivingEntity exploder) {
+			if(!this.isMatchingEntity(exploder)) {
 				return false;
 			}
 		}
 
-		return this.trigger(world, player, new BlockPos(explosion.getPosition()), 0, 0);
+		return this.trigger(world, player, new BlockPos(LMHelperClass.convertToVec3i(explosion.getPosition())), 0, 0);
 	}
 }

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -196,7 +197,7 @@ public class ItemDrop {
 	 * @param multiplier The value to multiply the quantity by.
 	 * @return The randomised amount to drop.
 	 */
-	public int getQuantity(Random random, int bonus, int multiplier) {
+	public int getQuantity(RandomSource random, int bonus, int multiplier) {
 		// Will It Drop?
 		float roll = random.nextFloat();
 		roll = Math.max(roll, 0);

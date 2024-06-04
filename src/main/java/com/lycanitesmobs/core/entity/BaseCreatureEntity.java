@@ -46,6 +46,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
@@ -56,24 +57,26 @@ import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.Minecart;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -2822,9 +2825,8 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     	if(this.attackEntityAsMob(target, damageScale)) {
 
     		// Apply Melee Damage Effects If Not Blocked:
-			if(target instanceof LivingEntity) {
-				LivingEntity livingTarget = (LivingEntity)target;
-				if(!(livingTarget.isBlocking() && livingTarget.getUseItem().isShield(livingTarget))) {
+			if(target instanceof LivingEntity livingTarget) {
+                if(!(livingTarget.isBlocking() && livingTarget.getUseItem().getItem() instanceof ShieldItem)) {
 					// Spread Fire:
 					if (this.spreadFire && this.isOnFire() && this.random.nextFloat() < this.creatureStats.getEffect())
 						target.setSecondsOnFire(this.getEffectDuration(4) / 20);
@@ -2859,7 +2861,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 			// Apply Damage Effects If Not Blocked:
 			if(target instanceof LivingEntity) {
 				LivingEntity livingTarget = (LivingEntity)target;
-				if(!(livingTarget.isBlocking() && livingTarget.getUseItem().isShield(livingTarget))) {
+				if(!(livingTarget.isBlocking() && livingTarget.getUseItem().getItem() instanceof ShieldItem)) {
 					// Element Effects:
 					if (this.creatureStats.getAmplifier() >= 0) {
 						this.applyDebuffs(livingTarget, 1, 1);
@@ -2900,16 +2902,16 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
 		boolean success;
 		if(damage <= pierceDamage) {
-			success = target.hurt(this.getDamageSource((EntityDamageSource) DamageSource.thrown(projectile, this).bypassArmor()).bypassMagic(), damage);
+			success = target.hurt(this.getDamageSource(target.level().damageSources().thrown(projectile, this)), damage);
 		}
 		else {
 			int hurtResistantTimeBefore = target.invulnerableTime;
 			if (pierceDamage > 0) {
-				target.hurt(this.getDamageSource((EntityDamageSource) DamageSource.thrown(projectile, this).bypassArmor()).bypassMagic(), (float) pierceDamage);
+				target.hurt(this.getDamageSource(target.level().damageSources().thrown(projectile, this)), (float) pierceDamage);
 			}
 			target.invulnerableTime = hurtResistantTimeBefore;
 			damage -= pierceDamage;
-			success = target.hurt(this.getDamageSource((EntityDamageSource)DamageSource.thrown(projectile, this)), damage);
+			success = target.hurt(this.getDamageSource(target.level().damageSources().thrown(projectile, this)), damage);
 		}
 
 		// Element Effects:
@@ -3046,7 +3048,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		boolean targetIsShielding = false;
 		if (target instanceof Player) {
 			Player targetPlayer = (Player)target;
-			targetIsShielding = targetPlayer.isBlocking() && targetPlayer.getUseItem().isShield(targetPlayer);
+			targetIsShielding = targetPlayer.isBlocking() && targetPlayer.getUseItem().getItem() instanceof ShieldItem;
 		}
 
 		// Attempt The Attack:
@@ -3056,12 +3058,12 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         	pierceDamage = 0;
 		}
         if(damage <= pierceDamage) {
-			attackSuccess = target.hurt(this.getDamageSource(null).bypassArmor().bypassMagic(), damage);
+			attackSuccess = target.hurt(this.getDamageSource(null), damage);
 		}
         else {
         	if(pierceDamage > 0) {
 				int hurtResistantTimeBefore = target.invulnerableTime;
-				target.hurt(this.getDamageSource(null).bypassArmor().bypassMagic(), (float) pierceDamage);
+				target.hurt(this.getDamageSource(null), (float) pierceDamage);
 				target.invulnerableTime = hurtResistantTimeBefore;
 				damage -= pierceDamage;
 			}
@@ -3071,7 +3073,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         // After Successful Attack:
         if(attackSuccess) {
             if(enchantmentKnockback > 0) {
-            	target.push((double)(-Math.sin(this.yRot * (float)Math.PI / 180.0F) * (float)enchantmentKnockback * 0.5F), 0.1D, (double)(Math.cos(this.yRotO * (float)Math.PI / 180.0F) * (float)enchantmentKnockback * 0.5F));
+            	target.push((double)(-Math.sin(this.yRotO * (float)Math.PI / 180.0F) * (float)enchantmentKnockback * 0.5F), 0.1D, (double)(Math.cos(this.yRotO * (float)Math.PI / 180.0F) * (float)enchantmentKnockback * 0.5F));
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.6D, 1, 0.6D));
             }
 
@@ -3109,7 +3111,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 				arrowPierce = true;
 			}
 		}
-		if (damageSource != target.level().damageSources() && target.isBlocking() && !arrowPierce) {
+		if (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR) && target.isBlocking() && !arrowPierce) {
 			Vec3 vector3d2 = damageSource.getSourcePosition();
 			if (vector3d2 != null) {
 				Vec3 vector3d = target.getViewVector(1.0F);
@@ -3187,7 +3189,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		damageAmount = net.minecraftforge.common.ForgeHooks.onLivingDamage(this, damageSrc, damageAmount);
 		if (damageAmount != 0.0F) {
 			float healthBeforeDamage = this.getHealth();
-			this.getCombatTracker().recordDamage(damageSrc, healthBeforeDamage, damageAmount);
+			this.getCombatTracker().recordDamage(damageSrc, damageAmount);
 			this.setHealth(healthBeforeDamage - damageAmount);
 			this.setAbsorptionAmount(this.getAbsorptionAmount() - damageAmount);
 		}
@@ -3441,8 +3443,8 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
 	/** Returns true if this entity can see the provided entity. **/
 	@Override
-	public boolean canSee(Entity target) {
-		return super.canSee(target);
+	public boolean hasLineOfSight(Entity target) {
+		return super.hasLineOfSight(target);
 	}
 
     /** Returns this entity's Owner Target. **/
@@ -3477,8 +3479,11 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     @Override
-    public Entity getControllingPassenger() {
-        return this.getPassengers().isEmpty() ? null : this.getPassengers().get(0);
+    public LivingEntity getControllingPassenger() {
+		if (this.getPassengers().get(0) instanceof LivingEntity firstPassenger) {
+			return this.getPassengers().isEmpty() ? null : firstPassenger;
+		}
+		return null;
     }
 
     /** Returns true if this creature can ride the provided entity. **/
@@ -3489,7 +3494,11 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         return super.canRide(entity);
     }
 
-    @Override
+	@Override
+	public boolean isControlledByLocalInstance() {
+		return this.canBeControlledByRider() && super.isControlledByLocalInstance();
+	}
+
 	public boolean canBeControlledByRider() {
 		return false;
 	}
@@ -3530,7 +3539,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     /** Returns the BlockPos in front or behind the provided entity with the given distance and angle offset (in degrees), use a negative distance for behind. **/
     public BlockPos getFacingPosition(Entity entity, double distance, double angleOffset) {
-        return this.getFacingPosition(entity.position().x(), entity.position().y(), entity.position().z(), distance, entity.yRot + angleOffset);
+        return this.getFacingPosition(entity.position().x(), entity.position().y(), entity.position().z(), distance, entity.yRotO + angleOffset);
     }
 
     /** Returns the BlockPos in front or behind the provided XYZ coords with the given distance and angle (in degrees), use a negative distance for behind. **/
@@ -3538,7 +3547,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         angle = Math.toRadians(angle);
     	double xAmount = -Math.sin(angle);
     	double zAmount = Math.cos(angle);
-        return new BlockPos(x + (distance * xAmount), y, z + (distance * zAmount));
+        return new BlockPos((int)Math.floor(x + (distance * xAmount)), (int)Math.floor(y), (int) Math.floor(z + (distance * zAmount)));
     }
 
     /** Returns the XYZ in front or behind the provided XYZ coords with the given distance and angle (in degrees), use a negative distance for behind. **/
@@ -3712,13 +3721,13 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		}
 
 		// Transformed Entity:
-		transformedEntity.moveTo(this.position().x(), this.position().y(), this.position().z(), this.yRot, this.xRot);
+		transformedEntity.moveTo(this.position().x(), this.position().y(), this.position().z(), this.yRotO, this.xRotO);
 		this.getCommandSenderWorld().addFreshEntity(transformedEntity);
 
 		// Remove Parts:
-		this.remove();
+		this.remove(RemovalReason.DISCARDED);
 		if(partner != null && destroyPartner) {
-			partner.remove();
+			partner.remove(RemovalReason.DISCARDED);
 		}
 
 		return transformedEntity;
@@ -3805,11 +3814,11 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     /** Returns true if this creature can safely land from its current position. **/
     public boolean isSafeToLand() {
-        if(this.onGround)
+        if(this.onGround())
             return true;
-        if(this.getCommandSenderWorld().getBlockState(this.blockPosition().below()).getMaterial().isSolid())
+        if(this.getCommandSenderWorld().getBlockState(this.blockPosition().below()).isSolid())
             return true;
-        if(this.getCommandSenderWorld().getBlockState(this.blockPosition().below(2)).getMaterial().isSolid())
+        if(this.getCommandSenderWorld().getBlockState(this.blockPosition().below(2)).isSolid())
             return true;
         return false;
     }
@@ -3834,9 +3843,11 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
 	@Override
-	public boolean canBeRiddenInWater(Entity rider) {
-		return true;
+	public boolean dismountsUnderwater() {
+		return false;
 	}
+
+
     
     /** Called when the creature has eaten. Some special AIs use this such as EntityAIEatBlock. **/
     public void onEat() {}
@@ -4260,7 +4271,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     /** Actually opens the GUI to the player, should be used by openGUI() for an initial opening and then by refreshGUIViewers() for constant updates. **/
     public void openGUIToPlayer(Player player) {
     	if(player instanceof ServerPlayer)
-			NetworkHooks.openGui((ServerPlayer)player, new CreatureContainerProvider(this), buf -> buf.writeInt(this.getId()));
+			NetworkHooks.openScreen((ServerPlayer)player, new CreatureContainerProvider(this), buf -> buf.writeInt(this.getId()));
     }
     
     /** Schedules a GUI refresh, normally takes 2 ticks for everything to update for display. **/
@@ -4270,12 +4281,12 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     /** The main interact method that is called when a player right clicks this entity. **/
     @Override
-    public ActionResultType mobInteract(Player player, Hand hand) { // New process interact
+    public InteractionResult mobInteract(Player player, InteractionHand hand) { // New process interact
 		if(this.hasPerchTarget()) {
-			return ActionResultType.FAIL;
+			return InteractionResult.FAIL;
 		}
 	    if(this.assessInteractCommand(getInteractCommands(player, player.getItemInHand(hand)), player, player.getItemInHand(hand))) {
-			return ActionResultType.SUCCESS;
+			return InteractionResult.SUCCESS;
 		}
 	    return super.mobInteract(player, hand);
     }
@@ -4386,10 +4397,10 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
     /** Consumes the specified amount from the item stack currently held by the specified player. **/
     public void consumePlayersItem(Player player, ItemStack itemStack, int amount) {
-    	if(!player.abilities.invulnerable)
+    	if(!player.getAbilities().invulnerable)
             itemStack.setCount(Math.max(0, itemStack.getCount() - amount));
         if(itemStack.getCount() <= 0)
-        	player.inventory.setItem(player.inventory.selected, ItemStack.EMPTY);
+        	player.getInventory().setItem(player.getInventory().selected, ItemStack.EMPTY);
     }
 
     // ========== Replace Player's Item ==========
@@ -4399,13 +4410,13 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
     /** Replaces the specified itemstack and amount with a new itemstack. **/
     public void replacePlayersItem(Player player, ItemStack itemStack, int amount, ItemStack newStack) {
-    	if(!player.abilities.invulnerable)
+    	if(!player.getAbilities().invulnerable)
             itemStack.setCount(Math.max(0, itemStack.getCount() - amount));
     	
         if(itemStack.getCount() <= 0)
-    		 player.inventory.setItem(player.inventory.selected, newStack);
+    		 player.getInventory().setItem(player.getInventory().selected, newStack);
          
-    	 else if(!player.inventory.add(newStack))
+    	 else if(!player.getInventory().add(newStack))
         	 player.drop(newStack, false);
     	
     }
@@ -4533,7 +4544,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     		if(leftoverStack != null)
     			entityItem.setItem(leftoverStack);
     		else
-    			entityItem.remove();
+    			entityItem.remove(RemovalReason.DISCARDED);
     	}
     }
 
@@ -4565,7 +4576,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 		}
 
     	// Fire Damage:
-		if(source.isFire() && !this.canBurn()) {
+		if(source.is(DamageTypeTags.IS_FIRE) && !this.canBurn()) {
 			return true;
 		}
 

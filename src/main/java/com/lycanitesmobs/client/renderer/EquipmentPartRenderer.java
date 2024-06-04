@@ -6,22 +6,37 @@ import com.lycanitesmobs.client.model.ItemObjModel;
 import com.lycanitesmobs.client.obj.VBOObjModel;
 import com.lycanitesmobs.client.renderer.layer.LayerItem;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import org.joml.AxisAngle4f;
+import org.joml.Quaternionf;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EquipmentPartRenderer extends ItemStackTileEntityRenderer implements IItemModelRenderer {
+public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer implements IItemModelRenderer {
 	protected List<LayerItem> renderLayers = new ArrayList<>();
 
+	public EquipmentPartRenderer(BlockEntityRenderDispatcher p_172550_, EntityModelSet p_172551_) {
+		super(p_172550_, p_172551_);
+	}
+
 	@Override
-	public void renderByItem(ItemStack itemStack, ItemCameraTransforms.TransformType transformType, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int brightness, int unknown) {
+	public void renderByItem(ItemStack itemStack, ItemDisplayContext transformType, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness, int unknown) {
 		if(!(itemStack.getItem() instanceof ItemEquipmentPart)) {
 			return;
 		}
 
-		Hand hand = null;
+		InteractionHand hand = null;
 
 		ItemEquipmentPart itemEquipmentPart = (ItemEquipmentPart)itemStack.getItem();
 		ItemObjModel itemObjModel = ModelManager.getInstance().getEquipmentPartModel(itemEquipmentPart);
@@ -37,9 +52,9 @@ public class EquipmentPartRenderer extends ItemStackTileEntityRenderer implement
 		}
 
 		matrixStack.translate(0.6F, 0.35F, 0.5F); // translate
-		matrixStack.mulPose(new Vector3f(1.0F, 0.0F, 0.0F).rotationDegrees(190));
-		matrixStack.mulPose(new Vector3f(0.0F, 1.0F, 0.0F).rotationDegrees(-45));
-		matrixStack.mulPose(new Vector3f(0.0F, 0.0F, 1.0F).rotationDegrees(10));
+		matrixStack.mulPose(new Quaternionf(new AxisAngle4f(190,1.0F, 0.0F, 0.0F)));
+		matrixStack.mulPose(new Quaternionf(new AxisAngle4f(-45,0.0F, 1.0F, 0.0F)));
+		matrixStack.mulPose(new Quaternionf(new AxisAngle4f(10,0.0F, 0.0F, 1.0F)));
 		matrixStack.translate(0F, -1.7F, 0F);
 
 		matrixStack.pushPose();
@@ -73,7 +88,7 @@ public class EquipmentPartRenderer extends ItemStackTileEntityRenderer implement
 	 * @param loop A constant tick for looping animations.
 	 * @param brightness The brightness of the mob based on block location, etc.
 	 */
-	protected void renderModel(ItemObjModel model, ItemStack itemStack, Hand hand, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, LayerItem layer, AnimationPart offsetObjPart, float loop, int brightness) {
+	protected void renderModel(ItemObjModel model, ItemStack itemStack, InteractionHand hand, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, LayerItem layer, AnimationPart offsetObjPart, float loop, int brightness) {
 		ResourceLocation texture = model.getTexture(itemStack, layer);
 		RenderType renderType = CustomRenderStates.getObjVBORenderType(model.getBlending(itemStack, layer), model.getGlow(itemStack, layer));
 //		if(layer instanceof LayerItemDye) {
@@ -94,7 +109,7 @@ public class EquipmentPartRenderer extends ItemStackTileEntityRenderer implement
 		if(location == null) {
 			return;
 		}
-		Minecraft.getInstance().getTextureManager().bind(location);
+		Minecraft.getInstance().getTextureManager().bindForSetup(location);
 	}
 
 	@Override

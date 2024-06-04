@@ -11,6 +11,7 @@ import com.lycanitesmobs.core.spawner.MobSpawn;
 import com.lycanitesmobs.core.spawner.condition.SpawnCondition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -482,7 +483,7 @@ public class DungeonSchematic {
 	 * @param random The instance of random to use.
 	 * @return A list of item stacks.
 	 */
-	public List<ItemStack> getRandomLoot(Random random) {
+	public List<ItemStack> getRandomLoot(RandomSource random) {
 		List<ItemStack> loot = new ArrayList<>();
 		for(ItemDrop itemDrop : this.loot) {
 			if(itemDrop.chance <= 0) {

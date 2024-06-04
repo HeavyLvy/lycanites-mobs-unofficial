@@ -6,24 +6,26 @@ import com.lycanitesmobs.client.obj.VBOObjModel;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.info.CreatureManager;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.Pose;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.RenderNameTagEvent;
 
 @OnlyIn(Dist.CLIENT)
-public class CreatureRenderer extends MobRenderer<BaseCreatureEntity, CreatureModel> {
-    public CreatureRenderer(String entityID, EntityRendererManager renderManager, float shadowSize) {
+public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<T, CreatureModel<T>> {
+    public CreatureRenderer(String entityID, EntityRendererProvider.Context renderManager, float shadowSize) {
     	super(renderManager, ModelManager.getInstance().getCreatureModel(CreatureManager.getInstance().getCreature(entityID), null), shadowSize);
 		if(this.model == null)
 			return;
@@ -39,7 +41,7 @@ public class CreatureRenderer extends MobRenderer<BaseCreatureEntity, CreatureMo
 	 * @param brightness The brightness of the mob based on block location, etc.
 	 */
 	@Override
-	public void render(BaseCreatureEntity entity, float partialTicks, float yaw, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int brightness) {
+	public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
 		// Get Model and Layers:
 		try {
 			this.layers.clear();
@@ -58,16 +60,16 @@ public class CreatureRenderer extends MobRenderer<BaseCreatureEntity, CreatureMo
 		boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
 		this.model.riding = shouldSit;
 		this.model.young = entity.isBaby();
-		float renderYaw = MathHelper.clamp(yaw, entity.yBodyRotO, entity.yBodyRot);
-		float renderYawHead = MathHelper.clamp(yaw, entity.yHeadRotO, entity.yHeadRot);
+		float renderYaw = LMHelperClass.convertToFloat(LMHelperClass.clamp(yaw, entity.yBodyRotO, entity.yBodyRot));
+		float renderYawHead = LMHelperClass.convertToFloat(LMHelperClass.clamp(yaw, entity.yHeadRotO, entity.yHeadRot));
 
 		// Looking Yaw:
 		float lookYaw = renderYawHead - renderYaw;
 		if(shouldSit && entity.getVehicle() instanceof LivingEntity) {
 			LivingEntity livingentity = (LivingEntity)entity.getVehicle();
-			renderYaw = MathHelper.clamp(yaw, livingentity.yBodyRotO, livingentity.yBodyRot);
+			renderYaw = LMHelperClass.convertToFloat(LMHelperClass.clamp(yaw, livingentity.yBodyRotO, livingentity.yBodyRot));
 			lookYaw = renderYawHead - renderYaw;
-			float renderYawMountOffset = MathHelper.wrapDegrees(lookYaw);
+			float renderYawMountOffset = LMHelperClass.convertToFloat(LMHelperClass.wrapDegrees(lookYaw));
 			if (renderYawMountOffset < -85.0F) {
 				renderYawMountOffset = -85.0F;
 			}
@@ -86,7 +88,7 @@ public class CreatureRenderer extends MobRenderer<BaseCreatureEntity, CreatureMo
 
 		// Looking Pitch:
 		matrixStack.pushPose();
-		float lookPitch = MathHelper.lerp(yaw, entity.xRotO, entity.xRot);
+		float lookPitch = Mth.lerp(yaw, entity.xRotO, entity.xRotO);
 		if(entity.getPose() == Pose.SLEEPING) {
 			Direction direction = entity.getBedOrientation();
 			if (direction != null) {
@@ -104,8 +106,8 @@ public class CreatureRenderer extends MobRenderer<BaseCreatureEntity, CreatureMo
 		float distance = 0.0F;
 		float time = 0.0F;
 		if (!shouldSit && entity.isAlive()) {
-			distance = MathHelper.lerp(yaw, entity.animationSpeedOld, entity.animationSpeed);
-			time = entity.animationPosition - entity.animationSpeed * (1.0F - yaw);
+			distance = entity.walkAnimation.speed(yaw);
+			time = entity.walkAnimation.position() - entity.walkAnimation.speed() * (1.0F - yaw);
 			if (entity.isBaby()) {
 				time *= 3.0F;
 			}
@@ -128,11 +130,11 @@ public class CreatureRenderer extends MobRenderer<BaseCreatureEntity, CreatureMo
 		// Render Model Layers:
 		this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
 		this.renderModel(entity, matrixStack, renderTypeBuffer, null, time, distance, loop, lookYaw, lookPitch, 1, brightness, fade, invisible, allyInvisible);
-		for(LayerRenderer<BaseCreatureEntity, CreatureModel> layer : this.layers) {
+		for(RenderLayer<T, CreatureModel<T>> layer : this.layers) {
 			if(!(layer instanceof LayerCreatureBase)) {
 				continue;
 			}
-			LayerCreatureBase layerCreatureBase = (LayerCreatureBase)layer;
+			LayerCreatureBase<T> layerCreatureBase = (LayerCreatureBase<T>)layer;
 			if(!layerCreatureBase.canRenderLayer(entity, scale)) {
 				continue;
 			}
@@ -145,10 +147,10 @@ public class CreatureRenderer extends MobRenderer<BaseCreatureEntity, CreatureMo
 
 		// Render Name Tag
 		if (!invisible) {
-			net.minecraftforge.client.event.RenderNameplateEvent renderNameplateEvent = new net.minecraftforge.client.event.RenderNameplateEvent(entity, entity.getDisplayName(), this, matrixStack, renderTypeBuffer, fade, time);
+			RenderNameTagEvent renderNameplateEvent = new RenderNameTagEvent(entity, entity.getDisplayName(), this, matrixStack, renderTypeBuffer, fade, time);
 			net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(renderNameplateEvent);
 			if (renderNameplateEvent.getResult() != net.minecraftforge.eventbus.api.Event.Result.DENY && (renderNameplateEvent.getResult() == net.minecraftforge.eventbus.api.Event.Result.ALLOW || this.shouldShowName(entity))) {
-				ITextComponent entityName = entity.getName();
+				MutableComponent entityName = entity.getName().copy();
 				if (entityName != null) {
 					this.renderNameTag(entity, entityName, matrixStack, renderTypeBuffer, brightness);
 				}
@@ -173,7 +175,7 @@ public class CreatureRenderer extends MobRenderer<BaseCreatureEntity, CreatureMo
 	 * @param invisible If true, the entity has invisibility or some form of stealth.
 	 * @param allyInvisible If true, the entity has invisibility or some form of stealth but is allied to the player so should be translucent, etc.
 	 */
-	protected void renderModel(BaseCreatureEntity entity, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade, boolean invisible, boolean allyInvisible) {
+	protected void renderModel(BaseCreatureEntity entity, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade, boolean invisible, boolean allyInvisible) {
 		ResourceLocation texture = this.getEntityTexture(entity, layer);
 
 		// Render Model
@@ -182,7 +184,7 @@ public class CreatureRenderer extends MobRenderer<BaseCreatureEntity, CreatureMo
 			VBOObjModel.renderType = CustomRenderStates.getObjVBORenderType(this.getMainModel().getBlending(entity, layer), this.getMainModel().getGlow(entity, layer));
 			VBOObjModel.renderNormal = true;
 		}
-		if (entity.isGlowing()) {
+		if (entity.isCurrentlyGlowing()) {
 			VBOObjModel.renderOutline = true;
 		}
 		VBOObjModel.tex = texture;

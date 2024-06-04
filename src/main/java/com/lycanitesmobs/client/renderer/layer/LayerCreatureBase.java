@@ -14,7 +14,7 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
-public class LayerCreatureBase extends RenderLayer<BaseCreatureEntity, CreatureModel> {
+public class LayerCreatureBase<T extends BaseCreatureEntity> extends RenderLayer<T, CreatureModel<T>> {
     public CreatureRenderer renderer;
     public String name;
     public boolean glow = false;

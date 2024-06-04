@@ -20,7 +20,7 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class CreatureModel extends EntityModel<BaseCreatureEntity> implements IAnimationModel {
+public abstract class CreatureModel<T extends BaseCreatureEntity> extends EntityModel<T> implements IAnimationModel {
 
 	// Matrix:
 	public PoseStack matrixStack;
@@ -74,7 +74,7 @@ public abstract class CreatureModel extends EntityModel<BaseCreatureEntity> impl
 	 * @param brightness The brightness of the mob based on block location, etc.
 	 * @param fade The damage fade to render (red flash when damaged).
 	 */
-	public abstract void render(BaseCreatureEntity entity, PoseStack matrixStack, VertexConsumer vertexBuilder, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade);
+	public abstract void render(T entity, PoseStack matrixStack, VertexConsumer vertexBuilder, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade);
 
 	/**
 	 * Called by the renderer to add custom layers to it.

@@ -11,20 +11,28 @@ import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class RenderRegister {
 
     public void registerModelLoaders() {
         //ModelLoaderRegistry.registerLoader(new ResourceLocation(LycanitesMobs.MODID), new ModelLoader()); Not needed.
+        final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modBus.addListener(RenderRegister::registerEntityRenders);
+    }
+    public static void init() {
+
+
     }
     @SubscribeEvent
-    public void registerRenderFactories(EntityRenderersEvent.RegisterRenderers event) {
+    public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
 
         // Creatures:
         for(CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
             if(creatureInfo.dummy) {
-                event.registerEntityRenderer(creatureInfo.getEntityType(), new RenderFactoryNone<BaseProjectileEntity>(creatureInfo.entityClass));
+                event.registerEntityRenderer(creatureInfo.getEntityType(), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
             }
             RenderingRegistry.registerEntityRenderingHandler(creatureInfo.getEntityType(), new CreatureRenderFactory<BaseCreatureEntity>(creatureInfo));
         }

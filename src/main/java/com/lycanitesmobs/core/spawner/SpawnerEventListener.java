@@ -4,18 +4,25 @@ import com.lycanitesmobs.ExtendedWorld;
 import com.lycanitesmobs.core.info.BlockReference;
 import com.lycanitesmobs.core.spawner.trigger.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.ItemFishedEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -205,8 +212,8 @@ public class SpawnerEventListener {
 	
 	/** This uses the player update events to update Tick Spawn Triggers. **/
 	@SubscribeEvent
-	public void onEntityUpdate(LivingUpdateEvent event) {
-		LivingEntity entity = event.getEntityLiving();
+	public void onEntityUpdate(LivingEvent.LivingTickEvent event) {
+		LivingEntity entity = event.getEntity();
 		if(entity == null || !(entity instanceof Player) || entity.getCommandSenderWorld() == null || entity.getCommandSenderWorld().isClientSide || event.isCanceled())
 			return;
 		
@@ -235,7 +242,7 @@ public class SpawnerEventListener {
 	@SubscribeEvent
 	public void onEntityDeath(LivingDeathEvent event) {
 		// Get Killed:
-		LivingEntity killedEntity = event.getEntityLiving();
+		LivingEntity killedEntity = event.getEntity();
 		if(killedEntity == null || killedEntity.getCommandSenderWorld().isClientSide || event.isCanceled()) {
 			return;
 		}
@@ -258,9 +265,9 @@ public class SpawnerEventListener {
 	// ==================================================
 	/** This uses the entity spawn events to update Entity Spawned Spawn Triggers. **/
 	@SubscribeEvent
-	public void onEntitySpawn(LivingSpawnEvent event) {
+	public void onEntitySpawn(MobSpawnEvent event) {
 		// Get Spawned:
-		LivingEntity spawnedEntity = event.getEntityLiving();
+		LivingEntity spawnedEntity = event.getEntity();
 		if(spawnedEntity == null || spawnedEntity.getCommandSenderWorld().isClientSide || event.isCanceled()) {
 			return;
 		}
@@ -360,15 +367,15 @@ public class SpawnerEventListener {
 	/** This uses the block break events to update Block Spawn Triggers. **/
     @SubscribeEvent
     public void onBlockBreak(BlockEvent.BreakEvent event) {
-		if(event.getState() == null || !(event.getWorld() instanceof World) || event.getWorld().isClientSide() || event.isCanceled()) {
+		if(event.getState() == null || !(event.getLevel() instanceof Level) || event.getLevel().isClientSide() || event.isCanceled()) {
 			return;
 		}
-		World world = (World)event.getWorld();
+		Level world = (Level)event.getLevel();
 		this.onBlockBreak(world, event.getPos(), event.getState(), event.getPlayer(), 0);
     }
 
-	public void onBlockBreak(World world, BlockPos blockPos, BlockState blockState, Player player, int chain) {
-		if(player != null && (!testOnCreative && player.abilities.instabuild)) {
+	public void onBlockBreak(Level world, BlockPos blockPos, BlockState blockState, Player player, int chain) {
+		if(player != null && (!testOnCreative && player.getAbilities().instabuild)) {
 			return;
 		}
 
@@ -385,17 +392,17 @@ public class SpawnerEventListener {
 	/** This uses the block place events to update Block Spawn Triggers. **/
 	@SubscribeEvent
 	public void onBlockPlace(BlockEvent.EntityPlaceEvent.EntityPlaceEvent event) {
-		if(event.getState() == null || !(event.getWorld() instanceof World) || event.getWorld().isClientSide() || event.isCanceled()) {
+		if(event.getState() == null || !(event.getLevel() instanceof Level) || event.getLevel().isClientSide() || event.isCanceled()) {
 			return;
 		}
-		World world = (World)event.getWorld();
+		Level world = (Level)event.getLevel();
 		if(event.getEntity() instanceof Player) {
 			this.onBlockPlace(world, event.getPos(), event.getState(), (Player) event.getEntity(), 0);
 		}
 	}
 
-	public void onBlockPlace(World world, BlockPos blockPos, BlockState blockState, Player player, int chain) {
-		if(player != null && (!testOnCreative && player.abilities.instabuild)) {
+	public void onBlockPlace(Level world, BlockPos blockPos, BlockState blockState, Player player, int chain) {
+		if(player != null && (!testOnCreative && player.getAbilities().instabuild)) {
 			return;
 		}
 
@@ -412,12 +419,12 @@ public class SpawnerEventListener {
 	/** This uses the player sleep in bed event to spawn mobs. **/
 	@SubscribeEvent
 	public void onSleep(PlayerSleepInBedEvent event) {
-		Player player = event.getPlayer();
+		Player player = event.getEntity();
 		if(player == null || player.getCommandSenderWorld().isClientSide || event.isCanceled())
 			return;
 		
 		// Get Coords:
-		World world = player.getCommandSenderWorld();
+		Level world = player.getCommandSenderWorld();
         BlockPos spawnPos = player.blockPosition().offset(0, 0, 1);
 		
 		if(world.isClientSide || world.isDay())
@@ -433,7 +440,7 @@ public class SpawnerEventListener {
 		
 		// Interrupt:
 		if(interrupted) {
-			event.setResult(Player.SleepResult.NOT_SAFE);
+			event.setResult(Player.BedSleepingProblem.NOT_SAFE);
 		}
 	}
 
@@ -444,14 +451,14 @@ public class SpawnerEventListener {
 	/** This uses the item fished event to spawn mobs. **/
 	@SubscribeEvent
 	public void onFished(ItemFishedEvent event) {
-		Player player = event.getPlayer();
+		Player player = event.getEntity();
 		if(player == null || player.getCommandSenderWorld().isClientSide || event.isCanceled())
 			return;
-		if(!testOnCreative && player.abilities.instabuild) { // No Spawning for Creative Players
+		if(!testOnCreative && player.getAbilities().instabuild) { // No Spawning for Creative Players
 			return;
 		}
 
-		World world = player.getCommandSenderWorld();
+		Level world = player.getCommandSenderWorld();
 		Entity hookEntity = event.getHookEntity();
 		for(FishingSpawnTrigger spawnTrigger : this.fishingSpawnTriggers) {
 			spawnTrigger.onFished(world, player, hookEntity);
@@ -470,13 +477,13 @@ public class SpawnerEventListener {
 			return;
 		}
 
-		World world = event.getWorld();
+		Level world = event.getLevel();
 		Player player = null;
-		if(explosion.getSourceMob() instanceof Player) {
-			player = (Player)explosion.getSourceMob();
+		if(explosion.getExploder() instanceof Player) {
+			player = (Player)explosion.getExploder();
 		}
 
-		if(player != null && (!testOnCreative && player.abilities.instabuild)) { // No Spawning for Creative Players
+		if(player != null && (!testOnCreative && player.getAbilities().instabuild)) { // No Spawning for Creative Players
 			return;
 		}
 
@@ -495,10 +502,10 @@ public class SpawnerEventListener {
 	/** This uses the block neighbor notify event with checks for lava and water mixing to spawn mobs. **/
 	@SubscribeEvent
 	public void onLavaMix(BlockEvent.FluidPlaceBlockEvent event) {
-		if(!(event.getWorld() instanceof World)) {
+		if(!(event.getLevel() instanceof Level)) {
 			return;
 		}
-		World world = (World)event.getWorld();
+		Level world = (Level)event.getLevel();
 
 		if (event.getOriginalState().getBlock() == Blocks.LAVA) {
 			if (event.getNewState().getBlock() == Blocks.OBSIDIAN) {

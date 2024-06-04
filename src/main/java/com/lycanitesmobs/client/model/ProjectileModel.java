@@ -6,9 +6,12 @@ import com.lycanitesmobs.client.renderer.layer.LayerProjectileBase;
 import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.model.EntityModel;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.AxisAngle4f;
+import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
@@ -114,7 +117,7 @@ public class ProjectileModel extends EntityModel<BaseProjectileEntity> implement
 
 	/** Returns the texture offset to be used for this part on the base layer (for scrolling, etc). **/
 	public Vector2f getBaseTextureOffset(String partName, BaseProjectileEntity entity, float loop) {
-		return Vector2f.ZERO;
+		return new Vector2f(0,0);
 	}
 
 	/**
@@ -173,20 +176,20 @@ public class ProjectileModel extends EntityModel<BaseProjectileEntity> implement
 	@Override
 	public void doRotate(float rotX, float rotY, float rotZ) {
 		if (rotX != 0.0F) {
-			this.matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotX));
+			this.matrixStack.mulPose(Axis.XP.rotationDegrees(rotX));
 		}
 		if (rotY != 0.0F) {
-			this.matrixStack.mulPose(Vector3f.YP.rotationDegrees(rotY));
+			this.matrixStack.mulPose(Axis.YP.rotationDegrees(rotY));
 		}
 		if (rotZ != 0.0F) {
-			this.matrixStack.mulPose(Vector3f.ZP.rotationDegrees(rotZ));
+			this.matrixStack.mulPose(Axis.ZP.rotationDegrees(rotZ));
 		}
 	}
 
 	@Override
 	public void doAngle(float rotation, float angleX, float angleY, float angleZ) {
 		if (rotation != 0.0F && (angleX != 0.0F || angleY != 0.0F || angleZ != 0.0F)) {
-			this.matrixStack.mulPose(new Vector3f(angleX, angleY, angleZ).rotationDegrees(rotation));
+			this.matrixStack.mulPose(new Quaternionf(new AxisAngle4f(rotation,angleX, angleY, angleZ)));
 		}
 	}
 

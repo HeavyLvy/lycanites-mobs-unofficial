@@ -11,7 +11,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class NoneRenderer extends EntityRenderer<Entity> {
+public class NoneRenderer<T extends Entity> extends EntityRenderer<T> {
     
     // ==================================================
     //                     Constructor
@@ -26,7 +26,7 @@ public class NoneRenderer extends EntityRenderer<Entity> {
     //                     Do Render
     // ==================================================
     @Override
-    public void render(Entity p_114485_, float p_114486_, float p_114487_, PoseStack p_114488_, MultiBufferSource p_114489_, int p_114490_) {
+    public void render(T p_114485_, float p_114486_, float p_114487_, PoseStack p_114488_, MultiBufferSource p_114489_, int p_114490_) {
         super.render(p_114485_, p_114486_, p_114487_, p_114488_, p_114489_, p_114490_);
     }
     
