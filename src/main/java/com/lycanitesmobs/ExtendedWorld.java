@@ -17,10 +17,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.LevelCapabilityData;
 
 import java.util.*;
 
-public class ExtendedWorld extends SavedData {
+public class ExtendedWorld extends SavedData implements INBTSerializable<CompoundTag> {
 	public static String EXT_PROP_NAME = "LycanitesMobs";
 	public static Map<Level, ExtendedWorld> loadedExtWorlds = new HashMap<>();
 
@@ -72,7 +74,7 @@ public class ExtendedWorld extends SavedData {
 		if(world instanceof ServerLevel) {
 			ServerLevel serverWorld = (ServerLevel) world;
 			world.increaseMaxEntityRadius(25);
-			ExtendedWorld worldSavedData = serverWorld.getDataStorage().get(ExtendedWorld::new, EXT_PROP_NAME);
+			ExtendedWorld worldSavedData = serverWorld.getDataStorage().get(() -> this., EXT_PROP_NAME);
 			if (worldSavedData != null) {
 				worldExt = worldSavedData;
 				worldExt.world = world;
@@ -554,5 +556,12 @@ public class ExtendedWorld extends SavedData {
 
         return nbtTagCompound;
 	}
-	
+	@Override
+	public void deserializeNBT(CompoundTag p_deserializeNBT_1_) {
+		this.load(p_deserializeNBT_1_);
+	}
+	@Override
+	public CompoundTag serializeNBT() {
+		return this.save(new CompoundTag());
+	}
 }

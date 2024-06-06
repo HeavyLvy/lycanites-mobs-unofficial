@@ -1,36 +1,30 @@
 package com.lycanitesmobs.core.capabilities;
 
 import com.lycanitesmobs.core.entity.ExtendedEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.Capability;
 
-public class ExtendedEntityStorage implements Capability.IStorage<IExtendedEntity> {
+public class ExtendedEntityStorage  {
 
     // ==================================================
     //                        NBT
     // ==================================================
     // ========== Read ===========
     /** Reads a list of Creature Knowledge from a player's NBTTag. **/
-    @Override
-    public void readNBT(Capability<IExtendedEntity> capability, IExtendedEntity instance, Direction facing, INBT nbt) {
-        if(!(instance instanceof ExtendedEntity) || !(nbt instanceof CompoundNBT))
+    public void readNBT(Capability<ExtendedEntity> capability, ExtendedEntity instance, Direction facing, CompoundTag nbt) {
+        if(!(instance instanceof ExtendedEntity) || !(nbt instanceof CompoundTag))
             return;
-        ExtendedEntity extendedEntity = (ExtendedEntity)instance;
-        CompoundNBT extTagCompound = (CompoundNBT)nbt;
-        extendedEntity.readNBT(extTagCompound);
+        instance.readNBT(nbt);
     }
 
     // ========== Write ==========
     /** Writes a list of Creature Knowledge to a player's NBTTag. **/
-    @Override
-    public INBT writeNBT(Capability<IExtendedEntity> capability, IExtendedEntity instance, Direction facing) {
+    public CompoundTag writeNBT(Capability<ExtendedEntity> capability, ExtendedEntity instance, Direction facing) {
         if(!(instance instanceof ExtendedEntity))
             return null;
-        ExtendedEntity extendedEntity = (ExtendedEntity)instance;
-        CompoundNBT extTagCompound = new CompoundNBT();
-        extendedEntity.writeNBT(extTagCompound);
+        CompoundTag extTagCompound = new CompoundTag();
+        instance.writeNBT(extTagCompound);
         return extTagCompound;
     }
 }

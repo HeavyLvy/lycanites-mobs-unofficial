@@ -33,6 +33,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.scores.Team;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -529,8 +530,8 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 					}
 				}
             }
-			else if(target instanceof TameableEntity) {
-				TameableEntity tamedTarget = (TameableEntity)target;
+			else if(target instanceof OwnableEntity) {
+				OwnableEntity tamedTarget = (OwnableEntity)target;
 				if(tamedTarget.getOwner() != null) {
 					if(!this.getCommandSenderWorld().getServer().isPvpAllowed() || !this.isPVP() || tamedTarget.getOwner() == this.getOwner()) {
 						return true;
@@ -569,8 +570,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 		if (target instanceof Mob) {
 			Mob mobTarget = (Mob)target;
 			if (this.getOwner() instanceof Player && mobTarget.getHealth() > 0 && mobTarget.getHealth() - totalDamage <= 0) {
-				DamageSource creditSource = new MinionEntityDamageSource(this.getDamageSource(null), this.getOwner());
-				creditSource.bypassArmor().bypassMagic();
+				DamageSource creditSource = new MinionEntityDamageSource(this.getDamageSource(null).typeHolder(), this.getOwner());
 				return target.hurt(creditSource, totalDamage);
 			}
 		}
@@ -584,7 +584,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 			return false;
 		if(target == null)
 			return false;
-		if(!this.canSee(target))
+		if(!this.hasLineOfSight(target))
 			return false;
 
 		float totalDamage = this.getAttackDamage(damageScale);
@@ -593,7 +593,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 		if (target instanceof Mob) {
 			Mob mobTarget = (Mob)target;
 			if (this.getOwner() instanceof Player && mobTarget.getHealth() > 0 && mobTarget.getHealth() - totalDamage <= 0) {
-				DamageSource creditSource = new MinionEntityDamageSource(this.getDamageSource(null), this.getOwner());
+				DamageSource creditSource = new MinionEntityDamageSource(this.getDamageSource(null).typeHolder(), this.getOwner());
 				creditSource.is(DamageTypes.MAGIC);
 				return target.hurt(creditSource, totalDamage);
 			}

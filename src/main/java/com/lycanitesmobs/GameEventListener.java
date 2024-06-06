@@ -3,6 +3,8 @@ package com.lycanitesmobs;
 import com.lycanitesmobs.core.block.BlockFireBase;
 import com.lycanitesmobs.core.capabilities.CapabilityProviderEntity;
 import com.lycanitesmobs.core.capabilities.CapabilityProviderPlayer;
+import com.lycanitesmobs.core.capabilities.IExtendedEntity;
+import com.lycanitesmobs.core.capabilities.IExtendedPlayer;
 import com.lycanitesmobs.core.config.ConfigExtra;
 import com.lycanitesmobs.core.entity.*;
 import com.lycanitesmobs.core.info.ItemConfig;
@@ -16,6 +18,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
@@ -62,16 +66,14 @@ public class GameEventListener {
     // ==================================================
     //                Attach Capabilities
     // ==================================================
-    @SubscribeEvent
-    public void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        if(event.getObject() instanceof LivingEntity) {
-            event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "entity"), new CapabilityProviderEntity());
-        }
-
-        if(event.getObject() instanceof Player) {
-            event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "player"), new CapabilityProviderPlayer());
-        }
-    }
+	@SubscribeEvent
+	public static void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
+		if (event.getObject() instanceof Player) {
+			event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "player"), new CapabilityProviderPlayer());
+		} else {
+			event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "entity"), new CapabilityProviderEntity());
+		}
+	}
 
 
     // ==================================================
@@ -84,9 +86,16 @@ public class GameEventListener {
 			extendedPlayer.backupPlayer();
 		}
     }
-
-
 	// ==================================================
+	//                Register Capabilities
+	// ==================================================
+	@SubscribeEvent
+	public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
+		event.register(ExtendedPlayer.class);
+		event.register(ExtendedEntity.class);
+
+	}
+		// ==================================================
     //                Entity Constructing
     // ==================================================
 	@SubscribeEvent

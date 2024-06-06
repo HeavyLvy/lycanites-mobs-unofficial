@@ -2,7 +2,6 @@ package com.lycanitesmobs.core.entity;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.VersionChecker;
-import com.lycanitesmobs.core.capabilities.IExtendedPlayer;
 import com.lycanitesmobs.core.config.ConfigExtra;
 import com.lycanitesmobs.core.info.*;
 import com.lycanitesmobs.core.item.summoningstaff.ItemStaffSummoning;
@@ -11,7 +10,6 @@ import com.lycanitesmobs.core.pets.PetEntry;
 import com.lycanitesmobs.core.pets.PetManager;
 import com.lycanitesmobs.core.pets.PlayerFamiliars;
 import com.lycanitesmobs.core.pets.SummonSet;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -27,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ExtendedPlayer implements IExtendedPlayer {
+public class ExtendedPlayer {
     public static Map<Player, ExtendedPlayer> clientExtendedPlayers = new HashMap<>();
 	public static Map<Player, ExtendedPlayer> serverExtendedPlayers = new HashMap<>();
 	public static Map<UUID, CompoundTag> backupNBTTags = new HashMap<>();
@@ -107,18 +105,11 @@ public class ExtendedPlayer implements IExtendedPlayer {
         }
 
         // Server Side:
-        IExtendedPlayer iExtendedPlayer = player.getCapability(LycanitesMobs.EXTENDED_PLAYER, null).orElse(null);
-		if(!(iExtendedPlayer instanceof ExtendedPlayer)) {
-			if(serverExtendedPlayers.containsKey(player)) {
-				return serverExtendedPlayers.get(player);
-			}
-			return null;
-		}
-        ExtendedPlayer extendedPlayer = (ExtendedPlayer)iExtendedPlayer;
-		serverExtendedPlayers.put(player, extendedPlayer);
-        if(extendedPlayer.getPlayer() != player)
-            extendedPlayer.setPlayer(player);
-        return extendedPlayer;
+		ExtendedPlayer iExtendedPlayer = player.getCapability(LycanitesMobs.EXTENDED_PLAYER, null).orElse(null);
+        serverExtendedPlayers.put(player, iExtendedPlayer);
+        if(iExtendedPlayer.getPlayer() != player)
+            iExtendedPlayer.setPlayer(player);
+        return iExtendedPlayer;
 	}
 
 

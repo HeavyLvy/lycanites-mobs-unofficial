@@ -3,8 +3,11 @@ package com.lycanitesmobs.core;
 import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stat;
+import net.minecraft.stats.StatFormatter;
 import net.minecraft.stats.StatType;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -51,14 +54,19 @@ public class StatManager {
 		if(!this.statTypes.containsKey(typeName)) {
 			return null;
 		}
-		return this.statTypes.get(typeName).get(new ResourceLocation(LycanitesMobs.modInfo.modid, name), IStatFormatter.DEFAULT);
+		return this.statTypes.get(typeName).get(new ResourceLocation(LycanitesMobs.modInfo.modid, name), StatFormatter.DEFAULT);
 	}
 
 	@SubscribeEvent
-	public void registerStats(RegistryEvent.Register<StatType<?>> event) {
+	public void registerStats(RegisterEvent event) {
 		this.createStatTypes();
-		for(StatType statType : this.statTypes.values()) {
-			event.getRegistry().register(statType);
+		for(StatType<?> statType : this.statTypes.values()) {
+			event.register(ForgeRegistries.Keys.STAT_TYPES,
+					helper -> {
+						helper.register(new ResourceLocation(LycanitesMobs.MODID, "stat type name"), statType);
+					}
+			);
+
 		}
 	}
 }

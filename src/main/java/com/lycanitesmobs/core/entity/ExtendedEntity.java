@@ -2,7 +2,6 @@ package com.lycanitesmobs.core.entity;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
-import com.lycanitesmobs.core.capabilities.IExtendedEntity;
 import com.lycanitesmobs.core.config.ConfigAdmin;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.network.MessageEntityPerched;
@@ -18,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ExtendedEntity implements IExtendedEntity {
+public class ExtendedEntity {
     public static Map<Entity, ExtendedEntity> clientExtendedEntities = new HashMap<>();
     public static List<? extends String> FORCE_REMOVE_ENTITY_IDS;
     public static int FORCE_REMOVE_ENTITY_TICKS = 40;
@@ -78,12 +77,9 @@ public class ExtendedEntity implements IExtendedEntity {
         }
 
         // Server Side:
-        IExtendedEntity iExtendedEntity = entity.getCapability(LycanitesMobs.EXTENDED_ENTITY, null).orElse(null);
-        if(!(iExtendedEntity instanceof ExtendedEntity))
-			return null;
-        ExtendedEntity extendedEntity = (ExtendedEntity)iExtendedEntity;
+		ExtendedEntity extendedEntity = entity.getCapability(LycanitesMobs.EXTENDED_ENTITY, null).orElse(null);
         if(extendedEntity.getEntity() != entity)
-            extendedEntity.setEntity(entity);
+			extendedEntity.setEntity(entity);
         return extendedEntity;
 	}
 	
