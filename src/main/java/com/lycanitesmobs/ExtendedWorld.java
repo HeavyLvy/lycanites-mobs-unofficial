@@ -15,8 +15,10 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LevelCapabilityData;
 
@@ -52,7 +54,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
 	// Dungeons:
 	public Map<UUID, DungeonInstance> dungeons = new HashMap<>();
 
-	
+
 	// ==================================================
     //                   Get for World
     // ==================================================
@@ -74,7 +76,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
 		if(world instanceof ServerLevel) {
 			ServerLevel serverWorld = (ServerLevel) world;
 			world.increaseMaxEntityRadius(25);
-			ExtendedWorld worldSavedData = serverWorld.getDataStorage().get(() -> this., EXT_PROP_NAME);
+			ExtendedWorld worldSavedData = serverWorld.getDataStorage().get(tag -> new ExtendedWorld(), EXT_PROP_NAME);
 			if (worldSavedData != null) {
 				worldExt = worldSavedData;
 				worldExt.world = world;
@@ -82,7 +84,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
 			}
 			else {
 				worldExt = new ExtendedWorld(world);
-				serverWorld.getDataStorage().set(worldExt);
+				serverWorld.getDataStorage().set(EXT_PROP_NAME,worldExt);
 			}
 		}
 
@@ -426,7 +428,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
 	 * @param pos The position to search around.
 	 * @return True if a boss is present.
 	 */
-	public boolean isBossNearby(Vector3d pos) {
+	public boolean isBossNearby(Vec3 pos) {
 		for(BossEntry bossEntry : this.bosses.values()) {
 			if(bossEntry == null || bossEntry.entity == null || !bossEntry.entity.isAlive()) {
 				continue;
@@ -494,7 +496,6 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
 	// ==================================================
     //                    Read From NBT
     // ==================================================
-	@Override
 	public void load(CompoundTag nbtTagCompound) {
 		// Events:
 		if(nbtTagCompound.contains("WorldEventStartTargetTime"))  {

@@ -3,35 +3,42 @@ package com.lycanitesmobs;
 import com.lycanitesmobs.core.block.BlockFireBase;
 import com.lycanitesmobs.core.capabilities.CapabilityProviderEntity;
 import com.lycanitesmobs.core.capabilities.CapabilityProviderPlayer;
-import com.lycanitesmobs.core.capabilities.IExtendedEntity;
-import com.lycanitesmobs.core.capabilities.IExtendedPlayer;
 import com.lycanitesmobs.core.config.ConfigExtra;
 import com.lycanitesmobs.core.entity.*;
 import com.lycanitesmobs.core.info.ItemConfig;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.network.MessagePlayerLeftClick;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -218,7 +225,7 @@ public class GameEventListener {
     // ==================================================
 	@SubscribeEvent
 	public void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-		Player player = event.getPlayer();
+		Player player = event.getEntity();
 		Entity entity = event.getTarget();
         if(player == null || !(entity instanceof LivingEntity))
 			return;
@@ -238,14 +245,14 @@ public class GameEventListener {
     //                 Attack Target Event
     // ==================================================
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
-	public void onAttackTarget(LivingSetAttackTargetEvent event) {
-		Entity targetEntity = event.getTarget();
+	public void onAttackTarget(LivingChangeTargetEvent event) {
+		Entity targetEntity = event.getNewTarget();
 		if(event.getEntity() == null || targetEntity == null) {
 			return;
 		}
 
 		// Better Invisibility:
-		if(!event.getEntity().hasEffect(Effects.INVISIBILITY)) {
+		if(!event.getEntity().hasEffect(MobEffects.INVISIBILITY)) {
 			if(targetEntity.isInvisible()) {
 				if(event.isCancelable())
 					event.setCanceled(true);
@@ -255,7 +262,7 @@ public class GameEventListener {
 		}
 
 		// Can Be Targeted:
-		if(event.getEntity() instanceof MobEntity && targetEntity instanceof BaseCreatureEntity) {
+		if(event.getEntity() instanceof Mob && targetEntity instanceof BaseCreatureEntity) {
 			if(!((BaseCreatureEntity)targetEntity).canBeTargetedBy(event.getEntity())) {
 				//event.getEntity().setRevengeTarget(null);
 				if(event.isCancelable())
@@ -281,16 +288,13 @@ public class GameEventListener {
         ExtendedEntity damagedEntityExt = ExtendedEntity.getForEntity(damagedEntity);
 
 		// True Source Extended Entity:
-		EntityDamageSource entityDamageSource;
-		if(event.getSource() instanceof EntityDamageSource) {
-			entityDamageSource = (EntityDamageSource) event.getSource();
-			if(entityDamageSource.getEntity() != null && entityDamageSource.getEntity() instanceof LivingEntity) {
-				ExtendedEntity attackerExtendedEntity = ExtendedEntity.getForEntity((LivingEntity) entityDamageSource.getEntity());
-				if(attackerExtendedEntity != null) {
-					attackerExtendedEntity.setLastAttackedEntity(damagedEntity);
-				}
-			}
-		}
+		if(event.getSource().getEntity() != null && 
+				event.getSource().getEntity() instanceof LivingEntity entity) {
+            ExtendedEntity attackerExtendedEntity = ExtendedEntity.getForEntity(entity);
+            if(attackerExtendedEntity != null) {
+                attackerExtendedEntity.setLastAttackedEntity(damagedEntity);
+            }
+        }
 
 		// ========== Mounted Protection ==========
 		if(damagedEntity.getVehicle() != null) {
@@ -305,14 +309,14 @@ public class GameEventListener {
 				}
 
 				// Prevent Mounted Entities from Suffocating:
-				if("inWall".equals(event.getSource().msgId)) {
+				if("inWall".equals(event.getSource().getMsgId())) {
 					event.setAmount(0);
 					event.setCanceled(true);
 					return;
 				}
 
 				// Copy Mount Immunities to Rider:
-				if(!creatureRideable.isVulnerableTo(event.getSource().msgId, event.getSource(), event.getAmount())) {
+				if(!creatureRideable.isVulnerableTo(event.getSource().getMsgId(), event.getSource(), event.getAmount())) {
 					event.setAmount(0);
 					event.setCanceled(true);
 					return;
@@ -323,7 +327,7 @@ public class GameEventListener {
         // ========== Picked Up/Feared Protection ==========
         if(damagedEntityExt != null && damagedEntityExt.isPickedUp()) {
             // Prevent Picked Up and Feared Entities from Suffocating:
-            if("inWall".equals(event.getSource().msgId)) {
+            if("inWall".equals(event.getSource().getMsgId())) {
                 event.setAmount(0);
                 event.setCanceled(true);
                 return;
@@ -337,7 +341,7 @@ public class GameEventListener {
     // ==================================================
 	@SubscribeEvent
     public void onLivingDrops(LivingDropsEvent event) {
-		World world = event.getEntity().getCommandSenderWorld();
+		Level world = event.getEntity().getCommandSenderWorld();
 
 		// Seasonal Items:
         if(ItemConfig.seasonalItemDropChance > 0
@@ -372,11 +376,11 @@ public class GameEventListener {
     // ==================================================
 	@SubscribeEvent
     public void onBucketFill(FillBucketEvent event) {
-        World world = event.getLevel();
-        RayTraceResult target = event.getTarget();
-        if(target == null || !(target instanceof BlockRayTraceResult))
+        Level world = event.getLevel();
+        HitResult target = event.getTarget();
+        if(target == null || !(target instanceof BlockHitResult))
             return;
-        BlockPos pos = ((BlockRayTraceResult)target).getBlockPos();
+        BlockPos pos = ((BlockHitResult)target).getBlockPos();
         Block block = world.getBlockState(pos).getBlock();
         Item bucket = ObjectManager.buckets.get(block);
         if(bucket != null && world.getFluidState(pos).getAmount() == 0) {
@@ -401,12 +405,12 @@ public class GameEventListener {
 		}
 
 		if(event.getPlayer() != null && !event.getPlayer().isCreative()) {
-			if (event.getLevel() instanceof World) {
-				ExtendedWorld extendedWorld = ExtendedWorld.getForWorld((World) event.getLevel());
-				if (!(event.getState().getBlock() instanceof BlockFireBase) && extendedWorld.isBossNearby(Vector3d.atLowerCornerOf(event.getPos()))) {
+			if (event.getLevel() instanceof Level) {
+				ExtendedWorld extendedWorld = ExtendedWorld.getForWorld((Level) event.getLevel());
+				if (!(event.getState().getBlock() instanceof BlockFireBase) && extendedWorld.isBossNearby(Vec3.atLowerCornerOf(event.getPos()))) {
 					event.setCanceled(true);
 					event.setResult(Event.Result.DENY);
-					event.getPlayer().displayClientMessage(new TranslationTextComponent("boss.block.protection.break"), true);
+					event.getPlayer().displayClientMessage(Component.translatable("boss.block.protection.break"), true);
 					return;
 				}
 			}
@@ -433,12 +437,12 @@ public class GameEventListener {
 		}
 
 		if(event.getEntity() instanceof Player && !((Player)event.getEntity()).isCreative()) {
-			if (event.getLevel() instanceof World) {
-				ExtendedWorld extendedWorld = ExtendedWorld.getForWorld((World) event.getLevel());
-				if (extendedWorld.isBossNearby(Vector3d.atLowerCornerOf(event.getPos()))) {
+			if (event.getLevel() instanceof Level) {
+				ExtendedWorld extendedWorld = ExtendedWorld.getForWorld((Level) event.getLevel());
+				if (extendedWorld.isBossNearby(Vec3.atLowerCornerOf(event.getPos()))) {
 					event.setCanceled(true);
 					event.setResult(Event.Result.DENY);
-					((Player)event.getEntity()).displayClientMessage(new TranslationTextComponent("boss.block.protection.place"), true);
+					((Player)event.getEntity()).displayClientMessage(Component.translatable("boss.block.protection.place"), true);
 					return;
 				}
 			}
@@ -450,12 +454,11 @@ public class GameEventListener {
 	//                   Check Spawn
 	// ==================================================
 	@SubscribeEvent
-	public void onCheckSpawn(LivingSpawnEvent.CheckSpawn event) {
-		if(event.isSpawner()) {
+	public void onCheckSpawn(MobSpawnEvent.PositionCheck event) {
+		if(event.getSpawnType() == MobSpawnType.SPAWNER) {
 			LivingEntity entity = event.getEntity();
-			if(entity instanceof BaseCreatureEntity && event.getLevel() instanceof World) {
-				BaseCreatureEntity baseCreatureEntity = (BaseCreatureEntity)entity;
-				if(!baseCreatureEntity.checkSpawnGroupLimit((World) event.getLevel(), event.getSpawner().getPos(), 16)) {
+			if(entity instanceof BaseCreatureEntity baseCreatureEntity && event.getLevel() instanceof Level) {
+                if(!baseCreatureEntity.checkSpawnGroupLimit((Level) event.getLevel(), event.getSpawner().getSpawnerEntity().blockPosition(), 16)) {
 					event.setResult(Event.Result.DENY);
 				}
 			}
@@ -492,27 +495,24 @@ public class GameEventListener {
 	@SubscribeEvent
 	public void onProjectileImpact(ProjectileImpactEvent event) {
 		Entity shooter = null;
-		if (!(event.getRayTraceResult() instanceof EntityRayTraceResult)) {
+		if (!(event.getRayTraceResult() instanceof EntityHitResult entityRayTraceResult)) {
 			return;
 		}
-		EntityRayTraceResult entityRayTraceResult = (EntityRayTraceResult)event.getRayTraceResult();
-		Entity target = entityRayTraceResult.getEntity();
+        Entity target = entityRayTraceResult.getEntity();
 		if (!(target instanceof BaseCreatureEntity)) {
 			return;
 		}
 		BaseCreatureEntity targetCreature = (BaseCreatureEntity)target;
 
-		if (event.getEntity() instanceof ProjectileEntity) {
-			ProjectileEntity projectileEntity = (ProjectileEntity)event.getEntity();
-			shooter = projectileEntity.getOwner();
+		if (event.getEntity() instanceof Projectile projectileEntity) {
+            shooter = projectileEntity.getOwner();
 		}
-		if (event.getEntity() instanceof ProjectileItemEntity) {
-			ProjectileItemEntity projectileItemEntity = (ProjectileItemEntity)event.getEntity();
-			shooter = projectileItemEntity.getOwner();
+		if (event.getEntity() instanceof ThrowableItemProjectile projectileItemEntity) {
+            shooter = projectileItemEntity.getOwner();
 		}
 
 		if (shooter != null && !targetCreature.isVulnerableTo(shooter)) {
-			event.setCanceled(true);
+			event.setImpactResult(ProjectileImpactEvent.ImpactResult.STOP_AT_CURRENT_NO_DAMAGE);
 		}
 	}
 }

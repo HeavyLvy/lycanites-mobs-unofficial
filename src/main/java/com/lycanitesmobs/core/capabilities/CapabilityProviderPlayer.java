@@ -33,12 +33,12 @@ public class CapabilityProviderPlayer implements ICapabilityProvider, ICapabilit
 	@Override
 	public CompoundTag serializeNBT() {
 		ExtendedPlayerStorage storage = new ExtendedPlayerStorage();
-		return storage.writeNBT(LycanitesMobs.EXTENDED_PLAYER, createInstance(), null);
+		return storage.writeNBT(LycanitesMobs.EXTENDED_PLAYER, this.getCapability(LycanitesMobs.EXTENDED_PLAYER, null).orElse(null), null);
 	}
 
 	@Override
 	public void deserializeNBT(CompoundTag nbt) {
 		ExtendedPlayerStorage storage = new ExtendedPlayerStorage();
-		storage.readNBT(LycanitesMobs.EXTENDED_PLAYER, createInstance(), null, nbt);
+		storage.readNBT(LycanitesMobs.EXTENDED_PLAYER, this.getCapability(LycanitesMobs.EXTENDED_PLAYER, null).orElse(null), null, nbt);
 	}
 }

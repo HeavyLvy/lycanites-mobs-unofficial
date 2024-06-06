@@ -32,12 +32,12 @@ public class CapabilityProviderEntity implements ICapabilityProvider, ICapabilit
 	@Override
 	public CompoundTag serializeNBT() {
 		ExtendedEntityStorage storage = new ExtendedEntityStorage();
-		return storage.writeNBT(LycanitesMobs.EXTENDED_ENTITY, createInstance(), null);
+		return storage.writeNBT(LycanitesMobs.EXTENDED_ENTITY, this.getCapability(LycanitesMobs.EXTENDED_ENTITY, null).orElse(null), null);
 	}
 
 	@Override
 	public void deserializeNBT(CompoundTag nbt) {
 		ExtendedEntityStorage storage = new ExtendedEntityStorage();
-		storage.readNBT(LycanitesMobs.EXTENDED_ENTITY, createInstance(), null, nbt);
+		storage.readNBT(LycanitesMobs.EXTENDED_ENTITY, this.getCapability(LycanitesMobs.EXTENDED_ENTITY, null).orElse(null), null, nbt);
 	}
 }
