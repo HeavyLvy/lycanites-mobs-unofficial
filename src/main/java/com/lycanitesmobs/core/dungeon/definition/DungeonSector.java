@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.helpers.JSONHelper;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.RandomSource;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
@@ -102,7 +103,7 @@ public class DungeonSector {
 	 * @param random The instance of Random to use.
 	 * @return A random size to use.
 	 */
-	public Vector3i getRandomSize(Random random) {
+	public Vector3i getRandomSize(RandomSource random) {
 		int x = this.sizeMin.getX();
 		if(this.sizeMax.getX() > x)
 			x += random.nextInt(this.sizeMax.getX() - x + 1);

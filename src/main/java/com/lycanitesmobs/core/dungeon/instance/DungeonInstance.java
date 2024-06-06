@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.dungeon.DungeonManager;
 import com.lycanitesmobs.core.dungeon.definition.DungeonSchematic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -152,7 +153,7 @@ public class DungeonInstance {
 	 * @param world The world being built in. This cannot be used for placement during WorldGen.
 	 * @param chunkPos The chunk position to build within.
 	 */
-	public void buildChunk(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, Random random) {
+	public void buildChunk(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
 		if(this.complete || this.layout == null || !this.layout.sectorChunkMap.containsKey(chunkPos)) {
 			return;
 		}

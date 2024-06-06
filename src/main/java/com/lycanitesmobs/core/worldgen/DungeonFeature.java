@@ -9,29 +9,32 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-public class DungeonFeature extends Feature<NoFeatureConfig> {
-	public DungeonFeature(Codec<NoFeatureConfig> configFactory) {
+public class DungeonFeature extends Feature<NoneFeatureConfiguration> {
+	public DungeonFeature(Codec<NoneFeatureConfiguration> configFactory) {
 		super(configFactory);
 	}
 
 	@Override
-	public boolean place(ISeedReader reader, ChunkGenerator generator, Random rand, BlockPos pos, NoFeatureConfig config) {
+	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
 		boolean enabled = ConfigDungeons.INSTANCE.dungeonsEnabled.get();
 		int dungeonDistance = ConfigDungeons.INSTANCE.dungeonDistance.get();
 
-		Level world = reader.getLevel();
+		Level world = context.level().getLevel();
 		ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(world);
 		if(!enabled || extendedWorld == null) {
 			return false;
 		}
 		try {
 			int dungeonSizeMax = dungeonDistance;
-			ChunkPos chunkPos = new ChunkPos(pos);
+			ChunkPos chunkPos = new ChunkPos(context.origin());
 			List<DungeonInstance> nearbyDungeons = extendedWorld.getNearbyDungeonInstances(chunkPos, dungeonSizeMax * 2);
 
 			// Create New Instances:
@@ -46,14 +49,14 @@ public class DungeonFeature extends Feature<NoFeatureConfig> {
 						}
 						LycanitesMobs.logDebug("Dungeon", "Creating A New Dungeon At Chunk: X" + (chunkPos.x + (dungeonSizeMax * x)) + " Z" + (chunkPos.z + (dungeonSizeMax * z)));
 						DungeonInstance dungeonInstance = new DungeonInstance();
-						int yPos = reader.getSeaLevel();
+						int yPos = context.level().getSeaLevel();
 						if(yPos < 64) {
 							yPos = 64;
 						}
 						BlockPos dungeonPos = new ChunkPos(chunkPos.x + (dungeonSizeMax * x), chunkPos.z + (dungeonSizeMax * z)).getWorldPosition().offset(7, yPos, 7);
 						dungeonInstance.setOrigin(dungeonPos);
 						if(dungeonInstance.init(world)) {
-							extendedWorld.addDungeonInstance(dungeonInstance, new UUID(rand.nextLong(), rand.nextLong()));
+							extendedWorld.addDungeonInstance(dungeonInstance, new UUID(context.random().nextLong(), context.random().nextLong()));
 							LycanitesMobs.logDebug("Dungeon", "Feature Created: " + dungeonInstance.toString());
 						}
 					}
@@ -63,7 +66,7 @@ public class DungeonFeature extends Feature<NoFeatureConfig> {
 			// Build Dungeons:
 			nearbyDungeons = extendedWorld.getNearbyDungeonInstances(chunkPos, 0);
 			for(DungeonInstance dungeonInstance : nearbyDungeons) {
-				dungeonInstance.buildChunk(reader, world, chunkPos, rand);
+				dungeonInstance.buildChunk(context.level(), world, chunkPos, context.random());
 			}
 		}
 		catch(Exception e) {
@@ -72,4 +75,6 @@ public class DungeonFeature extends Feature<NoFeatureConfig> {
 		}
 		return true;
 	}
+
+
 }

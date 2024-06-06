@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.api.IGroupBoss;
@@ -12,14 +13,20 @@ import com.lycanitesmobs.core.info.CreatureGroup;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.network.MessageEntityVelocity;
 import com.lycanitesmobs.core.util.DamageSourceHelper;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.*;
@@ -27,6 +34,8 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -229,7 +238,7 @@ public class Effects {
 		EffectBase smited = ObjectManager.getEffect("smited");
 		if(smited != null && !entity.getCommandSenderWorld().isClientSide) {
 			if(!invulnerable && entity.hasEffect(smited) && entity.getCommandSenderWorld().getGameTime() % 20 == 0) {
-				float brightness = entity.getBrightness();
+				float brightness = LMHelperClass.getBrightness(entity);
 				if(brightness > 0.5F && entity.getCommandSenderWorld().canSeeSkyFromBelowWater(entity.blockPosition())) {
 					entity.setSecondsOnFire(4);
 				}
@@ -260,7 +269,7 @@ public class Effects {
 		EffectBase swiftswimming = ObjectManager.getEffect("swiftswimming");
 		if(swiftswimming != null && entity instanceof Player) {
 			Player player = (Player)entity;
-			ModifiableAttributeInstance movement = entity.getAttribute(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get());
+			AttributeInstance movement = entity.getAttribute(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get());
 			int amplifier = -1;
 			if(entity.hasEffect(swiftswimming)) {
 				amplifier = entity.getEffect(swiftswimming).getAmplifier();
@@ -352,7 +361,7 @@ public class Effects {
 		boolean invulnerable = false;
 		if(entity instanceof Player) {
 			Player player = (Player)entity;
-			invulnerable = player.abilities.invulnerable;
+			invulnerable = player.getAbilities().invulnerable;
 		}
 		if(invulnerable) {
 			return;
@@ -428,7 +437,7 @@ public class Effects {
 		EffectBase fallresist = ObjectManager.getEffect("fallresist");
 		if(fallresist != null) {
             if(event.getEntity().hasEffect(fallresist)) {
-                if("fall".equals(event.getSource().msgId)) {
+                if("fall".equals(event.getSource().getMsgId())) {
                     event.setAmount(0);
                     event.setCanceled(true);
                 }
@@ -449,7 +458,7 @@ public class Effects {
 		EffectBase fear = ObjectManager.getEffect("fear");
 		if(fear != null) {
 			if(event.getEntity().hasEffect(fear)) {
-				if("inWall".equals(event.getSource().msgId)) {
+				if("inWall".equals(event.getSource().getMsgId())) {
 					event.setAmount(0);
 					event.setCanceled(true);
 				}
@@ -487,7 +496,7 @@ public class Effects {
 				double knockback = target.getEffect(repulsion).getAmplifier() + 2;
 				double xDist = attacker.position().x() - target.position().x();
 				double zDist = attacker.position().z() - target.position().z();
-				double xzDist = Math.max(MathHelper.sqrt(xDist * xDist + zDist * zDist), 0.01D);
+				double xzDist = Math.max(Mth.sqrt(LMHelperClass.convertToFloat(xDist * xDist + zDist * zDist)), 0.01D);
 				double motionCap = 10;
 				double xVel = xDist / xzDist * knockback;
 				double zVel = zDist / xzDist * knockback;
@@ -532,14 +541,14 @@ public class Effects {
 	/** This uses the player sleep in bed event to spawn mobs. **/
 	@SubscribeEvent
 	public void onSleep(PlayerSleepInBedEvent event) {
-		Player player = event.getPlayer();
+		Player player = event.getEntity();
 		if(player == null || player.getCommandSenderWorld().isClientSide || event.isCanceled())
 			return;
 
 		// Insomnia:
 		EffectBase insomnia = ObjectManager.getEffect("insomnia");
 		if(insomnia != null && player.hasEffect(insomnia)) {
-			event.setResult(Player.SleepResult.NOT_SAFE);
+			event.setResult(Player.BedSleepingProblem.NOT_SAFE);
 		}
 	}
 
@@ -573,7 +582,8 @@ public class Effects {
 	// ==================================================
 	/** Get entities that are near the provided entity. **/
 	public <T extends Entity> List<T> getNearbyEntities(Entity searchEntity, Class <? extends T > clazz, final Class filterClass, double range) {
-		return searchEntity.getCommandSenderWorld().getEntitiesOfClass(clazz, searchEntity.getBoundingBox().inflate(range, range, range), (Predicate<Entity>) entity -> {
+
+		return (List<T>) searchEntity.getCommandSenderWorld().getEntitiesOfClass(clazz, searchEntity.getBoundingBox().inflate(range, range, range), (Predicate<Entity>) entity -> {
 			if(filterClass == null)
 				return true;
 			return filterClass.isAssignableFrom(entity.getClass());
@@ -586,7 +596,7 @@ public class Effects {
 	 * @return True if the entity is a boss.
 	 */
 	public boolean isBoss(Entity entity) {
-		if (entity instanceof EnderDragonEntity || entity instanceof WitherEntity) {
+		if (entity instanceof EnderDragon || entity instanceof WitherBoss) {
 			return true;
 		}
 		if (entity instanceof BaseCreatureEntity) {

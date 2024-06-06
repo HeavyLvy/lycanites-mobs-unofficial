@@ -4,14 +4,10 @@ import com.google.common.collect.ImmutableSet;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.fluid.BaseFluidBlock;
 import com.lycanitesmobs.core.info.ItemManager;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
-import net.minecraft.world.gen.feature.*;
-import net.minecraft.world.gen.placement.ChanceConfig;
-import net.minecraft.world.gen.placement.NoPlacementConfig;
-import net.minecraft.world.gen.placement.Placement;
-import net.minecraft.world.gen.placement.TopSolidRangeConfig;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraftforge.common.world.NoneStructureModifier;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.HashMap;
@@ -27,11 +23,11 @@ public class WorldGenManager {
 	}
 	
 	// Placements:
-	public AlwaysPlacement alwaysPlacement = new AlwaysPlacement(NoPlacementConfig.CODEC);
+	public AlwaysPlacement alwaysPlacement = new AlwaysPlacement();
 	
 	// Features:
-	public ChunkSpawnFeature chunkSpawnFeature = new ChunkSpawnFeature(NoFeatureConfig.CODEC);
-	public DungeonFeature dungeonFeature = new DungeonFeature(NoFeatureConfig.CODEC);
+	public ChunkSpawnFeature chunkSpawnFeature = new ChunkSpawnFeature(NoneFeatureConfiguration.CODEC);
+	public DungeonFeature dungeonFeature = new DungeonFeature(NoneFeatureConfiguration.CODEC);
 	public Map<String, ConfiguredFeature<?, ?>> fluidConfiguredFeatures = new HashMap<>();
 
 	/**
@@ -42,7 +38,7 @@ public class WorldGenManager {
 			BaseFluidBlock fluidBlock = ItemManager.getInstance().worldgenFluidBlocks.get(fluidName);
 			ConfiguredFeature<?, ?> lakeFeature = null;
 			ConfiguredFeature<?, ?> springFeature = null;
-			LiquidsConfig springConfig = new LiquidsConfig(fluidBlock.getFluid().defaultFluidState(), true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE));
+			 springConfig = new LiquidsConfig(fluidBlock.getFluid().defaultFluidState(), true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE));
 
 			if (fluidBlock.defaultBlockState().getMaterial() == Material.WATER) {
 				lakeFeature = Feature.LAKE.configured(new BlockStateFeatureConfig(fluidBlock.defaultBlockState())).decorated(Placement.WATER_LAKE.configured(new ChanceConfig(40)));

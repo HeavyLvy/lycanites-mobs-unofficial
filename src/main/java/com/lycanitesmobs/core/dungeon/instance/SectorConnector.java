@@ -1,12 +1,14 @@
 package com.lycanitesmobs.core.dungeon.instance;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Blocks;
+import org.joml.Vector3i;
 
 import java.util.Random;
 
@@ -99,7 +101,7 @@ public class SectorConnector {
 	 * @param chunkPos The chunk position to build within.
 	 * @param random The instance of random to use.
 	 */
-	public void buildEntrance(IWorld worldWriter, World world, ChunkPos chunkPos, Random random) {
+	public void buildEntrance(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
 		SectorInstance sectorInstance = this.parentSector;
 		if(sectorInstance == null) {
 			sectorInstance = this.childSector;
@@ -112,7 +114,7 @@ public class SectorConnector {
 		Vector3i size = sectorInstance.getRoomSize();
 		if(this.childSector != null && sectorInstance != this.childSector) {
 			Vector3i childSize = this.childSector.getRoomSize();
-			size = new Vector3i(Math.min(size.getX(), childSize.getX()), Math.min(size.getY(), childSize.getY()), Math.min(size.getZ(), childSize.getZ()));
+			size = new Vector3i(Math.min(size.x(), childSize.x()), Math.min(size.y(), childSize.y()), Math.min(size.z(), childSize.z()));
 		}
 		int entranceHeight = 2;
 		int entranceRadius = 1;
@@ -128,7 +130,7 @@ public class SectorConnector {
 		if(this.facing == Direction.SOUTH || this.facing == Direction.NORTH) {
 			startX -= entranceRadius;
 			stopX += entranceRadius;
-			if(size.getX() % 2 != 0) {
+			if(size.x() % 2 != 0) {
 				startX -= 1;
 			}
 			startZ -= entranceClearance * 2;
@@ -137,7 +139,7 @@ public class SectorConnector {
 		else {
 			startZ -= entranceRadius;
 			stopZ += entranceRadius;
-			if(size.getZ() % 2 != 0) {
+			if(size.z() % 2 != 0) {
 				startZ -= 1;
 			}
 			startX -= entranceClearance * 2;
@@ -162,7 +164,7 @@ public class SectorConnector {
 	 * @param chunkPos The chunk position to build within.
 	 * @param random The instance of random to use.
 	 */
-	public void buildTest(IWorld worldWriter, World world, ChunkPos chunkPos, Random random) {
+	public void buildTest(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
 		SectorInstance sectorInstance = this.parentSector;
 		if(sectorInstance == null) {
 			sectorInstance = this.childSector;

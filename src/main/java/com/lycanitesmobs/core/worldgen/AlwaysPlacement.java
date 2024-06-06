@@ -1,23 +1,21 @@
 package com.lycanitesmobs.core.worldgen;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldDecoratingHelper;
-import net.minecraft.world.gen.placement.NoPlacementConfig;
-import net.minecraft.world.gen.placement.Placement;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.levelgen.placement.CarvingMaskPlacement;
+import net.minecraft.world.level.levelgen.placement.PlacementContext;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 
-import javax.annotation.Nonnull;
 import java.util.Random;
 import java.util.stream.Stream;
 
-public class AlwaysPlacement extends Placement<NoPlacementConfig> {
-
-	public AlwaysPlacement(Codec<NoPlacementConfig> codec) {
-		super(codec);
-	}
-
+public class AlwaysPlacement implements PlacementModifierType<NoPlacementConfig> {
 	@Override
-	public Stream<BlockPos> getPositions(WorldDecoratingHelper helper, Random rand, NoPlacementConfig config, BlockPos blockPos) {
-		return Stream.of(new BlockPos(blockPos));
+	public Codec<NoPlacementConfig> codec() {
+		return NoPlacementConfig.CODEC;
 	}
 }

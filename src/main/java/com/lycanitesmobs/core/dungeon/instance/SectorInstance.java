@@ -11,15 +11,20 @@ import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.spawner.MobSpawn;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraftforge.fluids.ForgeFlowingFluid;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
@@ -73,16 +78,16 @@ public class SectorInstance {
 	 * @param dungeonSector The Dungeon Sector to create this instance from.
 	 * @param random The instance of Random to use.
 	 */
-	public SectorInstance(DungeonLayout layout, DungeonSector dungeonSector, Random random) {
+	public SectorInstance(DungeonLayout layout, DungeonSector dungeonSector, RandomSource random) {
 		this.layout = layout;
 		this.dungeonSector = dungeonSector;
 
 		// Size:
 		this.roomSize = this.dungeonSector.getRandomSize(random);
 		this.occupiedSize = new Vector3i(
-				this.roomSize.x() + Math.max(1, this.dungeonSector.padding.x()),
-				this.roomSize.y() + this.dungeonSector.padding.y(),
-				this.roomSize.z() + Math.max(1, this.dungeonSector.padding.z())
+				this.roomSize.x() + Math.max(1, this.dungeonSector.padding.getX()),
+				this.roomSize.y() + this.dungeonSector.padding.getY(),
+				this.roomSize.z() + Math.max(1, this.dungeonSector.padding.getZ())
 		);
 
 		// Structures:
@@ -103,7 +108,7 @@ public class SectorInstance {
 	 * Initialises this Sector Instance. Must be connected to a parent connector.
 	 * @param random The instance of Random to use.
 	 */
-	public void init(Random random) {
+	public void init(RandomSource random) {
 		if(this.parentConnector == null) {
 			throw new RuntimeException("[Dungeon] Tried to initialise a Sector Instance with a null Parent Connector: " + this);
 		}
@@ -129,11 +134,11 @@ public class SectorInstance {
 		BlockPos boundsMin = this.getRoomBoundsMin();
 		BlockPos boundsMax = this.getRoomBoundsMax();
 		Vector3i size = this.getRoomSize();
-		int centerX = boundsMin.getX() + Math.round((float)size.getX() / 2);
-		int centerZ = boundsMin.getZ() + Math.round((float)size.getZ() / 2);
+		int centerX = boundsMin.getX() + Math.round((float)size.x() / 2);
+		int centerZ = boundsMin.getZ() + Math.round((float)size.z() / 2);
 
 		// Upper Exit:
-		int upperConnectorY = this.parentConnector.position.getY() + this.getRoomSize().getY();
+		int upperConnectorY = this.parentConnector.position.getY() + this.getRoomSize().y();
 		if(upperConnectorY < 255) {
 			BlockPos blockPos = new BlockPos(centerX, upperConnectorY, centerZ);
 			this.addConnector(blockPos, this.parentConnector.level + 1, Direction.UP);
@@ -147,27 +152,27 @@ public class SectorInstance {
 			BlockPos backPos = this.parentConnector.position;
 			Direction backFacing = Direction.NORTH;
 			if(this.parentConnector.facing == Direction.SOUTH || this.parentConnector.facing == Direction.UP) {
-				frontPos = new BlockPos(this.getConnectorOffset(random, size.getX(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMax.getZ() + 1);
+				frontPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMax.getZ() + 1);
 				frontFacing = Direction.SOUTH;
-				backPos = new BlockPos(this.getConnectorOffset(random, size.getX(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMin.getZ() - 1);
+				backPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMin.getZ() - 1);
 				backFacing = Direction.NORTH;
 			}
 			else if(this.parentConnector.facing == Direction.EAST) {
-				frontPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.getZ(), boundsMin.getZ()));
+				frontPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
 				frontFacing = Direction.EAST;
-				backPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.getZ(), boundsMin.getZ()));
+				backPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
 				backFacing = Direction.WEST;
 			}
 			else if(this.parentConnector.facing == Direction.NORTH) {
-				frontPos = new BlockPos(this.getConnectorOffset(random, size.getX(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMin.getZ() - 1);
+				frontPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMin.getZ() - 1);
 				frontFacing = Direction.NORTH;
-				backPos = new BlockPos(this.getConnectorOffset(random, size.getX(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMax.getZ() + 1);
+				backPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMax.getZ() + 1);
 				backFacing = Direction.SOUTH;
 			}
 			else if(this.parentConnector.facing == Direction.WEST) {
-				frontPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.getZ(), boundsMin.getZ()));
+				frontPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
 				frontFacing = Direction.WEST;
-				backPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.getZ(), boundsMin.getZ()));
+				backPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
 				backFacing = Direction.EAST;
 			}
 			this.addConnector(frontPos, this.parentConnector.level, frontFacing);
@@ -182,15 +187,15 @@ public class SectorInstance {
 				BlockPos rightPos = this.parentConnector.position;
 				Direction rightFacing = Direction.EAST;
 				if(this.parentConnector.facing == Direction.SOUTH || this.parentConnector.facing == Direction.NORTH || this.parentConnector.facing == Direction.UP) {
-					leftPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.getZ(), boundsMin.getZ()));
+					leftPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
 					leftFacing = Direction.WEST;
-					rightPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.getZ(), boundsMin.getZ()));
+					rightPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
 					rightFacing = Direction.EAST;
 				}
 				else if(this.parentConnector.facing == Direction.EAST || this.parentConnector.facing == Direction.WEST) {
-					leftPos = new BlockPos(this.getConnectorOffset(random, size.getX(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMax.getZ() + 1);
+					leftPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMax.getZ() + 1);
 					leftFacing = Direction.SOUTH;
-					rightPos = new BlockPos(this.getConnectorOffset(random, size.getX(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMin.getZ() - 1);
+					rightPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMin.getZ() - 1);
 					rightFacing = Direction.NORTH;
 				}
 				this.addConnector(leftPos, this.parentConnector.level, leftFacing);
@@ -200,7 +205,7 @@ public class SectorInstance {
 		if("stairs".equalsIgnoreCase(this.dungeonSector.type)) {
 
 			// Lower Exit:
-			int y = this.parentConnector.position.getY() - (size.getY() * 2);
+			int y = this.parentConnector.position.getY() - (size.y() * 2);
 			if(y > 0) {
 				BlockPos blockPos = new BlockPos(centerX, y, boundsMax.getZ() + 1);
 				if (this.parentConnector.facing == Direction.EAST) {
@@ -227,7 +232,7 @@ public class SectorInstance {
 	 * @param start The world position to add the offset to.
 	 * @return
 	 */
-	public int getConnectorOffset(Random random, int length, int start) {
+	public int getConnectorOffset(RandomSource random, int length, int start) {
 		int entrancePadding = 2;
 		if(!"room".equalsIgnoreCase(this.dungeonSector.type) || length <= entrancePadding * 2) {
 			return start + Math.round((float)length / 2);
@@ -255,7 +260,7 @@ public class SectorInstance {
 	 * @param random The instance of Random to use.
 	 * @return A random connector.
 	 */
-	public SectorConnector getRandomConnector(Random random, SectorInstance sectorInstance) {
+	public SectorConnector getRandomConnector(RandomSource random, SectorInstance sectorInstance) {
 		List<SectorConnector> openConnectors = this.getOpenConnectors(sectorInstance);
 		if(openConnectors.isEmpty()) {
 			return null;
@@ -374,7 +379,7 @@ public class SectorInstance {
 	 */
 	public Vector3i getRoomSize() {
 		if(this.parentConnector.facing == Direction.EAST || this.parentConnector.facing == Direction.WEST) {
-			return new Vector3i(this.roomSize.getZ(), this.roomSize.getY(), this.roomSize.getX());
+			return new Vector3i(this.roomSize.z(), this.roomSize.y(), this.roomSize.x());
 		}
 		return this.roomSize;
 	}
@@ -388,7 +393,7 @@ public class SectorInstance {
 	 */
 	public Vector3i getOccupiedSize() {
 		if(this.parentConnector.facing == Direction.EAST || this.parentConnector.facing == Direction.WEST) {
-			return new Vector3i(this.occupiedSize.getZ(), this.occupiedSize.getY(), this.occupiedSize.getX());
+			return new Vector3i(this.occupiedSize.z(), this.occupiedSize.y(), this.occupiedSize.x());
 		}
 		return this.occupiedSize;
 	}
@@ -403,14 +408,14 @@ public class SectorInstance {
 		BlockPos bounds = new BlockPos(this.parentConnector.position);
 		if(this.parentConnector.facing == Direction.UP) {
 			bounds = bounds.offset(
-					-(int)Math.ceil((double)boundsSize.getX() / 2),
+					-(int)Math.ceil((double)boundsSize.x() / 2),
 					0,
-					-(int)Math.ceil((double)boundsSize.getZ() / 2)
+					-(int)Math.ceil((double)boundsSize.z() / 2)
 			);
 		}
 		else if(this.parentConnector.facing == Direction.SOUTH) {
 			bounds = bounds.offset(
-					-(int)Math.ceil((double)boundsSize.getX() / 2),
+					-(int)Math.ceil((double)boundsSize.x() / 2),
 					0,
 					0
 			);
@@ -419,21 +424,21 @@ public class SectorInstance {
 			bounds = bounds.offset(
 					0,
 					0,
-					-(int)Math.ceil((double)boundsSize.getZ() / 2)
+					-(int)Math.ceil((double)boundsSize.z() / 2)
 			);
 		}
 		else if(this.parentConnector.facing == Direction.NORTH) {
 			bounds = bounds.offset(
-					-(int)Math.ceil((double)boundsSize.getX() / 2),
+					-(int)Math.ceil((double)boundsSize.x() / 2),
 					0,
-					-boundsSize.getZ()
+					-boundsSize.z()
 			);
 		}
 		else if(this.parentConnector.facing == Direction.WEST) {
 			bounds = bounds.offset(
-					-boundsSize.getX(),
+					-boundsSize.x(),
 					0,
-					-(int)Math.ceil((double)boundsSize.getZ() / 2)
+					-(int)Math.ceil((double)boundsSize.z() / 2)
 			);
 		}
 
@@ -450,37 +455,37 @@ public class SectorInstance {
 		BlockPos bounds = new BlockPos(this.parentConnector.position);
 		if(this.parentConnector.facing == Direction.UP) {
 			bounds = bounds.offset(
-					(int)Math.ceil((double)boundsSize.getX() / 2),
-					boundsSize.getY(),
-					(int)Math.ceil((double)boundsSize.getZ() / 2)
+					(int)Math.ceil((double)boundsSize.x() / 2),
+					boundsSize.y(),
+					(int)Math.ceil((double)boundsSize.z() / 2)
 			);
 		}
 		else if(this.parentConnector.facing == Direction.SOUTH) {
 			bounds = bounds.offset(
-					(int)Math.floor((double)boundsSize.getX() / 2),
-					boundsSize.getY(),
-					boundsSize.getZ()
+					(int)Math.floor((double)boundsSize.x() / 2),
+					boundsSize.y(),
+					boundsSize.z()
 			);
 		}
 		else if(this.parentConnector.facing == Direction.EAST) {
 			bounds = bounds.offset(
-					boundsSize.getX(),
-					boundsSize.getY(),
-					(int)Math.floor((double)boundsSize.getZ() / 2)
+					boundsSize.x(),
+					boundsSize.y(),
+					(int)Math.floor((double)boundsSize.z() / 2)
 			);
 		}
 		else if(this.parentConnector.facing == Direction.NORTH) {
 			bounds = bounds.offset(
-					(int)Math.floor((double)boundsSize.getX() / 2),
-					boundsSize.getY(),
+					(int)Math.floor((double)boundsSize.x() / 2),
+					boundsSize.y(),
 					0
 			);
 		}
 		else if(this.parentConnector.facing == Direction.WEST) {
 			bounds = bounds.offset(
 					0,
-					boundsSize.getY(),
-					(int)Math.floor((double)boundsSize.getZ() / 2)
+					boundsSize.y(),
+					(int)Math.floor((double)boundsSize.z() / 2)
 			);
 		}
 		return bounds;
@@ -494,7 +499,7 @@ public class SectorInstance {
 	public BlockPos getOccupiedBoundsMin() {
 		BlockPos occupiedBoundsMin = this.getBoundsMin(this.getOccupiedSize());
 		if("stairs".equals(this.dungeonSector.type)) {
-			occupiedBoundsMin = occupiedBoundsMin.subtract(new Vector3i(0, this.getRoomSize().getY() * 2, 0));
+			occupiedBoundsMin = occupiedBoundsMin.subtract(new Vec3i(0, this.getRoomSize().y() * 2, 0));
 		}
 		return occupiedBoundsMin;
 	}
@@ -536,8 +541,8 @@ public class SectorInstance {
 		BlockPos stopPos = this.getRoomBoundsMax();
 
 		Vector3i size = this.getRoomSize();
-		int centerX = startPos.getX() + Math.round((float)size.getX() / 2);
-		int centerZ = startPos.getZ() + Math.round((float)size.getZ() / 2);
+		int centerX = startPos.getX() + Math.round((float)size.x() / 2);
+		int centerZ = startPos.getZ() + Math.round((float)size.z() / 2);
 
 		return new BlockPos(centerX, startPos.getY(), centerZ);
 	}
@@ -551,7 +556,7 @@ public class SectorInstance {
 	 * @param blockState The block state to place.
 	 * @param random The instance of random, used for random mob spawns or loot on applicable blocks, etc.
 	 */
-	public void placeBlock(LevelAccessor worldWriter, ChunkPos chunkPos, BlockPos blockPos, BlockState blockState, Direction facing, Random random) {
+	public void placeBlock(LevelAccessor worldWriter, ChunkPos chunkPos, BlockPos blockPos, BlockState blockState, Direction facing, RandomSource random) {
 		// Restrict To Chunk Position:
 		int chunkOffset = 0;
 		if(blockPos.getX() < chunkPos.getMinBlockX() + chunkOffset || blockPos.getX() > chunkPos.getMaxBlockX() + chunkOffset) {
@@ -585,7 +590,7 @@ public class SectorInstance {
 		}
 
 		// Don't Update:
-		if(blockState.getBlock() == Blocks.AIR || blockState.getBlock() == Blocks.CAVE_AIR || blockState.getBlock() instanceof FlowingFluidBlock ||
+		if(blockState.getBlock() == Blocks.AIR || blockState.getBlock() == Blocks.CAVE_AIR || (blockState.liquid() && !blockState.getBlock().getFluidState(blockState).isSource()) ||
 				blockState.getBlock() instanceof FireBlock || blockState.getBlock() instanceof BlockFireBase ||
 				blockState.getBlock() instanceof BlockPoisonCloud || blockState.getBlock() instanceof BlockFrostCloud) {
 			flags = 0;
@@ -600,12 +605,13 @@ public class SectorInstance {
 
 		// Spawner:
 		if(blockState.getBlock() == Blocks.SPAWNER) {
-			TileEntity tileEntity = worldWriter.getBlockEntity(blockPos);
-			if(tileEntity instanceof MobSpawnerTileEntity) {
-				MobSpawnerTileEntity spawner = (MobSpawnerTileEntity)tileEntity;
+			BlockEntity tileEntity = worldWriter.getBlockEntity(blockPos);
+			if(tileEntity instanceof SpawnerBlockEntity) {
+				SpawnerBlockEntity spawner = (SpawnerBlockEntity)tileEntity;
 				MobSpawn mobSpawn = this.layout.dungeonInstance.schematic.getRandomMobSpawn(this.parentConnector.level, false, random);
 				if(mobSpawn != null && mobSpawn.entityType != null) {
-					spawner.getSpawner().setEntityId(mobSpawn.entityType);
+					Level level = this.layout.dungeonInstance.world;
+					spawner.getSpawner().setEntityId(mobSpawn.entityType,level,random,blockPos);
 				}
 			}
 			return;
@@ -636,7 +642,7 @@ public class SectorInstance {
 	 * @param chunkPos The chunk position to build within.
 	 * @param random The instance of random, used for characters that are random.
 	 */
-	public void build(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, Random random) {
+	public void build(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
 		this.clearArea(worldWriter, world, chunkPos, random);
 		this.buildFloor(worldWriter, world, chunkPos, random, 0);
 		this.buildWalls(worldWriter, world, chunkPos, random);
@@ -666,7 +672,7 @@ public class SectorInstance {
 	 * @param chunkPos The chunk position to build within.
 	 * @param random The instance of random, used for characters that are random.
 	 */
-	public void clearArea(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, Random random) {
+	public void clearArea(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
 		// Get Start and Stop Positions:
 		BlockPos startPos = this.getRoomBoundsMin();
 		BlockPos stopPos = this.getRoomBoundsMax();
@@ -699,7 +705,7 @@ public class SectorInstance {
 	 * @param random The instance of random, used for characters that are random.
 	 * @param offsetY The Y offset to build the floor at, useful for multiple floor sectors.
 	 */
-	public void buildFloor(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, Random random, int offsetY) {
+	public void buildFloor(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random, int offsetY) {
 		// Get Start and Stop Positions:
 		BlockPos startPos = this.getRoomBoundsMin().offset(0, offsetY, 0);
 		BlockPos stopPos = this.getRoomBoundsMax().offset(0, offsetY, 0);
@@ -737,7 +743,7 @@ public class SectorInstance {
 	 * @param chunkPos The chunk position to build within.
 	 * @param random The instance of random, used for characters that are random.
 	 */
-	public void buildWalls(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, Random random) {
+	public void buildWalls(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
 		// Get Start and Stop Positions:
 		BlockPos startPos = this.getRoomBoundsMin();
 		BlockPos stopPos = this.getRoomBoundsMax();
@@ -751,7 +757,7 @@ public class SectorInstance {
 		int stopZ = Math.max(startPos.getZ(), stopPos.getZ());
 
 		if("stairs".equalsIgnoreCase(this.dungeonSector.type)) {
-			startY = Math.max(1, startPos.getY() - (size.getY() * 2));
+			startY = Math.max(1, startPos.getY() - (size.y() * 2));
 		}
 
 		for(int layerIndex : this.dungeonSector.wall.layers.keySet()) {
@@ -798,7 +804,7 @@ public class SectorInstance {
 	 * @param chunkPos The chunk position to build within.
 	 * @param random The instance of random, used for characters that are random.
 	 */
-	public void buildCeiling(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, Random random) {
+	public void buildCeiling(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
 		// Get Start and Stop Positions:
 		BlockPos startPos = this.getRoomBoundsMin();
 		BlockPos stopPos = this.getRoomBoundsMax();
@@ -836,7 +842,7 @@ public class SectorInstance {
 	 * @param chunkPos The chunk position to build within.
 	 * @param random The instance of random, used for characters that are random.
 	 */
-	public void buildEntrances(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, Random random) {
+	public void buildEntrances(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
 		this.parentConnector.buildEntrance(worldWriter, world, chunkPos, random);
 	}
 
@@ -848,18 +854,18 @@ public class SectorInstance {
 	 * @param chunkPos The chunk position to build within.
 	 * @param random The instance of random, used for characters that are random.
 	 */
-	public void buildStairs(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, Random random) {
+	public void buildStairs(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
 		// Get Start and Stop Positions:
 		BlockPos startPos = this.getRoomBoundsMin();
 		BlockPos stopPos = this.getRoomBoundsMax();
 
 		Vector3i size = this.getRoomSize();
-		int centerX = startPos.getX() + Math.round((float)size.getX() / 2);
-		int centerZ = startPos.getZ() + Math.round((float)size.getZ() / 2);
+		int centerX = startPos.getX() + Math.round((float)size.x() / 2);
+		int centerZ = startPos.getZ() + Math.round((float)size.z() / 2);
 
-		int stairsHeight = this.parentConnector.parentSector.getOccupiedSize().getY() - 1;
+		int stairsHeight = this.parentConnector.parentSector.getOccupiedSize().y() - 1;
 		if(this.dungeonSector.type.equalsIgnoreCase("stairs")) {
-			stairsHeight = size.getY() * 2;
+			stairsHeight = size.y() * 2;
 		}
 		int startX = centerX - 1;
 		int stopX = centerX + 1;
@@ -899,7 +905,7 @@ public class SectorInstance {
 							blockState = floorBlockState;
 						}
 						else if (offsetX == 1 && offsetZ == 2) {
-							blockState = stairsBlockState.setValue(StairsBlock.FACING, Direction.WEST);
+							blockState = stairsBlockState.setValue(StairBlock.FACING, Direction.WEST);
 						}
 					}
 					if(step % 4 == 1) {
@@ -907,7 +913,7 @@ public class SectorInstance {
 							blockState = floorBlockState;
 						}
 						else if (offsetX == 2 && offsetZ == 1) {
-							blockState = stairsBlockState.setValue(StairsBlock.FACING, Direction.SOUTH);
+							blockState = stairsBlockState.setValue(StairBlock.FACING, Direction.SOUTH);
 						}
 					}
 					if(step % 4 == 0) {
@@ -915,7 +921,7 @@ public class SectorInstance {
 							blockState = floorBlockState;
 						}
 						else if (offsetX == 1 && offsetZ == 0) {
-							blockState = stairsBlockState.setValue(StairsBlock.FACING, Direction.EAST);
+							blockState = stairsBlockState.setValue(StairBlock.FACING, Direction.EAST);
 						}
 					}
 
@@ -936,7 +942,7 @@ public class SectorInstance {
 	 * @param mobSpawn The Mob Spawn entry to use.
 	 * @param random The instance of random, used for mob vacations where applicable.
 	 */
-	public void spawnMob(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, BlockPos blockPos, MobSpawn mobSpawn, Random random) {
+	public void spawnMob(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, BlockPos blockPos, MobSpawn mobSpawn, RandomSource random) {
 		// Restrict To Chunk Position:
 		int chunkOffset = 8;
 		if(blockPos.getX() < chunkPos.getMinBlockX() + chunkOffset || blockPos.getX() > chunkPos.getMaxBlockX() + chunkOffset) {
@@ -956,7 +962,7 @@ public class SectorInstance {
 
 		if(entityLiving instanceof BaseCreatureEntity) {
 			BaseCreatureEntity entityCreature = (BaseCreatureEntity)entityLiving;
-			entityCreature.setHome(blockPos.getX(), blockPos.getY(), blockPos.getZ(), Math.max(3, Math.max(this.roomSize.getX(), this.roomSize.getZ())));
+			entityCreature.setHome(blockPos.getX(), blockPos.getY(), blockPos.getZ(), Math.max(3, Math.max(this.roomSize.x(), this.roomSize.z())));
 		}
 
 		mobSpawn.onSpawned(entityLiving, null);

@@ -278,7 +278,7 @@ public class DungeonSchematic {
 	 * @param random The random instance to use.
 	 * @return A random number of sectors to generate.
 	 */
-	public int getRandomSectorCount(Random random) {
+	public int getRandomSectorCount(RandomSource random) {
 		if(this.sectorCountMax <= this.sectorCountMin) {
 			return this.sectorCountMin;
 		}
@@ -292,7 +292,7 @@ public class DungeonSchematic {
 	 * @param random The random instance to use.
 	 * @return A random Dungeon Sector.
 	 */
-	public DungeonSector getRandomSector(String type, Random random) {
+	public DungeonSector getRandomSector(String type, RandomSource random) {
 		// Get Sector List:
 		List<String> sectorList;
 		if("entrance".equalsIgnoreCase(type))
@@ -349,7 +349,7 @@ public class DungeonSchematic {
 	 * @param random The instance of Random to use.
 	 * @return The type of sector to use next.
 	 */
-	public String getNextConnectingSector(String parentType, Random random) {
+	public String getNextConnectingSector(String parentType, RandomSource random) {
 		if("room".equalsIgnoreCase(parentType)) {
 			return random.nextDouble() <= this.roomToRoomChance ? "room" : "corridor";
 		}
@@ -368,7 +368,7 @@ public class DungeonSchematic {
 	 * @param random The random instance to use.
 	 * @return A random Dungeon Theme to generate.
 	 */
-	public DungeonTheme getRandomTheme(Random random) {
+	public DungeonTheme getRandomTheme(RandomSource random) {
 		List<DungeonTheme> themes = new ArrayList<>();
 		for(String themeName : this.themes) {
 			DungeonTheme dungeonTheme = DungeonManager.getInstance().getTheme(themeName);
@@ -397,7 +397,7 @@ public class DungeonSchematic {
 	 * @param random The instance of random to use.
 	 * @return The MobSpawn of the mob to spawn or null if no mob can be spawned.
 	 **/
-	public MobSpawn getRandomMobSpawn(int level, boolean boss, Random random) {
+	public MobSpawn getRandomMobSpawn(int level, boolean boss, RandomSource random) {
 		int levelMin = level;
 		int levelMax = level;
 		if(level < 0) {
@@ -451,7 +451,7 @@ public class DungeonSchematic {
 	 * @param random The instance of random to use.
 	 * @return A loot table.
 	 */
-	public ResourceLocation getRandomLootTable(int level, Random random) {
+	public ResourceLocation getRandomLootTable(int level, RandomSource random) {
 		if(level < 0) {
 			level = -level * 2;
 		}
