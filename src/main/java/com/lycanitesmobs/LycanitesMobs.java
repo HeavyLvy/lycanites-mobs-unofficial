@@ -24,15 +24,23 @@ import com.lycanitesmobs.core.mobevent.MobEventManager;
 import com.lycanitesmobs.core.network.PacketHandler;
 import com.lycanitesmobs.core.spawner.SpawnerEventListener;
 import com.lycanitesmobs.core.spawner.SpawnerManager;
+import com.lycanitesmobs.core.worldgen.BiomeModifierProvider;
 import com.lycanitesmobs.core.worldgen.WorldGenManager;
 import com.lycanitesmobs.core.worldgen.WorldGenerator;
+import com.lycanitesmobs.core.worldgen.WorldGeneratorBiomeModifier;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.minecraftforge.common.world.BiomeModifier;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -46,6 +54,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -71,6 +82,32 @@ public class LycanitesMobs {
 
 	public static boolean configReady = false;
 	public static boolean earlyDebug = false;
+	//Datagen:
+	private void setup(final FMLCommonSetupEvent event, DataGenerator dataGenerator) {
+		event.enqueueWork(() -> {
+			DataGenerator.addProvider(dataGenerator, new BiomeModifierProvider(dataGenerator, MODID, event.getExistingFileHelper()));
+		});
+	}
+	// Biome Management:
+	public static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS =
+			DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MODID);
+
+	public static final RegistryObject<Codec<WorldGeneratorBiomeModifier>> WORLD_GENERATOR_CODEC = BIOME_MODIFIER_SERIALIZERS.register("world_generator", () ->
+			RecordCodecBuilder.create(instance -> instance.group(
+					Biome.LIST_CODEC.fieldOf("biomes").forGetter(WorldGeneratorBiomeModifier::biomes),
+					PlacedFeature.CODEC.fieldOf("chunk_spawn_feature").forGetter(WorldGeneratorBiomeModifier::chunkSpawnFeature),
+					PlacedFeature.CODEC.fieldOf("dungeon_feature").forGetter(WorldGeneratorBiomeModifier::dungeonFeature),
+					PlacedFeature.CODEC.fieldOf("poison_lake_feature").forGetter(WorldGeneratorBiomeModifier::poisonLakeFeature),
+					PlacedFeature.CODEC.fieldOf("poison_spring_feature").forGetter(WorldGeneratorBiomeModifier::poisonSpringFeature),
+					PlacedFeature.CODEC.fieldOf("acid_lake_feature").forGetter(WorldGeneratorBiomeModifier::acidLakeFeature),
+					PlacedFeature.CODEC.fieldOf("acid_spring_feature").forGetter(WorldGeneratorBiomeModifier::acidSpringFeature),
+					PlacedFeature.CODEC.fieldOf("ooze_lake_feature").forGetter(WorldGeneratorBiomeModifier::oozeLakeFeature),
+					PlacedFeature.CODEC.fieldOf("ooze_spring_feature").forGetter(WorldGeneratorBiomeModifier::oozeSpringFeature),
+					PlacedFeature.CODEC.fieldOf("moglava_lake_feature").forGetter(WorldGeneratorBiomeModifier::moglavaLakeFeature),
+					PlacedFeature.CODEC.fieldOf("moglava_spring_feature").forGetter(WorldGeneratorBiomeModifier::moglavaSpringFeature)
+			).apply(instance, WorldGeneratorBiomeModifier::new))
+	);
+
 
 	// Proxy:
 	public static IProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
@@ -89,12 +126,16 @@ public class LycanitesMobs {
 		FileLoader.initAll(modInfo.modid);
 		StreamLoader.initAll(modInfo.modid);
 
+		//Biome Management
+		BIOME_MODIFIER_SERIALIZERS.register(FMLJavaModLoadingContext.get().getModEventBus());
+
 		// Config:
 		CoreConfig.buildSpec();
 		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CoreConfig.SPEC);
 
 		// Setup Event Listeners:
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+		modEventBus.addListener(this::setup); //Biome Modifier Datagen
 		modEventBus.addListener(this::commonSetup);
 		modEventBus.addListener(this::clientSetup);
 //		modEventBus.addListener(this::serverStarting);
