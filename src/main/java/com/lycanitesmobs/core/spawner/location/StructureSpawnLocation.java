@@ -3,13 +3,16 @@ package com.lycanitesmobs.core.spawner.location;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.helpers.JSONHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.StructureTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraftforge.registries.RegistryManager;
 
 import java.util.ArrayList;
@@ -42,15 +45,15 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
 
 
 	@Override
-	public List<BlockPos> getSpawnPositions(World world, PlayerEntity player, BlockPos triggerPos) {
-		if (!(world instanceof ServerWorld)) {
+	public List<BlockPos> getSpawnPositions(Level world, Player player, BlockPos triggerPos) {
+		if (!(world instanceof ServerLevel)) {
 			LycanitesMobs.logWarning("", "[JSONSpawner] Structure spawn location was called with a non ServerWorld World instance.");
 			return new ArrayList<>();
 		}
 
 		List<BlockPos> spawnPositions = new ArrayList<>();
 		for(ResourceLocation structureId : this.structureIds) {
-			Structure<?> spawnStructure = RegistryManager.ACTIVE.getRegistry(Registry.STRUCTURE_FEATURE_REGISTRY).getValue(structureId);
+			Structure spawnStructure = RegistryManager.ACTIVE.getRegistry(Registries.STRUCTURE).getValue(structureId);
 			if (spawnStructure == null) {
 				continue;
 			}
@@ -58,7 +61,7 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
 
 			BlockPos structurePos = null;
 			try {
-				structurePos = ((ServerWorld) world).findNearestMapFeature(spawnStructure, triggerPos, this.structureRange, false);
+				structurePos = ((ServerLevel) world).findNearestMapStructure(spawnStructure, triggerPos, this.structureRange, false);
 			} catch (Exception e) {}
 
 			// No Structure:

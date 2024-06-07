@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.helpers.JSONHelper;
 import com.lycanitesmobs.core.util.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class MaterialSpawnLocation extends BlockSpawnLocation {
     /** A list of block materials to either spawn in or not spawn in depending on if it is a blacklist or whitelist. **/
-    public List<BlockBehaviour.Properties> materials = new ArrayList<>();
+    public List<Block> materials = new ArrayList<>();
 
 
 	@Override
@@ -42,10 +43,10 @@ public class MaterialSpawnLocation extends BlockSpawnLocation {
 		}
 
 		if("blacklist".equalsIgnoreCase(this.listType)) {
-			return !this.materials.contains(blockState);
+			return !this.materials.contains(blockState.getBlock());
 		}
 		else {
-			return this.materials.contains(blockState);
+			return this.materials.contains(blockState.getBlock());
 		}
 	}
 }

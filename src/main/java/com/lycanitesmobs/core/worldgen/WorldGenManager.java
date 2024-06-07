@@ -4,9 +4,13 @@ import com.google.common.collect.ImmutableSet;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.fluid.BaseFluidBlock;
 import com.lycanitesmobs.core.info.ItemManager;
+import com.lycanitesmobs.core.util.Material;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import net.minecraftforge.common.world.NoneStructureModifier;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -38,15 +42,15 @@ public class WorldGenManager {
 			BaseFluidBlock fluidBlock = ItemManager.getInstance().worldgenFluidBlocks.get(fluidName);
 			ConfiguredFeature<?, ?> lakeFeature = null;
 			ConfiguredFeature<?, ?> springFeature = null;
-			 springConfig = new LiquidsConfig(fluidBlock.getFluid().defaultFluidState(), true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE));
+			LiquidsConfig springConfig = new LiquidsConfig(fluidBlock.getFluid().defaultFluidState(), true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE));
 
-			if (fluidBlock.defaultBlockState().getMaterial() == Material.WATER) {
-				lakeFeature = Feature.LAKE.configured(new BlockStateFeatureConfig(fluidBlock.defaultBlockState())).decorated(Placement.WATER_LAKE.configured(new ChanceConfig(40)));
-				springFeature = Feature.SPRING.configured(springConfig).decorated(Placement.RANGE_BIASED.configured(new TopSolidRangeConfig(8, 8, 256))).squared().count(20);
+			if (Material.WATER.contains(fluidBlock.defaultBlockState().getBlock())) {
+				lakeFeature = Feature.LAKE.configuredCodec(new BlockStateConfiguration(fluidBlock.defaultBlockState())).decorated(PlacementModifierType.SURFACE_WATER_DEPTH_FILTER.configured(new ChanceConfig(40)));
+				springFeature = Feature.SPRING.configuredCodec(springConfig).decorated(Placement.RANGE_BIASED.configured(new TopSolidRangeConfig(8, 8, 256))).squared().count(20);
 			}
 			else {
-				lakeFeature = Feature.LAKE.configured(new BlockStateFeatureConfig(fluidBlock.defaultBlockState())).decorated(Placement.LAVA_LAKE.configured(new ChanceConfig(40)));
-				springFeature = Feature.SPRING.configured(springConfig).decorated(Placement.RANGE_VERY_BIASED.configured(new TopSolidRangeConfig(8, 16, 256))).squared().count(20);
+				lakeFeature = Feature.LAKE.configuredCodec(new BlockStateFeatureConfig(fluidBlock.defaultBlockState())).decorated(Placement.LAVA_LAKE.configured(new ChanceConfig(40)));
+				springFeature = Feature.SPRING.configuredCodec(springConfig).decorated(Placement.RANGE_VERY_BIASED.configured(new TopSolidRangeConfig(8, 16, 256))).squared().count(20);
 			}
 
 			fluidConfiguredFeatures.put(fluidName + "_lake", lakeFeature);

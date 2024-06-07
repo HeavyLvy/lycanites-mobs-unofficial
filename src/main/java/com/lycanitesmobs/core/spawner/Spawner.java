@@ -23,8 +23,10 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
@@ -464,7 +466,7 @@ public class Spawner {
 		if(!this.ignoreBiomes) {
 			biomes = new ArrayList<>();
 			for(BlockPos spawnPos : spawnPositions) {
-				Biome biome = world.getBiomeManager().getBiome(spawnPos); //getBiomeManager().getBiome()
+				Biome biome = world.getBiomeManager().getBiome(spawnPos).get(); //getBiomeManager().getBiome()
 				if(!biomes.contains(biome))
 					biomes.add(biome);
 			}
@@ -486,11 +488,11 @@ public class Spawner {
 			if(mobsSpawned >= mobCount) {
 				break;
 			}
-			Biome spawnBiome = world.getBiomeManager().getBiome(spawnPos);
+			Biome spawnBiome = world.getBiomeManager().getBiome(spawnPos).get();
 
 			LycanitesMobs.logDebug("JSONSpawner", "---------- Spawn Iteration: " + mobsSpawned + " ----------");
 			LycanitesMobs.logDebug("JSONSpawner", "Spawn Position: " + spawnPos);
-			LycanitesMobs.logDebug("JSONSpawner", "Spawn Biome: " + spawnBiome.getRegistryName());
+			LycanitesMobs.logDebug("JSONSpawner", "Spawn Biome: " + spawnBiome);
 
 			// Choose Mob To Spawn:
 			MobSpawn mobSpawn = null;
@@ -529,7 +531,8 @@ public class Spawner {
 			// Forge Can Spawn Event:
 			Event.Result canSpawn = Event.Result.ALLOW;
 			if(entityLiving instanceof Mob) {
-				canSpawn = ForgeEventFactory.canEntitySpawn((Mob)entityLiving, world, (float) spawnPos.getX() + 0.5F, (float) spawnPos.getY(), (float) spawnPos.getZ() + 0.5F, null, SpawnReason.NATURAL);
+				BlockPos blockPos = new BlockPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
+				canSpawn = new MobSpawnEvent.SpawnPlacementCheck(entityLiving.getType(), (ServerLevelAccessor)world, MobSpawnType.NATURAL,blockPos, world.getRandom(),false).getResult();
 				if (canSpawn == Event.Result.DENY && !this.ignoreForgeCanSpawnEvent && !mobSpawn.ignoreForgeCanSpawnEvent) {
 					LycanitesMobs.logDebug("JSONSpawner", "Spawn Check Failed! Spawning blocked by Forge Can Spawn Event, this is caused by another mod.");
 					continue;
@@ -547,8 +550,9 @@ public class Spawner {
 
 			// Call Entity's Initial Spawn:
 			if (entityLiving instanceof Mob) {
-				if (!ForgeEventFactory.doSpecialSpawn((Mob)entityLiving, world, (float) spawnPos.getX() + 0.5F, (float) spawnPos.getY(), (float) spawnPos.getZ() + 0.5F, null, SpawnReason.NATURAL)) {
-					((Mob)entityLiving).finalizeSpawn((IServerWorld) world, world.getCurrentDifficultyAt(spawnPos), SpawnReason.NATURAL, null, null);
+				BlockPos blockPos = new BlockPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
+				if (!ForgeEventFactory.checkSpawnPlacements(entityLiving.getType(), (ServerLevelAccessor)world, MobSpawnType.NATURAL,blockPos, world.getRandom(),false)) {
+					((Mob)entityLiving).finalizeSpawn((ServerLevelAccessor) world, world.getCurrentDifficultyAt(spawnPos), MobSpawnType.NATURAL, null, null);
 				}
 			}
 

@@ -2,13 +2,14 @@ package com.lycanitesmobs.core.spawner.trigger;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.spawner.Spawner;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.entity.LivingEntity;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
@@ -26,11 +27,11 @@ public class TreeBlockSpawnTrigger extends BlockSpawnTrigger {
 
 
 	@Override
-	public boolean isTriggerBlock(BlockState blockState, World world, BlockPos blockPos, int fortune, @Nullable LivingEntity entity) {
+	public boolean isTriggerBlock(BlockState blockState, Level world, BlockPos blockPos, int fortune, @Nullable LivingEntity entity) {
 		return this.isTreeLogBlock(blockState.getBlock(), world, blockPos) || this.isTreeLeavesBlock(blockState.getBlock(), world, blockPos);
 	}
 
-	public boolean isTreeLogBlock(Block block, World world, BlockPos pos) {
+	public boolean isTreeLogBlock(Block block, Level world, BlockPos pos) {
 		if(this.isLog(world.getBlockState(pos))) {
 			int x = pos.getX();
 			int y = pos.getY();
@@ -46,14 +47,14 @@ public class TreeBlockSpawnTrigger extends BlockSpawnTrigger {
 				}
 			}
 		}
-		String blockName = block.getRegistryName().toString();
+		String blockName = LMHelperClass.convertToResourceLocation(block).toString();
 		if((blockName.contains("tree") || blockName.contains("traverse")) && blockName.contains("branch")) {
 			return true;
 		}
 		return false;
 	}
 
-	public boolean isTreeLeavesBlock(Block block, World world, BlockPos pos) {
+	public boolean isTreeLeavesBlock(Block block, Level world, BlockPos pos) {
 		if(this.isLeaves(world.getBlockState(pos))) {
 			int x = pos.getX();
 			int y = pos.getY();
@@ -69,7 +70,7 @@ public class TreeBlockSpawnTrigger extends BlockSpawnTrigger {
 				}
 			}
 		}
-		String blockName = block.getRegistryName().toString();
+		String blockName = LMHelperClass.convertToResourceLocation(block).toString();
 		if((blockName.contains("tree") || blockName.contains("traverse")) && blockName.contains("leaves")) {
 			return true;
 		}
@@ -78,7 +79,7 @@ public class TreeBlockSpawnTrigger extends BlockSpawnTrigger {
 
 	public boolean isLog(BlockState blockState) {
 		Block block = blockState.getBlock();
-		if(block.is(BlockTags.LOGS)) {
+		if(block.defaultBlockState().is(BlockTags.LOGS)) {
 			return true;
 		}
 		return false;
@@ -86,7 +87,7 @@ public class TreeBlockSpawnTrigger extends BlockSpawnTrigger {
 
 	public boolean isLeaves(BlockState blockState) {
 		Block block = blockState.getBlock();
-		if(block instanceof LeavesBlock || block.is(BlockTags.LEAVES)) {
+		if(block instanceof LeavesBlock || block.defaultBlockState().is(BlockTags.LEAVES)) {
 			return true;
 		}
 		return false;

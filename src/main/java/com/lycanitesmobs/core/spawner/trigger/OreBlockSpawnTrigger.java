@@ -3,16 +3,17 @@ package com.lycanitesmobs.core.spawner.trigger;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.spawner.Spawner;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.SilverfishBlock;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.InfestedBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -44,20 +45,20 @@ public class OreBlockSpawnTrigger extends BlockSpawnTrigger {
 
 
 	@Override
-	public boolean isTriggerBlock(BlockState blockState, World world, BlockPos blockPos, int fortune, @Nullable LivingEntity entity) {
+	public boolean isTriggerBlock(BlockState blockState, Level world, BlockPos blockPos, int fortune, @Nullable LivingEntity entity) {
 		Block block = blockState.getBlock();
 
-		if(block instanceof SilverfishBlock) {
+		if(block instanceof InfestedBlock) {
 			return this.ores;
 		}
 		if(block == Blocks.COAL_ORE || block == Blocks.NETHER_GOLD_ORE) {
 			return this.ores;
 		}
 
-		if(block.getRegistryName() == null) {
+		if(LMHelperClass.convertToResourceLocation(block) == null) {
 			return false;
 		}
-		String blockName = block.getRegistryName().getPath();
+		String blockName = LMHelperClass.convertToResourceLocation(block).getPath();
 		String[] blockNameParts = blockName.split("\\.");
 		for(String blockNamePart : blockNameParts) {
 			int blockNamePartLength = blockNamePart.length();
@@ -84,13 +85,13 @@ public class OreBlockSpawnTrigger extends BlockSpawnTrigger {
 					return this.ores;
 				}
 
-				if(world instanceof ServerWorld) {
+				if(world instanceof ServerLevel) {
 					List<ItemStack> drops;
 					if(entity == null) {
-						drops = block.getDrops(blockState, (ServerWorld)world, blockPos, null);
+						drops = block.getDrops(blockState, (ServerLevel)world, blockPos, null);
 					}
 					else {
-						drops = block.getDrops(blockState, (ServerWorld)world, blockPos, null, entity, entity.getUseItem());
+						drops = block.getDrops(blockState, (ServerLevel)world, blockPos, null, entity, entity.getUseItem());
 					}
 					for(ItemStack dropStack : drops) {
 						if(dropStack.getItem() instanceof BlockItem) {
@@ -108,7 +109,7 @@ public class OreBlockSpawnTrigger extends BlockSpawnTrigger {
 	}
 
 	@Override
-	public int getBlockLevel(BlockState blockState, World world, BlockPos blockPos) {
+	public int getBlockLevel(BlockState blockState, Level world, BlockPos blockPos) {
 		Block block = blockState.getBlock();
 		if(block == Blocks.DIAMOND_ORE)
 			return 3;

@@ -82,12 +82,6 @@ public class LycanitesMobs {
 
 	public static boolean configReady = false;
 	public static boolean earlyDebug = false;
-	//Datagen:
-	private void setup(final FMLCommonSetupEvent event, DataGenerator dataGenerator) {
-		event.enqueueWork(() -> {
-			DataGenerator.addProvider(dataGenerator, new BiomeModifierProvider(dataGenerator, MODID, event.getExistingFileHelper()));
-		});
-	}
 	// Biome Management:
 	public static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS =
 			DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MODID);
@@ -135,7 +129,6 @@ public class LycanitesMobs {
 
 		// Setup Event Listeners:
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-		modEventBus.addListener(this::setup); //Biome Modifier Datagen
 		modEventBus.addListener(this::commonSetup);
 		modEventBus.addListener(this::clientSetup);
 //		modEventBus.addListener(this::serverStarting);
