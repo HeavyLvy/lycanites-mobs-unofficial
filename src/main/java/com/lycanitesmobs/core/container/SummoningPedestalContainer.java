@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 
 public class SummoningPedestalContainer extends BaseContainer {
-    public static final MenuType<SummoningPedestalContainer> TYPE = IForgeMenuType.create(SummoningPedestalContainer::new);
+    public static final MenuType<SummoningPedestalContainer> TYPE = (MenuType<SummoningPedestalContainer>) IForgeMenuType.create(SummoningPedestalContainer::new);
     public TileEntitySummoningPedestal summoningPedestal;
 
     /**

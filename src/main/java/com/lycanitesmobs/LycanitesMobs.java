@@ -4,12 +4,14 @@ import com.lycanitesmobs.client.ClientManager;
 import com.lycanitesmobs.client.ClientProxy;
 import com.lycanitesmobs.client.ModelManager;
 import com.lycanitesmobs.client.TextureManager;
+import com.lycanitesmobs.client.gui.*;
 import com.lycanitesmobs.core.*;
 import com.lycanitesmobs.core.capabilities.*;
 import com.lycanitesmobs.core.command.CommandManager;
 import com.lycanitesmobs.core.compatibility.DLDungeons;
 import com.lycanitesmobs.core.config.ConfigDebug;
 import com.lycanitesmobs.core.config.CoreConfig;
+import com.lycanitesmobs.core.container.*;
 import com.lycanitesmobs.core.dungeon.DungeonManager;
 import com.lycanitesmobs.core.entity.ExtendedEntity;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
@@ -30,6 +32,7 @@ import com.lycanitesmobs.core.worldgen.WorldGenerator;
 import com.lycanitesmobs.core.worldgen.WorldGeneratorBiomeModifier;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -220,6 +223,16 @@ public class LycanitesMobs {
 		TextureManager.getInstance().createTextures(modInfo);
 		ModelManager.getInstance().createModels();
 		ClientManager.getInstance().initRenderRegister();
+		//New menu screen registration
+		event.enqueueWork(
+				() -> {
+					MenuScreens.register(CreatureContainer.TYPE, CreatureInventoryScreen::new);
+					MenuScreens.register(SummoningPedestalContainer.TYPE, SummoningPedestalScreen::new);
+					MenuScreens.register(EquipmentForgeContainer.TYPE, EquipmentForgeScreen::new);
+					MenuScreens.register(EquipmentInfuserContainer.TYPE, EquipmentInfuserScreen::new);
+					MenuScreens.register(EquipmentStationContainer.TYPE, EquipmentStationScreen::new);
+				}
+		);
 	}
 
 	@SubscribeEvent

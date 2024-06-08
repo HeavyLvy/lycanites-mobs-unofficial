@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -195,7 +196,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
     //                Random Event Delay
     // ==================================================
     /** Gets a random time until the next random event will start. **/
-    public int getRandomEventDelay(Random random) {
+    public int getRandomEventDelay(RandomSource random) {
 		int min = Math.max(200, MobEventManager.getInstance().minTicksUntilEvent);
         int max = Math.max(200, MobEventManager.getInstance().maxTicksUntilEvent);
         if(max <= min)

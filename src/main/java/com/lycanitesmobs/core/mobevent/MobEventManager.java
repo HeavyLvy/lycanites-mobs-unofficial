@@ -12,7 +12,7 @@ import com.lycanitesmobs.core.StreamLoader;
 import com.lycanitesmobs.core.config.ConfigMobEvent;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.spawner.condition.SpawnCondition;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -206,8 +206,8 @@ public class MobEventManager extends JSONLoader {
 
 	/** Called every tick in a world and updates any active Server Side Mob Event players. **/
 	@SubscribeEvent
-	public void onWorldUpdate(TickEvent.WorldTickEvent event) {
-		World world = event.world;
+	public void onWorldUpdate(TickEvent.LevelTickEvent event) {
+		Level world = event.level;
 		if(world.isClientSide)
 			return;
 		ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
@@ -246,7 +246,7 @@ public class MobEventManager extends JSONLoader {
 		if(ClientManager.getInstance().getClientPlayer() == null)
 			return;
 
-        World world = ClientManager.getInstance().getClientPlayer().getCommandSenderWorld();
+		Level world = ClientManager.getInstance().getClientPlayer().getCommandSenderWorld();
 		if(!world.isClientSide)
 			return;
         ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);

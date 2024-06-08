@@ -10,21 +10,28 @@ import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.item.BaseItem;
 import com.lycanitesmobs.core.item.BaseToolItem;
 import com.lycanitesmobs.core.item.equipment.features.*;
+import com.lycanitesmobs.core.util.CustomTiers;
 import com.lycanitesmobs.core.util.DamageSourceHelper;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -33,6 +40,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolAction;
@@ -612,33 +620,45 @@ public class ItemEquipment extends BaseToolItem {
 
 	@Override
 	public Tier getTier() {
-		if(this.getSharpness(this.getDefaultInstance()) <= 0) {
+		if (this.getSharpness(this.getDefaultInstance()) <= 0) {
 			return null;
 		}
 
 		int harvestLevel = -1;
-		for(EquipmentFeature equipmentFeature : this.getFeaturesByType(this.getDefaultInstance(), "harvest")) {
-			HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature)equipmentFeature;
-			if(harvestLevel < harvestFeature.harvestLevel && tool == harvestFeature.getToolType()) {
+		for (EquipmentFeature equipmentFeature : this.getFeaturesByType(this.getDefaultInstance(), "harvest")) {
+			HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature) equipmentFeature;
+			if (harvestLevel < harvestFeature.harvestLevel) {
 				harvestLevel = harvestFeature.harvestLevel;
 			}
 		}
-		return harvestLevel;
-	}
 
-	public int getHarvestLevel(ItemStack itemStack, ToolType tool, @Nullable Player player, @Nullable BlockState blockState) {
-
+		switch (harvestLevel) {
+			case 0:
+				return CustomTiers.HARVEST_0;
+			case 1:
+				return CustomTiers.HARVEST_1;
+			case 2:
+				return CustomTiers.HARVEST_2;
+			case 3:
+				return CustomTiers.HARVEST_3;
+			case 4:
+				return CustomTiers.HARVEST_4;
+			default:
+				return null;
+		}
 	}
 
 	@Override
-	public boolean canHarvestBlock(ItemStack itemStack, BlockState blockState) {
-		if(this.getSharpness(itemStack) <= 0) {
+	public boolean isCorrectToolForDrops(BlockState blockState) {
+		ItemStack itemStack = this.getDefaultInstance();
+
+		if (this.getSharpness(itemStack) <= 0) {
 			return false;
 		}
 
-		for(EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "harvest")) {
-			HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature)equipmentFeature;
-			if(harvestFeature.canHarvestBlock(blockState)) {
+		for (EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "harvest")) {
+			HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature) equipmentFeature;
+			if (harvestFeature.canHarvestBlock(blockState)) {
 				return true;
 			}
 		}
@@ -660,7 +680,7 @@ public class ItemEquipment extends BaseToolItem {
 	}
 
 	@Override
-	public boolean mineBlock(ItemStack itemStack, World world, BlockState blockState, BlockPos pos, LivingEntity entityLiving) {
+	public boolean mineBlock(ItemStack itemStack, Level world, BlockState blockState, BlockPos pos, LivingEntity entityLiving) {
 		if(this.getSharpness(itemStack) <= 0) {
 			return super.mineBlock(itemStack, world, blockState, pos, entityLiving);
 		}
@@ -723,8 +743,8 @@ public class ItemEquipment extends BaseToolItem {
 					if (possibleTarget instanceof Player) {
 						continue;
 					}
-					if (possibleTarget instanceof TameableEntity) {
-						TameableEntity possibleTameableTarget = (TameableEntity) possibleTarget;
+					if (possibleTarget instanceof OwnableEntity) {
+						OwnableEntity possibleTameableTarget = (OwnableEntity) possibleTarget;
 						if (possibleTameableTarget.getOwner() != null && !attacker.getCommandSenderWorld().getServer().isPvpAllowed()) {
 							continue;
 						}
@@ -746,7 +766,7 @@ public class ItemEquipment extends BaseToolItem {
 					double targetXDist = possibleTarget.position().x() - attacker.position().x();
 					double targetZDist = attacker.position().z() - possibleTarget.position().z();
 					double targetAngleAbsolute = 180 + Math.toDegrees(Math.atan2(targetXDist, targetZDist));
-					double targetAngle = Math.abs(targetAngleAbsolute - attacker.yRot);
+					double targetAngle = Math.abs(targetAngleAbsolute - attacker.yRotO);
 					if(targetAngle > 180) {
 						targetAngle = 180 - (targetAngle - 180);
 					}
@@ -757,7 +777,7 @@ public class ItemEquipment extends BaseToolItem {
 					targets.add(possibleTarget);
 					DamageSource sweepSource = DamageSourceHelper.GENERIC;
 					if (attacker instanceof Player) {
-						sweepSource = DamageSource.playerAttack((Player) attacker);
+						sweepSource = attacker.level().damageSources().playerAttack((Player) attacker);
 					}
 					possibleTarget.hurt(sweepSource, sweepDamage);
 				}
@@ -778,7 +798,7 @@ public class ItemEquipment extends BaseToolItem {
 			if (knockback != 0 && attacker != null && target != null) {
 				double xDist = attacker.position().x() - target.position().x();
 				double zDist = attacker.position().z() - target.position().z();
-				double xzDist = Math.max(MathHelper.sqrt(xDist * xDist + zDist * zDist), 0.01D);
+				double xzDist = Math.max(Mth.sqrt(LMHelperClass.convertToFloat(xDist * xDist + zDist * zDist)), 0.01D);
 				double motionCap = 10;
 				if (target.getDeltaMovement().x() < motionCap && target.getDeltaMovement().x() > -motionCap && target.getDeltaMovement().z() < motionCap && target.getDeltaMovement().z() > -motionCap) {
 					target.push(

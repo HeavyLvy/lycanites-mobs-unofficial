@@ -4,13 +4,13 @@ import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.helpers.JSONHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -152,7 +152,7 @@ public class PlayerSpawnCondition extends SpawnCondition {
 
 
     @Override
-    public boolean isMet(World world, PlayerEntity player, BlockPos position) {
+    public boolean isMet(Level world, Player player, BlockPos position) {
 		if(player == null) {
 			return false;
 		}
@@ -182,7 +182,7 @@ public class PlayerSpawnCondition extends SpawnCondition {
 		}
 
 		// Check Spawn Distance:
-		double spawnDistance = player.position().distanceTo(new Vector3d(world.getLevelData().getXSpawn(), world.getLevelData().getYSpawn(), world.getLevelData().getZSpawn()));
+		double spawnDistance = player.position().distanceTo(new Vec3(world.getLevelData().getXSpawn(), world.getLevelData().getYSpawn(), world.getLevelData().getZSpawn()));
 		if(this.spawnDistanceMin >= 0 && spawnDistance < this.spawnDistanceMin) {
 			return false;
 		}
@@ -192,7 +192,7 @@ public class PlayerSpawnCondition extends SpawnCondition {
 
 		// Check Specific Position:
 		if (this.position != null) {
-			double positionDistance = player.position().distanceTo(new Vector3d(this.position.getX(), this.position.getY(), this.position.getZ()));
+			double positionDistance = player.position().distanceTo(new Vec3(this.position.getX(), this.position.getY(), this.position.getZ()));
 			if (this.positionDistanceMin >= 0 && positionDistance < this.positionDistanceMin) {
 				return false;
 			}
@@ -210,10 +210,10 @@ public class PlayerSpawnCondition extends SpawnCondition {
 		}
 
 		// Check States:
-		if(this.grounded && !player.isOnGround()) {
+		if(this.grounded && !player.onGround()) {
 			return false;
 		}
-		if(this.notGrounded && player.isOnGround()) {
+		if(this.notGrounded && player.onGround()) {
 			return false;
 		}
 		if(this.inWater && !player.isInWater()) {

@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import com.lycanitesmobs.client.ClientManager;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.TextureManager;
+import com.lycanitesmobs.client.renderer.EquipmentPartRenderer;
+import com.lycanitesmobs.client.renderer.IItemModelRenderer;
 import com.lycanitesmobs.core.helpers.JSONHelper;
 import com.lycanitesmobs.core.info.ElementInfo;
 import com.lycanitesmobs.core.info.ElementManager;
@@ -14,6 +16,7 @@ import com.lycanitesmobs.core.item.BaseItem;
 import com.lycanitesmobs.core.item.ChargeItem;
 import com.lycanitesmobs.core.item.equipment.features.EquipmentFeature;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -25,10 +28,12 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.joml.Vector3d;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class ItemEquipmentPart extends BaseItem {
 	/** The base amount of experience needed to level up, this is increased by the part's level scaled. **/
@@ -185,6 +190,16 @@ public class ItemEquipmentPart extends BaseItem {
 		return ClientManager.getInstance().getFontRenderer();
 	}*/
 
+	@Override
+	public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+		consumer.accept(new IClientItemExtensions() {
+
+			@Override
+			public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+				return new EquipmentPartRenderer();
+			}
+		});
+	}
 	/** Sets up this equipment part, this is called when the provided stack is dropped and needs to have its level randomized, etc. **/
 	public void randomizeLevel(Level world, ItemStack itemStack) {
 		int level = this.levelMax;

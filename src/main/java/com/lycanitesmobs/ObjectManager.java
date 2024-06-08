@@ -42,7 +42,7 @@ public class ObjectManager {
 	}
 	
 	// Maps:
-	public static Map<String, Object> blocks = new HashMap<>();
+	public static Map<String, Block> blocks = new HashMap<>();
     public static Map<String, Item> items = new HashMap<>();
     public static Map<Item, ModInfo> itemGroups = new HashMap<>();
 	public static Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
@@ -151,7 +151,7 @@ public class ObjectManager {
 		name = name.toLowerCase();
 		if(!blocks.containsKey(name))
 			return null;
-		return (Block) blocks.get(name);
+		return blocks.get(name);
 	}
 	
 	// ========== Item ==========

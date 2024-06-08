@@ -10,7 +10,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 
 public class CreatureContainer extends BaseContainer {
-	public static final MenuType<CreatureContainer> TYPE = (MenuType<CreatureContainer>) IForgeMenuType.create(CreatureContainer::new)/*.setRegistryName(LycanitesMobs.MODID, "creature")*/;
+	public static final MenuType<CreatureContainer> TYPE = (MenuType<CreatureContainer>) IForgeMenuType.create(CreatureContainer::new);
 	public BaseCreatureEntity creature;
 
 	/**

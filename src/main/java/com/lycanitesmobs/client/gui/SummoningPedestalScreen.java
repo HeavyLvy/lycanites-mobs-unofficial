@@ -3,6 +3,7 @@ package com.lycanitesmobs.client.gui;
 import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.client.gui.buttons.ButtonBase;
 import com.lycanitesmobs.client.gui.buttons.MainTab;
+import com.lycanitesmobs.client.gui.widgets.BaseListEntry;
 import com.lycanitesmobs.client.gui.widgets.SummoningPedestalList;
 import com.lycanitesmobs.core.container.SummoningPedestalContainer;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
@@ -43,7 +44,7 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
 
     public static int TAB_BUTTON_ID = 55555;
 
-    public SummoningPedestalScreen(SummoningPedestalContainer container, Inventory playerInventory, MutableComponent name) {
+    public SummoningPedestalScreen(SummoningPedestalContainer container, Inventory playerInventory, Component name) {
         super(container, playerInventory, name);
         this.summoningPedestal = container.summoningPedestal;
         this.player = playerInventory.player;
@@ -109,8 +110,7 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
         int listBottom = listTop + listHeight;
         int listX = this.windowX + (buttonSpacing * 2);
         this.list = new SummoningPedestalList(this, this.playerExt, listWidth, listHeight, listTop, listBottom, listX);
-        this.children().add(this.list);
-
+        this.addWidget(this.list);
     }
 
 

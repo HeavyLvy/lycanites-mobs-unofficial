@@ -45,7 +45,7 @@ public class EquipmentPartManager extends JSONLoader {
 	@Override
 	public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
 
-		Item.Properties properties = new Item.Properties().stacksTo(1).setNoRepair().setISTER(() -> com.lycanitesmobs.client.renderer.EquipmentPartRenderer::new);
+		Item.Properties properties = new Item.Properties().stacksTo(1).setNoRepair();
 		ItemEquipmentPart equipmentPart = new ItemEquipmentPart(properties, modInfo);
 		equipmentPart.loadFromJSON(json);
 		if(this.equipmentParts.containsKey(equipmentPart.itemName)) {

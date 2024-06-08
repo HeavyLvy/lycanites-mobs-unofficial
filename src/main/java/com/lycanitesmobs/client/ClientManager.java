@@ -45,17 +45,6 @@ public class ClientManager {
 	}
 
 	/**
-	 * Registers all GUI Screens, etc used by this mod.
-	 */
-	public void registerScreens() {
-		ScreenManager.register(CreatureContainer.TYPE, CreatureInventoryScreen::new);
-		ScreenManager.register(SummoningPedestalContainer.TYPE, SummoningPedestalScreen::new);
-		ScreenManager.register(EquipmentForgeContainer.TYPE, EquipmentForgeScreen::new);
-		ScreenManager.register(EquipmentInfuserContainer.TYPE, EquipmentInfuserScreen::new);
-		ScreenManager.register(EquipmentStationContainer.TYPE, EquipmentStationScreen::new);
-	}
-
-	/**
 	 * Registers all client side events listeners.
 	 */
 	public void registerEvents() {

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client;
 
+import com.lycanitesmobs.client.renderer.EquipmentPartRenderer;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.item.special.ItemSoulgazer;
@@ -23,7 +24,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.awt.*;
 
 public class ClientEventListener {
-
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void onItemTooltip(ItemTooltipEvent event) {

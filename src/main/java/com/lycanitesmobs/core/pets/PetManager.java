@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.pets;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -172,7 +173,7 @@ public class PetManager {
             return;
 
         // Load All NBT Data Into The NBT Map:
-        ListNBT entryList = nbtTagCompound.getList("PetManager", 10);
+        ListTag entryList = nbtTagCompound.getList("PetManager", 10);
         for(int i = 0; i < entryList.size(); ++i) {
             CompoundTag nbtEntry = (CompoundTag)entryList.get(i);
             if(!nbtEntry.hasUUID("UUID") && nbtEntry.contains("EntryName")) { // Convert Pet Entries from older mod versions.
@@ -191,7 +192,7 @@ public class PetManager {
     // ========== Write ==========
     /** Writes a list of Creature Knowledge to a player's NBTTag. **/
     public void writeToNBT(CompoundTag nbtTagCompound) {
-        ListNBT entryList = new ListNBT();
+        ListTag entryList = new ListTag();
         for(PetEntry petEntry : this.entries.values()) {
             CompoundTag nbtEntry = new CompoundTag();
             petEntry.writeToNBT(nbtEntry);
