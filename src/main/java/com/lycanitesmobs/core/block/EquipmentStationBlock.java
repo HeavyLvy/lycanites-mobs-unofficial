@@ -31,7 +31,7 @@ public class EquipmentStationBlock extends BlockBase {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
 	public EquipmentStationBlock(Properties properties, ModInfo group) {
-		super(properties);
+		super(properties,group,"equipment_station");
 		
 		// Properties:
 		this.group = group;

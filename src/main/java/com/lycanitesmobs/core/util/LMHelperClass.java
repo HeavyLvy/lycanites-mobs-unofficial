@@ -265,4 +265,7 @@ public class LMHelperClass {
             return hasTag(block, BlockTags.UNDERWATER_BONEMEALS) && isPlant(block);
         }
     }
+    public static <T> T cast(Object o) {
+        return (T) o;
+    }
 }

@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.block;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
@@ -22,9 +23,15 @@ public class BlockWallCustom extends WallBlock {
 	// ==================================================
 	public BlockWallCustom(Block.Properties properties, BlockBase block) {
 		super(properties);
-        //this.setRegistryName(new ResourceLocation(block.group.modid, block.blockName + "_wall"));
+        this.setRegistryName(block.group.modid, block.blockName + "_wall");
 	}
-
+	public ResourceLocation registryName;
+	public ResourceLocation getRegistryName() {
+		return registryName;
+	}
+	public ResourceLocation setRegistryName(String modID, String blockName) {
+		return registryName = new ResourceLocation(modID, blockName);
+	}
 	@Override
 	public MutableComponent getName() {
 		return Component.translatable(this.getDescriptionId());

@@ -5,14 +5,15 @@ import com.lycanitesmobs.Utilities;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.CustomProjectileEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.*;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.HashSet;
 
@@ -85,9 +86,9 @@ public class ProjectileBehaviourLaser extends ProjectileBehaviour {
 		boolean lockedLaser = false;
 		if(((CustomProjectileEntity)projectile).getParent() != null) {
 			double[] target = projectile.getFacingPosition(projectile, this.range, ((CustomProjectileEntity)projectile).laserAngle);
-			targetX = target[0] + ((MathHelper.cos((projectile.updateTick + ((CustomProjectileEntity)projectile).laserAngle) * 0.25F) * 1.0F) - 0.5F);
-			targetY = target[1] + (((MathHelper.cos((projectile.updateTick + ((CustomProjectileEntity)projectile).laserAngle) * 0.25F) * 1.0F) - 0.5F) * 10);
-			targetZ = target[2] + ((MathHelper.cos((projectile.updateTick + ((CustomProjectileEntity)projectile).laserAngle) * 0.25F) * 1.0F) - 0.5F);
+			targetX = target[0] + ((Mth.cos((projectile.updateTick + ((CustomProjectileEntity)projectile).laserAngle) * 0.25F) * 1.0F) - 0.5F);
+			targetY = target[1] + (((Mth.cos((projectile.updateTick + ((CustomProjectileEntity)projectile).laserAngle) * 0.25F) * 1.0F) - 0.5F) * 10);
+			targetZ = target[2] + ((Mth.cos((projectile.updateTick + ((CustomProjectileEntity)projectile).laserAngle) * 0.25F) * 1.0F) - 0.5F);
 		}
 		else if(projectile.getOwner() != null) {
 			if(projectile.getOwner() instanceof BaseCreatureEntity && ((BaseCreatureEntity)projectile.getOwner()).getTarget() != null) {
@@ -101,7 +102,7 @@ public class ProjectileBehaviourLaser extends ProjectileBehaviour {
 				lockedLaser = true;
 			}
 			else {
-				Vector3d lookDirection = projectile.getOwner().getLookAngle();
+				Vec3 lookDirection = projectile.getOwner().getLookAngle();
 				targetX = projectile.getOwner().position().x() + (lookDirection.x * this.range);
 				targetY = projectile.getOwner().position().y() + projectile.getOwner().getEyeHeight() + (lookDirection.y * this.range);
 				targetZ = projectile.getOwner().position().z() + (lookDirection.z * this.range);
@@ -117,26 +118,26 @@ public class ProjectileBehaviourLaser extends ProjectileBehaviour {
 				excludedEntities.add(projectile.getOwner().getControllingPassenger());
 			}
 		}
-		RayTraceResult rayTraceResult = Utilities.raytrace(projectile.getCommandSenderWorld(), projectile.position().x(), projectile.position().y(), projectile.position().z(), targetX, targetY, targetZ, this.width, projectile, excludedEntities);
+		HitResult rayTraceResult = Utilities.raytrace(projectile.getCommandSenderWorld(), projectile.position().x(), projectile.position().y(), projectile.position().z(), targetX, targetY, targetZ, this.width, projectile, excludedEntities);
 
 		// Update Laser End Position:
 		if(rayTraceResult != null && !lockedLaser) {
 			targetX = rayTraceResult.getLocation().x;
 			targetY = rayTraceResult.getLocation().y;
 			targetZ = rayTraceResult.getLocation().z;
-			if(rayTraceResult instanceof EntityRayTraceResult) {
-				Entity entityHit = ((EntityRayTraceResult)rayTraceResult).getEntity();
+			if(rayTraceResult instanceof EntityHitResult) {
+				Entity entityHit = ((EntityHitResult)rayTraceResult).getEntity();
 				if (entityHit != null) {
 					targetY += entityHit.getDimensions(entityHit.getPose()).height / 2;
 				}
 			}
 		}
 
-		((CustomProjectileEntity)projectile).setLaserEnd(new Vector3d(targetX, targetY, targetZ));
+		((CustomProjectileEntity)projectile).setLaserEnd(new Vec3(targetX, targetY, targetZ));
 
 		// Laser Damage:
-		if(projectile.updateTick % 10 == 0 && projectile.isAlive() && rayTraceResult instanceof EntityRayTraceResult) {
-			EntityRayTraceResult entityRayTraceResult = (EntityRayTraceResult)rayTraceResult;
+		if(projectile.updateTick % 10 == 0 && projectile.isAlive() && rayTraceResult instanceof EntityHitResult) {
+			EntityHitResult entityRayTraceResult = (EntityHitResult)rayTraceResult;
 			if(((CustomProjectileEntity)projectile).getLaserEnd().distanceTo(entityRayTraceResult.getEntity().position()) <= (this.width * 10)) {
 				boolean doDamage = true;
 				if (entityRayTraceResult.getEntity() instanceof LivingEntity) {
@@ -178,13 +179,13 @@ public class ProjectileBehaviourLaser extends ProjectileBehaviour {
 		else {
 			double pierceDamage = 1;
 			if(damage <= pierceDamage)
-				attackSuccess = target.hurt(DamageSource.thrown(projectile, projectile.getOwner()).bypassArmor().bypassMagic(), damage);
+				attackSuccess = target.hurt(projectile.level().damageSources().thrown(projectile, projectile.getOwner()), damage);
 			else {
 				int hurtResistantTimeBefore = target.invulnerableTime;
-				target.hurt(DamageSource.thrown(projectile, projectile.getOwner()).bypassArmor().bypassMagic(), (float)pierceDamage);
+				target.hurt(projectile.level().damageSources().thrown(projectile, projectile.getOwner()), (float)pierceDamage);
 				target.invulnerableTime = hurtResistantTimeBefore;
 				damage -= pierceDamage;
-				attackSuccess = target.hurt(DamageSource.thrown(projectile, projectile.getOwner()), damage);
+				attackSuccess = target.hurt(projectile.level().damageSources().thrown(projectile, projectile.getOwner()), damage);
 			}
 		}
 
@@ -204,5 +205,5 @@ public class ProjectileBehaviourLaser extends ProjectileBehaviour {
 	}
 
 	@Override
-	public void onProjectileImpact(BaseProjectileEntity projectile, World world, BlockPos pos) {}
+	public void onProjectileImpact(BaseProjectileEntity projectile, Level world, BlockPos pos) {}
 }

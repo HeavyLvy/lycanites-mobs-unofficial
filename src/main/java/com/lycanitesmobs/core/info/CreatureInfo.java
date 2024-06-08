@@ -576,7 +576,7 @@ public class CreatureInfo {
 		if(this.diets.isEmpty()) {
 			return Component.translatable("common.none");
 		}
-		Component dietNames = Component.literal("");
+		MutableComponent dietNames = Component.literal("");
 		boolean firstDiet = true;
 		for(String diet : this.diets) {
 			if(!firstDiet) {
@@ -602,7 +602,7 @@ public class CreatureInfo {
 		if(biomeIds.isEmpty()) {
 			return Component.translatable("gui.beastiary.biomes.none");
 		}
-		Component biomeNames = Component.literal("");
+		MutableComponent biomeNames = Component.literal("");
 		boolean firstBiome = true;
 		for(String biomeId : biomeIds) {
 			if(!firstBiome) {

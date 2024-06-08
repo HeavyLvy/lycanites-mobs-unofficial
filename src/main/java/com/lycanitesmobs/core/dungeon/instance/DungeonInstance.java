@@ -48,7 +48,7 @@ public class DungeonInstance {
 	long seed = 0;
 
 	/** The random instance to use when randomly generating, this can be seeded for consistent results. **/
-	public Random random;
+	public RandomSource random;
 
 	/** The generated layout of this dungeon, this contains all randomly selected sectors and their structures, etc. This is null on complete dungeons. **/
 	public DungeonLayout layout;
@@ -108,7 +108,7 @@ public class DungeonInstance {
 		if(this.seed == 0) {
 			this.seed = world.random.nextLong();
 		}
-		this.random = new Random(this.seed);
+		this.random = world.random;
 
 		// Generate Layout:
 		LycanitesMobs.logDebug("Dungeon", "Starting Dungeon Instance Generation For " + this);

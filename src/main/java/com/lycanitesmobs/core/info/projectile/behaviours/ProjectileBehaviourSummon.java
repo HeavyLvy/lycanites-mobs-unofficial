@@ -10,14 +10,14 @@ import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.network.MessageScreenRequest;
 import com.lycanitesmobs.core.pets.SummonSet;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ProjectileBehaviourSummon extends ProjectileBehaviour {
 	/** The id of the mob to summon. **/
@@ -66,7 +66,7 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
 	}
 
 	@Override
-	public void onProjectileImpact(BaseProjectileEntity projectile, World world, BlockPos pos) {
+	public void onProjectileImpact(BaseProjectileEntity projectile, Level world, BlockPos pos) {
 		if(projectile == null || projectile.getCommandSenderWorld().isClientSide) {
 			return;
 		}
@@ -78,19 +78,19 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
 		// Summon Minion:
 		SummonSet summonSet = null;
 		if(this.summonMinion) {
-			if(!(projectile.getOwner() instanceof PlayerEntity)) {
+			if(!(projectile.getOwner() instanceof Player)) {
 				return;
 			}
-			PlayerEntity player = (PlayerEntity)projectile.getOwner();
+			Player player = (Player)projectile.getOwner();
 			ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(player);
 			if(extendedPlayer == null) {
 				return;
 			}
 			summonSet = extendedPlayer.getSelectedSummonSet();
 			if(summonSet == null || summonSet.getCreatureType() == null) {
-				if (player instanceof ServerPlayerEntity) {
+				if (player instanceof ServerPlayer) {
 					MessageScreenRequest messageScreenRequest = new MessageScreenRequest(MessageScreenRequest.GuiRequest.SUMMONING);
-					LycanitesMobs.packetHandler.sendToPlayer(messageScreenRequest, (ServerPlayerEntity) player);
+					LycanitesMobs.packetHandler.sendToPlayer(messageScreenRequest, (ServerPlayer) player);
 				}
 				return;
 			}
@@ -104,7 +104,7 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
 				entityType = creatureInfo.getEntityType();
 			}
 			else {
-				Object entityTypeObj = GameRegistry.findRegistry(EntityType.class).getValue(new ResourceLocation(this.summonMobId));
+				Object entityTypeObj = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(this.summonMobId));
 				if (entityTypeObj instanceof EntityType) {
 					entityType = (EntityType) entityTypeObj;
 				}
@@ -123,16 +123,16 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
 			if (projectile.getCommandSenderWorld().random.nextDouble() <= this.summonChance) {
 				try {
 					Entity entity = entityType.create(projectile.getCommandSenderWorld());
-					entity.moveTo(projectile.blockPosition().getX(), projectile.blockPosition().getY(), projectile.blockPosition().getZ(), projectile.yRot, 0.0F);
+					entity.moveTo(projectile.blockPosition().getX(), projectile.blockPosition().getY(), projectile.blockPosition().getZ(), projectile.yRotO, 0.0F);
 					if (entity instanceof BaseCreatureEntity) {
 						BaseCreatureEntity entityCreature = (BaseCreatureEntity) entity;
 						entityCreature.setMinion(true);
 						entityCreature.setTemporary(this.summonDuration);
 						entityCreature.setSizeScale(this.sizeScale);
 
-						if (projectile.getOwner() instanceof PlayerEntity && entityCreature instanceof TameableCreatureEntity) {
+						if (projectile.getOwner() instanceof Player && entityCreature instanceof TameableCreatureEntity) {
 							TameableCreatureEntity entityTameable = (TameableCreatureEntity) entityCreature;
-							entityTameable.setPlayerOwner((PlayerEntity) projectile.getOwner());
+							entityTameable.setPlayerOwner((Player) projectile.getOwner());
 							entityTameable.setSitting(false);
 							entityTameable.setFollowing(true);
 							entityTameable.setPassive(false);
@@ -150,7 +150,7 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
 							randomAngle = -randomAngle;
 						}
 						BlockPos spawnPos = entityCreature.getFacingPosition(projectile, -1, randomAngle);
-						entity.moveTo(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), projectile.yRot, 0.0F);
+						entity.moveTo(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), projectile.yRotO, 0.0F);
 						entity.getCommandSenderWorld().addFreshEntity(entity);
 					}
 				}

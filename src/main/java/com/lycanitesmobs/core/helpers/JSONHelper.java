@@ -54,11 +54,10 @@ public class JSONHelper {
 
 	public static List<String> getJsonStrings(JsonArray jsonArray) {
 		List<String> strings = new ArrayList<>();
-		Iterator<JsonElement> jsonIterator = jsonArray.iterator();
-		while (jsonIterator.hasNext()) {
-			String string = jsonIterator.next().getAsString();
-			strings.add(string);
-		}
+        for (JsonElement jsonElement : jsonArray) {
+            String string = jsonElement.getAsString();
+            strings.add(string);
+        }
 		return strings;
 	}
 

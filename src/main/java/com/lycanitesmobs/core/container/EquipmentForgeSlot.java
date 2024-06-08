@@ -5,9 +5,9 @@ import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.item.equipment.features.EquipmentFeature;
 import com.lycanitesmobs.core.item.equipment.features.SlotEquipmentFeature;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,7 +150,7 @@ public class EquipmentForgeSlot extends BaseSlot {
 
 
 	@Override
-	public ItemStack onTake(PlayerEntity player, ItemStack itemStack) {
+	public void onTake(Player player, ItemStack itemStack) {
 		Item item = itemStack.getItem();
 
 		// Equipment Part:
@@ -173,12 +173,12 @@ public class EquipmentForgeSlot extends BaseSlot {
 			this.containerForge.onEquipmentPartSlotChanged(this);
 		}
 
-		return super.onTake(player, itemStack);
+		super.onTake(player, itemStack);
 	}
 
 
 	@Override
-	public boolean mayPickup(PlayerEntity player) {
+	public boolean mayPickup(Player player) {
 		if(!this.childSlots.isEmpty()) {
 			for(EquipmentForgeSlot childSlot : this.childSlots) {
 				if(!childSlot.getItem().isEmpty()) {

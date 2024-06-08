@@ -7,9 +7,10 @@ import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.CustomProjectileEntity;
 import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,7 @@ public class ProjectileBehaviourFireProjectiles extends ProjectileBehaviour {
 	}
 
 	@Override
-	public void onProjectileImpact(BaseProjectileEntity projectile, World world, BlockPos pos) {
+	public void onProjectileImpact(BaseProjectileEntity projectile, Level world, BlockPos pos) {
 		if(projectile.getCommandSenderWorld().isClientSide) {
 			return;
 		}
@@ -69,7 +70,7 @@ public class ProjectileBehaviourFireProjectiles extends ProjectileBehaviour {
 		}
 
 		for(BaseProjectileEntity spawnedProjectile : ((CustomProjectileEntity)projectile).spawnedProjectiles) {
-			spawnedProjectile.remove();
+			spawnedProjectile.remove(Entity.RemovalReason.DISCARDED);
 		}
 	}
 

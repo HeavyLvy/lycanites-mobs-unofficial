@@ -10,7 +10,9 @@ import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.item.Item;
@@ -38,43 +40,45 @@ public class RenderRegister {
         // Creatures:
         for(CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
             if(creatureInfo.dummy) {
-                event.registerEntityRenderer(creatureInfo.getEntityType(), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
+                //LMHelperClass.cast() is used here because its not happy with it not being ? extends T, this is a safe cast.
+                event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType().builtInRegistryHolder().get()), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
             }
-            RenderingRegistry.registerEntityRenderingHandler(creatureInfo.getEntityType(), new CreatureRenderFactory<BaseCreatureEntity>(creatureInfo));
+            event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new CreatureRenderer<BaseCreatureEntity>(creatureInfo.getName(), dispatcher, (float) creatureInfo.width / 2));
         }
 
         // Projectiles:
         for(ProjectileInfo projectileInfo : ProjectileManager.getInstance().projectiles.values()){
             if(projectileInfo.modelClassName != null) {
-                RenderingRegistry.registerEntityRenderingHandler(projectileInfo.getEntityType(), new ProjectileRenderFactory<CustomProjectileEntity>(projectileInfo));
+                //Here we retain the factory since we are choosing the renderer based off the projectileInfo. Later on we can get rid of this and do individual renderers.
+                event.registerEntityRenderer(LMHelperClass.cast(projectileInfo.getEntityType()), (dispatcher) -> new ProjectileRenderFactory<CustomProjectileEntity>(projectileInfo).createRenderFor(dispatcher));
             }
             else {
-                RenderingRegistry.registerEntityRenderingHandler(projectileInfo.getEntityType(), new ProjectileRenderFactory<CustomProjectileEntity>(projectileInfo));
+                event.registerEntityRenderer(LMHelperClass.cast(projectileInfo.getEntityType()),(dispatcher) -> new ProjectileRenderFactory<CustomProjectileEntity>(projectileInfo).createRenderFor(dispatcher));
             }
         }
 
         // Old Sprite Projectiles:
         for(String projectileName : ProjectileManager.getInstance().oldSpriteProjectiles.keySet()) {
             Class projectileClass = ProjectileManager.getInstance().oldSpriteProjectiles.get(projectileName);
-            RenderingRegistry.registerEntityRenderingHandler(ProjectileManager.getInstance().oldProjectileTypes.get(projectileClass), new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, false));
+            event.registerEntityRenderer(LMHelperClass.cast(ProjectileManager.getInstance().oldProjectileTypes.get(projectileClass)),(dispatcher) -> new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, false).createRenderFor(dispatcher));
         }
 
         // Old Model Projectiles:
         for(String projectileName : ProjectileManager.getInstance().oldModelProjectiles.keySet()) {
             Class projectileClass = ProjectileManager.getInstance().oldModelProjectiles.get(projectileName);
-            RenderingRegistry.registerEntityRenderingHandler(ProjectileManager.getInstance().oldProjectileTypes.get(projectileClass), new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, true));
+            event.registerEntityRenderer(ProjectileManager.getInstance().oldProjectileTypes.get(projectileClass),(dispatcher) ->  new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, true).createRenderFor(dispatcher));
         }
 
         // Special Entities:
         for(Class specialClass : ObjectManager.specialEntities.values()) {
-            RenderingRegistry.registerEntityRenderingHandler(ObjectManager.specialEntityTypes.get(specialClass), new RenderFactoryNone<BaseProjectileEntity>(specialClass));
+            event.registerEntityRenderer(LMHelperClass.cast(ObjectManager.specialEntityTypes.get(specialClass)),(dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
         }
 
     }
 
     public void registerBlockRenderLayers() {
         for(Block block : ItemManager.getInstance().cutoutBlocks) {
-            RenderTypeLookup.setRenderLayer(block, RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(block, RenderType.cutout());
         }
     }
 }

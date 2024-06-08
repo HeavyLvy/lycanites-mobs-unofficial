@@ -8,15 +8,15 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 public class MobEventCommand {
-	public static ArgumentBuilder<CommandSource, ?> register() {
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal("mobevent")
 				.then(Commands.literal("start")
 						.then(Commands.argument("mobevent", StringArgumentType.string())
@@ -41,16 +41,16 @@ public class MobEventCommand {
 									.executes(MobEventCommand::stopWorld)));
 	}
 
-	public static int start(final CommandContext<CommandSource> context) {
+	public static int start(final CommandContext<CommandSourceStack> context) {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
-		World world = context.getSource().getLevel();
+		Level world = context.getSource().getLevel();
 		String eventName = StringArgumentType.getString(context, "mobevent");
 		int level = Math.max(1, IntegerArgumentType.getInteger(context, "level"));
 
 		if(!MobEventManager.getInstance().mobEvents.containsKey(eventName)) {
-			context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.start.unknown"), true);
+			context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start.unknown"), true);
 			return 0;
 		}
 
@@ -59,38 +59,38 @@ public class MobEventCommand {
 			return 0;
 		}
 
-		PlayerEntity player = null;
+		Player player = null;
 		BlockPos pos = new BlockPos(0, 0, 0);
 
-		if(context.getSource().getEntity() instanceof PlayerEntity) {
-			player = (PlayerEntity)context.getSource().getEntity();
-			pos = new BlockPos(player.position());
+		if(context.getSource().getEntity() instanceof Player) {
+			player = (Player)context.getSource().getEntity();
+			pos = new BlockPos(player.blockPosition());
 
 			// Check Conditions:
 			MobEvent mobEvent = MobEventManager.getInstance().getMobEvent(eventName);
 			if (!mobEvent.canStart(world, player)) {
-				context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.start.conditions"), true);
+				context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start.conditions"), true);
 				return 0;
 			}
 
 		}
 
 		extendedWorld.startMobEvent(eventName, player, pos, level, -1);
-		context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.start"), true);
+		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start"), true);
 		return 0;
 	}
 
-	public static int startSubspecies(final CommandContext<CommandSource> context) {
+	public static int startSubspecies(final CommandContext<CommandSourceStack> context) {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
-		World world = context.getSource().getLevel();
+		Level world = context.getSource().getLevel();
 		String eventName = StringArgumentType.getString(context, "mobevent");
 		int level = Math.max(1, IntegerArgumentType.getInteger(context, "level"));
 		int subspecies = Math.max(-1, IntegerArgumentType.getInteger(context, "subspecies"));
 
 		if(!MobEventManager.getInstance().mobEvents.containsKey(eventName)) {
-			context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.start.unknown"), true);
+			context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start.unknown"), true);
 			return 0;
 		}
 
@@ -99,28 +99,28 @@ public class MobEventCommand {
 			return 0;
 		}
 
-		PlayerEntity player = null;
+		Player player = null;
 		BlockPos pos = new BlockPos(0, 0, 0);
 
-		if(context.getSource().getEntity() instanceof PlayerEntity) {
-			player = (PlayerEntity)context.getSource().getEntity();
-			pos = new BlockPos(player.position());
+		if(context.getSource().getEntity() instanceof Player) {
+			player = (Player)context.getSource().getEntity();
+			pos = new BlockPos(player.blockPosition());
 
 			// Check Conditions:
 			MobEvent mobEvent = MobEventManager.getInstance().getMobEvent(eventName);
 			if (!mobEvent.canStart(world, player)) {
-				context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.start.conditions"), true);
+				context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start.conditions"), true);
 				return 0;
 			}
 
 		}
 
 		extendedWorld.startMobEvent(eventName, player, pos, level, subspecies);
-		context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.start"), true);
+		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start"), true);
 		return 0;
 	}
 
-	public static int startWorld(final CommandContext<CommandSource> context) {
+	public static int startWorld(final CommandContext<CommandSourceStack> context) {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
@@ -130,43 +130,43 @@ public class MobEventCommand {
 		int worldId = IntegerArgumentType.getInteger(context, "world");
 
 		if(!MobEventManager.getInstance().mobEvents.containsKey(eventName)) {
-			context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.start.unknown"), true);
+			context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start.unknown"), true);
 			return 0;
 		}
 
 //		World world = DimensionManager.getWorld(context.getSource().getServer(), DimensionType.getById(worldId), false, false); TODO Get world from id instead!
-		World world = context.getSource().getLevel();
+		Level world = context.getSource().getLevel();
 		ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(world);
 		if(extendedWorld == null) {
 			return 0;
 		}
 
-		PlayerEntity player = null;
+		Player player = null;
 		BlockPos pos = new BlockPos(0, 0, 0);
 
-		if(context.getSource().getEntity() instanceof PlayerEntity) {
-			player = (PlayerEntity)context.getSource().getEntity();
-			pos = new BlockPos(player.position());
+		if(context.getSource().getEntity() instanceof Player) {
+			player = (Player)context.getSource().getEntity();
+			pos = new BlockPos(player.blockPosition());
 
 			// Check Conditions:
 			MobEvent mobEvent = MobEventManager.getInstance().getMobEvent(eventName);
 			if (!mobEvent.canStart(world, player)) {
-				context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.start.conditions"), true);
+				context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start.conditions"), true);
 				return 0;
 			}
 
 		}
 
 		extendedWorld.startMobEvent(eventName, player, pos, level, subspecies);
-		context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.start"), true);
+		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start"), true);
 		return 0;
 	}
 
-	public static int random(final CommandContext<CommandSource> context) {
+	public static int random(final CommandContext<CommandSourceStack> context) {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
-		World world = context.getSource().getLevel();
+		Level world = context.getSource().getLevel();
 		int level = Math.max(1, IntegerArgumentType.getInteger(context, "level"));
 
 		ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(world);
@@ -175,11 +175,11 @@ public class MobEventCommand {
 		}
 		extendedWorld.stopWorldEvent();
 		MobEventListener.getInstance().triggerRandomMobEvent(world, extendedWorld, level);
-		context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.random"), true);
+		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.random"), true);
 		return 0;
 	}
 
-	public static int randomWorld(final CommandContext<CommandSource> context) {
+	public static int randomWorld(final CommandContext<CommandSourceStack> context) {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
@@ -187,44 +187,44 @@ public class MobEventCommand {
 		int worldId = IntegerArgumentType.getInteger(context, "world");
 
 //		World world = DimensionManager.getWorld(context.getSource().getServer(), DimensionType.getById(worldId), false, false); TODO Get world from id instead!
-		World world = context.getSource().getLevel();
+		Level world = context.getSource().getLevel();
 		ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(world);
 		if(extendedWorld == null) {
 			return 0;
 		}
 		extendedWorld.stopWorldEvent();
 		MobEventListener.getInstance().triggerRandomMobEvent(world, extendedWorld, level);
-		context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.random"), true);
+		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.random"), true);
 		return 0;
 	}
 
-	public static int stop(final CommandContext<CommandSource> context) {
+	public static int stop(final CommandContext<CommandSourceStack> context) {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
-		World world = context.getSource().getLevel();
+		Level world = context.getSource().getLevel();
 		ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(world);
 		if(extendedWorld == null) {
 			return 0;
 		}
 		extendedWorld.stopWorldEvent();
-		context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.stop"), true);
+		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.stop"), true);
 		return 0;
 	}
 
-	public static int stopWorld(final CommandContext<CommandSource> context) {
+	public static int stopWorld(final CommandContext<CommandSourceStack> context) {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
 		int worldId = IntegerArgumentType.getInteger(context, "world");
 //		World world = DimensionManager.getWorld(context.getSource().getServer(), DimensionType.getById(worldId), false, false); TODO Get world from id instead!
-		World world = context.getSource().getLevel();
+		Level world = context.getSource().getLevel();
 		ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(world);
 		if(extendedWorld == null) {
 			return 0;
 		}
 		extendedWorld.stopWorldEvent();
-		context.getSource().sendSuccess(new TranslationTextComponent("lyc.command.mobevent.stop"), true);
+		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.stop"), true);
 		return 0;
 	}
 }

@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -26,7 +27,7 @@ import org.joml.Vector3f;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity> implements EntityRendererProvider<BaseProjectileEntity, ProjectileModel> {
+public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity> {
 	protected ProjectileModel renderModel;
 	protected ProjectileModel defaultModel;
 	protected final List<RenderLayer<BaseProjectileEntity, ProjectileModel>> renderLayers = Lists.newArrayList(); // TODO Layers for projectiles.
@@ -147,12 +148,13 @@ public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity
 		VBOObjModel.renderType = null;
 	}
 
-	@Override
+
+	//@Override
 	public ProjectileModel getModel() {
 		return this.renderModel;
 	}
 
-	public final boolean addLayer(LayerRenderer<BaseProjectileEntity, ProjectileModel> layer) {
+	public final boolean addLayer(RenderLayer<BaseProjectileEntity, ProjectileModel> layer) {
 		return this.renderLayers.add(layer);
 	}
 
@@ -174,4 +176,5 @@ public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity
 	public ResourceLocation getTextureLocation(BaseProjectileEntity entity) {
 		return entity.getTexture();
 	}
+
 }

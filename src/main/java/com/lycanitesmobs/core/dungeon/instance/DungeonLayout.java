@@ -3,9 +3,9 @@ package com.lycanitesmobs.core.dungeon.instance;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.config.ConfigDungeons;
 import com.lycanitesmobs.core.dungeon.definition.DungeonSector;
-import com.lycanitesmobs.core.worldgen.DungeonFeature;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 
 import java.util.*;
 
@@ -40,7 +40,7 @@ public class DungeonLayout {
 	/**
 	 * Generates (or regenerates) this entire Dungeon Layout.
 	 */
-	public void generate(Random random) {
+	public void generate(RandomSource random) {
 		this.sectors.clear();
 		this.sectorChunkMap.clear();
 		this.openConnectors.clear();
@@ -117,7 +117,7 @@ public class DungeonLayout {
 	 * @param random The instance of Random to use.
 	 * @return The generated entrance sector.
 	 */
-	public SectorInstance start(Random random) {
+	public SectorInstance start(RandomSource random) {
 		this.originConnector = new SectorConnector(this.dungeonInstance.originPos, null, 0, Direction.from2DDataValue(random.nextInt(100)));
 		DungeonSector entranceDungeonSector = this.dungeonInstance.schematic.getRandomSector("entrance", random);
 		SectorInstance entranceSector = new SectorInstance(this, entranceDungeonSector, random);
@@ -142,7 +142,7 @@ public class DungeonLayout {
 	 * @param length How many sectors to generate.
 	 * @return The end sector or null if it is the finish sector.
 	 */
-	public SectorInstance snake(Random random, SectorInstance startSector, int length) {
+	public SectorInstance snake(RandomSource random, SectorInstance startSector, int length) {
 		SectorInstance lastSector = startSector;
 		for(int i = 0; i < length; i++) {
 			String nextType = this.dungeonInstance.schematic.getNextConnectingSector(lastSector.dungeonSector.type, random);
@@ -183,7 +183,7 @@ public class DungeonLayout {
 	 * @param maxSectors The maximum amount of sectors to stem.
 	 * @return A list of generated sectors.
 	 */
-	public List<SectorInstance> stem(Random random, int maxSectors) {
+	public List<SectorInstance> stem(RandomSource random, int maxSectors) {
 		List<SectorInstance> generatedSectors = new ArrayList<>();
 		int stemmedSectors = 0;
 		for(SectorConnector connector : this.openConnectors.toArray(new SectorConnector[this.openConnectors.size()])) {
@@ -219,7 +219,7 @@ public class DungeonLayout {
 	 * @param startSector The sector to build on top of.
 	 * @return The generated tower sector.
 	 */
-	public SectorInstance tower(Random random, SectorInstance startSector) {
+	public SectorInstance tower(RandomSource random, SectorInstance startSector) {
 		DungeonSector dungeonSector = this.dungeonInstance.schematic.getRandomSector("tower", random);
 		SectorInstance sectorInstance = new SectorInstance(this, dungeonSector, random);
 		SectorConnector sectorConnector = startSector.getRandomConnector(random, sectorInstance);
@@ -242,7 +242,7 @@ public class DungeonLayout {
 	 * @param ledgeCount How many ledges to make, there must be enough open connectors to finish.
 	 * @return The generated tower sector.
 	 */
-	public SectorInstance ledge(Random random, SectorInstance startSector, int ledgeCount) {
+	public SectorInstance ledge(RandomSource random, SectorInstance startSector, int ledgeCount) {
 		SectorInstance lastSectorInstance = null;
 		int bossIndex = 0;
 		if(ledgeCount > 0) {

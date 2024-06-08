@@ -35,7 +35,7 @@ public class BlockEquipmentForge extends BlockBase {
 	//                   Constructor
 	// ==================================================
 	public BlockEquipmentForge(Block.Properties properties, ModInfo group, int level) {
-		super(properties);
+		super(properties,group,"");
 		
 		// Properties:
 		this.group = group;

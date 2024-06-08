@@ -37,7 +37,7 @@ public class EquipmentInfuserBlock extends BlockBase {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
 	public EquipmentInfuserBlock(Properties properties, ModInfo group) {
-		super(properties);
+		super(properties,group,"equipment_infuser");
 		
 		// Properties:
 		this.group = group;

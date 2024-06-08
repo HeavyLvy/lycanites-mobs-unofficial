@@ -45,7 +45,7 @@ public class BlockSummoningPedestal extends BlockBase {
 	//                   Constructor
 	// ==================================================
 	public BlockSummoningPedestal(Block.Properties properties, ModInfo group) {
-		super(properties);
+		super(properties,group,"summoningpedestal");
 
         this.group = group;
         this.blockName = "summoningpedestal";

@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -173,7 +174,7 @@ public class KeyHandler {
         // Left (Attack):
         if(event.getButton() == 0) {
             // Disable attack for large entity reach override:
-            if(!this.mc.player.isSpectator() && !this.mc.player.isHandsBusy() && this.mc.hitResult.getType() == RayTraceResult.Type.ENTITY) {
+            if(!this.mc.player.isSpectator() && !this.mc.player.isHandsBusy() && this.mc.hitResult.getType() == HitResult.Type.ENTITY) {
                 Entity entityHit = ((EntityHitResult)this.mc.hitResult).getEntity();
                 if(playerExt.canMeleeBigEntity(entityHit)) {
                     MessagePlayerAttack message = new MessagePlayerAttack(entityHit);

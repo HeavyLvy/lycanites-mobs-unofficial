@@ -1,9 +1,9 @@
 package com.lycanitesmobs.core.info;
 
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.biome.Biome;
-import net.minecraftforge.common.BiomeDictionary;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraftforge.common.BiomeManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,10 +41,10 @@ public class ModInfo {
 	public Biome[] biomes = new Biome[0];
 
     /** The list of biome types that mobs in this mod can spawn in. **/
-    public BiomeDictionary.Type[] biomeTypesAllowed;
+    public BiomeManager.BiomeType[] biomeTypesAllowed;
 
     /** The list of biome types that mobs in this mod cannot spawn in. **/
-    public BiomeDictionary.Type[] biomeTypesDenied;
+    public BiomeManager.BiomeType[] biomeTypesDenied;
 
 
     // ==================================================
@@ -64,7 +64,7 @@ public class ModInfo {
 	 * Returns the display title of this mod.
 	 * @return The text to display.
 	 */
-	public ITextComponent getTitle() {
-    	return new TranslationTextComponent(this.modid + ".name");
+	public Component getTitle() {
+    	return Component.translatable(this.modid + ".name");
 	}
 }

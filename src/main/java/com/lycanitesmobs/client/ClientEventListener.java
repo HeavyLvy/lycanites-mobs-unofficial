@@ -40,7 +40,7 @@ public class ClientEventListener {
         }
 
         if (event.getItemStack().getItem() instanceof ItemSoulgazer) {
-            ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(event.getPlayer());
+            ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(event.getEntity());
             if (extendedPlayer != null && extendedPlayer.creatureStudyCooldown > 0) {
                 event.getToolTip().add(Component.translatable("message.beastiary.study.cooldown").append(" " + String.format("%.0f", (float)extendedPlayer.creatureStudyCooldown / 20) + "s").withStyle(ChatFormatting.BLUE));
             }

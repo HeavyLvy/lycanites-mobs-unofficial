@@ -8,6 +8,8 @@ import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -86,11 +88,11 @@ public class BaseProjectileDispenseBehaviour extends AbstractProjectileDispenseB
 	//                        Sound
 	// ==================================================
 	@Override
-    protected void playSound(IBlockSource blockSource) {
+    protected void playSound(BlockSource blockSource) {
         SoundEvent soundEvent = this.getDispenseSound();
         if(soundEvent == null || blockSource == null)
             return;
-        blockSource.getLevel().playSound(null, blockSource.getPos(), soundEvent, SoundCategory.AMBIENT, 1.0F, 1.0F / (new Random().nextFloat() * 0.4F + 0.8F));
+        blockSource.getLevel().playSound(null, blockSource.getPos(), soundEvent, SoundSource.AMBIENT, 1.0F, 1.0F / (new Random().nextFloat() * 0.4F + 0.8F));
     }
 
     protected SoundEvent getDispenseSound() {

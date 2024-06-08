@@ -3,11 +3,10 @@ package com.lycanitesmobs.core.info.projectile.behaviours;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.BaseProjectileEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
 
 public class ProjectileBehaviourExplosion extends ProjectileBehaviour {
 	/** The explosion radius. **/
@@ -26,7 +25,7 @@ public class ProjectileBehaviourExplosion extends ProjectileBehaviour {
 	}
 
 	@Override
-	public void onProjectileImpact(BaseProjectileEntity projectile, World world, BlockPos pos) {
+	public void onProjectileImpact(BaseProjectileEntity projectile, Level world, BlockPos pos) {
 		if(this.radius <= 0 || projectile.getCommandSenderWorld().isClientSide) {
 			return;
 		}
@@ -43,12 +42,12 @@ public class ProjectileBehaviourExplosion extends ProjectileBehaviour {
 			}
 		}
 
-		Explosion.Mode explosionMode = Explosion.Mode.NONE;
+		Level.ExplosionInteraction explosionMode = Level.ExplosionInteraction.NONE;
 		if("break".equalsIgnoreCase(this.mode)) {
-			explosionMode = Explosion.Mode.BREAK;
+			explosionMode = Level.ExplosionInteraction.BLOCK;
 		}
 		else if("destroy".equalsIgnoreCase(this.mode)) {
-			explosionMode = Explosion.Mode.DESTROY;
+			explosionMode = Level.ExplosionInteraction.TNT;
 		}
 
 		world.explode(projectile, projectile.position().x(), projectile.position().y(), projectile.position().z(), explosionRadius, explosionMode);
