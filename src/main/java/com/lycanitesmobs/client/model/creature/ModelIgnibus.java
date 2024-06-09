@@ -3,8 +3,8 @@ package com.lycanitesmobs.client.model.creature;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.model.template.ModelTemplateDragon;
 import com.lycanitesmobs.core.entity.RideableCreatureEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 
 public class ModelIgnibus extends ModelTemplateDragon {
     public ModelIgnibus() {
@@ -32,7 +32,7 @@ public class ModelIgnibus extends ModelTemplateDragon {
         super.animatePart(partName, entity, time, distance, loop, lookY, lookX, scale);
 
         // Jumping/Flying:
-        if(entity != null && !entity.isOnGround()) {
+        if(entity != null && !entity.onGround()) {
             RideableCreatureEntity rideableCreatureEntity = (RideableCreatureEntity)entity;
 
             if (rideableCreatureEntity.hasRiderTarget()) {
@@ -58,10 +58,10 @@ public class ModelIgnibus extends ModelTemplateDragon {
                     this.rotate(20 * (1 - distance), 0, 0);
                 }
                 if (partName.equals("legleftfront")) {
-                    this.rotate((float) ((40 * (1 - distance)) + Math.toDegrees(MathHelper.sin(loop * 0.067F) * 0.05F)), 120 * (1 - distance), (float) ((-40 * (1 - distance)) + Math.toDegrees(MathHelper.cos(loop * 0.09F) * 0.05F + 0.05F)));
+                    this.rotate((float) ((40 * (1 - distance)) + Math.toDegrees(Mth.sin(loop * 0.067F) * 0.05F)), 120 * (1 - distance), (float) ((-40 * (1 - distance)) + Math.toDegrees(Mth.cos(loop * 0.09F) * 0.05F + 0.05F)));
                 }
                 if (partName.equals("legrightfront")) {
-                    this.rotate((float) ((40 * (1 - distance)) + Math.toDegrees(MathHelper.sin(loop * 0.067F) * 0.05F)), -120 * (1 - distance), (float) ((40 * (1 - distance)) + Math.toDegrees(MathHelper.cos(loop * 0.09F) * 0.05F + 0.05F)));
+                    this.rotate((float) ((40 * (1 - distance)) + Math.toDegrees(Mth.sin(loop * 0.067F) * 0.05F)), -120 * (1 - distance), (float) ((40 * (1 - distance)) + Math.toDegrees(Mth.cos(loop * 0.09F) * 0.05F + 0.05F)));
                 }
                 if (partName.contains("foot")) {
                     this.rotate(90 * (1 - distance), 0, 0);

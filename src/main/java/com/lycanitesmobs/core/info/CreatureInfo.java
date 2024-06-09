@@ -482,12 +482,18 @@ public class CreatureInfo {
 			entityTypeBuilder.setShouldReceiveVelocityUpdates(false);
 			entityTypeBuilder.sized((float)this.width, (float)this.height);
 			this.entityType = entityTypeBuilder.build(this.getName());
-			//this.entityType.setRegistryName(LycanitesMobs.MODID, this.getName());
+			this.setRegistryName(LycanitesMobs.MODID, this.getName());
 			EntityFactory.getInstance().addEntityType(this.entityType, this.entityConstructor, this.getName());
 		}
 		return this.entityType;
 	}
-
+	public ResourceLocation registryName;
+	public ResourceLocation getRegistryName() {
+		return registryName;
+	}
+	public ResourceLocation setRegistryName(String modID, String blockName) {
+		return registryName = new ResourceLocation(modID, blockName);
+	}
 
 	/**
 	 * Returns the resource location for this creature.

@@ -1,9 +1,9 @@
 package com.lycanitesmobs.client.renderer.layer;
 
 import com.lycanitesmobs.client.renderer.CreatureRenderer;
-import net.minecraft.util.math.vector.Vector2f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector2f;
 
 @OnlyIn(Dist.CLIENT)
 public class LayerCreatureScrolling extends LayerCreatureEffect {

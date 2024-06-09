@@ -9,13 +9,13 @@ import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureEffect;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureScrolling;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import net.minecraft.util.math.vector.Vector4f;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
 public class ModelSylph extends ModelTemplateElemental {
@@ -72,8 +72,8 @@ public class ModelSylph extends ModelTemplateElemental {
 			}
 			this.rotate(
 					0,
-					5 + (float)Math.toDegrees(MathHelper.sin(loop * 0.2F) * 0.4F),
-					4 + (float)Math.toDegrees(MathHelper.sin(loop * 0.2F) * 0.08F) + (attackAngle * this.getAttackProgress())
+					5 + (float)Math.toDegrees(Mth.sin(loop * 0.2F) * 0.4F),
+					4 + (float)Math.toDegrees(Mth.sin(loop * 0.2F) * 0.08F) + (attackAngle * this.getAttackProgress())
 			);
 		}
 		else if (partName.contains("wingright")) {
@@ -86,18 +86,18 @@ public class ModelSylph extends ModelTemplateElemental {
 			}
 			this.rotate(
 					0,
-					-5 + (float)Math.toDegrees(MathHelper.sin(loop * 0.2F + (float)Math.PI) * 0.4F),
-					-4 + (float)Math.toDegrees(MathHelper.sin(loop * 0.2F + (float)Math.PI) * 0.08F) + (attackAngle * this.getAttackProgress())
+					-5 + (float)Math.toDegrees(Mth.sin(loop * 0.2F + (float)Math.PI) * 0.4F),
+					-4 + (float)Math.toDegrees(Mth.sin(loop * 0.2F + (float)Math.PI) * 0.08F) + (attackAngle * this.getAttackProgress())
 			);
 		}
 
 		// Fingers:
 		else if(partName.contains("finger")) {
 			if(partName.contains("thumb")) {
-				this.rotate(-(float) Math.toDegrees(MathHelper.cos(loop * 0.2F) * 0.2F - 0.2F), 0, 0);
+				this.rotate(-(float) Math.toDegrees(Mth.cos(loop * 0.2F) * 0.2F - 0.2F), 0, 0);
 			}
 			else {
-				this.rotate((float) Math.toDegrees(MathHelper.cos(loop * 0.2F) * 0.2F - 0.2F), 0, 0);
+				this.rotate((float) Math.toDegrees(Mth.cos(loop * 0.2F) * 0.2F - 0.2F), 0, 0);
 			}
 		}
 	}

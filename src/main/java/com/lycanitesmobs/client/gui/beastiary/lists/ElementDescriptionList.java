@@ -4,14 +4,13 @@ import com.lycanitesmobs.client.gui.beastiary.BeastiaryScreen;
 import com.lycanitesmobs.client.gui.widgets.BaseList;
 import com.lycanitesmobs.client.gui.widgets.BaseListEntry;
 import com.lycanitesmobs.core.info.ElementInfo;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.potion.Effect;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class ElementDescriptionList extends BaseList {
 		}
 
 		@Override
-		public void render(MatrixStack matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
+		public void render(GuiGraphics matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
 			if(index == 0) {
 				this.parentList.drawHelper.drawStringWrapped(matrixStack, this.parentList.getContent(), left + 6, top, this.parentList.getWidth() - 20, 0xFFFFFF, true);
 			}
@@ -73,48 +72,48 @@ public class ElementDescriptionList extends BaseList {
 		}
 
 		// Summary:
-		ITextComponent text = new StringTextComponent("\u00A7l")
+		MutableComponent text = Component.literal("\u00A7l")
 				.append(elementInfo.getTitle())
 				.append(": " + "\u00A7r\n")
 				.append(elementInfo.getDescription());
 
 		// Buffs:
-		new TranslationTextComponent("\n\n\u00A7l")
-			.append(new TranslationTextComponent("gui.beastiary.elements.buffs"))
+		Component.translatable("\n\n\u00A7l")
+			.append(Component.translatable("gui.beastiary.elements.buffs"))
 			.append(": " + "\u00A7r");
 		for(String buff : this.elementInfo.buffs) {
-			Effect effect = GameRegistry.findRegistry(Effect.class).getValue(new ResourceLocation(buff));
+			MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(buff));
 			if(effect == null) {
 				continue;
 			}
 			ResourceLocation effectResource = new ResourceLocation(buff);
-			new StringTextComponent("\n")
+			Component.literal("\n")
 					.append(effect.getDisplayName())
 					.append(": ")
-					.append(new TranslationTextComponent("effect." + effectResource.getPath() + ".description"));
+					.append(Component.translatable("effect." + effectResource.getPath() + ".description"));
 		}
 
 		// Debuffs:
-		new TranslationTextComponent("\n\n\u00A7l")
-				.append(new TranslationTextComponent("gui.beastiary.elements.debuffs"))
+		Component.translatable("\n\n\u00A7l")
+				.append(Component.translatable("gui.beastiary.elements.debuffs"))
 				.append(": " + "\u00A7r");
 		for(String debuff : this.elementInfo.debuffs) {
 			if("burning".equals(debuff)) {
-				new StringTextComponent("\n")
-				.append(new TranslationTextComponent("effect.burning"))
+				Component.literal("\n")
+				.append(Component.translatable("effect.burning"))
 				.append(": ")
-				.append(new TranslationTextComponent("effect.burning.description"));
+				.append(Component.translatable("effect.burning.description"));
 				continue;
 			}
-			Effect effect = GameRegistry.findRegistry(Effect.class).getValue(new ResourceLocation(debuff));
+			MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(debuff));
 			if(effect == null) {
 				continue;
 			}
 			ResourceLocation effectResource = new ResourceLocation(debuff);
-			new StringTextComponent("\n")
+			Component.literal("\n")
 				.append(effect.getDisplayName())
 				.append(": ")
-				.append(new TranslationTextComponent("effect." + effectResource.getPath() + ".description"));
+				.append(Component.translatable("effect." + effectResource.getPath() + ".description"));
 		}
 
 		return text.getString();

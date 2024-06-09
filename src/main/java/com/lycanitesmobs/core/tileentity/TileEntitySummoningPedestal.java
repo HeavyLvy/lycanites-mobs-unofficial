@@ -75,7 +75,6 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
 
     // Block:
     protected boolean blockStateSet = false;
-
     /**
      * Constructor
      *
@@ -86,7 +85,6 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         super(pos, state);
         this.summoningFuelMax = ConfigExtra.INSTANCE.summoningPedestalRedstoneTime.get();
     }
-
     @Override
     public BlockEntityType<?> getType() {
         return ObjectManager.tileEntityTypes.get(this.getClass());

@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.helpers.JSONHelper;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.ToolType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -121,8 +122,8 @@ public class HarvestEquipmentFeature extends EquipmentFeature {
 	 * @return The Tool Type of this feature, will return null if it's not a Pickaxe, Axe or Shovel.
 	 */
 	@Nullable
-	public ToolAction getToolType() {
-		return ToolAction.get(this.harvestType);
+	public ToolType getToolType() {
+		return ToolType.get(this.harvestType);
 	}
 
 	/**

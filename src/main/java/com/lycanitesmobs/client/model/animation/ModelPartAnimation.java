@@ -3,9 +3,9 @@ package com.lycanitesmobs.client.model.animation;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.client.model.IAnimationModel;
 import com.lycanitesmobs.core.helpers.JSONHelper;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.world.entity.LivingEntity;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.List;

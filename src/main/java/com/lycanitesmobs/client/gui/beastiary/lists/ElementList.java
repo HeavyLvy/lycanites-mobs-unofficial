@@ -5,9 +5,7 @@ import com.lycanitesmobs.client.gui.widgets.BaseList;
 import com.lycanitesmobs.client.gui.widgets.BaseListEntry;
 import com.lycanitesmobs.core.info.ElementInfo;
 import com.lycanitesmobs.core.info.ElementManager;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.IGuiEventListener;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

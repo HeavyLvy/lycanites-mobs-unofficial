@@ -2,6 +2,9 @@ package com.lycanitesmobs;
 
 import com.lycanitesmobs.core.EffectBase;
 import com.lycanitesmobs.core.block.BlockBase;
+import com.lycanitesmobs.core.block.CustomFluid;
+import com.lycanitesmobs.core.block.fluid.BaseFluidBlock;
+import com.lycanitesmobs.core.block.fluid.type.BaseFluidType;
 import com.lycanitesmobs.core.container.*;
 import com.lycanitesmobs.core.entity.EntityFactory;
 import com.lycanitesmobs.core.info.ItemManager;
@@ -18,6 +21,9 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -25,10 +31,13 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -52,6 +61,7 @@ public class ObjectManager {
     public static Map<Block, Item> buckets = new HashMap<>();
     public static Map<String, Class> tileEntities = new HashMap<>();
 	public static Map<String, EffectBase> effects = new HashMap<>();
+	public static Map<String, ResourceLocation> soundNames = new HashMap<>();
 	public static Map<String, SoundEvent> sounds = new HashMap<>();
 
 	// Type Maps:
@@ -146,6 +156,7 @@ public class ObjectManager {
 		ResourceLocation resourceLocation = new ResourceLocation(modInfo.modid, path);
 		SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
 		//soundEvent.setRegistryName(resourceLocation);
+		soundNames.put(name,resourceLocation);
 		sounds.put(name, soundEvent);
 	}
 	
@@ -272,90 +283,126 @@ public class ObjectManager {
 
     // ========== Potions ==========
 	@SubscribeEvent
-    public void registerEffects(RegistryEvent.Register<Effect> event) {
-		for(EffectBase effect : effects.values()) {
-        	event.getRegistry().register(effect);
-		}
+    public void registerEffects(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.MOB_EFFECTS,
+				helper -> {
+					for(EffectBase effect : effects.values()) {
+						helper.register(effect.getRegistryName(), effect);
+					}
+				}
+		);
+
     }
 
 	// ========== Fluids ==========
 	@SubscribeEvent
-	public void registerFluids(RegistryEvent.Register<Fluid> event) {
-		for(Fluid fluid : fluids.values()) {
-			event.getRegistry().register(fluid);
-		}
+	public void registerFluids(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.FLUIDS,
+				helper -> {
+					for(Fluid fluid : fluids.values()) {
+						if (fluid instanceof CustomFluid customFluid) {
+							helper.register(customFluid.getRegistryName(), fluid);
+						}
+
+					}
+				}
+		);
+		event.register(ForgeRegistries.Keys.FLUID_TYPES,
+				helper -> {
+					for(Fluid fluid : fluids.values()) {
+						if (fluid.getFluidType() instanceof BaseFluidType fluidType) {
+							helper.register(fluidType.getRegistryName(), fluidType);
+						}
+					}
+				}
+		);
+
 	}
 
 	// ========== Entities ==========
 	@SubscribeEvent
-	public void registerEntities(RegistryEvent.Register<EntityType<?>> event) {
-		for(String entityName : specialEntities.keySet()) {
-			EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), EntityClassification.MISC);
-			entityTypeBuilder.setTrackingRange(10);
-			entityTypeBuilder.setUpdateInterval(3);
-			entityTypeBuilder.setShouldReceiveVelocityUpdates(true);
-			entityTypeBuilder.noSummon();
+	public void registerEntities(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.ENTITY_TYPES,
+				helper -> {
+					for(String entityName : specialEntities.keySet()) {
+						EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
+						entityTypeBuilder.setTrackingRange(10);
+						entityTypeBuilder.setUpdateInterval(3);
+						entityTypeBuilder.setShouldReceiveVelocityUpdates(true);
+						entityTypeBuilder.noSummon();
+						EntityType entityType = entityTypeBuilder.build(entityName);
+						EntityFactory.getInstance().addEntityType(entityType, specialEntityConstructors.get(specialEntities.get(entityName)), entityName);
+						specialEntityTypes.put(specialEntities.get(entityName), entityType);
+						helper.register(new ResourceLocation(LycanitesMobs.MODID,entityName), entityType);
+					}
+				}
+		);
 
-			EntityType entityType = entityTypeBuilder.build(entityName);
-			entityType.setRegistryName(LycanitesMobs.MODID, entityName);
-			EntityFactory.getInstance().addEntityType(entityType, specialEntityConstructors.get(specialEntities.get(entityName)), entityName);
-			specialEntityTypes.put(specialEntities.get(entityName), entityType);
-			event.getRegistry().register(entityType);
-		}
 	}
 
 	// ========== Sounds ==========
 	@SubscribeEvent
-	public void registerSounds(RegistryEvent.Register<SoundEvent> event) {
-		for(SoundEvent soundEvent : sounds.values()) {
-			if(soundEvent.getRegistryName() == null) {
-				LycanitesMobs.logWarning("", "Sound: " + soundEvent + " has no Registry Name!");
-			}
-			event.getRegistry().register(soundEvent);
-		}
+	public void registerSounds(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.SOUND_EVENTS,
+				helper -> {
+					for(SoundEvent soundEvent : sounds.values()) {
+						for (ResourceLocation registryName : soundNames.values()) {
+							if(registryName == null) {
+								LycanitesMobs.logWarning("", "Sound: " + soundEvent + " has no Registry Name!");
+							}
+							helper.register(registryName, soundEvent);
+						}
+					}
+				}
+		);
 	}
 
 	// ========== Containers ==========
-	@SubscribeEvent
-	public void registerContainers(RegistryEvent.Register<ContainerType<?>> event) {
-		event.getRegistry().register(CreatureContainer.TYPE);
-		event.getRegistry().register(SummoningPedestalContainer.TYPE);
-		event.getRegistry().register(EquipmentForgeContainer.TYPE);
-		event.getRegistry().register(EquipmentInfuserContainer.TYPE);
-		event.getRegistry().register(EquipmentStationContainer.TYPE);
+	private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, LycanitesMobs.MODID);
+	public static void registerContainers(IEventBus event) {
+		MENUS.register(event);
+		MENUS.register("creature", () -> CreatureContainer.TYPE);
+		MENUS.register("summoning_pedestal", () -> SummoningPedestalContainer.TYPE);
+		MENUS.register("equipment_forge", () -> EquipmentForgeContainer.TYPE);
+		MENUS.register("equipment_infuser", () -> EquipmentInfuserContainer.TYPE);
+		MENUS.register("equipment_station", () -> EquipmentStationContainer.TYPE);
 	}
+
 
 	// ========== Tile Entities ==========
 	@SubscribeEvent
-	public void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event) {
-		TileEntityType<TileEntity> summoningPedestalType = TileEntityType.Builder.of((Supplier<TileEntity>) TileEntitySummoningPedestal::new,
+	public void registerTileEntities(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES,
+				helper -> {
+		BlockEntityType<TileEntitySummoningPedestal> summoningPedestalType = BlockEntityType.Builder.of(TileEntitySummoningPedestal::new,
 				getBlock("summoningpedestal")
 		).build(null);
-		summoningPedestalType.setRegistryName(LycanitesMobs.MODID, "summoningpedestal");
-		event.getRegistry().register(summoningPedestalType);
+		ResourceLocation summoningpedestalLocation = new ResourceLocation(LycanitesMobs.MODID, "summoningpedestal");
+					helper.register(summoningpedestalLocation,summoningPedestalType);
 		tileEntityTypes.put(TileEntitySummoningPedestal.class, summoningPedestalType);
 
-		TileEntityType<TileEntity> equipmentForgeType = TileEntityType.Builder.of((Supplier<TileEntity>) TileEntityEquipmentForge::new,
+		BlockEntityType<TileEntityEquipmentForge> equipmentForgeType = BlockEntityType.Builder.of(TileEntityEquipmentForge::new,
 				getBlock("equipmentforge_lesser"),
 				getBlock("equipmentforge_greater"),
 				getBlock("equipmentforge_master")
 		).build(null);
-		equipmentForgeType.setRegistryName(LycanitesMobs.MODID, "equipmentforge");
-		event.getRegistry().register(equipmentForgeType);
+		ResourceLocation equipmentforgeLocation = new ResourceLocation(LycanitesMobs.MODID, "equipmentforge");
+					helper.register(equipmentforgeLocation,equipmentForgeType);
 		tileEntityTypes.put(TileEntityEquipmentForge.class, equipmentForgeType);
 
-		TileEntityType<TileEntity> equipmentInfuserType = TileEntityType.Builder.of((Supplier<TileEntity>) EquipmentInfuserTileEntity::new,
+		BlockEntityType<EquipmentInfuserTileEntity> equipmentInfuserType = BlockEntityType.Builder.of(EquipmentInfuserTileEntity::new,
 				getBlock("equipment_infuser")
 		).build(null);
-		equipmentInfuserType.setRegistryName(LycanitesMobs.MODID, "equipment_infuser");
-		event.getRegistry().register(equipmentInfuserType);
+					ResourceLocation equipment_infuserLocation = new ResourceLocation(LycanitesMobs.MODID, "equipment_infuser");
+					helper.register(equipment_infuserLocation,equipmentInfuserType);
 		tileEntityTypes.put(EquipmentInfuserTileEntity.class, equipmentInfuserType);
 
-		TileEntityType<TileEntity> equipmentStationType = TileEntityType.Builder.of((Supplier<TileEntity>) EquipmentStationTileEntity::new,
+		BlockEntityType<EquipmentStationTileEntity> equipmentStationType = BlockEntityType.Builder.of(EquipmentStationTileEntity::new,
 				getBlock("equipment_station")
 		).build(null);
-		equipmentStationType.setRegistryName(LycanitesMobs.MODID, "equipment_station");
-		event.getRegistry().register(equipmentStationType);
+		ResourceLocation equipment_stationLocation = new ResourceLocation(LycanitesMobs.MODID, "equipment_station");
+		helper.register(equipment_stationLocation,equipmentStationType);
 		tileEntityTypes.put(EquipmentStationTileEntity.class, equipmentStationType);
+	});
 	}
 }

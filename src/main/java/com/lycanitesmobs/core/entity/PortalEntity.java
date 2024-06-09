@@ -8,12 +8,17 @@ import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.item.summoningstaff.ItemStaffSummoning;
 import com.lycanitesmobs.core.pets.SummonSet;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -137,7 +142,7 @@ public class PortalEntity extends BaseProjectileEntity {
             // Summoning Pedestal:
             if(this.summoningPedestal != null) {
                 if(this.summonType == null) {
-                    this.remove();
+                    this.remove(RemovalReason.DISCARDED);
                     return;
                 }
             }
@@ -145,12 +150,12 @@ public class PortalEntity extends BaseProjectileEntity {
             // Summoning Staff:
             else {
                 if(this.shootingEntity == null || !this.shootingEntity.isAlive() || this.portalItem == null) {
-                    this.remove();
+                    this.remove(RemovalReason.DISCARDED);
                     return;
                 }
                 ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(this.shootingEntity);
 				if(playerExt != null && playerExt.staffPortal != this) {
-					this.remove();
+					this.remove(RemovalReason.DISCARDED);
 					return;
 				}
             }
@@ -166,7 +171,7 @@ public class PortalEntity extends BaseProjectileEntity {
             if(playerExt != null && this.portalItem != null) {
                 if(++this.summonTick >= this.portalItem.getRapidTime(null)) {
                     this.summonDuration = this.portalItem.getSummonDuration();
-                    if(this.shootingEntity.abilities.instabuild) {
+                    if(this.shootingEntity.getAbilities().instabuild) {
 						this.summonAmount += this.portalItem.getSummonAmount();
 					}
                     else {
@@ -285,13 +290,13 @@ public class PortalEntity extends BaseProjectileEntity {
     public void moveToTarget() {
     	if(this.shootingEntity != null && this.summoningPedestal == null) {
     		// Get Look Target
-	        Vector3d lookDirection = this.shootingEntity.getLookAngle();
+	        Vec3 lookDirection = this.shootingEntity.getLookAngle();
 			this.targetX = this.shootingEntity.position().x() + (lookDirection.x * this.portalRange);
 			this.targetY = this.shootingEntity.position().y() + (lookDirection.y * this.portalRange);
 			this.targetZ = this.shootingEntity.position().z() + (lookDirection.z * this.portalRange);
 	        
 			// Apply Raytrace to Look Target:
-			RayTraceResult target = Utilities.raytrace(this.getCommandSenderWorld(), this.shootingEntity.position().x(), this.shootingEntity.position().y(), this.shootingEntity.position().z(), this.targetX, this.targetY, this.targetZ, 1.0F, this, null);
+			HitResult target = Utilities.raytrace(this.getCommandSenderWorld(), this.shootingEntity.position().x(), this.shootingEntity.position().y(), this.shootingEntity.position().z(), this.targetX, this.targetY, this.targetZ, 1.0F, this, null);
 	        if(target != null) {
 				this.targetX = target.getLocation().x;
 				this.targetY = target.getLocation().y;
@@ -308,7 +313,7 @@ public class PortalEntity extends BaseProjectileEntity {
     // ========== Get Coord Behind ==========
     /** Returns the XYZ coordinate in front or behind this entity (using rotation angle) this entity with the given distance, use a negative distance for behind. **/
     public double[] getFacingPosition(Entity entity, double distance) {
-    	double angle = Math.toRadians(this.yRot);
+    	double angle = Math.toRadians(this.yRotO);
     	double xAmount = -Math.sin(angle);
     	double zAmount = Math.cos(angle);
     	double[] coords = new double[3];
@@ -323,7 +328,7 @@ public class PortalEntity extends BaseProjectileEntity {
  	//                     Impact
  	// ==================================================
     @Override
-    protected void onHit(RayTraceResult movingObjectPos) {}
+    protected void onHit(HitResult movingObjectPos) {}
     
     
     // ==================================================

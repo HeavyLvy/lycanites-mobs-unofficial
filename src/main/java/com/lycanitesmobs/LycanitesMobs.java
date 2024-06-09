@@ -132,6 +132,7 @@ public class LycanitesMobs {
 
 		// Setup Event Listeners:
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+		ObjectManager.registerContainers(modEventBus);
 		modEventBus.addListener(this::commonSetup);
 		modEventBus.addListener(this::clientSetup);
 //		modEventBus.addListener(this::serverStarting);

@@ -7,6 +7,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -19,13 +20,21 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nullable;
 
 public abstract class TileEntityBase extends BlockEntity implements WorldlyContainer {
+    public ResourceLocation registryName = null;
     /**
      * Constructor
      */
     public TileEntityBase(BlockPos pos, BlockState state) {
         super(BlockEntityType.CHEST, pos, state);
+
     }
 
+    public ResourceLocation getRegistryName() {
+        return registryName;
+    }
+    public ResourceLocation setRegistryName(String modID, String blockName) {
+        return registryName = new ResourceLocation(modID, blockName);
+    }
     /**
      * Gets the Tile Entity Type used by this Tile Entity. Should be overridden.
      *

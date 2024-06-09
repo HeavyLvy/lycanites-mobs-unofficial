@@ -37,12 +37,12 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
 		int petTypeListHeight = Math.round((float)this.colLeftHeight * 0.225F);
 		int petTypeListY = this.colLeftY;
 		this.petTypeList = new PetTypeList(this, this.colLeftWidth, petTypeListHeight, petTypeListY, petTypeListY + petTypeListHeight, this.colLeftX);
-		this.children().add(this.petTypeList);
+		this.addWidget(this.petTypeList);
 
 		int petListHeight = Math.round((float)this.colLeftHeight * 0.7F);
 		int petListY = petTypeListY + petTypeListHeight + Math.round((float)this.colLeftHeight * 0.025F);
 		this.petList = new CreatureList(CreatureList.Type.PET, this, this.petTypeList, this.colLeftWidth, petListHeight, petListY, petListY + petListHeight, this.colLeftX);
-		this.children().add(this.petList);
+		this.addWidget(this.petList);
 
 		int buttonWidth = 80;
 		int buttonHeight = 20;

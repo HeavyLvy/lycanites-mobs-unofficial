@@ -3,8 +3,8 @@ package com.lycanitesmobs.client.model.creature;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.model.template.ModelTemplateDragon;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 
 public class ModelQuetzodracl extends ModelTemplateDragon {
 
@@ -37,8 +37,8 @@ public class ModelQuetzodracl extends ModelTemplateDragon {
         float rotZ = 0F;
 
         // Walking:
-        if(entity != null && entity.isOnGround()) {
-            float walkIdle = MathHelper.sin(loop * 0.1F);
+        if(entity != null && entity.onGround()) {
+            float walkIdle = Mth.sin(loop * 0.1F);
             if(partName.equals("armleft02")) {
                 rotX -= 15 + Math.toDegrees(walkIdle * 0.05F);
                 rotY += 45 + Math.toDegrees(walkIdle * 0.05F);

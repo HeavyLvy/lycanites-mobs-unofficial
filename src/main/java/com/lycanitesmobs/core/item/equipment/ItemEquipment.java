@@ -15,6 +15,7 @@ import com.lycanitesmobs.core.item.equipment.features.*;
 import com.lycanitesmobs.core.util.CustomTiers;
 import com.lycanitesmobs.core.util.DamageSourceHelper;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.ToolType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -54,7 +55,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class ItemEquipment extends BaseToolItem {
+public class ItemEquipment extends BaseItem {
 	/** The maximum amount of parts that can be added to an Equipment Piece. **/
 	public static int PART_LIMIT = 20;
 
@@ -64,8 +65,9 @@ public class ItemEquipment extends BaseToolItem {
 	/**
 	 * Constructor
 	 */
-	public ItemEquipment(float attackDamage, float attackSpeed, Tier tier, TagKey<Block> blockTagKey, Properties properties) {
-		super(attackDamage, attackSpeed, tier, blockTagKey, properties);
+	public ItemEquipment(/*float attackDamage, float attackSpeed, Tier tier, TagKey<Block> blockTagKey, */Properties properties) {
+		//super(attackDamage, attackSpeed, tier, blockTagKey, properties);
+		super(properties);
 		this.itemName = "equipment";
 		this.modInfo = LycanitesMobs.modInfo;
 		setup();
@@ -626,14 +628,14 @@ public class ItemEquipment extends BaseToolItem {
 
 
 	@Nonnull
-	public Set<ToolAction> getToolTypes(ItemStack itemStack) {
-		Map<ToolAction, Boolean> toolTypes = new HashMap<>();
+	public Set<ToolType> getToolTypes(ItemStack itemStack) {
+		Map<ToolType, Boolean> toolTypes = new HashMap<>();
 		if(this.getSharpness(itemStack) <= 0) {
 			return toolTypes.keySet();
 		}
 		for(EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "harvest")) {
 			HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature)equipmentFeature;
-			ToolAction toolType = harvestFeature.getToolType();
+			ToolType toolType = harvestFeature.getToolType();
 			if(toolType != null) {
 				toolTypes.put(toolType, true);
 			}
@@ -645,8 +647,22 @@ public class ItemEquipment extends BaseToolItem {
 	public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
 		return super.canPerformAction(stack, toolAction);
 	}
+	public int getHarvestLevel(ItemStack itemStack, ToolType tool, @Nullable Player player, @Nullable BlockState blockState) {
+		if(this.getSharpness(itemStack) <= 0) {
+			return -1;
+		}
 
-	@Override
+		int harvestLevel = -1;
+		for(EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "harvest")) {
+			HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature)equipmentFeature;
+			if(harvestLevel < harvestFeature.harvestLevel && tool == harvestFeature.getToolType()) {
+				harvestLevel = harvestFeature.harvestLevel;
+			}
+		}
+		return harvestLevel;
+	}
+	//TODO: impliment harvest levels
+	/*@Override
 	public Tier getTier() {
 		if (this.getSharpness(this.getDefaultInstance()) <= 0) {
 			return null;
@@ -674,7 +690,7 @@ public class ItemEquipment extends BaseToolItem {
 			default:
 				return null;
 		}
-	}
+	}*/
 
 	@Override
 	public boolean isCorrectToolForDrops(BlockState blockState) {

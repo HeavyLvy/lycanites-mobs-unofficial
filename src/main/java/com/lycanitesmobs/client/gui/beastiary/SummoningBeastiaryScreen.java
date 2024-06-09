@@ -36,12 +36,12 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
 		int petListHeight = this.colLeftHeight;
 		int petListY = this.colLeftY;
 		this.petList = new CreatureList(CreatureList.Type.SUMMONABLE, this, null, this.colLeftWidth, petListHeight, petListY, petListY + petListHeight, this.colLeftX);
-		this.children().add(this.petList);
+		this.addWidget(this.petList);
 
 		int subspeciesListHeight = 80;
 		int subspeciesListY = this.colRightY + 70;
 		this.subspeciesList = new SubspeciesList(this, true, 90, subspeciesListHeight, subspeciesListY, subspeciesListY + subspeciesListHeight, this.colRightX);
-		this.children().add(this.subspeciesList);
+		this.addWidget(this.subspeciesList);
 
 		int summoningSlots = this.playerExt.summonSetMax;
 		int buttonSpacing = 2;

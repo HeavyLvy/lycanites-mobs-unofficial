@@ -7,13 +7,13 @@ import com.lycanitesmobs.client.renderer.CustomRenderStates;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureEffect;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureScrolling;
-import net.minecraft.util.math.vector.Vector4f;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
 public class ModelBanshee extends ModelTemplateElemental {
@@ -54,7 +54,7 @@ public class ModelBanshee extends ModelTemplateElemental {
     	super.animatePart(partName, entity, time, distance, loop, lookY, lookX, scale);
 
     	// Hands
-		float bob = -MathHelper.sin(loop * 0.2F) * 0.15F;
+		float bob = -Mth.sin(loop * 0.2F) * 0.15F;
 		if(partName.equals("handleft")) {
 			this.translate(bob / 4, bob, this.getAttackProgress());
 		}
@@ -80,27 +80,27 @@ public class ModelBanshee extends ModelTemplateElemental {
 
 		// Hair
 		else if(partName.equals("hair01")) {
-			this.rotate((float)Math.toDegrees(MathHelper.cos(loop * 0.2F) * 0.2F - 0.2F), 0, 0);
+			this.rotate((float)Math.toDegrees(Mth.cos(loop * 0.2F) * 0.2F - 0.2F), 0, 0);
 		}
 		else if(partName.equals("hair02")) {
-			this.rotate((float)Math.toDegrees(MathHelper.cos(loop * 0.1F) * 0.2F - 0.2F), 0, 0);
+			this.rotate((float)Math.toDegrees(Mth.cos(loop * 0.1F) * 0.2F - 0.2F), 0, 0);
 		}
 		
     	// Fingers:
 		else if(partName.equals("fingerleft01") || partName.equals("fingerright01")) {
-			this.rotate((float)Math.toDegrees(MathHelper.cos(loop * 0.2F) * 0.2F - 0.2F), 0, 0);
+			this.rotate((float)Math.toDegrees(Mth.cos(loop * 0.2F) * 0.2F - 0.2F), 0, 0);
     	}
 		else if(partName.equals("fingerleft02") || partName.equals("fingerright02")) {
-			this.rotate((float)Math.toDegrees(MathHelper.cos((loop + 20) * 0.2F) * 0.2F - 0.2F), 0, 0);
+			this.rotate((float)Math.toDegrees(Mth.cos((loop + 20) * 0.2F) * 0.2F - 0.2F), 0, 0);
 		}
 		else if(partName.equals("fingerleft03") || partName.equals("fingerright03")) {
-			this.rotate((float)Math.toDegrees(MathHelper.cos((loop + 40) * 0.2F) * 0.2F - 0.2F), 0, 0);
+			this.rotate((float)Math.toDegrees(Mth.cos((loop + 40) * 0.2F) * 0.2F - 0.2F), 0, 0);
 		}
 		else if(partName.equals("fingerleft04") || partName.equals("fingerright04")) {
-			this.rotate((float)Math.toDegrees(MathHelper.cos((loop + 60) * 0.2F) * 0.2F - 0.2F), 0, 0);
+			this.rotate((float)Math.toDegrees(Mth.cos((loop + 60) * 0.2F) * 0.2F - 0.2F), 0, 0);
 		}
 		else if(partName.equals("fingerleft05") || partName.equals("fingerright05")) {
-			this.rotate((float)Math.toDegrees(MathHelper.cos((loop + 60) * 0.2F) * 0.2F + 0.2F), 0, 0);
+			this.rotate((float)Math.toDegrees(Mth.cos((loop + 60) * 0.2F) * 0.2F + 0.2F), 0, 0);
 		}
     }
 

@@ -270,10 +270,12 @@ public class ItemManager extends JSONLoader {
 		private ForgeFlowingFluid.Properties fluidProperties;
 		private final ForgeFlowingFluid flowingFluid;
 		private final ForgeFlowingFluid stillFluid;
-		public FluidBuilder(String fluidName) {
+		private final ResourceLocation registryName;
+		public FluidBuilder(String fluidName,ResourceLocation registryLocation) {
 			stillFluid = ObjectManager.getFluid(fluidName);
 			flowingFluid = ObjectManager.getFluid(fluidName + "_flowing");
 			bucketItem = (BucketItem) ObjectManager.getItem(fluidName + "_bucket");
+			this.registryName = registryLocation;
 		}
 		public FluidType createFluidType(final ResourceLocation stillTexture, final ResourceLocation flowingTexture, final ResourceLocation overlayTexture,
 										 final int tintColor, final Vector3f fogColor, int fluidDensity, int fluidViscosity, int fluidTemperature, int fluidLuminosity,
@@ -286,7 +288,7 @@ public class ItemManager extends JSONLoader {
 			if (fluidMultiply) {
 				fluidBuilder.canConvertToSource(true);
 			}
-			fluidType = new BaseFluidType(stillTexture, flowingTexture, overlayTexture,
+			fluidType = new BaseFluidType(registryName,stillTexture, flowingTexture, overlayTexture,
 					tintColor, fogColor, fluidBuilder);
 			return fluidType;
 		}
@@ -321,7 +323,7 @@ public class ItemManager extends JSONLoader {
 
 	public void addFluid(String fluidName, Vector3f fogColor, int tintColor, int fluidTickRate, int density, int viscosity, int temperature, int luminosity, boolean multiply, Constructor<? extends BaseFluidBlock> blockClass, BlockBehaviour.Properties blockProperties, String elementName, boolean destroyItems, boolean worldgen) {
 		ElementInfo element = ElementManager.getInstance().getElement(elementName);
-		FluidBuilder builder = new FluidBuilder(fluidName);
+		FluidBuilder builder = new FluidBuilder(fluidName,new ResourceLocation(LycanitesMobs.MODID, fluidName));
 		FluidType fluidType = builder.createFluidType(new ResourceLocation(LycanitesMobs.MODID, "block/" + fluidName + "_still"), new ResourceLocation(LycanitesMobs.MODID, "block/" + fluidName + "_flowing"),null,
 				tintColor,fogColor,density,viscosity,temperature,luminosity,multiply);
 		ForgeFlowingFluid.Properties fluidProperties = builder.fluidProperties(fluidType,fluidTickRate,ObjectManager.getFluidBlock(fluidName));

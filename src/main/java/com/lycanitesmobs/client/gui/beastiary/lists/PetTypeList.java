@@ -112,8 +112,7 @@ public class PetTypeList extends CreatureFilterList {
 
 		@Override
 		public void render(GuiGraphics guiGraphics, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
-			PoseStack matrixStack = guiGraphics.pose();
-			this.parentList.screen.drawHelper.drawString(matrixStack, Component.translatable(this.petTypeKey).getString(), left + 2 , top + 4, 0xFFFFFF);
+			this.parentList.screen.drawHelper.drawString(guiGraphics, Component.translatable(this.petTypeKey).getString(), left + 2 , top + 4, 0xFFFFFF);
 		}
 
 		

@@ -15,6 +15,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 
 public class EffectBase extends MobEffect {
 	public String name;
+	public ResourceLocation registryName;
 	
 	// ==================================================
 	//                    Constructor
@@ -22,11 +23,16 @@ public class EffectBase extends MobEffect {
 	public EffectBase(String name, boolean badEffect, int color) {
 		super(badEffect ? MobEffectCategory.HARMFUL : MobEffectCategory.BENEFICIAL, color);
 		this.name = name;
-		//this.setRegistryName(LycanitesMobs.MODID, name);
+		this.setRegistryName(LycanitesMobs.MODID, name);
 		TextureManager.addTexture("effect." + name, LycanitesMobs.modInfo, "textures/mob_effect/" + name + ".png");
 	}
 
-
+	public ResourceLocation getRegistryName() {
+		return registryName;
+	}
+	public ResourceLocation setRegistryName(String modID, String blockName) {
+		return registryName = new ResourceLocation(modID, blockName);
+	}
 
 
 	// ==================================================

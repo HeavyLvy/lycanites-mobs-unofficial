@@ -22,11 +22,11 @@ public class ElementsBeastiaryScreen extends BeastiaryScreen {
 		super.initWidgets();
 
 		this.elementList = new ElementList(this, this.colLeftWidth, this.colLeftHeight, this.colLeftY,this.colLeftY + this.colLeftHeight, this.colLeftX);
-		this.children().add(this.elementList);
+		this.addWidget(this.elementList);
 
 		int descriptionListY = this.colRightY;
 		this.descriptionList = new ElementDescriptionList(this, this.colRightWidth, this.colRightHeight, descriptionListY, this.colRightY + this.colRightHeight, this.colRightX);
-		this.children().add(this.descriptionList);
+		this.addWidget(this.descriptionList);
 	}
 
 	@Override
