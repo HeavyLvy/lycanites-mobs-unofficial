@@ -3,11 +3,12 @@ package com.lycanitesmobs.client.renderer.layer.specific;
 import com.lycanitesmobs.client.renderer.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+
 import com.lycanitesmobs.core.entity.creature.EntityRoa;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
 public class LayerRoa extends LayerCreatureBase {

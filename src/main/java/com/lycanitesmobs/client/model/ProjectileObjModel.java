@@ -11,12 +11,12 @@ import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.io.IOUtils;
@@ -95,10 +95,10 @@ public class ProjectileObjModel extends ProjectileModel {
         ResourceLocation modelPartsLocation = new ResourceLocation(modInfo.modid, "models/" + path + "_parts.json");
         try {
 			Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-            InputStream in = Minecraft.getInstance().getResourceManager().getResource(modelPartsLocation).getInputStream();
+            InputStream in = Minecraft.getInstance().getResourceManager().getResource(modelPartsLocation).get().open();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             try {
-				JsonArray jsonArray = JSONUtils.fromJson(gson, reader, JsonArray.class, false);
+				JsonArray jsonArray = GsonHelper.fromJson(gson, reader, JsonArray.class, false);
                 Iterator<JsonElement> jsonIterator = jsonArray.iterator();
                 while (jsonIterator.hasNext()) {
                     JsonObject partJson = jsonIterator.next().getAsJsonObject();
@@ -125,10 +125,10 @@ public class ProjectileObjModel extends ProjectileModel {
 		ResourceLocation animationLocation = new ResourceLocation(modInfo.modid, "models/" + path + "_animation.json");
 		try {
 			Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-			InputStream in = Minecraft.getInstance().getResourceManager().getResource(animationLocation).getInputStream();
+			InputStream in = Minecraft.getInstance().getResourceManager().getResource(animationLocation).get().open();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 			try {
-				JsonObject json = JSONUtils.fromJson(gson, reader, JsonObject.class, false);
+				JsonObject json = GsonHelper.fromJson(gson, reader, JsonObject.class, false);
 				this.animation = new ModelAnimation();
 				this.animation.loadFromJson(json);
 			}
@@ -212,7 +212,7 @@ public class ProjectileObjModel extends ProjectileModel {
 	}
 
 	@Override
-	public void render(BaseProjectileEntity entity, MatrixStack matrixStack, IVertexBuilder vertexBuilder, LayerProjectileBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness) {
+	public void render(BaseProjectileEntity entity, PoseStack matrixStack, VertexConsumer vertexBuilder, LayerProjectileBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness) {
 		this.matrixStack = matrixStack;
 
 		// Assess Scale:

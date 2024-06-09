@@ -1,8 +1,9 @@
 package com.lycanitesmobs.client.obj;
 
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3f;
+
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -9,13 +9,13 @@ import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureEffect;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureScrolling;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import net.minecraft.util.math.vector.Vector4f;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
 public class ModelWraith extends ModelTemplateElemental {
@@ -66,17 +66,17 @@ public class ModelWraith extends ModelTemplateElemental {
 		if(entity instanceof BaseCreatureEntity) {
 			BaseCreatureEntity entityCreature = (BaseCreatureEntity)entity;
 			if (entityCreature.hasAttackTarget() && partName.equals("mouth")) {
-				this.rotate(20 + (float)-Math.toDegrees(MathHelper.cos(loop) * 0.1F), 0.0F, 0.0F);
+				this.rotate(20 + (float)-Math.toDegrees(Mth.cos(loop) * 0.1F), 0.0F, 0.0F);
 			}
 		}
 
 		// Vibrate:
 		float vibration = loop * 2;
 		if("head".equals(partName)) {
-			this.translate(MathHelper.cos(vibration) * 0.01f, MathHelper.cos(vibration) * 0.01f, MathHelper.cos(vibration) * 0.01f);
+			this.translate(Mth.cos(vibration) * 0.01f, Mth.cos(vibration) * 0.01f, Mth.cos(vibration) * 0.01f);
 		}
 		else if("mouth".equals(partName)) {
-			this.rotate((float)-Math.toDegrees(MathHelper.cos(vibration) * 0.025F), 0.0F, 0.0F);
+			this.rotate((float)-Math.toDegrees(Mth.cos(vibration) * 0.025F), 0.0F, 0.0F);
 		}
 	}
 

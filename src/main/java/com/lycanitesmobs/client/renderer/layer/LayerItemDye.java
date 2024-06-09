@@ -2,11 +2,12 @@ package com.lycanitesmobs.client.renderer.layer;
 
 import com.lycanitesmobs.client.renderer.IItemModelRenderer;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector4f;
+
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector3d;
+import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
 public class LayerItemDye extends LayerItem {

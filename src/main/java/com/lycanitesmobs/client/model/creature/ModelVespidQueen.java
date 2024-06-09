@@ -2,7 +2,7 @@ package com.lycanitesmobs.client.model.creature;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.model.template.ModelTemplateInsect;
-import net.minecraft.entity.LivingEntity;
+
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 

@@ -1,7 +1,9 @@
 package com.lycanitesmobs.client.obj;
 
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3f;
+
+
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 
@@ -63,30 +65,30 @@ public class IndexedModel {
 		mesh.indices = indicesArrayInt;
 	}
 
-	public void computeNormals() {
+	public void computeNormals() throws CloneNotSupportedException {
 		for(int i = 0; i < indices.size(); i += 3) {
 			int x = indices.get(i);
 			int y = indices.get(i + 1);
 			int z = indices.get(i + 2);
 
             // Per Vertex Normal:
-			Vector3f v = vertices.get(y).copy();
+			Vector3f v = (Vector3f) vertices.get(y).clone();
 			v.sub(vertices.get(x));
 			Vector3f l0 = v;
-			v = vertices.get(z).copy();
+			v = (Vector3f) vertices.get(z).clone();
 			v.sub(vertices.get(x));
 			Vector3f l1 = v;
-			v = l0.copy();
+			v = (Vector3f) l0.clone();
 			v.cross(l1); //cross(l0, l1)
 			Vector3f normal = v;
 
-			v = normals.get(x).copy();
+			v = (Vector3f) normals.get(x).clone();
 			v.add(normal);
 			normals.set(x, v);
-			v = normals.get(y).copy();
+			v = (Vector3f) normals.get(y).clone();
             v.add(normal);
 			normals.set(y, v);
-			v = normals.get(z).copy();
+			v = (Vector3f) normals.get(z).clone();
             v.add(normal);
 			normals.set(z, v);
 
@@ -120,7 +122,7 @@ public class IndexedModel {
         return output;
     }
 
-	public void computeTangents() {
+	public void computeTangents() throws CloneNotSupportedException {
 		tangents.clear();
 		for(int i = 0; i < vertices.size(); i++ )
 			tangents.add(new Vector3f());
@@ -130,10 +132,10 @@ public class IndexedModel {
 			int i1 = indices.get(i + 1);
 			int i2 = indices.get(i + 2);
 
-			Vector3f v = (Vector3f)vertices.get(i1).copy(); // clone()
+			Vector3f v = (Vector3f)vertices.get(i1).clone(); // clone()
 			v.sub(vertices.get(i0));
 			Vector3f edge1 = v;
-			v = (Vector3f)vertices.get(i2).copy(); // clone()
+			v = (Vector3f)vertices.get(i2).clone(); // clone()
 			v.sub(vertices.get(i0));
 			Vector3f edge2 = v;
 
@@ -147,13 +149,13 @@ public class IndexedModel {
 
 			Vector3f tangent = new Vector3f((float)(f * (deltaV2 * edge1.x() - deltaV1 * edge2.x())), (float)(f * (deltaV2 * edge1.y() - deltaV1 * edge2.y())), (float)(f * (deltaV2 * edge1.z() - deltaV1 * edge2.z())));
 
-			v = (Vector3f)tangents.get(i0).copy(); // clone()
+			v = (Vector3f)tangents.get(i0).clone(); // clone()
 			v.add(tangent); // add()
 			tangents.set(i0, v);
-			v = (Vector3f)tangents.get(i1).copy(); // clone()
+			v = (Vector3f)tangents.get(i1).clone(); // clone()
 			v.add(tangent);
 			tangents.set(i1, v);
-			v = (Vector3f)tangents.get(i2).copy(); // clone()
+			v = (Vector3f)tangents.get(i2).clone(); // clone()
 			v.add(tangent);
 			tangents.set(i2, v);
 		}

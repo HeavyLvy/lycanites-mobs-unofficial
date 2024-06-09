@@ -5,9 +5,9 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.model.ProjectileObjModel;
 import com.lycanitesmobs.client.renderer.layer.LayerProjectileBase;
 import com.lycanitesmobs.core.entity.BaseProjectileEntity;
-import net.minecraft.util.math.vector.Vector4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
 public class AetherwaveModel extends ProjectileObjModel {
