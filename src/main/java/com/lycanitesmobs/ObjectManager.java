@@ -7,6 +7,7 @@ import com.lycanitesmobs.core.entity.EntityFactory;
 import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.info.ObjectLists;
+import com.lycanitesmobs.core.item.BaseItem;
 import com.lycanitesmobs.core.tileentity.EquipmentInfuserTileEntity;
 import com.lycanitesmobs.core.tileentity.EquipmentStationTileEntity;
 import com.lycanitesmobs.core.tileentity.TileEntityEquipmentForge;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
@@ -43,6 +45,7 @@ public class ObjectManager {
 	
 	// Maps:
 	public static Map<String, Block> blocks = new HashMap<>();
+	public static Map<String, LiquidBlock> liquidBlocks = new HashMap<>();
     public static Map<String, Item> items = new HashMap<>();
     public static Map<Item, ModInfo> itemGroups = new HashMap<>();
 	public static Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
@@ -86,9 +89,13 @@ public class ObjectManager {
     //                        Add
     // ==================================================
 	// ========== Block ==========
-	public static Block addBlock(String name, Block block) {
-		blocks.put(name, block);
-        return block;
+	public static void addBlock(String name, Object block) {
+		if (block instanceof Block baseBlock) {
+			blocks.put(name, baseBlock);
+		}
+		if (block instanceof LiquidBlock liquidBlock) {
+			liquidBlocks.put(name, liquidBlock);
+		}
 	}
 
 	// ========== Fluid ==========
@@ -152,6 +159,12 @@ public class ObjectManager {
 		if(!blocks.containsKey(name))
 			return null;
 		return blocks.get(name);
+	}
+	public static LiquidBlock getFluidBlock(String name) {
+		name = name.toLowerCase();
+		if(!liquidBlocks.containsKey(name))
+			return null;
+		return liquidBlocks.get(name);
 	}
 	
 	// ========== Item ==========
@@ -223,25 +236,38 @@ public class ObjectManager {
 
     // ========== Items ==========
 	@SubscribeEvent
-    public void registerItems(RegistryEvent.Register<Item> event) {
-		for(Item item : items.values()) {
-	    	LycanitesMobs.logDebug("Item", "Registering item: " + item.getRegistryName());
-	        if(item.getRegistryName() == null) {
-	            LycanitesMobs.logWarning("", "Item: " + item + " has no Registry Name!");
-            }
-            event.getRegistry().register(item);
-        }
+    public void registerItems(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.ITEMS,
+				helper -> {
+					for(Item item : items.values()) {
+						if (item instanceof BaseItem baseItem){
+							LycanitesMobs.logDebug("Item", "Registering item: " + baseItem.getRegistryName());
+							if(baseItem.getRegistryName() == null) {
+								LycanitesMobs.logWarning("", "Item: " + item + " has no Registry Name!");
+							}
+							helper.register(baseItem.getRegistryName(), baseItem);
+						}
+					}
+				}
+		);
 
-	    Item.Properties blockItemProperties = new Item.Properties().tab(ItemManager.getInstance().blocksGroup);
-		for(Block block : blocks.values()) {
-			BlockItem blockItem = new BlockItem(block, blockItemProperties);
-			blockItem.setRegistryName(block.getRegistryName());
-			LycanitesMobs.logDebug("Item", "Registering item block: " + blockItem.getRegistryName());
-			if(block.getRegistryName() == null) {
-				LycanitesMobs.logWarning("", "Block Item: " + blockItem + " has no Registry Name!");
-			}
-			event.getRegistry().register(blockItem);
-		}
+		//.tab(ItemManager.getInstance().blocksGroup);
+	    Item.Properties blockItemProperties = new Item.Properties();
+		event.register(ForgeRegistries.Keys.ITEMS,
+				helper -> {
+					for(Block block : blocks.values()) {
+						if (block instanceof BlockBase blockBase) {
+							BlockItem blockItem = new BlockItem(block, blockItemProperties);
+							LycanitesMobs.logDebug("Item", "Registering item block: " + blockBase.getRegistryName());
+							if(blockBase.getRegistryName() == null) {
+								LycanitesMobs.logWarning("", "Block Item: " + blockItem + " has no Registry Name!");
+							}
+							helper.register(blockBase.getRegistryName(), blockItem);
+						}
+					}
+				}
+		);
+
     }
 
     // ========== Potions ==========

@@ -31,7 +31,9 @@ public class EquipmentRenderer extends BlockEntityWithoutLevelRenderer implement
 	public EquipmentRenderer(BlockEntityRenderDispatcher p_172550_, EntityModelSet p_172551_) {
 		super(p_172550_, p_172551_);
 	}
-
+	public EquipmentRenderer() {
+		super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
+	}
 	@Override
 	public void renderByItem(ItemStack itemStack, ItemDisplayContext transformType, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness, int unknown) {
 		if(!(itemStack.getItem() instanceof ItemEquipment)) {

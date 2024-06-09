@@ -10,6 +10,7 @@ import com.lycanitesmobs.core.block.*;
 import com.lycanitesmobs.core.block.building.HiveBlock;
 import com.lycanitesmobs.core.block.effect.*;
 import com.lycanitesmobs.core.block.fluid.*;
+import com.lycanitesmobs.core.block.fluid.type.BaseFluidType;
 import com.lycanitesmobs.core.item.*;
 import com.lycanitesmobs.core.item.consumable.*;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
@@ -19,20 +20,33 @@ import com.lycanitesmobs.core.item.special.ItemSoulkey;
 import com.lycanitesmobs.core.item.special.ItemSoulstone;
 import com.lycanitesmobs.core.item.summoningstaff.*;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import com.mojang.blaze3d.shaders.FogShape;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
+import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -40,6 +54,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ItemManager extends JSONLoader {
@@ -140,7 +155,7 @@ public class ItemManager extends JSONLoader {
 			entries.accept(this.item);
 		});*/
 		// Equipment Pieces:
-		Item.Properties equipmentProperties = new Item.Properties().stacksTo(1).setNoRepair().setISTER(() -> com.lycanitesmobs.client.renderer.EquipmentRenderer::new);
+		Item.Properties equipmentProperties = new Item.Properties().stacksTo(1).setNoRepair();
 		ObjectManager.addItem("equipment", new ItemEquipment(equipmentProperties));
 
 		// Keys:
@@ -235,45 +250,95 @@ public class ItemManager extends JSONLoader {
 		Block.Properties waterBlockProperties = Block.Properties.of(Material.WATER).noCollission().randomTicks().strength(100).noDrops();
 		Block.Properties waterBrightBlockProperties = Block.Properties.of(Material.WATER).noCollission().randomTicks().strength(100).noDrops().lightLevel((BlockState blockState) -> { return 10; });
 		Block.Properties lavaBlockProperties = Block.Properties.of(Material.LAVA).noCollission().randomTicks().strength(100).noDrops().lightLevel((BlockState blockState) -> { return 15; });
-		this.addFluid("ooze", 0x009F9F, 3000, 3000, 0, 10, false, OozeFluidBlock.class, waterBrightBlockProperties, "frost", false, true);
-		this.addFluid("rabbitooze", 0x00AFAF, 3000, 3000, 0, 10, true, OozeFluidBlock.class, waterBrightBlockProperties, "frost", false, false);
-		this.addFluid("moglava", 0xFF5722, 3000, 5000, 1100, 15, true, MoglavaFluidBlock.class, lavaBlockProperties, "lava", false, true);
-		this.addFluid("acid", 0x8BC34A, 1000, 10, 40, 10, false, AcidFluidBlock.class, waterBrightBlockProperties, "acid", true, true);
-		this.addFluid("sharacid", 0x8BB35A, 1000, 10, 40, 10, true, AcidFluidBlock.class, waterBrightBlockProperties, "acid", false, false);
-		this.addFluid("poison", 0x9C27B0, 1000, 8, 20, 0, false, PoisonFluidBlock.class, waterBlockProperties, "poison", false, true);
-		this.addFluid("vesspoison", 0xAC27A0, 1000, 8, 20, 0, true, PoisonFluidBlock.class, waterBlockProperties, "poison", false, false);
-		this.addFluid("veshoney", 0xCEBC39, 4000, 4000, 0, 0, false, VeshoneyFluidBlock.class, waterBlockProperties, "fae", false, false);
+		this.addFluid("ooze", 0x009F9F, 3000, 3000, 0, 10, false, OozeFluidBlock, waterBrightBlockProperties, "frost", false, true);
+		this.addFluid("rabbitooze", 0x00AFAF, 3000, 3000, 0, 10, true, OozeFluidBlock, waterBrightBlockProperties, "frost", false, false);
+		this.addFluid("moglava", 0xFF5722, 3000, 5000, 1100, 15, true, MoglavaFluidBlock, lavaBlockProperties, "lava", false, true);
+		this.addFluid("acid", 0x8BC34A, 1000, 10, 40, 10, false, AcidFluidBlock, waterBrightBlockProperties, "acid", true, true);
+		this.addFluid("sharacid", 0x8BB35A, 1000, 10, 40, 10, true, AcidFluidBlock, waterBrightBlockProperties, "acid", false, false);
+		this.addFluid("poison", 0x9C27B0, 1000, 8, 20, 0, false, PoisonFluidBlock, waterBlockProperties, "poison", false, true);
+		this.addFluid("vesspoison", 0xAC27A0, 1000, 8, 20, 0, true, PoisonFluidBlock, waterBlockProperties, "poison", false, false);
+		this.addFluid("veshoney", 0xCEBC39, 4000, 4000, 0, 0, false, VeshoneyFluidBlock, waterBlockProperties, "fae", false, false);
 		ObjectManager.addDamageSource("ooze", new DamageSource("ooze"));
 		ObjectManager.addDamageSource("acid", new DamageSource("acid"));
 	}
 
-	public void addFluid(String fluidName, int fluidColor, int density, int viscosity, int temperature, int luminosity, boolean multiply, Class<? extends BaseFluidBlock> blockClass, AbstractBlock.Properties blockProperties, String elementName, boolean destroyItems, boolean worldgen) {
-		ElementInfo element = ElementManager.getInstance().getElement(elementName);
-		Supplier<ForgeFlowingFluid> stillFluidSupplier = () -> ObjectManager.getFluid(fluidName);
-		Supplier<ForgeFlowingFluid> flowingFluidSupplier = () -> ObjectManager.getFluid(fluidName + "_flowing");
 
-		FluidAttributes.Builder fluidBuilder = FluidAttributes.builder(new ResourceLocation(LycanitesMobs.MODID, "block/" + fluidName + "_still"), new ResourceLocation(LycanitesMobs.MODID, "block/" + fluidName + "_flowing"));
-		fluidBuilder.color(fluidColor);
-		fluidBuilder.density(density);
-		fluidBuilder.viscosity(viscosity);
-		fluidBuilder.temperature(temperature);
-		fluidBuilder.luminosity(luminosity);
-		ForgeFlowingFluid.Properties fluidProperties = new ForgeFlowingFluid.Properties(stillFluidSupplier, flowingFluidSupplier, fluidBuilder);
-		if(multiply) {
-			fluidProperties.canMultiply();
+
+	public static class FluidBuilder {
+		private FluidType fluidType;
+		private final BucketItem bucketItem;
+		private ForgeFlowingFluid.Properties fluidProperties;
+		private final ForgeFlowingFluid flowingFluid;
+		private final ForgeFlowingFluid stillFluid;
+		public FluidBuilder(String fluidName) {
+			stillFluid = ObjectManager.getFluid(fluidName);
+			flowingFluid = ObjectManager.getFluid(fluidName + "_flowing");
+			bucketItem = (BucketItem) ObjectManager.getItem(fluidName + "_bucket");
 		}
-		fluidProperties.bucket(() -> ObjectManager.getItem(fluidName + "_bucket"));
-		fluidProperties.block(() -> (FlowingFluidBlock)ObjectManager.getBlock(fluidName));
+		public FluidType createFluidType(final ResourceLocation stillTexture, final ResourceLocation flowingTexture, final ResourceLocation overlayTexture,
+										 final int tintColor, final Vector3f fogColor, int fluidDensity, int fluidViscosity, int fluidTemperature, int fluidLuminosity,
+										 boolean fluidMultiply) {
+			FluidType.Properties fluidBuilder = FluidType.Properties.create();
+			fluidBuilder.density(fluidDensity);
+			fluidBuilder.viscosity(fluidViscosity);
+			fluidBuilder.temperature(fluidTemperature);
+			fluidBuilder.lightLevel(fluidLuminosity);
+			if (fluidMultiply) {
+				fluidBuilder.canConvertToSource(true);
+			}
+			fluidType = new BaseFluidType(stillTexture, flowingTexture, overlayTexture,
+					tintColor, fogColor, fluidBuilder);
+			return fluidType;
+		}
+		/**
+		 * Generates fluid properties for creating fluids.
+		 */
+		public ForgeFlowingFluid.Properties fluidProperties(FluidType fT, int fluidTickRate, LiquidBlock fluidBlock) {
+			ForgeFlowingFluid.Properties fluidProperties = new ForgeFlowingFluid.Properties(() -> fT, () -> stillFluid, () -> flowingFluid);
+			fluidProperties.tickRate(fluidTickRate);
+			fluidProperties.bucket(() -> bucketItem);
+			fluidProperties.block(() -> fluidBlock);
+			this.fluidProperties = fluidProperties;
+			return fluidProperties;
+		}
+		public ForgeFlowingFluid.Properties getFluidProperties() {
+			return fluidProperties;
+		}
+		public FluidType getFluidType() {
+			return fluidType;
+		}
+		public BucketItem getBucketItem() {
+			return bucketItem;
+		}
+		public ForgeFlowingFluid getStillFluid() {
+			return stillFluid;
+		}
+		public ForgeFlowingFluid getFlowingFluid() {
+			return flowingFluid;
+		}
+	}
+
+
+	public void addFluid(String fluidName, Vector3f fogColor, int tintColor, int fluidTickRate, int density, int viscosity, int temperature, int luminosity, boolean multiply, Constructor<? extends BaseFluidBlock> blockClass, BlockBehaviour.Properties blockProperties, String elementName, boolean destroyItems, boolean worldgen) {
+		ElementInfo element = ElementManager.getInstance().getElement(elementName);
+		FluidBuilder builder = new FluidBuilder(fluidName);
+		FluidType fluidType = builder.createFluidType(new ResourceLocation(LycanitesMobs.MODID, "block/" + fluidName + "_still"), new ResourceLocation(LycanitesMobs.MODID, "block/" + fluidName + "_flowing"),null,
+				tintColor,fogColor,density,viscosity,temperature,luminosity,multiply);
+		ForgeFlowingFluid.Properties fluidProperties = builder.fluidProperties(fluidType,fluidTickRate,ObjectManager.getFluidBlock(fluidName));
+
 
 		ObjectManager.addFluid(fluidName, new CustomFluid.Still(fluidProperties, fluidName));
 		ObjectManager.addFluid(fluidName + "_flowing", new CustomFluid.Flowing(fluidProperties, fluidName + "_flowing"));
 		ObjectManager.addSound(fluidName, LycanitesMobs.modInfo, "block." + fluidName);
-
-		Item.Properties bucketProperties = new Item.Properties().tab(this.itemsGroup).craftRemainder(Items.BUCKET).stacksTo(1);
-		ObjectManager.addItem(fluidName + "_bucket", new BucketItem(stillFluidSupplier, bucketProperties).setRegistryName(LycanitesMobs.MODID, fluidName + "_bucket"));
+		//TODO: add bucket to itemsGroup
+		//.tab(this.itemsGroup)
+		Item.Properties bucketProperties = new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1);
+		//.setRegistryName(LycanitesMobs.MODID, fluidName + "_bucket")
+		ObjectManager.addItem(fluidName + "_bucket", new BucketItem(() -> builder.stillFluid, bucketProperties));
 
 		try {
-			Constructor<? extends BaseFluidBlock> blockConstructor = blockClass.getDeclaredConstructor(Supplier.class, AbstractBlock.Properties.class, String.class, ElementInfo.class, boolean.class);
+			Supplier<ForgeFlowingFluid> stillFluidSupplier = () -> builder.stillFluid;
+			Constructor<? extends BaseFluidBlock> blockConstructor = blockClass.getDeclaringClass().getConstructor(Supplier.class, BlockBehaviour.Properties.class, String.class, ElementInfo.class, boolean.class);
 			BaseFluidBlock fluidBlock = blockConstructor.newInstance(stillFluidSupplier, blockProperties, fluidName, element, destroyItems);
 			ObjectManager.addBlock(fluidName, fluidBlock);
 			if (worldgen) {

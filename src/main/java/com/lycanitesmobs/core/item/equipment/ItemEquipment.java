@@ -5,6 +5,8 @@ import com.google.common.collect.MultimapBuilder;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.ClientManager;
 import com.lycanitesmobs.client.TextureManager;
+import com.lycanitesmobs.client.renderer.EquipmentPartRenderer;
+import com.lycanitesmobs.client.renderer.EquipmentRenderer;
 import com.lycanitesmobs.core.entity.ExtendedEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.item.BaseItem;
@@ -15,6 +17,7 @@ import com.lycanitesmobs.core.util.DamageSourceHelper;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -43,11 +46,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.common.ToolAction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class ItemEquipment extends BaseToolItem {
 	/** The maximum amount of parts that can be added to an Equipment Piece. **/
@@ -55,6 +60,7 @@ public class ItemEquipment extends BaseToolItem {
 
 	public static int SHARPNESS_MAX = 1500;
 	public static int MANA_MAX = 1500;
+	public ResourceLocation registryName = null;
 	/**
 	 * Constructor
 	 */
@@ -62,7 +68,29 @@ public class ItemEquipment extends BaseToolItem {
 		super(attackDamage, attackSpeed, tier, blockTagKey, properties);
 		this.itemName = "equipment";
 		this.modInfo = LycanitesMobs.modInfo;
+		setup();
 		properties.stacksTo(1);
+	}
+	public ResourceLocation getRegistryName() {
+		return registryName;
+	}
+	public ResourceLocation setRegistryName(String modID, String itemName) {
+		return registryName = new ResourceLocation(modID, itemName);
+	}
+	public void setup() {
+		this.setRegistryName(this.modInfo.modid, this.itemName);
+	}
+	// ==================================================
+	//                 Custom Renderer
+	// ==================================================
+	@Override
+	public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+		consumer.accept(new IClientItemExtensions() {
+			@Override
+			public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+				return new EquipmentRenderer();
+			}
+		});
 	}
 	// ==================================================
 	//                      Info
