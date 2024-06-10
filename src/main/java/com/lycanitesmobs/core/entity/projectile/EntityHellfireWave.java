@@ -7,12 +7,11 @@ import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.creature.EntityRahovart;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
 import com.lycanitesmobs.core.util.DamageSourceHelper;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -31,15 +30,15 @@ public class EntityHellfireWave extends BaseProjectileEntity {
     // ==================================================
  	//                   Constructors
  	// ==================================================
-    public EntityHellfireWave(EntityType<? extends BaseProjectileEntity> entityType, World world) {
+    public EntityHellfireWave(EntityType<? extends BaseProjectileEntity> entityType, Level world) {
         super(entityType, world);
     }
 
-    public EntityHellfireWave(EntityType<? extends BaseProjectileEntity> entityType, World world, LivingEntity shooterEntity) {
+    public EntityHellfireWave(EntityType<? extends BaseProjectileEntity> entityType, Level world, LivingEntity shooterEntity) {
         super(entityType, world, shooterEntity);
     }
 
-    public EntityHellfireWave(EntityType<? extends BaseProjectileEntity> entityType, World world, double x, double y, double z) {
+    public EntityHellfireWave(EntityType<? extends BaseProjectileEntity> entityType, Level world, double x, double y, double z) {
         super(entityType, world, x, y, z);
     }
     
@@ -73,7 +72,7 @@ public class EntityHellfireWave extends BaseProjectileEntity {
 
         // Time Update:
         if(this.time++ >= this.timeMax)
-            this.remove();
+            this.remove(RemovalReason.DISCARDED);
 
         // Populate:
         if(this.hellfireWalls == null) {
@@ -108,7 +107,7 @@ public class EntityHellfireWave extends BaseProjectileEntity {
                 );
                 this.hellfireWalls[row][col].projectileLife = 2 * 20;
                 if(!this.isAlive())
-                    this.hellfireWalls[row][col].remove();
+                    this.hellfireWalls[row][col].remove(RemovalReason.DISCARDED);
             }
         }
     }

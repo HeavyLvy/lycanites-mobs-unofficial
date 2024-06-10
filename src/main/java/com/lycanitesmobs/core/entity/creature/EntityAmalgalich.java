@@ -9,40 +9,41 @@ import com.lycanitesmobs.core.entity.goals.actions.FindNearbyPlayersGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.*;
 import com.lycanitesmobs.core.entity.goals.targeting.CopyMasterAttackTargetGoal;
 import com.lycanitesmobs.core.info.CreatureManager;
-import net.minecraft.block.Block;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.monster.ZombifiedPiglinEntity;
-import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.ZombifiedPiglin;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector3d;
 
-public class EntityAmalgalich extends BaseCreatureEntity implements IMob, IGroupHeavy, IGroupBoss {
+public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGroupHeavy, IGroupBoss {
     private ForceGoal consumptionGoalP0;
     private ForceGoal consumptionGoalP2;
     private int consumptionDuration = 15 * 20;
     private int consumptionWindUp = 3 * 20;
     private int consumptionAnimationTime = 0;
 
-    public EntityAmalgalich(EntityType<? extends EntityAmalgalich> entityType, World world) {
+    public EntityAmalgalich(EntityType<? extends EntityAmalgalich> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEAD;
+        this.attribute = MobType.UNDEAD;
         this.hasAttackSound = true;
         this.setAttackCooldownMax(30);
         this.hasJumpSound = false;
-        this.pushthrough = 1.0F;
+        //this.pushthrough = 1.0F;
         this.setupMob();
         this.hitAreaWidthScale = 2F;
 
@@ -96,7 +97,7 @@ public class EntityAmalgalich extends BaseCreatureEntity implements IMob, IGroup
 
     /** Returns a larger bounding box for rendering this large entity. **/
     @OnlyIn(Dist.CLIENT)
-    public AxisAlignedBB getBoundingBoxForCulling() {
+    public AABB getBoundingBoxForCulling() {
         return this.getBoundingBox().inflate(200, 50, 200).move(0, -25, 0);
     }
 
@@ -246,7 +247,7 @@ public class EntityAmalgalich extends BaseCreatureEntity implements IMob, IGroup
     public void onTryToDamageMinion(LivingEntity minion, float damageAmount) {
         super.onTryToDamageMinion(minion, damageAmount);
         if(damageAmount >= 1000) {
-            minion.remove();
+            minion.remove(RemovalReason.DISCARDED);
             this.heal(25);
         }
     }
@@ -272,17 +273,17 @@ public class EntityAmalgalich extends BaseCreatureEntity implements IMob, IGroup
 
     @Override
     public boolean isVulnerableTo(Entity entity) {
-        if(entity instanceof ZombifiedPiglinEntity) {
-            entity.remove();
+        if(entity instanceof ZombifiedPiglin) {
+            entity.remove(RemovalReason.DISCARDED);
             return false;
         }
-        if(entity instanceof IronGolemEntity) {
-            entity.remove();
+        if(entity instanceof IronGolem) {
+            entity.remove(RemovalReason.DISCARDED);
             return false;
         }
-        if(entity instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity)entity;
-            if (!player.abilities.invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
+        if(entity instanceof Player) {
+            Player player = (Player)entity;
+            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
                 return false;
             }
         }
@@ -290,12 +291,12 @@ public class EntityAmalgalich extends BaseCreatureEntity implements IMob, IGroup
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT nbt) {
+    public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT nbt) {
+    public void addAdditionalSaveData(CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
     }
 

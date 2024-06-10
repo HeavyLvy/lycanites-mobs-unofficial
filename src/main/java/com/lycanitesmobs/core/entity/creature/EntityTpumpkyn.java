@@ -1,22 +1,18 @@
 package com.lycanitesmobs.core.entity.creature;
 
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
-import com.lycanitesmobs.core.entity.goals.GoalConditions;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
-import com.lycanitesmobs.core.entity.goals.actions.abilities.FireProjectilesGoal;
-import net.minecraft.entity.*;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.level.Level;
 
 public class EntityTpumpkyn extends TameableCreatureEntity {
 
-    public EntityTpumpkyn(EntityType<? extends EntityTpumpkyn> entityType, World world) {
+    public EntityTpumpkyn(EntityType<? extends EntityTpumpkyn> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
         this.setupMob();
     }

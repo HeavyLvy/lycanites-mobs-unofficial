@@ -3,27 +3,27 @@ package com.lycanitesmobs.core.entity.creature;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.WanderGoal;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.pathfinding.PathNodeType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
-public class EntityNingen extends TameableCreatureEntity implements IMob {
+public class EntityNingen extends TameableCreatureEntity implements Enemy {
 	
 	WanderGoal wanderAI;
     
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityNingen(EntityType<? extends EntityNingen> entityType, World world) {
+    public EntityNingen(EntityType<? extends EntityNingen> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.spawnsOnLand = true;
         this.spawnsInWater = true;
         this.hasAttackSound = true;
@@ -32,7 +32,7 @@ public class EntityNingen extends TameableCreatureEntity implements IMob {
         this.canGrow = false;
         this.setupMob();
 
-        this.setPathfindingMalus(PathNodeType.WATER, 0F);
+        this.setPathfindingMalus(BlockPathTypes.WATER, 0F);
     }
 
     // ========== Init AI ==========
@@ -85,7 +85,7 @@ public class EntityNingen extends TameableCreatureEntity implements IMob {
     // ========== Get Wander Position ==========
     public BlockPos getWanderPosition(BlockPos wanderPosition) {
         BlockPos groundPos;
-        for(groundPos = wanderPosition.below(); groundPos.getY() > 0 && !this.getCommandSenderWorld().getBlockState(groundPos).getMaterial().isSolid(); groundPos = groundPos.below()) {}
+        for(groundPos = wanderPosition.below(); groundPos.getY() > 0 && !this.getCommandSenderWorld().getBlockState(groundPos).isSolid(); groundPos = groundPos.below()) {}
         return groundPos.above();
     }
     

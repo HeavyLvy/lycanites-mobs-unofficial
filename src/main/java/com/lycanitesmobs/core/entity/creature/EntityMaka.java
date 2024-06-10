@@ -6,27 +6,27 @@ import com.lycanitesmobs.core.entity.goals.actions.TemptGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindMasterGoal;
 import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.Material;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class EntityMaka extends AgeableCreatureEntity {
 	
 	// ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityMaka(EntityType<? extends EntityMaka> entityType, World world) {
+    public EntityMaka(EntityType<? extends EntityMaka> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
 
         this.babySpawnChance = 0.1D;
@@ -61,7 +61,7 @@ public class EntityMaka extends AgeableCreatureEntity {
 				EntityMakaAlpha alpha = (EntityMakaAlpha)CreatureManager.getInstance().getCreature("makaalpha").createEntity(this.getCommandSenderWorld());
                 alpha.copyPosition(this);
                 this.getCommandSenderWorld().addFreshEntity(alpha);
-                this.remove();
+                this.remove(RemovalReason.DISCARDED);
             }
         }
         super.onFirstSpawn();
@@ -77,9 +77,9 @@ public class EntityMaka extends AgeableCreatureEntity {
         BlockState blockState = this.getCommandSenderWorld().getBlockState(new BlockPos(x, y - 1, z));
         Block block = blockState.getBlock();
 		if(block != Blocks.AIR) {
-			if(blockState.getMaterial() == Material.GRASS)
+			if(Material.GRASS.contains(blockState.getBlock()))
 				return 10F;
-			if(blockState.getMaterial() == Material.DIRT)
+			if(Material.DIRT.contains(blockState.getBlock()))
 				return 7F;
 		}
         return super.getBlockPathWeight(x, y, z);
@@ -87,7 +87,7 @@ public class EntityMaka extends AgeableCreatureEntity {
     
 	// ========== Can leash ==========
     @Override
-    public boolean canBeLeashed(PlayerEntity player) {
+    public boolean canBeLeashed(Player player) {
 	    return true;
     }
 
@@ -120,7 +120,7 @@ public class EntityMaka extends AgeableCreatureEntity {
 				EntityMakaAlpha alpha = (EntityMakaAlpha)CreatureManager.getInstance().getCreature("makaalpha").createEntity(this.getCommandSenderWorld());
                 alpha.copyPosition(this);
                 this.getCommandSenderWorld().addFreshEntity(alpha);
-                this.remove();
+                this.remove(RemovalReason.DISCARDED);
             }
         }
         super.setGrowingAge(age);

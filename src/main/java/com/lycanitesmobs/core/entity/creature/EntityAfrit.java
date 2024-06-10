@@ -3,20 +3,22 @@ package com.lycanitesmobs.core.entity.creature;
 import com.lycanitesmobs.core.entity.CustomItemEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.pathfinding.PathNodeType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import org.joml.Vector3d;
 
-public class EntityAfrit extends TameableCreatureEntity implements IMob {
+
+public class EntityAfrit extends TameableCreatureEntity implements Enemy {
 
     protected boolean wantsToLand;
     protected boolean  isLanded;
@@ -24,11 +26,11 @@ public class EntityAfrit extends TameableCreatureEntity implements IMob {
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityAfrit(EntityType<? extends EntityAfrit> entityType, World world) {
+    public EntityAfrit(EntityType<? extends EntityAfrit> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.spawnsOnLand = true;
         this.spawnsInWater = true;
         this.isLavaCreature = true;
@@ -37,9 +39,9 @@ public class EntityAfrit extends TameableCreatureEntity implements IMob {
 
         this.setupMob();
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
 
-        this.setPathfindingMalus(PathNodeType.LAVA, 0F);
+        this.setPathfindingMalus(BlockPathTypes.LAVA, 0F);
     }
 
     // ========== Init AI ==========
@@ -99,7 +101,7 @@ public class EntityAfrit extends TameableCreatureEntity implements IMob {
         if(this.wantsToLand || !this.isLanded) {
             BlockPos groundPos;
             for(groundPos = wanderPosition.below(); groundPos.getY() > 0 && this.getCommandSenderWorld().getBlockState(groundPos).getBlock() == Blocks.AIR; groundPos = groundPos.below()) {}
-            if(this.getCommandSenderWorld().getBlockState(groundPos).getMaterial().isSolid()) {
+            if(this.getCommandSenderWorld().getBlockState(groundPos).isSolid()) {
                 return groundPos.above();
             }
         }
@@ -193,7 +195,7 @@ public class EntityAfrit extends TameableCreatureEntity implements IMob {
     // ========== Damage Modifier ==========
     @Override
     public float getDamageModifier(DamageSource damageSrc) {
-    	if(damageSrc.isFire())
+    	if(damageSrc.is(DamageTypeTags.IS_FIRE))
     		return 0F;
     	else return super.getDamageModifier(damageSrc);
     }

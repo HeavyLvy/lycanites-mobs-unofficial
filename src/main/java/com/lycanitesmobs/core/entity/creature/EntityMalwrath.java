@@ -7,12 +7,12 @@ import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import net.minecraft.entity.*;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import org.joml.Vector3d;
 
 public class EntityMalwrath extends RideableCreatureEntity {
     public boolean griefing = true;
@@ -20,16 +20,16 @@ public class EntityMalwrath extends RideableCreatureEntity {
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityMalwrath(EntityType<? extends EntityMalwrath> entityType, World world) {
+    public EntityMalwrath(EntityType<? extends EntityMalwrath> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEAD;
+        this.attribute = MobType.UNDEAD;
         this.hasAttackSound = false;
 
         this.setupMob();
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
         this.hitAreaWidthScale = 1.5F;
     }
 
@@ -61,8 +61,8 @@ public class EntityMalwrath extends RideableCreatureEntity {
 
     @Override
     public void riderEffects(LivingEntity rider) {
-        if(rider.hasEffect(Effects.WITHER))
-            rider.removeEffect(Effects.WITHER);
+        if(rider.hasEffect(MobEffects.WITHER))
+            rider.removeEffect(MobEffects.WITHER);
         if(rider.isOnFire())
             rider.clearFire();
     }
@@ -186,8 +186,8 @@ public class EntityMalwrath extends RideableCreatureEntity {
         if(this.getStamina() < this.getStaminaCost())
             return;
 
-        if(rider instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity)rider;
+        if(rider instanceof Player) {
+            Player player = (Player)rider;
             ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile("demonicblast");
             if(projectileInfo != null) {
                 BaseProjectileEntity projectile = projectileInfo.createProjectile(this.getCommandSenderWorld(), player);

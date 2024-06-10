@@ -16,38 +16,37 @@ import com.lycanitesmobs.core.entity.projectile.EntityHellfireOrb;
 import com.lycanitesmobs.core.entity.projectile.EntityHellfireWave;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.*;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.monster.ZombifiedPiglinEntity;
-import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.ZombifiedPiglin;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHeavy, IGroupBoss {
+public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupHeavy, IGroupBoss {
 
     public int hellfireEnergy = 0;
     public List<EntityHellfireOrb> hellfireOrbs = new ArrayList<>();
 
     // Data Manager:
-    protected static final DataParameter<Integer> HELLFIRE_ENERGY = EntityDataManager.defineId(EntityRahovart.class, DataSerializers.INT);
+    protected static final EntityDataAccessor<Integer> HELLFIRE_ENERGY = SynchedEntityData.defineId(EntityRahovart.class, EntityDataSerializers.INT);
 
     // First Phase:
     public List<EntityBelphegor> hellfireBelphegorMinions = new ArrayList<>();
@@ -68,15 +67,15 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityRahovart(EntityType<? extends EntityRahovart> entityType, World world) {
+    public EntityRahovart(EntityType<? extends EntityRahovart> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEAD;
+        this.attribute = MobType.UNDEAD;
         this.hasAttackSound = false;
         this.setAttackCooldownMax(40);
         this.solidCollision = true;
-        this.pushthrough = 1.0F;
+        //this.pushthrough = 1.0F;
         this.setupMob();
         this.hitAreaWidthScale = 2F;
 
@@ -115,7 +114,7 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
     // ========== Rendering Distance ==========
     /** Returns a larger bounding box for rendering this large entity. **/
     @OnlyIn(Dist.CLIENT)
-    public AxisAlignedBB getBoundingBoxForCulling() {
+    public AABB getBoundingBoxForCulling() {
         return this.getBoundingBox().inflate(200, 50, 200).move(0, -25, 0);
     }
 
@@ -211,9 +210,9 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
                     if (minion.hellfireEnergy >= 100) {
                         this.hellfireEnergy += 20;
                         this.onMinionDeath(minion, null);
-                        this.getCommandSenderWorld().explode(minion, minion.position().x(), minion.position().y(), minion.position().z(), 1, Explosion.Mode.NONE);
+                        this.getCommandSenderWorld().explode(minion, minion.position().x(), minion.position().y(), minion.position().z(), 1, Level.ExplosionInteraction.NONE);
                         minion.hellfireEnergy = 0;
-                        minion.remove();
+                        minion.remove(RemovalReason.DISCARDED);
                         continue;
                     }
                 }
@@ -266,9 +265,9 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
                     if (minion.hellfireEnergy >= 100) {
                         this.hellfireEnergy += 20;
                         this.onMinionDeath(minion, null);
-                        this.getCommandSenderWorld().explode(minion, minion.position().x(), minion.position().y(), minion.position().z(), 1, Explosion.Mode.NONE);
+                        this.getCommandSenderWorld().explode(minion, minion.position().x(), minion.position().y(), minion.position().z(), 1, Level.ExplosionInteraction.NONE);
                         minion.hellfireEnergy = 0;
-                        minion.remove();
+                        minion.remove(RemovalReason.DISCARDED);
                         continue;
                     }
                 }
@@ -438,7 +437,7 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
 
         // Remove Excess Orbs:
         while(hellfireOrbs.size() > hellfireChargeCount) {
-            hellfireOrbs.get(hellfireOrbs.size() - 1).remove();
+            hellfireOrbs.get(hellfireOrbs.size() - 1).remove(RemovalReason.DISCARDED);
             hellfireOrbs.remove(hellfireOrbs.size() - 1);
         }
 
@@ -465,7 +464,7 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
     public boolean canAttack(LivingEntity targetEntity) {
         if(targetEntity instanceof EntityBelphegor || targetEntity instanceof EntityBehemophet || targetEntity instanceof EntityApollyon || targetEntity instanceof EntityWraith) {
             if(targetEntity instanceof TameableCreatureEntity)
-                return ((TameableCreatureEntity)targetEntity).getOwner() instanceof PlayerEntity;
+                return ((TameableCreatureEntity)targetEntity).getOwner() instanceof Player;
             else
                 return false;
         }
@@ -541,11 +540,11 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
 
     public void hellfireWallCleanup() {
         if(this.hellfireWallLeft != null) {
-            this.hellfireWallLeft.remove();
+            this.hellfireWallLeft.remove(RemovalReason.DISCARDED);
             this.hellfireWallLeft = null;
         }
         if(this.hellfireWallRight != null) {
-            this.hellfireWallRight.remove();
+            this.hellfireWallRight.remove(RemovalReason.DISCARDED);
             this.hellfireWallRight = null;
         }
     }
@@ -575,7 +574,7 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
             this.hellfireBarrierHealth = 100;
             if(this.hellfireBarriers.size() > 0) {
                 EntityHellfireBarrier hellfireBarrier = this.hellfireBarriers.get(this.hellfireBarriers.size() - 1);
-                hellfireBarrier.remove();
+                hellfireBarrier.remove(RemovalReason.DISCARDED);
                 this.hellfireBarriers.remove(this.hellfireBarriers.size() - 1);
             }
         }
@@ -593,7 +592,7 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
         if(this.getCommandSenderWorld().isClientSide || this.hellfireBarriers.size() < 1)
             return;
         for(EntityHellfireBarrier hellfireBarrier : this.hellfireBarriers) {
-            hellfireBarrier.remove();
+            hellfireBarrier.remove(RemovalReason.DISCARDED);
         }
         this.hellfireBarriers = new ArrayList<>();
         this.hellfireBarrierHealth = 100;
@@ -614,8 +613,8 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
     //                     Immunities
     // ==================================================
     @Override
-    public boolean canBeAffected(EffectInstance potionEffect) {
-        if(potionEffect.getEffect() == Effects.WITHER)
+    public boolean canBeAffected(MobEffectInstance potionEffect) {
+        if(potionEffect.getEffect() == MobEffects.WITHER)
             return false;
         if(ObjectManager.getEffect("decay") != null)
             if(potionEffect.getEffect() == ObjectManager.getEffect("decay")) return false;
@@ -628,17 +627,17 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
 
     @Override
     public boolean isVulnerableTo(Entity entity) {
-        if(entity instanceof ZombifiedPiglinEntity) {
-            entity.remove();
+        if(entity instanceof ZombifiedPiglin) {
+            entity.remove(RemovalReason.DISCARDED);
             return false;
         }
-        if(entity instanceof IronGolemEntity) {
-            entity.remove();
+        if(entity instanceof IronGolem) {
+            entity.remove(RemovalReason.DISCARDED);
             return false;
         }
-        if(entity instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity)entity;
-            if (!player.abilities.invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
+        if(entity instanceof Player) {
+            Player player = (Player)entity;
+            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
                 return false;
             }
         }
@@ -646,7 +645,7 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT nbt) {
+    public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
         if(nbt.contains("HellfireEnergy")) {
             this.hellfireEnergy = nbt.getInt("HellfireEnergy");
@@ -655,9 +654,9 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
             this.hellfireWallTime = nbt.getInt("HellfireWallTime");
         }
         if(nbt.contains("BelphegorIDs")) {
-            ListNBT belphegorIDs = nbt.getList("BelphegorIDs", 10);
+            ListTag belphegorIDs = nbt.getList("BelphegorIDs", 10);
             for(int i = 0; i < belphegorIDs.size(); i++) {
-                CompoundNBT belphegorID = belphegorIDs.getCompound(i);
+                CompoundTag belphegorID = belphegorIDs.getCompound(i);
                 if(belphegorID.contains("ID")) {
                     Entity entity = this.getCommandSenderWorld().getEntity(belphegorID.getInt("ID"));
                     if(entity != null && entity instanceof EntityBelphegor)
@@ -666,9 +665,9 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
             }
         }
         if(nbt.contains("BehemophetIDs")) {
-            ListNBT behemophetIDs = nbt.getList("BehemophetIDs", 10);
+            ListTag behemophetIDs = nbt.getList("BehemophetIDs", 10);
             for(int i = 0; i < behemophetIDs.size(); i++) {
-                CompoundNBT behemophetID = behemophetIDs.getCompound(i);
+                CompoundTag behemophetID = behemophetIDs.getCompound(i);
                 if(behemophetID.contains("ID")) {
                     Entity entity = this.getCommandSenderWorld().getEntity(behemophetID.getInt("ID"));
                     if(entity != null && entity instanceof EntityBehemophet)
@@ -679,23 +678,23 @@ public class EntityRahovart extends BaseCreatureEntity implements IMob, IGroupHe
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT nbt) {
+    public void addAdditionalSaveData(CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.putInt("HellfireEnergy", this.hellfireEnergy);
         nbt.putInt("HellfireWallTime", this.hellfireWallTime);
         if(this.getBattlePhase() == 0) {
-            ListNBT belphegorIDs = new ListNBT();
+            ListTag belphegorIDs = new ListTag();
             for(EntityBelphegor entityBelphegoregor : this.hellfireBelphegorMinions) {
-                CompoundNBT belphegorID = new CompoundNBT();
+                CompoundTag belphegorID = new CompoundTag();
                 belphegorID.putInt("ID", entityBelphegoregor.getId());
                 belphegorIDs.add(belphegorID);
             }
             nbt.put("BelphegorIDs", belphegorIDs);
         }
         if(this.getBattlePhase() == 1) {
-            ListNBT behemophetIDs = new ListNBT();
+            ListTag behemophetIDs = new ListTag();
             for(EntityBehemophet entityBehemophet : this.hellfireBehemophetMinions) {
-                CompoundNBT behemophetID = new CompoundNBT();
+                CompoundTag behemophetID = new CompoundTag();
                 behemophetID.putInt("ID", entityBehemophet.getId());
                 behemophetIDs.add(behemophetID);
             }

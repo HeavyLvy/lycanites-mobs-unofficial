@@ -7,17 +7,21 @@ import com.lycanitesmobs.core.entity.goals.targeting.CopyRiderAttackTargetGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.RevengeRiderGoal;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.ObjectLists;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.Team;
+import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -36,7 +40,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
 	// ==================================================
   	//                    Constructor
   	// ==================================================
-	protected RideableCreatureEntity(EntityType<? extends RideableCreatureEntity> entityType, World world) {
+	protected RideableCreatureEntity(EntityType<? extends RideableCreatureEntity> entityType, Level world) {
 		super(entityType, world);
 		this.hasJumpSound = true;
 	}
@@ -85,11 +89,11 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
 
 				// Protect Rider from Effects:
 				if(!this.canBurn()) {
-					riderLiving.addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, (5 * 20) + 5, 1));
+					riderLiving.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, (5 * 20) + 5, 1));
 				}
 				for(Object possibleEffect : riderLiving.getActiveEffects().toArray(new Object[0])) {
-					if(possibleEffect instanceof EffectInstance) {
-						EffectInstance effectInstance = (EffectInstance)possibleEffect;
+					if(possibleEffect instanceof MobEffectInstance) {
+                        MobEffectInstance effectInstance = (MobEffectInstance)possibleEffect;
 						if(!this.canBeAffected(effectInstance))
 							riderLiving.removeEffect(effectInstance.getEffect());
 					}
@@ -105,8 +109,8 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
 			}
 
 			// Dismounting:
-//			if (!this.getCommandSenderWorld().isClientSide && this.getControllingPassenger() instanceof PlayerEntity) {
-//				PlayerEntity player = (PlayerEntity) this.getControllingPassenger();
+//			if (!this.getCommandSenderWorld().isClientSide && this.getControllingPassenger() instanceof Player) {
+//				Player player = (Player) this.getControllingPassenger();
 //				ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
 //				if(playerExt != null && playerExt.isControlActive(ExtendedPlayer.CONTROL_ID.MOUNT_DISMOUNT)) {
 //					player.stopRiding();
@@ -122,7 +126,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
     public void riderEffects(LivingEntity rider) {
         if(!rider.canBreatheUnderwater() && this.canBreatheUnderwater() && rider.isInWater())
             rider.setAirSupply(300);
-        for(EffectInstance effectInstance : rider.getActiveEffects().toArray(new EffectInstance[rider.getActiveEffects().size()])) {
+        for(MobEffectInstance effectInstance : rider.getActiveEffects().toArray(new MobEffectInstance[rider.getActiveEffects().size()])) {
         	if(!this.canBeAffected(effectInstance) && ObjectLists.inEffectList("debuffs", effectInstance.getEffect())) {
         		rider.removeEffect(effectInstance.getEffect());
 			}
@@ -136,13 +140,13 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
     public void mountAbility(Entity rider) {}
 
     public void onDismounted(Entity entity) {
-		this.setDeltaMovement(Vector3d.ZERO);
+		this.setDeltaMovement(new Vec3(0,0,0));
 		if(this.isSitting()) {
-			int homeY = MathHelper.floor(this.position().y());
+			int homeY = Mth.floor(this.position().y());
 			if(!this.isFlying()) {
 				homeY = this.getGroundY(this.blockPosition());
 			}
-			this.setHomePosition(MathHelper.floor(this.position().x()), homeY, MathHelper.floor(this.position().z()));
+            this.setHomePosition(Mth.floor(this.position().x()), homeY, Mth.floor(this.position().z()));
 		}
 	}
 	
@@ -172,20 +176,20 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
     }
     
     @Override
-    public void positionRider(Entity passenger) {
+    public void positionRider(Entity passenger,MoveFunction moveFunction) {
         if(this.hasPassenger(passenger)) {
         	double zOffset = this.getMountedZOffset();
         	if(zOffset == 0) {
         		zOffset = 0.00001D;
 			}
-			Vector3d mountOffset = this.getFacingPositionDouble(0, 0, 0, zOffset, this.yRot);
+			Vector3d mountOffset = this.getFacingPositionDouble(0, 0, 0, zOffset, this.yRotO);
             this.getControllingPassenger().setPos(this.position().x() + mountOffset.x, this.position().y() + this.getPassengersRidingOffset() + passenger.getMyRidingOffset(), this.position().z() + mountOffset.z);
         }
     }
 
     private void mount(Entity entity) {
-    	entity.yRot = this.yRot;
-    	entity.xRot = this.xRot;
+    	entity.yRotO = this.yRotO;
+    	entity.xRot = this.xRotO;
         if(!this.getCommandSenderWorld().isClientSide)
         	entity.startRiding(this);
     }
@@ -199,7 +203,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
     
     // ========== Move with Heading ==========
     @Override
-    public void travel(Vector3d direction) {
+    public void travel(Vec3 direction) {
         // Check if Mounted:
         if (!this.isTamed() || !this.hasSaddle() || !this.hasRiderTarget() || !(this.getControllingPassenger() instanceof LivingEntity) || !this.riderControl()) {
             super.travel(direction);
@@ -212,7 +216,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
         // Apply Rider Movement:
         if(this.getControllingPassenger() instanceof LivingEntity) {
             LivingEntity rider = (LivingEntity) this.getControllingPassenger();
-            this.yRotO = this.yRot = rider.yRot;
+            this.yRotO = this.yRot = rider.getYRot();
             this.xRot = rider.xRot * 0.5F;
             this.setRot(this.yRot, this.xRot);
             this.yHeadRot = this.yBodyRot = this.yRot;
@@ -223,8 +227,8 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
         // Swimming / Flying Controls:
         double verticalMotion = 0;
         if(this.isInWater() || this.isInLava() || this.isFlying()) {
-            if (this.getControllingPassenger() instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) this.getControllingPassenger();
+            if (this.getControllingPassenger() instanceof Player) {
+                Player player = (Player) this.getControllingPassenger();
                 ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
                 if(playerExt != null && playerExt.isControlActive(ExtendedPlayer.CONTROL_ID.JUMP)) {
                     verticalMotion = this.creatureStats.getSpeed() * 20;
@@ -241,8 +245,8 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
         else {
             // Jumping Controls:
             if (!this.isMountJumping()) {
-                if (this.getControllingPassenger() instanceof PlayerEntity) {
-                    PlayerEntity player = (PlayerEntity) this.getControllingPassenger();
+                if (this.getControllingPassenger() instanceof Player) {
+                    Player player = (Player) this.getControllingPassenger();
                     ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
                     if (playerExt != null && playerExt.isControlActive(ExtendedPlayer.CONTROL_ID.JUMP)) {
                         this.startJumping();
@@ -253,13 +257,13 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
             // Jumping Behaviour:
             if (this.getJumpPower() > 0.0F && !this.isMountJumping() && this.isControlledByLocalInstance()) {
                 this.setDeltaMovement(this.getDeltaMovement().add(0, this.getMountJumpHeight() * (double) this.getJumpPower(), 0));
-                if (this.hasEffect(Effects.JUMP))
-					this.setDeltaMovement(this.getDeltaMovement().add(0, ((float) (this.getEffect(Effects.JUMP).getAmplifier() + 1) * 0.1F), 0));
+                if (this.hasEffect(MobEffects.JUMP))
+					this.setDeltaMovement(this.getDeltaMovement().add(0, ((float) (this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.1F), 0));
                 this.setMountJumping(true);
                 this.hasImpulse = true;
                 if (forward > 0.0F) {
-                    float f2 = MathHelper.sin(this.yRot * (float) Math.PI / 180.0F);
-                    float f3 = MathHelper.cos(this.yRot * (float) Math.PI / 180.0F);
+                    float f2 = Mth.sin(this.yRot * (float) Math.PI / 180.0F);
+                    float f3 = Mth.cos(this.yRot * (float) Math.PI / 180.0F);
 					this.setDeltaMovement(this.getDeltaMovement().add(-0.4F * f2 * this.jumpPower, 0, 0.4F * f3 * this.jumpPower));
                 }
                 if (!this.getCommandSenderWorld().isClientSide)
@@ -267,12 +271,12 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
                 this.setJumpPower(0);
                 net.minecraftforge.common.ForgeHooks.onLivingJump(this);
             }
-            this.flyingSpeed = (float) (this.getSpeed() * this.getGlideScale());
+            this.setFlyingSpeed((float) (this.getSpeed() * this.getGlideScale()));
         }
 
 		// Ability Controls:
-		if(this.getControllingPassenger() instanceof PlayerEntity) {
-			PlayerEntity player = (PlayerEntity)this.getControllingPassenger();
+		if(this.getControllingPassenger() instanceof Player) {
+			Player player = (Player)this.getControllingPassenger();
 			ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
 			if(playerExt != null) {
 
@@ -302,8 +306,8 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
             this.setSpeed((float)this.getAttribute(Attributes.MOVEMENT_SPEED).getValue());
             if(!this.useDirectNavigator()) {
                 if(this.isFlying() && !this.isInWater() && !this.isInLava()) {
-                    this.moveRelative(0.1F, new Vector3d(strafe, 0, forward));
-                    this.move(MoverType.SELF, new Vector3d(this.getDeltaMovement().x, verticalMotion / 16, this.getDeltaMovement().z));
+                    this.moveRelative(0.1F, new Vec3(strafe, 0, forward));
+                    this.move(MoverType.SELF, new Vec3(this.getDeltaMovement().x, verticalMotion / 16, this.getDeltaMovement().z));
                     this.setDeltaMovement(this.getDeltaMovement().multiply(0.8999999761581421D, 0.8999999761581421D, 0.8999999761581421D));
                 }
 				else if(this.isInWater()) {
@@ -312,7 +316,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
 						strafe *= 0.25f;
 						forward *= 0.25f;
 					}
-					this.moveRelative(0.1F, new Vector3d(strafe, 0, forward));
+					this.moveRelative(0.1F, new Vec3(strafe, 0, forward));
 					this.move(MoverType.SELF, this.getDeltaMovement().add(0, verticalMotion / 16, 0));
 					this.setDeltaMovement(this.getDeltaMovement().multiply(0.8999999761581421D, 0.8999999761581421D, 0.8999999761581421D));
 				}
@@ -322,32 +326,33 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
 						strafe *= 0.5f;
 						forward *= 0.5f;
 					}
-					this.moveRelative(0.1F, new Vector3d(strafe, 0, forward));
+					this.moveRelative(0.1F, new Vec3(strafe, 0, forward));
 					this.move(MoverType.SELF, this.getDeltaMovement().add(0, verticalMotion / 16, 0));
 					this.setDeltaMovement(this.getDeltaMovement().multiply(0.8999999761581421D, 0.8999999761581421D, 0.8999999761581421D));
 				}
                 else
-                    super.travel(new Vector3d(strafe, up, forward));
+                    super.travel(new Vec3(strafe, up, forward));
             }
             else
                 this.directNavigator.flightMovement(strafe, forward);
         }
 
         // Clear Jumping:
-        if(this.onGround || this.isInWater() || this.isInLava()) {
+        if(this.onGround() || this.isInWater() || this.isInLava()) {
             this.setJumpPower(0);
             this.setMountJumping(false);
         }
 
         // Animate Limbs:
-        this.animationSpeedOld = this.animationSpeed;
+        this.calculateEntityAnimation(true);
+        /*this.animationSpeedOld = this.animationSpeed;
         double d0 = this.position().x() - this.xo;
         double d1 = this.position().z() - this.zo;
-        float f4 = MathHelper.sqrt(d0 * d0 + d1 * d1) * 4.0F;
+        float f4 = Mth.sqrt(d0 * d0 + d1 * d1) * 4.0F;
         if (f4 > 1.0F)
             f4 = 1.0F;
         this.animationSpeed += (f4 - this.animationSpeed) * 0.4F;
-        this.animationPosition += this.animationSpeed;
+        this.animationPosition += this.animationSpeed;*/
     }
 
     // ========== Jumping Start ==========
@@ -404,7 +409,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
   	// ==================================================
     // ========== Get Interact Commands ==========
     @Override
-    public HashMap<Integer, String> getInteractCommands(PlayerEntity player, @Nonnull ItemStack itemStack) {
+    public HashMap<Integer, String> getInteractCommands(Player player, @Nonnull ItemStack itemStack) {
     	HashMap<Integer, String> commands = new HashMap<Integer, String>();
     	commands.putAll(super.getInteractCommands(player, itemStack));
     	
@@ -420,7 +425,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
     
     // ========== Perform Command ==========
     @Override
-    public boolean performCommand(String command, PlayerEntity player, ItemStack itemStack) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack) {
     	
     	// Mount:
     	if(command.equals("Mount")) {
@@ -484,14 +489,14 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
     		return false;
     	
     	// Can Be Mounted By A Player:
-    	if(this.isTamed() && entity instanceof PlayerEntity) {
-    		PlayerEntity player = (PlayerEntity)entity;
+    	if(this.isTamed() && entity instanceof Player) {
+    		Player player = (Player)entity;
     		if(player == this.getOwner())
     			return this.hasSaddle() && !this.isBaby();
     	}
     	
     	// Can Be Mounted By Mobs:
-    	else if(!this.isTamed() && !(entity instanceof PlayerEntity)) {
+    	else if(!this.isTamed() && !(entity instanceof Player)) {
     		return !this.isBaby();
     	}
     	

@@ -5,19 +5,20 @@ import com.lycanitesmobs.api.IGroupBoss;
 import com.lycanitesmobs.api.IGroupHeavy;
 import com.lycanitesmobs.core.entity.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SEntityVelocityPacket;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
-public class EntityThresher extends RideableCreatureEntity implements IMob, IGroupHeavy {
+public class EntityThresher extends RideableCreatureEntity implements Enemy, IGroupHeavy {
     protected int whirlpoolRange = 8;
 
     protected int whirlpoolEnergy = 0;
@@ -28,11 +29,11 @@ public class EntityThresher extends RideableCreatureEntity implements IMob, IGro
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityThresher(EntityType<? extends EntityThresher> entityType, World world) {
+    public EntityThresher(EntityType<? extends EntityThresher> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.spawnsOnLand = false;
         this.spawnsInWater = true;
         this.hasAttackSound = true;
@@ -44,7 +45,7 @@ public class EntityThresher extends RideableCreatureEntity implements IMob, IGro
         this.hitAreaHeightScale = 1F;
 
         // Stats:
-        this.pushthrough = 0.9F;
+        //this.pushthrough = 0.9F;
     }
 
     @Override
@@ -83,15 +84,15 @@ public class EntityThresher extends RideableCreatureEntity implements IMob, IGro
                         if(entityLivingBase.hasEffect(ObjectManager.getEffect("weight")) || !this.canAttack(entityLivingBase))
                             continue;
                     }
-                    ServerPlayerEntity player = null;
-                    if (entity instanceof ServerPlayerEntity) {
-                        player = (ServerPlayerEntity) entity;
-                        if (player.abilities.instabuild)
+                    ServerPlayer player = null;
+                    if (entity instanceof ServerPlayer) {
+                        player = (ServerPlayer) entity;
+                        if (player.getAbilities().instabuild)
                             continue;
                     }
                     double xDist = this.position().x() - entity.position().x();
                     double zDist = this.position().z() - entity.position().z();
-                    double xzDist = Math.max(MathHelper.sqrt(xDist * xDist + zDist * zDist), 0.01D);
+                    double xzDist = Math.max(Mth.sqrt(LMHelperClass.convertToFloat(xDist * xDist + zDist * zDist)), 0.01D);
                     double factor = 0.1D;
                     entity.push(
                             xDist / xzDist * factor + entity.getDeltaMovement().x() * factor,
@@ -99,7 +100,7 @@ public class EntityThresher extends RideableCreatureEntity implements IMob, IGro
                             zDist / xzDist * factor + entity.getDeltaMovement().z() * factor
                     );
                     if (player != null)
-                        player.connection.send(new SEntityVelocityPacket(entity));
+                        player.connection.send(new ClientboundSetEntityMotionPacket(entity));
                 }
                 if(--this.whirlpoolEnergy <= 0)
                     this.whirlpoolRecharging = true;
@@ -112,7 +113,7 @@ public class EntityThresher extends RideableCreatureEntity implements IMob, IGro
 
     @Override
     public void riderEffects(LivingEntity rider) {
-        rider.addEffect(new EffectInstance(Effects.WATER_BREATHING, (5 * 20) + 5, 1));
+        rider.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, (5 * 20) + 5, 1));
         if(rider.hasEffect(ObjectManager.getEffect("paralysis")))
             rider.removeEffect(ObjectManager.getEffect("paralysis"));
         if(rider.hasEffect(ObjectManager.getEffect("penetration")))
@@ -240,7 +241,7 @@ public class EntityThresher extends RideableCreatureEntity implements IMob, IGro
     public void onDismounted(Entity entity) {
         super.onDismounted(entity);
         if(entity instanceof LivingEntity) {
-            ((LivingEntity)entity).addEffect(new EffectInstance(Effects.WATER_BREATHING, 5 * 20, 1));
+            ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 5 * 20, 1));
         }
     }
 

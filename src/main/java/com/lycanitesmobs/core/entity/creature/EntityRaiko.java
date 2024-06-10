@@ -4,15 +4,15 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.ExtendedEntity;
 import com.lycanitesmobs.core.entity.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 
-public class EntityRaiko extends RideableCreatureEntity implements IMob {
+public class EntityRaiko extends RideableCreatureEntity implements Enemy {
 
     protected int waterTime = 0;
     protected boolean wantsToLand;
@@ -21,16 +21,16 @@ public class EntityRaiko extends RideableCreatureEntity implements IMob {
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityRaiko(EntityType<? extends EntityRaiko> entityType, World world) {
+    public EntityRaiko(EntityType<? extends EntityRaiko> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
         this.flySoundSpeed = 20;
         this.setupMob();
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
     }
 
     // ========== Init AI ==========
@@ -134,11 +134,11 @@ public class EntityRaiko extends RideableCreatureEntity implements IMob {
         if(this.wantsToLand || !this.isLanded) {
             BlockPos groundPos;
             for(groundPos = wanderPosition.below(); groundPos.getY() > 0 && this.getCommandSenderWorld().getBlockState(groundPos).getBlock() == Blocks.AIR; groundPos = groundPos.below()) {}
-            if(this.getCommandSenderWorld().getBlockState(groundPos).getMaterial().isSolid()) {
+            if(this.getCommandSenderWorld().getBlockState(groundPos).isSolid()) {
                 return groundPos.above();
             }
         }
-        if(this.hasPickupEntity() && this.getPickupEntity() instanceof PlayerEntity)
+        if(this.hasPickupEntity() && this.getPickupEntity() instanceof Player)
             wanderPosition = new BlockPos(wanderPosition.getX(), this.restrictYHeightFromGround(wanderPosition, 6, 14), wanderPosition.getZ());
         return wanderPosition;
     }
@@ -229,7 +229,7 @@ public class EntityRaiko extends RideableCreatureEntity implements IMob {
     	// Drop Weight Effect:
         if(this.hasPickupEntity()) {
             if(ObjectManager.getEffect("weight") != null)
-                this.getPickupEntity().addEffect(new EffectInstance(ObjectManager.getEffect("weight"), this.getEffectDuration(5), 1));
+                this.getPickupEntity().addEffect(new MobEffectInstance(ObjectManager.getEffect("weight"), this.getEffectDuration(5), 1));
         }
     	super.dropPickupEntity();
     }

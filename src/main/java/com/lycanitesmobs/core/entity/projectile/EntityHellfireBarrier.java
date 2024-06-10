@@ -7,12 +7,11 @@ import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.creature.EntityRahovart;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
 import com.lycanitesmobs.core.util.DamageSourceHelper;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -32,15 +31,15 @@ public class EntityHellfireBarrier extends BaseProjectileEntity {
     // ==================================================
  	//                   Constructors
  	// ==================================================
-    public EntityHellfireBarrier(EntityType<? extends BaseProjectileEntity> entityType, World world) {
+    public EntityHellfireBarrier(EntityType<? extends BaseProjectileEntity> entityType, Level world) {
         super(entityType, world);
     }
 
-    public EntityHellfireBarrier(EntityType<? extends BaseProjectileEntity> entityType, World world, LivingEntity par2LivingEntity) {
+    public EntityHellfireBarrier(EntityType<? extends BaseProjectileEntity> entityType, Level world, LivingEntity par2LivingEntity) {
         super(entityType, world, par2LivingEntity);
     }
 
-    public EntityHellfireBarrier(EntityType<? extends BaseProjectileEntity> entityType, World world, double par2, double par4, double par6) {
+    public EntityHellfireBarrier(EntityType<? extends BaseProjectileEntity> entityType, Level world, double par2, double par4, double par6) {
         super(entityType, world, par2, par4, par6);
     }
     
@@ -72,7 +71,7 @@ public class EntityHellfireBarrier extends BaseProjectileEntity {
 
         // Time Update:
         if(this.time++ >= this.timeMax)
-            this.remove();
+            this.remove(RemovalReason.DISCARDED);
 
         // Populate:
         if(this.hellfireWalls == null) {
@@ -127,7 +126,7 @@ public class EntityHellfireBarrier extends BaseProjectileEntity {
                 this.hellfireWalls[row][col].projectileLife = 2 * 20;
 
                 if(!this.isAlive())
-                    this.hellfireWalls[row][col].remove();
+                    this.hellfireWalls[row][col].remove(RemovalReason.DISCARDED);
             }
         }
     }

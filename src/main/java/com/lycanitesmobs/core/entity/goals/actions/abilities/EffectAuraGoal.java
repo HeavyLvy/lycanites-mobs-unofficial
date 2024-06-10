@@ -4,17 +4,16 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.BaseGoal;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
 
 public class EffectAuraGoal extends BaseGoal {
     // Properties:
-	protected Effect effect;
+	protected MobEffect effect;
 	protected float auraRange = 10F;
 	protected int effectSeconds = 5;
 	protected int effectAmplifier = 0;
@@ -73,7 +72,7 @@ public class EffectAuraGoal extends BaseGoal {
 	 * @param effect The effect to apply.
 	 * @return This goal for chaining.
 	 */
-	public EffectAuraGoal setEffect(Effect effect) {
+	public EffectAuraGoal setEffect(MobEffect effect) {
 		this.effect = effect;
 		return this;
 	}
@@ -180,9 +179,9 @@ public class EffectAuraGoal extends BaseGoal {
 			return;
 		}
 
-		EffectInstance effectInstance = null;
+		MobEffectInstance effectInstance = null;
 		if(this.effect != null) {
-			effectInstance = new EffectInstance(this.effect, this.host.getEffectDuration(this.effectSeconds), this.effectAmplifier);
+			effectInstance = new MobEffectInstance(this.effect, this.host.getEffectDuration(this.effectSeconds), this.effectAmplifier);
 		}
 
 		List<LivingEntity> aoeTargets = this.host.getNearbyEntities(LivingEntity.class, entity -> {
@@ -222,7 +221,7 @@ public class EffectAuraGoal extends BaseGoal {
 				}
 				return false;
 			}
-			if(this.checkSight && !this.host.getSensing().canSee(entity)) {
+			if(this.checkSight && !this.host.getSensing().hasLineOfSight(entity)) {
 				return false;
 			}
 			return true;
@@ -240,9 +239,7 @@ public class EffectAuraGoal extends BaseGoal {
 
 			// Apply Damage:
 			if(this.damageAmount != 0) {
-				DamageSource damageSource = new EntityDamageSource("mob", this.host);
-				damageSource.bypassMagic();
-				damageSource.bypassArmor();
+				DamageSource damageSource = this.host.level().damageSources().mobAttack(this.host);
 				target.hurt(damageSource, this.damageAmount);
 				if(this.host.minions.contains(target)) {
 					this.host.onTryToDamageMinion(target, this.damageAmount);

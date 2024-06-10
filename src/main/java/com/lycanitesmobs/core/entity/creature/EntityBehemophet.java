@@ -1,43 +1,42 @@
 package com.lycanitesmobs.core.entity.creature;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.projectile.EntityHellfireOrb;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.CreeperEntity;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityBehemophet extends TameableCreatureEntity implements IMob {
+public class EntityBehemophet extends TameableCreatureEntity implements Enemy {
 
     // Data Manager:
-    protected static final DataParameter<Integer> HELLFIRE_ENERGY = EntityDataManager.defineId(EntityBehemophet.class, DataSerializers.INT);
+    protected static final EntityDataAccessor<Integer> HELLFIRE_ENERGY = SynchedEntityData.defineId(EntityBehemophet.class, EntityDataSerializers.INT);
 
     public int hellfireEnergy = 0;
     public List<EntityHellfireOrb> hellfireOrbs = new ArrayList<>();
 
-    public EntityBehemophet(EntityType<? extends EntityBehemophet> entityType, World world) {
+    public EntityBehemophet(EntityType<? extends EntityBehemophet> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEAD;
+        this.attribute = MobType.UNDEAD;
         this.hasAttackSound = false;
         this.setupMob();
     }
@@ -122,7 +121,7 @@ public class EntityBehemophet extends TameableCreatureEntity implements IMob {
             }
             else if (this.getPickupEntity() == target && this.getRandom().nextBoolean()) {
                 this.dropPickupEntity();
-                target.setDeltaMovement(this.getFacingPositionDouble(0, 1D, 0, 2D, this.yBodyRot));
+                target.setDeltaMovement(LMHelperClass.convertToVec3(this.getFacingPositionDouble(0, 1D, 0, 2D, this.yBodyRot)));
             }
         }
 

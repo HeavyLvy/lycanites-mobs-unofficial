@@ -4,31 +4,31 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.AgeableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.TemptGoal;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.Material;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashMap;
 
 public class EntityBobeko extends AgeableCreatureEntity {
-    public EntityBobeko(EntityType<? extends EntityBobeko> entityType, World world) {
+    public EntityBobeko(EntityType<? extends EntityBobeko> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = false;
         this.fleeHealthPercent = 1.0F;
         this.isAggressiveByDefault = false;
@@ -70,16 +70,16 @@ public class EntityBobeko extends AgeableCreatureEntity {
         BlockState blockState = this.getCommandSenderWorld().getBlockState(new BlockPos(x, y - 1, z));
         Block block = blockState.getBlock();
         if(block != Blocks.AIR) {
-            if(blockState.getMaterial() == Material.GRASS || blockState.getMaterial() == Material.TOP_SNOW)
+            if(Material.GRASS.contains(blockState.getBlock()) || Material.TOP_SNOW.contains(blockState.getBlock()))
                 return 10F;
-            if(blockState.getMaterial() == Material.DIRT || blockState.getMaterial() == Material.ICE)
+            if(Material.DIRT.contains(blockState.getBlock()) || Material.ICE.contains(blockState.getBlock()))
                 return 7F;
         }
         return super.getBlockPathWeight(x, y, z);
     }
 
     @Override
-    public boolean canBeLeashed(PlayerEntity player) {
+    public boolean canBeLeashed(Player player) {
 	    return true;
     }
 
@@ -96,14 +96,14 @@ public class EntityBobeko extends AgeableCreatureEntity {
     }
 
     @Override
-    public boolean canBeAffected(EffectInstance potionEffect) {
-        if(potionEffect.getEffect() == Effects.MOVEMENT_SLOWDOWN) return false;
-        if(potionEffect.getEffect() == Effects.HUNGER) return false;
+    public boolean canBeAffected(MobEffectInstance potionEffect) {
+        if(potionEffect.getEffect() == MobEffects.MOVEMENT_SLOWDOWN) return false;
+        if(potionEffect.getEffect() == MobEffects.HUNGER) return false;
         return super.canBeAffected(potionEffect);
     }
 
     @Override
-    public HashMap<Integer, String> getInteractCommands(PlayerEntity player, ItemStack itemStack) {
+    public HashMap<Integer, String> getInteractCommands(Player player, ItemStack itemStack) {
     	HashMap<Integer, String> commands = new HashMap<Integer, String>();
     	commands.putAll(super.getInteractCommands(player, itemStack));
     	
@@ -117,7 +117,7 @@ public class EntityBobeko extends AgeableCreatureEntity {
     }
 
     @Override
-    public boolean performCommand(String command, PlayerEntity player, ItemStack itemStack) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack) {
     	
     	// Milk:
     	if(command.equals("Milk")) {

@@ -7,35 +7,35 @@ import com.lycanitesmobs.core.entity.CreatureRelationshipEntry;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.PlaceBlockGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindMasterGoal;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class EntityVespid extends AgeableCreatureEntity implements IMob {
+public class EntityVespid extends AgeableCreatureEntity implements Enemy {
     public PlaceBlockGoal aiPlaceBlock;
     public CreatureBuildTask creatureBuildTask;
 
 	private boolean hiveBuilding = true;
 
-    public EntityVespid(EntityType<? extends EntityVespid> entityType, World world) {
+    public EntityVespid(EntityType<? extends EntityVespid> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.ARTHROPOD;
+        this.attribute = MobType.ARTHROPOD;
         this.hasAttackSound = true;
         this.setupMob();
 
         this.canGrow = true;
         this.babySpawnChance = 0.1D;
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
         this.setAttackCooldownMax(10);
     }
 
@@ -122,7 +122,7 @@ public class EntityVespid extends AgeableCreatureEntity implements IMob {
 
 	@Override
     public float getDamageModifier(DamageSource damageSrc) {
-    	if(damageSrc.isFire())
+    	if(damageSrc.is(DamageTypeTags.IS_FIRE))
     		return 2.0F;
     	return super.getDamageModifier(damageSrc);
     }
@@ -134,10 +134,10 @@ public class EntityVespid extends AgeableCreatureEntity implements IMob {
     }
 
     @Override
-	public boolean canSee(Entity entity) {
+	public boolean hasLineOfSight(Entity entity) {
     	if (entity instanceof EntityVespidQueen) {
     		return true;
 		}
-    	return super.canSee(entity);
+    	return super.hasLineOfSight(entity);
 	}
 }

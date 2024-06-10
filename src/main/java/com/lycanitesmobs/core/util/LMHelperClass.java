@@ -49,6 +49,7 @@ import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 
 public class LMHelperClass {
     public static Object convertObjectToDesired(Object input, String outputType) {
@@ -73,9 +74,18 @@ public class LMHelperClass {
         }
         return null;
     }
+    public static Vec3 convertToVec3(Object input) {
+        if (input instanceof Vector3i v) {
+            return new Vec3(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
+        }else if (input instanceof Vector3f v) {
+            return new Vec3(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
+        }else if (input instanceof Vector3d v) {
+            return new Vec3(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
+        }
+        return null;
+    }
     public static Vec3i convertToVec3i(Object input) {
         if (input instanceof Vec3 v) {
-
             return new Vec3i(convertToInteger(v.x), convertToInteger(v.y), convertToInteger(v.z));
         }else if (input instanceof Vector3f v) {
             return new Vec3i(convertToInteger(v.x), convertToInteger(v.y), convertToInteger(v.z));

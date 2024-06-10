@@ -1,16 +1,34 @@
 package com.lycanitesmobs.core.entity.creature;
 
 import com.google.common.collect.Maps;
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.AgeableCreatureEntity;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.EatBlockGoal;
 import com.lycanitesmobs.core.entity.goals.actions.TemptGoal;
 import com.lycanitesmobs.core.info.ItemDrop;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.Material;
 import net.minecraft.Util;
-import net.minecraft.world.item.DyeColor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.TransientCraftingContainer;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.IForgeShearable;
 
 import javax.annotation.Nonnull;
@@ -18,14 +36,13 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public class EntityYale extends AgeableCreatureEntity implements IForgeShearable {
 
-	protected static final DataParameter<Byte> FUR = EntityDataManager.defineId(EntityYale.class, DataSerializers.BYTE);
+	protected static final EntityDataAccessor<Byte> FUR = SynchedEntityData.defineId(EntityYale.class, EntityDataSerializers.BYTE);
 
-	private static final Map<DyeColor, IItemProvider> WOOL_BY_COLOR = Util.make(Maps.newEnumMap(DyeColor.class), (itemProviderMap) -> {
+	private static final Map<DyeColor, ItemLike> WOOL_BY_COLOR = Util.make(Maps.newEnumMap(DyeColor.class), (itemProviderMap) -> {
 		itemProviderMap.put(DyeColor.WHITE, Blocks.WHITE_WOOL);
 		itemProviderMap.put(DyeColor.ORANGE, Blocks.ORANGE_WOOL);
 		itemProviderMap.put(DyeColor.MAGENTA, Blocks.MAGENTA_WOOL);
@@ -50,11 +67,11 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
     protected ItemDrop woolDrop;
 
 
-    public EntityYale(EntityType<? extends EntityYale> entityType, World world) {
+    public EntityYale(EntityType<? extends EntityYale> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = false;
 
         this.canGrow = true;
@@ -63,7 +80,7 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
         this.isAggressiveByDefault = false;
         this.setupMob();
 
-		this.woolDrop = new ItemDrop(Blocks.WHITE_WOOL.getRegistryName().toString(), 1).setMinAmount(1).setMaxAmount(3);
+		this.woolDrop = new ItemDrop(LMHelperClass.convertToResourceLocation(Blocks.WHITE_WOOL).toString(), 1).setMinAmount(1).setMaxAmount(3);
     }
 
     @Override
@@ -88,12 +105,12 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 	}
 
 	@Override
-	public boolean isShearable(@Nonnull ItemStack item, World world, BlockPos pos) {
+	public boolean isShearable(@Nonnull ItemStack item, Level world, BlockPos pos) {
 		return this.hasFur() && !this.isBaby();
 	}
 
 	@Override
-	public ArrayList<ItemStack> onSheared(@Nullable PlayerEntity player, @Nonnull ItemStack item, World world, BlockPos pos, int fortune) {
+	public ArrayList<ItemStack> onSheared(@Nullable Player player, @Nonnull ItemStack item, Level world, BlockPos pos, int fortune) {
 		ArrayList<ItemStack> dropStacks = new ArrayList<>();
 		if(this.woolDrop == null) {
 			return dropStacks;
@@ -104,7 +121,7 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 
 		int quantity = this.woolDrop.getQuantity(this.getRandom(), fortune, 1);
 		ItemStack dropStack = this.woolDrop.getEntityDropItemStack(this, quantity);
-		if(dropStack != null && dropStack.getItem() instanceof BlockItem && ((BlockItem)dropStack.getItem()).getBlock().getRegistryName().toString().contains("_wool")) {
+		if(dropStack != null && dropStack.getItem() instanceof BlockItem && LMHelperClass.convertToResourceLocation(((BlockItem)dropStack.getItem()).getBlock()).toString().contains("_wool")) {
 			dropStack = new ItemStack(WOOL_BY_COLOR.get(this.getColor()), dropStack.getCount());
 		}
 		dropStacks.add(dropStack);
@@ -129,7 +146,7 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 	}
 	
 	@Override
-	public boolean canBeColored(PlayerEntity player) {
+	public boolean canBeColored(Player player) {
 		return true;
 	}
 	
@@ -137,7 +154,7 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 	public void setColor(DyeColor color) {
 		Item woolItem = WOOL_BY_COLOR.get(this.getColor()).asItem();
         if(this.woolDrop == null) {
-			this.woolDrop = new ItemDrop(woolItem.getRegistryName().toString(), 1).setMinAmount(1).setMaxAmount(3);
+			this.woolDrop = new ItemDrop(LMHelperClass.convertToResourceLocation(woolItem).toString(), 1).setMinAmount(1).setMaxAmount(3);
 		}
 		else if(this.woolDrop.getItemStack().getItem() != woolItem) {
 			this.woolDrop.setDrop(new ItemStack(woolItem, 1));
@@ -145,7 +162,7 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 		super.setColor(color);
 	}
 
-	public DyeColor getRandomFurColor(Random random) {
+	public DyeColor getRandomFurColor(RandomSource random) {
 		int i = random.nextInt(100);
 		if (i < 5) {
 			return DyeColor.BLACK;
@@ -166,15 +183,20 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 	private DyeColor getMixedFurColor(BaseCreatureEntity father, BaseCreatureEntity mother) {
 		DyeColor dyeA = father.getColor();
 		DyeColor dyeB = mother.getColor();
-		CraftingInventory craftinginventory = mixColors(dyeA, dyeB);
-		return this.level.getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, craftinginventory, this.level).map((craftingRecipe) ->
-				craftingRecipe.assemble(craftinginventory)).map(ItemStack::getItem).filter(DyeItem.class::isInstance).map(DyeItem.class::cast).map(DyeItem::getDyeColor).orElseGet(() ->
-				this.level.random.nextBoolean() ? dyeA : dyeB);
+		TransientCraftingContainer craftinginventory = mixColors(dyeA, dyeB);
+		return this.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftinginventory, this.level()).map((craftingRecipe) ->
+				craftingRecipe.assemble(craftinginventory,level().registryAccess())).map(ItemStack::getItem).filter(DyeItem.class::isInstance).map(DyeItem.class::cast).map(DyeItem::getDyeColor).orElseGet(() ->
+				this.level().random.nextBoolean() ? dyeA : dyeB);
 	}
 
-	private static CraftingInventory mixColors(DyeColor dyeA, DyeColor dyeB) {
-		CraftingInventory craftinginventory = new CraftingInventory(new Container(null, -1) {
-			public boolean stillValid(PlayerEntity playerIn) {
+	private static TransientCraftingContainer mixColors(DyeColor dyeA, DyeColor dyeB) {
+		TransientCraftingContainer craftinginventory = new TransientCraftingContainer(new AbstractContainerMenu(null, -1) {
+			@Override
+			public ItemStack quickMoveStack(Player player, int i) {
+				return ItemStack.EMPTY;
+			}
+
+			public boolean stillValid(Player playerIn) {
 				return false;
 			}
 		}, 2, 1);
@@ -198,16 +220,16 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
         BlockState blockState = this.getCommandSenderWorld().getBlockState(new BlockPos(x, y - 1, z));
         Block block = blockState.getBlock();
         if(block != Blocks.AIR) {
-            if(blockState.getMaterial() == Material.GRASS)
+            if(Material.GRASS.contains(blockState.getBlock()))
                 return 10F;
-            if(blockState.getMaterial() == Material.DIRT)
+            if(Material.DIRT.contains(blockState.getBlock()))
                 return 7F;
         }
         return super.getBlockPathWeight(x, y, z);
     }
 
     @Override
-    public boolean canBeLeashed(PlayerEntity player) {
+    public boolean canBeLeashed(Player player) {
         return true;
     }
 
@@ -227,7 +249,7 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 		if(!super.canDropItem(itemDrop)) {
 			return false;
 		}
-		if(itemDrop.getItemStack().getItem() instanceof BlockItem && ((BlockItem)itemDrop.getItemStack().getItem()).getBlock().getRegistryName().toString().contains("_wool")) {
+		if(itemDrop.getItemStack().getItem() instanceof BlockItem && LMHelperClass.convertToResourceLocation(((BlockItem)itemDrop.getItemStack().getItem()).getBlock()).toString().contains("_wool")) {
 			return this.hasFur();
 		}
 		return true;
@@ -235,7 +257,7 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 
 	@Override
 	public void dropItem(ItemStack itemStack) {
-		if(this.woolDrop != null && itemStack.getItem() instanceof BlockItem && ((BlockItem)itemStack.getItem()).getBlock().getRegistryName().toString().contains("_wool")) {
+		if(this.woolDrop != null && itemStack.getItem() instanceof BlockItem && LMHelperClass.convertToResourceLocation(((BlockItem)itemStack.getItem()).getBlock()).toString().contains("_wool")) {
 			itemStack = new ItemStack(WOOL_BY_COLOR.get(this.getColor()), itemStack.getCount());
 		}
 		super.dropItem(itemStack);
@@ -250,7 +272,7 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 	}
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT nbt) {
+    public void readAdditionalSaveData(CompoundTag nbt) {
     	super.readAdditionalSaveData(nbt);
     	if(nbt.contains("HasFur")) {
     		this.setFur(nbt.getBoolean("HasFur"));
@@ -258,7 +280,7 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT nbt) {
+    public void addAdditionalSaveData(CompoundTag nbt) {
     	super.addAdditionalSaveData(nbt);
     	nbt.putBoolean("HasFur", this.hasFur());
     }

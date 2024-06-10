@@ -4,26 +4,26 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.StealthGoal;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.particles.RedstoneParticleData;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import org.joml.Vector3d;
 
-public class EntityDarkling extends TameableCreatureEntity implements IMob {
+public class EntityDarkling extends TameableCreatureEntity implements Enemy {
 
     // Data Manager:
-    protected static final DataParameter<Integer> LATCH_TARGET = EntityDataManager.defineId(EntityDarkling.class, DataSerializers.INT);
-    protected static final DataParameter<Float> LATCH_HEIGHT = EntityDataManager.defineId(EntityDarkling.class, DataSerializers.FLOAT);
-    protected static final DataParameter<Float> LATCH_ANGLE = EntityDataManager.defineId(EntityDarkling.class, DataSerializers.FLOAT);
+    protected static final EntityDataAccessor<Integer> LATCH_TARGET = SynchedEntityData.defineId(EntityDarkling.class, EntityDataSerializers.INT);
+    protected static final EntityDataAccessor<Float> LATCH_HEIGHT = SynchedEntityData.defineId(EntityDarkling.class, EntityDataSerializers.FLOAT);
+    protected static final EntityDataAccessor<Float> LATCH_ANGLE = SynchedEntityData.defineId(EntityDarkling.class, EntityDataSerializers.FLOAT);
 
     // Latching
     LivingEntity latchEntity = null;
@@ -34,11 +34,11 @@ public class EntityDarkling extends TameableCreatureEntity implements IMob {
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityDarkling(EntityType<? extends EntityDarkling> entityType, World world) {
+    public EntityDarkling(EntityType<? extends EntityDarkling> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEAD;
+        this.attribute = MobType.UNDEAD;
         this.hasAttackSound = true;
         this.setupMob();
     }
@@ -73,7 +73,7 @@ public class EntityDarkling extends TameableCreatureEntity implements IMob {
         super.aiStep();
         
         // Leap:
-        if(!this.getCommandSenderWorld().isClientSide && this.hasAttackTarget() && !this.hasLatchTarget() && this.onGround && !this.getCommandSenderWorld().isClientSide && this.random.nextInt(10) == 0)
+        if(!this.getCommandSenderWorld().isClientSide && this.hasAttackTarget() && !this.hasLatchTarget() && this.onGround() && !this.getCommandSenderWorld().isClientSide && this.random.nextInt(10) == 0)
         	this.leap(6.0F, 0.6D, this.getTarget());
 
         // Latch:
@@ -85,7 +85,7 @@ public class EntityDarkling extends TameableCreatureEntity implements IMob {
             this.setPos(latchPos.x, latchPos.y, latchPos.z);
             double distanceX = this.getLatchTarget().position().x() - this.position().x();
             double distanceZ = this.getLatchTarget().position().z() - this.position().z();
-            this.yBodyRot = this.yRot = -((float) MathHelper.atan2(distanceX, distanceZ)) * (180F / (float)Math.PI);
+            this.yBodyRot = this.yRot = -((float) Mth.atan2(distanceX, distanceZ)) * (180F / (float)Math.PI);
 
             // Server:
             if(!this.getCommandSenderWorld().isClientSide) {
@@ -107,7 +107,7 @@ public class EntityDarkling extends TameableCreatureEntity implements IMob {
             // Client:
             else {
                 for(int i = 0; i < 2; ++i) {
-                    this.getCommandSenderWorld().addParticle(RedstoneParticleData.REDSTONE, this.position().x() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double)this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
+                    this.getCommandSenderWorld().addParticle(DustParticleOptions.REDSTONE, this.position().x() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double)this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
                 }
             }
         }
@@ -206,11 +206,11 @@ public class EntityDarkling extends TameableCreatureEntity implements IMob {
 
     /** Returns true if this entity can see the provided entity. **/
     @Override
-    public boolean canSee(Entity target) {
+    public boolean hasLineOfSight(Entity target) {
         if (target == this.getLatchTarget()) {
             return true;
         }
-        return super.canSee(target);
+        return super.hasLineOfSight(target);
     }
 
 
@@ -241,7 +241,7 @@ public class EntityDarkling extends TameableCreatureEntity implements IMob {
     @Override
     public void startStealth() {
         if(this.getCommandSenderWorld().isClientSide) {
-            IParticleData particle = ParticleTypes.WITCH;
+            ParticleOptions particle = ParticleTypes.WITCH;
             double d0 = this.random.nextGaussian() * 0.02D;
             double d1 = this.random.nextGaussian() * 0.02D;
             double d2 = this.random.nextGaussian() * 0.02D;

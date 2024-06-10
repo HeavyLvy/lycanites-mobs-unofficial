@@ -1,23 +1,18 @@
 package com.lycanitesmobs.core.entity.creature;
 
-import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
-import com.lycanitesmobs.core.entity.goals.GoalConditions;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
-import com.lycanitesmobs.core.entity.goals.actions.abilities.FireProjectilesGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
-import net.minecraft.entity.*;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.GroundPathNavigator;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.level.Level;
 
 public class EntityNecrovore extends TameableCreatureEntity {
-    public EntityNecrovore(EntityType<? extends EntityNecrovore> entityType, World world) {
+    public EntityNecrovore(EntityType<? extends EntityNecrovore> entityType, Level world) {
         super(entityType, world);
 
-        this.attribute = CreatureAttribute.UNDEAD;
+        this.attribute = MobType.UNDEAD;
         this.hasAttackSound = true;
         this.spreadFire = true;
 
@@ -35,8 +30,8 @@ public class EntityNecrovore extends TameableCreatureEntity {
         this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(EntityType.ZOMBIE, EntityType.ZOMBIE_HORSE, EntityType.ZOMBIFIED_PIGLIN, EntityType.ZOGLIN, EntityType.SKELETON, EntityType.SKELETON_HORSE, EntityType.STRAY, EntityType.HUSK, EntityType.ZOMBIE_VILLAGER));
         this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(EntityGeist.class, EntityGhoul.class, EntityCryptkeeper.class));
 
-        if(this.getNavigation() instanceof GroundPathNavigator) {
-            GroundPathNavigator pathNavigateGround = (GroundPathNavigator)this.getNavigation();
+        if(this.getNavigation() instanceof GroundPathNavigation) {
+            GroundPathNavigation pathNavigateGround = (GroundPathNavigation)this.getNavigation();
             pathNavigateGround.setCanOpenDoors(true);
             pathNavigateGround.setAvoidSun(true);
         }

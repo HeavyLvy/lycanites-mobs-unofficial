@@ -3,30 +3,31 @@ package com.lycanitesmobs.core.entity.creature;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import org.joml.Vector3d;
 
-public class EntitySylph extends TameableCreatureEntity implements IMob {
+public class EntitySylph extends TameableCreatureEntity implements Enemy {
 
 	public float fireDamageAbsorbed = 0;
 
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntitySylph(EntityType<? extends EntitySylph> entityType, World world) {
+    public EntitySylph(EntityType<? extends EntitySylph> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = false;
         this.setupMob();
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
     }
 
     // ========== Init AI ==========
@@ -94,7 +95,7 @@ public class EntitySylph extends TameableCreatureEntity implements IMob {
     public boolean isVulnerableTo(String type, DamageSource source, float damage) {
         if(type.equals("cactus") || type.equals("inWall"))
             return false;
-        if(source.isFire()) {
+        if(source.is(DamageTypeTags.IS_FIRE)) {
             this.fireDamageAbsorbed += damage;
             return false;
         }

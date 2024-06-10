@@ -1,29 +1,28 @@
 package com.lycanitesmobs.core.entity.creature;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.api.IGroupHeavy;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.StealthGoal;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.Material;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class EntityCrusk extends TameableCreatureEntity implements IGroupHeavy {
     
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityCrusk(EntityType<? extends EntityCrusk> entityType, World world) {
+    public EntityCrusk(EntityType<? extends EntityCrusk> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.ARTHROPOD;
+        this.attribute = MobType.ARTHROPOD;
         this.hasAttackSound = true;
         this.babySpawnChance = 0.25D;
         this.growthTime = -120000;
@@ -31,7 +30,7 @@ public class EntityCrusk extends TameableCreatureEntity implements IGroupHeavy {
         this.hitAreaWidthScale = 1.5F;
 
         // Stats:
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
     }
 
     // ========== Init AI ==========
@@ -39,7 +38,7 @@ public class EntityCrusk extends TameableCreatureEntity implements IGroupHeavy {
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(this.nextPriorityGoalIndex++, new StealthGoal(this).setStealthTime(60));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(PlayerEntity.class).setLongMemory(false));
+        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
         this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
     }
 
@@ -58,13 +57,13 @@ public class EntityCrusk extends TameableCreatureEntity implements IGroupHeavy {
     		return false;
         BlockState blockState = this.getCommandSenderWorld().getBlockState(this.blockPosition().offset(0, -1, 0));
 		if(blockState.getBlock() != Blocks.AIR) {
-        	if(blockState.getMaterial() == Material.DIRT) return true;
-        	if(blockState.getMaterial() == Material.GRASS) return true;
-        	if(blockState.getMaterial() == Material.LEAVES) return true;
-        	if(blockState.getMaterial() == Material.SAND) return true;
-        	if(blockState.getMaterial() == Material.CLAY) return true;
-        	if(blockState.getMaterial() == Material.TOP_SNOW) return true;
-        	if(blockState.getMaterial() == Material.SNOW) return true;
+        	if(Material.DIRT.contains(blockState.getBlock())) return true;
+        	if(Material.GRASS.contains(blockState.getBlock())) return true;
+        	if(Material.LEAVES.contains(blockState.getBlock())) return true;
+        	if(Material.SAND.contains(blockState.getBlock())) return true;
+        	if(Material.CLAY.contains(blockState.getBlock())) return true;
+        	if(Material.TOP_SNOW.contains(blockState.getBlock())) return true;
+        	if(Material.SNOW.contains(blockState.getBlock())) return true;
         }
         if(blockState.getBlock() == Blocks.NETHERRACK)
             return true;

@@ -2,39 +2,39 @@ package com.lycanitesmobs.core.entity.creature;
 
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector3d;
 
 import java.util.HashMap;
 
-public class EntityXaphan extends TameableCreatureEntity implements IMob {
+public class EntityXaphan extends TameableCreatureEntity implements Enemy {
 	private int nextSplash = 20;
 
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityXaphan(EntityType<? extends EntityXaphan> entityType, World world) {
+    public EntityXaphan(EntityType<? extends EntityXaphan> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.spawnsInWater = true;
         this.hasAttackSound = false;
         this.setupMob();
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
     }
 
     // ========== Init AI ==========
@@ -138,7 +138,7 @@ public class EntityXaphan extends TameableCreatureEntity implements IMob {
     // ==================================================
     // ========== Get Interact Commands ==========
     @Override
-    public HashMap<Integer, String> getInteractCommands(PlayerEntity player, ItemStack itemStack) {
+    public HashMap<Integer, String> getInteractCommands(Player player, ItemStack itemStack) {
         HashMap<Integer, String> commands = new HashMap<>();
         commands.putAll(super.getInteractCommands(player, itemStack));
 

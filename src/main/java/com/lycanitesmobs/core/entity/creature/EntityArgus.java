@@ -6,30 +6,30 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.StealthGoal;
 import com.lycanitesmobs.core.info.CreatureManager;
-import net.minecraft.entity.*;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import org.joml.Vector3d;
 
-public class EntityArgus extends TameableCreatureEntity implements IMob, IFusable {
+public class EntityArgus extends TameableCreatureEntity implements Enemy, IFusable {
 
 	private int teleportTime = 60;
 
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityArgus(EntityType<? extends EntityArgus> entityType, World world) {
+    public EntityArgus(EntityType<? extends EntityArgus> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
         this.spawnsInWater = true;
         this.setupMob();
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
 
         this.setAttackCooldownMax(40);
     }

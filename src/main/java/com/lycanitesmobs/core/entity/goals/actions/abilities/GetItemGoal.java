@@ -4,15 +4,14 @@ import com.google.common.base.Predicate;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.TargetSorterNearest;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.item.ItemEntity;
 
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
-import net.minecraft.entity.ai.goal.Goal.Flag;
 
 public class GetItemGoal extends Goal {
 	// Targets:
@@ -115,7 +114,7 @@ public class GetItemGoal extends Goal {
         	return false;
         
         if(this.checkSight)
-            if(this.host.getSensing().canSee(this.target))
+            if(this.host.getSensing().hasLineOfSight(this.target))
                 this.cantSeeTime = 0;
             else if(++this.cantSeeTime > this.cantSeeTimeMax)
                 return false;

@@ -2,23 +2,22 @@ package com.lycanitesmobs.core.entity.creature;
 
 import com.lycanitesmobs.core.entity.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.World;
-
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 public class EntityUvaraptor extends RideableCreatureEntity {
     
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityUvaraptor(EntityType<? extends EntityUvaraptor> entityType, World world) {
+    public EntityUvaraptor(EntityType<? extends EntityUvaraptor> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.spawnsUnderground = false;
         this.hasAttackSound = true;
         this.hasJumpSound = true;
@@ -29,14 +28,14 @@ public class EntityUvaraptor extends RideableCreatureEntity {
         this.setupMob();
         
         // Stats:
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
     }
 
     // ========== Init AI ==========
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(PlayerEntity.class).setLongMemory(false));
+        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
         this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
     }
 	
@@ -50,7 +49,7 @@ public class EntityUvaraptor extends RideableCreatureEntity {
         super.aiStep();
         
         // Random Leaping:
-        if(!this.isTamed() && this.onGround && !this.getCommandSenderWorld().isClientSide) {
+        if(!this.isTamed() && this.onGround() && !this.getCommandSenderWorld().isClientSide) {
         	if(this.hasAttackTarget()) {
         		if(this.random.nextInt(10) == 0)
         			this.leap(6.0F, 1.0D, this.getTarget());
@@ -69,7 +68,7 @@ public class EntityUvaraptor extends RideableCreatureEntity {
 	// ========== Movement Speed Modifier ==========
 	@Override
 	public float getAISpeedModifier() {
-		if(!this.onGround)
+		if(!this.onGround())
 			return 5.0F;
 		return 1.0F;
 	}

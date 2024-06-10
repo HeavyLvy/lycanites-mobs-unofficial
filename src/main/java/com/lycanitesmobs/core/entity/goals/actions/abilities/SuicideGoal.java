@@ -1,9 +1,8 @@
 package com.lycanitesmobs.core.entity.goals.actions.abilities;
 
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 public class SuicideGoal extends Goal {
 	BaseCreatureEntity host;
@@ -53,10 +52,7 @@ public class SuicideGoal extends Goal {
 		if(this.countdown-- > 0) {
 			return;
 		}
-
-		DamageSource damageSource = new EntityDamageSource("mob", this.host);
-		damageSource.bypassMagic();
-		damageSource.bypassArmor();
+		DamageSource damageSource = this.host.level().damageSources().mobAttack(this.host);
 		this.host.hurt(damageSource, this.host.getHealth());
     }
 }

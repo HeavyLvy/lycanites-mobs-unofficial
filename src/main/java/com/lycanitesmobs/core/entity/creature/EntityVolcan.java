@@ -2,41 +2,42 @@ package com.lycanitesmobs.core.entity.creature;
 
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.entity.*;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.monster.SilverfishEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Silverfish;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.fluids.ForgeFlowingFluid;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class EntityVolcan extends TameableCreatureEntity implements IMob {
+public class EntityVolcan extends TameableCreatureEntity implements Enemy {
 
 	public int blockMeltingRadius = 2;
 
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityVolcan(EntityType<? extends EntityVolcan> entityType, World world) {
+    public EntityVolcan(EntityType<? extends EntityVolcan> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
         
         this.setupMob();
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F); 
     }
 
     @Override
@@ -64,7 +65,7 @@ public class EntityVolcan extends TameableCreatureEntity implements IMob {
 			List aoeTargets = this.getNearbyEntities(LivingEntity.class, null, 4);
 			for(Object entityObj : aoeTargets) {
 				LivingEntity target = (LivingEntity)entityObj;
-				if(target != this && this.canAttackType(target.getType()) && this.canAttack(target) && this.getSensing().canSee(target)) {
+				if(target != this && this.canAttackType(target.getType()) && this.canAttack(target) && this.getSensing().hasLineOfSight(target)) {
 					target.setSecondsOnFire(2);
 				}
 			}
@@ -78,7 +79,7 @@ public class EntityVolcan extends TameableCreatureEntity implements IMob {
 					for (int h = -((int) Math.ceil(this.getDimensions(Pose.STANDING).height) + range); h <= Math.ceil(this.getDimensions(Pose.STANDING).height); h++) {
 						Block block = this.getCommandSenderWorld().getBlockState(this.blockPosition().offset(w, h, d)).getBlock();
 						if (block == Blocks.COBBLESTONE || block == Blocks.GRAVEL) {
-							BlockState blockState = Blocks.LAVA.defaultBlockState().setValue(FlowingFluidBlock.LEVEL, 5);
+							BlockState blockState = Blocks.LAVA.defaultBlockState().setValue(ForgeFlowingFluid.LEVEL, 5);
 							this.getCommandSenderWorld().setBlockAndUpdate(this.blockPosition().offset(w, h, d), blockState);
 						}
 						/*else if (block == Blocks.WATER || block == Blocks.FLOWING_WATER || block == Blocks.ICE || block == Blocks.SNOW) {
@@ -113,8 +114,8 @@ public class EntityVolcan extends TameableCreatureEntity implements IMob {
     		return false;
 
         // Silverfish Extermination:
-        if(target instanceof SilverfishEntity) {
-            target.remove();
+        if(target instanceof Silverfish) {
+            target.remove(RemovalReason.DISCARDED);
         }
         
         return true;
@@ -129,7 +130,7 @@ public class EntityVolcan extends TameableCreatureEntity implements IMob {
 
 	// ========== Get Interact Commands ==========
 	@Override
-	public HashMap<Integer, String> getInteractCommands(PlayerEntity player, ItemStack itemStack) {
+	public HashMap<Integer, String> getInteractCommands(Player player, ItemStack itemStack) {
 		HashMap<Integer, String> commands = new HashMap<>();
 		commands.putAll(super.getInteractCommands(player, itemStack));
 
@@ -144,7 +145,7 @@ public class EntityVolcan extends TameableCreatureEntity implements IMob {
 
 	// ========== Perform Command ==========
 	@Override
-	public boolean performCommand(String command, PlayerEntity player, ItemStack itemStack) {
+	public boolean performCommand(String command, Player player, ItemStack itemStack) {
 
 		// Water:
 		if(command.equals("Water")) {
@@ -167,7 +168,7 @@ public class EntityVolcan extends TameableCreatureEntity implements IMob {
    	// ==================================================
 	// ========== Damage Modifier ==========
 	public float getDamageModifier(DamageSource damageSrc) {
-		if(damageSrc.isFire())
+		if(damageSrc.is(DamageTypeTags.IS_FIRE))
 			return 0F;
 		else return super.getDamageModifier(damageSrc);
 	}

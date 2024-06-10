@@ -6,29 +6,30 @@ import com.lycanitesmobs.core.entity.CustomItemEntity;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.pathfinding.PathNodeType;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
+import net.minecraft.core.BlockPos;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 
 import java.util.List;
 
-public class EntitySalamander extends RideableCreatureEntity implements IMob {
-    public EntitySalamander(EntityType<? extends EntitySalamander> entityType, World world) {
+public class EntitySalamander extends RideableCreatureEntity implements Enemy {
+    public EntitySalamander(EntityType<? extends EntitySalamander> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.spawnsOnLand = true;
         this.spawnsInWater = true;
         this.isLavaCreature = true;
@@ -41,9 +42,9 @@ public class EntitySalamander extends RideableCreatureEntity implements IMob {
         this.setupMob();
 
         // Stats:
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
 
-        this.setPathfindingMalus(PathNodeType.LAVA, 0F);
+        this.setPathfindingMalus(BlockPathTypes.LAVA, 0F);
     }
 
     @Override
@@ -59,7 +60,7 @@ public class EntitySalamander extends RideableCreatureEntity implements IMob {
 
     @Override
     public void riderEffects(LivingEntity rider) {
-        rider.addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, (5 * 20) + 5, 1));
+        rider.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, (5 * 20) + 5, 1));
         if(rider.hasEffect(ObjectManager.getEffect("penetration")))
             rider.removeEffect(ObjectManager.getEffect("penetration"));
         if(rider.isOnFire())
@@ -90,9 +91,9 @@ public class EntitySalamander extends RideableCreatureEntity implements IMob {
     }
 
     @Override
-    public boolean canStandOnFluid(Fluid fluid) {
-        if (this.getControllingPassenger() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) this.getControllingPassenger();
+    public boolean canStandOnFluid(FluidState fluid) {
+        if (this.getControllingPassenger() instanceof Player) {
+            Player player = (Player) this.getControllingPassenger();
             ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
             if (playerExt != null && playerExt.isControlActive(ExtendedPlayer.CONTROL_ID.DESCEND)) {
                 return false;
@@ -125,8 +126,8 @@ public class EntitySalamander extends RideableCreatureEntity implements IMob {
         if(!possibleTargets.isEmpty()) {
             for(LivingEntity possibleTarget : possibleTargets) {
                 boolean doDamage = true;
-                if(this.getRider() instanceof PlayerEntity) {
-                    if(MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((PlayerEntity)this.getRider(), possibleTarget))) {
+                if(this.getRider() instanceof Player) {
+                    if(MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((Player)this.getRider(), possibleTarget))) {
                         doDamage = false;
                     }
                 }
@@ -173,7 +174,7 @@ public class EntitySalamander extends RideableCreatureEntity implements IMob {
     public void onDismounted(Entity entity) {
         super.onDismounted(entity);
         if(entity instanceof LivingEntity) {
-            ((LivingEntity)entity).addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 5 * 20, 1));
+            ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 5 * 20, 1));
         }
     }
 
@@ -204,7 +205,7 @@ public class EntitySalamander extends RideableCreatureEntity implements IMob {
     }
 
     public float getDamageModifier(DamageSource damageSrc) {
-    	if(damageSrc.isFire())
+    	if(damageSrc.is(DamageTypeTags.IS_FIRE))
     		return 0F;
     	else return super.getDamageModifier(damageSrc);
     }

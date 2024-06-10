@@ -5,18 +5,18 @@ import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.TemptGoal;
 import com.lycanitesmobs.core.info.CreatureManager;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.Material;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class EntityConcapedeHead extends AgeableCreatureEntity {
 	
@@ -27,11 +27,11 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityConcapedeHead(EntityType<? extends EntityConcapedeHead> entityType, World world) {
+    public EntityConcapedeHead(EntityType<? extends EntityConcapedeHead> entityType, Level world) {
         super(entityType, world);
 
         // Setup:
-        this.attribute = CreatureAttribute.ARTHROPOD;
+        this.attribute = MobType.ARTHROPOD;
         this.hasAttackSound = true;
 
         this.canGrow = true;
@@ -149,9 +149,9 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
         BlockState blockState = this.getCommandSenderWorld().getBlockState(new BlockPos(x, y - 1, z));
         Block block = blockState.getBlock();
         if(block != Blocks.AIR) {
-            if(blockState.getMaterial() == Material.GRASS)
+            if(Material.GRASS.contains(blockState.getBlock()))
                 return 10F;
-            if(blockState.getMaterial() == Material.DIRT)
+            if(Material.DIRT.contains(blockState.getBlock()))
                 return 7F;
         }
         return super.getBlockPathWeight(x, y, z);
@@ -159,7 +159,7 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
 
     // ========== Can leash ==========
     @Override
-    public boolean canBeLeashed(PlayerEntity player) {
+    public boolean canBeLeashed(Player player) {
         return true;
     }
 
@@ -278,7 +278,7 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
 	// ========== Read ===========
 	/** Used when loading this mob from a saved chunk. **/
 	@Override
-	public void readAdditionalSaveData(CompoundNBT nbt) {
+	public void readAdditionalSaveData(CompoundTag nbt) {
 		if(nbt.contains("IsHungry")) {
 			this.isHungry = nbt.getBoolean("IsHungry");
 		}
@@ -288,7 +288,7 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
 	// ========== Write ==========
 	/** Used when saving this mob to a chunk. **/
 	@Override
-	public void addAdditionalSaveData(CompoundNBT nbt) {
+	public void addAdditionalSaveData(CompoundTag nbt) {
 		super.addAdditionalSaveData(nbt);
 		nbt.putBoolean("IsHungry", this.isHungry);
 	}

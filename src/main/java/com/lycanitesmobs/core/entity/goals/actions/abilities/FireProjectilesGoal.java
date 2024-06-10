@@ -6,15 +6,12 @@ import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.goals.BaseGoal;
 import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import org.joml.Vector3d;
 
 import java.util.EnumSet;
 
-import net.minecraft.entity.ai.goal.Goal.Flag;
-import net.minecraft.world.World;
 
 public class FireProjectilesGoal extends BaseGoal {
 	protected String projectileName;
@@ -23,7 +20,7 @@ public class FireProjectilesGoal extends BaseGoal {
 	protected float inaccuracy = 0F;
 	protected float scale = 1F;
 	protected float angle = 0F;
-	protected Vector3d offset = Vector3d.ZERO;
+	protected Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
 	protected int fireRate = 60;
 	protected boolean allPlayers = false;
 	protected int randomCount = 0;
@@ -198,8 +195,8 @@ public class FireProjectilesGoal extends BaseGoal {
 
 		// All Players Mode:
 		if(this.allPlayers) {
-			for (PlayerEntity target : this.host.playerTargets) {
-				if(target.abilities.invulnerable || target.isSpectator())
+			for (Player target : this.host.playerTargets) {
+				if(target.getAbilities().invulnerable || target.isSpectator())
 					continue;
 				this.fireProjectile(target);
 			}

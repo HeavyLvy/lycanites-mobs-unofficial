@@ -3,11 +3,11 @@ package com.lycanitesmobs.core.entity.creature;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
-import net.minecraft.entity.*;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.world.World;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 
@@ -21,11 +21,11 @@ public class EntityBarghest extends RideableCreatureEntity {
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityBarghest(EntityType<? extends EntityBarghest> entityType, World world) {
+    public EntityBarghest(EntityType<? extends EntityBarghest> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
         this.spreadFire = false;
 
@@ -34,14 +34,14 @@ public class EntityBarghest extends RideableCreatureEntity {
         this.setupMob();
         
         // Stats:
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
     }
 
     // ========== Init AI ==========
     @Override
     protected void registerGoals() {
 		super.registerGoals();
-		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(PlayerEntity.class).setLongMemory(false));
+		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
 		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
     }
 	
@@ -55,7 +55,7 @@ public class EntityBarghest extends RideableCreatureEntity {
         super.aiStep();
         
         // Random Leaping:
-        if(!this.isTamed() && this.onGround && !this.getCommandSenderWorld().isClientSide) {
+        if(!this.isTamed() && this.onGround() && !this.getCommandSenderWorld().isClientSide) {
         	if(this.hasAttackTarget()) {
         		if(this.random.nextInt(10) == 0)
         			this.leap(4.0F, 0.5D, this.getTarget());
@@ -63,11 +63,11 @@ public class EntityBarghest extends RideableCreatureEntity {
         }
 
         // Leap Landing Paralysis:
-        if(this.leapedAbilityQueued && !this.onGround && !this.getCommandSenderWorld().isClientSide) {
+        if(this.leapedAbilityQueued && !this.onGround() && !this.getCommandSenderWorld().isClientSide) {
             this.leapedAbilityQueued = false;
             this.leapedAbilityReady = true;
         }
-        if(this.leapedAbilityReady && this.onGround && !this.getCommandSenderWorld().isClientSide) {
+        if(this.leapedAbilityReady && this.onGround() && !this.getCommandSenderWorld().isClientSide) {
             this.leapedAbilityReady = false;
             double distance = 4.0D;
             List<LivingEntity> possibleTargets = this.getCommandSenderWorld().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(distance, distance, distance), possibleTarget -> {
@@ -84,16 +84,16 @@ public class EntityBarghest extends RideableCreatureEntity {
             if(!possibleTargets.isEmpty()) {
                 for(LivingEntity possibleTarget : possibleTargets) {
                     boolean doDamage = true;
-                    if(this.getRider() instanceof PlayerEntity) {
-                        if(MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((PlayerEntity)this.getRider(), possibleTarget))) {
+                    if(this.getRider() instanceof Player) {
+                        if(MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((Player)this.getRider(), possibleTarget))) {
                             doDamage = false;
                         }
                     }
                     if(doDamage) {
                         if (ObjectManager.getEffect("weight") != null)
-                            possibleTarget.addEffect(new EffectInstance(ObjectManager.getEffect("weight"), this.getEffectDuration(5), 1));
+                            possibleTarget.addEffect(new MobEffectInstance(ObjectManager.getEffect("weight"), this.getEffectDuration(5), 1));
                         else
-                            possibleTarget.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 10 * 20, 0));
+                            possibleTarget.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10 * 20, 0));
                     }
                 }
             }
@@ -102,8 +102,8 @@ public class EntityBarghest extends RideableCreatureEntity {
     }
     
     public void riderEffects(LivingEntity rider) {
-    	if(rider.hasEffect(Effects.MOVEMENT_SLOWDOWN))
-    		rider.removeEffect(Effects.MOVEMENT_SLOWDOWN);
+    	if(rider.hasEffect(MobEffects.MOVEMENT_SLOWDOWN))
+    		rider.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
     	if(rider.hasEffect(ObjectManager.getEffect("weight")))
     		rider.removeEffect(ObjectManager.getEffect("weight"));
     }
@@ -115,7 +115,7 @@ public class EntityBarghest extends RideableCreatureEntity {
     // ========== Movement Speed Modifier ==========
     @Override
     public float getAISpeedModifier() {
-    	if(!this.onGround)
+    	if(!this.onGround())
     		return 2.0F;
     	return 1.0F;
     }
@@ -150,7 +150,7 @@ public class EntityBarghest extends RideableCreatureEntity {
     	if(this.getCommandSenderWorld().isClientSide)
     		return;
 
-        if(!this.onGround)
+        if(!this.onGround())
             return;
     	if(this.abilityToggled)
     		return;

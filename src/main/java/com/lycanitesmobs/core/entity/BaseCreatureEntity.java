@@ -5426,4 +5426,16 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             this.isChild = child;
         }
     }
+
+	/**
+	 * Adding custom flying speed function because this was removed in recent versions.
+	 */
+	public float flyingSpeed = this.getControllingPassenger() instanceof Player ? this.getSpeed() * 0.1F : 0.02F;;
+	public void setFlyingSpeed(float speed) {
+		flyingSpeed = speed;
+	}
+	@Override
+	public float getFlyingSpeed() {
+		return flyingSpeed;
+	}
 }

@@ -4,31 +4,32 @@ import com.lycanitesmobs.api.IFusable;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.info.CreatureManager;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import org.joml.Vector3d;
 
-public class EntityZephyr extends TameableCreatureEntity implements IMob, IFusable {
+public class EntityZephyr extends TameableCreatureEntity implements Enemy, IFusable {
 
 	public float fireDamageAbsorbed = 0;
 
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityZephyr(EntityType<? extends EntityZephyr> entityType, World world) {
+    public EntityZephyr(EntityType<? extends EntityZephyr> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = false;
         this.setupMob();
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
     }
 
     // ========== Init AI ==========
@@ -109,7 +110,7 @@ public class EntityZephyr extends TameableCreatureEntity implements IMob, IFusab
     public boolean isVulnerableTo(String type, DamageSource source, float damage) {
         if(type.equals("cactus") || type.equals("inWall"))
             return false;
-        if(source.isFire()) {
+        if(source.is(DamageTypeTags.IS_FIRE)) {
             this.fireDamageAbsorbed += damage;
             return false;
         }

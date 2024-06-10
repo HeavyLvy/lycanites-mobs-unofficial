@@ -8,35 +8,37 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import net.minecraft.entity.*;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityCinder extends TameableCreatureEntity implements IMob, IFusable {
+public class EntityCinder extends TameableCreatureEntity implements Enemy, IFusable {
 
 	public float inWallDamageAbsorbed = 0;
     
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityCinder(EntityType<? extends EntityCinder> entityType, World world) {
+    public EntityCinder(EntityType<? extends EntityCinder> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.spawnsInBlock = false;
         this.hasAttackSound = false;
         this.setupMob();
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
     }
 
     // ========== Init AI ==========
@@ -126,7 +128,7 @@ public class EntityCinder extends TameableCreatureEntity implements IMob, IFusab
 	        double d0 = target.position().x() - this.position().x() + accuracy;
 	        double d1 = target.position().y() + (double)target.getEyeHeight() - 1.100000023841858D - projectile.position().y() + accuracy;
 	        double d2 = target.position().z() - this.position().z() + accuracy;
-	        float f1 = MathHelper.sqrt(d0 * d0 + d2 * d2) * 0.2F;
+	        float f1 = Mth.sqrt(LMHelperClass.convertToFloat(d0 * d0 + d2 * d2)) * 0.2F;
 	        float velocity = 0.6F;
 	        projectile.shoot(d0, d1 + (double)f1, d2, velocity, 6.0F);
 	        
@@ -184,7 +186,7 @@ public class EntityCinder extends TameableCreatureEntity implements IMob, IFusab
    	// ==================================================
     // ========== Damage Modifier ==========
     public float getDamageModifier(DamageSource damageSrc) {
-    	if(damageSrc.isFire())
+    	if(damageSrc.is(DamageTypeTags.IS_FIRE))
     		return 0F;
     	else return super.getDamageModifier(damageSrc);
     }

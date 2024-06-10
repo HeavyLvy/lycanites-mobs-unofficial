@@ -4,24 +4,24 @@ import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.actions.AvoidGoal;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import org.joml.Vector3d;
 
-public class EntityBrucha extends TameableCreatureEntity implements IMob {
+public class EntityBrucha extends TameableCreatureEntity implements Enemy {
 	AvoidGoal aiAvoid;
 
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityBrucha(EntityType<? extends EntityBrucha> entityType, World world) {
+    public EntityBrucha(EntityType<? extends EntityBrucha> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
         this.setupMob();
     }

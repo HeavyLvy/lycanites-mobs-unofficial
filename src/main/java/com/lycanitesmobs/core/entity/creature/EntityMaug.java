@@ -3,12 +3,12 @@ package com.lycanitesmobs.core.entity.creature;
 import com.google.common.base.Predicate;
 import com.lycanitesmobs.core.entity.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
-import net.minecraft.entity.*;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 
@@ -22,11 +22,11 @@ public class EntityMaug extends RideableCreatureEntity {
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityMaug(EntityType<? extends EntityMaug> entityType, World world) {
+    public EntityMaug(EntityType<? extends EntityMaug> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
         this.spreadFire = false;
 
@@ -35,14 +35,14 @@ public class EntityMaug extends RideableCreatureEntity {
         this.setupMob();
         
         // Stats:
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
     }
 
     // ========== Init AI ==========
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(PlayerEntity.class).setLongMemory(false));
+        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
         this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
     }
 	
@@ -56,7 +56,7 @@ public class EntityMaug extends RideableCreatureEntity {
         super.aiStep();
         
         // Random Leaping:
-        if(!this.isTamed() && this.onGround && !this.getCommandSenderWorld().isClientSide) {
+        if(!this.isTamed() && this.onGround() && !this.getCommandSenderWorld().isClientSide) {
         	if(this.hasAttackTarget()) {
         		if(this.random.nextInt(10) == 0)
         			this.leap(4.0F, 0.5D, this.getTarget());
@@ -64,11 +64,11 @@ public class EntityMaug extends RideableCreatureEntity {
         }
 
         // Leap Landing Slow:
-        if(this.leapedAbilityQueued && !this.onGround && !this.getCommandSenderWorld().isClientSide) {
+        if(this.leapedAbilityQueued && !this.onGround() && !this.getCommandSenderWorld().isClientSide) {
             this.leapedAbilityQueued = false;
             this.leapedAbilityReady = true;
         }
-        if(this.leapedAbilityReady && this.onGround && !this.getCommandSenderWorld().isClientSide) {
+        if(this.leapedAbilityReady && this.onGround() && !this.getCommandSenderWorld().isClientSide) {
             this.leapedAbilityReady = false;
             double distance = 4.0D;
             List<LivingEntity> possibleTargets = this.getCommandSenderWorld().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(distance, distance, distance), new Predicate<LivingEntity>() {
@@ -88,13 +88,13 @@ public class EntityMaug extends RideableCreatureEntity {
             if(!possibleTargets.isEmpty()) {
                 for(LivingEntity possibleTarget : possibleTargets) {
                     boolean doDamage = true;
-                    if(this.getRider() instanceof PlayerEntity) {
-                        if(MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((PlayerEntity)this.getRider(), possibleTarget))) {
+                    if(this.getRider() instanceof Player) {
+                        if(MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((Player)this.getRider(), possibleTarget))) {
                             doDamage = false;
                         }
                     }
                     if(doDamage) {
-                        possibleTarget.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 10 * 20, 0));
+                        possibleTarget.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10 * 20, 0));
                     }
                 }
             }
@@ -103,10 +103,10 @@ public class EntityMaug extends RideableCreatureEntity {
     }
     
     public void riderEffects(LivingEntity rider) {
-    	if(rider.hasEffect(Effects.MOVEMENT_SLOWDOWN))
-    		rider.removeEffect(Effects.MOVEMENT_SLOWDOWN);
-        if(rider.hasEffect(Effects.HUNGER))
-            rider.removeEffect(Effects.HUNGER);
+    	if(rider.hasEffect(MobEffects.MOVEMENT_SLOWDOWN))
+    		rider.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+        if(rider.hasEffect(MobEffects.HUNGER))
+            rider.removeEffect(MobEffects.HUNGER);
     }
 
 	
@@ -116,7 +116,7 @@ public class EntityMaug extends RideableCreatureEntity {
     // ========== Movement Speed Modifier ==========
     @Override
     public float getAISpeedModifier() {
-    	if(!this.onGround)
+    	if(!this.onGround())
     		return 2.0F;
     	return 1.0F;
     }
@@ -151,7 +151,7 @@ public class EntityMaug extends RideableCreatureEntity {
     	if(this.getCommandSenderWorld().isClientSide)
     		return;
 
-        if(!this.onGround)
+        if(!this.onGround())
             return;
     	if(this.abilityToggled)
     		return;

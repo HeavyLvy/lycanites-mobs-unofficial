@@ -4,32 +4,41 @@ import com.lycanitesmobs.api.IFusable;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.info.CreatureManager;
-import net.minecraft.entity.*;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3d;
 
 import java.util.HashMap;
 
-public class EntityJengu extends TameableCreatureEntity implements IMob, IFusable {
+public class EntityJengu extends TameableCreatureEntity implements Enemy, IFusable {
 
     // ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityJengu(EntityType<? extends EntityJengu> entityType, World world) {
+    public EntityJengu(EntityType<? extends EntityJengu> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.spawnsInWater = true;
         this.hasAttackSound = false;
         this.setupMob();
 
-        this.maxUpStep = 1.0F;
+        this.setMaxUpStep(1.0F);
     }
 
     // ========== Init AI ==========
@@ -124,7 +133,7 @@ public class EntityJengu extends TameableCreatureEntity implements IMob, IFusabl
     // ==================================================
     // ========== Get Interact Commands ==========
     @Override
-    public HashMap<Integer, String> getInteractCommands(PlayerEntity player, ItemStack itemStack) {
+    public HashMap<Integer, String> getInteractCommands(Player player, ItemStack itemStack) {
         HashMap<Integer, String> commands = new HashMap<>();
         commands.putAll(super.getInteractCommands(player, itemStack));
 
@@ -139,7 +148,7 @@ public class EntityJengu extends TameableCreatureEntity implements IMob, IFusabl
 
     // ========== Perform Command ==========
     @Override
-    public boolean performCommand(String command, PlayerEntity player, ItemStack itemStack) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack) {
 
         // Water:
         if(command.equals("Water")) {

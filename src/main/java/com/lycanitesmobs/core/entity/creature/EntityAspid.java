@@ -4,26 +4,26 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.entity.AgeableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.TemptGoal;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import com.lycanitesmobs.core.util.Material;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class EntityAspid extends AgeableCreatureEntity {
 	
 	// ==================================================
  	//                    Constructor
  	// ==================================================
-    public EntityAspid(EntityType<? extends EntityAspid> entityType, World world) {
+    public EntityAspid(EntityType<? extends EntityAspid> entityType, Level world) {
         super(entityType, world);
         
         // Setup:
-        this.attribute = CreatureAttribute.UNDEFINED;
+        this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
 
         this.canGrow = true;
@@ -77,9 +77,9 @@ public class EntityAspid extends AgeableCreatureEntity {
 	public float getBlockPathWeight(int x, int y, int z) {
         if(this.getCommandSenderWorld().getBlockState(new BlockPos(x, y - 1, z)).getBlock() != Blocks.AIR) {
             BlockState blockState = this.getCommandSenderWorld().getBlockState(new BlockPos(x, y - 1, z));
-            if(blockState.getMaterial() == Material.GRASS)
+            if(Material.GRASS.contains(blockState.getBlock()))
                 return 10F;
-            if(blockState.getMaterial() == Material.DIRT)
+            if(Material.DIRT.contains(blockState.getBlock()))
                 return 7F;
         }
         return super.getBlockPathWeight(x, y, z);
@@ -93,7 +93,7 @@ public class EntityAspid extends AgeableCreatureEntity {
     public int getBagSize() { return this.creatureInfo.bagSize; }
 	// ========== Can leash ==========
     @Override
-    public boolean canBeLeashed(PlayerEntity player) {
+    public boolean canBeLeashed(Player player) {
 	    if(!this.hasAttackTarget() && !this.hasMaster())
 	        return true;
 	    return super.canBeLeashed(player);
