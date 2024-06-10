@@ -15,10 +15,9 @@ authors="Lycanite (Richard Nicholson)"
 description='''
 This mod adds many new mobs to specific biomes, dimensions and more. These mobs range from peaceful Makas, farmable mammal-like reptiles with massive sails (watch out for the alphas) to horrific Grues that are made of the very shadows themselves! Expect to see angry elementals such as Cinders spawning from large fires or Spriggans from tall grass and crops!
 '''
-
 [[dependencies.lycanitesmobs]]
     modId="forge"
     mandatory=true
-    versionRange="[1.20.1,1.21)"
+    versionRange="[47.2.20,)"
     ordering="NONE"
     side="BOTH"
