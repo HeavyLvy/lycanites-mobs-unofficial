@@ -72,7 +72,7 @@ public class FileLoader {
 			// Unknown File Scheme:
 			else {
 				LycanitesMobs.logError("Unsupported file scheme: " + rootUri.getScheme());
-				throw new RuntimeException("Unsupported file scheme: " + rootUri.getScheme());
+				//throw new RuntimeException("Unsupported file scheme: " + rootUri.getScheme());
 			}
 		}
 		catch(Exception e) {

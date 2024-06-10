@@ -112,14 +112,14 @@ public class WorldGenManager {
 		PLACEMENT_MODIFIERS.register(event);
 		PLACEMENT_MODIFIERS.register("always", () -> alwaysPlacement);WorldGenManager manager = WorldGenManager.getInstance();
 		CONFIGURED_FEATURES.register(event);
-		CONFIGURED_FEATURES.register("poison_lake",() -> fluidConfiguredFeatures.get("poison_lake"));CONFIGURED_FEATURES.register("poison_spring",() -> fluidConfiguredFeatures.get("poison_spring"));
+		/*CONFIGURED_FEATURES.register("poison_lake",() -> fluidConfiguredFeatures.get("poison_lake"));CONFIGURED_FEATURES.register("poison_spring",() -> fluidConfiguredFeatures.get("poison_spring"));
 		CONFIGURED_FEATURES.register("acid_lake",() -> fluidConfiguredFeatures.get("acid_lake"));
 		CONFIGURED_FEATURES.register("acid_spring",() -> fluidConfiguredFeatures.get("acid_spring"));
 		CONFIGURED_FEATURES.register("ooze_lake",() -> fluidConfiguredFeatures.get("ooze_lake"));
 		CONFIGURED_FEATURES.register("ooze_spring",() -> fluidConfiguredFeatures.get("ooze_spring"));
 		CONFIGURED_FEATURES.register("acid_lake",() -> fluidConfiguredFeatures.get("acid_lake"));
 		CONFIGURED_FEATURES.register("moglava_lake",() -> fluidConfiguredFeatures.get("moglava_lake"));
-		CONFIGURED_FEATURES.register("moglava_spring",() -> fluidConfiguredFeatures.get("moglava_spring"));
+		CONFIGURED_FEATURES.register("moglava_spring",() -> fluidConfiguredFeatures.get("moglava_spring"));*/
 	}
 
 	@SubscribeEvent
