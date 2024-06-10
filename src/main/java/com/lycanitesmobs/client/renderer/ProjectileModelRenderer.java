@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -27,7 +28,7 @@ import org.joml.Vector3f;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity> {
+public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity> implements RenderLayerParent<BaseProjectileEntity, ProjectileModel> {
 	protected ProjectileModel renderModel;
 	protected ProjectileModel defaultModel;
 	protected final List<RenderLayer<BaseProjectileEntity, ProjectileModel>> renderLayers = Lists.newArrayList(); // TODO Layers for projectiles.

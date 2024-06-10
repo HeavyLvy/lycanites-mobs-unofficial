@@ -2,11 +2,13 @@ package com.lycanitesmobs.core.entity.goals.actions.abilities;
 
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.player.Player;
 
 
 public class ForceGoal extends Goal {
@@ -180,7 +182,7 @@ public class ForceGoal extends Goal {
 				entity.stopRiding();
 			}
 			if (player != null) {
-				player.connection.send(new SEntityVelocityPacket(entity));
+				player.connection.send(new ClientboundSetEntityMotionPacket(entity));
 			}
 		}
     }

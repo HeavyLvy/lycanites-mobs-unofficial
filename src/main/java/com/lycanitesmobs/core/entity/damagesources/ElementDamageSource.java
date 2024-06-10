@@ -22,9 +22,9 @@ public class ElementDamageSource extends DamageSource {
         return super.getMsgId();
     }
 
-    public static ElementDamageSource causeElementDamage(Entity entity, ElementInfo element) {
+    /*public static ElementDamageSource causeElementDamage(Entity entity, ElementInfo element) {
         return new ElementDamageSource(entity, element);
-    }
+    }*/
 
     /*public ElementDamageSource(Entity entity, ElementInfo element) {
 		super("mob", entity);

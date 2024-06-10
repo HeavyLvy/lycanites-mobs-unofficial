@@ -5,6 +5,7 @@ import com.lycanitesmobs.client.renderer.ProjectileModelRenderer;
 import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -19,9 +20,8 @@ public class LayerProjectileBase extends RenderLayer<BaseProjectileEntity, Proje
     public boolean glow = false;
     public int blending = 0;
 
-
-    public LayerProjectileBase(ProjectileModelRenderer renderer) {
-        super(renderer);
+    public LayerProjectileBase(ProjectileModelRenderer p_117346_) {
+        super(p_117346_);
         this.renderer = renderer;
         this.name = "Layer";
     }

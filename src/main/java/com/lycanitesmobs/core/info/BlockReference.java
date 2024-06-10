@@ -1,21 +1,22 @@
 package com.lycanitesmobs.core.info;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Objects;
 
 public class BlockReference {
-	protected final World world;
+	protected final Level world;
 	protected final BlockPos pos;
 
-	public BlockReference(World world, BlockPos pos) {
+	public BlockReference(Level world, BlockPos pos) {
 		this.world = world;
 		this.pos = pos;
 	}
 
-	public World getWorld() {
+	public Level getWorld() {
 		return this.world;
 	}
 

@@ -9,10 +9,13 @@ import com.lycanitesmobs.core.config.ConfigCreatures;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.CreatureStats;
 import com.lycanitesmobs.core.spawner.SpawnerMobRegistry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -192,11 +195,16 @@ public class CreatureManager extends JSONLoader {
 	 * @param event The entity register event.
 	 */
 	@SubscribeEvent
-	public void registerEntities(RegistryEvent.Register<EntityType<?>> event) {
-		LycanitesMobs.logDebug("Creature", "Forge registering all " + this.creatures.size() + " creatures...");
-		for(CreatureInfo creatureInfo : this.creatures.values()) {
-			event.getRegistry().register(creatureInfo.getEntityType());
-		}
+	public void registerEntities(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.ENTITY_TYPES,
+				helper -> {
+					LycanitesMobs.logDebug("Creature", "Forge registering all " + this.creatures.size() + " creatures...");
+					for(CreatureInfo creatureInfo : this.creatures.values()) {
+						helper.register(creatureInfo.registryName, creatureInfo.getEntityType());
+					}
+				}
+		);
+
 	}
 
 	@SubscribeEvent
@@ -207,9 +215,13 @@ public class CreatureManager extends JSONLoader {
 	}
 
 	@SubscribeEvent
-	public void registerBlocks(RegistryEvent.Register<Attribute> event) {
-		event.getRegistry().register(BaseCreatureEntity.DEFENSE);
-		event.getRegistry().register(BaseCreatureEntity.RANGED_SPEED);
+	public void registerBlocks(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.ATTRIBUTES,
+				helper -> {
+					helper.register(new ResourceLocation(LycanitesMobs.MODID, "defense"), BaseCreatureEntity.DEFENSE);
+					helper.register(new ResourceLocation(LycanitesMobs.MODID, "ranged_speed"), BaseCreatureEntity.RANGED_SPEED);
+				}
+		);
 	}
 
 	/**

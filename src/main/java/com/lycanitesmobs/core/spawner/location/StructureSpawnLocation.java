@@ -5,6 +5,7 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.helpers.JSONHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.StructureTags;
@@ -54,6 +55,8 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
 		List<BlockPos> spawnPositions = new ArrayList<>();
 		for(ResourceLocation structureId : this.structureIds) {
 			Structure spawnStructure = RegistryManager.ACTIVE.getRegistry(Registries.STRUCTURE).getValue(structureId);
+			TagKey<Structure> lycaniteStructures = StructureTags.create("lycaniteStructures");
+
 			if (spawnStructure == null) {
 				continue;
 			}
@@ -61,7 +64,7 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
 
 			BlockPos structurePos = null;
 			try {
-				structurePos = ((ServerLevel) world).findNearestMapStructure(spawnStructure, triggerPos, this.structureRange, false);
+				structurePos = ((ServerLevel) world).findNearestMapStructure(lycaniteStructures, triggerPos, this.structureRange, false);
 			} catch (Exception e) {}
 
 			// No Structure:

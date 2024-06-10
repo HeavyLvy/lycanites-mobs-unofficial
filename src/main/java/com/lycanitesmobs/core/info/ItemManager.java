@@ -34,8 +34,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidType;
@@ -188,10 +190,10 @@ public class ItemManager extends JSONLoader {
 		ObjectManager.addItem("frostyfur", new ItemBlockPlacer(itemProperties, "frostyfur", "frostcloud"));
 		ObjectManager.addItem("poisongland", new ItemBlockPlacer(itemProperties, "poisongland", "poisoncloud"));
 		ObjectManager.addItem("geistliver", new ItemBlockPlacer(itemProperties, "geistliver", "shadowfire"));
-
-
+		
+		//.tab(this.itemsGroup)
 		// Summoning Staves:
-		Item.Properties summoningStaffProperties = new Item.Properties().tab(this.itemsGroup).stacksTo(1).durability(500);
+		Item.Properties summoningStaffProperties = new Item.Properties().stacksTo(1).durability(500);
 		ObjectManager.addItem("summoningstaff", new ItemStaffSummoning(summoningStaffProperties, "summoningstaff", "summoningstaff"));
 		ObjectManager.addItem("stablesummoningstaff", new ItemStaffStable(summoningStaffProperties, "stablesummoningstaff", "staffstable"));
 		ObjectManager.addItem("bloodsummoningstaff", new ItemStaffBlood(summoningStaffProperties, "bloodsummoningstaff", "staffblood"));
@@ -206,16 +208,16 @@ public class ItemManager extends JSONLoader {
 		BlockMaker.addDungeonBlocks(modInfo, "demon");
 		BlockMaker.addDungeonBlocks(modInfo, "aberrant");
 		BlockMaker.addDungeonBlocks(modInfo, "ashen");
-		ObjectManager.addBlock("soulcubedemonic", new BlockBase(Block.Properties.of(Material.STONE).sound(SoundType.STONE).strength(2F, 1200.0F), modInfo, "soulcubedemonic"));
-		ObjectManager.addBlock("soulcubeundead", new BlockBase(Block.Properties.of(Material.STONE).sound(SoundType.STONE).strength(2F, 1200.0F), modInfo, "soulcubeundead"));
-		ObjectManager.addBlock("soulcubeaberrant", new BlockBase(Block.Properties.of(Material.STONE).sound(SoundType.STONE).strength(2F, 1200.0F), modInfo, "soulcubeaberrant"));
-		ObjectManager.addBlock("propolis", new HiveBlock(Block.Properties.of(Material.CLAY).sound(SoundType.WET_GRASS).strength(0.6F).randomTicks(), "propolis"));
-		ObjectManager.addBlock("veswax", new HiveBlock(Block.Properties.of(Material.WOOD).sound(SoundType.WOOD).strength(0.6F).randomTicks(), "veswax"));
+		ObjectManager.addBlock("soulcubedemonic", new BlockBase(Block.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE).strength(2F, 1200.0F), modInfo, "soulcubedemonic"));
+		ObjectManager.addBlock("soulcubeundead", new BlockBase(Block.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE).strength(2F, 1200.0F), modInfo, "soulcubeundead"));
+		ObjectManager.addBlock("soulcubeaberrant", new BlockBase(Block.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE).strength(2F, 1200.0F), modInfo, "soulcubeaberrant"));
+		ObjectManager.addBlock("propolis", new HiveBlock(Block.Properties.of().mapColor(MapColor.CLAY).sound(SoundType.WET_GRASS).strength(0.6F).randomTicks(), "propolis"));
+		ObjectManager.addBlock("veswax", new HiveBlock(Block.Properties.of().mapColor(MapColor.WOOD).sound(SoundType.WOOD).strength(0.6F).randomTicks(), "veswax"));
 
 
 		// Effect Blocks:
-		Block.Properties fireProperties = Block.Properties.of(Material.FIRE).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion();
-		Block.Properties brightFireProperties = Block.Properties.of(Material.FIRE).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion().lightLevel((BlockState blockState) -> { return 15; });
+		Block.Properties fireProperties = Block.Properties.of().mapColor(MapColor.FIRE).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion();
+		Block.Properties brightFireProperties = Block.Properties.of().mapColor(MapColor.FIRE).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion().lightLevel((BlockState blockState) -> { return 15; });
 		ObjectManager.addSound("frostfire", modInfo, "block.frostfire");
 		ObjectManager.addBlock("frostfire", new BlockFrostfire(fireProperties));
 		ObjectManager.addSound("icefire", modInfo, "block.icefire");
@@ -233,7 +235,7 @@ public class ItemManager extends JSONLoader {
 		ObjectManager.addSound("smitefire", modInfo, "block.smitefire");
 		ObjectManager.addBlock("smitefire", new BlockSmitefire(brightFireProperties));
 
-		Block.Properties cloudProperties = Block.Properties.of(Material.DECORATION).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion();
+		Block.Properties cloudProperties = Block.Properties.of().mapColor(MapColor.NONE).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion();
 		ObjectManager.addSound("frostcloud", modInfo, "block.frostcloud");
 		ObjectManager.addBlock("frostcloud", new BlockFrostCloud(cloudProperties));
 		ObjectManager.addSound("poisoncloud", modInfo, "block.poisoncloud");
@@ -241,16 +243,16 @@ public class ItemManager extends JSONLoader {
 		ObjectManager.addSound("poopcloud", modInfo, "block.poopcloud");
 		ObjectManager.addBlock("poopcloud", new BlockPoopCloud(cloudProperties));
 
-		Block.Properties webProperties = Block.Properties.of(Material.WEB).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion();
+		Block.Properties webProperties = Block.Properties.of().mapColor(MapColor.WOOL).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion();
 		ObjectManager.addBlock("quickweb", new BlockQuickWeb(webProperties));
 		ObjectManager.addBlock("frostweb", new BlockFrostweb(webProperties));
 
 
 		// Fluids:
-		Block.Properties waterBlockProperties = Block.Properties.of(Material.WATER).noCollission().randomTicks().strength(100).noDrops();
-		Block.Properties waterBrightBlockProperties = Block.Properties.of(Material.WATER).noCollission().randomTicks().strength(100).noDrops().lightLevel((BlockState blockState) -> { return 10; });
-		Block.Properties lavaBlockProperties = Block.Properties.of(Material.LAVA).noCollission().randomTicks().strength(100).noDrops().lightLevel((BlockState blockState) -> { return 15; });
-		this.addFluid("ooze", 0x009F9F, 3000, 3000, 0, 10, false, OozeFluidBlock, waterBrightBlockProperties, "frost", false, true);
+		Block.Properties waterBlockProperties = Block.Properties.of().mapColor(MapColor.WATER).noCollission().randomTicks().strength(100).noLootTable();
+		Block.Properties waterBrightBlockProperties = Block.Properties.of().mapColor(MapColor.WATER).noCollission().randomTicks().strength(100).noLootTable().lightLevel((BlockState blockState) -> { return 10; });
+		Block.Properties lavaBlockProperties = Block.Properties.of().mapColor(MapColor.FIRE).noCollission().randomTicks().strength(100).noLootTable().lightLevel((BlockState blockState) -> { return 15; });
+		/*this.addFluid("ooze", 0x009F9F, 3000, 3000, 0, 10, false, OozeFluidBlock, waterBrightBlockProperties, "frost", false, true);
 		this.addFluid("rabbitooze", 0x00AFAF, 3000, 3000, 0, 10, true, OozeFluidBlock, waterBrightBlockProperties, "frost", false, false);
 		this.addFluid("moglava", 0xFF5722, 3000, 5000, 1100, 15, true, MoglavaFluidBlock, lavaBlockProperties, "lava", false, true);
 		this.addFluid("acid", 0x8BC34A, 1000, 10, 40, 10, false, AcidFluidBlock, waterBrightBlockProperties, "acid", true, true);
@@ -259,7 +261,7 @@ public class ItemManager extends JSONLoader {
 		this.addFluid("vesspoison", 0xAC27A0, 1000, 8, 20, 0, true, PoisonFluidBlock, waterBlockProperties, "poison", false, false);
 		this.addFluid("veshoney", 0xCEBC39, 4000, 4000, 0, 0, false, VeshoneyFluidBlock, waterBlockProperties, "fae", false, false);
 		ObjectManager.addDamageSource("ooze", new DamageSource("ooze"));
-		ObjectManager.addDamageSource("acid", new DamageSource("acid"));
+		ObjectManager.addDamageSource("acid", new DamageSource("acid"));*/
 	}
 
 

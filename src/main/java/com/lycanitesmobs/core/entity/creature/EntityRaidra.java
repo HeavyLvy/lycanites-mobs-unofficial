@@ -54,7 +54,7 @@ public class EntityRaidra extends TameableCreatureEntity implements Enemy {
             for(Object entityObj : aoeTargets) {
                 LivingEntity target = (LivingEntity)entityObj;
                 if(target != this && this.canAttackType(target.getType()) && this.canAttack(target) && this.getSensing().hasLineOfSight(target)) {
-                    target.hurt(ElementDamageSource.causeElementDamage(this, ElementManager.getInstance().getElement("lightning")), this.getAttackDamage(1));
+                    //target.hurt(ElementDamageSource.causeElementDamage(this, ElementManager.getInstance().getElement("lightning")), this.getAttackDamage(1));
                 }
             }
         }
