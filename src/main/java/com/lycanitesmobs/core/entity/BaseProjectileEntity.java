@@ -674,7 +674,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 
 	public ResourceLocation getTexture() {
 		if(TextureManager.getTexture(this.getTextureName()) == null)
-			TextureManager.addTexture(this.getTextureName(), this.modInfo, "textures/item/" + this.getTextureName() + ".png");
+			TextureManager.addTexture(this.getTextureName(), "textures/item/" + this.getTextureName() + ".png");
 		return TextureManager.getTexture(this.getTextureName());
 	}
 	

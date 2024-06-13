@@ -38,7 +38,7 @@ public class LayerZephyr extends LayerCreatureBase {
 		}
 		textureName += "_ribbon";
 		if(TextureManager.getTexture(textureName) == null)
-			TextureManager.addTexture(textureName, entity.creatureInfo.modInfo, "textures/entity/" + textureName.toLowerCase() + ".png");
+			TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
 		return TextureManager.getTexture(textureName);
     }
 

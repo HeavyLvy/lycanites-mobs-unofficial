@@ -36,11 +36,10 @@ import javax.annotation.Nullable;
 public class EquipmentInfuserBlock extends BlockBase {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-	public EquipmentInfuserBlock(Properties properties, ModInfo group) {
-		super(properties,group,"equipment_infuser");
+	public EquipmentInfuserBlock(Properties properties) {
+		super(properties,"equipment_infuser");
 		
 		// Properties:
-		this.group = group;
 		this.blockName = "equipment_infuser";
 		//this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
 		this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));

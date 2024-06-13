@@ -93,7 +93,7 @@ public class EntityHellLaser extends LaserProjectileEntity {
     @Override
     public ResourceLocation getBeamTexture() {
     	if(TextureManager.getTexture(this.entityName + "Beam") == null)
-    		TextureManager.addTexture(this.entityName + "Beam", this.modInfo, "textures/item/" + this.entityName.toLowerCase() + "beam.png");
+    		TextureManager.addTexture(this.entityName + "Beam", "textures/item/" + this.entityName.toLowerCase() + "beam.png");
     	return TextureManager.getTexture(this.entityName + "Beam");
     }
     

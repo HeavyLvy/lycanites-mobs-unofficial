@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block;
 
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.container.EquipmentStationContainerProvider;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.tileentity.EquipmentStationTileEntity;
@@ -30,13 +31,12 @@ import org.jetbrains.annotations.Nullable;
 public class EquipmentStationBlock extends BlockBase {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-	public EquipmentStationBlock(Properties properties, ModInfo group) {
-		super(properties,group,"equipment_station");
+	public EquipmentStationBlock(Properties properties) {
+		super(properties,"equipment_station");
 		
 		// Properties:
-		this.group = group;
 		this.blockName = "equipment_station";
-		this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
+		this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
 		this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
 	}
 

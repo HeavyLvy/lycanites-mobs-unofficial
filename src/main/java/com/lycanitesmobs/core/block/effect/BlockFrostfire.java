@@ -39,7 +39,7 @@ public class BlockFrostfire extends BlockFireBase {
     }
 
     public BlockFrostfire(Block.Properties properties, String name) {
-        super(properties, LycanitesMobs.modInfo, name);
+        super(properties, name);
 
         // Stats:
         this.tickRate = 30;

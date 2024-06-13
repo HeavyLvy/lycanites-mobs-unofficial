@@ -31,7 +31,7 @@ public class BlockShadowfire extends BlockFireBase {
     public boolean blindness;
 
 	public BlockShadowfire(Block.Properties properties) {
-		super(properties, LycanitesMobs.modInfo, "shadowfire");
+		super(properties,  "shadowfire");
 		
 		// Stats:
 		this.tickRate = 30;

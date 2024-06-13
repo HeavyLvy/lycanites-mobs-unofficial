@@ -17,7 +17,6 @@ public class ItemBlockPlacer extends BaseItem {
 
 	public ItemBlockPlacer(Item.Properties properties, String itemName, String placedBlockName) {
 		super(properties);
-		this.modInfo = LycanitesMobs.modInfo;
 		this.itemName = itemName;
 		this.placedBlockName = placedBlockName;
 		this.setup();

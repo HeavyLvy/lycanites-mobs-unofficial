@@ -66,11 +66,9 @@ public class ItemEquipmentPart extends BaseItem {
 
 	/**
 	 * Constructor
-	 * @param groupInfo The group that this part belongs to.
 	 */
-	public ItemEquipmentPart(Item.Properties properties, ModInfo groupInfo) {
+	public ItemEquipmentPart(Item.Properties properties) {
 		super(properties);
-		this.modInfo = groupInfo;
 	}
 
 	/** Loads this part from a JSON object. **/
@@ -125,7 +123,7 @@ public class ItemEquipmentPart extends BaseItem {
 		}
 		this.sortFeatures();
 
-		TextureManager.addTexture(this.itemName, this.modInfo, "textures/equipment/" + this.itemName + ".png");
+		TextureManager.addTexture(this.itemName, "textures/equipment/" + this.itemName + ".png");
 	}
 
 	@Override

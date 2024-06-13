@@ -14,7 +14,7 @@ public class ModelEquipmentPart extends ItemObjModel {
 	 * @param equipmentPart The equipment part item to render.
 	 */
 	public ModelEquipmentPart(ItemEquipmentPart equipmentPart) {
-		this.initModel(equipmentPart.itemName, equipmentPart.modInfo, "equipment/" + equipmentPart.itemName.replace("equipmentpart_", ""));
+		this.initModel(equipmentPart.itemName, "equipment/" + equipmentPart.itemName.replace("equipmentpart_", ""));
 	}
 
 	/**
@@ -37,7 +37,7 @@ public class ModelEquipmentPart extends ItemObjModel {
 
 		String textureName = itemEquipmentPart.itemName.toLowerCase().replace("equipmentpart_", "") + suffix;
 		if(TextureManager.getTexture(textureName) == null)
-			TextureManager.addTexture(textureName, itemEquipmentPart.modInfo, "textures/equipment/" + textureName + ".png");
+			TextureManager.addTexture(textureName, "textures/equipment/" + textureName + ".png");
 		return TextureManager.getTexture(textureName);
 	}
 

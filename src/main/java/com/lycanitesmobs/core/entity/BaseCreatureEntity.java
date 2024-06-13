@@ -5206,7 +5206,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 			textureName += "_" + suffix;
 		}
 		if(TextureManager.getTexture(textureName) == null)
-			TextureManager.addTexture(textureName, this.creatureInfo.modInfo, "textures/entity/" + textureName.toLowerCase() + ".png");
+			TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
 		return TextureManager.getTexture(textureName);
 	}
 
@@ -5226,7 +5226,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         String textureName = this.getTextureName();
         textureName += "_" + subName;
         if(TextureManager.getTexture(textureName) == null)
-            TextureManager.addTexture(textureName, this.creatureInfo.modInfo, "textures/entity/" + textureName.toLowerCase() + ".png");
+            TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
         return TextureManager.getTexture(textureName);
     }
 

@@ -28,7 +28,7 @@ public class BlockPrimefire extends BlockFireBase {
     }
 
     public BlockPrimefire(Properties properties, String name) {
-        super(properties, LycanitesMobs.modInfo, name);
+        super(properties,  name);
 
         // Stats:
         this.tickRate = 30;

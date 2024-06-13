@@ -39,9 +39,8 @@ public class BlockFrostweb extends BlockBase {
 	//                   Constructor
 	// ==================================================
 	public BlockFrostweb(Block.Properties properties) {
-		super(properties,LycanitesMobs.modInfo,"frostweb");
+		super(properties,"frostweb");
 
-		this.group = LycanitesMobs.modInfo;
 		this.blockName = "frostweb";
 		
 		// Stats:
@@ -52,7 +51,7 @@ public class BlockFrostweb extends BlockBase {
 
 		this.noBreakCollision = false;
 
-		this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
+		this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
 		this.registerDefaultState(this.getStateDefinition().any().setValue(AGE, 0));
 
 		ItemManager.getInstance().cutoutBlocks.add(this);

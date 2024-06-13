@@ -44,7 +44,7 @@ public class CustomProjectileModelEntity extends CustomProjectileEntity {
 		if("projectile".equals(this.getTextureName()))
 			return null;
 		if(TextureManager.getTexture(this.getTextureName()) == null)
-			TextureManager.addTexture(this.getTextureName(), this.modInfo, "textures/projectile/" + this.getTextureName() + ".png");
+			TextureManager.addTexture(this.getTextureName(), "textures/projectile/" + this.getTextureName() + ".png");
 		return TextureManager.getTexture(this.getTextureName());
 	}
 

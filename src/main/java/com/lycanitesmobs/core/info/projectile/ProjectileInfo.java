@@ -288,9 +288,9 @@ public class ProjectileInfo {
 		}
 
 		// Sounds:
-		ObjectManager.addSound(name, modInfo, "projectile." + name);
+		ObjectManager.addSound(name, "projectile." + name);
 		if(this.impactSound) {
-			ObjectManager.addSound(name + "_impact", modInfo, "projectile." + name + ".impact");
+			ObjectManager.addSound(name + "_impact", "projectile." + name + ".impact");
 		}
 	}
 

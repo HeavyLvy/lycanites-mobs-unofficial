@@ -69,7 +69,6 @@ public class ItemEquipment extends BaseItem {
 		//super(attackDamage, attackSpeed, tier, blockTagKey, properties);
 		super(properties);
 		this.itemName = "equipment";
-		this.modInfo = LycanitesMobs.modInfo;
 		setup();
 		properties.stacksTo(1);
 	}
@@ -80,7 +79,7 @@ public class ItemEquipment extends BaseItem {
 		return registryName = new ResourceLocation(modID, itemName);
 	}
 	public void setup() {
-		this.setRegistryName(this.modInfo.modid, this.itemName);
+		this.setRegistryName(LycanitesMobs.MODID, this.itemName);
 	}
 	// ==================================================
 	//                 Custom Renderer

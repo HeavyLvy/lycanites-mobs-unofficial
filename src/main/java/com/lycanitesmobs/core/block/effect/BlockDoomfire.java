@@ -28,7 +28,7 @@ import java.util.Random;
 public class BlockDoomfire extends BlockFireBase {
 
 	public BlockDoomfire(Block.Properties properties) {
-		super(properties, LycanitesMobs.modInfo, "doomfire");
+		super(properties, "doomfire");
 
         // Stats:
         this.tickRate = 30;

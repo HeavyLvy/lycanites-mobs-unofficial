@@ -28,9 +28,8 @@ public class BlockPoisonCloud extends BlockBase {
 	//                   Constructor
 	// ==================================================
 	public BlockPoisonCloud(Block.Properties properties) {
-		super(properties,LycanitesMobs.modInfo,"poisoncloud");
+		super(properties,"poisoncloud");
 
-		this.group = LycanitesMobs.modInfo;
 		this.blockName = "poisoncloud";
 		
 		// Stats:

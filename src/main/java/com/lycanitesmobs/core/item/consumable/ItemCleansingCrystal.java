@@ -19,7 +19,6 @@ public class ItemCleansingCrystal extends BaseItem {
 	// ==================================================
     public ItemCleansingCrystal(Item.Properties properties) {
         super(properties);
-        this.modInfo = LycanitesMobs.modInfo;
         this.itemName = "cleansingcrystal";
         this.setup();
     }

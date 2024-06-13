@@ -26,7 +26,7 @@ public class BlockScorchfire extends BlockFireBase {
 	//                   Constructor
 	// ==================================================
 	public BlockScorchfire(Block.Properties properties) {
-		super(properties, LycanitesMobs.modInfo, "scorchfire");
+		super(properties,  "scorchfire");
 
         // Stats:
         this.tickRate = 30;

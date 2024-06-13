@@ -32,7 +32,6 @@ public class BaseItem extends Item {
 	public static int DESCRIPTION_WIDTH = 200;
 	public ResourceLocation registryName = null;
 	public String itemName = "unamed_item";
-	public ModInfo modInfo = LycanitesMobs.modInfo;
 
     public BaseItem(Properties properties) {
     	super(properties);
@@ -45,13 +44,13 @@ public class BaseItem extends Item {
         return registryName = new ResourceLocation(modID, itemName);
     }
     public void setup() {
-        this.setRegistryName(this.modInfo.modid, this.itemName);
+        this.setRegistryName(LycanitesMobs.MODID, this.itemName);
     }
 
     @Override
 	@Nonnull
 	public String getDescriptionId() {
-    	return "item." + this.modInfo.modid + "." + this.itemName;
+    	return "item." + LycanitesMobs.MODID + "." + this.itemName;
 	}
 
 	@Override

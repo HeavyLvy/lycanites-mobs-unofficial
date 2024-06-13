@@ -9,8 +9,8 @@ public class BlockDoubleSlab extends BlockPillar {
 	// ==================================================
 	//                   Constructor
 	// ==================================================
-	public BlockDoubleSlab(Block.Properties properties, ModInfo group, String name, String slabName) {
-		super(properties, group, name);
+	public BlockDoubleSlab(Block.Properties properties,String name, String slabName) {
+		super(properties, name);
         this.slabName = slabName;
 		setup();
 	}

@@ -27,9 +27,8 @@ public class BlockPoopCloud extends BlockBase {
 	//                   Constructor
 	// ==================================================
 	public BlockPoopCloud(Block.Properties properties) {
-		super(properties,LycanitesMobs.modInfo,"poopcloud");
+		super(properties,"poopcloud");
 
-		this.group = LycanitesMobs.modInfo;
 		this.blockName = "poopcloud";
 		
 		// Stats:

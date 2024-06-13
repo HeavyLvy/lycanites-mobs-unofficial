@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block;
 
+import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -23,7 +24,7 @@ public class BlockWallCustom extends WallBlock {
 	// ==================================================
 	public BlockWallCustom(Block.Properties properties, BlockBase block) {
 		super(properties);
-        this.setRegistryName(block.group.modid, block.blockName + "_wall");
+        this.setRegistryName(LycanitesMobs.MODID, block.blockName + "_wall");
 	}
 	public ResourceLocation registryName;
 	public ResourceLocation getRegistryName() {

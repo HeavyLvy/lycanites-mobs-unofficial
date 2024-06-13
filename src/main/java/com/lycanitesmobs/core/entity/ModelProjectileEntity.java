@@ -27,7 +27,7 @@ public class ModelProjectileEntity extends BaseProjectileEntity {
 	@Override
 	public ResourceLocation getTexture() {
 		if(TextureManager.getTexture(this.getTextureName()) == null)
-			TextureManager.addTexture(this.getTextureName(), this.modInfo, "textures/projectile/" + this.getTextureName() + ".png");
+			TextureManager.addTexture(this.getTextureName(), "textures/projectile/" + this.getTextureName() + ".png");
 		return TextureManager.getTexture(this.getTextureName());
 	}
 }

@@ -66,13 +66,12 @@ public abstract class ItemObjModel implements IAnimationModel {
 	/**
 	 * Constructor
 	 * @param name The unique model name.
-	 * @param groupInfo The group, used for submods.
 	 * @param path The path to find the model obj in such as equipment/darklingskull (obj is already appended).
 	 * @return
 	 */
-	public ItemObjModel initModel(String name, ModInfo groupInfo, String path) {
+	public ItemObjModel initModel(String name, String path) {
 		// Load Obj Model:
-		this.objModel = new VBOObjModel(new ResourceLocation(groupInfo.modid, "models/" + path + ".obj"));
+		this.objModel = new VBOObjModel(new ResourceLocation(LycanitesMobs.MODID, "models/" + path + ".obj"));
 		this.objParts = this.objModel.objParts;
 		if(this.objParts.isEmpty())
 			LycanitesMobs.logWarning("", "Unable to load any parts for the " + name + " model!");
@@ -81,7 +80,7 @@ public abstract class ItemObjModel implements IAnimationModel {
 		this.animator = new Animator(this);
 
 		// Load Model Parts:
-		ResourceLocation animPartsLoc = new ResourceLocation(groupInfo.modid, "models/" + path + "_parts.json");
+		ResourceLocation animPartsLoc = new ResourceLocation(LycanitesMobs.MODID, "models/" + path + "_parts.json");
 		try {
 			Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
 			InputStream in = Minecraft.getInstance().getResourceManager().getResource(animPartsLoc).get().open();
@@ -111,7 +110,7 @@ public abstract class ItemObjModel implements IAnimationModel {
 		}
 
 		// Load Animations:
-		ResourceLocation animationLocation = new ResourceLocation(groupInfo.modid, "models/" + path + "_animation.json");
+		ResourceLocation animationLocation = new ResourceLocation(LycanitesMobs.MODID, "models/" + path + "_animation.json");
 		try {
 			Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
 			InputStream in = Minecraft.getInstance().getResourceManager().getResource(animationLocation).get().open();

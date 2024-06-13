@@ -140,14 +140,14 @@ public class EntityEnt extends TameableCreatureEntity implements Enemy {
         if(this.hasCustomName() && "Twisted Ent".equals(this.getCustomName().getString())) {
             String textureName = this.getTextureName() + "_twisted";
             if (TextureManager.getTexture(textureName) == null)
-                TextureManager.addTexture(textureName, this.creatureInfo.modInfo, "textures/entity/" + textureName.toLowerCase() + ".png");
+                TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
             return TextureManager.getTexture(textureName);
         }
 
         if(this.hasCustomName() && "Salty Tree".equals(this.getCustomName().getString())) {
             String textureName = this.getTextureName() + "_saltytree";
             if (TextureManager.getTexture(textureName) == null)
-                TextureManager.addTexture(textureName, this.creatureInfo.modInfo, "textures/entity/" + textureName.toLowerCase() + ".png");
+                TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
             return TextureManager.getTexture(textureName);
         }
 

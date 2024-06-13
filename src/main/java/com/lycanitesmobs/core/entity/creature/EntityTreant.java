@@ -145,14 +145,14 @@ public class EntityTreant extends BaseCreatureEntity implements Enemy, IGroupHea
 		if(this.hasCustomName() && "Wicked Treant".equals(this.getCustomName().getString())) {
 			String textureName = this.getTextureName() + "_wicked";
 			if (TextureManager.getTexture(textureName) == null)
-				TextureManager.addTexture(textureName, this.creatureInfo.modInfo, "textures/entity/" + textureName.toLowerCase() + ".png");
+				TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
 			return TextureManager.getTexture(textureName);
 		}
 
 		if(this.hasCustomName() && "Salty Tree".equals(this.getCustomName().getString())) {
 			String textureName = this.getTextureName() + "_saltytree";
 			if (TextureManager.getTexture(textureName) == null)
-				TextureManager.addTexture(textureName, this.creatureInfo.modInfo, "textures/entity/" + textureName.toLowerCase() + ".png");
+				TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
 			return TextureManager.getTexture(textureName);
 		}
 

@@ -26,7 +26,6 @@ public class ItemSoulContract extends BaseItem {
 
     public ItemSoulContract(Properties properties) {
 		super(properties);
-		this.modInfo = LycanitesMobs.modInfo;
         this.itemName = "soul_contract";
 		this.setup();
     }

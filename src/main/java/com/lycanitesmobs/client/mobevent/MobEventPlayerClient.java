@@ -141,7 +141,7 @@ public class MobEventPlayerClient {
     @OnlyIn(Dist.CLIENT)
     public ResourceLocation getTexture() {
         if(TextureManager.getTexture("guimobevent" + this.mobEvent.title) == null)
-            TextureManager.addTexture("guimobevent" + this.mobEvent.title, LycanitesMobs.modInfo, "textures/mobevents/" + this.mobEvent.title.toLowerCase() + ".png");
+            TextureManager.addTexture("guimobevent" + this.mobEvent.title, "textures/mobevents/" + this.mobEvent.title.toLowerCase() + ".png");
         return TextureManager.getTexture("guimobevent" + this.mobEvent.title);
     }
 }

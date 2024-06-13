@@ -27,10 +27,9 @@ public class ItemWinterGiftLarge extends BaseItem {
 	// ==================================================
     public ItemWinterGiftLarge(Item.Properties properties) {
         super(properties);
-        this.modInfo = LycanitesMobs.modInfo;
         this.itemName = "wintergiftlarge";
         this.setup();
-        ObjectManager.addSound(this.itemName + "_bad", this.modInfo, "item." + this.itemName + ".bad");
+        ObjectManager.addSound(this.itemName + "_bad", "item." + this.itemName + ".bad");
     }
     
     

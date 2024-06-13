@@ -16,8 +16,8 @@ public class BlockPillar extends BlockBase {
 	// ==================================================
 	//                   Constructor
 	// ==================================================
-	public BlockPillar(Block.Properties properties, ModInfo group, String name) {
-		super(properties, group, name);
+	public BlockPillar(Block.Properties properties, String name) {
+		super(properties, name);
         this.registerDefaultState(this.defaultBlockState().setValue(AXIS, Direction.Axis.Y));
 	}
 

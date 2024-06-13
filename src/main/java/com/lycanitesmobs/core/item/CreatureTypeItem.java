@@ -18,12 +18,12 @@ public class CreatureTypeItem extends BaseItem {
 		super(properties);
 		this.itemName = itemName;
 		this.creatureType = creatureType;
-		if (creatureType != null) {
+		/*if (creatureType != null) {
 			this.modInfo = creatureType.modInfo;
 		}
 		else {
 			this.modInfo = LycanitesMobs.modInfo;
-		}
+		}*/
     }
 
 	/**

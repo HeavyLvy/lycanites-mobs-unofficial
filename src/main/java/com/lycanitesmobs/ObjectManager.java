@@ -151,9 +151,9 @@ public class ObjectManager {
     }
 
 	// ========== Sound ==========
-	public static void addSound(String name, ModInfo modInfo, String path) {
+	public static void addSound(String name,  String path) {
 		name = name.toLowerCase();
-		ResourceLocation resourceLocation = new ResourceLocation(modInfo.modid, path);
+		ResourceLocation resourceLocation = new ResourceLocation(LycanitesMobs.MODID, path);
 		SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
 		//soundEvent.setRegistryName(resourceLocation);
 		soundNames.put(name,resourceLocation);
@@ -341,7 +341,7 @@ public class ObjectManager {
 	}
 
 	// ========== Sounds ==========
-	@SubscribeEvent
+	/*@SubscribeEvent
 	public void registerSounds(RegisterEvent event) {
 		event.register(ForgeRegistries.Keys.SOUND_EVENTS,
 				helper -> {
@@ -355,7 +355,7 @@ public class ObjectManager {
 					}
 				}
 		);
-	}
+	}*/
 
 	// ========== Containers ==========
 	private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, LycanitesMobs.MODID);
@@ -370,7 +370,7 @@ public class ObjectManager {
 
 
 	// ========== Tile Entities ==========
-	@SubscribeEvent
+	//@SubscribeEvent
 	public void registerTileEntities(RegisterEvent event) {
 		event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES,
 				helper -> {

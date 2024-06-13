@@ -3,7 +3,6 @@ package com.lycanitesmobs.core.block;
 
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.info.ItemManager;
-import com.lycanitesmobs.core.info.ModInfo;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,11 +11,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.*;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.PipeBlock;
+import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.levelgen.placement.PlacementContext;
 import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraft.world.ticks.TickPriority;
 import net.minecraftforge.api.distmarker.Dist;
@@ -24,7 +25,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.Random;
 
 public class BlockFireBase extends BlockBase {
     public static final BooleanProperty PERMANENT = BooleanProperty.create("permanent");
@@ -42,8 +42,8 @@ public class BlockFireBase extends BlockBase {
     public float spreadChance = 1;
     public boolean removeOnNoFireTick;
 
-    public BlockFireBase(Block.Properties properties, ModInfo group, String name) {
-        super(properties, group, name);
+    public BlockFireBase(Block.Properties properties, String name) {
+        super(properties,  name);
 
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;

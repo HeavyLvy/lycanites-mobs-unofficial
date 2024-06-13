@@ -24,7 +24,7 @@ public class EffectBase extends MobEffect {
 		super(badEffect ? MobEffectCategory.HARMFUL : MobEffectCategory.BENEFICIAL, color);
 		this.name = name;
 		this.setRegistryName(LycanitesMobs.MODID, name);
-		TextureManager.addTexture("effect." + name, LycanitesMobs.modInfo, "textures/mob_effect/" + name + ".png");
+		TextureManager.addTexture("effect." + name, "textures/mob_effect/" + name + ".png");
 	}
 
 	public ResourceLocation getRegistryName() {

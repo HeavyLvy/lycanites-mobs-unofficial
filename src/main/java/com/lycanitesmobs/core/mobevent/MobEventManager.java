@@ -176,7 +176,7 @@ public class MobEventManager extends JSONLoader {
             return;
         this.mobEvents.put(mobEvent.name, mobEvent);
         try {
-			ObjectManager.addSound("mobevent_" + mobEvent.title.toLowerCase(), LycanitesMobs.modInfo, "mobevent." + mobEvent.title.toLowerCase());
+			ObjectManager.addSound("mobevent_" + mobEvent.title.toLowerCase(), "mobevent." + mobEvent.title.toLowerCase());
 		}
 		catch(Exception e) {}
     }

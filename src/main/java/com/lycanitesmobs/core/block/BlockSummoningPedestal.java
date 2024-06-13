@@ -44,10 +44,9 @@ public class BlockSummoningPedestal extends BlockBase {
 	// ==================================================
 	//                   Constructor
 	// ==================================================
-	public BlockSummoningPedestal(Block.Properties properties, ModInfo group) {
-		super(properties,group,"summoningpedestal");
+	public BlockSummoningPedestal(Block.Properties properties) {
+		super(properties,"summoningpedestal");
 
-        this.group = group;
         this.blockName = "summoningpedestal";
         this.registerDefaultState(this.getStateDefinition().any().setValue(PROPERTY_OWNER, EnumSummoningPedestal.NONE.ownerId));
     }

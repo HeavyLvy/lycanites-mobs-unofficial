@@ -39,7 +39,6 @@ public class ChargeItem extends BaseItem {
     public ChargeItem(Item.Properties properties, ProjectileInfo projectileInfo) {
         super(properties);
         this.projectileInfo = projectileInfo;
-        this.modInfo = LycanitesMobs.modInfo;
         if(this.projectileInfo != null) {
             this.itemName = projectileInfo.chargeItemName;
             LycanitesMobs.logDebug("Projectile", "Created Charge Item: " + projectileInfo.chargeItemName);

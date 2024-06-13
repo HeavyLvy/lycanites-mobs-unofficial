@@ -88,7 +88,7 @@ public class Effects {
 		MinecraftForge.EVENT_BUS.register(this);
 
 		// Effect Sounds:
-		ObjectManager.addSound("effect_fear", LycanitesMobs.modInfo, "effect.fear");
+		ObjectManager.addSound("effect_fear", "effect.fear");
 	}
 
 

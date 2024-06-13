@@ -21,7 +21,7 @@ public class BlockFenceCustom extends FenceBlock {
 	public ResourceLocation registryName;
 	public BlockFenceCustom(Block.Properties properties, BlockBase block) {
 		super(properties);
-        this.setRegistryName(block.group.modid, block.blockName + "_fence");
+        this.setRegistryName(LycanitesMobs.MODID, block.blockName + "_fence");
 	}
 	public ResourceLocation getRegistryName() {
 		return registryName;

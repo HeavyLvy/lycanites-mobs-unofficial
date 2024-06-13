@@ -23,16 +23,15 @@ public class HiveBlock extends BlockBase {
 	//                   Constructor
 	// ==================================================
 	public HiveBlock(Block.Properties properties, String name) {
-		super(properties,LycanitesMobs.modInfo,name);
+		super(properties,name);
 
-		this.group = LycanitesMobs.modInfo;
 		this.blockName = name;
 		
 		// Stats:
 		this.tickRate = 100;
 		this.removeOnTick = true;
 
-		this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
+		this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
 		this.registerDefaultState(this.getStateDefinition().any().setValue(AGE, 0));
 	}
 

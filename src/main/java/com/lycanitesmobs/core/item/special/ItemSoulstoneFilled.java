@@ -17,7 +17,7 @@ public class ItemSoulstoneFilled extends ItemSoulstone {
 	public ItemSoulstoneFilled(Item.Properties properties, CreatureType creatureType) {
         super(properties, creatureType);
         this.itemName = creatureType.getSoulstoneName();
-        this.setRegistryName(this.modInfo.modid, this.itemName);
+        this.setRegistryName(LycanitesMobs.MODID, this.itemName);
     }
     @Override
     public void setup() {}

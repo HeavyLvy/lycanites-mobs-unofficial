@@ -421,23 +421,23 @@ public class CreatureInfo {
 	 * Adds sounds that this creature uses.
 	 */
 	public void addSounds(String suffix) {
-		ObjectManager.addSound(this.getName() + suffix + "_say", modInfo, "entity." + getName() + suffix + ".say");
-		ObjectManager.addSound(this.name + suffix + "_hurt", modInfo, "entity." + getName() + suffix + ".hurt");
-		ObjectManager.addSound(this.name + suffix + "_death", modInfo, "entity." + getName() + suffix + ".death");
-		ObjectManager.addSound(this.name + suffix + "_step", modInfo, "entity." + getName() + suffix + ".step");
-		ObjectManager.addSound(this.name + suffix + "_attack", modInfo, "entity." + getName() + suffix + ".attack");
-		ObjectManager.addSound(this.name + suffix + "_jump", modInfo, "entity." + getName() + suffix + ".jump");
-		ObjectManager.addSound(this.name + suffix + "_fly", modInfo, "entity." + getName() + suffix + ".fly");
+		ObjectManager.addSound(this.getName() + suffix + "_say", "entity." + getName() + suffix + ".say");
+		ObjectManager.addSound(this.name + suffix + "_hurt", "entity." + getName() + suffix + ".hurt");
+		ObjectManager.addSound(this.name + suffix + "_death", "entity." + getName() + suffix + ".death");
+		ObjectManager.addSound(this.name + suffix + "_step", "entity." + getName() + suffix + ".step");
+		ObjectManager.addSound(this.name + suffix + "_attack", "entity." + getName() + suffix + ".attack");
+		ObjectManager.addSound(this.name + suffix + "_jump", "entity." + getName() + suffix + ".jump");
+		ObjectManager.addSound(this.name + suffix + "_fly", "entity." + getName() + suffix + ".fly");
 		if(this.isSummonable() || this.isTameable() || TameableCreatureEntity.class.isAssignableFrom(this.entityClass)) {
-			ObjectManager.addSound(this.name + suffix + "_tame", modInfo, "entity." + getName() + suffix + ".tame");
-			ObjectManager.addSound(this.name + suffix + "_beg", modInfo, "entity." + getName() + suffix + ".beg");
+			ObjectManager.addSound(this.name + suffix + "_tame", "entity." + getName() + suffix + ".tame");
+			ObjectManager.addSound(this.name + suffix + "_beg", "entity." + getName() + suffix + ".beg");
 		}
 		if(this.isTameable())
-			ObjectManager.addSound(this.name + suffix + "_eat", modInfo, "entity." + getName() + suffix + ".eat");
+			ObjectManager.addSound(this.name + suffix + "_eat", "entity." + getName() + suffix + ".eat");
 		if(this.isMountable())
-			ObjectManager.addSound(this.name + suffix + "_mount", modInfo, "entity." + getName() + suffix + ".mount");
+			ObjectManager.addSound(this.name + suffix + "_mount", "entity." + getName() + suffix + ".mount");
 		if(this.isBoss())
-			ObjectManager.addSound(this.name + suffix + "_phase", modInfo, "entity." + getName() + suffix + ".phase");
+			ObjectManager.addSound(this.name + suffix + "_phase", "entity." + getName() + suffix + ".phase");
 	}
 
 
@@ -679,7 +679,7 @@ public class CreatureInfo {
 	public ResourceLocation getIcon() {
 		ResourceLocation texture = TextureManager.getTexture(this.getName() + "_icon");
 		if(texture == null) {
-			TextureManager.addTexture(this.getName() + "_icon", this.modInfo, "textures/guis/creatures/" + this.getName() + "_icon.png");
+			TextureManager.addTexture(this.getName() + "_icon", "textures/guis/creatures/" + this.getName() + "_icon.png");
 			texture = TextureManager.getTexture(this.getName() + "_icon");
 		}
 		return texture;

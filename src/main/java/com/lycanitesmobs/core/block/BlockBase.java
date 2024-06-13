@@ -38,7 +38,6 @@ import java.util.List;
 public class BlockBase extends BaseEntityBlock {
 
 	// Properties:
-	public ModInfo group;
 	public String blockName = "block_base";
     public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
 	public ResourceLocation registryName;
@@ -69,11 +68,10 @@ public class BlockBase extends BaseEntityBlock {
 	    public int getValue() { return id; }
 	}
 
-    public BlockBase(Block.Properties properties, ModInfo group, String name) {
+    public BlockBase(Block.Properties properties, String name) {
         super(properties);
-        this.group = group;
         this.blockName = name;
-		this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
+		this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
     }
 	public ResourceLocation getRegistryName() {
 		return registryName;
@@ -82,7 +80,7 @@ public class BlockBase extends BaseEntityBlock {
 		return registryName = new ResourceLocation(modID, blockName);
 	}
 	public void setup() {
-		this.setRegistryName(this.group.modid, this.blockName);
+		this.setRegistryName(LycanitesMobs.MODID, this.blockName);
 	}
 	@Override
 	@Nonnull

@@ -337,13 +337,13 @@ public class PortalEntity extends BaseProjectileEntity {
     @Override
     public ResourceLocation getTexture() {
     	if(TextureManager.getTexture(this.entityName) == null) {
-			TextureManager.addTexture(this.entityName, LycanitesMobs.modInfo, "textures/particles/" + this.entityName.toLowerCase() + ".png");
+			TextureManager.addTexture(this.entityName, "textures/particles/" + this.entityName.toLowerCase() + ".png");
 		}
         if(TextureManager.getTexture(this.entityName + "_client") == null) {
-			TextureManager.addTexture(this.entityName + "_client", LycanitesMobs.modInfo, "textures/particles/" + this.entityName.toLowerCase() + "_client.png");
+			TextureManager.addTexture(this.entityName + "_client", "textures/particles/" + this.entityName.toLowerCase() + "_client.png");
 		}
         if(TextureManager.getTexture(this.entityName + "_player") == null) {
-			TextureManager.addTexture(this.entityName + "_player", LycanitesMobs.modInfo, "textures/particles/" + this.entityName.toLowerCase() + "_player.png");
+			TextureManager.addTexture(this.entityName + "_player", "textures/particles/" + this.entityName.toLowerCase() + "_player.png");
 		}
 
         if(this.ownerUUID != null) {

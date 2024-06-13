@@ -3,6 +3,7 @@ package com.lycanitesmobs;
 import com.lycanitesmobs.core.block.BlockFireBase;
 import com.lycanitesmobs.core.capabilities.CapabilityProviderEntity;
 import com.lycanitesmobs.core.capabilities.CapabilityProviderPlayer;
+import com.lycanitesmobs.core.capabilities.IExtendedEntity;
 import com.lycanitesmobs.core.config.ConfigExtra;
 import com.lycanitesmobs.core.entity.*;
 import com.lycanitesmobs.core.info.ItemConfig;
@@ -71,19 +72,6 @@ public class GameEventListener {
 
 
     // ==================================================
-    //                Attach Capabilities
-    // ==================================================
-	@SubscribeEvent
-	public static void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
-		if (event.getObject() instanceof Player) {
-			event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "player"), new CapabilityProviderPlayer());
-		} else {
-			event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "entity"), new CapabilityProviderEntity());
-		}
-	}
-
-
-    // ==================================================
     //                    Player Clone
     // ==================================================
     @SubscribeEvent
@@ -94,13 +82,25 @@ public class GameEventListener {
 		}
     }
 	// ==================================================
+	//                Attach Capabilities
+	// ==================================================
+	@SubscribeEvent
+	public static void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
+		if (event.getObject() instanceof Player) {
+			event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "player"), new CapabilityProviderPlayer());
+		} else {
+			if (!event.getObject().getCapability(CapabilityProviderEntity.EXTENDED_ENTITY).isPresent()) {
+				event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "entity"), new CapabilityProviderEntity());
+			}
+		}
+	}
+	// ==================================================
 	//                Register Capabilities
 	// ==================================================
 	@SubscribeEvent
 	public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
-		event.register(ExtendedPlayer.class);
 		event.register(ExtendedEntity.class);
-
+		event.register(ExtendedPlayer.class);
 	}
 		// ==================================================
     //                Entity Constructing

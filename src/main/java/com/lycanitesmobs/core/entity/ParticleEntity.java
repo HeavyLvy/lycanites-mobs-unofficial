@@ -92,7 +92,7 @@ public class ParticleEntity extends ThrowableProjectile {
     // ==================================================
     public ResourceLocation getTexture() {
     	if(TextureManager.getTexture(this.texture) == null)
-    		TextureManager.addTexture(this.texture, this.group, "textures/particles/" + this.texture.toLowerCase() + ".png");
+    		TextureManager.addTexture(this.texture, "textures/particles/" + this.texture.toLowerCase() + ".png");
     	return TextureManager.getTexture(this.texture);
     }
 }

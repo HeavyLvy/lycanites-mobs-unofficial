@@ -2,11 +2,15 @@ package com.lycanitesmobs.core.entity;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
+import com.lycanitesmobs.core.capabilities.CapabilityProviderEntity;
+import com.lycanitesmobs.core.capabilities.IExtendedEntity;
 import com.lycanitesmobs.core.config.ConfigAdmin;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.network.MessageEntityPerched;
 import com.lycanitesmobs.core.network.MessageEntityPickedUp;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,29 +20,30 @@ import org.joml.Vector3d;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class ExtendedEntity {
-    public static Map<Entity, ExtendedEntity> clientExtendedEntities = new HashMap<>();
-    public static List<? extends String> FORCE_REMOVE_ENTITY_IDS;
-    public static int FORCE_REMOVE_ENTITY_TICKS = 40;
+	public static Map<Entity, ExtendedEntity> clientExtendedEntities = new HashMap<>();
+	public static List<? extends String> FORCE_REMOVE_ENTITY_IDS;
+	public static int FORCE_REMOVE_ENTITY_TICKS = 40;
 
-    // Entity Instance:
+	// Entity Instance:
 	public LivingEntity entity;
 
 	// Projectiles:
 	protected Map<String, Integer> projectileCooldownsPrimary = new HashMap<>();
 	protected Map<String, Integer> projectileCooldownsSecondary = new HashMap<>();
 
-    // Safe Position:
-    /** The last coordinates the entity was at where it wasn't inside an opaque block. (Helps prevent suffocation). **/
-    Vector3d lastSafePos;
-    private boolean playerAllowFlyingSnapshot;
-    private boolean playerIsFlyingSnapshot;
+	// Safe Position:
+	/** The last coordinates the entity was at where it wasn't inside an opaque block. (Helps prevent suffocation). **/
+	Vector3d lastSafePos;
+	private boolean playerAllowFlyingSnapshot;
+	private boolean playerIsFlyingSnapshot;
 
-    // Last Attacked:
+	// Last Attacked:
 	public LivingEntity lastAttackedEntity;
 	public int lastAttackedTime = 0;
-	
+
 	// Picked Up:
 	public Entity pickedUpByEntity;
 
@@ -46,78 +51,83 @@ public class ExtendedEntity {
 	public Entity perchedByEntity;
 	public boolean perchedEntityNoclip = false;
 
-    // Fear:
+	// Fear:
 	public FearEntity fearEntity;
 
-    // Force Remove:
-    boolean forceRemoveChecked = false;
-    boolean forceRemove = false;
-    int forceRemoveTicks = FORCE_REMOVE_ENTITY_TICKS;
-	
+	// Force Remove:
+	boolean forceRemoveChecked = false;
+	boolean forceRemove = false;
+	int forceRemoveTicks = FORCE_REMOVE_ENTITY_TICKS;
+
 	// ==================================================
-    //                   Get for Entity
-    // ==================================================
+	//                   Get for Entity
+	// ==================================================
 	public static ExtendedEntity getForEntity(LivingEntity entity) {
 		if(entity == null) {
 			//LycanitesMobs.logWarning("", "Tried to access an ExtendedEntity from a null Entity.");
 			return null;
 		}
 
-        // Client Side:
+		// Client Side:
 		if(entity.getCommandSenderWorld().isClientSide) {
-            if(clientExtendedEntities.containsKey(entity)) {
-                ExtendedEntity extendedEntity = clientExtendedEntities.get(entity);
-                extendedEntity.setEntity(entity);
-                return extendedEntity;
-            }
-            ExtendedEntity extendedEntity = new ExtendedEntity();
-            extendedEntity.setEntity(entity);
-            clientExtendedEntities.put(entity, extendedEntity);
-            return extendedEntity;
-        }
-
-        // Server Side:
-		ExtendedEntity extendedEntity = entity.getCapability(LycanitesMobs.EXTENDED_ENTITY, null).orElse(null);
-        if(extendedEntity.getEntity() != entity)
+			if(clientExtendedEntities.containsKey(entity)) {
+				ExtendedEntity extendedEntity = clientExtendedEntities.get(entity);
+				extendedEntity.setEntity(entity);
+				return extendedEntity;
+			}
+			ExtendedEntity extendedEntity = new ExtendedEntity();
 			extendedEntity.setEntity(entity);
-        return extendedEntity;
+			clientExtendedEntities.put(entity, extendedEntity);
+			return extendedEntity;
+		}
+
+		// Server Side:
+		ExtendedEntity iExtendedEntity = entity.getCapability(CapabilityProviderEntity.EXTENDED_ENTITY).orElse(new ExtendedEntity());
+        if(iExtendedEntity.getEntity() != entity)
+			iExtendedEntity.setEntity(entity);
+		return iExtendedEntity;
 	}
-	
-	
+
+
 	// ==================================================
-    //                    Constructor
-    // ==================================================
+	//                    Constructor
+	// ==================================================
 	public ExtendedEntity() {
 
 	}
 
 
-    // ==================================================
-    //                      Entity
-    // ==================================================
-    /** Initially sets the entity. **/
-    public void setEntity(LivingEntity entity) {
-        this.entity = entity;
-    }
+	// ==================================================
+	//                      Entity
+	// ==================================================
+	/** Initially sets the entity. **/
+	public void setEntity(LivingEntity entity) {
+		this.entity = entity;
+		if (this.entity == null) {
+			this.entityUUID = entity.getUUID();
+		}
 
-    public LivingEntity getEntity() {
-        return this.entity;
-    }
+	}
+
+	public LivingEntity getEntity() {
+
+		return this.entity;
+	}
 
 	public void setLastAttackedEntity(LivingEntity target) {
 		this.lastAttackedEntity = target;
 		this.lastAttackedTime = this.entity.tickCount;
 	}
-	
-	
-	// ==================================================
-    //                      Update
-    // ==================================================
-	public void onUpdate() {
-        if(this.entity == null)
-            return;
 
-        // Projectiles:
+
+	// ==================================================
+	//                      Update
+	// ==================================================
+	public void onUpdate() {
+		if(this.entity == null)
+			return;
+
+		// Projectiles:
 		for(String cooldownName : this.projectileCooldownsPrimary.keySet()) {
 			int cooldownValue = this.projectileCooldownsPrimary.get(cooldownName);
 			if(cooldownValue > 0) {
@@ -131,23 +141,23 @@ public class ExtendedEntity {
 			}
 		}
 
-        // Force Remove Entity:
+		// Force Remove Entity:
 		ExtendedEntity.FORCE_REMOVE_ENTITY_IDS = ConfigAdmin.INSTANCE.forceRemoveEntityIds.get();
 		ExtendedEntity.FORCE_REMOVE_ENTITY_TICKS = 40;
-        if (!this.entity.getCommandSenderWorld().isClientSide && FORCE_REMOVE_ENTITY_IDS != null && FORCE_REMOVE_ENTITY_IDS.size() > 0 && !this.forceRemoveChecked) {
-            LycanitesMobs.logDebug("ForceRemoveEntity", "Forced entity removal, checking: " + this.entity.getName());
-            for (String forceRemoveID : FORCE_REMOVE_ENTITY_IDS) {
-                if (forceRemoveID.equalsIgnoreCase(this.entity.getType().toString())) {
-                    this.forceRemove = true;
-                    break;
-                }
-            }
-            this.forceRemoveChecked = true;
-        }
-        if (this.forceRemove && this.forceRemoveTicks-- <= 0)
-            this.entity.remove(Entity.RemovalReason.DISCARDED);
+		if (!this.entity.getCommandSenderWorld().isClientSide && FORCE_REMOVE_ENTITY_IDS != null && FORCE_REMOVE_ENTITY_IDS.size() > 0 && !this.forceRemoveChecked) {
+			LycanitesMobs.logDebug("ForceRemoveEntity", "Forced entity removal, checking: " + this.entity.getName());
+			for (String forceRemoveID : FORCE_REMOVE_ENTITY_IDS) {
+				if (forceRemoveID.equalsIgnoreCase(LMHelperClass.convertToResourceLocation(this.entity.getType()).toString())) {
+					this.forceRemove = true;
+					break;
+				}
+			}
+			this.forceRemoveChecked = true;
+		}
+		if (this.forceRemove && this.forceRemoveTicks-- <= 0)
+			this.entity.remove(Entity.RemovalReason.DISCARDED);
 
-        // Safe Position:
+		// Safe Position:
 		if (this.lastSafePos == null) {
 			this.lastSafePos = new Vector3d(this.entity.position().x(), this.entity.position().y(), this.entity.position().z());
 		}
@@ -155,11 +165,11 @@ public class ExtendedEntity {
 			this.lastSafePos = new Vector3d(Math.floor(this.entity.position().x()) + 0.5D, this.entity.blockPosition().getY(), Math.floor(this.entity.position().z()) + 0.5D);
 		}
 
-        // Fear Entity:
-        if (this.fearEntity != null && !this.fearEntity.isAlive())
-            this.fearEntity = null;
+		// Fear Entity:
+		if (this.fearEntity != null && !this.fearEntity.isAlive())
+			this.fearEntity = null;
 
-        // Picked Up By Entity:
+		// Picked Up By Entity:
 		try {
 			this.updatePickedUpByEntity();
 		}
@@ -171,24 +181,24 @@ public class ExtendedEntity {
 		}
 		catch (Exception e) {}
 	}
-	
-	
+
+
 	// ==================================================
-    //                       Death
-    // ==================================================
+	//                       Death
+	// ==================================================
 	public void onDeath() {
 		this.setPickedUpByEntity(null);
 	}
-	
-	
-	// ==================================================
-    //                 Picked Up By Entity
-    // ==================================================
-    public void updatePickedUpByEntity() {
-        if(this.pickedUpByEntity == null)
-            return;
 
-        // Check:
+
+	// ==================================================
+	//                 Picked Up By Entity
+	// ==================================================
+	public void updatePickedUpByEntity() {
+		if(this.pickedUpByEntity == null)
+			return;
+
+		// Check:
 		if(!this.entity.getCommandSenderWorld().isClientSide) {
 			if (!this.pickedUpByEntity.isAlive()) {
 				this.setPickedUpByEntity(null);
@@ -213,7 +223,7 @@ public class ExtendedEntity {
 			}
 		}
 
-        // Movement:
+		// Movement:
 		if(this.pickedUpByEntity != null) {
 			double[] pickupOffset = this.getPickedUpOffset();
 			this.entity.setPos(this.pickedUpByEntity.position().x() + pickupOffset[0], this.pickedUpByEntity.position().y() + pickupOffset[1], this.pickedUpByEntity.position().z() + pickupOffset[2]);
@@ -225,66 +235,66 @@ public class ExtendedEntity {
 				this.entity.noPhysics = true;
 			}
 		}
-    }
+	}
 
 	public void setPickedUpByEntity(Entity pickedUpByEntity) {
-        if(this.pickedUpByEntity == pickedUpByEntity || this.entity == null) {
+		if(this.pickedUpByEntity == pickedUpByEntity || this.entity == null) {
 			return;
 		}
 
 		this.pickedUpByEntity = pickedUpByEntity;
 
-        // Server Side:
+		// Server Side:
 		if(!this.entity.getCommandSenderWorld().isClientSide) {
 
-            // Player Flying:
+			// Player Flying:
 			if(this.entity instanceof Player) {
 				if(pickedUpByEntity != null) {
-                    this.playerAllowFlyingSnapshot = ((Player) this.entity).getAbilities().mayfly;
-                    this.playerIsFlyingSnapshot = ((Player)this.entity).getAbilities().flying;
-                }
+					this.playerAllowFlyingSnapshot = ((Player) this.entity).getAbilities().mayfly;
+					this.playerIsFlyingSnapshot = ((Player)this.entity).getAbilities().flying;
+				}
 				else {
-                    ((Player)this.entity).getAbilities().mayfly = this.playerAllowFlyingSnapshot;
-                    ((Player)this.entity).getAbilities().flying = this.playerIsFlyingSnapshot;
-                    this.entity.noPhysics = false;
-                }
+					((Player)this.entity).getAbilities().mayfly = this.playerAllowFlyingSnapshot;
+					((Player)this.entity).getAbilities().flying = this.playerIsFlyingSnapshot;
+					this.entity.noPhysics = false;
+				}
 			}
 
-            // Teleport To Initial Pickup Position:
-            if(this.pickedUpByEntity != null && !(this.entity instanceof Player)) {
-                double[] pickupOffset = this.getPickedUpOffset();
-                this.entity.teleportToWithTicket(this.pickedUpByEntity.position().x() + pickupOffset[0], this.pickedUpByEntity.position().y() + pickupOffset[1], this.pickedUpByEntity.position().z() + pickupOffset[2]);
-            }
+			// Teleport To Initial Pickup Position:
+			if(this.pickedUpByEntity != null && !(this.entity instanceof Player)) {
+				double[] pickupOffset = this.getPickedUpOffset();
+				this.entity.teleportToWithTicket(this.pickedUpByEntity.position().x() + pickupOffset[0], this.pickedUpByEntity.position().y() + pickupOffset[1], this.pickedUpByEntity.position().z() + pickupOffset[2]);
+			}
 
 			MessageEntityPickedUp message = new MessageEntityPickedUp(this.entity, pickedUpByEntity);
 			LycanitesMobs.packetHandler.sendToWorld(message, this.entity.getCommandSenderWorld());
 		}
 
-        // Safe Drop Position:
-        if(pickedUpByEntity == null) {
-            if(this.lastSafePos != null) {
-                this.entity.setPos(this.lastSafePos.x(), this.lastSafePos.y(), this.lastSafePos.z());
-            }
-            this.entity.setDeltaMovement(0, 0, 0);
-            this.entity.fallDistance = 0;
-        }
+		// Safe Drop Position:
+		if(pickedUpByEntity == null) {
+			if(this.lastSafePos != null) {
+				this.entity.setPos(this.lastSafePos.x(), this.lastSafePos.y(), this.lastSafePos.z());
+			}
+			this.entity.setDeltaMovement(0, 0, 0);
+			this.entity.fallDistance = 0;
+		}
 	}
 
 	public double[] getPickedUpOffset() {
-        double[] pickupOffset = new double[] {0, 0, 0};
-        if(this.pickedUpByEntity instanceof BaseCreatureEntity) {
-            pickupOffset = ((BaseCreatureEntity) this.pickedUpByEntity).getPickupOffset(this.entity);
-        }
-        if(CreatureManager.getInstance().config.disablePickupOffsets && this.entity instanceof Player) {
-            return new double[] {0, 0, 0};
-        }
-        return pickupOffset;
-    }
+		double[] pickupOffset = new double[] {0, 0, 0};
+		if(this.pickedUpByEntity instanceof BaseCreatureEntity) {
+			pickupOffset = ((BaseCreatureEntity) this.pickedUpByEntity).getPickupOffset(this.entity);
+		}
+		if(CreatureManager.getInstance().config.disablePickupOffsets && this.entity instanceof Player) {
+			return new double[] {0, 0, 0};
+		}
+		return pickupOffset;
+	}
 
-    public boolean isPickedUp() {
-        return this.pickedUpByEntity != null;
-    }
-	
+	public boolean isPickedUp() {
+		return this.pickedUpByEntity != null;
+	}
+
 	public boolean isFeared() {
 		return this.pickedUpByEntity instanceof FearEntity;
 	}
@@ -336,7 +346,7 @@ public class ExtendedEntity {
 		double entityWidth = this.entity.getDimensions(this.entity.getPose()).width;
 		double entityHeight = this.entity.getDimensions(this.entity.getPose()).height;
 
-		double angle = Math.toRadians(this.entity.yRotO) + 90;
+		double angle = Math.toRadians(this.entity.yRot) + 90;
 		double xPerchPos = this.entity.position().x();
 		double zPerchPos = this.entity.position().z();
 		double distance = entityWidth * 0.7D;
@@ -361,7 +371,7 @@ public class ExtendedEntity {
 			Vector3d perchPosition = this.getPerchPosition();
 			perchedByEntity.setPos(perchPosition.x(), perchPosition.y(), perchPosition.z());
 			perchedByEntity.setDeltaMovement(this.entity.getDeltaMovement());
-			perchedByEntity.yRotO = this.entity.yRotO;
+			perchedByEntity.yRot = this.entity.yRot;
 			perchedByEntity.noPhysics = true;
 		}
 	}
@@ -411,19 +421,32 @@ public class ExtendedEntity {
 		clientExtendedEntities.remove(this.entity);
 	}
 
+	public UUID entityUUID = null;
 
-    // ==================================================
-    //                        NBT
-    // ==================================================
-    // ========== Read ===========
-    /** Reads a list of Creature Knowledge from a player's NBTTag. **/
-    public void readNBT(CompoundTag nbtTagCompound) {
+	public UUID getEntityUUID() {
+		if (entityUUID == null) {
+			if (this.entity != null) {
+				entityUUID = entity.getUUID();
+			}
+		}
+		return entityUUID;
+	}
 
-    }
+	public void setEntityUUID(UUID entityUUID) {
+		this.entityUUID = entityUUID;
+	}
+	// ==================================================
+	//                        NBT
+	// ==================================================
+	// ========== Read ===========
+	/** Reads a list of Creature Knowledge from a player's NBTTag. **/
+	public void readNBT(CompoundTag nbtTagCompound) {
+		nbtTagCompound.get("extendedEntity");
+	}
 
-    // ========== Write ==========
-    /** Writes a list of Creature Knowledge to a player's NBTTag. **/
-    public void writeNBT(CompoundTag nbtTagCompound) {
-
-    }
+	// ========== Write ==========
+	/** Writes a list of Creature Knowledge to a player's NBTTag. **/
+	public void writeNBT(CompoundTag nbtTagCompound) {
+		nbtTagCompound.putUUID("extendedEntity", getEntityUUID());
+	}
 }

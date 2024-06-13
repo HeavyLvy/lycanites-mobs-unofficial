@@ -20,22 +20,22 @@ public class StreamLoader {
 
 	/**
 	 * Creates and initialises all file loaders for the provided mod domain.
-	 * @param domain The mod domain get load from, ex: "lycanitesmobs"
+	 * @param domain The mod domain to load from, ex: "lycanitesmobs"
 	 */
 	public static void initAll(String domain) {
 		CLIENT = new StreamLoader("assets", domain);
 		SERVER = new StreamLoader("data", domain);
 		COMMON = new StreamLoader("common", domain);
-		LycanitesMobs.logDebug("", "All FileLoaders initialised successfully.");
+		LycanitesMobs.logDebug("", "All StreamLoaders initialised successfully.");
 	}
 
 	private String rootPath;
 	private String domain;
 
 	/**
-	 * Constrcutor
+	 * Constructor
 	 * @param type The type of directory to load from, ex: "assets", "data", "common"
-	 * @param domain The mod domain get load from, ex: "lycanitesmobs"
+	 * @param domain The mod domain to load from, ex: "lycanitesmobs"
 	 */
 	public StreamLoader(String type, String domain) {
 		this.domain = domain;
@@ -63,7 +63,7 @@ public class StreamLoader {
 	/**
 	 * Creates an input stream from this Stream Loader for the provided sub path.
 	 * @param subPath The sub directory or file path to load, ex: "creatures/grue.json", "globalspawning.json"
-	 * @return
+	 * @return InputStream for the specified sub path
 	 */
 	public InputStream getStream(String subPath) {
 		return this.getClass().getResourceAsStream("/" + this.rootPath + "/" + subPath);
@@ -72,7 +72,7 @@ public class StreamLoader {
 	/**
 	 * Creates a list of input streams from this Stream Loader for the provided sub directory.
 	 * @param dir The directory to stream files from, ex: "creatures", "textures/blocks"
-	 * @return
+	 * @return List of InputStreams for the specified directory
 	 */
 	public List<InputStream> getStreams(String dir) {
 		List<InputStream> inputStreams = new ArrayList<>();

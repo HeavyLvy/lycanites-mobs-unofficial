@@ -109,10 +109,6 @@ public class LycanitesMobs {
 	// Proxy:
 	public static IProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
 
-	// Capabilities:
-	public static final Capability<ExtendedEntity> EXTENDED_ENTITY = CapabilityManager.get(new CapabilityToken<>(){});
-	public static final Capability<ExtendedPlayer> EXTENDED_PLAYER = CapabilityManager.get(new CapabilityToken<>(){});
-
 
 	// Potion Effects:
 	public static Effects EFFECTS;
@@ -120,27 +116,32 @@ public class LycanitesMobs {
 	/** Constructor **/
 	public LycanitesMobs() {
 		modInfo = new ModInfo(this, name, 1000);
+		// Config:
+		CoreConfig.buildSpec();
+		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CoreConfig.SPEC);
+
 		FileLoader.initAll(modInfo.modid);
 		StreamLoader.initAll(modInfo.modid);
+
+
 
 		//Biome Management
 		BIOME_MODIFIER_SERIALIZERS.register(FMLJavaModLoadingContext.get().getModEventBus());
 
-		// Config:
-		CoreConfig.buildSpec();
-		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CoreConfig.SPEC);
+
 
 		// Setup Event Listeners:
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		WorldGenManager.registerPlacements(modEventBus);
 		ObjectManager.registerContainers(modEventBus);
+		//ItemManager.registerItem(modEventBus);
 		modEventBus.addListener(this::commonSetup);
 		modEventBus.addListener(this::clientSetup);
 //		modEventBus.addListener(this::serverStarting);
 		modEventBus.addListener(this::enqueueIMC);
 		modEventBus.addListener(this::processIMC);
 		modEventBus.register(ObjectManager.getInstance());
-		modEventBus.register(ItemManager.getInstance());
+		//modEventBus.register(ItemManager.getInstance());
 		modEventBus.register(CreatureManager.getInstance());
 		modEventBus.register(ProjectileManager.getInstance());
 		modEventBus.register(WorldGenManager.getInstance());
@@ -175,7 +176,7 @@ public class LycanitesMobs {
 		EFFECTS = new Effects();
 
 		// Blocks and Items:
-		ItemManager.getInstance().startup(modInfo);
+		//ItemManager.getInstance().startup(modInfo);
 
 		// Equipment Parts:
 		EquipmentPartManager.getInstance().loadAllFromJson(modInfo);
@@ -212,7 +213,6 @@ public class LycanitesMobs {
 		this.loadConfigs();
 		// Fix Health Limit:
 		LMReflectionHelper.fixMaxHealth();
-
 		// Mod Support:
 		DLDungeons.init();
 	}
@@ -242,7 +242,7 @@ public class LycanitesMobs {
 	}
 
 	public void loadConfigs() {
-		ItemManager.getInstance().loadConfig();
+		//ItemManager.getInstance().loadConfig();
 		CreatureManager.getInstance().loadConfig();
 		MobEventManager.getInstance().loadConfig();
 		AltarInfo.loadGlobalSettings();

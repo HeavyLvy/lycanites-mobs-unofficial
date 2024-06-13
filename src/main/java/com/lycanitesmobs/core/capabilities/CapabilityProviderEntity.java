@@ -3,41 +3,42 @@ package com.lycanitesmobs.core.capabilities;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.ExtendedEntity;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraftforge.common.capabilities.*;
 import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class CapabilityProviderEntity implements ICapabilityProvider, ICapabilitySerializable<CompoundTag> {
-	private final ExtendedEntity instance = null;
-	private final LazyOptional<ExtendedEntity> optional = LazyOptional.of(this::createInstance);;
+public class CapabilityProviderEntity implements ICapabilitySerializable<CompoundTag> {
+	public static Capability<ExtendedEntity> EXTENDED_ENTITY = CapabilityManager.get(new CapabilityToken<>() {
+    });
+	private ExtendedEntity instance = null;
+	private final LazyOptional<ExtendedEntity> optional = LazyOptional.of(this::createInstance);
 
 	public ExtendedEntity createInstance() {
-			if (instance == null) {
-				return new ExtendedEntity();
+			if (this.instance == null) {
+				this.instance = new ExtendedEntity();
 			}
 			return this.instance;
 	}
 	@Nonnull
 	@Override
 	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-		return capability == LycanitesMobs.EXTENDED_ENTITY ? optional.cast() : LazyOptional.empty();
+		return capability == EXTENDED_ENTITY ? optional.cast() : LazyOptional.empty();
 	}
 
 	@Override
 	public CompoundTag serializeNBT() {
-		ExtendedEntityStorage storage = new ExtendedEntityStorage();
-		return storage.writeNBT(LycanitesMobs.EXTENDED_ENTITY, this.getCapability(LycanitesMobs.EXTENDED_ENTITY, null).orElse(null), null);
+		CompoundTag nbt = new CompoundTag();
+		createInstance().writeNBT(nbt);
+		return nbt;
 	}
 
 	@Override
 	public void deserializeNBT(CompoundTag nbt) {
-		ExtendedEntityStorage storage = new ExtendedEntityStorage();
-		storage.readNBT(LycanitesMobs.EXTENDED_ENTITY, this.getCapability(LycanitesMobs.EXTENDED_ENTITY, null).orElse(null), null, nbt);
+		createInstance().readNBT(nbt);
 	}
 }

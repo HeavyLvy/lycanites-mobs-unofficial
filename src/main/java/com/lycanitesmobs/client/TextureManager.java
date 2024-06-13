@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client;
 
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.info.ModInfo;
 import net.minecraft.resources.ResourceLocation;
 
@@ -24,26 +25,26 @@ public class TextureManager {
 	 */
 	public void createTextures(ModInfo modInfo) {
 		// Beastiary:
-		addTexture("GUIBeastiaryBackground", modInfo, "textures/guis/beastiary/background.png");
-		addTexture("GUIPetLevel", modInfo, "textures/guis/beastiary/level.png");
-		addTexture("GUIPetSpirit", modInfo, "textures/guis/beastiary/spirit.png");
-		addTexture("GUIPetSpiritEmpty", modInfo, "textures/guis/beastiary/spirit_empty.png");
-		addTexture("GUIPetSpiritUsed", modInfo, "textures/guis/beastiary/spirit_used.png");
-		addTexture("GUIPetSpiritFilling", modInfo, "textures/guis/beastiary/spirit_filling.png");
-		addTexture("GUIPetBarHealth", modInfo, "textures/guis/beastiary/bar_health.png");
-		addTexture("GUIPetBarRespawn", modInfo, "textures/guis/beastiary/bar_respawn.png");
-		addTexture("GUIBarExperience", modInfo, "textures/guis/beastiary/bar_experience.png");
-		addTexture("GUIPetBarEmpty", modInfo, "textures/guis/beastiary/bar_empty.png");
+		addTexture("GUIBeastiaryBackground", "textures/guis/beastiary/background.png");
+		addTexture("GUIPetLevel", "textures/guis/beastiary/level.png");
+		addTexture("GUIPetSpirit", "textures/guis/beastiary/spirit.png");
+		addTexture("GUIPetSpiritEmpty", "textures/guis/beastiary/spirit_empty.png");
+		addTexture("GUIPetSpiritUsed", "textures/guis/beastiary/spirit_used.png");
+		addTexture("GUIPetSpiritFilling", "textures/guis/beastiary/spirit_filling.png");
+		addTexture("GUIPetBarHealth", "textures/guis/beastiary/bar_health.png");
+		addTexture("GUIPetBarRespawn", "textures/guis/beastiary/bar_respawn.png");
+		addTexture("GUIBarExperience", "textures/guis/beastiary/bar_experience.png");
+		addTexture("GUIPetBarEmpty", "textures/guis/beastiary/bar_empty.png");
 
 		// Containers:
-		addTexture("GUIInventoryCreature", modInfo, "textures/guis/inventory_creature.png");
-		addTexture("GUISummoningPedestal", modInfo, "textures/guis/minion_lg.png");
-		addTexture("GUIEquipmentForge", modInfo, "textures/guis/equipmentforge.png");
+		addTexture("GUIInventoryCreature", "textures/guis/inventory_creature.png");
+		addTexture("GUISummoningPedestal", "textures/guis/minion_lg.png");
+		addTexture("GUIEquipmentForge", "textures/guis/equipmentforge.png");
 	}
 
-	public static void addTexture(String name, ModInfo modInfo, String path) {
+	public static void addTexture(String name, String path) {
 		name = name.toLowerCase();
-		textures.put(name, new ResourceLocation(modInfo.modid, path));
+		textures.put(name, new ResourceLocation(LycanitesMobs.MODID, path));
 	}
 
 	public static ResourceLocation getTexture(String name) {

@@ -162,7 +162,7 @@ public class EntityHellfireWave extends BaseProjectileEntity {
     // ==================================================
     public ResourceLocation getTexture() {
         if(TextureManager.getTexture("hellfirewall") == null)
-            TextureManager.addTexture("hellfirewall", this.modInfo, "textures/items/hellfirewall" + ".png");
+            TextureManager.addTexture("hellfirewall", "textures/items/hellfirewall" + ".png");
         return TextureManager.getTexture("hellfirewall");
     }
 }

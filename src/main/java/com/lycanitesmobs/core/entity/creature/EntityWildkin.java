@@ -86,7 +86,7 @@ public class EntityWildkin extends TameableCreatureEntity implements Enemy {
 
         String textureName = this.getTextureName() + "_gooderness";
         if(TextureManager.getTexture(textureName) == null)
-            TextureManager.addTexture(textureName, this.creatureInfo.modInfo, "textures/entity/" + textureName.toLowerCase() + ".png");
+            TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
         return TextureManager.getTexture(textureName);
     }
 }

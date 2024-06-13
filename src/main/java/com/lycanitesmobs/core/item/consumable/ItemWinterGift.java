@@ -30,11 +30,10 @@ public class ItemWinterGift extends BaseItem {
 	// ==================================================
     public ItemWinterGift(Item.Properties properties) {
 		super(properties);
-        this.modInfo = LycanitesMobs.modInfo;
         this.itemName = "wintergift";
         this.setup();
-		ObjectManager.addSound(this.itemName + "_good", this.modInfo, "item." + this.itemName + ".good");
-		ObjectManager.addSound(this.itemName + "_bad", this.modInfo, "item." + this.itemName + ".bad");
+		ObjectManager.addSound(this.itemName + "_good",  "item." + this.itemName + ".good");
+		ObjectManager.addSound(this.itemName + "_bad",  "item." + this.itemName + ".bad");
     }
     
     

@@ -34,11 +34,10 @@ public class BlockEquipmentForge extends BlockBase {
 	// ==================================================
 	//                   Constructor
 	// ==================================================
-	public BlockEquipmentForge(Block.Properties properties, ModInfo group, int level) {
-		super(properties,group,"");
+	public BlockEquipmentForge(Block.Properties properties,  int level) {
+		super(properties,"");
 		
 		// Properties:
-		this.group = group;
 		this.level = level;
 		if(level <= 1) {
 			this.blockName = "equipmentforge_lesser";
@@ -50,7 +49,7 @@ public class BlockEquipmentForge extends BlockBase {
 			this.blockName = "equipmentforge_master";
 		}
 
-		this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
+		this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
 		this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
 	}
 

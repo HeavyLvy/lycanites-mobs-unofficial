@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.entity;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.VersionChecker;
+import com.lycanitesmobs.core.capabilities.CapabilityProviderPlayer;
 import com.lycanitesmobs.core.config.ConfigExtra;
 import com.lycanitesmobs.core.info.*;
 import com.lycanitesmobs.core.item.summoningstaff.ItemStaffSummoning;
@@ -105,7 +106,7 @@ public class ExtendedPlayer {
         }
 
         // Server Side:
-		ExtendedPlayer iExtendedPlayer = player.getCapability(LycanitesMobs.EXTENDED_PLAYER, null).orElse(null);
+		ExtendedPlayer iExtendedPlayer = player.getCapability(CapabilityProviderPlayer.EXTENDED_PLAYER).orElse(new ExtendedPlayer());
         serverExtendedPlayers.put(player, iExtendedPlayer);
         if(iExtendedPlayer.getPlayer() != player)
             iExtendedPlayer.setPlayer(player);

@@ -199,7 +199,7 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
 			textureName += "_" + suffix;
 		}
         if(TextureManager.getTexture(textureName) == null)
-            TextureManager.addTexture(textureName, this.creatureInfo.modInfo, "textures/entity/" + textureName.toLowerCase() + ".png");
+            TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
         return TextureManager.getTexture(textureName);
     }
 }

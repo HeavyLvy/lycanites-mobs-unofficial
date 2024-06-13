@@ -25,7 +25,7 @@ public class BlockStairsCustom extends StairBlock {
 	// ==================================================
 	public BlockStairsCustom(Block.Properties properties, BlockBase block) {
 		super(block.defaultBlockState(), properties);
-        this.setRegistryName(block.group.modid, block.blockName + "_stairs");
+        this.setRegistryName(LycanitesMobs.MODID, block.blockName + "_stairs");
 	}
 	public ResourceLocation getRegistryName() {
 		return registryName;
