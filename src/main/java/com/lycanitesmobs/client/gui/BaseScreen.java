@@ -18,6 +18,7 @@ public abstract class BaseScreen extends Screen implements Button.OnPress {
 	public Window scaledResolution;
 	public float zLevel = 0;
 
+
 	public BaseScreen(MutableComponent screenName) {
         super(screenName);
     }
@@ -27,10 +28,8 @@ public abstract class BaseScreen extends Screen implements Button.OnPress {
 	 */
 	@Override
 	public void init() {
-		super.init();
 		this.drawHelper = new DrawHelper(minecraft, minecraft.font);
-		this.minecraft = minecraft;
-		super.init(minecraft, width, height);
+		//this.init(this.minecraft, width, height);
 		this.initWidgets();
 	}
 

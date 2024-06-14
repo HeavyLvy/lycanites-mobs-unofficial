@@ -43,6 +43,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -59,7 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
+@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ItemManager extends JSONLoader {
 	public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LycanitesMobs.MODID);
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, LycanitesMobs.MODID);
@@ -105,8 +106,8 @@ public class ItemManager extends JSONLoader {
 	 * @param modInfo The mod loading this manager.
 	 */
 	public void startup(ModInfo modInfo) {
-		this.loadItems();
-		this.loadAllFromJson(modInfo);
+		loadItems();
+		loadAllFromJson(modInfo);
 	}
 
 
@@ -153,14 +154,14 @@ public static final Map<String, Item> registryItems = new HashMap<>();
 	}
 	/** Called during early start up, loads all non-json items. **/
 	public void loadItems() {
-
+		if (true) {
+			return;
+		}
 		//CreativeModeTab.Builder itemTab = this.itemsGroup;
 		Item.Properties itemProperties = new Item.Properties();
 		Item.Properties itemPropertiesNoStack = new Item.Properties().stacksTo(1);
 		registryItems.put("soulgazer", new ItemSoulgazer(itemPropertiesNoStack));
-		if (true) {
-			return;
-		}
+
 		ObjectManager.addItem("soulgazer", new ItemSoulgazer(itemPropertiesNoStack));
 		ObjectManager.addItem("soul_contract", new ItemSoulContract(itemPropertiesNoStack));
 		ObjectManager.addItem("mobtoken", new ItemMobToken(new Item.Properties()));
@@ -379,26 +380,36 @@ public static final Map<String, Item> registryItems = new HashMap<>();
 		Item item = itemStack.getItem();
 		Object locationObj = LMHelperClass.convertObjectToDesired(item, "resourcelocation");
 		if (locationObj instanceof ResourceLocation location) {
-			for (String itemId : ItemConfig.lowEquipmentSharpnessItems) {
-				if (new ResourceLocation(itemId).equals(location)) {
-					return ItemConfig.lowEquipmentRepairAmount;
+			if (ItemConfig.lowEquipmentSharpnessItems != null) {
+				for (String itemId : ItemConfig.lowEquipmentSharpnessItems) {
+					if (new ResourceLocation(itemId).equals(location)) {
+						return ItemConfig.lowEquipmentRepairAmount;
+					}
 				}
 			}
-			for (String itemId : ItemConfig.mediumEquipmentSharpnessItems) {
-				if (new ResourceLocation(itemId).equals(location)) {
-					return ItemConfig.mediumEquipmentRepairAmount;
+			if (ItemConfig.mediumEquipmentSharpnessItems != null) {
+				for (String itemId : ItemConfig.mediumEquipmentSharpnessItems) {
+					if (new ResourceLocation(itemId).equals(location)) {
+						return ItemConfig.mediumEquipmentRepairAmount;
+					}
 				}
 			}
-			for (String itemId : ItemConfig.highEquipmentSharpnessItems) {
-				if (new ResourceLocation(itemId).equals(location)) {
-					return ItemConfig.highEquipmentRepairAmount;
+
+			if (ItemConfig.highEquipmentSharpnessItems != null) {
+				for (String itemId : ItemConfig.highEquipmentSharpnessItems) {
+					if (new ResourceLocation(itemId).equals(location)) {
+						return ItemConfig.highEquipmentRepairAmount;
+					}
 				}
 			}
-			for (String itemId : ItemConfig.maxEquipmentSharpnessItems) {
-				if (new ResourceLocation(itemId).equals(location)) {
-					return ItemEquipment.SHARPNESS_MAX;
+			if (ItemConfig.maxEquipmentSharpnessItems != null) {
+				for (String itemId : ItemConfig.maxEquipmentSharpnessItems) {
+					if (new ResourceLocation(itemId).equals(location)) {
+						return ItemEquipment.SHARPNESS_MAX;
+					}
 				}
 			}
+
 		}
 		return 0;
 	}
@@ -419,26 +430,35 @@ public static final Map<String, Item> registryItems = new HashMap<>();
 			if (item instanceof ChargeItem) {
 				return ItemConfig.highEquipmentRepairAmount;
 			}
-			for (String itemId : ItemConfig.lowEquipmentManaItems) {
-				if (new ResourceLocation(itemId).equals(location)) {
-					return ItemConfig.lowEquipmentRepairAmount;
+			if (ItemConfig.lowEquipmentManaItems != null) {
+				for (String itemId : ItemConfig.lowEquipmentManaItems) {
+					if (new ResourceLocation(itemId).equals(location)) {
+						return ItemConfig.lowEquipmentRepairAmount;
+					}
 				}
 			}
-			for (String itemId : ItemConfig.mediumEquipmentManaItems) {
-				if (new ResourceLocation(itemId).equals(location)) {
-					return ItemConfig.mediumEquipmentRepairAmount;
+			if (ItemConfig.mediumEquipmentManaItems != null) {
+				for (String itemId : ItemConfig.mediumEquipmentManaItems) {
+					if (new ResourceLocation(itemId).equals(location)) {
+						return ItemConfig.mediumEquipmentRepairAmount;
+					}
 				}
 			}
-			for (String itemId : ItemConfig.highEquipmentManaItems) {
-				if (new ResourceLocation(itemId).equals(location)) {
-					return ItemConfig.highEquipmentRepairAmount;
+			if (ItemConfig.highEquipmentManaItems != null) {
+				for (String itemId : ItemConfig.highEquipmentManaItems) {
+					if (new ResourceLocation(itemId).equals(location)) {
+						return ItemConfig.highEquipmentRepairAmount;
+					}
 				}
 			}
-			for (String itemId : ItemConfig.maxEquipmentManaItems) {
-				if (new ResourceLocation(itemId).equals(location)) {
-					return ItemEquipment.MANA_MAX;
+			if (ItemConfig.maxEquipmentManaItems != null) {
+				for (String itemId : ItemConfig.maxEquipmentManaItems) {
+					if (new ResourceLocation(itemId).equals(location)) {
+						return ItemEquipment.MANA_MAX;
+					}
 				}
 			}
+
 		}
 		return 0;
 	}

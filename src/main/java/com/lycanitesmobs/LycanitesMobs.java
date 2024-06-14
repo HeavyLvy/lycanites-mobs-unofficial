@@ -64,8 +64,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Mod(LycanitesMobs.MODID)
+@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class LycanitesMobs {
-	private static final Logger LOGGER = LogManager.getLogger();
+	public static final Logger LOGGER = LogManager.getLogger();
 
 	public static final String MODID = "lycanitesmobs";
 	public static final String name = "Lycanites Mobs";
@@ -193,8 +194,12 @@ public class LycanitesMobs {
 
 		// World Gen:
 		WorldGenManager.getInstance().startup();
+
+		//Registry Objects
+		LycanitesMobs.registryObjects();
+
 	}
-	private void registryObjects() {
+	public static void registryObjects() {
 		// Blocks and Items:
 		ItemManager.getInstance().startup(modInfo);
 		// Equipment Parts:
@@ -212,7 +217,7 @@ public class LycanitesMobs {
 		LMReflectionHelper.fixMaxHealth();
 		// Mod Support:
 		DLDungeons.init();
-		registryObjects();
+
 	}
 
 	@SubscribeEvent

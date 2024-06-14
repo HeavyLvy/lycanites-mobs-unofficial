@@ -201,7 +201,7 @@ public class ProjectileManager extends JSONLoader {
 		}
 		this.oldSpriteProjectiles.put(name, entityClass);
 	}
-	
+
 	public void addOldProjectile(String name, Class<? extends BaseProjectileEntity> entityClass, boolean impactSound) {
 		ModInfo modInfo = LycanitesMobs.modInfo;
 		ObjectManager.addSound(name, "projectile." + name);

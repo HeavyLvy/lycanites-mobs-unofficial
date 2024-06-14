@@ -35,11 +35,11 @@ public class EquipmentPartManager extends JSONLoader {
 
 	/** Loads all JSON Equipment Parts. **/
 	public void loadAllFromJson(ModInfo modInfo) {
-		if(!this.loadedGroups.contains(modInfo)) {
-			this.loadedGroups.add(modInfo);
+		if(!loadedGroups.contains(modInfo)) {
+			loadedGroups.add(modInfo);
 		}
-		this.loadAllJson(modInfo, "Equipment", "equipment", "itemName", false, null, FileLoader.COMMON, StreamLoader.COMMON);
-		LycanitesMobs.logDebug("Equipment", "Complete! " + this.equipmentParts.size() + " JSON Equipment Parts Loaded In Total.");
+		loadAllJson(modInfo, "Equipment", "equipment", "itemName", false, null, FileLoader.COMMON, StreamLoader.COMMON);
+		LycanitesMobs.logDebug("Equipment", "Complete! " + equipmentParts.size() + " JSON Equipment Parts Loaded In Total.");
 	}
 
 	@Override

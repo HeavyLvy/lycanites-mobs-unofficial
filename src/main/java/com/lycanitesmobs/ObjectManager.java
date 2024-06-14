@@ -34,6 +34,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -43,7 +44,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-
+@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ObjectManager {
 	public static ObjectManager INSTANCE;
 	public static ObjectManager getInstance() {
@@ -360,6 +361,7 @@ public class ObjectManager {
 	// ========== Containers ==========
 	private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, LycanitesMobs.MODID);
 	public static void registerContainers(IEventBus event) {
+
 		MENUS.register(event);
 		MENUS.register("creature", () -> CreatureContainer.TYPE);
 		MENUS.register("summoning_pedestal", () -> SummoningPedestalContainer.TYPE);

@@ -73,7 +73,7 @@ public class BaseOverlay extends BaseGui {
 		matrixStack.pushPose();
 		RenderSystem.enableBlend();
 		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
 		int sWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth(); // getMainWindow()
         int sHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
@@ -99,7 +99,7 @@ public class BaseOverlay extends BaseGui {
                 (this.minecraft.player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof ItemStaffSummoning)
                 || (this.minecraft.player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof ItemStaffSummoning)
                 )) {
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			this.minecraft.getTextureManager().bindForSetup(TextureManager.getTexture("GUIInventoryCreature"));
 			
 			int barYSpace = 10;
@@ -144,7 +144,7 @@ public class BaseOverlay extends BaseGui {
             }
             
             // Mount Ability Stamina Bar:
-			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			this.minecraft.getTextureManager().bindForSetup(GUI_ICONS_LOCATION);
             int staminaBarWidth = 182;
             int staminaBarHeight = 5;
