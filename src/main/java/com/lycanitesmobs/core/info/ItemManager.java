@@ -151,7 +151,6 @@ public static final Map<String, Item> registryItems = new HashMap<>();
 	public void loadConfig() {
 		ItemConfig.loadGlobalSettings();
 	}
-	public static final Item SOULGAZER = new ItemSoulgazer(new Item.Properties());
 	/** Called during early start up, loads all non-json items. **/
 	public void loadItems() {
 

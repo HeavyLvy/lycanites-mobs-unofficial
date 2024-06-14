@@ -141,7 +141,7 @@ public class LycanitesMobs {
 		modEventBus.addListener(this::enqueueIMC);
 		modEventBus.addListener(this::processIMC);
 		modEventBus.register(ObjectManager.getInstance());
-		//modEventBus.register(ItemManager.getInstance());
+		modEventBus.register(ItemManager.getInstance());
 		modEventBus.register(CreatureManager.getInstance());
 		modEventBus.register(ProjectileManager.getInstance());
 		modEventBus.register(WorldGenManager.getInstance());
@@ -175,18 +175,6 @@ public class LycanitesMobs {
 		// Potion Effects:
 		EFFECTS = new Effects();
 
-		// Blocks and Items:
-		//ItemManager.getInstance().startup(modInfo);
-
-		// Equipment Parts:
-		EquipmentPartManager.getInstance().loadAllFromJson(modInfo);
-
-		// Creatures:
-		CreatureManager.getInstance().startup(modInfo);
-
-		// Projectiles:
-		ProjectileManager.getInstance().startup(modInfo);
-
 		// Spawners:
 		SpawnerManager.getInstance().loadAllFromJson(modInfo);
 
@@ -206,7 +194,16 @@ public class LycanitesMobs {
 		// World Gen:
 		WorldGenManager.getInstance().startup();
 	}
-
+	private void registryObjects() {
+		// Blocks and Items:
+		ItemManager.getInstance().startup(modInfo);
+		// Equipment Parts:
+		EquipmentPartManager.getInstance().loadAllFromJson(modInfo);
+		// Creatures:
+		CreatureManager.getInstance().startup(modInfo);
+		// Projectiles:
+		ProjectileManager.getInstance().startup(modInfo);
+	}
 	private void commonSetup(final FMLCommonSetupEvent event) {
 		configReady = true;
 		ObjectManager.setCurrentModInfo(modInfo);
@@ -215,6 +212,7 @@ public class LycanitesMobs {
 		LMReflectionHelper.fixMaxHealth();
 		// Mod Support:
 		DLDungeons.init();
+		registryObjects();
 	}
 
 	@SubscribeEvent
