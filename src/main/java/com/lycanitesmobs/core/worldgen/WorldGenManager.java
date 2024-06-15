@@ -54,6 +54,7 @@ public class WorldGenManager {
 	 * Called on startup after all LM assets have been defined but before mob startup events.
 	 */
 	public static void startup() {
+		if (ItemManager.getInstance().worldgenFluidBlocks == null) return;
 		for (String fluidName : ItemManager.getInstance().worldgenFluidBlocks.keySet()) {
 			BaseFluidBlock fluidBlock = ItemManager.getInstance().worldgenFluidBlocks.get(fluidName);
 
@@ -111,7 +112,7 @@ public class WorldGenManager {
 	private static final DeferredRegister<PlacementModifierType<?>> PLACEMENT_MODIFIERS = DeferredRegister.create(Registries.PLACEMENT_MODIFIER_TYPE, LycanitesMobs.MODID);
 	public static void registerPlacements(IEventBus event) {
 		PLACEMENT_MODIFIERS.register(event);
-		PLACEMENT_MODIFIERS.register("always", () -> alwaysPlacement);WorldGenManager manager = WorldGenManager.getInstance();
+		PLACEMENT_MODIFIERS.register("always", () -> alwaysPlacement);
 		CONFIGURED_FEATURES.register(event);
 		/*CONFIGURED_FEATURES.register("poison_lake",() -> fluidConfiguredFeatures.get("poison_lake"));CONFIGURED_FEATURES.register("poison_spring",() -> fluidConfiguredFeatures.get("poison_spring"));
 		CONFIGURED_FEATURES.register("acid_lake",() -> fluidConfiguredFeatures.get("acid_lake"));

@@ -46,6 +46,7 @@ import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorTy
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -277,5 +278,18 @@ public class LMHelperClass {
     }
     public static <T> T cast(Object o) {
         return (T) o;
+    }
+    /**
+     * Runs the provided Runnable if the current environment matches the specified environment.
+     *
+     * @param prodEnvironment If true, run the code in a production environment. If false, run the code in a development environment.
+     * @param runnable The code to run in the specified environment.
+     */
+    public static void environmentRunnable(boolean prodEnvironment, Runnable runnable) {
+        if (prodEnvironment && FMLEnvironment.production) {
+            runnable.run();
+        } else if (!FMLEnvironment.production) {
+            runnable.run();
+        }
     }
 }

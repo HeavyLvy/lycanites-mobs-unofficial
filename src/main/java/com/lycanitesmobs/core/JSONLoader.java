@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.info.ModInfo;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -154,12 +155,21 @@ public abstract class JSONLoader {
 	 */
 	public void loadJsonObjects(Gson gson, Path path, Map<String, JsonObject> jsonObjectMap, String mapKey, String jsonType) {
 		if(path == null) {
+			LMHelperClass.environmentRunnable(true,()-> {
+				LycanitesMobs.logWarning("", "Path is null");
+			});
 			return;
 		}
 		try {
+			LMHelperClass.environmentRunnable(true,()-> {
+				LycanitesMobs.logInfo("", "Path: " + path);
+			});
 			Iterator<Path> iterator = Files.walk(path).iterator();
 			while(iterator.hasNext()) {
 				Path filePath = iterator.next();
+				LMHelperClass.environmentRunnable(true,()-> {
+					LycanitesMobs.logInfo("", "File Path: " + filePath);
+				});
 				Path relativePath = path.relativize(filePath);
 				if (!"json".equals(FilenameUtils.getExtension(filePath.toString()))) {
 					continue;

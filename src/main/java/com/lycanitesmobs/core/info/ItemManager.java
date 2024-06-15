@@ -92,7 +92,6 @@ public class ItemManager extends JSONLoader {
 	 * @param modInfo The mod loading this manager.
 	 */
 	public void startup(ModInfo modInfo) {
-		loadItems();
 		loadAllFromJson(modInfo);
 	}
 
@@ -121,6 +120,7 @@ public class ItemManager extends JSONLoader {
 	}*/
 	@SubscribeEvent
 	public void registerItems(RegisterEvent event) {
+		loadItems();
 		LycanitesMobs.logInfo("", "Registering items: " + items.size());
 		for(ItemInfo itemInfo : items.values()) {
 			event.register(ForgeRegistries.Keys.ITEMS,
@@ -148,7 +148,7 @@ public static final Map<String, Item> registryItems = new HashMap<>();
 	}
 	/** Called during early start up, loads all non-json items. **/
 	public void loadItems() {
-
+		if (true) return;
 		//CreativeModeTab.Builder itemTab = this.itemsGroup;
 		Item.Properties itemProperties = new Item.Properties();
 		Item.Properties itemPropertiesNoStack = new Item.Properties().stacksTo(1);

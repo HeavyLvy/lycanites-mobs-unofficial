@@ -196,7 +196,7 @@ public class LycanitesMobs {
 		WorldGenManager.getInstance().startup();
 
 		//Registry Objects
-		LycanitesMobs.registryObjects();
+		//LycanitesMobs.registryObjects();
 
 	}
 	public static void registryObjects() {
