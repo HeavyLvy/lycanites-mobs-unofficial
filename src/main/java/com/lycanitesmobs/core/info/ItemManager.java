@@ -9,7 +9,7 @@ import com.lycanitesmobs.core.StreamLoader;
 import com.lycanitesmobs.core.block.*;
 import com.lycanitesmobs.core.block.building.HiveBlock;
 import com.lycanitesmobs.core.block.effect.*;
-import com.lycanitesmobs.core.block.fluid.*;
+import com.lycanitesmobs.core.block.fluid.BaseFluidBlock;
 import com.lycanitesmobs.core.block.fluid.type.BaseFluidType;
 import com.lycanitesmobs.core.item.*;
 import com.lycanitesmobs.core.item.consumable.*;
@@ -20,26 +20,15 @@ import com.lycanitesmobs.core.item.special.ItemSoulkey;
 import com.lycanitesmobs.core.item.special.ItemSoulstone;
 import com.lycanitesmobs.core.item.summoningstaff.*;
 import com.lycanitesmobs.core.util.LMHelperClass;
-import com.mojang.blaze3d.shaders.FogShape;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Camera;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
@@ -48,8 +37,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.lang.reflect.Constructor;
@@ -58,7 +45,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ItemManager extends JSONLoader {
@@ -135,7 +121,15 @@ public class ItemManager extends JSONLoader {
 	}*/
 	@SubscribeEvent
 	public void registerItems(RegisterEvent event) {
-		for(Item item : registryItems.values()) {
+		LycanitesMobs.logInfo("", "Registering items: " + items.size());
+		for(ItemInfo itemInfo : items.values()) {
+			event.register(ForgeRegistries.Keys.ITEMS,
+					helper -> {
+							helper.register(new ResourceLocation(LycanitesMobs.MODID, itemInfo.getItem().itemName), itemInfo.getItem());
+					}
+			);
+		}
+		/*for(Item item : registryItems.values()) {
 			//LycanitesMobs.logDebug("Item", "Registering item: " + itemInfo.getName());
 			event.register(ForgeRegistries.Keys.ITEMS,
 					helper -> {
@@ -145,7 +139,7 @@ public class ItemManager extends JSONLoader {
 			}
 			);
 
-		}
+		}*/
 	}
 public static final Map<String, Item> registryItems = new HashMap<>();
 	/** Called during early start up, loads all global configs into this manager. **/
@@ -154,13 +148,11 @@ public static final Map<String, Item> registryItems = new HashMap<>();
 	}
 	/** Called during early start up, loads all non-json items. **/
 	public void loadItems() {
-		if (true) {
-			return;
-		}
+
 		//CreativeModeTab.Builder itemTab = this.itemsGroup;
 		Item.Properties itemProperties = new Item.Properties();
 		Item.Properties itemPropertiesNoStack = new Item.Properties().stacksTo(1);
-		registryItems.put("soulgazer", new ItemSoulgazer(itemPropertiesNoStack));
+		//registryItems.put("soulgazer", new ItemSoulgazer(itemPropertiesNoStack));
 
 		ObjectManager.addItem("soulgazer", new ItemSoulgazer(itemPropertiesNoStack));
 		ObjectManager.addItem("soul_contract", new ItemSoulContract(itemPropertiesNoStack));

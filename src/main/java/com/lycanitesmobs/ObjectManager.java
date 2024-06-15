@@ -142,7 +142,6 @@ public class ObjectManager {
 	public static void addSpecialEntity(String name, Class<? extends Entity> entityClass, Constructor<? extends Entity> specialEntityConstructor) {
 		specialEntities.put(name, entityClass);
 		specialEntityConstructors.put(entityClass, specialEntityConstructor);
-
 	}
 
     // ========== Damage Source ==========
