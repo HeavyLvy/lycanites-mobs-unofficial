@@ -26,7 +26,7 @@ public class LMItemsGroup {
 					.icon(this::getIconItem)
 					.displayItems((enabledFeatures, entries) -> {
 						for(ItemInfo info : ItemManager.items.values()) {
-							entries.accept(info.item);
+							entries.accept(info.getItem());
 						}
 					});
 	}

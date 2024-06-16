@@ -44,6 +44,9 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+
+import static com.lycanitesmobs.core.info.ItemManager.registryItems;
+
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ObjectManager {
 	public static ObjectManager INSTANCE;
@@ -56,7 +59,7 @@ public class ObjectManager {
 	// Maps:
 	public static Map<String, Block> blocks = new HashMap<>();
 	public static Map<String, LiquidBlock> liquidBlocks = new HashMap<>();
-    public static Map<String, Item> items = new HashMap<>();
+	public static final Map<String, RegistryObject<Item>> items = new HashMap<>();
     public static Map<Item, ModInfo> itemGroups = new HashMap<>();
 	public static Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
     public static Map<Block, Item> buckets = new HashMap<>();
@@ -116,10 +119,9 @@ public class ObjectManager {
 	}
 
 	// ========== Item ==========
-	public static Item addItem(String name, Item item) {
+	public static void addItem(String name, Supplier<? extends Item> itemSupplier) {
+		RegistryObject<Item> item = LycanitesMobs.ITEMS.register(name, itemSupplier);
 		items.put(name, item);
-        itemGroups.put(item, currentModInfo);
-        return item;
 	}
 
     // ========== Tile Entity ==========
@@ -183,7 +185,7 @@ public class ObjectManager {
 		name = name.toLowerCase();
 		if(!items.containsKey(name))
 			return null;
-		return items.get(name);
+		return items.get(name).get();
 	}
 
 	// ========== Fluid ==========
@@ -250,8 +252,8 @@ public class ObjectManager {
     public void registerItems(RegisterEvent event) {
 		event.register(ForgeRegistries.Keys.ITEMS,
 				helper -> {
-					for(Item item : items.values()) {
-						if (item instanceof BaseItem baseItem){
+					for(RegistryObject<Item> item : items.values()) {
+						if (item.get() instanceof BaseItem baseItem){
 							LycanitesMobs.logDebug("Item", "Registering item: " + baseItem.getRegistryName());
 							if(baseItem.getRegistryName() == null) {
 								LycanitesMobs.logWarning("", "Item: " + item + " has no Registry Name!");

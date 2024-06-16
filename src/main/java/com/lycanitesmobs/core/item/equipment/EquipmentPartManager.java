@@ -44,7 +44,6 @@ public class EquipmentPartManager extends JSONLoader {
 
 	@Override
 	public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
-
 		Item.Properties properties = new Item.Properties().stacksTo(1).setNoRepair();
 		ItemEquipmentPart equipmentPart = new ItemEquipmentPart(properties);
 		equipmentPart.loadFromJSON(json);
@@ -61,7 +60,7 @@ public class EquipmentPartManager extends JSONLoader {
 		ItemManager.getInstance().equipmentPartsGroup.displayItems((enabledFeatures, entries) -> {
 			entries.accept(equipmentPart);
 		});
-		ObjectManager.addItem(equipmentPart.itemName, equipmentPart);
+		ObjectManager.addItem(equipmentPart.itemName,() -> equipmentPart);
 	}
 
 	/**

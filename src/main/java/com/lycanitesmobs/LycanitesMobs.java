@@ -37,6 +37,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraftforge.common.MinecraftForge;
@@ -124,15 +125,13 @@ public class LycanitesMobs {
 		FileLoader.initAll(modInfo.modid);
 		StreamLoader.initAll(modInfo.modid);
 
-
+		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
 		//Biome Management
-		BIOME_MODIFIER_SERIALIZERS.register(FMLJavaModLoadingContext.get().getModEventBus());
-
-
+		BIOME_MODIFIER_SERIALIZERS.register(modEventBus);
 
 		// Setup Event Listeners:
-		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+		ITEMS.register(modEventBus);
 		WorldGenManager.registerPlacements(modEventBus);
 		ObjectManager.registerContainers(modEventBus);
 		//ItemManager.registerItem(modEventBus);
@@ -196,9 +195,11 @@ public class LycanitesMobs {
 		WorldGenManager.getInstance().startup();
 
 		//Registry Objects
-		//LycanitesMobs.registryObjects();
+		LycanitesMobs.registryObjects();
 
 	}
+	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
+
 	public static void registryObjects() {
 		// Blocks and Items:
 		ItemManager.getInstance().startup(modInfo);

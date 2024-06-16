@@ -43,10 +43,11 @@ public abstract class JSONLoader {
 
 		// Load Default:
 		Map<String, JsonObject> defaultJsons = new HashMap<>();
-		if (fileLoader.ready) {
+		if(fileLoader.ready) {
 			Path path = fileLoader.getPath(dataPath);
 			this.loadJsonObjects(gson, path, defaultJsons, mapKey, jsonType);
-		} else {
+		}
+		else {
 			this.loadJsonObjects(gson, streamLoader.getStreams(dataPath), defaultJsons, mapKey, jsonType);
 		}
 
@@ -58,25 +59,30 @@ public abstract class JSONLoader {
 		Map<String, JsonObject> customJsons = new HashMap<>();
 		this.loadJsonObjects(gson, customPath, customJsons, mapKey, jsonType);
 
+
 		// Write Defaults:
 		this.writeDefaultJSONObjects(gson, defaultJsons, customJsons, jsons, loadCustom, dataPath);
 
-		// Parse JSON:
+
+		// Parse Json:
 		LycanitesMobs.logDebug(loadGroup, "Loading " + jsons.size() + " " + loadGroup + "...");
-		for (String jsonName : jsons.keySet()) {
-			JsonObject json = jsons.get(jsonName);
+		for(String jsonName : jsons.keySet()) {
+			JsonObject json;
 			try {
+				json = jsons.get(jsonName);
 				LycanitesMobs.logDebug(loadGroup, "Loading " + loadGroup + " JSON: " + json);
-				if (json.isJsonNull())
+				if(json.isJsonNull())
 					throw new RuntimeException("Tried to load JSON data from a null json object.");
-				this.parseJson(modInfo, loadGroup, json);
-			} catch (JsonParseException e) {
+			}
+			catch (JsonParseException e) {
 				LycanitesMobs.logError("Parsing error loading JSON " + loadGroup + ": " + jsonName);
 				throw new RuntimeException(e);
-			} catch (Exception e) {
+			}
+			catch(Exception e) {
 				LycanitesMobs.logError("There was a problem loading JSON " + loadGroup + ": " + jsonName);
 				throw new RuntimeException(e);
 			}
+			this.parseJson(modInfo, loadGroup, json);
 		}
 	}
 

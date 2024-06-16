@@ -279,7 +279,7 @@ public class ProjectileInfo {
 				Item.Properties properties = new Item.Properties();
 				//properties.tab(ItemManager.getInstance().chargesGroup);
 				this.chargeItem = new ChargeItem(properties, this);
-				ObjectManager.addItem(this.chargeItemName, this.chargeItem);
+				ObjectManager.addItem(this.chargeItemName,() -> this.chargeItem);
 			}
 
 			// Dispenser:

@@ -52,8 +52,6 @@ public class FileLoader {
 					this.rootPath = rootPathString;
 					this.fileSystem = rootFilePath.getFileSystem();
 					this.ready = true;
-				/*Path rootPath = rootFilePath.getFileSystem().getPath(rootPathString);
-				copyJsonObjectsFromPath(rootPath);*/
 				}
 				case "modjar" -> {
 					try (JarFile jar = new JarFile(getJarFile())) {

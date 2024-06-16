@@ -12,12 +12,16 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.food.Foods;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Iterator;
+import java.util.function.Supplier;
+
+import static com.lycanitesmobs.ObjectManager.items;
 
 public class ItemInfo {
 	/** The Item based on this Item Info. **/
-	public GenericItem item;
+	//public GenericItem item;
 
 	// Core Info:
 	/** The name of this item. Lowercase, no space, used for language entries and for generating the projectile id, etc. Required. **/
@@ -115,13 +119,15 @@ public class ItemInfo {
 			properties.food(food);
 
 		// Create Item:
-		this.item = new GenericItem(properties, this.name);
-		this.item.modelName = modelName;
+		String finalModelName = modelName;
+		RegistryObject<Item> item = LycanitesMobs.ITEMS.register(name, () -> new GenericItem(properties, this.name, finalModelName));
+		items.put(name, item);
+		//this.getItem().modelName = modelName;
 		/*
 		 * Creative Mode Tab
 		 */
 		group.displayItems((enabledFeatures, entries) -> {
-			entries.accept(this.item);
+			entries.accept(this.getItem());
 		});
 	}
 
@@ -130,7 +136,7 @@ public class ItemInfo {
 	 * @return The item.
 	 */
 	public GenericItem getItem() {
-		return this.item;
+		return (GenericItem) items.get(name).get();
 	}
 
 	/**

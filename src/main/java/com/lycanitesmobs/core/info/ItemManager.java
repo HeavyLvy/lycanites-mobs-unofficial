@@ -93,6 +93,8 @@ public class ItemManager extends JSONLoader {
 	 */
 	public void startup(ModInfo modInfo) {
 		loadAllFromJson(modInfo);
+		loadItems();
+
 	}
 
 
@@ -118,9 +120,13 @@ public class ItemManager extends JSONLoader {
 		ITEM_DEFERRED_REGISTER.register(event);
 		ITEM_DEFERRED_REGISTER.register("soulgazer", () -> new ItemSoulgazer(new Item.Properties()));
 	}*/
+	/** Called during early start up, loads all global configs into this manager. **/
+	public void loadConfig() {
+		ItemConfig.loadGlobalSettings();
+	}
+	public static final Map<String, Item.Properties> registryItems = new HashMap<>();
 	@SubscribeEvent
 	public void registerItems(RegisterEvent event) {
-		loadItems();
 		LycanitesMobs.logInfo("", "Registering items: " + items.size());
 		for(ItemInfo itemInfo : items.values()) {
 			event.register(ForgeRegistries.Keys.ITEMS,
@@ -129,47 +135,60 @@ public class ItemManager extends JSONLoader {
 					}
 			);
 		}
-		/*for(Item item : registryItems.values()) {
-			//LycanitesMobs.logDebug("Item", "Registering item: " + itemInfo.getName());
-			event.register(ForgeRegistries.Keys.ITEMS,
-					helper -> {
-				if (item instanceof GenericItem genericItem) {
-					helper.register(new ResourceLocation(LycanitesMobs.MODID, genericItem.itemName), item);
-				}
-			}
-			);
+	}
 
-		}*/
-	}
-public static final Map<String, Item> registryItems = new HashMap<>();
-	/** Called during early start up, loads all global configs into this manager. **/
-	public void loadConfig() {
-		ItemConfig.loadGlobalSettings();
-	}
+
 	/** Called during early start up, loads all non-json items. **/
 	public void loadItems() {
-		if (true) return;
+
 		//CreativeModeTab.Builder itemTab = this.itemsGroup;
 		Item.Properties itemProperties = new Item.Properties();
 		Item.Properties itemPropertiesNoStack = new Item.Properties().stacksTo(1);
 		//registryItems.put("soulgazer", new ItemSoulgazer(itemPropertiesNoStack));
 
-		ObjectManager.addItem("soulgazer", new ItemSoulgazer(itemPropertiesNoStack));
-		ObjectManager.addItem("soul_contract", new ItemSoulContract(itemPropertiesNoStack));
-		ObjectManager.addItem("mobtoken", new ItemMobToken(new Item.Properties()));
-		ObjectManager.addItem("soulstone", new ItemSoulstone(itemProperties, null));
+		ObjectManager.addItem("soulgazer",() -> new ItemSoulgazer(itemPropertiesNoStack));
+		ObjectManager.addItem("soul_contract",() -> new ItemSoulContract(itemPropertiesNoStack));
+		ObjectManager.addItem("mobtoken",() -> new ItemMobToken(new Item.Properties()));
+		ObjectManager.addItem("soulstone",() -> new ItemSoulstone(itemProperties, null));
 		/*this.itemsGroup.displayItems((enabledFeatures, entries) -> {
 			entries.accept(this.item);
 		});*/
 		// Equipment Pieces:
 		Item.Properties equipmentProperties = new Item.Properties().stacksTo(1).setNoRepair();
-		ObjectManager.addItem("equipment", new ItemEquipment(equipmentProperties));
+		ObjectManager.addItem("equipment",() -> new ItemEquipment(equipmentProperties));
 
 		// Keys:
-		ObjectManager.addItem("soulkey", new ItemSoulkey(itemProperties, "soulkey", 0));
-		ObjectManager.addItem("soulkeydiamond", new ItemSoulkey(itemProperties, "soulkeydiamond", 1));
-		ObjectManager.addItem("soulkeyemerald", new ItemSoulkey(itemProperties, "soulkeyemerald", 2));
+		ObjectManager.addItem("soulkey",() -> new ItemSoulkey(itemProperties, "soulkey", 0));
+		ObjectManager.addItem("soulkeydiamond",() -> new ItemSoulkey(itemProperties, "soulkeydiamond", 1));
+		ObjectManager.addItem("soulkeyemerald",() -> new ItemSoulkey(itemProperties, "soulkeyemerald", 2));
 
+		if (true) return;
+
+
+		// Buff Items:
+		ObjectManager.addItem("immunizer",() -> new ItemImmunizer(itemProperties));
+		ObjectManager.addItem("cleansingcrystal",() -> new ItemCleansingCrystal(itemProperties));
+
+
+		// Seasonal Items:
+		ObjectManager.addItem("halloweentreat",() -> new ItemHalloweenTreat(itemProperties));
+		ObjectManager.addItem("wintergift",() -> new ItemWinterGift(itemProperties));
+		ObjectManager.addItem("wintergiftlarge",() -> new ItemWinterGiftLarge(itemProperties));
+
+
+		// Special:
+		ObjectManager.addItem("frostyfur",() -> new ItemBlockPlacer(itemProperties, "frostyfur", "frostcloud"));
+		ObjectManager.addItem("poisongland",() -> new ItemBlockPlacer(itemProperties, "poisongland", "poisoncloud"));
+		ObjectManager.addItem("geistliver",() -> new ItemBlockPlacer(itemProperties, "geistliver", "shadowfire"));
+		
+		//.tab(this.itemsGroup)
+		// Summoning Staves:
+		Item.Properties summoningStaffProperties = new Item.Properties().stacksTo(1).durability(500);
+		ObjectManager.addItem("summoningstaff",() -> new ItemStaffSummoning(summoningStaffProperties, "summoningstaff", "summoningstaff"));
+		ObjectManager.addItem("stablesummoningstaff",() -> new ItemStaffStable(summoningStaffProperties, "stablesummoningstaff", "staffstable"));
+		ObjectManager.addItem("bloodsummoningstaff",() -> new ItemStaffBlood(summoningStaffProperties, "bloodsummoningstaff", "staffblood"));
+		ObjectManager.addItem("sturdysummoningstaff",() -> new ItemStaffSturdy(summoningStaffProperties, "sturdysummoningstaff", "staffsturdy"));
+		ObjectManager.addItem("savagesummoningstaff",() -> new ItemStaffSavage(summoningStaffProperties, "savagesummoningstaff", "staffsavage"));
 
 		// Utilities:
 		ObjectManager.addBlock("summoningpedestal", new BlockSummoningPedestal(Block.Properties.of().sound(SoundType.METAL).strength(5, 10)));
@@ -178,33 +197,6 @@ public static final Map<String, Item> registryItems = new HashMap<>();
 		ObjectManager.addBlock("equipmentforge_master", new BlockEquipmentForge(Block.Properties.of().sound(SoundType.METAL).strength(5, 1000), 3));
 		ObjectManager.addBlock("equipment_infuser", new EquipmentInfuserBlock(Block.Properties.of().sound(SoundType.METAL).strength(5, 1000)));
 		ObjectManager.addBlock("equipment_station", new EquipmentStationBlock(Block.Properties.of().sound(SoundType.METAL).strength(5, 1000)));
-
-
-		// Buff Items:
-		ObjectManager.addItem("immunizer", new ItemImmunizer(itemProperties));
-		ObjectManager.addItem("cleansingcrystal", new ItemCleansingCrystal(itemProperties));
-
-
-		// Seasonal Items:
-		ObjectManager.addItem("halloweentreat", new ItemHalloweenTreat(itemProperties));
-		ObjectManager.addItem("wintergift", new ItemWinterGift(itemProperties));
-		ObjectManager.addItem("wintergiftlarge", new ItemWinterGiftLarge(itemProperties));
-
-
-		// Special:
-		ObjectManager.addItem("frostyfur", new ItemBlockPlacer(itemProperties, "frostyfur", "frostcloud"));
-		ObjectManager.addItem("poisongland", new ItemBlockPlacer(itemProperties, "poisongland", "poisoncloud"));
-		ObjectManager.addItem("geistliver", new ItemBlockPlacer(itemProperties, "geistliver", "shadowfire"));
-		
-		//.tab(this.itemsGroup)
-		// Summoning Staves:
-		Item.Properties summoningStaffProperties = new Item.Properties().stacksTo(1).durability(500);
-		ObjectManager.addItem("summoningstaff", new ItemStaffSummoning(summoningStaffProperties, "summoningstaff", "summoningstaff"));
-		ObjectManager.addItem("stablesummoningstaff", new ItemStaffStable(summoningStaffProperties, "stablesummoningstaff", "staffstable"));
-		ObjectManager.addItem("bloodsummoningstaff", new ItemStaffBlood(summoningStaffProperties, "bloodsummoningstaff", "staffblood"));
-		ObjectManager.addItem("sturdysummoningstaff", new ItemStaffSturdy(summoningStaffProperties, "sturdysummoningstaff", "staffsturdy"));
-		ObjectManager.addItem("savagesummoningstaff", new ItemStaffSavage(summoningStaffProperties, "savagesummoningstaff", "staffsavage"));
-
 
 		// Building Blocks:
 		BlockMaker.addDungeonBlocks("lush");
@@ -343,7 +335,7 @@ public static final Map<String, Item> registryItems = new HashMap<>();
 		//.tab(this.itemsGroup)
 		Item.Properties bucketProperties = new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1);
 		//.setRegistryName(LycanitesMobs.MODID, fluidName + "_bucket")
-		ObjectManager.addItem(fluidName + "_bucket", new BucketItem(() -> builder.stillFluid, bucketProperties));
+		ObjectManager.addItem(fluidName + "_bucket",() -> new BucketItem(() -> builder.stillFluid, bucketProperties));
 
 		try {
 			Supplier<ForgeFlowingFluid> stillFluidSupplier = () -> builder.stillFluid;

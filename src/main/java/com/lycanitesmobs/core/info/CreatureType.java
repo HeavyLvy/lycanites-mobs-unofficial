@@ -184,18 +184,18 @@ public class CreatureType {
 
 		// Treat:
 		this.treat = new CreatureTreatItem(smallStackItemProperties, this);
-		ObjectManager.addItem(this.getTreatName(), this.treat);
+		ObjectManager.addItem(this.getTreatName(),() -> this.treat);
 
 		// Saddle:
 		this.saddle = new CreatureSaddleItem(smallStackItemProperties, this);
-		ObjectManager.addItem(this.getSaddleName(), this.saddle);
+		ObjectManager.addItem(this.getSaddleName(),() -> this.saddle);
 
 		// Spawn Eggs:
 		this.spawnEgg = new ItemCustomSpawnEgg(spawnEggProperties, this);
-		ObjectManager.addItem(this.getSpawnEggName(), this.spawnEgg);
+		ObjectManager.addItem(this.getSpawnEggName(),() -> this.spawnEgg);
 
 		// Soulstone:
 		this.soulstone = new ItemSoulstoneFilled(standardItemProperties, this);
-		ObjectManager.addItem(this.getSoulstoneName(), this.soulstone);
+		ObjectManager.addItem(this.getSoulstoneName(),() -> this.soulstone);
 	}
 }
