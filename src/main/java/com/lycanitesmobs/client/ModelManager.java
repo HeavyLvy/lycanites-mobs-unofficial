@@ -1,6 +1,7 @@
 package com.lycanitesmobs.client;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.client.model.CreatureModel;
 import com.lycanitesmobs.client.model.EquipmentModel;
 import com.lycanitesmobs.client.model.ModelEquipmentPart;
@@ -75,8 +76,8 @@ public class ModelManager {
 
 		// Equipment Models:
 		this.equipmentModel = new EquipmentModel();
-		for(Supplier<ItemEquipmentPart> equipmentPart : EquipmentPartManager.getInstance().equipmentParts.values()) {
-			this.equipmentPartModels.put(equipmentPart.get(), new ModelEquipmentPart(equipmentPart.get()));
+		for(String equipmentPartName : EquipmentPartManager.getInstance().equipmentParts.keySet()) {
+			this.equipmentPartModels.put((ItemEquipmentPart) ObjectManager.getItem(equipmentPartName), new ModelEquipmentPart((ItemEquipmentPart) ObjectManager.getItem(equipmentPartName)));
 		}
 	}
 

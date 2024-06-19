@@ -2,12 +2,15 @@ package com.lycanitesmobs.core.spawner.condition;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.ExtendedWorld;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.helpers.JSONHelper;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -228,8 +231,14 @@ public class WorldSpawnCondition extends SpawnCondition {
 	 */
 	public boolean isAllowedBiome(Level world, BlockPos position) {
 		if(position != null) {
-			String biomeId = LMHelperClass.convertToResourceLocation(world.getBiomeManager().getBiome(position).get()).toString();
-
+			Object biome = LMHelperClass.convertToResourceLocation(world.getBiomeManager().getBiome(position).get());
+			String biomeId;
+			if (biome != null){
+				biomeId = ((ResourceLocation)biome).toString();
+			}else {
+				//LycanitesMobs.logWarning("", "Biome: " + ForgeRegistries.BIOMES.getKey(world.getBiomeManager().getBiome(position).get()));
+				return false;
+			}
 			// Biome IDs:
 			if (!this.biomeIds.isEmpty()) {
 				if (this.biomeIds.contains(biomeId)) {

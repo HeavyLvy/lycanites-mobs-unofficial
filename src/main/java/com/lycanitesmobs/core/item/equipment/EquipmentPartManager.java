@@ -62,9 +62,9 @@ public class EquipmentPartManager extends JSONLoader {
 		}*/
 		this.equipmentParts.put(name, equipmentPart);
 		/* Creative Tab Builder **/
-		ItemManager.getInstance().equipmentPartsGroup.displayItems((enabledFeatures, entries) -> {
+		/*ItemManager.getInstance().equipmentPartsGroup.displayItems((enabledFeatures, entries) -> {
 			entries.accept(equipmentPart::get);
-		});
+		});*/
 		ObjectManager.addItem(name,equipmentPart);
 	}
 

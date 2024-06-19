@@ -41,7 +41,9 @@ import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -246,19 +248,21 @@ public class ObjectManager {
 			}
         }
     }
-
     // ========== Items ==========
 	@SubscribeEvent
     public void registerItems(RegisterEvent event) {
 		event.register(ForgeRegistries.Keys.ITEMS,
 				helper -> {
-					for(Supplier<?> item : items.values()) {
-						if (item.get() instanceof BaseItem baseItem){
+					for(RegistryObject<?> item : items.values()) {
+						if (item.get() instanceof BaseItem baseItem /*&& !(item.get() instanceof ItemEquipmentPart)*/){
 							LycanitesMobs.logDebug("Item", "Registering item: " + baseItem.getRegistryName());
 							if(baseItem.getRegistryName() == null) {
 								LycanitesMobs.logWarning("", "Item: " + item + " has no Registry Name!");
 							}
-							helper.register(baseItem.getRegistryName(), baseItem);
+
+							if (!(baseItem instanceof ItemEquipmentPart)) {
+								helper.register(baseItem.getRegistryName(), baseItem);
+							}
 						}
 					}
 				}

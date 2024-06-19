@@ -177,11 +177,9 @@ public class LycanitesMobs {
 
 		// Potion Effects:
 		EFFECTS = new Effects();
-		//Registry Objects
-		LycanitesMobs.registryObjects();
 
 		// Spawners:
-		//SpawnerManager.getInstance().loadAllFromJson(modInfo);
+		SpawnerManager.getInstance().loadAllFromJson(modInfo);
 
 		// Altars:
 		AltarInfo.createAltars();
@@ -200,6 +198,8 @@ public class LycanitesMobs {
 		WorldGenManager.getInstance().startup();
 
 
+		//Registry Objects
+		LycanitesMobs.registryObjects();
 
 	}
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
@@ -209,7 +209,7 @@ public class LycanitesMobs {
 		// Blocks and Items:
 		ItemManager.getInstance().startup(modInfo);
 		// Equipment Parts:
-		//EquipmentPartManager.getInstance().loadAllFromJson(modInfo);
+		EquipmentPartManager.getInstance().loadAllFromJson(modInfo);
 		// Creatures:
 		//CreatureManager.getInstance().startup(modInfo);
 		// Projectiles:
