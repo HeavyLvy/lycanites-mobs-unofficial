@@ -1,6 +1,8 @@
 package com.lycanitesmobs.core.item;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.ObjectManager;
+import com.lycanitesmobs.core.dispenser.BaseProjectileDispenseBehaviour;
 import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.TameableCreatureEntity;
 import com.lycanitesmobs.core.info.ElementInfo;
@@ -19,6 +21,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
 
 import javax.annotation.Nullable;
 import javax.tools.Tool;
@@ -43,6 +46,10 @@ public class ChargeItem extends BaseItem {
             this.itemName = projectileInfo.chargeItemName;
             LycanitesMobs.logDebug("Projectile", "Created Charge Item: " + projectileInfo.chargeItemName);
         }
+        // Dispenser:
+        var dispenserBehaviour = new BaseProjectileDispenseBehaviour(projectileInfo);
+        DispenserBlock.registerBehavior(this, dispenserBehaviour);
+
         setup();
     }
 

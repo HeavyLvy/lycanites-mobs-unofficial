@@ -101,11 +101,11 @@ public class ClientManager {
 	/**
 	 * Registers Colored Items
 	 */
-	@SubscribeEvent
+	//@SubscribeEvent
 	public void registerItemColors(RegisterColorHandlersEvent.Item event) {
 		for(CreatureType creatureType : CreatureManager.getInstance().creatureTypes.values()) {
-			if(creatureType.spawnEgg != null) {
-				event.getItemColors().register(new ItemColorCustomSpawnEgg(), creatureType.spawnEgg);
+			if(creatureType.spawnEgg.get() != null) {
+				event.getItemColors().register(new ItemColorCustomSpawnEgg(), creatureType.spawnEgg.get());
 			}
 		}
 	}

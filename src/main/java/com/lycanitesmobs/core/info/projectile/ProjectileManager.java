@@ -54,6 +54,12 @@ public class ProjectileManager extends JSONLoader {
 	public void startup(ModInfo modInfo) {
 		this.loadAllFromJSON(modInfo);
 		for(ProjectileInfo projectileInfo : this.projectiles.values()) {
+			EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
+			entityTypeBuilder.setTrackingRange(40);
+			entityTypeBuilder.setUpdateInterval(3);
+			entityTypeBuilder.setShouldReceiveVelocityUpdates(true);
+			entityTypeBuilder.sized(projectileInfo.width, projectileInfo.height);
+			LycanitesMobs.ENTITY_TYPES.register(projectileInfo.getName(),() -> entityTypeBuilder.build(projectileInfo.getName()));
 			projectileInfo.load();
 		}
 		this.loadOldProjectiles();
@@ -88,7 +94,7 @@ public class ProjectileManager extends JSONLoader {
 	 * Registers all creatures added to this creature manager, called from the registry event.
 	 * @param event The entity register event.
 	 */
-	@SubscribeEvent
+	//@SubscribeEvent
 	public void registerEntities(RegisterEvent event) {
 		LycanitesMobs.logDebug("Projectile", "Forge registering all " + this.projectiles.size() + " projectiles...");
 
@@ -97,7 +103,6 @@ public class ProjectileManager extends JSONLoader {
 				helper -> {
 					for(ProjectileInfo projectileInfo : this.projectiles.values()) {
 						helper.register(new ResourceLocation(LycanitesMobs.MODID, projectileInfo.name), projectileInfo.getEntityType());
-
 					}
 				}
 		);

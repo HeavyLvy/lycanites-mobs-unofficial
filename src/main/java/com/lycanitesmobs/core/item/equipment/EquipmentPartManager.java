@@ -9,18 +9,21 @@ import com.lycanitesmobs.core.StreamLoader;
 import com.lycanitesmobs.core.info.ItemInfo;
 import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.info.ModInfo;
+import com.lycanitesmobs.core.item.GenericItem;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class EquipmentPartManager extends JSONLoader {
 
 	public static EquipmentPartManager INSTANCE;
 
-	public Map<String, ItemEquipmentPart> equipmentParts = new HashMap<>();
+	public Map<String, Supplier<ItemEquipmentPart>> equipmentParts = new HashMap<>();
 
 	/** A list of mod groups that have loaded with this Equipment Part Manager. **/
 	public List<ModInfo> loadedGroups = new ArrayList<>();
@@ -45,22 +48,24 @@ public class EquipmentPartManager extends JSONLoader {
 	@Override
 	public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
 		Item.Properties properties = new Item.Properties().stacksTo(1).setNoRepair();
-		ItemEquipmentPart equipmentPart = new ItemEquipmentPart(properties);
-		equipmentPart.loadFromJSON(json);
-		if(this.equipmentParts.containsKey(equipmentPart.itemName)) {
-			LycanitesMobs.logWarning("", "[Equipment] Tried to add a Equipment Part with a name that is already in use: " + equipmentPart.itemName);
-			throw new RuntimeException("[Equipment] Tried to add a Equipment Part with a name that is already in use: " + equipmentPart.itemName);
+		Supplier<ItemEquipmentPart> equipmentPart = () -> new ItemEquipmentPart(properties,json);
+		String name = ItemEquipmentPart.getPartName(json);
+		//RegistryObject<Item> partObject = LycanitesMobs.ITEMS.register(name, equipmentPart);
+		//equipmentPart.loadFromJSON(json);
+		if(this.equipmentParts.containsKey(name)) {
+			LycanitesMobs.logWarning("", "[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
+			throw new RuntimeException("[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
 		}
-		if(this.equipmentParts.values().contains(equipmentPart)) {
-			LycanitesMobs.logWarning("", "[Equipment] Tried to add a Equipment Part that is already added: " + equipmentPart.itemName);
-			throw new RuntimeException("[Equipment] Tried to add a Equipment Part that is already added: " + equipmentPart.itemName);
-		}
-		this.equipmentParts.put(equipmentPart.itemName, equipmentPart);
+		/*if(this.equipmentParts.values().contains(equipmentPart)) {
+			LycanitesMobs.logWarning("", "[Equipment] Tried to add a Equipment Part that is already added: " + name);
+			throw new RuntimeException("[Equipment] Tried to add a Equipment Part that is already added: " + name);
+		}*/
+		this.equipmentParts.put(name, equipmentPart);
 		/* Creative Tab Builder **/
 		ItemManager.getInstance().equipmentPartsGroup.displayItems((enabledFeatures, entries) -> {
-			entries.accept(equipmentPart);
+			entries.accept(equipmentPart::get);
 		});
-		ObjectManager.addItem(equipmentPart.itemName,() -> equipmentPart);
+		ObjectManager.addItem(name,equipmentPart);
 	}
 
 	/**

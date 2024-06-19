@@ -12,11 +12,14 @@ import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
 import com.lycanitesmobs.core.item.equipment.EquipmentPartManager;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class ModelManager {
 	private static ModelManager INSTANCE;
@@ -72,8 +75,8 @@ public class ModelManager {
 
 		// Equipment Models:
 		this.equipmentModel = new EquipmentModel();
-		for(ItemEquipmentPart equipmentPart : EquipmentPartManager.getInstance().equipmentParts.values()) {
-			this.equipmentPartModels.put(equipmentPart, new ModelEquipmentPart(equipmentPart));
+		for(Supplier<ItemEquipmentPart> equipmentPart : EquipmentPartManager.getInstance().equipmentParts.values()) {
+			this.equipmentPartModels.put(equipmentPart.get(), new ModelEquipmentPart(equipmentPart.get()));
 		}
 	}
 

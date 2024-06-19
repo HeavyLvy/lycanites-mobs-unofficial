@@ -35,12 +35,13 @@ public class RenderRegister {
     }
     @SubscribeEvent
     public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
+        if (true) return;
         LycanitesMobs.LOGGER.info("LycanitesMobs: Registering Renderers!" + CreatureManager.getInstance().creatures.size());
         // Creatures:
         for(CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
             if(creatureInfo.dummy) {
                 //LMHelperClass.cast() is used here because its not happy with it not being ? extends T, this is a safe cast.
-                event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType().builtInRegistryHolder().get()), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
+                event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
             }
 
             event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new CreatureRenderer<>(creatureInfo.getName(), dispatcher, (float) creatureInfo.width / 2));
@@ -77,6 +78,7 @@ public class RenderRegister {
     }
 
     public void registerBlockRenderLayers() {
+        if (true) return;
         for(Block block : ItemManager.getInstance().cutoutBlocks) {
             ItemBlockRenderTypes.setRenderLayer(block, RenderType.cutout());
         }

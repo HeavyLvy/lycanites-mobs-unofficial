@@ -20,7 +20,6 @@ import org.joml.Vector3d;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class ExtendedEntity {
 	public static Map<Entity, ExtendedEntity> clientExtendedEntities = new HashMap<>();
@@ -103,10 +102,6 @@ public class ExtendedEntity {
 	/** Initially sets the entity. **/
 	public void setEntity(LivingEntity entity) {
 		this.entity = entity;
-		if (this.entity == null) {
-			this.entityUUID = entity.getUUID();
-		}
-
 	}
 
 	public LivingEntity getEntity() {
@@ -421,20 +416,7 @@ public class ExtendedEntity {
 		clientExtendedEntities.remove(this.entity);
 	}
 
-	public UUID entityUUID = null;
 
-	public UUID getEntityUUID() {
-		if (entityUUID == null) {
-			if (this.entity != null) {
-				entityUUID = entity.getUUID();
-			}
-		}
-		return entityUUID;
-	}
-
-	public void setEntityUUID(UUID entityUUID) {
-		this.entityUUID = entityUUID;
-	}
 	// ==================================================
 	//                        NBT
 	// ==================================================
@@ -447,6 +429,9 @@ public class ExtendedEntity {
 	// ========== Write ==========
 	/** Writes a list of Creature Knowledge to a player's NBTTag. **/
 	public void writeNBT(CompoundTag nbtTagCompound) {
-		nbtTagCompound.putUUID("extendedEntity", getEntityUUID());
+		/*ExtendedEntity extendedEntity = (ExtendedEntity)instance;
+		CompoundNBT extTagCompound = new CompoundNBT();
+		extendedEntity.writeNBT(extTagCompound);
+		return extTagCompound;*/
 	}
 }

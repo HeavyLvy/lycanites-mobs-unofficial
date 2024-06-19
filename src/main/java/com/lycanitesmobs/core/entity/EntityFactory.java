@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.entity;
 import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.network.PlayMessages;
 
@@ -10,6 +11,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public class EntityFactory implements EntityType.EntityFactory<Entity> {
 	public static EntityFactory INSTANCE;
@@ -23,7 +25,7 @@ public class EntityFactory implements EntityType.EntityFactory<Entity> {
 
 	public Map<EntityType, Constructor<? extends Entity>> entityTypeConstructorMap = new HashMap<>();
 	public Map<Constructor<? extends Entity>, EntityType> entityConstructorTypeMap = new HashMap<>();
-	public Map<String, EntityType> entityTypeNetworkMap = new HashMap<>();
+	public Map<String,EntityType> entityTypeNetworkMap = new HashMap<>();
 
 	/**
 	 * Adds a new Entity Type and Entity Class mapping for this Factory to create.
@@ -31,7 +33,7 @@ public class EntityFactory implements EntityType.EntityFactory<Entity> {
 	 * @param entityClass The Entity Class to instantiate for the type.
 	 */
 	public void addEntityType(EntityType entityType, Constructor<? extends Entity> entityClass, String networkName) {
-		LycanitesMobs.logDebug("Entity", "Adding entity: " + entityClass + " Type: " + entityType.getDescription() + " Classification: " + entityType.getCategory());
+		//LycanitesMobs.logDebug("Entity", "Adding entity: " + entityClass + " Type: " + entityType.getDescription() + " Classification: " + entityType.getCategory());
 		this.entityTypeConstructorMap.put(entityType, entityClass);
 		this.entityConstructorTypeMap.put(entityClass, entityType);
 		this.entityTypeNetworkMap.put(networkName, entityType);

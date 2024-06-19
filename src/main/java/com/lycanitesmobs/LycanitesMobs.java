@@ -36,6 +36,7 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
@@ -132,6 +133,8 @@ public class LycanitesMobs {
 
 		// Setup Event Listeners:
 		ITEMS.register(modEventBus);
+		ENTITY_TYPES.register(modEventBus);
+
 		WorldGenManager.registerPlacements(modEventBus);
 		ObjectManager.registerContainers(modEventBus);
 		//ItemManager.registerItem(modEventBus);
@@ -159,9 +162,9 @@ public class LycanitesMobs {
 
 		// Network:
 		packetHandler.register();
-
 		// Load Content:
 		this.loadContent();
+
 	}
 
 	// Content Loading:
@@ -174,9 +177,11 @@ public class LycanitesMobs {
 
 		// Potion Effects:
 		EFFECTS = new Effects();
+		//Registry Objects
+		LycanitesMobs.registryObjects();
 
 		// Spawners:
-		SpawnerManager.getInstance().loadAllFromJson(modInfo);
+		//SpawnerManager.getInstance().loadAllFromJson(modInfo);
 
 		// Altars:
 		AltarInfo.createAltars();
@@ -194,21 +199,21 @@ public class LycanitesMobs {
 		// World Gen:
 		WorldGenManager.getInstance().startup();
 
-		//Registry Objects
-		LycanitesMobs.registryObjects();
+
 
 	}
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
+	public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
 
 	public static void registryObjects() {
 		// Blocks and Items:
 		ItemManager.getInstance().startup(modInfo);
 		// Equipment Parts:
-		EquipmentPartManager.getInstance().loadAllFromJson(modInfo);
+		//EquipmentPartManager.getInstance().loadAllFromJson(modInfo);
 		// Creatures:
-		CreatureManager.getInstance().startup(modInfo);
+		//CreatureManager.getInstance().startup(modInfo);
 		// Projectiles:
-		ProjectileManager.getInstance().startup(modInfo);
+		//ProjectileManager.getInstance().startup(modInfo);
 	}
 	private void commonSetup(final FMLCommonSetupEvent event) {
 		configReady = true;

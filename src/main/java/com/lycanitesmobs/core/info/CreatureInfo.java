@@ -8,6 +8,7 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.core.entity.*;
 import com.lycanitesmobs.core.helpers.JSONHelper;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
@@ -15,12 +16,15 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import org.joml.Vector3d;
 import net.minecraft.network.chat.Component;
 
@@ -29,6 +33,7 @@ import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.List;
+import java.util.function.Supplier;
 
 /** Contains various information about a creature from default spawn information to stats, etc. **/
 public class CreatureInfo {
@@ -56,7 +61,8 @@ public class CreatureInfo {
 	public ModInfo modInfo;
 
 	/** The entity type used to store base attributes of this creature. **/
-	protected EntityType<? extends LivingEntity> entityType;
+	protected EntityType entityType = null;
+	//public Map<String, Supplier<EntityType<? extends LivingEntity>>> entityTypes;
 
 	/** If false, this mob will be removed from the world if present and wont be allowed by any spawners. **/
 	public boolean enabled = true;
@@ -238,7 +244,7 @@ public class CreatureInfo {
 		}
 
 		// Spawning:
-		this.creatureSpawn.loadFromJSON(this, json.get("spawning").getAsJsonObject());
+		//this.creatureSpawn.loadFromJSON(this, json.get("spawning").getAsJsonObject());
 
 		// Size:
 		if(json.has("width"))
@@ -466,13 +472,18 @@ public class CreatureInfo {
 	public List<CreatureGroup> getGroups() {
 		return this.groups;
 	}
-
+	public static final Map<String, EntityType<?>> entityTypes = new HashMap<>();
 
 	/**
 	 * Returns the entity type of this creature.
 	 * @return Creature's entity type.
 	 */
 	@Nonnull
+	public EntityType getEntityType() {
+        this.entityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(LycanitesMobs.MODID, this.getName()));
+		return this.entityType;
+	}
+	/*@Nonnull
 	public EntityType<? extends LivingEntity> getEntityType() {
 		if(this.entityType == null) {
 			EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), this.peaceful ? MobCategory.CREATURE : MobCategory.MONSTER);
@@ -481,12 +492,13 @@ public class CreatureInfo {
 			entityTypeBuilder.setUpdateInterval(3);
 			entityTypeBuilder.setShouldReceiveVelocityUpdates(false);
 			entityTypeBuilder.sized((float)this.width, (float)this.height);
-			this.entityType = entityTypeBuilder.build(this.getName());
+			Supplier<EntityType> registryObject = () -> entityTypeBuilder.build(this.getName());
+			this.entityType = registryObject.get();
 			this.setRegistryName(LycanitesMobs.MODID, this.getName());
 			EntityFactory.getInstance().addEntityType(this.entityType, this.entityConstructor, this.getName());
 		}
 		return this.entityType;
-	}
+	}*/
 	public ResourceLocation registryName;
 	public ResourceLocation getRegistryName() {
 		return registryName;

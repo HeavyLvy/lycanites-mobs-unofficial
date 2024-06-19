@@ -120,8 +120,8 @@ public class ItemInfo {
 
 		// Create Item:
 		String finalModelName = modelName;
-		RegistryObject<Item> item = LycanitesMobs.ITEMS.register(name, () -> new GenericItem(properties, this.name, finalModelName));
-		items.put(name, item);
+		Supplier<Item> item = () -> new GenericItem(properties, this.name, finalModelName);
+		ObjectManager.addItem(name, item);
 		//this.getItem().modelName = modelName;
 		/*
 		 * Creative Mode Tab

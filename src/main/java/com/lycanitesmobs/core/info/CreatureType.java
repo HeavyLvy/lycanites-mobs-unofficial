@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class CreatureType {
 
@@ -34,16 +35,16 @@ public class CreatureType {
 	public List<CreatureInfo> tameableCreatures = new ArrayList<>();
 
 	/** The treat item this type uses. **/
-	public Item treat;
+	public Supplier<Item> treat;
 
 	/** The saddle item this type uses. **/
-	public Item saddle;
+	public Supplier<Item> saddle;
 
 	/** The soulstone item this type uses. **/
-	public ItemSoulstone soulstone;
+	public Supplier<ItemSoulstone> soulstone;
 
 	/** The spawn egg item this type uses. **/
-	public Item spawnEgg;
+	public Supplier<Item> spawnEgg;
 
 	/** The diet type this Creature Type provides as food for predators. "none" by default. **/
 	public String dietProvided = "none";
@@ -102,7 +103,7 @@ public class CreatureType {
 	 * @return The treat item for this creature type.
 	 */
 	public Item getTreatItem() {
-		return this.treat;
+		return this.treat.get();
 	}
 
 	/**
@@ -118,7 +119,7 @@ public class CreatureType {
 	 * @return The saddle item for this creature type.
 	 */
 	public Item getSaddleItem() {
-		return this.saddle;
+		return this.saddle.get();
 	}
 
 	/**
@@ -134,7 +135,7 @@ public class CreatureType {
 	 * @return The soulstone item for this creature type.
 	 */
 	public ItemSoulstone getSoulstoneItem() {
-		return this.soulstone;
+		return this.soulstone.get();
 	}
 
 	/**
@@ -151,7 +152,7 @@ public class CreatureType {
 	 * @return The spawn egg item for this creature type.
 	 */
 	public Item getSpawnEggItem() {
-		return this.spawnEgg;
+		return this.spawnEgg.get();
 	}
 
 	/**
@@ -183,19 +184,21 @@ public class CreatureType {
 		Item.Properties spawnEggProperties = new Item.Properties();
 
 		// Treat:
-		this.treat = new CreatureTreatItem(smallStackItemProperties, this);
-		ObjectManager.addItem(this.getTreatName(),() -> this.treat);
+		this.treat = () -> new CreatureTreatItem(smallStackItemProperties, this);
+		ObjectManager.addItem(this.getTreatName(),this.treat);
 
 		// Saddle:
-		this.saddle = new CreatureSaddleItem(smallStackItemProperties, this);
-		ObjectManager.addItem(this.getSaddleName(),() -> this.saddle);
+		this.saddle = () -> new CreatureSaddleItem(smallStackItemProperties, this);
+		//this.saddleItems.put(this.getName(),this.saddle);
+		ObjectManager.addItem(this.getSaddleName(),this.saddle);
+
 
 		// Spawn Eggs:
-		this.spawnEgg = new ItemCustomSpawnEgg(spawnEggProperties, this);
-		ObjectManager.addItem(this.getSpawnEggName(),() -> this.spawnEgg);
+		this.spawnEgg = () -> new ItemCustomSpawnEgg(spawnEggProperties, this);
+		ObjectManager.addItem(this.getSpawnEggName(),this.spawnEgg);
 
 		// Soulstone:
-		this.soulstone = new ItemSoulstoneFilled(standardItemProperties, this);
-		ObjectManager.addItem(this.getSoulstoneName(),() -> this.soulstone);
+		this.soulstone = () -> new ItemSoulstoneFilled(standardItemProperties, this);
+		ObjectManager.addItem(this.getSoulstoneName(),this.soulstone);
 	}
 }

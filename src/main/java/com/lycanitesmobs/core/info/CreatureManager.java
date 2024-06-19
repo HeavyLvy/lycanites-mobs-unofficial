@@ -8,10 +8,12 @@ import com.lycanitesmobs.core.StreamLoader;
 import com.lycanitesmobs.core.config.ConfigCreatures;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.CreatureStats;
+import com.lycanitesmobs.core.entity.EntityFactory;
 import com.lycanitesmobs.core.spawner.SpawnerMobRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -39,6 +41,7 @@ public class CreatureManager extends JSONLoader {
 
 	/** A map of all creatures by name. **/
 	public Map<String, CreatureInfo> creatures = new HashMap<>();
+	public static Map<String, EntityType.Builder> entityTypeBuilders = new HashMap<>();
 
 	/** A map of all creatures by class. **/
 	public Map<Class, CreatureInfo> creatureClassMap = new HashMap<>();
@@ -92,6 +95,14 @@ public class CreatureManager extends JSONLoader {
 			creatureGroup.init();
 		}
 		for(CreatureInfo creatureInfo : this.creatures.values()) {
+				LycanitesMobs.logInfo("", "EntityType Registry: "+ creatureInfo.getName());
+				EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), creatureInfo.peaceful ? MobCategory.CREATURE : MobCategory.MONSTER)
+						.setTrackingRange(creatureInfo.isBoss() ? 32 : 10)
+						.setUpdateInterval(3)
+						.setShouldReceiveVelocityUpdates(false)
+						.sized((float) creatureInfo.width, (float) creatureInfo.height);
+			//entityTypeBuilders.put(creatureInfo.getName(), entityTypeBuilder);
+			LycanitesMobs.ENTITY_TYPES.register(creatureInfo.getName(),() -> entityTypeBuilder.build(creatureInfo.getName()));
 			creatureInfo.init();
 		}
 	}
@@ -167,6 +178,7 @@ public class CreatureManager extends JSONLoader {
 			}
 
 			this.creatures.put(creatureInfo.name, creatureInfo);
+			LycanitesMobs.logInfo("",   "Putting creature in creatures map: " + creatureInfo.name);
 			this.creatureClassMap.put(creatureInfo.entityClass, creatureInfo);
 		}
 	}
@@ -200,14 +212,14 @@ public class CreatureManager extends JSONLoader {
 				helper -> {
 					LycanitesMobs.logDebug("Creature", "Forge registering all " + this.creatures.size() + " creatures...");
 					for(CreatureInfo creatureInfo : this.creatures.values()) {
-						helper.register(creatureInfo.registryName, creatureInfo.getEntityType());
+						//helper.register(creatureInfo.registryName, entityTypeBuilders.get(creatureInfo.getName()).build(creatureInfo.getName()));
 					}
 				}
 		);
 
 	}
 
-	@SubscribeEvent
+	//@SubscribeEvent
 	public void registerEntityAttributes(EntityAttributeCreationEvent event) {
 		for(CreatureInfo creatureInfo : this.creatures.values()) {
 			event.put(creatureInfo.getEntityType(), BaseCreatureEntity.registerCustomAttributes().build());

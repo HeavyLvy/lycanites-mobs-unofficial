@@ -11,6 +11,8 @@ import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.info.ObjectLists;
 import com.lycanitesmobs.core.item.BaseItem;
+import com.lycanitesmobs.core.item.equipment.ItemEquipment;
+import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.tileentity.EquipmentInfuserTileEntity;
 import com.lycanitesmobs.core.tileentity.EquipmentStationTileEntity;
 import com.lycanitesmobs.core.tileentity.TileEntityEquipmentForge;
@@ -19,10 +21,7 @@ import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -40,12 +39,12 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static com.lycanitesmobs.core.info.ItemManager.registryItems;
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ObjectManager {
@@ -59,7 +58,7 @@ public class ObjectManager {
 	// Maps:
 	public static Map<String, Block> blocks = new HashMap<>();
 	public static Map<String, LiquidBlock> liquidBlocks = new HashMap<>();
-	public static final Map<String, RegistryObject<Item>> items = new HashMap<>();
+	public static final Map<String, RegistryObject<? extends Item>> items = new HashMap<>();
     public static Map<Item, ModInfo> itemGroups = new HashMap<>();
 	public static Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
     public static Map<Block, Item> buckets = new HashMap<>();
@@ -121,6 +120,7 @@ public class ObjectManager {
 	// ========== Item ==========
 	public static void addItem(String name, Supplier<? extends Item> itemSupplier) {
 		RegistryObject<Item> item = LycanitesMobs.ITEMS.register(name, itemSupplier);
+		//LycanitesMobs.ITEMS.register(name,item);
 		items.put(name, item);
 	}
 
@@ -252,7 +252,7 @@ public class ObjectManager {
     public void registerItems(RegisterEvent event) {
 		event.register(ForgeRegistries.Keys.ITEMS,
 				helper -> {
-					for(RegistryObject<Item> item : items.values()) {
+					for(Supplier<?> item : items.values()) {
 						if (item.get() instanceof BaseItem baseItem){
 							LycanitesMobs.logDebug("Item", "Registering item: " + baseItem.getRegistryName());
 							if(baseItem.getRegistryName() == null) {
@@ -340,6 +340,30 @@ public class ObjectManager {
 				}
 		);
 
+	}
+	public static final Map<String, EntityType<?>> entityTypes = new HashMap<>();
+
+	public static void addEntityType(String name, EntityType.Builder<? extends LivingEntity> builder) {
+		//if (!entityTypes.keySet().contains(name)) {
+			RegistryObject<EntityType<? extends LivingEntity>> entityType = LycanitesMobs.ENTITY_TYPES.register(name, () -> builder.build(name));
+			entityTypes.put(name, entityType.get());
+		//}
+	}
+
+	/*public static void loadEntityTypes() {
+		addEntityType("your_entity_name", EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.CREATURE)
+				.setTrackingRange(10)
+				.setUpdateInterval(3)
+				.setShouldReceiveVelocityUpdates(false)
+				.sized(0.6F, 1.8F));
+	}*/
+
+	@Nonnull
+	public static EntityType<? extends LivingEntity> getEntityType(String name) {
+		LMHelperClass.environmentRunnable(false,() -> {
+			LycanitesMobs.logInfo("", "EntityType: " + name);
+		});
+		return (EntityType<? extends LivingEntity>) entityTypes.get(name);
 	}
 
 	// ========== Sounds ==========

@@ -228,7 +228,7 @@ public class WorldSpawnCondition extends SpawnCondition {
 	 */
 	public boolean isAllowedBiome(Level world, BlockPos position) {
 		if(position != null) {
-			String biomeId = LMHelperClass.convertToResourceLocation(world.getBiomeManager().getBiome(position)).toString();
+			String biomeId = LMHelperClass.convertToResourceLocation(world.getBiomeManager().getBiome(position).get()).toString();
 
 			// Biome IDs:
 			if (!this.biomeIds.isEmpty()) {

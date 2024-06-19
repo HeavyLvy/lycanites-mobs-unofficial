@@ -14,6 +14,7 @@ import com.lycanitesmobs.core.block.fluid.type.BaseFluidType;
 import com.lycanitesmobs.core.item.*;
 import com.lycanitesmobs.core.item.consumable.*;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
+import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.item.special.ItemSoulContract;
 import com.lycanitesmobs.core.item.special.ItemSoulgazer;
 import com.lycanitesmobs.core.item.special.ItemSoulkey;
@@ -41,10 +42,7 @@ import org.joml.Vector3f;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ItemManager extends JSONLoader {
@@ -92,9 +90,8 @@ public class ItemManager extends JSONLoader {
 	 * @param modInfo The mod loading this manager.
 	 */
 	public void startup(ModInfo modInfo) {
-		loadAllFromJson(modInfo);
 		loadItems();
-
+		loadAllFromJson(modInfo);
 	}
 
 
@@ -111,6 +108,7 @@ public class ItemManager extends JSONLoader {
 	public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
 		ItemInfo itemInfo = new ItemInfo(modInfo);
 		itemInfo.loadFromJSON(json);
+		if (Objects.equals(itemInfo.name, "unamed_item")) return;
 		this.items.put(itemInfo.name, itemInfo);
 	}
 	/*private static final DeferredRegister<Item> ITEM_DEFERRED_REGISTER = DeferredRegister.create(ForgeRegistries.ITEMS, LycanitesMobs.MODID);

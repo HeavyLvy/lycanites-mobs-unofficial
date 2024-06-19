@@ -67,10 +67,13 @@ public class ItemEquipmentPart extends BaseItem {
 	/**
 	 * Constructor
 	 */
-	public ItemEquipmentPart(Item.Properties properties) {
+	public ItemEquipmentPart(Item.Properties properties,JsonObject jsonObject) {
 		super(properties);
+		loadFromJSON(jsonObject);
 	}
-
+	public static String getPartName(JsonObject json) {
+		return "equipmentpart_" + json.get("itemName").getAsString();
+	}
 	/** Loads this part from a JSON object. **/
 	public void loadFromJSON(JsonObject json) {
 		this.itemName = "equipmentpart_" + json.get("itemName").getAsString();

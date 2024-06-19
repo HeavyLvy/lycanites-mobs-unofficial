@@ -38,6 +38,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ProjectileInfo {
 
@@ -66,7 +67,7 @@ public class ProjectileInfo {
 
 	// Item:
 	/** The item used to fire this projectile from a dispenser and on use. **/
-	public Item chargeItem;
+	public Supplier<Item> chargeItem;
 	/** The name of the charge item for this projectile. Can be automatically generated using the name of this projectile or overridden. **/
 	public String chargeItemName;
 	/** If true, no charge item is generated for this projectile. **/
@@ -274,18 +275,14 @@ public class ProjectileInfo {
 	public void load() {
 		// Charge Item:
 		if(!this.noChargeItem) {
-			this.chargeItem = ObjectManager.getItem(this.chargeItemName);
-			if (this.chargeItem == null) {
+			this.chargeItem = () -> ObjectManager.getItem(this.chargeItemName);
+			if (this.chargeItem.get() == null) {
 				Item.Properties properties = new Item.Properties();
 				//properties.tab(ItemManager.getInstance().chargesGroup);
-				this.chargeItem = new ChargeItem(properties, this);
-				ObjectManager.addItem(this.chargeItemName,() -> this.chargeItem);
+				this.chargeItem = () -> new ChargeItem(properties, this);
+				ObjectManager.addItem(this.chargeItemName,this.chargeItem);
 			}
-
-			// Dispenser:
-			this.dispenserBehaviour = new BaseProjectileDispenseBehaviour(this);
-			DispenserBlock.registerBehavior(this.chargeItem, this.dispenserBehaviour);
-		}
+			}
 
 		// Sounds:
 		ObjectManager.addSound(name, "projectile." + name);
@@ -342,7 +339,11 @@ public class ProjectileInfo {
 	 * Returns the entity type of this projectile.
 	 * @return Projectiles's entity type.
 	 */
-	@Nonnull
+	public EntityType getEntityType() {
+        this.entityType = (EntityType) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(LycanitesMobs.MODID, this.getName()));
+		return this.entityType;
+	}
+	/*@Nonnull
 	public EntityType<? extends BaseProjectileEntity> getEntityType() {
 		if(this.entityType == null) {
 			EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
@@ -356,7 +357,7 @@ public class ProjectileInfo {
 			EntityFactory.getInstance().addEntityType(this.entityType, this.entityConstructor, this.getName());
 		}
 		return this.entityType;
-	}
+	}*/
 
 	/**
 	 * Returns the resource location for this projectile.
