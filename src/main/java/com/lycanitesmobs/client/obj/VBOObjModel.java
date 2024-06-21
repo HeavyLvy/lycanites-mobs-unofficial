@@ -31,7 +31,7 @@ public class VBOObjModel extends ObjModel {
 		}
 
 		if (renderNormal) {
-			VBOBatcher.getInstance().queue(renderType, 
+			VBOBatcher.getInstance().queue(renderType,
 					new VBODrawCommand(objPart.mesh.getVbo(), objPart.mesh.indices.length, renderType.format(), matrix4f, tex)
 							.setColor(color)
 							.setTextureOffset(textureOffset)
@@ -39,7 +39,7 @@ public class VBOObjModel extends ObjModel {
 							.setLightOffset(brightness));
 		}
 		if (renderOutline) {
-			VBOBatcher.getInstance().queue(CustomRenderStates.OBJ_OUTLINE_RENDER_TYPE, 
+			VBOBatcher.getInstance().queue(CustomRenderStates.OBJ_OUTLINE_RENDER_TYPE,
 					new VBODrawCommand(objPart.mesh.getVbo(), objPart.mesh.indices.length, renderType.format(), matrix4f, tex));
 		}
 	}

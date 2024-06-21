@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.obj;
 
+import com.lycanitesmobs.LycanitesMobs;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -42,22 +43,27 @@ public class Mesh {
 			for (int i = 0; i < this.indices.length; i++) {
 				Vertex vertex = this.vertices[this.indices[i]];
 				Vector3f normal = this.normals[i];
-				bufferBuilder.vertex(vertex.getPos().x(), vertex.getPos().y(), vertex.getPos().z())
-						.uv(vertex.getTexCoords().x, 1.0F - vertex.getTexCoords().y)
-						.normal(normal.x(), normal.y(), normal.z())
-						.endVertex();
+				bufferBuilder.vertex(vertex.getPos().x(), vertex.getPos().y(), vertex.getPos().z());
+				bufferBuilder.uv(vertex.getTexCoords().x, 1.0F - vertex.getTexCoords().y);
+				bufferBuilder.normal(normal.x(), normal.y(), normal.z());
+				bufferBuilder.endVertex();
 			}
 			bufferBuilder.end();
 
 			this.vbo = GL21.glGenBuffers();
 			GL21.glBindBuffer(GL21.GL_ARRAY_BUFFER, vbo);
-			GL21.glBufferData(GL21.GL_ARRAY_BUFFER, bufferBuilder.end().vertexBuffer().slice(), GL21.GL_STATIC_DRAW);
+			GL21.glBufferData(GL21.GL_ARRAY_BUFFER, popNextBuffer(bufferBuilder), GL21.GL_STATIC_DRAW);
 			GL21.glBindBuffer(GL21.GL_ARRAY_BUFFER, 0);
 		}
 
 		return this.vbo;
 	}
-
+	public ByteBuffer popNextBuffer(BufferBuilder bufferBuilder) {
+		ByteBuffer bytebuffer = bufferBuilder.buffer.slice();
+		bytebuffer.order(bufferBuilder.buffer.order());
+		bufferBuilder.buffer.clear();
+		return bytebuffer;
+	}
 
 	private static Vector3f calcNormal(Vector3f v1, Vector3f v2, Vector3f v3) {
 		Vector3f output = new Vector3f();

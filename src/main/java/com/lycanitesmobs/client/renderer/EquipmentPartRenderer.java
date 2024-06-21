@@ -33,6 +33,7 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
 		super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
 	}
 
+
 	@Override
 	public void renderByItem(ItemStack itemStack, ItemDisplayContext transformType, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness, int unknown) {
 		if(!(itemStack.getItem() instanceof ItemEquipmentPart)) {

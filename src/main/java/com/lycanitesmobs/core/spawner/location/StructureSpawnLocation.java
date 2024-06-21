@@ -54,8 +54,12 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
 
 		List<BlockPos> spawnPositions = new ArrayList<>();
 		for(ResourceLocation structureId : this.structureIds) {
-			Structure spawnStructure = RegistryManager.ACTIVE.getRegistry(Registries.STRUCTURE).getValue(structureId);
-			TagKey<Structure> lycaniteStructures = StructureTags.create("lycaniteStructures");
+			Structure spawnStructure = null;
+			if (RegistryManager.ACTIVE.getRegistry(Registries.STRUCTURE.location()) != null) {
+				spawnStructure = (Structure) RegistryManager.ACTIVE.getRegistry(Registries.STRUCTURE.location()).getValue(structureId);
+			}
+
+			TagKey<Structure> lycaniteStructures = TagKey.create(Registries.STRUCTURE, new ResourceLocation(LycanitesMobs.MODID,"lycanitestructures"));
 
 			if (spawnStructure == null) {
 				continue;

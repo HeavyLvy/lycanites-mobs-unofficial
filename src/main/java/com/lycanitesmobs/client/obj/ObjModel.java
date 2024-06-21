@@ -16,30 +16,30 @@ public class ObjModel {
 	public String filename;
 	public List<ObjPart> objParts = new ArrayList<>();
 
-    public ObjModel(ResourceLocation resourceLocation) {
+	public ObjModel(ResourceLocation resourceLocation) {
 		this.filename = resourceLocation.getPath();
-        String path = resourceLocation.toString();
-        try {
+		String path = resourceLocation.toString();
+		try {
 			InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(resourceLocation).get().open();
-            String content = new String(read(inputStream), "UTF-8");
-            String startPath = path.substring(0, path.lastIndexOf('/') + 1);
-            HashMap<ObjPart, IndexedModel> map = new OBJLoader().loadModel(startPath, content);
+			String content = new String(read(inputStream), "UTF-8");
+			String startPath = path.substring(0, path.lastIndexOf('/') + 1);
+			HashMap<ObjPart, IndexedModel> map = new OBJLoader().loadModel(startPath, content);
 			this.objParts.clear();
-            Set<ObjPart> keys = map.keySet();
-            Iterator<ObjPart> it = keys.iterator();
-            while(it.hasNext()) {
-                ObjPart objPart = it.next();
-                Mesh mesh = new Mesh();
-                objPart.mesh = mesh;
-                this.objParts.add(objPart);
-                map.get(objPart).toMesh(mesh);
-            }
-        }
-        catch(Exception e) {
+			Set<ObjPart> keys = map.keySet();
+			Iterator<ObjPart> it = keys.iterator();
+			while(it.hasNext()) {
+				ObjPart objPart = it.next();
+				Mesh mesh = new Mesh();
+				objPart.mesh = mesh;
+				this.objParts.add(objPart);
+				map.get(objPart).toMesh(mesh);
+			}
+		}
+		catch(Exception e) {
 			LycanitesMobs.logWarning("", "Unable to load model: " + resourceLocation);
-            e.toString();
-        }
-    }
+			e.toString();
+		}
+	}
 
 	protected byte[] read(InputStream resource) throws IOException {
 		int i;
@@ -72,27 +72,27 @@ public class ObjModel {
 		return output;
 	}
 
-    public void renderAll(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, Vector4f color, Vector2f textureOffset) {
-        Collections.sort(this.objParts, (a, b) -> {
+	public void renderAll(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, Vector4f color, Vector2f textureOffset) {
+		Collections.sort(this.objParts, (a, b) -> {
 			Vec3 v = Minecraft.getInstance().getCameraEntity().position();
 			double aDist = v.distanceTo(new Vec3(a.center.x(), a.center.y(), a.center.z()));
 			double bDist = v.distanceTo(new Vec3(b.center.x(), b.center.y(), b.center.z()));
 			return Double.compare(aDist, bDist);
 		});
-        for(ObjPart objPart : this.objParts) {
-            this.renderPart(vertexBuilder, matrix3f, matrix4f, brightness, fade, objPart, color, textureOffset);
-        }
-    }
+		for(ObjPart objPart : this.objParts) {
+			this.renderPart(vertexBuilder, matrix3f, matrix4f, brightness, fade, objPart, color, textureOffset);
+		}
+	}
 
-    public void renderPartGroup(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, Vector4f color, Vector2f textureOffset, String group) {
-        for(ObjPart objPart : this.objParts) {
-            if(objPart.getName().equals(group)) {
-                renderPart(vertexBuilder, matrix3f, matrix4f, brightness, fade, objPart, color, textureOffset);
-            }
-        }
-    }
+	public void renderPartGroup(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, Vector4f color, Vector2f textureOffset, String group) {
+		for(ObjPart objPart : this.objParts) {
+			if(objPart.getName().equals(group)) {
+				renderPart(vertexBuilder, matrix3f, matrix4f, brightness, fade, objPart, color, textureOffset);
+			}
+		}
+	}
 
-    public void renderPart(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
+	public void renderPart(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
 		// Mesh data:
 		if(objPart.mesh == null) {
 			return;
@@ -103,12 +103,12 @@ public class ObjModel {
 			objPart.mesh.normals = new Vector3f[indices.length];
 		}
 
-    	// Invalid Builder:
-    	if(vertexBuilder == null) {
-    		return;
+		// Invalid Builder:
+		if(vertexBuilder == null) {
+			return;
 		}
 
-    	// Build:
+		// Build:
 		for(int i = 0; i < indices.length; i += 3) {
 
 			// Normal:
@@ -130,5 +130,6 @@ public class ObjModel {
 						.endVertex();
 			}
 		}
-    }
+	}
 }
+
