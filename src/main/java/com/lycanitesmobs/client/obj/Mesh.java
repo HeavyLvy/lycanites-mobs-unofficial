@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL21;
 
 import com.lycanitesmobs.client.renderer.CustomRenderStates;
@@ -48,16 +49,31 @@ public class Mesh {
 				bufferBuilder.normal(normal.x(), normal.y(), normal.z());
 				bufferBuilder.endVertex();
 			}
-			bufferBuilder.end();
+
+			ByteBuffer buffer;
+			try {
+				bufferBuilder.end();
+				buffer = popNextBuffer(bufferBuilder);
+			} catch (Exception e) {
+				LycanitesMobs.logError("Exception in BufferBuilder end: " + e.getMessage());
+				return -1;
+			}
 
 			this.vbo = GL21.glGenBuffers();
 			GL21.glBindBuffer(GL21.GL_ARRAY_BUFFER, vbo);
-			GL21.glBufferData(GL21.GL_ARRAY_BUFFER, popNextBuffer(bufferBuilder), GL21.GL_STATIC_DRAW);
+			GL21.glBufferData(GL21.GL_ARRAY_BUFFER, buffer, GL21.GL_STATIC_DRAW);
 			GL21.glBindBuffer(GL21.GL_ARRAY_BUFFER, 0);
+
+			int error = GL11.glGetError();
+			if (error != GL11.GL_NO_ERROR) {
+				LycanitesMobs.logError("OpenGL error after uploading buffer data: " + error);
+				this.vbo = -1;
+			}
 		}
 
 		return this.vbo;
 	}
+
 	public ByteBuffer popNextBuffer(BufferBuilder bufferBuilder) {
 		ByteBuffer bytebuffer = bufferBuilder.buffer.slice();
 		bytebuffer.order(bufferBuilder.buffer.order());
@@ -87,5 +103,6 @@ public class Mesh {
 			vbo = -1;
 		}
 	}
+
 
 }

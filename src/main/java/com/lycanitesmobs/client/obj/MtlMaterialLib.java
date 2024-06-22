@@ -102,7 +102,7 @@ public class MtlMaterialLib
         }
         return 0;
     }
-    
+
     public static ByteBuffer imageToByteBuffer(BufferedImage img)
     {
         int[] pixels = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
@@ -129,7 +129,7 @@ public class MtlMaterialLib
         oglPixelBuf.flip();
         return oglPixelBuf;
     }
-    
+
     public static int loadTexture(BufferedImage img)
     {
         ByteBuffer oglPixelBuf = imageToByteBuffer(img);

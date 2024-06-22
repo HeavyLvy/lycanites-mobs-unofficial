@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -18,10 +19,10 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL21;
+import org.lwjgl.opengl.*;
+
+import static com.lycanitesmobs.LycanitesMobs.logError;
+import static com.lycanitesmobs.LycanitesMobs.logInfo;
 
 public class VBOBatcher {
 
@@ -94,31 +95,85 @@ public class VBOBatcher {
 		}
 
 		public void draw() {
-			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-			RenderSystem.setShaderTexture(0, texLocation);
-			RenderSystem.setShaderColor(red, green, blue, alpha);
+			final int[] vao = new int[1];
+			try {
 
-			// Set shader lights and level diffuse lighting
-			RenderSystem.setShaderLights(new Vector3f(lightOffsetX, lightOffsetY, 0.0F), new Vector3f(0.0F, 0.0F, 0.0F));
-			RenderSystem.setupLevelDiffuseLighting(new Vector3f(lightOffsetX, lightOffsetY, 0.0F), new Vector3f(0.0F, 0.0F, 0.0F), new Matrix4f());
+				RenderSystem.assertOnRenderThread();
 
-			// Set shader texture and GUI flat diffuse lighting
-			RenderSystem.setShaderTexture(LMHelperClass.convertToInteger(textureOffsetX), LMHelperClass.convertToInteger(textureOffsetY));
-			RenderSystem.setupGuiFlatDiffuseLighting(new Vector3f(overlayOffsetX, overlayOffsetY, 0.0F), new Vector3f(0.0F, 0.0F, 0.0F));
 
-			RenderSystem.applyModelViewMatrix();
+				Minecraft.getInstance().getTextureManager().bindForSetup(texLocation);
 
-			// Bind VBO and setup buffer state
-			RenderSystem.glBindBuffer(GL15.GL_ARRAY_BUFFER, () -> vbo);
-			format.setupBufferState();
 
-			// Draw arrays using OpenGL
-			GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
+				RenderSystem.setShaderColor(correctedColor(red), correctedColor(green), correctedColor(blue), correctedColor(alpha));
 
-			// Cleanup states
-			RenderSystem.disableBlend();
-			RenderSystem.defaultBlendFunc();
+				RenderSystem.glGenVertexArrays(id -> {
+					vao[0] = id;
+				});
+
+				int error = GL11.glGetError();
+				if (error != GL11.GL_NO_ERROR) {
+					logError("Error after glGenVertexArrays: " + error);
+				}
+
+				if (vao[0] != 0) {
+					RenderSystem.glBindVertexArray(() -> vao[0]);
+
+					error = GL11.glGetError();
+					if (error != GL11.GL_NO_ERROR) {
+						logError("Error after glBindVertexArray: " + error);
+					}
+
+					RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> vbo);
+
+					format.setupBufferState();
+
+					error = GL11.glGetError();
+					if (error != GL11.GL_NO_ERROR) {
+						logError("Error after setupBufferState: " + error);
+					}
+
+					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
+
+					error = GL11.glGetError();
+					if (error != GL11.GL_NO_ERROR) {
+					}
+
+					format.clearBufferState();
+
+					RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> 0);
+
+					RenderSystem.glBindVertexArray(() -> 0);
+
+					RenderSystem.glDeleteVertexArrays(vao[0]);
+				} else {
+					logError("Failed to generate VAO.");
+				}
+
+			} catch (Exception e) {
+				logError("Exception in draw method: " + e.getMessage());
+			}
+
+			flushBufferBuilder();
 		}
+
+
+		private void flushBufferBuilder() {
+			BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+			if (bufferBuilder.building()) {
+				try {
+					bufferBuilder.end();
+				} catch (Exception e) {
+					logError("Exception in flushBufferBuilder: " + e.getMessage());
+				}
+			}
+		}
+		private void logError(String message) {
+			LycanitesMobs.logError(message);
+		}
+		private void logDebug(String message) {
+			logInfo("", message);
+		}
+
 
 		private static float correctedColor(float f) {
 			return ((int) (f * 255.0F) & 0xFF) / 255.0F;
