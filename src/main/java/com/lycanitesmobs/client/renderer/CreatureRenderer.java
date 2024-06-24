@@ -143,7 +143,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
 		this.getMainModel().clearAnimationFrames();
 		matrixStack.popPose();
 
-		VBOBatcher.getInstance().endBatches();
+		VBOBatcher.getInstance().endBatches(matrixStack);
 
 		// Render Name Tag
 		if (!invisible) {

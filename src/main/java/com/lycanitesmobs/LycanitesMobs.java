@@ -5,6 +5,8 @@ import com.lycanitesmobs.client.ClientProxy;
 import com.lycanitesmobs.client.ModelManager;
 import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.client.gui.*;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
 import com.lycanitesmobs.core.*;
 import com.lycanitesmobs.core.capabilities.*;
 import com.lycanitesmobs.core.command.CommandManager;
@@ -64,6 +66,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 @Mod(LycanitesMobs.MODID)
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
@@ -228,12 +233,14 @@ public class LycanitesMobs {
 
 	@SubscribeEvent
 	public void clientSetup(final FMLClientSetupEvent event) {
+
 		ClientManager.getInstance().initLanguageManager();
 		ClientManager.getInstance().registerEvents();
 		TextureManager.getInstance().createTextures(modInfo);
 		ModelManager.getInstance().createModels();
 		ClientManager.getInstance().initRenderRegister();
 		//New menu screen registration
+
 		event.enqueueWork(
 				() -> {
 					MenuScreens.register(CreatureContainer.TYPE, CreatureInventoryScreen::new);
@@ -243,6 +250,9 @@ public class LycanitesMobs {
 					MenuScreens.register(EquipmentStationContainer.TYPE, EquipmentStationScreen::new);
 				}
 		);
+
+
+
 	}
 
 	@SubscribeEvent

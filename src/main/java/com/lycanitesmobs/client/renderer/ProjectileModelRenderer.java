@@ -102,7 +102,7 @@ public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity
 				}
 				this.getModel().clearAnimationFrames();
 
-				VBOBatcher.getInstance().endBatches();
+				VBOBatcher.getInstance().endBatches(matrixStack);
 			}
 		}
 		catch (Exception exception) {

@@ -1,6 +1,5 @@
 package com.lycanitesmobs.client.obj;
 
-
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -71,9 +70,9 @@ public class OBJLoader
             int indicesOffset = 0;
             int texOffset = 0;
             int normOffset = 0;
-            ArrayList<Vector3f> positions = new ArrayList<>();
+            ArrayList<Vector3o> positions = new ArrayList<>();
             ArrayList<Vector2f> texCoords = new ArrayList<>();
-            ArrayList<Vector3f> normals = new ArrayList<>();
+            ArrayList<Vector3o> normals = new ArrayList<>();
             ArrayList<OBJIndex> indices = new ArrayList<>();
             ArrayList<Material> materials = new ArrayList<>();
             HashMapWithDefault<OBJIndex, Integer> resultIndexMap = new HashMapWithDefault<OBJIndex, Integer>();
@@ -82,9 +81,9 @@ public class OBJLoader
             resultIndexMap.setDefault(-1);
             normalIndexMap.setDefault(-1);
             indexMap.setDefault(-1);
-            
+
             HashMap<ObjPart, IndexedModel> map = new HashMap<>();
-            
+
             ObjPart currentObject;
             HashMap<ObjPart, IndexedModel[]> objects = new HashMap<>();
             objects.put(currentObject = new ObjPart("main"), new IndexedModel[]{result, normalModel});
@@ -101,7 +100,7 @@ public class OBJLoader
                     }
                     else if(parts[0].equals(POSITION))
                     {
-                        positions.add(new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
+                        positions.add(new Vector3o(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
                     }
                     else if(parts[0].equals(FACE))
                     {
@@ -114,7 +113,7 @@ public class OBJLoader
                     }
                     else if(parts[0].equals(NORMAL))
                     {
-                        normals.add(new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
+                        normals.add(new Vector3o(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
                     }
                     else if(parts[0].equals(TEX_COORDS))
                     {
@@ -147,7 +146,7 @@ public class OBJLoader
             }
             result.getObjIndices().addAll(indices);
             normalModel.getObjIndices().addAll(indices);
-            
+
             Iterator<ObjPart> it = objects.keySet().iterator();
             while(it.hasNext())
             {
@@ -160,7 +159,7 @@ public class OBJLoader
                 for(int i = 0; i < indices.size(); i++)
                 {
                     OBJIndex current = indices.get(i);
-                    Vector3f pos = positions.get(current.positionIndex);
+                    Vector3o pos = positions.get(current.positionIndex);
                     Vector2f texCoord;
                     if(hasTexCoords)
                     {
@@ -170,7 +169,7 @@ public class OBJLoader
                     {
                         texCoord = new Vector2f(0, 0);
                     }
-                    Vector3f normal;
+                    Vector3o normal;
                     if(hasNormals)
                     {
                         try
@@ -179,12 +178,12 @@ public class OBJLoader
                         }
                         catch(Exception e)
                         {
-                           normal = new Vector3f();
+                            normal = new Vector3o();
                         }
                     }
                     else
                     {
-                        normal = new Vector3f();
+                        normal = new Vector3o();
                     }
 
                     int modelVertexIndex = resultIndexMap.get(current);
@@ -197,7 +196,7 @@ public class OBJLoader
                         result.getTexCoords().add(texCoord);
                         if(hasNormals)
                             result.getNormals().add(normal);
-                        result.getTangents().add(new Vector3f());
+                        result.getTangents().add(new Vector3o());
                     }
 
                     int normalModelIndex = normalIndexMap.get(current.positionIndex);
@@ -210,7 +209,7 @@ public class OBJLoader
                         normalModel.getPositions().add(pos);
                         normalModel.getTexCoords().add(texCoord);
                         normalModel.getNormals().add(normal);
-                        normalModel.getTangents().add(new Vector3f());
+                        normalModel.getTangents().add(new Vector3o());
                     }
 
                     result.getIndices().add(modelVertexIndex);

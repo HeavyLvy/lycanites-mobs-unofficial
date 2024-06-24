@@ -54,8 +54,8 @@ public class ObjModel {
 		return out.toByteArray();
 	}
 
-	public Vector3f getNormal(Vector3f p1, Vector3f p2, Vector3f p3) {
-		Vector3f output = new Vector3f();
+	public Vector3o getNormal(Vector3o p1, Vector3o p2, Vector3o p3) {
+		Vector3o output = new Vector3o();
 
 		// Calculate Edges:
 		Vector3f calU = new Vector3f(p2.x() - p1.x(), p2.y() - p1.y(), p2.z() - p1.z());
@@ -100,7 +100,7 @@ public class ObjModel {
 		int[] indices = objPart.mesh.indices;
 		Vertex[] vertices = objPart.mesh.vertices;
 		if(objPart.mesh.normals == null) {
-			objPart.mesh.normals = new Vector3f[indices.length];
+			objPart.mesh.normals = new Vector3o[indices.length];
 		}
 
 		// Invalid Builder:
@@ -112,7 +112,7 @@ public class ObjModel {
 		for(int i = 0; i < indices.length; i += 3) {
 
 			// Normal:
-			Vector3f normal = objPart.mesh.normals[i];
+			Vector3o normal = objPart.mesh.normals[i];
 			if(normal == null) {
 				normal = this.getNormal(vertices[indices[i]].getPos(), vertices[indices[i + 1]].getPos(), vertices[indices[i + 2]].getPos());
 				objPart.mesh.normals[i] = normal;
@@ -132,4 +132,3 @@ public class ObjModel {
 		}
 	}
 }
-

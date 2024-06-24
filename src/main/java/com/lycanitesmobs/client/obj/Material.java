@@ -5,7 +5,7 @@ import org.joml.Vector3f;
 
 public class Material
 {
-    
+
     private String name;
     public Vector3f diffuseColor;
     public Vector3f ambientColor;
