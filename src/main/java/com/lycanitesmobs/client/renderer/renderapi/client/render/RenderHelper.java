@@ -1,7 +1,6 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render;
 
 
-import com.lycanitesmobs.client.renderer.renderapi.client.TestRenderClient;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -12,7 +11,7 @@ import static org.lwjgl.opengl.GL33.*;
 
 
 public class RenderHelper {
-    public WorldBuffer startLines(TestRenderClient.RenderContext context) {
+    public WorldBuffer startLines(RenderAPIEvents.ForgeAPIEvents.RenderContext context) {
         glEnable(GL_LINE_SMOOTH);
         return new WorldBuffer(GL_LINES, ShaderManager.getPositionColorShader(), context);
     }
@@ -31,7 +30,7 @@ public class RenderHelper {
         buffer.vert(x2, y2, z2, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
 
-    public static WorldBuffer startTri(TestRenderClient.RenderContext context) {
+    public static WorldBuffer startTri(RenderAPIEvents.ForgeAPIEvents.RenderContext context) {
         return new WorldBuffer(GL_TRIANGLES, ShaderManager.getPositionColorShader(), context);
     }
 

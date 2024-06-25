@@ -1,7 +1,8 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render.buffer;
 
 
-import com.lycanitesmobs.client.renderer.renderapi.client.TestRenderClient;
+import com.lycanitesmobs.client.obj.Vertex;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.Shader;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -24,7 +25,7 @@ public class WorldBuffer {
     private FloatBuffer projectionMatrix;
     private final Vec3 cameraPos;
 
-    public WorldBuffer(int drawMode, Shader shader, TestRenderClient.RenderContext worldRenderContext) {
+    public WorldBuffer(int drawMode, Shader shader, RenderAPIEvents.ForgeAPIEvents.RenderContext worldRenderContext) {
         this.drawMode = drawMode;
         this.shader = shader;
         this.cameraPos = worldRenderContext.camera.getPosition();
