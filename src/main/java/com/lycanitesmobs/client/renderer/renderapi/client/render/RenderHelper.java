@@ -1,9 +1,13 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render;
 
 
+import com.lycanitesmobs.client.model.CreatureObjModel;
+import com.lycanitesmobs.client.obj.ObjPart;
+import com.lycanitesmobs.client.obj.Vector3o;
+import com.lycanitesmobs.client.obj.Vertex;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
-import net.minecraft.client.renderer.LevelRenderer;
+import org.joml.*;
 
 import java.awt.*;
 
@@ -11,9 +15,9 @@ import static org.lwjgl.opengl.GL33.*;
 
 
 public class RenderHelper {
-    public WorldBuffer startLines(RenderAPIEvents.ForgeAPIEvents.RenderContext context) {
+    public WorldBuffer startLines() {
         glEnable(GL_LINE_SMOOTH);
-        return new WorldBuffer(GL_LINES, ShaderManager.getPositionColorShader(), context);
+        return new WorldBuffer(GL_LINES, ShaderManager.getPositionColorShader());
     }
 
     public void endLines(WorldBuffer buffer) {
@@ -30,8 +34,8 @@ public class RenderHelper {
         buffer.vert(x2, y2, z2, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
 
-    public static WorldBuffer startTri(RenderAPIEvents.ForgeAPIEvents.RenderContext context) {
-        return new WorldBuffer(GL_TRIANGLES, ShaderManager.getPositionColorShader(), context);
+    public static WorldBuffer startTri() {
+        return new WorldBuffer(GL_TRIANGLES, ShaderManager.getPositionColorShader());
     }
 
     public static void endTri(WorldBuffer buffer) {
@@ -51,5 +55,69 @@ public class RenderHelper {
         buffer.vert(x1, y1, z1, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
         buffer.vert(x2, y2, z2, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
         buffer.vert(x3, y3, z3, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+    }
+    public static void renderModel(WorldBuffer buffer, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, CreatureObjModel objPart, Vector4f color, Vector2f textureOffset) {
+        for (ObjPart part : objPart.objParts){
+            if (part.mesh == null) {
+                return;
+            }
+            int[] indices = part.mesh.indices;
+            Vertex[] vertices = part.mesh.vertices;
+            for (int i = 0; i < indices.length; i += 3) {
+                for (int iv = 0; iv < 3; iv++) {
+                    Vertex v = vertices[indices[i + iv]];
+                    buffer.vert(
+                            v.getPos().x(), v.getPos().y(), v.getPos().z(),
+                            color.x(), color.y(), color.z(), color.w()
+                    );
+                }
+            }
+            buffer.draw();
+        }
+    }
+    public static void renderPart(WorldBuffer buffer, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
+        if (objPart.mesh == null) {
+            return;
+        }
+
+        int[] indices = objPart.mesh.indices;
+        Vertex[] vertices = objPart.mesh.vertices;
+        if (objPart.mesh.normals == null) {
+            objPart.mesh.normals = new Vector3o[indices.length];
+        }
+
+        for (int i = 0; i < indices.length; i += 3) {
+            Vector3o normal = objPart.mesh.normals[i];
+            if (normal == null) {
+                normal = getNormal(vertices[indices[i]].getPos(), vertices[indices[i + 1]].getPos(), vertices[indices[i + 2]].getPos());
+                objPart.mesh.normals[i] = normal;
+            }
+
+            for (int iv = 0; iv < 3; iv++) {
+                Vertex v = vertices[indices[i + iv]];
+                buffer.vert(
+                        v.getPos().x(), v.getPos().y(), v.getPos().z(),
+                        color.x(), color.y(), color.z(), color.w()
+                );
+            }
+        }
+
+        buffer.draw();
+    }
+
+    private static Vector3o getNormal(Vector3o p1, Vector3o p2, Vector3o p3) {
+        Vector3o output = new Vector3o();
+
+        Vector3f calU = new Vector3f(p2.x() - p1.x(), p2.y() - p1.y(), p2.z() - p1.z());
+        Vector3f calV = new Vector3f(p3.x() - p1.x(), p3.y() - p1.y(), p3.z() - p1.z());
+
+        output.set(
+                calU.y() * calV.z() - calU.z() * calV.y(),
+                calU.z() * calV.x() - calU.x() * calV.z(),
+                calU.x() * calV.y() - calU.y() * calV.x()
+        );
+
+        output.normalize();
+        return output;
     }
 }

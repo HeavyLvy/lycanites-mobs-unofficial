@@ -1,6 +1,9 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.client.model.CreatureObjModel;
+import com.lycanitesmobs.client.model.creature.ModelAbaia;
+import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
@@ -10,12 +13,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-
-import java.awt.*;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 import static org.lwjgl.opengl.GL15.glGenBuffers;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
@@ -35,19 +40,24 @@ public class RenderAPIEvents {
             });
         }
     }
+    public static final CreatureObjModel model = new ModelAbaia();
     @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-    public class ForgeAPIEvents {
+    public static class ForgeAPIEvents {
 
         @SubscribeEvent
-        public static void onRenderLevel(RenderLevelStageEvent event) {
+        public static void onRenderLevel(TickEvent.RenderTickEvent event) {
             LocalPlayer player = Minecraft.getInstance().player;
-            if (player == null) {return;}
-            if (player.getMainHandItem().getItem() != Items.ANVIL) {return;}
-
-            RenderContext context = new RenderContext(event.getLevelRenderer(),event.getCamera());
-            WorldBuffer buffer = RenderHelper.startTri(context);
-            RenderHelper.drawTri(buffer, 0, 100, 0, 0, 101, 0, 0, 100, 1, new Color(255, 255, 0, 100));
-            RenderHelper.endTri(buffer);
+            if (player == null) { return; }
+            if (player.getMainHandItem().getItem() != Items.ANVIL) { return; }
+            WorldBuffer buffer = RenderHelper.startTri();
+            for (ObjPart part : model.objParts) {
+                Matrix3f normalMatrix = new Matrix3f();
+                Matrix4f modelMatrix = new Matrix4f();
+                Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
+                Vector2f textureOffset = new Vector2f(0.0f, 0.0f);
+                RenderHelper.renderPart(buffer, normalMatrix, modelMatrix, 15728880, 0, part, color, textureOffset);
+                RenderHelper.endTri(buffer);
+            }
         }
 
         public static class RenderContext {

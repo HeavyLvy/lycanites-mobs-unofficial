@@ -95,12 +95,6 @@ public class IndexedModel {
 			v = copy(normals.get(z));
 			v.add(normal);
 			normals.set(z, v);
-
-            /*/ Per Face Normal:
-            Vector3f faceNormal = this.getFaceNormal(vertices.get(x), vertices.get(y), vertices.get(z));
-            faceNormals.set(x, faceNormal);
-            faceNormals.set(y, faceNormal);
-            faceNormals.set(z, faceNormal);*/
 		}
 
 		for(int i = 0; i < normals.size(); i++ ) {

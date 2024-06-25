@@ -15,8 +15,10 @@ import com.lycanitesmobs.core.config.ConfigDebug;
 import com.lycanitesmobs.core.config.CoreConfig;
 import com.lycanitesmobs.core.container.*;
 import com.lycanitesmobs.core.dungeon.DungeonManager;
+import com.lycanitesmobs.core.entity.EntityFactory;
 import com.lycanitesmobs.core.entity.ExtendedEntity;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.entity.creature.EntityAbaia;
 import com.lycanitesmobs.core.helpers.LMReflectionHelper;
 import com.lycanitesmobs.core.info.*;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
@@ -39,8 +41,10 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraftforge.common.MinecraftForge;
@@ -66,6 +70,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.lang.reflect.Constructor;
 
 import static org.lwjgl.opengl.GL15.glGenBuffers;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
@@ -209,14 +215,22 @@ public class LycanitesMobs {
 	}
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
 	public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
-
-	public static void registryObjects() {
+	public static final RegistryObject<EntityType> ABIA = ENTITY_TYPES.register("abia", LycanitesMobs::getAbia);
+		public static EntityType<?> getAbia() {
+			EntityType.EntityFactory<EntityAbaia> factory = (EntityType.EntityFactory) (entityType, level) -> new EntityAbaia(entityType, level);
+			return EntityType.Builder.of(factory, MobCategory.MONSTER)
+					.setTrackingRange(10)
+					.setUpdateInterval(3)
+					.setShouldReceiveVelocityUpdates(false)
+					.sized(2f, 1f).build("abia");
+		}
+	public static void registryObjects()  {
 		// Blocks and Items:
 		ItemManager.getInstance().startup(modInfo);
 		// Equipment Parts:
 		EquipmentPartManager.getInstance().loadAllFromJson(modInfo);
 		// Creatures:
-		//CreatureManager.getInstance().startup(modInfo);
+		CreatureManager.getInstance().startup(modInfo);
 		// Projectiles:
 		//ProjectileManager.getInstance().startup(modInfo);
 	}

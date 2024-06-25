@@ -11,6 +11,7 @@ import com.lycanitesmobs.api.Targeting;
 import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.core.container.CreatureContainer;
 import com.lycanitesmobs.core.container.CreatureContainerProvider;
+import com.lycanitesmobs.core.entity.creature.EntityRemobra;
 import com.lycanitesmobs.core.entity.damagesources.ElementDamageSource;
 import com.lycanitesmobs.core.entity.goals.actions.*;
 import com.lycanitesmobs.core.entity.goals.targeting.*;
@@ -516,7 +517,11 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 				.add(RANGED_SPEED)
 				.add(Attributes.FOLLOW_RANGE);
 	}
-
+	@Override
+	public AttributeMap getAttributes() {
+		AttributeMap attrs = new AttributeMap(registerCustomAttributes().build());
+		return attrs;
+	}
 
 	/**
 	 * Loads this entity's dynamic attributes.
@@ -3481,8 +3486,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     @Override
     public LivingEntity getControllingPassenger() {
+		if (this.getPassengers().isEmpty()) return null;
 		if (this.getPassengers().get(0) instanceof LivingEntity firstPassenger) {
-			return this.getPassengers().isEmpty() ? null : firstPassenger;
+			return firstPassenger;
 		}
 		return null;
     }

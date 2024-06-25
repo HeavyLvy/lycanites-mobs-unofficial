@@ -7,6 +7,8 @@ import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.obj.VBOObjModel;
 import com.lycanitesmobs.client.renderer.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
@@ -21,6 +23,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.io.IOUtils;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -352,7 +358,14 @@ public class CreatureObjModel extends CreatureModel {
 			this.currentAnimationPart.applyAnimationFrames(this.animator);
 
 			// Render Part:
-			this.objModel.renderPart(vertexBuilder, matrixStack.last().normal(), matrixStack.last().pose(), this.getBrightness(partName, layer, entity, brightness), fade, part, this.getPartColor(partName, entity, layer, renderAsTrophy, loop), this.getPartTextureOffset(partName, entity, layer, renderAsTrophy, loop));
+			WorldBuffer buffer = RenderHelper.startTri();
+			Matrix3f normalMatrix = new Matrix3f();
+			Matrix4f modelMatrix = new Matrix4f();
+			Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
+			Vector2f textureOffset = new Vector2f(0.0f, 0.0f);
+			//RenderHelper.renderPart(buffer, normalMatrix, modelMatrix, 15728880, 0, part, color, textureOffset);
+			RenderHelper.endTri(buffer);
+			this.objModel.renderPart(vertexBuilder, buffer, matrixStack.last().normal(), matrixStack.last().pose(), this.getBrightness(partName, layer, entity, brightness), fade, part, this.getPartColor(partName, entity, layer, renderAsTrophy, loop), this.getPartTextureOffset(partName, entity, layer, renderAsTrophy, loop));
 			matrixStack.popPose();
 		}
     }

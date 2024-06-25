@@ -121,17 +121,9 @@ public class OBJLoader
                     }
                     else if(parts[0].equals(NEW_MATERIAL))
                     {
-                        // No need to load textures here.
-                        /*String path = startPath+parts[1];
-                        MtlMaterialLib material = new MtlMaterialLib(path);
-                        ResourceLocation resourceLocation = new ResourceLocation(path);
-                        InputStream inputStream = Minecraft.getMinecraft().getResourceManager().getResource(resourceLocation).getInputStream();
-                        material.parse(read(inputStream));
-                        materials.addAll(material.getMaterials());*/
                     }
                     else if(parts[0].equals(USE_MATERIAL))
                     {
-                        //currentObject.material = getMaterial(materials, parts[1]); // No longer bother with the material files.
                     }
                     else if(parts[0].equals(NEW_OBJECT) || parts[0].equals(NEW_GROUP))
                     {

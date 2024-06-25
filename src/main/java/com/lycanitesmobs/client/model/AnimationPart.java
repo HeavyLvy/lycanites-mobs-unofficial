@@ -134,15 +134,5 @@ public class AnimationPart {
 		this.offset = offsetPart;
 		return this;
 
-		/*ModelObjPart combinedPart = new ModelObjPart();
-		combinedPart.name = this.name + "-" + combinedWithPart.name;
-		combinedPart.centerX = this.centerX + combinedWithPart.centerX;
-		combinedPart.centerY = this.centerY + combinedWithPart.centerY;
-		combinedPart.centerZ = this.centerZ + combinedWithPart.centerZ;
-		combinedPart.rotationX = this.rotationX + combinedWithPart.rotationX;
-		combinedPart.rotationY = this.rotationY + combinedWithPart.rotationY;
-		combinedPart.rotationZ = this.rotationZ + combinedWithPart.rotationZ;
-
-		return combinedPart;*/
 	}
 }

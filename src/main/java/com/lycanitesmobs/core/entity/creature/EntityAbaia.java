@@ -11,6 +11,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -39,6 +40,8 @@ public class EntityAbaia extends TameableCreatureEntity implements Enemy {
         this.canGrow = true;
         this.setupMob();
     }
+
+
 
     // ========== Init AI ==========
     @Override

@@ -5,6 +5,7 @@ import com.lycanitesmobs.client.obj.Vertex;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.Shader;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.ArrayUtils;
@@ -25,10 +26,10 @@ public class WorldBuffer {
     private FloatBuffer projectionMatrix;
     private final Vec3 cameraPos;
 
-    public WorldBuffer(int drawMode, Shader shader, RenderAPIEvents.ForgeAPIEvents.RenderContext worldRenderContext) {
+    public WorldBuffer(int drawMode, Shader shader) {
         this.drawMode = drawMode;
         this.shader = shader;
-        this.cameraPos = worldRenderContext.camera.getPosition();
+        this.cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
         makeProjectionMatrix(RenderSystem.getProjectionMatrix(), RenderSystem.getModelViewStack().last().pose());
     }
 

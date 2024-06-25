@@ -10,9 +10,11 @@ import com.lycanitesmobs.core.entity.*;
 import com.lycanitesmobs.core.entity.projectile.*;
 import com.lycanitesmobs.core.info.ModInfo;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 
@@ -135,7 +137,7 @@ public class ProjectileManager extends JSONLoader {
 	 * @return The projectile's Entity Type.
 	 */
 	public EntityType createEntityType(String entityName, Class<? extends Entity> entityClass) {
-		EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
+		/*EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
 		entityTypeBuilder.setTrackingRange(40);
 		entityTypeBuilder.setUpdateInterval(3);
 		entityTypeBuilder.setShouldReceiveVelocityUpdates(true);
@@ -150,7 +152,8 @@ public class ProjectileManager extends JSONLoader {
 
 		LycanitesMobs.logDebug("Projectile", "Added (Projectile) Entity Type: " + entityName + " Type: " + entityType);
 		this.oldProjectileTypes.put(entityClass, entityType);
-		return entityType;
+		return entityType;*/
+		return null;
 	}
 
 	/**
