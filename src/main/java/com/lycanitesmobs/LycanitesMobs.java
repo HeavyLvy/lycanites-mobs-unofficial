@@ -30,6 +30,7 @@ import com.lycanitesmobs.core.mobevent.MobEventManager;
 import com.lycanitesmobs.core.network.PacketHandler;
 import com.lycanitesmobs.core.spawner.SpawnerEventListener;
 import com.lycanitesmobs.core.spawner.SpawnerManager;
+import com.lycanitesmobs.core.util.EntityTypeGetter;
 import com.lycanitesmobs.core.worldgen.BiomeModifierProvider;
 import com.lycanitesmobs.core.worldgen.WorldGenManager;
 import com.lycanitesmobs.core.worldgen.WorldGenerator;
@@ -37,10 +38,12 @@ import com.lycanitesmobs.core.worldgen.WorldGeneratorBiomeModifier;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -53,6 +56,7 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.world.BiomeModifier;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -73,6 +77,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 
+import static com.lycanitesmobs.core.info.CreatureManager.entityTypeBuilders;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
@@ -103,6 +108,20 @@ public class LycanitesMobs {
 	public static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS =
 			DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MODID);
 
+	/*@SubscribeEvent
+	public static void onServerLoaded(ServerStartingEvent event) {
+		var creatureManager = CreatureManager.getInstance();
+		for(CreatureInfo creatureInfo : creatureManager.creatures.values()) {
+			EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
+			LycanitesMobs.logInfo("", "Registeredcreature: " + entityType);
+			creatureInfo.entityType = (EntityType<? extends LivingEntity>) entityType;
+			if (creatureInfo.entityType instanceof EntityTypeGetter getter) {
+				getter.setRegistryName(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
+			}
+			EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor, creatureInfo.getName());
+			creatureInfo.init();
+		}
+	}*/
 	public static final RegistryObject<Codec<WorldGeneratorBiomeModifier>> WORLD_GENERATOR_CODEC = BIOME_MODIFIER_SERIALIZERS.register("world_generator", () ->
 			RecordCodecBuilder.create(instance -> instance.group(
 					Biome.LIST_CODEC.fieldOf("biomes").forGetter(WorldGeneratorBiomeModifier::biomes),
@@ -242,9 +261,28 @@ public class LycanitesMobs {
 		LMReflectionHelper.fixMaxHealth();
 		// Mod Support:
 		DLDungeons.init();
-
+		loadValues();
 	}
 
+	/**
+	 * Some initialization must be done after registries have been initialized so we do them on common setup
+	 */
+	public static void loadValues() {
+		/**
+		 * Creature Manager Values
+		 */
+		var creatureManager = CreatureManager.getInstance();
+		for(CreatureInfo creatureInfo : creatureManager.creatures.values()) {
+			EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
+			LycanitesMobs.logInfo("", "Registeredcreature: " + entityType);
+			creatureInfo.entityType = (EntityType<? extends LivingEntity>) entityType;
+			if (creatureInfo.entityType instanceof EntityTypeGetter getter) {
+				getter.setRegistryName(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
+			}
+			EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor, creatureInfo.getName());
+			creatureInfo.init();
+		}
+	}
 	@SubscribeEvent
 	public void clientSetup(final FMLClientSetupEvent event) {
 

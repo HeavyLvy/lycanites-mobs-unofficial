@@ -57,7 +57,7 @@ public class CreatureInfo {
 	public ModInfo modInfo;
 
 	/** The entity type used to store base attributes of this creature. **/
-	protected EntityType<? extends LivingEntity> entityType;
+	public EntityType<? extends LivingEntity> entityType;
 
 	/** If false, this mob will be removed from the world if present and wont be allowed by any spawners. **/
 	public boolean enabled = true;

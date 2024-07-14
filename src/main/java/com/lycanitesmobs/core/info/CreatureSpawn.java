@@ -236,7 +236,14 @@ public class CreatureSpawn {
 			return true;
 		}
 
-		String biomeId = LMHelperClass.convertToResourceLocation(biome).toString();
+		Object biomeRL = LMHelperClass.convertToResourceLocation(biome);
+		String biomeId = null;
+		if (biomeRL != null) {
+			biomeId = biomeRL.toString();
+		}else {
+			LycanitesMobs.logWarning("", "Invalid biome: " + biome.toString());
+			return false;
+		}
 
 		// Biome Tags:
 		if(!this.biomeTags.isEmpty()) {

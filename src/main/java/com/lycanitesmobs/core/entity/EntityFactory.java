@@ -33,7 +33,8 @@ public class EntityFactory implements EntityType.EntityFactory<Entity> {
 	 * @param entityClass The Entity Class to instantiate for the type.
 	 */
 	public void addEntityType(EntityType entityType, Constructor<? extends Entity> entityClass, String networkName) {
-		//LycanitesMobs.logDebug("Entity", "Adding entity: " + entityClass + " Type: " + entityType.getDescription() + " Classification: " + entityType.getCategory());
+		LycanitesMobs.logDebug("Entity", "Adding entity: " + entityClass + " Type: " + entityType.getDescription() + " Classification: " + entityType.getCategory());
+
 		this.entityTypeConstructorMap.put(entityType, entityClass);
 		this.entityConstructorTypeMap.put(entityClass, entityType);
 		this.entityTypeNetworkMap.put(networkName, entityType);
@@ -49,6 +50,9 @@ public class EntityFactory implements EntityType.EntityFactory<Entity> {
 	public Entity create(EntityType entityType, Level world) {
 		if(!this.entityTypeConstructorMap.containsKey(entityType)) {
 			LycanitesMobs.logWarning("", "Unable to find constructor for Entity Type: " + entityType);
+			for (EntityType<?> type : this.entityTypeConstructorMap.keySet()) {
+				LycanitesMobs.logWarning("", "Values: " + type);
+			}
 			return null;
 		}
 		LycanitesMobs.logDebug("Entity", "Spawning entity: " + this.entityTypeConstructorMap.get(entityType) + " - " + entityType.getCategory());

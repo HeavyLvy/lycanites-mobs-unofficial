@@ -11,6 +11,8 @@ import com.lycanitesmobs.core.entity.CreatureStats;
 import com.lycanitesmobs.core.entity.EntityFactory;
 import com.lycanitesmobs.core.spawner.SpawnerMobRegistry;
 import com.lycanitesmobs.core.util.EntityTypeGetter;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,6 +25,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static com.lycanitesmobs.core.info.CreatureInfo.entityTypeMap;
 
@@ -106,15 +109,17 @@ public class CreatureManager extends JSONLoader {
 			entityTypeBuilder.sized((float)creatureInfo.width, (float)creatureInfo.height);
 			entityTypeBuilders.put(creatureInfo.getName(),entityTypeBuilder);
 			LycanitesMobs.ENTITY_TYPES.register(creatureInfo.getName(), () -> entityTypeBuilder.build(creatureInfo.getName()));
-			/*entityTypeMap.put(creatureInfo.getName(), supplier);*/
-			creatureInfo.entityType = (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
+			/**
+			 * Below logic must be done later after registries have finished, moved to LycanitesMobs.loadValues() for common setup
+			 */
+			/*entityTypeMap.put(creatureInfo.getName(), supplier);
+			EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
+			creatureInfo.entityType = (EntityType<? extends LivingEntity>) entityType;
 			if (creatureInfo.entityType instanceof EntityTypeGetter getter) {
 				getter.setRegistryName(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
 			}
-
 			EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor, creatureInfo.getName());
-
-			creatureInfo.init();
+			creatureInfo.init();*/
 		}
 	}
 
