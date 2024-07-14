@@ -1,15 +1,25 @@
 package com.lycanitesmobs.client.renderer;
 
+import java.awt.*;
+import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.Shader;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
@@ -21,6 +31,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL33;
 
 public class VBOBatcher {
 
@@ -41,13 +53,15 @@ public class VBOBatcher {
 		private float overlayOffsetY;
 		private float lightOffsetX;
 		private float lightOffsetY;
-
+		private Shader shader;
 		public VBODrawCommand(int vbo, int vertexCount, VertexFormat format, Matrix4f matrix, ResourceLocation texLocation) {
 			this.vbo = vbo;
 			this.vertexCount = vertexCount;
 			this.format = format;
 			this.matrix = matrix;
 			this.texLocation = texLocation;
+			ShaderManager.loadShaders(); // Ensure shaders are loaded
+			this.shader = ShaderManager.getPositionColorShader();
 		}
 
 		public VBODrawCommand setColor(Vector4f color) {
@@ -92,42 +106,66 @@ public class VBOBatcher {
 			return this;
 		}
 
+
 		public void draw(PoseStack poseStack) {
-			if (true) return;
 			Minecraft.getInstance().getTextureManager().bindForSetup(texLocation);
 
 			RenderSystem.setShaderColor(correctedColor(red), correctedColor(green), correctedColor(blue), correctedColor(alpha));
+
 			if (textureOffsetX != 0.0F || textureOffsetY != 0.0F) {
-				//GL11.glMatrixMode(GL21.GL_TEXTURE);
 				poseStack.pushPose();
 				poseStack.translate(textureOffsetX, textureOffsetY, 0.0F);
-				//GL11.glMatrixMode(GL21.GL_MODELVIEW);
+				// Apply the texture matrix transformation directly
+				Matrix4f textureMatrix = new Matrix4f();
+				textureMatrix.translate(textureOffsetX, textureOffsetY, 0.0F);
+				shader.uniformMatrix4f("TextureMat", textureMatrix.get(FloatBuffer.allocate(16)));
 			}
-			RenderSystem.texParameter(GL21.GL_TEXTURE1, LMHelperClass.convertToInteger(overlayOffsetX), LMHelperClass.convertToInteger(overlayOffsetY));
-			RenderSystem.texParameter(GL21.GL_TEXTURE2, LMHelperClass.convertToInteger(lightOffsetX), LMHelperClass.convertToInteger(lightOffsetY));
+
+			// Set additional texture parameters with valid wrap and filter modes
+			RenderSystem.texParameter(GL21.GL_TEXTURE_2D, GL21.GL_TEXTURE_WRAP_S, GL21.GL_REPEAT);
+			RenderSystem.texParameter(GL21.GL_TEXTURE_2D, GL21.GL_TEXTURE_WRAP_T, GL21.GL_REPEAT);
+			RenderSystem.texParameter(GL21.GL_TEXTURE_2D, GL21.GL_TEXTURE_MIN_FILTER, GL21.GL_LINEAR);
+			RenderSystem.texParameter(GL21.GL_TEXTURE_2D, GL21.GL_TEXTURE_MAG_FILTER, GL21.GL_LINEAR);
 
 			poseStack.pushPose();
 			poseStack.mulPoseMatrix(matrix);
+
+			shader.bind(); // Bind the shader before drawing
+
+			// Set the projection matrix uniform
+			Matrix4f projectionMatrix = new Matrix4f(poseStack.last().pose());
+			shader.uniformMatrix4f("u_projection", projectionMatrix.get(FloatBuffer.allocate(16)));
+
+			// Generate and bind a VAO
+			int vao = GL30.glGenVertexArrays();
+			GL30.glBindVertexArray(vao);
+
+			// Bind the VBO and set up the vertex attributes
 			RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> vbo);
 			format.setupBufferState();
 
-			GL11.glDrawArrays(GL21.GL_TRIANGLES, 0, vertexCount);
+			// Draw the vertices
+			GL33.glDrawArrays(GL21.GL_TRIANGLES, 0, vertexCount);
 
+			// Clear the buffer state
 			format.clearBufferState();
 			RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> 0);
+
+			// Unbind and delete the VAO
+			GL30.glBindVertexArray(0);
+			GL30.glDeleteVertexArrays(vao);
+
+			shader.unbind(); // Unbind the shader after drawing
 			poseStack.popPose();
 
 			if (textureOffsetX != 0.0F || textureOffsetY != 0.0F) {
-				//GL11.glMatrixMode(GL21.GL_TEXTURE);
-				GL11.glPopMatrix();
-				//GL11.glMatrixMode(GL21.GL_MODELVIEW);
+				poseStack.popPose();
 			}
 		}
 
 		private static float correctedColor(float f) {
 			return ((int) (f * 255.0F) & 0xFF) / 255.0F;
 		}
-
 	}
 
 	private static final VBOBatcher INSTANCE = new VBOBatcher();
@@ -148,7 +186,6 @@ public class VBOBatcher {
 			}
 
 			renderType.setupRenderState();
-			//RenderSystem.enableTexture();
 
 			for (VBODrawCommand drawCommand : drawCommands) {
 				drawCommand.draw(poseStack);

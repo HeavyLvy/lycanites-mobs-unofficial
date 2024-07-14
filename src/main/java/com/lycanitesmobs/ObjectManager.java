@@ -11,6 +11,7 @@ import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.info.ObjectLists;
 import com.lycanitesmobs.core.item.BaseItem;
+import com.lycanitesmobs.core.item.equipment.CreatureSaddleItem;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.tileentity.EquipmentInfuserTileEntity;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SaddleItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -260,8 +262,8 @@ public class ObjectManager {
 								LycanitesMobs.logWarning("", "Item: " + item + " has no Registry Name!");
 							}
 
-							if (!(baseItem instanceof ItemEquipmentPart)) {
-								helper.register(baseItem.getRegistryName(), baseItem);
+							if (!(baseItem instanceof ItemEquipmentPart) && !(baseItem instanceof CreatureSaddleItem)) {
+								//helper.register(baseItem.getRegistryName(), baseItem);
 							}
 						}
 					}
@@ -326,11 +328,11 @@ public class ObjectManager {
 	}
 
 	// ========== Entities ==========
-	@SubscribeEvent
+	/*@SubscribeEvent
 	public void registerEntities(RegisterEvent event) {
 		event.register(ForgeRegistries.Keys.ENTITY_TYPES,
 				helper -> {
-					for(String entityName : specialEntities.keySet()) {
+					*//*for(String entityName : specialEntities.keySet()) {
 						EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
 						entityTypeBuilder.setTrackingRange(10);
 						entityTypeBuilder.setUpdateInterval(3);
@@ -340,11 +342,11 @@ public class ObjectManager {
 						EntityFactory.getInstance().addEntityType(entityType, specialEntityConstructors.get(specialEntities.get(entityName)), entityName);
 						specialEntityTypes.put(specialEntities.get(entityName), entityType);
 						helper.register(new ResourceLocation(LycanitesMobs.MODID,entityName), entityType);
-					}
+					}*//*
 				}
 		);
 
-	}
+	}*/
 	public static final Map<String, EntityType<?>> entityTypes = new HashMap<>();
 
 	public static void addEntityType(String name, EntityType.Builder<? extends LivingEntity> builder) {

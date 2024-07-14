@@ -1,0 +1,27 @@
+{
+  "vertex": "renderer:include/vertex_shader",
+  "fragment": "renderer:include/fragment_shader",
+  "attributes": ["Position", "UV"],
+  "samplers": [
+    {
+      "name": "textureSampler"
+    }
+  ],
+  "uniforms": [
+    {
+      "name": "ModelViewMat",
+      "type": "mat4",
+      "count": 1
+    },
+    {
+      "name": "ProjMat",
+      "type": "mat4",
+      "count": 1
+    },
+    {
+      "name": "TextureMat",
+      "type": "mat4",
+      "count": 1
+    }
+  ]
+}

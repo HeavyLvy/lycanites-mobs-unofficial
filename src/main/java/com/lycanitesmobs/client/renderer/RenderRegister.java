@@ -22,8 +22,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-import static com.lycanitesmobs.LycanitesMobs.ABIA;
-import static com.lycanitesmobs.LycanitesMobs.getAbia;
+/*import static com.lycanitesmobs.LycanitesMobs.ABIA;
+import static com.lycanitesmobs.LycanitesMobs.getAbia;*/
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class RenderRegister {
@@ -39,8 +39,8 @@ public class RenderRegister {
     }
     @SubscribeEvent
     public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(LMHelperClass.cast(getAbia()), (dispatcher) -> new CreatureRenderer<>("abia", dispatcher, (float) 2 / 2));
-        if (true) return;
+        //event.registerEntityRenderer(LMHelperClass.cast(ABIA.get()), (dispatcher) -> new CreatureRenderer<>("abia", dispatcher, (float) 2 / 2));
+       // if (true) return;
         LycanitesMobs.LOGGER.info("LycanitesMobs: Registering Renderers!" + CreatureManager.getInstance().creatures.size());
         // Creatures:
         for(CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {

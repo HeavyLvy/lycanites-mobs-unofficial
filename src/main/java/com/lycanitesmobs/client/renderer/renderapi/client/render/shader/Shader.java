@@ -18,8 +18,6 @@ public class Shader {
         try {
             int v = ShaderManager.loadShaderProgram(name, ShaderManager.ShaderType.VERTEX);
             int f = ShaderManager.loadShaderProgram(name, ShaderManager.ShaderType.FRAGMENT);
-            LycanitesMobs.logInfo("", "Shader Vertex: " + v);
-            LycanitesMobs.logInfo("", "Shader Vertex: " + f);
             this.id = glCreateProgram();
             glAttachShader(id, v);
             glAttachShader(id, f);

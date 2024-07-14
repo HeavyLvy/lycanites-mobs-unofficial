@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.helpers.JSONHelper;
-import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.EntityTypeGetter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -237,8 +237,10 @@ public class CreatureGroup {
 		if(this.inferno && (entity.getType() == EntityType.BLAZE || entity.getType() == EntityType.MAGMA_CUBE)) {
 			return true;
 		}
-
-		ResourceLocation entityResourceLocation = LMHelperClass.convertToResourceLocation(entity);
+		ResourceLocation entityResourceLocation = null;
+		if (entity.getType() instanceof EntityTypeGetter getter) {
+			entityResourceLocation = getter.getRegistryName();
+		}
 		if(entityResourceLocation == null) {
 			return false;
 		}

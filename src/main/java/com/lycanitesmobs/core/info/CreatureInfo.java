@@ -8,15 +8,12 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.core.entity.*;
 import com.lycanitesmobs.core.helpers.JSONHelper;
-import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.EntityTypeGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -26,7 +23,6 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.joml.Vector3d;
-import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -38,7 +34,7 @@ import java.util.function.Supplier;
 /** Contains various information about a creature from default spawn information to stats, etc. **/
 public class CreatureInfo {
 
-    // Core Info:
+	// Core Info:
 	/** The name of this mob. Lowercase, no space, used for language entries and for generating the entity id, etc. Required. **/
 	protected String name;
 
@@ -61,8 +57,7 @@ public class CreatureInfo {
 	public ModInfo modInfo;
 
 	/** The entity type used to store base attributes of this creature. **/
-	protected EntityType entityType = null;
-	//public Map<String, Supplier<EntityType<? extends LivingEntity>>> entityTypes;
+	protected EntityType<? extends LivingEntity> entityType;
 
 	/** If false, this mob will be removed from the world if present and wont be allowed by any spawners. **/
 	public boolean enabled = true;
@@ -244,7 +239,7 @@ public class CreatureInfo {
 		}
 
 		// Spawning:
-		//this.creatureSpawn.loadFromJSON(this, json.get("spawning").getAsJsonObject());
+		this.creatureSpawn.loadFromJSON(this, json.get("spawning").getAsJsonObject());
 
 		// Size:
 		if(json.has("width"))
@@ -428,20 +423,20 @@ public class CreatureInfo {
 	 */
 	public void addSounds(String suffix) {
 		ObjectManager.addSound(this.getName() + suffix + "_say", "entity." + getName() + suffix + ".say");
-		ObjectManager.addSound(this.name + suffix + "_hurt", "entity." + getName() + suffix + ".hurt");
+		ObjectManager.addSound(this.name + suffix + "_hurt",  "entity." + getName() + suffix + ".hurt");
 		ObjectManager.addSound(this.name + suffix + "_death", "entity." + getName() + suffix + ".death");
 		ObjectManager.addSound(this.name + suffix + "_step", "entity." + getName() + suffix + ".step");
 		ObjectManager.addSound(this.name + suffix + "_attack", "entity." + getName() + suffix + ".attack");
-		ObjectManager.addSound(this.name + suffix + "_jump", "entity." + getName() + suffix + ".jump");
-		ObjectManager.addSound(this.name + suffix + "_fly", "entity." + getName() + suffix + ".fly");
+		ObjectManager.addSound(this.name + suffix + "_jump",  "entity." + getName() + suffix + ".jump");
+		ObjectManager.addSound(this.name + suffix + "_fly",  "entity." + getName() + suffix + ".fly");
 		if(this.isSummonable() || this.isTameable() || TameableCreatureEntity.class.isAssignableFrom(this.entityClass)) {
 			ObjectManager.addSound(this.name + suffix + "_tame", "entity." + getName() + suffix + ".tame");
-			ObjectManager.addSound(this.name + suffix + "_beg", "entity." + getName() + suffix + ".beg");
+			ObjectManager.addSound(this.name + suffix + "_beg",  "entity." + getName() + suffix + ".beg");
 		}
 		if(this.isTameable())
-			ObjectManager.addSound(this.name + suffix + "_eat", "entity." + getName() + suffix + ".eat");
+			ObjectManager.addSound(this.name + suffix + "_eat",  "entity." + getName() + suffix + ".eat");
 		if(this.isMountable())
-			ObjectManager.addSound(this.name + suffix + "_mount", "entity." + getName() + suffix + ".mount");
+			ObjectManager.addSound(this.name + suffix + "_mount",  "entity." + getName() + suffix + ".mount");
 		if(this.isBoss())
 			ObjectManager.addSound(this.name + suffix + "_phase", "entity." + getName() + suffix + ".phase");
 	}
@@ -472,40 +467,18 @@ public class CreatureInfo {
 	public List<CreatureGroup> getGroups() {
 		return this.groups;
 	}
-	public static final Map<String, EntityType<?>> entityTypes = new HashMap<>();
+	public static final Map<String, EntityType.Builder> entityTypeBuilders = new HashMap<>();
+	public static final Map<String, Supplier<EntityType>> entityTypeMap = new HashMap<>();
 
 	/**
 	 * Returns the entity type of this creature.
 	 * @return Creature's entity type.
 	 */
 	@Nonnull
-	public EntityType getEntityType() {
-        this.entityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(LycanitesMobs.MODID, this.getName()));
-		return this.entityType;
-	}
-	/*@Nonnull
 	public EntityType<? extends LivingEntity> getEntityType() {
-		if(this.entityType == null) {
-			EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), this.peaceful ? MobCategory.CREATURE : MobCategory.MONSTER);
-//			entityTypeBuilder.setCustomClientFactory(EntityFactory.getInstance().createOnClientFunction); // Was created when experimenting with custom spawn packets, not in use currently but may be needed in the future.
-			entityTypeBuilder.setTrackingRange(this.isBoss() ? 32 : 10);
-			entityTypeBuilder.setUpdateInterval(3);
-			entityTypeBuilder.setShouldReceiveVelocityUpdates(false);
-			entityTypeBuilder.sized((float)this.width, (float)this.height);
-			Supplier<EntityType> registryObject = () -> entityTypeBuilder.build(this.getName());
-			this.entityType = registryObject.get();
-			this.setRegistryName(LycanitesMobs.MODID, this.getName());
-			EntityFactory.getInstance().addEntityType(this.entityType, this.entityConstructor, this.getName());
-		}
-		return this.entityType;
-	}*/
-	public ResourceLocation registryName;
-	public ResourceLocation getRegistryName() {
-		return registryName;
+		return (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(LycanitesMobs.MODID, this.getName()));
 	}
-	public ResourceLocation setRegistryName(String modID, String blockName) {
-		return registryName = new ResourceLocation(modID, blockName);
-	}
+
 
 	/**
 	 * Returns the resource location for this creature.
@@ -538,7 +511,7 @@ public class CreatureInfo {
 	 * Returns a translated description of this creature.
 	 * @return The creature description.
 	 */
-	public Component getDescription() {
+	public MutableComponent getDescription() {
 		return Component.translatable("entity." + this.getLocalisationKey() + ".description");
 	}
 
@@ -547,7 +520,7 @@ public class CreatureInfo {
 	 * Returns a translated description of this creature.
 	 * @return The creature description.
 	 */
-	public Component getHabitatDescription() {
+	public MutableComponent getHabitatDescription() {
 		return Component.translatable("entity." + this.getLocalisationKey() + ".habitat");
 	}
 
@@ -556,7 +529,7 @@ public class CreatureInfo {
 	 * Returns a translated description of this creature.
 	 * @return The creature description.
 	 */
-	public Component getCombatDescription() {
+	public MutableComponent getCombatDescription() {
 		return Component.translatable("entity." + this.getLocalisationKey() + ".combat");
 	}
 
@@ -590,7 +563,7 @@ public class CreatureInfo {
 	 * Returns a comma separated list of Diets used by this Creature.
 	 * @return The Diets used by this Creature.
 	 */
-	public Component getDietNames() {
+	public MutableComponent getDietNames() {
 		if(this.diets.isEmpty()) {
 			return Component.translatable("common.none");
 		}
@@ -611,7 +584,7 @@ public class CreatureInfo {
 	 * Returns a comma separated list of Biomes native for this Creature.
 	 * @return The Biomes native for this Creature.
 	 */
-	public Component getBiomeNames() {
+	public MutableComponent getBiomeNames() {
 		List<String> biomeIds = new ArrayList<>();
 		if(this.creatureSpawn.biomesFromTags != null)
 			biomeIds.addAll(this.creatureSpawn.biomesFromTags);
@@ -637,7 +610,7 @@ public class CreatureInfo {
 	 * Returns a comma separated list of items dropped by this Creature.
 	 * @return The items dropped by this Creature.
 	 */
-	public Component getDropNames() {
+	public MutableComponent getDropNames() {
 		if(this.drops.isEmpty()) {
 			return Component.literal("");
 		}
@@ -691,7 +664,7 @@ public class CreatureInfo {
 	public ResourceLocation getIcon() {
 		ResourceLocation texture = TextureManager.getTexture(this.getName() + "_icon");
 		if(texture == null) {
-			TextureManager.addTexture(this.getName() + "_icon", "textures/guis/creatures/" + this.getName() + "_icon.png");
+			TextureManager.addTexture(this.getName() + "_icon",  "textures/guis/creatures/" + this.getName() + "_icon.png");
 			texture = TextureManager.getTexture(this.getName() + "_icon");
 		}
 		return texture;
@@ -849,6 +822,7 @@ public class CreatureInfo {
 		}
 		return false;
 	}
+
 
 	/**
 	 * Creates a new Entity instance from this creature info. Returns null on failure.

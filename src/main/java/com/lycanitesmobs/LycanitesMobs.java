@@ -209,21 +209,21 @@ public class LycanitesMobs {
 		WorldGenManager.getInstance().startup();
 
 
+
 		//Registry Objects
 		LycanitesMobs.registryObjects();
-
 	}
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
 	public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
-	public static final RegistryObject<EntityType> ABIA = ENTITY_TYPES.register("abia", LycanitesMobs::getAbia);
+	/*public static final RegistryObject<EntityType> ABIA = ENTITY_TYPES.register("abia", LycanitesMobs::getAbia);
 		public static EntityType<?> getAbia() {
-			EntityType.EntityFactory<EntityAbaia> factory = (EntityType.EntityFactory) (entityType, level) -> new EntityAbaia(entityType, level);
+			EntityType.EntityFactory factory = EntityAbaia::new;
 			return EntityType.Builder.of(factory, MobCategory.MONSTER)
 					.setTrackingRange(10)
 					.setUpdateInterval(3)
 					.setShouldReceiveVelocityUpdates(false)
 					.sized(2f, 1f).build("abia");
-		}
+		}*/
 	public static void registryObjects()  {
 		// Blocks and Items:
 		ItemManager.getInstance().startup(modInfo);

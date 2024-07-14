@@ -1,0 +1,4 @@
+{
+  "vertex": "renderer:include/vertex_shader",
+  "fragment": "renderer:include/fragment_shader"
+}

@@ -56,7 +56,7 @@ public class RenderHelper {
         buffer.vert(x2, y2, z2, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
         buffer.vert(x3, y3, z3, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
-    public static void renderModel(WorldBuffer buffer, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, CreatureObjModel objPart, Vector4f color, Vector2f textureOffset) {
+    public static void renderModel(WorldBuffer buffer, CreatureObjModel objPart, Vector4f color) {
         for (ObjPart part : objPart.objParts){
             if (part.mesh == null) {
                 return;
