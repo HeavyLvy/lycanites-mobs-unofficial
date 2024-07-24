@@ -62,7 +62,7 @@ public class ObjectManager {
 	// Maps:
 	public static Map<String, Block> blocks = new HashMap<>();
 	public static Map<String, LiquidBlock> liquidBlocks = new HashMap<>();
-	public static final Map<String, RegistryObject<? extends Item>> items = new HashMap<>();
+	public static final Map<String, Supplier<? extends Item>> items = new HashMap<>();
     public static Map<Item, ModInfo> itemGroups = new HashMap<>();
 	public static Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
     public static Map<Block, Item> buckets = new HashMap<>();
@@ -255,16 +255,14 @@ public class ObjectManager {
     public void registerItems(RegisterEvent event) {
 		event.register(ForgeRegistries.Keys.ITEMS,
 				helper -> {
-					for(RegistryObject<?> item : items.values()) {
-						if (item.get() instanceof BaseItem baseItem /*&& !(item.get() instanceof ItemEquipmentPart)*/){
-							LycanitesMobs.logDebug("Item", "Registering item: " + baseItem.getRegistryName());
-							if(baseItem.getRegistryName() == null) {
-								LycanitesMobs.logWarning("", "Item: " + item + " has no Registry Name!");
+					for(Supplier<? extends Item> item : items.values()) {
+						for (String name : items.keySet()) {
+							if (ItemManager.items.containsKey(name)) {
+							LycanitesMobs.LOGGER.info("Tried registering item in Item Manager's item list, skipping: " + name);
+							return;
 							}
-
-							if (!(baseItem instanceof ItemEquipmentPart) && !(baseItem instanceof CreatureSaddleItem)) {
-								//helper.register(baseItem.getRegistryName(), baseItem);
-							}
+								LycanitesMobs.logDebug("Item", "Registering item: " + name);
+									helper.register(new ResourceLocation(LycanitesMobs.MODID,name), item.get());
 						}
 					}
 				}

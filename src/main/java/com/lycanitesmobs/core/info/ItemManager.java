@@ -129,6 +129,10 @@ public class ItemManager extends JSONLoader {
 		for(ItemInfo itemInfo : items.values()) {
 			event.register(ForgeRegistries.Keys.ITEMS,
 					helper -> {
+							if (ObjectManager.items.containsKey(itemInfo.name)) {
+								LycanitesMobs.LOGGER.info("Tried registering item in Object Manager's item list, skipping: " + itemInfo.name);
+								return;
+							}
 							helper.register(new ResourceLocation(LycanitesMobs.MODID, itemInfo.getItem().itemName), itemInfo.getItem());
 					}
 			);
