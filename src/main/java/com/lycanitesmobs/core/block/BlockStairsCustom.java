@@ -16,38 +16,47 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BlockStairsCustom extends StairBlock {
-	public String blockName = "BlockBase";
-	public ResourceLocation registryName;
+public class BlockStairsCustom extends StairBlock implements BlockTypeGetter {
+    public String blockName = "BlockBase";
+    public ResourceLocation registryName;
 
-	// ==================================================
-	//                   Constructor
-	// ==================================================
-	public BlockStairsCustom(Block.Properties properties, BlockBase block) {
-		super(block.defaultBlockState(), properties);
+    // ==================================================
+    //                   Constructor
+    // ==================================================
+    public BlockStairsCustom(Block.Properties properties, BlockBase block) {
+        super(block.defaultBlockState(), properties);
         this.setRegistryName(LycanitesMobs.MODID, block.blockName + "_stairs");
-	}
-	public ResourceLocation getRegistryName() {
-		return registryName;
-	}
-	public ResourceLocation setRegistryName(String modID, String blockName) {
-		return registryName = new ResourceLocation(modID, blockName);
-	}
-	public void setup() {
-		this.setRegistryName(LycanitesMobs.MODID, this.blockName);
-	}
-	@Override
-	public MutableComponent getName() {
-		return Component.translatable(this.getDescriptionId());
-	}
+    }
 
-	@OnlyIn(Dist.CLIENT)
-	@Override
-	public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag flag) {
-		tooltip.add(this.getDescription(stack, world));
-	}
+    public ResourceLocation getRegistryName() {
+        return registryName;
+    }
 
-	public MutableComponent getDescription(ItemStack itemStack, @Nullable BlockGetter world) {
-		return Component.translatable(this.getDescriptionId() + ".description").withStyle(ChatFormatting.GREEN);
-	}
+    @Override
+    public void setRegistryName(ResourceLocation registryName) {
+        this.registryName = registryName;
+    }
+
+    public ResourceLocation setRegistryName(String modID, String blockName) {
+        return registryName = new ResourceLocation(modID, blockName);
+    }
+
+    public void setup() {
+        this.setRegistryName(LycanitesMobs.MODID, this.blockName);
+    }
+
+    @Override
+    public MutableComponent getName() {
+        return Component.translatable(this.getDescriptionId());
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag flag) {
+        tooltip.add(this.getDescription(stack, world));
+    }
+
+    public MutableComponent getDescription(ItemStack itemStack, @Nullable BlockGetter world) {
+        return Component.translatable(this.getDescriptionId() + ".description").withStyle(ChatFormatting.GREEN);
+    }
 }

@@ -1,9 +1,11 @@
 package com.lycanitesmobs.core.block;
 
+import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -19,17 +21,18 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-public class BlockSlabCustom extends SlabBlock {
+public class BlockSlabCustom extends SlabBlock implements BlockTypeGetter {
     public String blockName = "BlockBase";
+    public ResourceLocation registryName;
 
-	// ==================================================
-	//                   Constructor
-	// ==================================================
-	public BlockSlabCustom(Block.Properties properties, BlockBase block) {
-		super(properties);
+    // ==================================================
+    //                   Constructor
+    // ==================================================
+    public BlockSlabCustom(Block.Properties properties, BlockBase block) {
+        super(properties);
         String slabName = "_slab";
-        //this.setRegistryName(new ResourceLocation(block.group.modid, block.blockName + slabName));
-	}
+        this.registryName = new ResourceLocation(LycanitesMobs.MODID, block.blockName + slabName);
+    }
 
     @Override
     public boolean useShapeForLightOcclusion(BlockState blockState) {
@@ -62,5 +65,15 @@ public class BlockSlabCustom extends SlabBlock {
 
     public ItemStack getItem(Level worldIn, BlockPos pos, BlockState state) {
         return new ItemStack(this);
+    }
+
+    @Override
+    public ResourceLocation getRegistryName() {
+        return registryName;
+    }
+
+    @Override
+    public void setRegistryName(ResourceLocation registryName) {
+        this.registryName = registryName;
     }
 }
