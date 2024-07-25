@@ -49,6 +49,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -84,293 +85,289 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 @Mod(LycanitesMobs.MODID)
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class LycanitesMobs {
-	public static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger();
 
-	public static final String MODID = "lycanitesmobs";
-	public static final String name = "Lycanites Mobs";
-	public static final String versionNumber = "2.3.3.4";
-	public static final String versionMC = "1.20.1";
-	public static final String version = versionNumber + " - MC " + versionMC;
-	public static final String website = "https://lycanitesmobs.com";
-	public static final String serviceAPI = "https://service.lycanitesmobs.com/api/v1";
-	public static final String twitter = "https://twitter.com/Lycanite05";
-	public static final String patreon = "https://www.patreon.com/lycanite";
-	public static final String guilded = "https://www.guilded.gg/i/jpLvd6J2";
-	public static final String discord = "https://discord.gg/bFpV3z4";
+    public static final String MODID = "lycanitesmobs";
+    public static final String name = "Lycanites Mobs";
+    public static final String versionNumber = "2.3.3.4";
+    public static final String versionMC = "1.20.1";
+    public static final String version = versionNumber + " - MC " + versionMC;
+    public static final String website = "https://lycanitesmobs.com";
+    public static final String serviceAPI = "https://service.lycanitesmobs.com/api/v1";
+    public static final String twitter = "https://twitter.com/Lycanite05";
+    public static final String patreon = "https://www.patreon.com/lycanite";
+    public static final String guilded = "https://www.guilded.gg/i/jpLvd6J2";
+    public static final String discord = "https://discord.gg/bFpV3z4";
 
-	public static final PacketHandler packetHandler = new PacketHandler();
+    public static final PacketHandler packetHandler = new PacketHandler();
+    // Biome Management:
+    public static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS =
+            DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MODID);
+    /*@SubscribeEvent
+    public static void onServerLoaded(ServerStartingEvent event) {
+        var creatureManager = CreatureManager.getInstance();
+        for(CreatureInfo creatureInfo : creatureManager.creatures.values()) {
+            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
+            LycanitesMobs.logInfo("", "Registeredcreature: " + entityType);
+            creatureInfo.entityType = (EntityType<? extends LivingEntity>) entityType;
+            if (creatureInfo.entityType instanceof EntityTypeGetter getter) {
+                getter.setRegistryName(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
+            }
+            EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor, creatureInfo.getName());
+            creatureInfo.init();
+        }
+    }*/
+    public static final RegistryObject<Codec<WorldGeneratorBiomeModifier>> WORLD_GENERATOR_CODEC = BIOME_MODIFIER_SERIALIZERS.register("world_generator", () ->
+            RecordCodecBuilder.create(instance -> instance.group(
+                    Biome.LIST_CODEC.fieldOf("biomes").forGetter(WorldGeneratorBiomeModifier::biomes),
+                    PlacedFeature.CODEC.fieldOf("chunk_spawn_feature").forGetter(WorldGeneratorBiomeModifier::chunkSpawnFeature),
+                    PlacedFeature.CODEC.fieldOf("dungeon_feature").forGetter(WorldGeneratorBiomeModifier::dungeonFeature),
+                    PlacedFeature.CODEC.fieldOf("poison_lake_feature").forGetter(WorldGeneratorBiomeModifier::poisonLakeFeature),
+                    PlacedFeature.CODEC.fieldOf("poison_spring_feature").forGetter(WorldGeneratorBiomeModifier::poisonSpringFeature),
+                    PlacedFeature.CODEC.fieldOf("acid_lake_feature").forGetter(WorldGeneratorBiomeModifier::acidLakeFeature),
+                    PlacedFeature.CODEC.fieldOf("acid_spring_feature").forGetter(WorldGeneratorBiomeModifier::acidSpringFeature),
+                    PlacedFeature.CODEC.fieldOf("ooze_lake_feature").forGetter(WorldGeneratorBiomeModifier::oozeLakeFeature),
+                    PlacedFeature.CODEC.fieldOf("ooze_spring_feature").forGetter(WorldGeneratorBiomeModifier::oozeSpringFeature),
+                    PlacedFeature.CODEC.fieldOf("moglava_lake_feature").forGetter(WorldGeneratorBiomeModifier::moglavaLakeFeature),
+                    PlacedFeature.CODEC.fieldOf("moglava_spring_feature").forGetter(WorldGeneratorBiomeModifier::moglavaSpringFeature)
+            ).apply(instance, WorldGeneratorBiomeModifier::new))
+    );
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.Keys.BLOCKS, MODID);
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
+    public static ModInfo modInfo;
+    public static boolean configReady = false;
+    public static boolean earlyDebug = false;
+    // Proxy:
+    public static IProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
+    // Potion Effects:
+    public static Effects EFFECTS;
+    /**
+     * Constructor
+     **/
+    public LycanitesMobs() {
+        modInfo = new ModInfo(this, name, 1000);
+        // Config:
+        CoreConfig.buildSpec();
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CoreConfig.SPEC);
 
-	public static ModInfo modInfo;
+        FileLoader.initAll(modInfo.modid);
+        StreamLoader.initAll(modInfo.modid);
 
-	public static boolean configReady = false;
-	public static boolean earlyDebug = false;
-	// Biome Management:
-	public static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS =
-			DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MODID);
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-	/*@SubscribeEvent
-	public static void onServerLoaded(ServerStartingEvent event) {
-		var creatureManager = CreatureManager.getInstance();
-		for(CreatureInfo creatureInfo : creatureManager.creatures.values()) {
-			EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
-			LycanitesMobs.logInfo("", "Registeredcreature: " + entityType);
-			creatureInfo.entityType = (EntityType<? extends LivingEntity>) entityType;
-			if (creatureInfo.entityType instanceof EntityTypeGetter getter) {
-				getter.setRegistryName(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
-			}
-			EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor, creatureInfo.getName());
-			creatureInfo.init();
-		}
-	}*/
-	public static final RegistryObject<Codec<WorldGeneratorBiomeModifier>> WORLD_GENERATOR_CODEC = BIOME_MODIFIER_SERIALIZERS.register("world_generator", () ->
-			RecordCodecBuilder.create(instance -> instance.group(
-					Biome.LIST_CODEC.fieldOf("biomes").forGetter(WorldGeneratorBiomeModifier::biomes),
-					PlacedFeature.CODEC.fieldOf("chunk_spawn_feature").forGetter(WorldGeneratorBiomeModifier::chunkSpawnFeature),
-					PlacedFeature.CODEC.fieldOf("dungeon_feature").forGetter(WorldGeneratorBiomeModifier::dungeonFeature),
-					PlacedFeature.CODEC.fieldOf("poison_lake_feature").forGetter(WorldGeneratorBiomeModifier::poisonLakeFeature),
-					PlacedFeature.CODEC.fieldOf("poison_spring_feature").forGetter(WorldGeneratorBiomeModifier::poisonSpringFeature),
-					PlacedFeature.CODEC.fieldOf("acid_lake_feature").forGetter(WorldGeneratorBiomeModifier::acidLakeFeature),
-					PlacedFeature.CODEC.fieldOf("acid_spring_feature").forGetter(WorldGeneratorBiomeModifier::acidSpringFeature),
-					PlacedFeature.CODEC.fieldOf("ooze_lake_feature").forGetter(WorldGeneratorBiomeModifier::oozeLakeFeature),
-					PlacedFeature.CODEC.fieldOf("ooze_spring_feature").forGetter(WorldGeneratorBiomeModifier::oozeSpringFeature),
-					PlacedFeature.CODEC.fieldOf("moglava_lake_feature").forGetter(WorldGeneratorBiomeModifier::moglavaLakeFeature),
-					PlacedFeature.CODEC.fieldOf("moglava_spring_feature").forGetter(WorldGeneratorBiomeModifier::moglavaSpringFeature)
-			).apply(instance, WorldGeneratorBiomeModifier::new))
-	);
+        //Biome Management
+        BIOME_MODIFIER_SERIALIZERS.register(modEventBus);
 
+        // Setup Event Listeners:
+        ITEMS.register(modEventBus);
+        ENTITY_TYPES.register(modEventBus);
 
-	// Proxy:
-	public static IProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
-
-
-	// Potion Effects:
-	public static Effects EFFECTS;
-
-	/** Constructor **/
-	public LycanitesMobs() {
-		modInfo = new ModInfo(this, name, 1000);
-		// Config:
-		CoreConfig.buildSpec();
-		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CoreConfig.SPEC);
-
-		FileLoader.initAll(modInfo.modid);
-		StreamLoader.initAll(modInfo.modid);
-
-		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-
-		//Biome Management
-		BIOME_MODIFIER_SERIALIZERS.register(modEventBus);
-
-		// Setup Event Listeners:
-		ITEMS.register(modEventBus);
-		ENTITY_TYPES.register(modEventBus);
-
-		WorldGenManager.registerPlacements(modEventBus);
-		ObjectManager.registerContainers(modEventBus);
-		//ItemManager.registerItem(modEventBus);
-		modEventBus.addListener(this::commonSetup);
-		modEventBus.addListener(this::clientSetup);
+        WorldGenManager.registerPlacements(modEventBus);
+        ObjectManager.registerContainers(modEventBus);
+        //ItemManager.registerItem(modEventBus);
+        modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::clientSetup);
 //		modEventBus.addListener(this::serverStarting);
-		modEventBus.addListener(this::enqueueIMC);
-		modEventBus.addListener(this::processIMC);
-		modEventBus.register(ObjectManager.getInstance());
-		modEventBus.register(ItemManager.getInstance());
-		modEventBus.register(CreatureManager.getInstance());
-		modEventBus.register(ProjectileManager.getInstance());
-		modEventBus.register(WorldGenManager.getInstance());
+        modEventBus.addListener(this::enqueueIMC);
+        modEventBus.addListener(this::processIMC);
+        modEventBus.register(ObjectManager.getInstance());
+        modEventBus.register(ItemManager.getInstance());
+        modEventBus.register(CreatureManager.getInstance());
+        modEventBus.register(ProjectileManager.getInstance());
+        modEventBus.register(WorldGenManager.getInstance());
 //		modEventBus.register(StatManager.getInstance()); TODO Stats
-		PROXY.registerEvents();
+        PROXY.registerEvents();
 
-		// Game Event Listeners:
-		MinecraftForge.EVENT_BUS.register(this);
-		MinecraftForge.EVENT_BUS.register(CommandManager.getInstance());
-		MinecraftForge.EVENT_BUS.register(new GameEventListener());
-		MinecraftForge.EVENT_BUS.register(SpawnerEventListener.getInstance());
-		MinecraftForge.EVENT_BUS.register(MobEventManager.getInstance());
-		MinecraftForge.EVENT_BUS.register(MobEventListener.getInstance());
-		MinecraftForge.EVENT_BUS.register(new WorldGenerator());
+        // Game Event Listeners:
+        MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(CommandManager.getInstance());
+        MinecraftForge.EVENT_BUS.register(new GameEventListener());
+        MinecraftForge.EVENT_BUS.register(SpawnerEventListener.getInstance());
+        MinecraftForge.EVENT_BUS.register(MobEventManager.getInstance());
+        MinecraftForge.EVENT_BUS.register(MobEventListener.getInstance());
+        MinecraftForge.EVENT_BUS.register(new WorldGenerator());
 
-		// Network:
-		packetHandler.register();
-		// Load Content:
-		this.loadContent();
+        // Network:
+        packetHandler.register();
+        // Load Content:
+        this.loadContent();
 
-	}
+    }
 
-	// Content Loading:
-	public void loadContent() {
-		// Elements:
-		ElementManager.getInstance().loadAllFromJson(modInfo);
+    /*public static final RegistryObject<EntityType> ABIA = ENTITY_TYPES.register("abia", LycanitesMobs::getAbia);
+        public static EntityType<?> getAbia() {
+            EntityType.EntityFactory factory = EntityAbaia::new;
+            return EntityType.Builder.of(factory, MobCategory.MONSTER)
+                    .setTrackingRange(10)
+                    .setUpdateInterval(3)
+                    .setShouldReceiveVelocityUpdates(false)
+                    .sized(2f, 1f).build("abia");
+        }*/
+    public static void registryObjects() {
+        // Blocks and Items:
+        ItemManager.getInstance().startup(modInfo);
+        // Equipment Parts:
+        EquipmentPartManager.getInstance().loadAllFromJson(modInfo);
+        // Creatures:
+        CreatureManager.getInstance().startup(modInfo);
+        // Projectiles:
+        //ProjectileManager.getInstance().startup(modInfo);
+    }
 
-		// Vanilla Item Lists:
-		ObjectLists.createVanillaLists();
+    /**
+     * Some initialization must be done after registries have been initialized so we do them on common setup
+     */
+    public static void loadValues() {
+        /**
+         * Creature Manager Values
+         */
+        var creatureManager = CreatureManager.getInstance();
+        for (CreatureInfo creatureInfo : creatureManager.creatures.values()) {
+            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
+            LycanitesMobs.logInfo("", "Registeredcreature: " + entityType);
+            creatureInfo.entityType = (EntityType<? extends LivingEntity>) entityType;
+            if (creatureInfo.entityType instanceof EntityTypeGetter getter) {
+                getter.setRegistryName(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
+            }
+            EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor, creatureInfo.getName());
+            creatureInfo.init();
+        }
+    }
 
-		// Potion Effects:
-		EFFECTS = new Effects();
+    /**
+     * Prints an info message into the console.
+     *
+     * @param key     The debug config key to use, if empty, the message is always printed.
+     * @param message The message to print.
+     */
+    public static void logInfo(String key, String message) {
+        if ("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
+            LOGGER.info("[LycanitesMobs] [Info] [" + key + "] " + message);
+        }
+    }
 
-		// Spawners:
-		SpawnerManager.getInstance().loadAllFromJson(modInfo);
+    /**
+     * Prints an info debug into the console.
+     *
+     * @param key     The debug config key to use, if empty, the message is always printed.
+     * @param message The message to print.
+     */
+    public static void logDebug(String key, String message) {
+        if ("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
+            LOGGER.debug("[LycanitesMobs] [Debug] [" + key + "] " + message);
+        }
+    }
 
-		// Altars:
-		AltarInfo.createAltars();
+    /**
+     * Prints an info warning into the console.
+     *
+     * @param key     The debug config key to use, if empty, the message is always printed.
+     * @param message The message to print.
+     */
+    public static void logWarning(String key, String message) {
+        if ("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
+            LOGGER.warn("[LycanitesMobs] [WARNING] [" + key + "] " + message);
+        }
+    }
 
-		// Mob Events:
-		MobEventManager.getInstance().loadAllFromJson(modInfo);
+    /**
+     * Prints an error message into the console.
+     *
+     * @param message The error message to print.
+     */
+    public static void logError(String message) {
+        LOGGER.error("[LycanitesMobs] " + message);
+    }
 
-		// Dungeons:
-		DungeonManager.getInstance().loadAllFromJson(modInfo);
+    // Content Loading:
+    public void loadContent() {
+        // Elements:
+        ElementManager.getInstance().loadAllFromJson(modInfo);
 
-		// Treat Lists:
-		ItemHalloweenTreat.createObjectLists();
-		ItemWinterGift.createObjectLists();
+        // Vanilla Item Lists:
+        ObjectLists.createVanillaLists();
 
-		// World Gen:
-		WorldGenManager.getInstance().startup();
+        // Potion Effects:
+        EFFECTS = new Effects();
 
+        // Spawners:
+        SpawnerManager.getInstance().loadAllFromJson(modInfo);
 
+        // Altars:
+        AltarInfo.createAltars();
 
-		//Registry Objects
-		LycanitesMobs.registryObjects();
-	}
-	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
-	public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
-	/*public static final RegistryObject<EntityType> ABIA = ENTITY_TYPES.register("abia", LycanitesMobs::getAbia);
-		public static EntityType<?> getAbia() {
-			EntityType.EntityFactory factory = EntityAbaia::new;
-			return EntityType.Builder.of(factory, MobCategory.MONSTER)
-					.setTrackingRange(10)
-					.setUpdateInterval(3)
-					.setShouldReceiveVelocityUpdates(false)
-					.sized(2f, 1f).build("abia");
-		}*/
-	public static void registryObjects()  {
-		// Blocks and Items:
-		ItemManager.getInstance().startup(modInfo);
-		// Equipment Parts:
-		EquipmentPartManager.getInstance().loadAllFromJson(modInfo);
-		// Creatures:
-		CreatureManager.getInstance().startup(modInfo);
-		// Projectiles:
-		//ProjectileManager.getInstance().startup(modInfo);
-	}
-	private void commonSetup(final FMLCommonSetupEvent event) {
-		configReady = true;
-		ObjectManager.setCurrentModInfo(modInfo);
-		this.loadConfigs();
-		// Fix Health Limit:
-		LMReflectionHelper.fixMaxHealth();
-		// Mod Support:
-		DLDungeons.init();
-		loadValues();
-	}
+        // Mob Events:
+        MobEventManager.getInstance().loadAllFromJson(modInfo);
 
-	/**
-	 * Some initialization must be done after registries have been initialized so we do them on common setup
-	 */
-	public static void loadValues() {
-		/**
-		 * Creature Manager Values
-		 */
-		var creatureManager = CreatureManager.getInstance();
-		for(CreatureInfo creatureInfo : creatureManager.creatures.values()) {
-			EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
-			LycanitesMobs.logInfo("", "Registeredcreature: " + entityType);
-			creatureInfo.entityType = (EntityType<? extends LivingEntity>) entityType;
-			if (creatureInfo.entityType instanceof EntityTypeGetter getter) {
-				getter.setRegistryName(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
-			}
-			EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor, creatureInfo.getName());
-			creatureInfo.init();
-		}
-	}
-	@SubscribeEvent
-	public void clientSetup(final FMLClientSetupEvent event) {
+        // Dungeons:
+        DungeonManager.getInstance().loadAllFromJson(modInfo);
 
-		ClientManager.getInstance().initLanguageManager();
-		ClientManager.getInstance().registerEvents();
-		TextureManager.getInstance().createTextures(modInfo);
-		ModelManager.getInstance().createModels();
-		ClientManager.getInstance().initRenderRegister();
-		//New menu screen registration
+        // Treat Lists:
+        ItemHalloweenTreat.createObjectLists();
+        ItemWinterGift.createObjectLists();
 
-		event.enqueueWork(
-				() -> {
-					MenuScreens.register(CreatureContainer.TYPE, CreatureInventoryScreen::new);
-					MenuScreens.register(SummoningPedestalContainer.TYPE, SummoningPedestalScreen::new);
-					MenuScreens.register(EquipmentForgeContainer.TYPE, EquipmentForgeScreen::new);
-					MenuScreens.register(EquipmentInfuserContainer.TYPE, EquipmentInfuserScreen::new);
-					MenuScreens.register(EquipmentStationContainer.TYPE, EquipmentStationScreen::new);
-				}
-		);
-
-
-
-	}
-
-	@SubscribeEvent
-	public void serverStarting(final ServerStartingEvent event) {
-
-	}
-
-	public void loadConfigs() {
-		//ItemManager.getInstance().loadConfig();
-		CreatureManager.getInstance().loadConfig();
-		MobEventManager.getInstance().loadConfig();
-		AltarInfo.loadGlobalSettings();
-	}
-
-	private void enqueueIMC(final InterModEnqueueEvent event) {
-		// Example code to dispatch IMC to another mod
-		//InterModComms.sendTo("modif", "methodname", () -> { LOGGER.info("Hello world from the MDK"); return "Hello world";});
-	}
-
-	private void processIMC(final InterModProcessEvent event) {
-		// Example code to receive and process InterModComms from other mods
-		//LOGGER.info("Got IMC {}", event.getIMCStream().map(m->m.getMessageSupplier().get()).collect(Collectors.toList()));
-	}
+        // World Gen:
+        WorldGenManager.getInstance().startup();
 
 
-	/**
-	 * Prints an info message into the console.
-	 * @param key The debug config key to use, if empty, the message is always printed.
-	 * @param message The message to print.
-	 */
-	public static void logInfo(String key, String message) {
-		if("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
-			LOGGER.info("[LycanitesMobs] [Info] [" + key + "] " + message);
-		}
-	}
+        //Registry Objects
+        LycanitesMobs.registryObjects();
+    }
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        configReady = true;
+        ObjectManager.setCurrentModInfo(modInfo);
+        this.loadConfigs();
+        // Fix Health Limit:
+        LMReflectionHelper.fixMaxHealth();
+        // Mod Support:
+        DLDungeons.init();
+        loadValues();
+    }
+
+    @SubscribeEvent
+    public void clientSetup(final FMLClientSetupEvent event) {
+
+        ClientManager.getInstance().initLanguageManager();
+        ClientManager.getInstance().registerEvents();
+        TextureManager.getInstance().createTextures(modInfo);
+        ModelManager.getInstance().createModels();
+        ClientManager.getInstance().initRenderRegister();
+        //New menu screen registration
+
+        event.enqueueWork(
+                () -> {
+                    MenuScreens.register(CreatureContainer.TYPE, CreatureInventoryScreen::new);
+                    MenuScreens.register(SummoningPedestalContainer.TYPE, SummoningPedestalScreen::new);
+                    MenuScreens.register(EquipmentForgeContainer.TYPE, EquipmentForgeScreen::new);
+                    MenuScreens.register(EquipmentInfuserContainer.TYPE, EquipmentInfuserScreen::new);
+                    MenuScreens.register(EquipmentStationContainer.TYPE, EquipmentStationScreen::new);
+                }
+        );
 
 
-	/**
-	 * Prints an info debug into the console.
-	 * @param key The debug config key to use, if empty, the message is always printed.
-	 * @param message The message to print.
-	 */
-	public static void logDebug(String key, String message) {
-		if("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
-			LOGGER.debug("[LycanitesMobs] [Debug] [" + key + "] " + message);
-		}
-	}
+    }
 
+    @SubscribeEvent
+    public void serverStarting(final ServerStartingEvent event) {
 
-	/**
-	 * Prints an info warning into the console.
-	 * @param key The debug config key to use, if empty, the message is always printed.
-	 * @param message The message to print.
-	 */
-	public static void logWarning(String key, String message) {
-		if("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
-			LOGGER.warn("[LycanitesMobs] [WARNING] [" + key + "] " + message);
-		}
-	}
+    }
 
+    public void loadConfigs() {
+        //ItemManager.getInstance().loadConfig();
+        CreatureManager.getInstance().loadConfig();
+        MobEventManager.getInstance().loadConfig();
+        AltarInfo.loadGlobalSettings();
+    }
 
-	/**
-	 * Prints an error message into the console.
-	 * @param message The error message to print.
-	 */
-	public static void logError(String message) {
-		LOGGER.error("[LycanitesMobs] " + message);
-	}
+    private void enqueueIMC(final InterModEnqueueEvent event) {
+        // Example code to dispatch IMC to another mod
+        //InterModComms.sendTo("modif", "methodname", () -> { LOGGER.info("Hello world from the MDK"); return "Hello world";});
+    }
+
+    private void processIMC(final InterModProcessEvent event) {
+        // Example code to receive and process InterModComms from other mods
+        //LOGGER.info("Got IMC {}", event.getIMCStream().map(m->m.getMessageSupplier().get()).collect(Collectors.toList()));
+    }
 }

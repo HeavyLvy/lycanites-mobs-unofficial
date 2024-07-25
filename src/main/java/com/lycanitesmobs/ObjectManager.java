@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
@@ -66,13 +67,13 @@ public class ObjectManager {
 
 	}*/
     public static final Map<String, EntityType<?>> entityTypes = new HashMap<>();
+    // Maps:
+    public static final Map<String, Lazy<? extends Block>> blocks = new HashMap<>();
+    public static final Map<String, Lazy<? extends BlockItem>> blockItems = new HashMap<>();
+    public static final Map<String, Lazy<? extends LiquidBlock>> liquidBlocks = new HashMap<>();
     // ========== Containers ==========
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, LycanitesMobs.MODID);
     public static ObjectManager INSTANCE;
-    // Maps:
-    public static Map<String, Supplier<? extends Block>> blocks = new HashMap<>();
-    public static Map<String, Supplier<? extends BlockItem>> blockItems = new HashMap<>();
-    public static Map<String, Supplier<? extends LiquidBlock>> liquidBlocks = new HashMap<>();
     public static Map<Item, ModInfo> itemGroups = new HashMap<>();
     public static Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
     public static Map<Block, Item> buckets = new HashMap<>();
@@ -120,12 +121,11 @@ public class ObjectManager {
     // ========== Block ==========
     public static void addBlock(String name, Supplier<? extends Block> block, boolean isLiquid) {
         if (isLiquid) {
-            liquidBlocks.put(name, (Supplier<? extends LiquidBlock>) block);
+            liquidBlocks.put(name, Lazy.of(() -> (LiquidBlock) block.get()));
         } else {
             Item.Properties blockItemProperties = new Item.Properties();
-            Supplier<? extends BlockItem> blockItem = () -> new BlockItem(block.get(), blockItemProperties);
-            blockItems.put(name, blockItem);
-            blocks.put(name, block);
+            blocks.put(name, Lazy.of(block));
+            blockItems.put(name, () -> new BlockItem(blocks.get(name).get(), blockItemProperties));
         }
     }
 
@@ -243,12 +243,6 @@ public class ObjectManager {
         return sounds.get(name);
     }
 
-    public static void addEntityType(String name, EntityType.Builder<? extends LivingEntity> builder) {
-        //if (!entityTypes.keySet().contains(name)) {
-        RegistryObject<EntityType<? extends LivingEntity>> entityType = LycanitesMobs.ENTITY_TYPES.register(name, () -> builder.build(name));
-        entityTypes.put(name, entityType.get());
-        //}
-    }
 
     @Nonnull
     public static EntityType<? extends LivingEntity> getEntityType(String name) {
@@ -256,6 +250,13 @@ public class ObjectManager {
             LycanitesMobs.logInfo("", "EntityType: " + name);
         });
         return (EntityType<? extends LivingEntity>) entityTypes.get(name);
+    }
+
+    public static void addEntityType(String name, EntityType.Builder<? extends LivingEntity> builder) {
+        //if (!entityTypes.keySet().contains(name)) {
+        RegistryObject<EntityType<? extends LivingEntity>> entityType = LycanitesMobs.ENTITY_TYPES.register(name, () -> builder.build(name));
+        entityTypes.put(name, entityType.get());
+        //}
     }
 
     public static void registerContainers(IEventBus event) {
@@ -272,6 +273,19 @@ public class ObjectManager {
     //                  Registry Events
     // ==================================================
     // ========== Blocks ==========
+
+    /**
+     * Registers blocks and their corresponding block items.
+     * <p>
+     * Block items must be registered in the same Registry Event after blocks
+     * to ensure that a non-null block is passed to the BlockItem constructor.
+     * This sequence guarantees that the block references used in block items
+     * are fully initialized and registered, avoiding any potential issues
+     * with null references or unregistered blocks.
+     * </p>
+     *
+     * @param event The register event for blocks and items.
+     */
     @SubscribeEvent
     public void registerBlocks(RegisterEvent event) {
         event.register(ForgeRegistries.Keys.BLOCKS,
@@ -283,15 +297,22 @@ public class ObjectManager {
                     }
                 }
         );
-    }
+        event.register(ForgeRegistries.Keys.ITEMS,
+                helper -> {
+                    for (Map.Entry<String, Lazy<? extends BlockItem>> entry : ObjectManager.blockItems.entrySet()) {
+                        String name = entry.getKey();
+                        Supplier<? extends BlockItem> blockItem = entry.getValue();
 
-	/*public static void loadEntityTypes() {
-		addEntityType("your_entity_name", EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.CREATURE)
-				.setTrackingRange(10)
-				.setUpdateInterval(3)
-				.setShouldReceiveVelocityUpdates(false)
-				.sized(0.6F, 1.8F));
-	}*/
+                        LycanitesMobs.logDebug("Item", "Registering item block: " + name);
+                        if (name == null) {
+                            LycanitesMobs.logWarning("", "Block Item: " + name + " has no Registry Name!");
+                            continue;
+                        }
+                        helper.register(new ResourceLocation(LycanitesMobs.MODID, name), blockItem.get());
+                    }
+                }
+        );
+    }
 
     // ========== Items ==========
     @SubscribeEvent
@@ -319,18 +340,6 @@ public class ObjectManager {
                             helper.register(new ResourceLocation(LycanitesMobs.MODID, name), item.get());
                         }
                     }
-                    //Block Items
-                    for (Supplier<? extends BlockItem> blockItem : blockItems.values()) {
-                        for (String name : blockItems.keySet()) {
-                            LycanitesMobs.logDebug("Item", "Registering item block: " + name);
-                            if (name == null) {
-                                LycanitesMobs.logWarning("", "Block Item: " + name + " has no Registry Name!");
-                                return;
-                            }
-                            helper.register(new ResourceLocation(LycanitesMobs.MODID, name), blockItem.get());
-                        }
-                    }
-
                 }
         );
 

@@ -1,20 +1,24 @@
 package com.lycanitesmobs.core.block;
 
 
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.info.ModInfo;
 import com.lycanitesmobs.core.util.Material;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class BlockMaker {
-    public static final Map<String, Supplier<? extends Block>> blocks = new HashMap<>();
     // ==================================================
     //                Add Dungeon Blocks
     // ==================================================
@@ -30,31 +34,30 @@ public class BlockMaker {
             return 15;
         });
 
-        Supplier<? extends Block> stoneBlock = () -> new BlockBase(properties, stoneName + "stone");
-        Supplier<? extends Block> crystalStair = () -> new BlockStairsCustom(properties, (BlockBase) stoneBlock.get());
-        Supplier<? extends Block> crystalSlab = () -> new BlockSlabCustom(properties, (BlockBase) stoneBlock.get());
+        Lazy<? extends Block> stoneBlock = Lazy.of(() -> new BlockBase(properties, stoneName + "stone"));
+        Lazy<? extends Block> crystalStair = Lazy.of(() -> new BlockStairsCustom(properties, (BlockBase) stoneBlock.get()));
+        Lazy<? extends Block> crystalSlab = Lazy.of(() -> new BlockSlabCustom(properties, (BlockBase) stoneBlock.get()));
+        Lazy<? extends Block> stoneBrickBlock = Lazy.of(() -> new BlockBase(properties, stoneName + "stonebrick"));
+        Lazy<? extends Block> stoneBrickStairs = Lazy.of(() -> new BlockStairsCustom(properties, (BlockBase) stoneBrickBlock.get()));
+        Lazy<? extends Block> stoneBrickSlab = Lazy.of(() -> new BlockSlabCustom(properties, (BlockBase) stoneBrickBlock.get()));
+        Lazy<? extends Block> stoneBrickFence = Lazy.of(() -> new BlockFenceCustom(properties, (BlockBase) stoneBrickBlock.get()));
+        Lazy<? extends Block> stoneBrickWall = Lazy.of(() -> new BlockWallCustom(properties, (BlockBase) stoneBrickBlock.get()));
+        Lazy<? extends Block> stoneTileBlock = Lazy.of(() -> new BlockBase(properties, stoneName + "stonetile"));
+        Lazy<? extends Block> stoneTilePolished = Lazy.of(() -> new BlockBase(properties, stoneName + "stonepolished"));
+        Lazy<? extends Block> stoneTileChiseled = Lazy.of(() -> new BlockBase(properties, stoneName + "stonechiseled"));
+        Lazy<? extends Block> stoneTileCrystal = Lazy.of(() -> new BlockBase(crystalProperties, stoneName + "crystal"));
+        Lazy<? extends Block> stoneTileStairs = Lazy.of(() -> new BlockStairsCustom(properties, (BlockBase) stoneTileBlock.get()));
+        Lazy<? extends Block> stoneTileSlab = Lazy.of(() -> new BlockSlabCustom(properties, (BlockBase) stoneTileBlock.get()));
+        Lazy<? extends Block> stoneTilePillar = Lazy.of(() -> new BlockPillar(properties, stoneName + "stonepillar"));
+
         ObjectManager.addBlock(stoneName + "stone", stoneBlock, false);
         ObjectManager.addBlock(stoneName + "stone_stairs", crystalStair, false);
         ObjectManager.addBlock(stoneName + "stone_slab", crystalSlab, false);
-
-        Supplier<? extends Block> stoneBrickBlock = () -> new BlockBase(properties, stoneName + "stonebrick");
-        Supplier<? extends Block> stoneBrickStairs = () -> new BlockStairsCustom(properties, (BlockBase) stoneBrickBlock.get());
-        Supplier<? extends Block> stoneBrickSlab = () -> new BlockSlabCustom(properties, (BlockBase) stoneBrickBlock.get());
-        Supplier<? extends Block> stoneBrickFence = () -> new BlockFenceCustom(properties, (BlockBase) stoneBrickBlock.get());
-        Supplier<? extends Block> stoneBrickWall = () -> new BlockWallCustom(properties, (BlockBase) stoneBrickBlock.get());
         ObjectManager.addBlock(stoneName + "stonebrick", stoneBrickBlock, false);
         ObjectManager.addBlock(stoneName + "stonebrick_stairs", stoneBrickStairs, false);
         ObjectManager.addBlock(stoneName + "stonebrick_slab", stoneBrickSlab, false);
         ObjectManager.addBlock(stoneName + "stonebrick_fence", stoneBrickFence, false);
         ObjectManager.addBlock(stoneName + "stonebrick_wall", stoneBrickWall, false);
-
-        Supplier<? extends Block> stoneTileBlock = () -> new BlockBase(properties, stoneName + "stonetile");
-        Supplier<? extends Block> stoneTilePolished = () -> new BlockBase(properties, stoneName + "stonepolished");
-        Supplier<? extends Block> stoneTileChiseled = () -> new BlockBase(properties, stoneName + "stonechiseled");
-        Supplier<? extends Block> stoneTileCrystal = () -> new BlockBase(crystalProperties, stoneName + "crystal");
-        Supplier<? extends Block> stoneTileStairs = () -> new BlockStairsCustom(properties, (BlockBase) stoneTileBlock.get());
-        Supplier<? extends Block> stoneTileSlab = () -> new BlockSlabCustom(properties, (BlockBase) stoneTileBlock.get());
-        Supplier<? extends Block> stoneTilePillar = () -> new BlockPillar(properties, stoneName + "stonepillar");
         ObjectManager.addBlock(stoneName + "stonetile", stoneTileBlock, false);
         ObjectManager.addBlock(stoneName + "stonetile_stairs", stoneTileStairs, false);
         ObjectManager.addBlock(stoneName + "stonetile_slab", stoneTileSlab, false);
