@@ -45,49 +45,33 @@ import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ObjectManager {
+    // ========== Items/Blocks ==========
     public static final Map<String, Supplier<? extends Item>> items = new HashMap<>();
-    // ========== Entities ==========
-	/*@SubscribeEvent
-	public void registerEntities(RegisterEvent event) {
-		event.register(ForgeRegistries.Keys.ENTITY_TYPES,
-				helper -> {
-					*//*for(String entityName : specialEntities.keySet()) {
-						EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
-						entityTypeBuilder.setTrackingRange(10);
-						entityTypeBuilder.setUpdateInterval(3);
-						entityTypeBuilder.setShouldReceiveVelocityUpdates(true);
-						entityTypeBuilder.noSummon();
-						EntityType entityType = entityTypeBuilder.build(entityName);
-						EntityFactory.getInstance().addEntityType(entityType, specialEntityConstructors.get(specialEntities.get(entityName)), entityName);
-						specialEntityTypes.put(specialEntities.get(entityName), entityType);
-						helper.register(new ResourceLocation(LycanitesMobs.MODID,entityName), entityType);
-					}*//*
-				}
-		);
-
-	}*/
-    public static final Map<String, EntityType<?>> entityTypes = new HashMap<>();
-    // Maps:
-    public static final Map<String, Lazy<? extends Block>> blocks = new HashMap<>();
     public static final Map<String, Lazy<? extends BlockItem>> blockItems = new HashMap<>();
+    public static final Map<String, Lazy<? extends Block>> blocks = new HashMap<>();
     public static final Map<String, Lazy<? extends LiquidBlock>> liquidBlocks = new HashMap<>();
+    // ========== Entities ==========
+    public static final Map<String, Lazy<? extends EntityType<?>>> entityTypes = new HashMap<>();
     // ========== Containers ==========
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, LycanitesMobs.MODID);
     public static ObjectManager INSTANCE;
-    public static Map<Item, ModInfo> itemGroups = new HashMap<>();
+    public static ModInfo currentModInfo;
+    public static Map<String, Class> tileEntities = new HashMap<>();
+    public static Map<Class<? extends BlockEntity>, BlockEntityType<? extends BlockEntity>> tileEntityTypes = new HashMap<>();
     public static Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
     public static Map<Block, Item> buckets = new HashMap<>();
-    public static Map<String, Class> tileEntities = new HashMap<>();
+    // ========== Creative Mode Tabs ==========
+    public static Map<Item, ModInfo> itemGroups = new HashMap<>();
+    // ========== Damage Sources/Effects ==========
+    public static Map<String, DamageSource> damageSources = new HashMap<>();
     public static Map<String, EffectBase> effects = new HashMap<>();
+    // ========== Sounds ==========
     public static Map<String, ResourceLocation> soundNames = new HashMap<>();
-    public static Map<String, SoundEvent> sounds = new HashMap<>();
-    // Type Maps:
+    public static Map<String, Lazy<? extends SoundEvent>> sounds = new HashMap<>();
     public static Map<String, Class<? extends Entity>> specialEntities = new HashMap<>();
     public static Map<Class<? extends Entity>, Constructor<? extends Entity>> specialEntityConstructors = new HashMap<>();
     public static Map<Class<? extends Entity>, EntityType<? extends Entity>> specialEntityTypes = new HashMap<>();
-    public static Map<Class<? extends BlockEntity>, BlockEntityType<? extends BlockEntity>> tileEntityTypes = new HashMap<>();
-    public static Map<String, DamageSource> damageSources = new HashMap<>();
-    public static ModInfo currentModInfo;
+
     /**
      * The next available network id for special entities to register by.
      **/
@@ -174,10 +158,8 @@ public class ObjectManager {
     public static void addSound(String name, String path) {
         name = name.toLowerCase();
         ResourceLocation resourceLocation = new ResourceLocation(LycanitesMobs.MODID, path);
-        SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(resourceLocation);
-        //soundEvent.setRegistryName(resourceLocation);
         soundNames.put(name, resourceLocation);
-        sounds.put(name, soundEvent);
+        sounds.put(name, Lazy.of(() -> SoundEvent.createVariableRangeEvent(resourceLocation)));
     }
 
     // ==================================================
@@ -240,7 +222,7 @@ public class ObjectManager {
         name = name.toLowerCase();
         if (!sounds.containsKey(name))
             return null;
-        return sounds.get(name);
+        return sounds.get(name).get();
     }
 
 
@@ -249,14 +231,12 @@ public class ObjectManager {
         LMHelperClass.environmentRunnable(false, () -> {
             LycanitesMobs.logInfo("", "EntityType: " + name);
         });
-        return (EntityType<? extends LivingEntity>) entityTypes.get(name);
+        return (EntityType<? extends LivingEntity>) entityTypes.get(name).get();
     }
 
     public static void addEntityType(String name, EntityType.Builder<? extends LivingEntity> builder) {
-        //if (!entityTypes.keySet().contains(name)) {
-        RegistryObject<EntityType<? extends LivingEntity>> entityType = LycanitesMobs.ENTITY_TYPES.register(name, () -> builder.build(name));
-        entityTypes.put(name, entityType.get());
-        //}
+        entityTypes.put(name, () -> builder.build(name));
+
     }
 
     public static void registerContainers(IEventBus event) {
@@ -272,6 +252,18 @@ public class ObjectManager {
     // ==================================================
     //                  Registry Events
     // ==================================================
+    // ========== Entities ==========
+    @SubscribeEvent
+    public void registerEntities(RegisterEvent event) {
+        event.register(ForgeRegistries.Keys.ENTITY_TYPES,
+                helper -> {
+                    for (Map.Entry<String, Lazy<? extends EntityType<?>>> entityType : entityTypes.entrySet()) {
+                        helper.register(new ResourceLocation(LycanitesMobs.MODID, entityType.getKey()), entityType.getValue().get());
+                    }
+                }
+        );
+
+    }
     // ========== Blocks ==========
 
     /**
@@ -346,21 +338,29 @@ public class ObjectManager {
     }
 
     // ========== Sounds ==========
-	/*@SubscribeEvent
-	public void registerSounds(RegisterEvent event) {
-		event.register(ForgeRegistries.Keys.SOUND_EVENTS,
-				helper -> {
-					for(SoundEvent soundEvent : sounds.values()) {
-						for (ResourceLocation registryName : soundNames.values()) {
-							if(registryName == null) {
-								LycanitesMobs.logWarning("", "Sound: " + soundEvent + " has no Registry Name!");
-							}
-							helper.register(registryName, soundEvent);
-						}
-					}
-				}
-		);
-	}*/
+
+    /**
+     * Sounds are for some reason being registered elsewhere(assuming during the process of
+     * adding them to the sounds map with SoundEvent.createVariableRangeEvent(resourceLocation)
+     * so this is not needed. Kept for future organization.
+     *
+     * @param event
+     */
+    /*@SubscribeEvent
+    public void registerSounds(RegisterEvent event) {
+        event.register(ForgeRegistries.Keys.SOUND_EVENTS,
+                helper -> {
+                    for (Lazy<? extends SoundEvent> soundEvent : sounds.values()) {
+                        for (ResourceLocation registryName : soundNames.values()) {
+                            if (registryName == null) {
+                                LycanitesMobs.logWarning("", "Sound: " + soundEvent + " has no Registry Name!");
+                            }
+                            helper.register(registryName, soundEvent.get());
+                        }
+                    }
+                }
+        );
+    }*/
 
     // ========== Potions ==========
     @SubscribeEvent

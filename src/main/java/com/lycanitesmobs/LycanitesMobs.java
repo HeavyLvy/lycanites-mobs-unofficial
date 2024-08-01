@@ -76,12 +76,6 @@ import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Constructor;
-
-import static com.lycanitesmobs.core.info.CreatureManager.entityTypeBuilders;
-import static org.lwjgl.opengl.GL15.glGenBuffers;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
-
 @Mod(LycanitesMobs.MODID)
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class LycanitesMobs {
@@ -142,6 +136,7 @@ public class LycanitesMobs {
     public static IProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
     // Potion Effects:
     public static Effects EFFECTS;
+
     /**
      * Constructor
      **/
