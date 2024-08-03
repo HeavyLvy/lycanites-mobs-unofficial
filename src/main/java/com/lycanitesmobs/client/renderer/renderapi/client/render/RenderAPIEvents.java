@@ -28,6 +28,9 @@ import static org.lwjgl.opengl.GL15.glGenBuffers;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class RenderAPIEvents {
+    public static final CreatureObjModel model = new ModelAbaia();
+    public static final CreatureObjModel model2 = new ModelBobeko();
+
     @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModAPIEvents {
         @SubscribeEvent
@@ -41,20 +44,22 @@ public class RenderAPIEvents {
             });
         }
     }
-    public static final CreatureObjModel model = new ModelAbaia();
 
-    public static final CreatureObjModel model2 = new ModelBobeko();
     @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeAPIEvents {
-        @SubscribeEvent
+        //@SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
             LocalPlayer player = Minecraft.getInstance().player;
-            if (player == null) { return; }
-            if (player.getMainHandItem().getItem() != Items.ANVIL) { return; }
+            if (player == null) {
+                return;
+            }
+            if (player.getMainHandItem().getItem() != Items.ANVIL) {
+                return;
+            }
             WorldBuffer buffer = RenderHelper.startTri();
-                Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
-                RenderHelper.renderModel(buffer, model2, color);
-                RenderHelper.endTri(buffer);
+            Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
+            RenderHelper.renderModel(buffer, model2, color);
+            RenderHelper.endTri(buffer);
         }
 
         public static class RenderContext {

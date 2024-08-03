@@ -7,6 +7,7 @@ import com.lycanitesmobs.client.obj.Vector3o;
 import com.lycanitesmobs.client.obj.Vertex;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
+import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 
 import java.awt.*;
@@ -15,25 +16,6 @@ import static org.lwjgl.opengl.GL33.*;
 
 
 public class RenderHelper {
-    public WorldBuffer startLines() {
-        glEnable(GL_LINE_SMOOTH);
-        return new WorldBuffer(GL_LINES, ShaderManager.getPositionColorShader());
-    }
-
-    public void endLines(WorldBuffer buffer) {
-        glEnable(GL_BLEND);
-        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(false);
-        buffer.draw();
-        glDepthMask(true);
-        glDisable(GL_BLEND);
-    }
-
-    public void drawLine(WorldBuffer buffer, float x1, float y1, float z1, float x2, float y2, float z2, Color color) {
-        buffer.vert(x1, y1, z1, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
-        buffer.vert(x2, y2, z2, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
-    }
-
     public static WorldBuffer startTri() {
         return new WorldBuffer(GL_TRIANGLES, ShaderManager.getPositionColorShader());
     }
@@ -56,8 +38,9 @@ public class RenderHelper {
         buffer.vert(x2, y2, z2, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
         buffer.vert(x3, y3, z3, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
+
     public static void renderModel(WorldBuffer buffer, CreatureObjModel objPart, Vector4f color) {
-        for (ObjPart part : objPart.objParts){
+        for (ObjPart part : objPart.objParts) {
             if (part.mesh == null) {
                 return;
             }
@@ -75,7 +58,8 @@ public class RenderHelper {
             buffer.draw();
         }
     }
-    public static void renderPart(WorldBuffer buffer, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
+
+    public static void renderPart(WorldBuffer buffer, ObjPart objPart, Vector4f color, Vec3 entityPos) {
         if (objPart.mesh == null) {
             return;
         }
@@ -96,7 +80,9 @@ public class RenderHelper {
             for (int iv = 0; iv < 3; iv++) {
                 Vertex v = vertices[indices[i + iv]];
                 buffer.vert(
-                        v.getPos().x(), v.getPos().y(), v.getPos().z(),
+                        (float) (v.getPos().x() + entityPos.x()),
+                        (float) (v.getPos().y() + entityPos.y()),
+                        (float) (v.getPos().z() + entityPos.z()),
                         color.x(), color.y(), color.z(), color.w()
                 );
             }
@@ -104,6 +90,7 @@ public class RenderHelper {
 
         buffer.draw();
     }
+
 
     private static Vector3o getNormal(Vector3o p1, Vector3o p2, Vector3o p3) {
         Vector3o output = new Vector3o();
@@ -119,5 +106,24 @@ public class RenderHelper {
 
         output.normalize();
         return output;
+    }
+
+    public WorldBuffer startLines() {
+        glEnable(GL_LINE_SMOOTH);
+        return new WorldBuffer(GL_LINES, ShaderManager.getPositionColorShader());
+    }
+
+    public void endLines(WorldBuffer buffer) {
+        glEnable(GL_BLEND);
+        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(false);
+        buffer.draw();
+        glDepthMask(true);
+        glDisable(GL_BLEND);
+    }
+
+    public void drawLine(WorldBuffer buffer, float x1, float y1, float z1, float x2, float y2, float z2, Color color) {
+        buffer.vert(x1, y1, z1, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+        buffer.vert(x2, y2, z2, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
 }

@@ -23,8 +23,8 @@ public class WorldBuffer {
     private final List<Vertex> vertices = new ArrayList<>();
     private final int drawMode;
     private final Shader shader;
-    private FloatBuffer projectionMatrix;
     private final Vec3 cameraPos;
+    private FloatBuffer projectionMatrix;
 
     public WorldBuffer(int drawMode, Shader shader) {
         this.drawMode = drawMode;
@@ -35,6 +35,10 @@ public class WorldBuffer {
 
     public void vert(float x, float y, float z, float r, float g, float b, float a) {
         vertices.add(new Vertex(x - (float) cameraPos.x, y - (float) cameraPos.y, z - (float) cameraPos.z, r, g, b, a));
+    }
+
+    private void makeProjectionMatrix(Matrix4f projectionMatrix, Matrix4f viewModelMatrix) {
+        this.projectionMatrix = new Matrix4f(projectionMatrix).mul(viewModelMatrix).get(BufferUtils.createFloatBuffer(16));
     }
 
     public void draw() {
@@ -50,7 +54,7 @@ public class WorldBuffer {
         glEnableVertexAttribArray(1);
 
         BufferManager.unbindBuffer();
-        if (shader != null){
+        if (shader != null) {
             shader.bind();
             BufferManager.draw(drawMode, this.vertices.size());
             shader.unbind();
@@ -78,9 +82,6 @@ public class WorldBuffer {
         return floatBuffer.flip();
     }
 
-    private void makeProjectionMatrix(Matrix4f projectionMatrix, Matrix4f viewModelMatrix) {
-        this.projectionMatrix = projectionMatrix.mul(viewModelMatrix).get(BufferUtils.createFloatBuffer(16));
-    }
 
     private void applyProjectionMatrix() {
         if (shader == null) return;
