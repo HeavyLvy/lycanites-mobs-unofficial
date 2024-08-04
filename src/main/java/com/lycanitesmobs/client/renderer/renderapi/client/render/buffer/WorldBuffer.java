@@ -38,7 +38,7 @@ public class WorldBuffer {
     }
 
     private void makeProjectionMatrix(Matrix4f projectionMatrix, Matrix4f viewModelMatrix) {
-        this.projectionMatrix = new Matrix4f(projectionMatrix).mul(viewModelMatrix).get(BufferUtils.createFloatBuffer(16));
+        this.projectionMatrix = projectionMatrix.mul(viewModelMatrix, new Matrix4f()).get(BufferUtils.createFloatBuffer(16));
     }
 
     public void draw() {

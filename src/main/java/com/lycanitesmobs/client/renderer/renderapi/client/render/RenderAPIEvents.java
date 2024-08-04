@@ -1,21 +1,29 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.client.model.CreatureModel;
 import com.lycanitesmobs.client.model.CreatureObjModel;
+import com.lycanitesmobs.client.model.CreatureObjModelOld;
 import com.lycanitesmobs.client.model.creature.ModelAbaia;
 import com.lycanitesmobs.client.model.creature.ModelBobeko;
 import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
+import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.ChunkDataEvent;
+import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -24,12 +32,19 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.lwjgl.opengl.GL15.glGenBuffers;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class RenderAPIEvents {
     public static final CreatureObjModel model = new ModelAbaia();
     public static final CreatureObjModel model2 = new ModelBobeko();
+    public static final Map<BaseCreatureEntity, CreatureObjModel> entities = new HashMap<>();
+    public static final Map<BaseCreatureEntity, CreatureObjModelOld> entitiesLegacy = new HashMap<>();
 
     @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModAPIEvents {
@@ -47,7 +62,7 @@ public class RenderAPIEvents {
 
     @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeAPIEvents {
-        //@SubscribeEvent
+        @SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null) {
@@ -57,10 +72,27 @@ public class RenderAPIEvents {
                 return;
             }
             WorldBuffer buffer = RenderHelper.startTri();
+            if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) return;
             Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
-            RenderHelper.renderModel(buffer, model2, color);
-            RenderHelper.endTri(buffer);
+            for (Map.Entry<BaseCreatureEntity, CreatureObjModel> entityMap : entities.entrySet()) {
+                if (entityMap.getKey().isRemoved()) {
+                    entities.remove(entityMap.getValue());
+                } else {
+                    RenderHelper.renderModel(buffer, entityMap.getValue(), color, entityMap.getKey().position());
+                    RenderHelper.endTri(buffer);
+                }
+            }
+            for (Map.Entry<BaseCreatureEntity, CreatureObjModelOld> entityMap : entitiesLegacy.entrySet()) {
+                if (entityMap.getKey().isRemoved()) {
+                    entitiesLegacy.remove(entityMap.getValue());
+                } else {
+                    RenderHelper.renderLegacyModel(buffer, entityMap.getValue(), color, entityMap.getKey().position());
+                    RenderHelper.endTri(buffer);
+                }
+            }
+
         }
+
 
         public static class RenderContext {
             public final LevelRenderer levelRenderer;

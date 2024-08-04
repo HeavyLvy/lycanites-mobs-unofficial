@@ -7,6 +7,7 @@ import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.obj.VBOObjModel;
 import com.lycanitesmobs.client.renderer.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
@@ -20,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.io.IOUtils;
@@ -361,7 +363,10 @@ public class CreatureObjModel extends CreatureModel {
                 scale *= entity.getScale();
             }
         }
-
+        // Adds the model + entity to the renderer's map to render during level rendering
+        if (!RenderAPIEvents.entities.containsKey(entity)) {
+            RenderAPIEvents.entities.put(entity, this);
+        }
         for (ObjPart part : this.objParts) {
             String partName = part.getName().toLowerCase();
             if (!this.canRenderPart(partName, entity, layer, renderAsTrophy))
@@ -390,16 +395,7 @@ public class CreatureObjModel extends CreatureModel {
 
             this.currentAnimationPart.applyAnimationFrames(this.animator);
 
-            WorldBuffer buffer = RenderHelper.startTri();
-            Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
-            try {
-                RenderHelper.renderPart(buffer, part, color, entity.position());
-                RenderHelper.endTri(buffer);
-                matrixStack.popPose();
-            } catch (Exception e) {
-                LycanitesMobs.LOGGER.error("Error in CreatureObjModel renderer. ", e);
-                matrixStack.popPose();
-            }
+            matrixStack.popPose();
         }
     }
 

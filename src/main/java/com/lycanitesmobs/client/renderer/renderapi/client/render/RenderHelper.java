@@ -2,6 +2,7 @@ package com.lycanitesmobs.client.renderer.renderapi.client.render;
 
 
 import com.lycanitesmobs.client.model.CreatureObjModel;
+import com.lycanitesmobs.client.model.CreatureObjModelOld;
 import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.obj.Vector3o;
 import com.lycanitesmobs.client.obj.Vertex;
@@ -11,6 +12,8 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL33.*;
 
@@ -39,8 +42,29 @@ public class RenderHelper {
         buffer.vert(x3, y3, z3, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
 
-    public static void renderModel(WorldBuffer buffer, CreatureObjModel objPart, Vector4f color) {
+    public static void renderModel(WorldBuffer buffer, CreatureObjModel objPart, Vector4f color, Vec3 pos) {
         for (ObjPart part : objPart.objParts) {
+            if (part.mesh == null) {
+                continue;
+            }
+            int[] indices = part.mesh.indices;
+            Vertex[] vertices = part.mesh.vertices;
+            for (int i = 0; i < indices.length; i += 3) {
+                for (int iv = 0; iv < 3; iv++) {
+                    Vertex v = vertices[indices[i + iv]];
+                    buffer.vert(
+                            (float) (v.getPos().x() + pos.x), (float) (v.getPos().y() + pos.y), (float) (v.getPos().z() + pos.z),
+                            color.x(), color.y(), color.z(), color.w()
+                    );
+                }
+            }
+        }
+        buffer.draw();
+    }
+
+
+    public static void renderLegacyModel(WorldBuffer buffer, CreatureObjModelOld objPart, Vector4f color, Vec3 pos) {
+        for (ObjPart part : objPart.wavefrontParts) {
             if (part.mesh == null) {
                 return;
             }
@@ -50,13 +74,13 @@ public class RenderHelper {
                 for (int iv = 0; iv < 3; iv++) {
                     Vertex v = vertices[indices[i + iv]];
                     buffer.vert(
-                            v.getPos().x(), v.getPos().y(), v.getPos().z(),
+                            (float) (v.getPos().x() + pos.x), (float) (v.getPos().y() + pos.y), (float) (v.getPos().z() + pos.z),
                             color.x(), color.y(), color.z(), color.w()
                     );
                 }
             }
-            buffer.draw();
         }
+        buffer.draw();
     }
 
     public static void renderPart(WorldBuffer buffer, ObjPart objPart, Vector4f color, Vec3 entityPos) {

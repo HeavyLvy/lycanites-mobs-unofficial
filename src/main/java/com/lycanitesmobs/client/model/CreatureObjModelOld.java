@@ -5,6 +5,7 @@ import com.lycanitesmobs.client.obj.ObjModel;
 import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.obj.VBOObjModel;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
@@ -150,7 +151,10 @@ public class CreatureObjModelOld extends CreatureModel {
                 loop = entity.onlyRenderTicks;
             }
         }
-
+        // Adds the model + entity to the renderer's map to render during level rendering
+        if (!RenderAPIEvents.entities.containsKey(entity)) {
+            RenderAPIEvents.entitiesLegacy.put(entity, this);
+        }
         // Render and Animate Each Part:
         for (ObjPart part : this.wavefrontParts) {
             if (part.getName() == null)
@@ -219,16 +223,9 @@ public class CreatureObjModelOld extends CreatureModel {
             /*this.uncenterPart(partName);
 			this.objModel.renderPart(vertexBuilder, matrixStack.last().normal(), matrixStack.last().pose(), this.getBrightness(partName, layer, entity, brightness), fade, part, this.getPartColor(partName, entity, layer, trophyModel, loop), this.getPartTextureOffset(partName, entity, layer, trophyModel, loop));
 			matrixStack.popPose();*/
-            WorldBuffer buffer = RenderHelper.startTri();
-            Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
-            try {
-                RenderHelper.renderPart(buffer, part, color, entity.position());
-                RenderHelper.endTri(buffer);
-                matrixStack.popPose();
-            } catch (Exception e) {
-                LycanitesMobs.LOGGER.error("Error in CreatureObjModel renderer. ", e);
-                matrixStack.popPose();
-            }
+
+
+            matrixStack.popPose();
         }
     }
 
