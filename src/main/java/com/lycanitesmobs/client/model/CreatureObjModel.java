@@ -14,13 +14,16 @@ import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.ModInfo;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -37,6 +40,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.entities;
 
 @OnlyIn(Dist.CLIENT)
 public class CreatureObjModel extends CreatureModel {
@@ -364,9 +369,10 @@ public class CreatureObjModel extends CreatureModel {
             }
         }
         // Adds the model + entity to the renderer's map to render during level rendering
-        if (!RenderAPIEvents.entities.containsKey(entity)) {
-            RenderAPIEvents.entities.put(entity, this);
+        if (!entities.containsKey(entity)) {
+            entities.put(entity, this);
         }
+
         for (ObjPart part : this.objParts) {
             String partName = part.getName().toLowerCase();
             if (!this.canRenderPart(partName, entity, layer, renderAsTrophy))

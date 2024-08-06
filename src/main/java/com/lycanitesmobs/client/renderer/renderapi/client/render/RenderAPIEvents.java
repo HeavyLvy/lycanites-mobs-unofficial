@@ -1,48 +1,39 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.model.CreatureModel;
 import com.lycanitesmobs.client.model.CreatureObjModel;
 import com.lycanitesmobs.client.model.CreatureObjModelOld;
 import com.lycanitesmobs.client.model.creature.ModelAbaia;
 import com.lycanitesmobs.client.model.creature.ModelBobeko;
-import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.ChunkDataEvent;
-import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
 import org.joml.Vector4f;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class RenderAPIEvents {
-    public static final CreatureObjModel model = new ModelAbaia();
-    public static final CreatureObjModel model2 = new ModelBobeko();
     public static final Map<BaseCreatureEntity, CreatureObjModel> entities = new HashMap<>();
     public static final Map<BaseCreatureEntity, CreatureObjModelOld> entitiesLegacy = new HashMap<>();
 
@@ -64,6 +55,8 @@ public class RenderAPIEvents {
     public static class ForgeAPIEvents {
         @SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
+            if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
+
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null) {
                 return;
@@ -71,38 +64,42 @@ public class RenderAPIEvents {
             if (player.getMainHandItem().getItem() != Items.ANVIL) {
                 return;
             }
-            WorldBuffer buffer = RenderHelper.startTri();
-            if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) return;
+
+
+            Matrix4f projectionMatrix = event.getProjectionMatrix();
+            Matrix4f viewMatrix = event.getPoseStack().last().pose();
+            WorldBuffer buffer = RenderHelper.startTri(projectionMatrix, viewMatrix);
+            Frustum frustum = event.getFrustum();
+            frustum.prepare(player.getX(), player.getY(), player.getZ());
+
             Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
+            final double extend = 25.0;
+
+            // Render modern models
             for (Map.Entry<BaseCreatureEntity, CreatureObjModel> entityMap : entities.entrySet()) {
-                if (entityMap.getKey().isRemoved()) {
+                BaseCreatureEntity entity = entityMap.getKey();
+                if (entity.isRemoved()) {
                     entities.remove(entityMap.getValue());
                 } else {
-                    RenderHelper.renderModel(buffer, entityMap.getValue(), color, entityMap.getKey().position());
-                    RenderHelper.endTri(buffer);
+                    if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
+                        RenderHelper.renderModel(buffer, entityMap.getValue(), color, entity);
+                    }
                 }
             }
+
+            // Render legacy models
             for (Map.Entry<BaseCreatureEntity, CreatureObjModelOld> entityMap : entitiesLegacy.entrySet()) {
-                if (entityMap.getKey().isRemoved()) {
+                BaseCreatureEntity entity = entityMap.getKey();
+                if (entity.isRemoved()) {
                     entitiesLegacy.remove(entityMap.getValue());
                 } else {
-                    RenderHelper.renderLegacyModel(buffer, entityMap.getValue(), color, entityMap.getKey().position());
-                    RenderHelper.endTri(buffer);
+                    if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
+                        RenderHelper.renderLegacyModel(buffer, entityMap.getValue(), color, entity);
+                    }
                 }
             }
 
-        }
-
-
-        public static class RenderContext {
-            public final LevelRenderer levelRenderer;
-
-            public final Camera camera;
-
-            public RenderContext(LevelRenderer levelRenderer, Camera camera) {
-                this.levelRenderer = levelRenderer;
-                this.camera = camera;
-            }
+            RenderHelper.endTri(buffer);
         }
     }
 }

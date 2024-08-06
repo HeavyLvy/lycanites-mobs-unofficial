@@ -6,6 +6,7 @@
   "mixins": [
     "EntityTypeMixin"
   ],
-  "client": [],
+  "client": [
+  ],
   "refmap": "lycanitesmobs.refmap.json"
 }

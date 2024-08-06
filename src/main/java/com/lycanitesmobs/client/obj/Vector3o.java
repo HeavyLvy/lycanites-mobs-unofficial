@@ -4,6 +4,7 @@ import com.lycanitesmobs.core.util.LMHelperClass;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 
 
@@ -28,11 +29,16 @@ public class Vector3o {
         this.z = p_i48098_3_;
     }
 
+    // Forge start
+    public Vector3o(float[] values) {
+        set(values);
+    }
+
     public boolean equals(Object p_equals_1_) {
         if (this == p_equals_1_) {
             return true;
         } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
-            Vector3o vector3f = (Vector3o)p_equals_1_;
+            Vector3o vector3f = (Vector3o) p_equals_1_;
             if (Float.compare(vector3f.x, this.x) != 0) {
                 return false;
             } else if (Float.compare(vector3f.y, this.y) != 0) {
@@ -111,7 +117,7 @@ public class Vector3o {
 
     public boolean normalize() {
         float f = this.x * this.x + this.y * this.y + this.z * this.z;
-        if ((double)f < 1.0E-5D) {
+        if ((double) f < 1.0E-5D) {
             return false;
         } else {
             float f1 = LMHelperClass.convertToFloat(Mth.fastInvSqrt(f));
@@ -134,14 +140,12 @@ public class Vector3o {
         this.z = f * f4 - f1 * f3;
     }
 
-
     public void lerp(Vector3o p_229190_1_, float p_229190_2_) {
         float f = 1.0F - p_229190_2_;
         this.x = this.x * f + p_229190_1_.x * p_229190_2_;
         this.y = this.y * f + p_229190_1_.y * p_229190_2_;
         this.z = this.z * f + p_229190_1_.z * p_229190_2_;
     }
-
 
     public Vector3o copy() {
         return new Vector3o(this.x, this.y, this.z);
@@ -153,22 +157,31 @@ public class Vector3o {
         this.z = p_229191_1_.get(this.z);
     }
 
+    public Vec3 toVec3() {
+        return new Vec3(this.x, this.y, this.z);
+    }
+
     public String toString() {
         return "[" + this.x + ", " + this.y + ", " + this.z + "]";
     }
 
-    // Forge start
-    public Vector3o(float[] values) {
-        set(values);
-    }
     public void set(float[] values) {
         this.x = values[0];
         this.y = values[1];
         this.z = values[2];
     }
-    public void setX(float x) { this.x = x; }
-    public void setY(float y) { this.y = y; }
-    public void setZ(float z) { this.z = z; }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public void setZ(float z) {
+        this.z = z;
+    }
 
     public Quaternionf rotationDegrees(float p_229187_1_) {
         return rotationDegrees(p_229187_1_, true);
@@ -176,7 +189,7 @@ public class Vector3o {
 
     public Quaternionf rotationDegrees(float p_i48101_2_, boolean p_i48101_3_) {
         if (p_i48101_3_) {
-            p_i48101_2_ *= ((float)Math.PI / 180F);
+            p_i48101_2_ *= ((float) Math.PI / 180F);
         }
 
         float f = sin(p_i48101_2_ / 2.0F);
@@ -184,15 +197,15 @@ public class Vector3o {
         float j = this.y() * f;
         float k = this.z() * f;
         float r = cos(p_i48101_2_ / 2.0F);
-        return new Quaternionf(i, j, k , r);
+        return new Quaternionf(i, j, k, r);
     }
 
     private float sin(float p_214903_0_) {
-        return (float)Math.sin((double)p_214903_0_);
+        return (float) Math.sin((double) p_214903_0_);
     }
 
     private float cos(float p_214904_0_) {
-        return (float)Math.cos((double)p_214904_0_);
+        return (float) Math.cos((double) p_214904_0_);
     }
 
 }

@@ -33,58 +33,79 @@ public class WorldBuffer {
         makeProjectionMatrix(RenderSystem.getProjectionMatrix(), RenderSystem.getModelViewStack().last().pose());
     }
 
+    public WorldBuffer(int drawMode, Shader shader, Matrix4f projectionMatrix, Matrix4f viewMatrix) {
+        this.drawMode = drawMode;
+        this.shader = shader;
+        this.cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+        makeProjectionMatrix(projectionMatrix, viewMatrix);
+    }
+
     public void vert(float x, float y, float z, float r, float g, float b, float a) {
+        // Subtract camera position for view-relative coordinates
         vertices.add(new Vertex(x - (float) cameraPos.x, y - (float) cameraPos.y, z - (float) cameraPos.z, r, g, b, a));
     }
+
 
     private void makeProjectionMatrix(Matrix4f projectionMatrix, Matrix4f viewModelMatrix) {
         this.projectionMatrix = projectionMatrix.mul(viewModelMatrix, new Matrix4f()).get(BufferUtils.createFloatBuffer(16));
     }
 
     public void draw() {
+        // Bind necessary buffers and apply projection matrix
         BufferManager.bind();
         BufferManager.bindBuffer();
 
-        BufferManager.writeBuffer(getBuffer());
+        // Prepare vertex data and send it to the GPU
+        FloatBuffer buffer = getBuffer();
+        BufferManager.writeBuffer(buffer);
+
+        glEnable(GL_DEPTH_TEST); // Enable depth testing
+        glDepthFunc(GL_LEQUAL);  // Depth function to handle depth comparisons
+
+        glEnable(GL_BLEND);      // Enable blending for handling transparency
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         applyProjectionMatrix();
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        // Set up vertex attribute pointers
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0); // For position
+
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 4, GL_FLOAT, false, 0, vertices.size() * 3 * 4L);
+        glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES); // For color
         glEnableVertexAttribArray(1);
 
-        BufferManager.unbindBuffer();
+        // Draw all vertices at once
         if (shader != null) {
             shader.bind();
-            BufferManager.draw(drawMode, this.vertices.size());
+            glDrawArrays(drawMode, 0, vertices.size());
             shader.unbind();
         }
+
+        // Unbind everything and reset states
+        BufferManager.unbindBuffer();
         BufferManager.unbind();
+
+        // Disable states after use
+        glDisable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
+
+        // Clear vertices after drawing to prepare for next frame
+        vertices.clear();
     }
 
     private FloatBuffer getBuffer() {
         FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(vertices.size() * 7);
-        ArrayList<Float> floats = new ArrayList<>();
         for (Vertex vertex : vertices) {
-            floats.add(vertex.getX());
-            floats.add(vertex.getY());
-            floats.add(vertex.getZ());
+            floatBuffer.put(vertex.getX()).put(vertex.getY()).put(vertex.getZ());
+            floatBuffer.put(vertex.getR()).put(vertex.getG()).put(vertex.getB()).put(vertex.getA());
         }
-        for (Vertex vertex : vertices) {
-            floats.add(vertex.getR());
-            floats.add(vertex.getG());
-            floats.add(vertex.getB());
-            floats.add(vertex.getA());
-        }
-        Float[] floatArray = new Float[floats.size()];
-        floats.toArray(floatArray);
-        floatBuffer.put(ArrayUtils.toPrimitive(floatArray));
-        return floatBuffer.flip();
+        floatBuffer.flip();
+        return floatBuffer;
     }
 
-
     private void applyProjectionMatrix() {
-        if (shader == null) return;
-        shader.uniformMatrix4f("u_projection", projectionMatrix);
+        if (shader != null) {
+            shader.uniformMatrix4f("u_projection", projectionMatrix);
+        }
     }
 }
