@@ -5,6 +5,7 @@ import com.lycanitesmobs.client.model.CreatureObjModel;
 import com.lycanitesmobs.client.model.CreatureObjModelOld;
 import com.lycanitesmobs.client.model.creature.ModelAbaia;
 import com.lycanitesmobs.client.model.creature.ModelBobeko;
+import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
@@ -86,7 +87,6 @@ public class RenderAPIEvents {
                     }
                 }
             }
-
             // Render legacy models
             for (Map.Entry<BaseCreatureEntity, CreatureObjModelOld> entityMap : entitiesLegacy.entrySet()) {
                 BaseCreatureEntity entity = entityMap.getKey();

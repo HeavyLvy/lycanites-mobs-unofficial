@@ -36,166 +36,114 @@ import org.lwjgl.opengl.GL33;
 
 public class VBOBatcher {
 
-	public static class VBODrawCommand {
+    private static final VBOBatcher INSTANCE = new VBOBatcher();
+    private final Map<RenderType, List<VBODrawCommand>> batchedDrawCommands = new LinkedHashMap<>();
 
-		private final int vbo;
-		private final int vertexCount;
-		private final VertexFormat format;
-		private final Matrix4f matrix;
-		private final ResourceLocation texLocation;
-		private float red = 1.0F;
-		private float green = 1.0F;
-		private float blue = 1.0F;
-		private float alpha = 1.0F;
-		private float textureOffsetX;
-		private float textureOffsetY;
-		private float overlayOffsetX;
-		private float overlayOffsetY;
-		private float lightOffsetX;
-		private float lightOffsetY;
-		private Shader shader;
-		public VBODrawCommand(int vbo, int vertexCount, VertexFormat format, Matrix4f matrix, ResourceLocation texLocation) {
-			this.vbo = vbo;
-			this.vertexCount = vertexCount;
-			this.format = format;
-			this.matrix = matrix;
-			this.texLocation = texLocation;
-			ShaderManager.loadShaders(); // Ensure shaders are loaded
-			this.shader = ShaderManager.getPositionColorShader();
-		}
+    public static VBOBatcher getInstance() {
+        return INSTANCE;
+    }
 
-		public VBODrawCommand setColor(Vector4f color) {
-			return setColor(color.x(), color.y(), color.z(), color.w());
-		}
+    public void queue(RenderType renderType, VBODrawCommand drawCommand) {
+        batchedDrawCommands.computeIfAbsent(renderType, k -> new LinkedList<>()).add(drawCommand);
+    }
 
-		public VBODrawCommand setColor(float red, float green, float blue, float alpha) {
-			this.red = red;
-			this.green = green;
-			this.blue = blue;
-			this.alpha = alpha;
-			return this;
-		}
+    public void endBatches(PoseStack poseStack) {
+        batchedDrawCommands.forEach((renderType, drawCommands) -> {
+            if (drawCommands.isEmpty()) {
+                return;
+            }
 
-		public VBODrawCommand setTextureOffset(Vector2f textureOffset) {
-			return setTextureOffset(textureOffset.x * 0.01F, -textureOffset.y * 0.01F);
-		}
+            renderType.setupRenderState();
 
-		public VBODrawCommand setTextureOffset(float textureOffsetX, float textureOffsetY) {
-			this.textureOffsetX = textureOffsetX;
-			this.textureOffsetY = textureOffsetY;
-			return this;
-		}
+            for (VBODrawCommand drawCommand : drawCommands) {
+                drawCommand.draw(poseStack);
+            }
 
-		public VBODrawCommand setOverlayOffset(float white, boolean red) {
-			return setOverlayOffset(OverlayTexture.u(white), OverlayTexture.v(red));
-		}
+            renderType.clearRenderState();
+            drawCommands.clear();
+        });
 
-		public VBODrawCommand setOverlayOffset(float overlayOffsetX, float overlayOffsetY) {
-			this.overlayOffsetX = overlayOffsetX;
-			this.overlayOffsetY = overlayOffsetY;
-			return this;
-		}
+        batchedDrawCommands.clear();
+    }
 
-		public VBODrawCommand setLightOffset(int packed) {
-			return setLightOffset(LightTexture.block(packed) << 4, LightTexture.sky(packed) << 4);
-		}
+    public static class VBODrawCommand {
 
-		public VBODrawCommand setLightOffset(float lightOffsetX, float lightOffsetY) {
-			this.lightOffsetX = lightOffsetX;
-			this.lightOffsetY = lightOffsetY;
-			return this;
-		}
+        private final int vbo;
+        private final int vertexCount;
+        private final VertexFormat format;
+        private final Matrix4f matrix;
+        private final ResourceLocation texLocation;
+        private float red = 1.0F;
+        private float green = 1.0F;
+        private float blue = 1.0F;
+        private float alpha = 1.0F;
+        private float textureOffsetX;
+        private float textureOffsetY;
+        private float overlayOffsetX;
+        private float overlayOffsetY;
+        private float lightOffsetX;
+        private float lightOffsetY;
+        private Shader shader;
 
+        public VBODrawCommand(int vbo, int vertexCount, VertexFormat format, Matrix4f matrix, ResourceLocation texLocation) {
+            this.vbo = vbo;
+            this.vertexCount = vertexCount;
+            this.format = format;
+            this.matrix = matrix;
+            this.texLocation = texLocation;
+            ShaderManager.loadShaders(); // Ensure shaders are loaded
+            this.shader = ShaderManager.getPositionColorShader();
+        }
 
-		public void draw(PoseStack poseStack) {
-			Minecraft.getInstance().getTextureManager().bindForSetup(texLocation);
+        private static float correctedColor(float f) {
+            return ((int) (f * 255.0F) & 0xFF) / 255.0F;
+        }
 
-			RenderSystem.setShaderColor(correctedColor(red), correctedColor(green), correctedColor(blue), correctedColor(alpha));
+        public VBODrawCommand setColor(Vector4f color) {
+            return setColor(color.x(), color.y(), color.z(), color.w());
+        }
 
-			if (textureOffsetX != 0.0F || textureOffsetY != 0.0F) {
-				poseStack.pushPose();
-				poseStack.translate(textureOffsetX, textureOffsetY, 0.0F);
-				// Apply the texture matrix transformation directly
-				Matrix4f textureMatrix = new Matrix4f();
-				textureMatrix.translate(textureOffsetX, textureOffsetY, 0.0F);
-				shader.uniformMatrix4f("TextureMat", textureMatrix.get(FloatBuffer.allocate(16)));
-			}
+        public VBODrawCommand setColor(float red, float green, float blue, float alpha) {
+            this.red = red;
+            this.green = green;
+            this.blue = blue;
+            this.alpha = alpha;
+            return this;
+        }
 
-			// Set additional texture parameters with valid wrap and filter modes
-			RenderSystem.texParameter(GL21.GL_TEXTURE_2D, GL21.GL_TEXTURE_WRAP_S, GL21.GL_REPEAT);
-			RenderSystem.texParameter(GL21.GL_TEXTURE_2D, GL21.GL_TEXTURE_WRAP_T, GL21.GL_REPEAT);
-			RenderSystem.texParameter(GL21.GL_TEXTURE_2D, GL21.GL_TEXTURE_MIN_FILTER, GL21.GL_LINEAR);
-			RenderSystem.texParameter(GL21.GL_TEXTURE_2D, GL21.GL_TEXTURE_MAG_FILTER, GL21.GL_LINEAR);
+        public VBODrawCommand setTextureOffset(Vector2f textureOffset) {
+            return setTextureOffset(textureOffset.x * 0.01F, -textureOffset.y * 0.01F);
+        }
 
-			poseStack.pushPose();
-			poseStack.mulPoseMatrix(matrix);
+        public VBODrawCommand setTextureOffset(float textureOffsetX, float textureOffsetY) {
+            this.textureOffsetX = textureOffsetX;
+            this.textureOffsetY = textureOffsetY;
+            return this;
+        }
 
-			shader.bind(); // Bind the shader before drawing
+        public VBODrawCommand setOverlayOffset(float white, boolean red) {
+            return setOverlayOffset(OverlayTexture.u(white), OverlayTexture.v(red));
+        }
 
-			// Set the projection matrix uniform
-			Matrix4f projectionMatrix = new Matrix4f(poseStack.last().pose());
-			shader.uniformMatrix4f("u_projection", projectionMatrix.get(FloatBuffer.allocate(16)));
+        public VBODrawCommand setOverlayOffset(float overlayOffsetX, float overlayOffsetY) {
+            this.overlayOffsetX = overlayOffsetX;
+            this.overlayOffsetY = overlayOffsetY;
+            return this;
+        }
 
-			// Generate and bind a VAO
-			int vao = GL30.glGenVertexArrays();
-			GL30.glBindVertexArray(vao);
+        public VBODrawCommand setLightOffset(int packed) {
+            return setLightOffset(LightTexture.block(packed) << 4, LightTexture.sky(packed) << 4);
+        }
 
-			// Bind the VBO and set up the vertex attributes
-			RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> vbo);
-			format.setupBufferState();
+        public VBODrawCommand setLightOffset(float lightOffsetX, float lightOffsetY) {
+            this.lightOffsetX = lightOffsetX;
+            this.lightOffsetY = lightOffsetY;
+            return this;
+        }
 
-			// Draw the vertices
-			GL33.glDrawArrays(GL21.GL_TRIANGLES, 0, vertexCount);
+        public void draw(PoseStack poseStack) {
 
-			// Clear the buffer state
-			format.clearBufferState();
-			RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> 0);
-
-			// Unbind and delete the VAO
-			GL30.glBindVertexArray(0);
-			GL30.glDeleteVertexArrays(vao);
-
-			shader.unbind(); // Unbind the shader after drawing
-			poseStack.popPose();
-
-			if (textureOffsetX != 0.0F || textureOffsetY != 0.0F) {
-				poseStack.popPose();
-			}
-		}
-
-		private static float correctedColor(float f) {
-			return ((int) (f * 255.0F) & 0xFF) / 255.0F;
-		}
-	}
-
-	private static final VBOBatcher INSTANCE = new VBOBatcher();
-	private final Map<RenderType, List<VBODrawCommand>> batchedDrawCommands = new LinkedHashMap<>();
-
-	public static VBOBatcher getInstance() {
-		return INSTANCE;
-	}
-
-	public void queue(RenderType renderType, VBODrawCommand drawCommand) {
-		batchedDrawCommands.computeIfAbsent(renderType, k -> new LinkedList<>()).add(drawCommand);
-	}
-
-	public void endBatches(PoseStack poseStack) {
-		batchedDrawCommands.forEach((renderType, drawCommands) -> {
-			if (drawCommands.isEmpty()) {
-				return;
-			}
-
-			renderType.setupRenderState();
-
-			for (VBODrawCommand drawCommand : drawCommands) {
-				drawCommand.draw(poseStack);
-			}
-
-			renderType.clearRenderState();
-			drawCommands.clear();
-		});
-
-		batchedDrawCommands.clear();
-	}
+        }
+    }
 
 }

@@ -1,14 +1,18 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render;
 
 
+import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.client.model.AnimationPart;
 import com.lycanitesmobs.client.model.CreatureObjModel;
 import com.lycanitesmobs.client.model.CreatureObjModelOld;
 import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.obj.Vector3o;
 import com.lycanitesmobs.client.obj.Vertex;
+import com.lycanitesmobs.client.renderer.obj.Part;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 
@@ -21,9 +25,7 @@ import static org.lwjgl.opengl.GL33.*;
 
 
 public class RenderHelper {
-    public static WorldBuffer startTri() {
-        return new WorldBuffer(GL_TRIANGLES, ShaderManager.getPositionColorShader());
-    }
+    public static List<String> logMessageOnce = new ArrayList<>();
 
     public static WorldBuffer startTri(Matrix4f modelViewMatrix, Matrix4f viewMatrix) {
         return new WorldBuffer(GL_TRIANGLES, ShaderManager.getPositionColorShader(), modelViewMatrix, viewMatrix);
@@ -42,52 +44,7 @@ public class RenderHelper {
         glDepthRange(0, 1);
     }
 
-    public static void drawTri(WorldBuffer buffer, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, Color color) {
-        buffer.vert(x1, y1, z1, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
-        buffer.vert(x2, y2, z2, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
-        buffer.vert(x3, y3, z3, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
-    }
-
-    /*public static void renderModel(WorldBuffer buffer, CreatureObjModel objPart, Vector4f color, BaseCreatureEntity entity) {
-        for (ObjPart part : objPart.objParts) {
-            if (part.mesh == null) {
-                continue;
-            }
-            int[] indices = part.mesh.indices;
-            Vertex[] vertices = part.mesh.vertices;
-            for (int i = 0; i < indices.length; i += 3) {
-                for (int iv = 0; iv < 3; iv++) {
-                    Vertex v = vertices[indices[i + iv]];
-                    buffer.vert(
-                            (float) (v.getPos().x() + entity.position().x), (float) (v.getPos().y() + entity.position().y), (float) (v.getPos().z() + entity.position().z),
-                            color.x(), color.y(), color.z(), color.w()
-                    );
-                }
-            }
-        }
-        buffer.draw();
-    }
-
-    public static void renderLegacyModel(WorldBuffer buffer, CreatureObjModelOld objPart, Vector4f color, BaseCreatureEntity entity) {
-        for (ObjPart part : objPart.wavefrontParts) {
-            if (part.mesh == null) {
-                return;
-            }
-            int[] indices = part.mesh.indices;
-            Vertex[] vertices = part.mesh.vertices;
-            for (int i = 0; i < indices.length; i += 3) {
-                for (int iv = 0; iv < 3; iv++) {
-                    Vertex v = vertices[indices[i + iv]];
-                    buffer.vert(
-                            (float) (v.getPos().x() + entity.position().x), (float) (v.getPos().y() + entity.position().y), (float) (v.getPos().z() + entity.position().z),
-                            color.x(), color.y(), color.z(), color.w()
-                    );
-                }
-            }
-        }
-        buffer.draw();
-    }*/
-    public static void renderModel(WorldBuffer buffer, CreatureObjModel objPart, Vector4f color, BaseCreatureEntity entity) {
+    /*public static void renderModel(WorldBuffer buffer, CreatureObjModel objPart, Vector4f color, BaseCreatureEntity entity, ModelAegis modelAegis) {
         float yaw = entity.yBodyRot * ((float) Math.PI / 180F);  // Convert degrees to radians
         float pitch = entity.xRot * ((float) Math.PI / 180F);  // Convert degrees to radians
 
@@ -95,23 +52,28 @@ public class RenderHelper {
             if (part.mesh == null) {
                 continue;
             }
-            int[] indices = part.mesh.indices;
-            Vertex[] vertices = part.mesh.vertices;
-            for (int i = 0; i < indices.length; i += 3) {
-                for (int iv = 0; iv < 3; iv++) {
-                    Vertex v = vertices[indices[i + iv]];
-                    Vec3 rotatedPos = rotateVertex(v.getPos().toVec3(), yaw, pitch);
-                    buffer.vert(
-                            (float) (rotatedPos.x() + entity.position().x),
-                            (float) (rotatedPos.y() + entity.position().y),
-                            (float) (rotatedPos.z() + entity.position().z),
-                            color.x(), color.y(), color.z(), color.w()
-                    );
-                }
-            }
+            // Use ModelAegis' renderPartWithAnimation method instead
+            modelAegis.renderPartWithAnimation(buffer, part, color, new Vec3(entity.position().x(), entity.position().y(), entity.position().z()), new Matrix4f());
         }
+    }*/
+
+    public static void renderModel(WorldBuffer buffer, CreatureObjModel objPart, Vector4f color, BaseCreatureEntity entity) {
+        float yaw = entity.yBodyRot * ((float) Math.PI / 180F);  // Convert degrees to radians
+        float pitch = entity.xRot * ((float) Math.PI / 180F);  // Convert degrees to radians
+
+        Matrix4f baseMatrix = new Matrix4f().rotateY(yaw).rotateX(pitch);
+
+        for (ObjPart part : objPart.objParts) {
+            if (part.mesh == null) {
+                continue;
+            }
+            // Delegate part rendering to the model class itself
+            objPart.renderPart(buffer, part, color, entity.position(), baseMatrix);
+        }
+
         buffer.draw();
     }
+
 
     public static void renderLegacyModel(WorldBuffer buffer, CreatureObjModelOld objPart, Vector4f color, BaseCreatureEntity entity) {
         float yaw = entity.yBodyRot * ((float) Math.PI / 180F);  // Convert degrees to radians
@@ -139,18 +101,51 @@ public class RenderHelper {
         buffer.draw();
     }
 
+    public static void renderPartWithAnimation(WorldBuffer buffer, ObjPart objPart, Vector4f color, Vec3 entityPos, Matrix4f animationMatrix) {
+        if (objPart.mesh == null) {
+            return;
+        }
+
+        int[] indices = objPart.mesh.indices;
+        Vertex[] vertices = objPart.mesh.vertices;
+        if (objPart.mesh.normals == null) {
+            objPart.mesh.normals = new Vector3o[indices.length];
+        }
+
+        for (int i = 0; i < indices.length; i += 3) {
+            for (int iv = 0; iv < 3; iv++) {
+                Vertex v = vertices[indices[i + iv]];
+                Vector4f pos = new Vector4f((float) v.getPos().x(), (float) v.getPos().y(), (float) v.getPos().z(), 1.0f);
+                pos.mul(animationMatrix);
+                buffer.vert(
+                        (float) (pos.x() + entityPos.x()),
+                        (float) (pos.y() + entityPos.y()),
+                        (float) (pos.z() + entityPos.z()),
+                        color.x(), color.y(), color.z(), color.w()
+                );
+            }
+        }
+
+        buffer.draw();
+    }
+
+    public static void logDebug(String message) {
+        if (!logMessageOnce.contains(message)) {
+            LycanitesMobs.LOGGER.info(message);
+            logMessageOnce.add(message);
+        }
+    }
+
     public static Vec3 rotateVertex(Vec3 pos, float yaw, float pitch) {
         double x = pos.x();
         double y = pos.y();
         double z = pos.z();
 
-        // Rotate around Y axis (yaw)
         double xzLen = Math.sqrt(x * x + z * z);
         double yawAngle = Math.atan2(z, x) + yaw;
         x = xzLen * Math.cos(yawAngle);
         z = xzLen * Math.sin(yawAngle);
 
-        // Rotate around X axis (pitch)
         double yzLen = Math.sqrt(y * y + z * z);
         double pitchAngle = Math.atan2(z, y) + pitch;
         y = yzLen * Math.cos(pitchAngle);
@@ -158,7 +153,6 @@ public class RenderHelper {
 
         return new Vec3(x, y, z);
     }
-
 
     private static Vector3o getNormal(Vector3o p1, Vector3o p2, Vector3o p3) {
         Vector3o output = new Vector3o();
@@ -207,25 +201,5 @@ public class RenderHelper {
 
         buffer.draw();
     }
-
-    public WorldBuffer startLines() {
-        glEnable(GL_LINE_SMOOTH);
-        return new WorldBuffer(GL_LINES, ShaderManager.getPositionColorShader());
-    }
-
-    public void endLines(WorldBuffer buffer) {
-        glEnable(GL_BLEND);
-        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(false);
-        buffer.draw();
-        glDepthMask(true);
-        glDisable(GL_BLEND);
-    }
-
-    public void drawLine(WorldBuffer buffer, float x1, float y1, float z1, float x2, float y2, float z2, Color color) {
-        buffer.vert(x1, y1, z1, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
-        buffer.vert(x2, y2, z2, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
-    }
-
 
 }
