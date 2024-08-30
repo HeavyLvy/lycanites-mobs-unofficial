@@ -3,8 +3,6 @@ package com.lycanitesmobs.client.renderer.renderapi.client.render;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.model.CreatureObjModel;
 import com.lycanitesmobs.client.model.CreatureObjModelOld;
-import com.lycanitesmobs.client.model.ModelPart;
-import com.lycanitesmobs.client.model.ModelPartLoader;
 import com.lycanitesmobs.client.model.creature.ModelAbaia;
 import com.lycanitesmobs.client.model.creature.ModelBobeko;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
@@ -55,8 +53,6 @@ public class RenderAPIEvents {
 
     @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeAPIEvents {
-        public static Map<String, ModelPart> modelParts = ModelPartLoader.loadModelParts("/assets/lycanitesmobs/models/entity/aegis_parts.json");
-
         @SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
             if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
@@ -68,7 +64,6 @@ public class RenderAPIEvents {
             if (player.getMainHandItem().getItem() != Items.ANVIL) {
                 return;
             }
-
 
             Matrix4f projectionMatrix = event.getProjectionMatrix();
             Matrix4f viewMatrix = event.getPoseStack().last().pose();
@@ -86,7 +81,9 @@ public class RenderAPIEvents {
                     entities.remove(entityMap.getValue());
                 } else {
                     if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
-                        RenderHelper.renderModelWithRotations(buffer, entityMap.getValue(), color, entity, modelParts);
+                        entityMap.getValue().generateAnimationFrames(entity, (float) entity.tickCount, (float) entity.getDeltaMovement().length(), entity.tickCount % 100, entity.yHeadRot, entity.xRot, 1.0F, 0);
+                        RenderHelper.renderModel(buffer, entityMap.getValue(), color, entity);
+                        entityMap.getValue().clearAnimationFrames();
                     }
                 }
             }
@@ -98,7 +95,9 @@ public class RenderAPIEvents {
                     entitiesLegacy.remove(entityMap.getValue());
                 } else {
                     if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
+                        entityMap.getValue().generateAnimationFrames(entity, (float) entity.tickCount, (float) entity.getDeltaMovement().length(), entity.tickCount % 100, entity.yHeadRot, entity.xRot, 1.0F, 0);
                         RenderHelper.renderLegacyModel(buffer, entityMap.getValue(), color, entity);
+                        entityMap.getValue().clearAnimationFrames();
                     }
                 }
             }

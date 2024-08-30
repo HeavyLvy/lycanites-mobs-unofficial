@@ -1,7 +1,11 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render.shader;
 
 
+
+import com.lycanitesmobs.LycanitesMobs;
+
 import java.nio.FloatBuffer;
+import java.util.concurrent.ExecutionException;
 
 import static org.lwjgl.opengl.GL33.*;
 
@@ -18,7 +22,7 @@ public class Shader {
             glAttachShader(id, v);
             glAttachShader(id, f);
             glLinkProgram(id);
-        } catch (Exception e) {
+        }catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -37,4 +41,9 @@ public class Shader {
         unbind();
     }
 
+    public void uniformValue2f(String name, float value1, float value2) {
+        bind();
+        glUniform2f(glGetUniformLocation(id, name), value1, value2);
+        unbind();
+    }
 }
