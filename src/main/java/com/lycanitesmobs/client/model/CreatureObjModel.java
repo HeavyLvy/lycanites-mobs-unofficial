@@ -5,7 +5,6 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.obj.ObjModel;
 import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.obj.VBOObjModel;
-import com.lycanitesmobs.client.obj.Vertex;
 import com.lycanitesmobs.client.renderer.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents;
@@ -509,30 +508,6 @@ public class CreatureObjModel extends CreatureModel {
     @Override
     public void scale(float scaleX, float scaleY, float scaleZ) {
         this.currentAnimationPart.addAnimationFrame(new ModelObjAnimationFrame("scale", 1, scaleX, scaleY, scaleZ));
-    }
-
-    public void renderPart(WorldBuffer buffer, ObjPart part, Vector4f color, Vec3 entityPos, Matrix4f animationMatrix) {
-        // Default rendering logic without animation
-        if (part.mesh == null) {
-            return;
-        }
-
-        int[] indices = part.mesh.indices;
-        Vertex[] vertices = part.mesh.vertices;
-
-        for (int i = 0; i < indices.length; i += 3) {
-            for (int iv = 0; iv < 3; iv++) {
-                Vertex v = vertices[indices[i + iv]];
-                Vector4f pos = new Vector4f((float) v.getPos().x(), (float) v.getPos().y(), (float) v.getPos().z(), 1.0f);
-                pos.mul(animationMatrix);
-                buffer.vert(
-                        (float) (pos.x() + entityPos.x()),
-                        (float) (pos.y() + entityPos.y()),
-                        (float) (pos.z() + entityPos.z()),
-                        color.x(), color.y(), color.z(), color.w()
-                );
-            }
-        }
     }
 
     /**

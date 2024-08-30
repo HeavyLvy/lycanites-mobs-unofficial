@@ -3,9 +3,10 @@ package com.lycanitesmobs.client.renderer.renderapi.client.render;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.model.CreatureObjModel;
 import com.lycanitesmobs.client.model.CreatureObjModelOld;
+import com.lycanitesmobs.client.model.ModelPart;
+import com.lycanitesmobs.client.model.ModelPartLoader;
 import com.lycanitesmobs.client.model.creature.ModelAbaia;
 import com.lycanitesmobs.client.model.creature.ModelBobeko;
-import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
@@ -54,6 +55,8 @@ public class RenderAPIEvents {
 
     @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeAPIEvents {
+        public static Map<String, ModelPart> modelParts = ModelPartLoader.loadModelParts("/assets/lycanitesmobs/models/entity/aegis_parts.json");
+
         @SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
             if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
@@ -83,10 +86,11 @@ public class RenderAPIEvents {
                     entities.remove(entityMap.getValue());
                 } else {
                     if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
-                        RenderHelper.renderModel(buffer, entityMap.getValue(), color, entity);
+                        RenderHelper.renderModelWithRotations(buffer, entityMap.getValue(), color, entity, modelParts);
                     }
                 }
             }
+
             // Render legacy models
             for (Map.Entry<BaseCreatureEntity, CreatureObjModelOld> entityMap : entitiesLegacy.entrySet()) {
                 BaseCreatureEntity entity = entityMap.getKey();
