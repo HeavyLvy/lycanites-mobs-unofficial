@@ -17,120 +17,75 @@ import java.util.Arrays;
 
 public class Mesh {
 
-	public int[] indices;
-	public Vertex[] vertices;
-	public Vector3o[] normals;
-	private int vbo = -1;
+    public int[] indices;
+    public Vertex[] vertices;
+    public Vector3o[] normals;
+    private int vbo = -1;
 
-	public int getVbo() {
-		if (this.vbo == -1) {
-			if (this.normals == null) {
-				this.normals = new Vector3o[this.indices.length];
-				for (int i = 0; i < this.normals.length / 3; i++) {
-					Vector3o v1 = this.vertices[this.indices[i * 3]].getPos();
-					Vector3o v2 = this.vertices[this.indices[i * 3 + 1]].getPos();
-					Vector3o v3 = this.vertices[this.indices[i * 3 + 2]].getPos();
-					Vector3o normal = calcNormal(v1, v2, v3);
-					this.normals[i * 3] = normal;
-					this.normals[i * 3 + 1] = normal;
-					this.normals[i * 3 + 2] = normal;
-				}
-			}
+    private static Vector3o calcNormal(Vector3o v1, Vector3o v2, Vector3o v3) {
+        Vector3o output = new Vector3o();
 
-			Tesselator tessellator = Tesselator.getInstance();
-			BufferBuilder bufferBuilder = tessellator.getBuilder();
+        Vector3f calU = new Vector3f(v2.x() - v1.x(), v2.y() - v1.y(), v2.z() - v1.z());
+        Vector3f calV = new Vector3f(v3.x() - v1.x(), v3.y() - v1.y(), v3.z() - v1.z());
 
-			bufferBuilder.begin(VertexFormat.Mode.TRIANGLES, CustomRenderStates.POS_TEX_NORMAL);
-			for (int i = 0; i < this.indices.length; i++) {
-				Vertex vertex = this.vertices[this.indices[i]];
-				Vector3o normal = this.normals[i];
-				bufferBuilder.vertex(vertex.getPos().x(), vertex.getPos().y(), vertex.getPos().z());
-				bufferBuilder.uv(vertex.getTexCoords().x, 1.0F - vertex.getTexCoords().y);
-				bufferBuilder.normal(normal.x(), normal.y(), normal.z());
-				bufferBuilder.endVertex();
-			}
-			ByteBuffer buffer;
-			try {
-				bufferBuilder.end();
-				buffer = popNextBuffer(bufferBuilder);
-			} catch (Exception e) {
-				LycanitesMobs.logError("Exception in BufferBuilder end: " + e.getMessage());
-				return -1;
-			}
+        output.setX(calU.y() * calV.z() - calU.z() * calV.y());
+        output.setY(calU.z() * calV.x() - calU.x() * calV.z());
+        output.setZ(calU.x() * calV.y() - calU.y() * calV.x());
 
-			this.vbo = GL21.glGenBuffers();
-			GL21.glBindBuffer(GL21.GL_ARRAY_BUFFER, vbo);
-			GL21.glBufferData(GL21.GL_ARRAY_BUFFER, buffer, GL21.GL_STATIC_DRAW);
-			GL21.glBindBuffer(GL21.GL_ARRAY_BUFFER, 0);
+        output.normalize();
+        return output;
+    }
 
-			int error = GL11.glGetError();
-			if (error != GL11.GL_NO_ERROR) {
-				LycanitesMobs.logError("OpenGL error after uploading buffer data: " + error);
-				this.vbo = -1;
-			}
-		}
+    public int getVbo() {
+        if (this.vbo == -1) {
+            if (this.normals == null) {
+                this.normals = new Vector3o[this.indices.length];
+                for (int i = 0; i < this.normals.length / 3; i++) {
+                    Vector3o v1 = this.vertices[this.indices[i * 3]].getPos();
+                    Vector3o v2 = this.vertices[this.indices[i * 3 + 1]].getPos();
+                    Vector3o v3 = this.vertices[this.indices[i * 3 + 2]].getPos();
+                    Vector3o normal = calcNormal(v1, v2, v3);
+                    this.normals[i * 3] = normal;
+                    this.normals[i * 3 + 1] = normal;
+                    this.normals[i * 3 + 2] = normal;
+                }
+            }
 
-		return this.vbo;
-	}
-	/*public ByteBuffer popNextBuffer(BufferBuilder bufferBuilder) {
-		ByteBuffer bytebuffer = bufferBuilder.buffer.slice();
-		bytebuffer.order(bufferBuilder.buffer.order());
-		bufferBuilder.buffer.clear();
-		return bytebuffer;
-	}*/
+            Tesselator tessellator = Tesselator.getInstance();
+            BufferBuilder bufferBuilder = tessellator.getBuilder();
 
-	public ByteBuffer popNextBuffer(BufferBuilder bufferBuilder) {
-		int originalPosition = bufferBuilder.buffer.position();
-		int originalLimit = bufferBuilder.buffer.limit();
-		//Vector3f bufferbuilder$drawstate = Arrays.stream(bufferBuilder.sortingPoints).toList().get(bufferBuilder.renderedBufferCount++);
-		// Adjust the buffer's position and limit
-		/*bufferBuilder.buffer.position(bufferBuilder.renderedBufferPointer);
-		bufferBuilder.renderedBufferPointer += bufferBuilder.storeRenderedBuffer().drawState().vertexCount() * bufferBuilder.format.getVertexSize();
-		bufferBuilder.buffer.limit(bufferBuilder.renderedBufferPointer);*/
+            bufferBuilder.begin(VertexFormat.Mode.TRIANGLES, CustomRenderStates.POS_TEX_NORMAL);
+            for (int i = 0; i < this.indices.length; i++) {
+                Vertex vertex = this.vertices[this.indices[i]];
+                Vector3o normal = this.normals[i];
+                bufferBuilder.vertex(vertex.getPos().x(), vertex.getPos().y(), vertex.getPos().z());
+                bufferBuilder.uv(vertex.getTexCoords().x, 1.0F - vertex.getTexCoords().y);
+                bufferBuilder.normal(normal.x(), normal.y(), normal.z());
+                bufferBuilder.endVertex();
+            }
+            BufferBuilder.RenderedBuffer renderedBuffer = bufferBuilder.end();
+            ByteBuffer buffer = renderedBuffer.vertexBuffer();
 
-		// Slice the buffer to create a new ByteBuffer
-		ByteBuffer slicedBuffer = bufferBuilder.buffer.slice();
-		slicedBuffer.order(bufferBuilder.buffer.order());
+            this.vbo = GL21.glGenBuffers();
+            GL21.glBindBuffer(GL21.GL_ARRAY_BUFFER, vbo);
+            GL21.glBufferData(GL21.GL_ARRAY_BUFFER, buffer, GL21.GL_STATIC_DRAW);
+            GL21.glBindBuffer(GL21.GL_ARRAY_BUFFER, 0);
 
-		/*// Restore the original buffer's position and limit
-		bufferBuilder.buffer.position(originalPosition);
-		bufferBuilder.buffer.limit(originalLimit);*/
+            int error = GL11.glGetError();
+            if (error != GL11.GL_NO_ERROR) {
+                LycanitesMobs.logError("OpenGL error after uploading buffer data: " + error);
+                this.vbo = -1;
+            }
+        }
 
-		// Clear the buffer if necessary
-		if (bufferBuilder.renderedBufferPointer == bufferBuilder.buffer.capacity()) {
-			if (bufferBuilder.renderedBufferCount != bufferBuilder.renderedBufferPointer) {
-				LogManager.getLogger().warn("Bytes mismatch " + bufferBuilder.renderedBufferCount + " " + bufferBuilder.renderedBufferPointer);
-			}
-			bufferBuilder.clear(); // Reset buffer and pointers
-		}
+        return this.vbo;
+    }
 
-		return slicedBuffer;
-	}
-
-
-
-
-	private static Vector3o calcNormal(Vector3o v1, Vector3o v2, Vector3o v3) {
-		Vector3o output = new Vector3o();
-
-		// Calculate Edges:
-		Vector3f calU = new Vector3f(v2.x() - v1.x(), v2.y() - v1.y(), v2.z() - v1.z());
-		Vector3f calV = new Vector3f(v3.x() - v1.x(), v3.y() - v1.y(), v3.z() - v1.z());
-
-		// Cross Edges
-		output.setX(calU.y() * calV.z() - calU.z() * calV.y());
-		output.setY(calU.z() * calV.x() - calU.x() * calV.z());
-		output.setZ(calU.x() * calV.y() - calU.y() * calV.x());
-
-		output.normalize();
-		return output;
-	}
-
-	public void delete() {
-		if (vbo != -1) {
-			GL21.glDeleteBuffers(vbo);
-			vbo = -1;
-		}
-	}
+    public void delete() {
+        if (vbo != -1) {
+            GL21.glDeleteBuffers(vbo);
+            vbo = -1;
+        }
+    }
 
 }

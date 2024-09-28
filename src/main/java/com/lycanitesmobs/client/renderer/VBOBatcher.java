@@ -7,20 +7,22 @@ import java.util.Map;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.util.LMHelperClass;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.resources.ResourceLocation;
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector4f;
-import org.lwjgl.opengl.GL21;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+import org.lwjgl.opengl.*;
+
+import static com.lycanitesmobs.LycanitesMobs.logError;
+import static com.lycanitesmobs.LycanitesMobs.logInfo;
 
 public class VBOBatcher {
 
@@ -35,17 +37,16 @@ public class VBOBatcher {
         batchedDrawCommands.computeIfAbsent(renderType, k -> new LinkedList<>()).add(drawCommand);
     }
 
-    public void endBatches(PoseStack poseStack) {
+    public void endBatches() {
         batchedDrawCommands.forEach((renderType, drawCommands) -> {
             if (drawCommands.isEmpty()) {
                 return;
             }
 
             renderType.setupRenderState();
-            //RenderSystem.enableTexture();
-
             for (VBODrawCommand drawCommand : drawCommands) {
-                drawCommand.draw(poseStack);
+                drawCommand.draw();
+                RenderSystem.setTextureMatrix(drawCommand.matrix);
             }
 
             renderType.clearRenderState();
@@ -57,10 +58,10 @@ public class VBOBatcher {
 
     public static class VBODrawCommand {
 
+        public final Matrix4f matrix;
         private final int vbo;
         private final int vertexCount;
         private final VertexFormat format;
-        private final Matrix4f matrix;
         private final ResourceLocation texLocation;
         private float red = 1.0F;
         private float green = 1.0F;
@@ -98,7 +99,7 @@ public class VBOBatcher {
         }
 
         public VBODrawCommand setTextureOffset(Vector2f textureOffset) {
-            return setTextureOffset(textureOffset.x * 0.01F, -textureOffset.y * 0.01F);
+            return setTextureOffset(textureOffset.x() * 0.01F, -textureOffset.y() * 0.01F);
         }
 
         public VBODrawCommand setTextureOffset(float textureOffsetX, float textureOffsetY) {
@@ -127,41 +128,71 @@ public class VBOBatcher {
             return this;
         }
 
-        public void draw(PoseStack poseStack) {
+        public void draw() {
             try {
+                RenderSystem.assertOnRenderThread();
+
                 Minecraft.getInstance().getTextureManager().bindForSetup(texLocation);
 
+                RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
                 RenderSystem.setShaderColor(correctedColor(red), correctedColor(green), correctedColor(blue), correctedColor(alpha));
 
                 if (textureOffsetX != 0.0F || textureOffsetY != 0.0F) {
-                    poseStack.pushPose();
-                    poseStack.translate(textureOffsetX, textureOffsetY, 0.0F);
+                    Matrix4f textureMatrix = new Matrix4f().translation(textureOffsetX, textureOffsetY, 0.0F);
+                    RenderSystem.setTextureMatrix(textureMatrix);
                 }
 
                 RenderSystem.setShaderTexture(1, OverlayTexture.pack((int) overlayOffsetX, (int) overlayOffsetY));
                 RenderSystem.setShaderTexture(2, LightTexture.pack((int) lightOffsetX, (int) lightOffsetY));
 
-                poseStack.pushPose();
-                poseStack.mulPoseMatrix(matrix);
+                final int vao = GL30.glGenVertexArrays();
+                GL30.glBindVertexArray(vao);
 
                 RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> vbo);
+
                 format.setupBufferState();
-                RenderSystem.drawElements(GL21.GL_TRIANGLES, 0, vertexCount);
+
+                GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
+                int error = GL11.glGetError();
+                if (error != GL11.GL_NO_ERROR) {
+                    logError("Error after glDrawArrays: " + error);
+                }
+
                 format.clearBufferState();
                 RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> 0);
 
-                poseStack.popPose();
+                GL30.glBindVertexArray(0);
+                GL30.glDeleteVertexArrays(vao);
 
                 if (textureOffsetX != 0.0F || textureOffsetY != 0.0F) {
-                    poseStack.popPose();
+                    RenderSystem.resetTextureMatrix();
                 }
+
             } catch (Exception e) {
-                LycanitesMobs.logInfo("", e.getMessage());
+                logError("Exception in draw method: " + e.getMessage());
             }
 
+            flushBufferBuilder();
+        }
+
+        private void flushBufferBuilder() {
+            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+
+            if (bufferBuilder.building()) {
+                try {
+                    BufferBuilder.RenderedBuffer renderedBuffer = bufferBuilder.end();
+
+                    VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+                    vertexBuffer.upload(renderedBuffer);
+
+                    vertexBuffer.draw();
+                    vertexBuffer.close();
+                } catch (Exception e) {
+                    logError("Exception in flushBufferBuilder: " + e.getMessage());
+                }
+            }
         }
 
 
     }
-
 }
