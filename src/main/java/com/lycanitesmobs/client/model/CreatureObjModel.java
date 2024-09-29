@@ -370,10 +370,10 @@ public class CreatureObjModel extends CreatureModel {
         }
         // Adds the model + entity to the renderer's map to render during level rendering
         if (!entities.containsKey(entity)) {
-            entities.put(entity, this);
+            entities.put(entity.getId(), this);
         }
 
-        for (ObjPart part : this.objParts) {
+        /*for (ObjPart part : this.objParts) {
             String partName = part.getName().toLowerCase();
             if (!this.canRenderPart(partName, entity, layer, renderAsTrophy))
                 continue;
@@ -402,7 +402,7 @@ public class CreatureObjModel extends CreatureModel {
             this.currentAnimationPart.applyAnimationFrames(this.animator);
 
             matrixStack.popPose();
-        }
+        }*/
     }
 
 

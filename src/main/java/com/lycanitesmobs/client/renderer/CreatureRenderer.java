@@ -2,14 +2,20 @@ package com.lycanitesmobs.client.renderer;
 
 import com.lycanitesmobs.client.ModelManager;
 import com.lycanitesmobs.client.model.CreatureModel;
+import com.lycanitesmobs.client.model.CreatureObjModel;
 import com.lycanitesmobs.client.obj.VBOObjModel;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.info.CreatureManager;
+import com.lycanitesmobs.core.util.ContextUtils;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -22,6 +28,14 @@ import net.minecraft.world.entity.Pose;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderNameTagEvent;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
+
+import java.awt.image.renderable.RenderContext;
+import java.util.Map;
+
+import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.animationContext;
+import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.entities;
 
 @OnlyIn(Dist.CLIENT)
 public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<T, CreatureModel<T>> {
@@ -43,6 +57,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      */
     @Override
     public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
+
         // Get Model and Layers:
         try {
             this.layers.clear();
@@ -126,9 +141,18 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         // Entity Visibility:
         boolean invisible = !this.isBodyVisible(entity);
         boolean allyInvisible = invisible && !entity.isInvisibleTo(Minecraft.getInstance().player);
+        var context = new ContextUtils.AnimationContext(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
+        if (!animationContext.containsKey(entity)) {
+            animationContext.put(entity, context);
+        } else {
+            animationContext.remove(entity);
+            animationContext.put(entity, context);
+        }
 
+
+        //if (true) return;
         // Render Model Layers:
-        this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
+        //this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
         this.renderModel(entity, matrixStack, renderTypeBuffer, null, time, distance, loop, lookYaw, lookPitch, 1, brightness, fade, invisible, allyInvisible);
         for (RenderLayer<T, CreatureModel<T>> layer : this.layers) {
             if (!(layer instanceof LayerCreatureBase)) {

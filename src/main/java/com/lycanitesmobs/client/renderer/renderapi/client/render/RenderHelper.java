@@ -55,7 +55,7 @@ public class RenderHelper {
     public static void renderModel(WorldBuffer buffer, CreatureObjModel objModel, Vector4f color, BaseCreatureEntity entity) {
         PoseStack poseStack = new PoseStack();
        /* poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot));  // Adjust yaw
-        poseStack.mulPose(Axis.XP.rotationDegrees(entity.xRot));   */    // Adjust pitch
+        poseStack.mulPose(Axis.XP.rotationDegrees(entity.xRot));*/       // Adjust pitch
 
         for (ObjPart part : objModel.objParts) {
             if (part.mesh == null) {
