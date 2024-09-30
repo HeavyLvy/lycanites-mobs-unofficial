@@ -29,13 +29,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderNameTagEvent;
 import org.joml.Matrix4f;
-import org.joml.Vector4f;
 
-import java.awt.image.renderable.RenderContext;
-import java.util.Map;
-
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.animationContext;
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.entities;
+import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.animationContexts;
 
 @OnlyIn(Dist.CLIENT)
 public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<T, CreatureModel<T>> {
@@ -141,13 +136,9 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         // Entity Visibility:
         boolean invisible = !this.isBodyVisible(entity);
         boolean allyInvisible = invisible && !entity.isInvisibleTo(Minecraft.getInstance().player);
+
         var context = new ContextUtils.AnimationContext(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
-        if (!animationContext.containsKey(entity)) {
-            animationContext.put(entity, context);
-        } else {
-            animationContext.remove(entity);
-            animationContext.put(entity, context);
-        }
+        animationContexts.put(entity.getId(), context);
 
 
         //if (true) return;

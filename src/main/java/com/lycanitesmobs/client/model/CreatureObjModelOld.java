@@ -152,8 +152,8 @@ public class CreatureObjModelOld extends CreatureModel {
             }
         }
         // Adds the model + entity to the renderer's map to render during level rendering
-        if (!RenderAPIEvents.entities.containsKey(entity)) {
-            RenderAPIEvents.entitiesLegacy.put(entity, this);
+        if (!RenderAPIEvents.entities.containsKey(entity.getId())) {
+            RenderAPIEvents.entitiesLegacy.put(entity.getId(), this);
         }
         // Render and Animate Each Part:
         for (ObjPart part : this.wavefrontParts) {

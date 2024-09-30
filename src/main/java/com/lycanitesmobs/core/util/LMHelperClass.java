@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.util;
 
+import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -48,11 +49,84 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.logging.log4j.Logger;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class LMHelperClass {
+    public static final Set<String> errorMessagesLogged = new HashSet<>();
+    public static final Set<String> warningMessagesLogged = new HashSet<>();
+    public static final Set<String> infoMessagesLogged = new HashSet<>();
+    public static Logger LOGGER = LycanitesMobs.LOGGER;
+
+    public static void logErrorMessageOnce(String errorMessage) {
+        if (!errorMessagesLogged.contains(errorMessage)) {
+            LOGGER.error("[Lycanites]: " + errorMessage);
+            errorMessagesLogged.add(errorMessage);
+        }
+    }
+
+    public static void logErrorMessage(String errorMessage) {
+        LOGGER.error("[Lycanites]: " + errorMessage);
+    }
+
+    public static void logWarningMessageOnce(String errorMessage) {
+        if (!warningMessagesLogged.contains(errorMessage)) {
+            LOGGER.warn("[Lycanites]: " + errorMessage);
+            warningMessagesLogged.add(errorMessage);
+        }
+    }
+
+    public static void logWarningMessageOnceDev(String errorMessage) {
+        if (!FMLEnvironment.production && !warningMessagesLogged.contains(errorMessage)) {
+            LOGGER.warn("[Lycanites]: " + errorMessage);
+            warningMessagesLogged.add(errorMessage);
+        }
+    }
+
+    public static void logWarningMessage(String errorMessage) {
+        LOGGER.warn("[Lycanites]: " + errorMessage);
+    }
+
+    public static void logErrorMessageCatchable(String errorMessage, Throwable e) {
+        LOGGER.error("[Lycanites]: " + errorMessage, e);
+    }
+
+    public static void logErrorMessageOnceCatchable(String errorMessage, Throwable e) {
+        if (!errorMessagesLogged.contains(errorMessage)) {
+            LOGGER.error("[Lycanites]: " + errorMessage, e);
+            errorMessagesLogged.add(errorMessage);
+        }
+    }
+
+    public static void logInfoMessageOnce(String info) {
+        if (!infoMessagesLogged.contains(info)) {
+            LOGGER.info("[Lycanites]: " + info);
+            infoMessagesLogged.add(info);
+        }
+    }
+
+    public static void logInfoMessageOnceDev(String info) {
+        if (!FMLEnvironment.production && !infoMessagesLogged.contains(info)) {
+            LOGGER.info("[Lycanites]: " + info);
+            infoMessagesLogged.add(info);
+        }
+    }
+
+    public static void logInfoMessage(String info) {
+        LOGGER.info("[Lycanites]: " + info);
+    }
+
+    public static void logInfoMessageDev(String info) {
+        if (!FMLEnvironment.production) {
+            LOGGER.info("[Lycanites]: " + info);
+        }
+    }
+
     public static Object convertObjectToDesired(Object input, String outputType) {
         return switch (outputType.toLowerCase()) {
             case "integer" -> convertToInteger(input);
@@ -64,37 +138,41 @@ public class LMHelperClass {
             default -> input;
         };
     }
+
     public static Vector3d convertToVec3d(Object input) {
         if (input instanceof Vec3 v) {
 
             return new Vector3d(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
-        }else if (input instanceof Vector3f v) {
+        } else if (input instanceof Vector3f v) {
             return new Vector3d(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
-        }else if (input instanceof Vector3d v) {
+        } else if (input instanceof Vector3d v) {
             return new Vector3d(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
         }
         return null;
     }
+
     public static Vec3 convertToVec3(Object input) {
         if (input instanceof Vector3i v) {
             return new Vec3(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
-        }else if (input instanceof Vector3f v) {
+        } else if (input instanceof Vector3f v) {
             return new Vec3(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
-        }else if (input instanceof Vector3d v) {
+        } else if (input instanceof Vector3d v) {
             return new Vec3(convertToDouble(v.x), convertToDouble(v.y), convertToDouble(v.z));
         }
         return null;
     }
+
     public static Vec3i convertToVec3i(Object input) {
         if (input instanceof Vec3 v) {
             return new Vec3i(convertToInteger(v.x), convertToInteger(v.y), convertToInteger(v.z));
-        }else if (input instanceof Vector3f v) {
+        } else if (input instanceof Vector3f v) {
             return new Vec3i(convertToInteger(v.x), convertToInteger(v.y), convertToInteger(v.z));
-        }else if (input instanceof Vector3d v) {
+        } else if (input instanceof Vector3d v) {
             return new Vec3i(convertToInteger(v.x), convertToInteger(v.y), convertToInteger(v.z));
         }
         return null;
     }
+
     public static ResourceLocation convertToResourceLocation(Object input) {
         if (input == null) {
             return null;
@@ -167,6 +245,7 @@ public class LMHelperClass {
 
         return null;
     }
+
     public static Boolean convertToBoolean(Object input) {
         if (input instanceof Boolean) {
             return (Boolean) input;
@@ -211,12 +290,14 @@ public class LMHelperClass {
             return null;
         }
     }
+
     public static DamageSource damageSourceFromResourceKey(Level level, ResourceKey<DamageType> damageTypeResourceKey) {
         ResourceKey<Registry<DamageType>> damageTypeRegistryKey = ResourceKey.createRegistryKey(new ResourceLocation("damage_type"));
         Registry<DamageType> damageTypeRegistry = level.registryAccess().registryOrThrow(damageTypeRegistryKey);
         Holder<DamageType> holder = damageTypeRegistry.getHolderOrThrow(damageTypeResourceKey);
         return new DamageSource(holder);
     }
+
     public static double wrapDegrees(double p_76138_0_) {
         double lvt_2_1_ = p_76138_0_ % 360.0;
         if (lvt_2_1_ >= 180.0) {
@@ -227,6 +308,7 @@ public class LMHelperClass {
         }
         return lvt_2_1_;
     }
+
     public static double clamp(double p_151237_0_, double p_151237_2_, double p_151237_4_) {
         if (p_151237_0_ < p_151237_2_) {
             return p_151237_2_;
@@ -234,62 +316,73 @@ public class LMHelperClass {
             return Math.min(p_151237_0_, p_151237_4_);
         }
     }
+
     public static boolean hasTag(Object obj, Object tag) {
         if (obj instanceof BlockState block) {
             if (tag instanceof TagKey<?> tagKey) {
                 return block.getTags().anyMatch(blockTagKey -> blockTagKey == tagKey);
-            }else if (tag instanceof String string){
+            } else if (tag instanceof String string) {
                 return block.getTags().anyMatch(blockTagKey -> blockTagKey.location().equals(new ResourceLocation(string)));
             }
         }
         return false;
     }
+
     public static float getBrightness(Entity entity) {
         BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos(entity.getX(), 0.0, entity.getZ());
         if (entity.level().hasChunkAt(blockpos$mutable)) {
             blockpos$mutable.setY((int) Math.floor(entity.getEyeY()));
-            return entity.level().getBrightness(LightLayer.BLOCK,blockpos$mutable);
+            return entity.level().getBrightness(LightLayer.BLOCK, blockpos$mutable);
         } else {
             return 0.0F;
         }
     }
-    public static class Materials {
-        public static boolean isLeaves(Block block) {
-            return hasTag(block, BlockTags.LEAVES);
-        }
-        public static boolean isDirt(Block block) {
-            return hasTag(block, BlockTags.DIRT);
-        }
-        public static boolean isCoral(Block block) {
-            return hasTag(block, BlockTags.CORAL_PLANTS);
-        }
-        public static boolean isCrop(Block block) {
-            return hasTag(block, BlockTags.CROPS);
-        }
-        public static boolean isPlant(Block block) {
-            return block instanceof IPlantable;
-        }
-        public static boolean isReplaceablePlant(Block block) {
-            return hasTag(block, BlockTags.REPLACEABLE) && isPlant(block);
-        }
-        public static boolean isUnderwaterPlant(Block block) {
-            return hasTag(block, BlockTags.UNDERWATER_BONEMEALS) && isPlant(block);
-        }
-    }
+
     public static <T> T cast(Object o) {
         return (T) o;
     }
+
     /**
      * Runs the provided Runnable if the current environment matches the specified environment.
      *
      * @param prodEnvironment If true, run the code in a production environment. If false, run the code in a development environment.
-     * @param runnable The code to run in the specified environment.
+     * @param runnable        The code to run in the specified environment.
      */
     public static void environmentRunnable(boolean prodEnvironment, Runnable runnable) {
         if (prodEnvironment && FMLEnvironment.production) {
             runnable.run();
         } else if (!FMLEnvironment.production) {
             runnable.run();
+        }
+    }
+
+    public static class Materials {
+        public static boolean isLeaves(Block block) {
+            return hasTag(block, BlockTags.LEAVES);
+        }
+
+        public static boolean isDirt(Block block) {
+            return hasTag(block, BlockTags.DIRT);
+        }
+
+        public static boolean isCoral(Block block) {
+            return hasTag(block, BlockTags.CORAL_PLANTS);
+        }
+
+        public static boolean isCrop(Block block) {
+            return hasTag(block, BlockTags.CROPS);
+        }
+
+        public static boolean isPlant(Block block) {
+            return block instanceof IPlantable;
+        }
+
+        public static boolean isReplaceablePlant(Block block) {
+            return hasTag(block, BlockTags.REPLACEABLE) && isPlant(block);
+        }
+
+        public static boolean isUnderwaterPlant(Block block) {
+            return hasTag(block, BlockTags.UNDERWATER_BONEMEALS) && isPlant(block);
         }
     }
 }

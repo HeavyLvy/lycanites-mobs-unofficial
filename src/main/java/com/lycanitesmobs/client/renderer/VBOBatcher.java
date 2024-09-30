@@ -130,6 +130,7 @@ public class VBOBatcher {
 
         public void draw() {
             try {
+                if (true) return;
                 RenderSystem.assertOnRenderThread();
 
                 Minecraft.getInstance().getTextureManager().bindForSetup(texLocation);

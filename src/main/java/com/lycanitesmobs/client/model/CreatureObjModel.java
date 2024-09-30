@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.animationContexts;
 import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.entities;
 
 @OnlyIn(Dist.CLIENT)
@@ -353,6 +354,7 @@ public class CreatureObjModel extends CreatureModel {
 
     @Override
     public void render(BaseCreatureEntity entity, PoseStack matrixStack, VertexConsumer vertexBuilder, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade) {
+
         this.matrixStack = matrixStack;
 
         boolean renderAsTrophy = false;
@@ -360,6 +362,7 @@ public class CreatureObjModel extends CreatureModel {
         if (entity != null) {
             this.young = entity.isBaby();
         }
+
         if (scale < 0) {
             renderAsTrophy = true;
             scale = -scale;
@@ -369,11 +372,11 @@ public class CreatureObjModel extends CreatureModel {
             }
         }
         // Adds the model + entity to the renderer's map to render during level rendering
-        if (!entities.containsKey(entity)) {
+        if (!entities.containsKey(entity.getId())) {
             entities.put(entity.getId(), this);
         }
 
-        /*for (ObjPart part : this.objParts) {
+        for (ObjPart part : this.objParts) {
             String partName = part.getName().toLowerCase();
             if (!this.canRenderPart(partName, entity, layer, renderAsTrophy))
                 continue;
@@ -402,7 +405,7 @@ public class CreatureObjModel extends CreatureModel {
             this.currentAnimationPart.applyAnimationFrames(this.animator);
 
             matrixStack.popPose();
-        }*/
+        }
     }
 
 
