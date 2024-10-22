@@ -41,7 +41,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.animationContexts;
 import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.entities;
 
 @OnlyIn(Dist.CLIENT)
@@ -130,7 +129,7 @@ public class CreatureObjModel extends CreatureModel {
     /**
      * The animator INSTANCE, this is a helper class that performs actual GL11 functions, etc.
      **/
-    protected Animator animator;
+    public Animator animator;
     /**
      * The current animation part that is having an animation frame generated for.
      **/

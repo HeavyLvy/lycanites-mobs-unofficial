@@ -1,10 +1,7 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render;
 
 
-import com.lycanitesmobs.client.model.AnimationPart;
-import com.lycanitesmobs.client.model.CreatureObjModel;
-import com.lycanitesmobs.client.model.CreatureObjModelOld;
-import com.lycanitesmobs.client.model.ModelObjAnimationFrame;
+import com.lycanitesmobs.client.model.*;
 import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.obj.Vector3o;
 import com.lycanitesmobs.client.obj.Vertex;
@@ -18,8 +15,6 @@ import org.joml.*;
 
 import java.awt.*;
 import java.lang.Math;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.lwjgl.opengl.GL33.*;
 
@@ -52,54 +47,65 @@ public class RenderHelper {
         buffer.vert(x3, y3, z3, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
 
-    public static void renderModel(WorldBuffer buffer, CreatureObjModel objModel, Vector4f color, BaseCreatureEntity entity) {
-        PoseStack poseStack = new PoseStack();
-       /* poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot));  // Adjust yaw
-        poseStack.mulPose(Axis.XP.rotationDegrees(entity.xRot));*/       // Adjust pitch
+    public static void renderModel(Animator animator, PoseStack poseStack, WorldBuffer buffer, CreatureObjModel objModel, Vector4f color, BaseCreatureEntity entity) {
+        poseStack.pushPose();
 
+        // Apply entity rotations
+        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot));
+        poseStack.mulPose(Axis.XP.rotationDegrees(entity.xRot));
+
+        // Iterate through each part and render them separately
         for (ObjPart part : objModel.objParts) {
-            if (part.mesh == null) {
-                continue;
-            }
-
             AnimationPart animationPart = objModel.animationParts.get(part.getName().toLowerCase());
-            if (animationPart != null) {
-                applyAnimationFrames(poseStack, animationPart);
-            }
+            renderPart(animator, animationPart, poseStack, buffer, part, color, entity);
+        }
 
-            int[] indices = part.mesh.indices;
-            Vertex[] vertices = part.mesh.vertices;
-            for (int i = 0; i < indices.length; i += 3) {
-                for (int iv = 0; iv < 3; iv++) {
-                    Vertex v = vertices[indices[i + iv]];
-                    Vector4f transformedPos = transformVertex(poseStack, v.getPos().toVec3());
-                    buffer.vert(
-                            (float) (transformedPos.x() + entity.position().x),
-                            (float) (transformedPos.y() + entity.position().y),
-                            (float) (transformedPos.z() + entity.position().z),
-                            color.x(), color.y(), color.z(), color.w()
-                    );
-                }
+        buffer.draw();
+        poseStack.popPose();
+    }
+
+
+    public static void renderPart(Animator animator, AnimationPart animationPart, PoseStack poseStack, WorldBuffer buffer, ObjPart part, Vector4f color, BaseCreatureEntity entity) {
+        if (part.mesh == null) {
+            return;
+        }
+
+        poseStack.pushPose();
+        /*if ("head".equals(part.getName().toLowerCase())) {
+            poseStack.mulPose(Axis.YP.rotationDegrees(90)); // Rotating head part by 90 degrees on Y axis
+        }*/
+        // Apply part-specific animation frames
+        if (animationPart != null) {
+            animationPart.applyAnimationFrames(animator);
+        }
+
+        // Rendering the part mesh
+        int[] indices = part.mesh.indices;
+        Vertex[] vertices = part.mesh.vertices;
+
+        for (int i = 0; i < indices.length; i += 3) {
+            for (int iv = 0; iv < 3; iv++) {
+                Vertex v = vertices[indices[i + iv]];
+                Vector4f transformedPos = transformVertex(poseStack, v.getPos().toVec3());
+                buffer.vert(
+                        (float) (transformedPos.x() + entity.position().x),
+                        (float) (transformedPos.y() + entity.position().y),
+                        (float) (transformedPos.z() + entity.position().z),
+                        color.x(), color.y(), color.z(), color.w()
+                );
             }
         }
-        buffer.draw();
+
+        poseStack.popPose();
     }
 
     public static void renderLegacyModel(WorldBuffer buffer, CreatureObjModelOld objModel, Vector4f color, BaseCreatureEntity entity) {
         PoseStack poseStack = new PoseStack();
-       /* poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot));  // Adjust yaw
-        poseStack.mulPose(Axis.XP.rotationDegrees(entity.xRot)); */      // Adjust pitch
-
         for (ObjPart part : objModel.wavefrontParts) {
             if (part.mesh == null) {
                 continue;
             }
 
-            /*AnimationPart animationPart = objModel.animationParts.get(part.getName().toLowerCase());
-            if (animationPart != null) {
-                applyAnimationFrames(poseStack, animationPart);
-            }*/
-
             int[] indices = part.mesh.indices;
             Vertex[] vertices = part.mesh.vertices;
             for (int i = 0; i < indices.length; i += 3) {
@@ -118,15 +124,6 @@ public class RenderHelper {
         buffer.draw();
     }
 
-    public static void applyAnimationFrames(PoseStack poseStack, AnimationPart animationPart) {
-        if (animationPart.parent != null) {
-            applyAnimationFrames(poseStack, animationPart.parent);
-        }
-
-        for (ModelObjAnimationFrame frame : animationPart.animationFrames) {
-            frame.apply(poseStack);
-        }
-    }
 
     public static Vector4f transformVertex(PoseStack poseStack, Vec3 vertexPos) {
         Matrix4f transformMatrix = poseStack.last().pose();
@@ -135,122 +132,6 @@ public class RenderHelper {
         return transformedPos;
     }
 
-    // Helper method to apply animation frames
-    /*private static void applyAnimationFrames(PoseStack poseStack, AnimationPart animationPart) {
-        for (ModelObjAnimationFrame frame : animationPart.animationFrames) {
-            if ("angle".equals(frame.type)) {
-
-                poseStack.mulPose(new Quaternionf(frame.x, frame.y, frame.z, frame.amount));
-            } else if ("rotate".equals(frame.type)) {
-                poseStack.mulPose(Axis.XP.rotationDegrees(frame.x * frame.amount));
-                poseStack.mulPose(Axis.YP.rotationDegrees(frame.y * frame.amount));
-                poseStack.mulPose(Axis.ZP.rotationDegrees(frame.z * frame.amount));
-            } else if ("translate".equals(frame.type)) {
-                poseStack.translate(frame.x * frame.amount, frame.y * frame.amount, frame.z * frame.amount);
-            } else if ("scale".equals(frame.type)) {
-                poseStack.scale(frame.x * frame.amount, frame.y * frame.amount, frame.z * frame.amount);
-            }
-        }
-    }
-
-    // Helper method to transform vertex positions
-    private static Vector4f transformVertex(PoseStack poseStack, Vector3f pos) {
-        Matrix4f matrix = poseStack.last().pose();
-        Vector4f vector = new Vector4f(pos.x(), pos.y(), pos.z(), 1.0F);
-        vector.mul(matrix);
-        return vector;
-    }*/
-
-    /*public static void renderModel(WorldBuffer buffer, CreatureObjModel objPart, Vector4f color, BaseCreatureEntity entity) {
-        for (ObjPart part : objPart.objParts) {
-            if (part.mesh == null) {
-                continue;
-            }
-            int[] indices = part.mesh.indices;
-            Vertex[] vertices = part.mesh.vertices;
-            for (int i = 0; i < indices.length; i += 3) {
-                for (int iv = 0; iv < 3; iv++) {
-                    Vertex v = vertices[indices[i + iv]];
-                    buffer.vert(
-                            (float) (v.getPos().x() + entity.position().x), (float) (v.getPos().y() + entity.position().y), (float) (v.getPos().z() + entity.position().z),
-                            color.x(), color.y(), color.z(), color.w()
-                    );
-                }
-            }
-        }
-        buffer.draw();
-    }
-
-    public static void renderLegacyModel(WorldBuffer buffer, CreatureObjModelOld objPart, Vector4f color, BaseCreatureEntity entity) {
-        for (ObjPart part : objPart.wavefrontParts) {
-            if (part.mesh == null) {
-                return;
-            }
-            int[] indices = part.mesh.indices;
-            Vertex[] vertices = part.mesh.vertices;
-            for (int i = 0; i < indices.length; i += 3) {
-                for (int iv = 0; iv < 3; iv++) {
-                    Vertex v = vertices[indices[i + iv]];
-                    buffer.vert(
-                            (float) (v.getPos().x() + entity.position().x), (float) (v.getPos().y() + entity.position().y), (float) (v.getPos().z() + entity.position().z),
-                            color.x(), color.y(), color.z(), color.w()
-                    );
-                }
-            }
-        }
-        buffer.draw();
-    }*/
-   /* public static void renderModel(WorldBuffer buffer, CreatureObjModel objPart, Vector4f color, BaseCreatureEntity entity) {
-        float yaw = entity.yBodyRot * ((float) Math.PI / 180F);  // Convert degrees to radians
-        float pitch = entity.xRot * ((float) Math.PI / 180F);  // Convert degrees to radians
-
-        for (ObjPart part : objPart.objParts) {
-            if (part.mesh == null) {
-                continue;
-            }
-            int[] indices = part.mesh.indices;
-            Vertex[] vertices = part.mesh.vertices;
-            for (int i = 0; i < indices.length; i += 3) {
-                for (int iv = 0; iv < 3; iv++) {
-                    Vertex v = vertices[indices[i + iv]];
-                    Vec3 rotatedPos = rotateVertex(v.getPos().toVec3(), yaw, pitch);
-                    buffer.vert(
-                            (float) (rotatedPos.x() + entity.position().x),
-                            (float) (rotatedPos.y() + entity.position().y),
-                            (float) (rotatedPos.z() + entity.position().z),
-                            color.x(), color.y(), color.z(), color.w()
-                    );
-                }
-            }
-        }
-        buffer.draw();
-    }
-
-    public static void renderLegacyModel(WorldBuffer buffer, CreatureObjModelOld objPart, Vector4f color, BaseCreatureEntity entity) {
-        float yaw = entity.yBodyRot * ((float) Math.PI / 180F);  // Convert degrees to radians
-        float pitch = entity.xRot * ((float) Math.PI / 180F);  // Convert degrees to radians
-
-        for (ObjPart part : objPart.wavefrontParts) {
-            if (part.mesh == null) {
-                continue;
-            }
-            int[] indices = part.mesh.indices;
-            Vertex[] vertices = part.mesh.vertices;
-            for (int i = 0; i < indices.length; i += 3) {
-                for (int iv = 0; i < 3; iv++) {
-                    Vertex v = vertices[indices[i + iv]];
-                    Vec3 rotatedPos = rotateVertex(v.getPos().toVec3(), yaw, pitch);
-                    buffer.vert(
-                            (float) (rotatedPos.x() + entity.position().x),
-                            (float) (rotatedPos.y() + entity.position().y),
-                            (float) (rotatedPos.z() + entity.position().z),
-                            color.x(), color.y(), color.z(), color.w()
-                    );
-                }
-            }
-        }
-        buffer.draw();
-    }*/
 
     public static Vec3 rotateVertex(Vec3 pos, float yaw, float pitch) {
         double x = pos.x();

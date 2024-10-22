@@ -141,9 +141,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         animationContexts.put(entity.getId(), context);
 
 
-        //if (true) return;
         // Render Model Layers:
-        //this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
         this.renderModel(entity, matrixStack, renderTypeBuffer, null, time, distance, loop, lookYaw, lookPitch, 1, brightness, fade, invisible, allyInvisible);
         for (RenderLayer<T, CreatureModel<T>> layer : this.layers) {
             if (!(layer instanceof LayerCreatureBase)) {

@@ -1,10 +1,12 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.client.model.AnimationPart;
 import com.lycanitesmobs.client.model.CreatureObjModel;
 import com.lycanitesmobs.client.model.CreatureObjModelOld;
 import com.lycanitesmobs.client.model.creature.ModelAbaia;
 import com.lycanitesmobs.client.model.creature.ModelBobeko;
+import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
@@ -77,7 +79,7 @@ public class RenderAPIEvents {
 
             Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
             final double extend = 25.0;
-
+            var poseStack = event.getPoseStack();
             // Render modern models
             for (Map.Entry<Integer, CreatureObjModel> entityMap : entities.entrySet()) {
                 Entity entity = player.level().getEntity(entityMap.getKey());
@@ -88,7 +90,7 @@ public class RenderAPIEvents {
                 if (entity instanceof BaseCreatureEntity baseCreature) {
                     if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
                         entityMap.getValue().generateAnimationFrames(context.entity, context.time, context.distance, context.loop, context.lookY, context.lookX, context.scale, context.brightness);
-                        RenderHelper.renderModel(buffer, entityMap.getValue(), color, baseCreature);
+                        RenderHelper.renderModel(entityMap.getValue().animator, poseStack, buffer, entityMap.getValue(), color, baseCreature);
                         entityMap.getValue().clearAnimationFrames();
                     }
                 }
@@ -96,7 +98,7 @@ public class RenderAPIEvents {
 
 
             // Render legacy models
-            for (Map.Entry<Integer, CreatureObjModelOld> entityMap : entitiesLegacy.entrySet()) {
+            /*for (Map.Entry<Integer, CreatureObjModelOld> entityMap : entitiesLegacy.entrySet()) {
                 Entity entity = player.level().getEntity(entityMap.getKey());
                 var context = animationContexts.get(entityMap.getKey());
                 if (entity == null) {
@@ -109,7 +111,7 @@ public class RenderAPIEvents {
                         entityMap.getValue().clearAnimationFrames();
                     }
                 }
-            }
+            }*/
 
             RenderHelper.endTri(buffer);
         }
