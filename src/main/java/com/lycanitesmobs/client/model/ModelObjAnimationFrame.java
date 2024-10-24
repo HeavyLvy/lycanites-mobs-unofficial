@@ -55,4 +55,20 @@ public class ModelObjAnimationFrame {
             animator.doScale(this.x * this.amount, this.y * this.amount, this.z * this.amount);
     }
 
+    public void apply(PoseStack poseStack) {
+        if ("angle".equals(this.type)) {
+            poseStack.mulPose(Axis.YP.rotationDegrees(this.amount));
+            poseStack.mulPose(Axis.XP.rotationDegrees(this.x));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(this.z));
+        } else if ("rotate".equals(this.type)) {
+            poseStack.mulPose(Axis.XP.rotationDegrees(this.x * this.amount));
+            poseStack.mulPose(Axis.YP.rotationDegrees(this.y * this.amount));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(this.z * this.amount));
+        } else if ("translate".equals(this.type)) {
+            poseStack.translate(this.x * this.amount, this.y * this.amount, this.z * this.amount);
+        } else if ("scale".equals(this.type)) {
+            poseStack.scale(this.x * this.amount, this.y * this.amount, this.z * this.amount);
+        }
+    }
+
 }

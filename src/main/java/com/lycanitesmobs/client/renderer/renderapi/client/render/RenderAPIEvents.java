@@ -32,6 +32,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
@@ -63,7 +64,7 @@ public class RenderAPIEvents {
         public static void onRenderLevel(RenderLevelStageEvent event) {
             if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
 
-            LocalPlayer player = Minecraft.getInstance().player;
+            var player = Minecraft.getInstance().player;
             if (player == null) {
                 return;
             }
@@ -71,49 +72,59 @@ public class RenderAPIEvents {
                 return;
             }
 
+            var poseStack = event.getPoseStack();
             Matrix4f projectionMatrix = event.getProjectionMatrix();
             Matrix4f viewMatrix = event.getPoseStack().last().pose();
             WorldBuffer buffer = RenderHelper.startTri(projectionMatrix, viewMatrix);
             Frustum frustum = event.getFrustum();
             frustum.prepare(player.getX(), player.getY(), player.getZ());
-
             Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
             final double extend = 25.0;
-            var poseStack = event.getPoseStack();
-            // Render modern models
-            for (Map.Entry<Integer, CreatureObjModel> entityMap : entities.entrySet()) {
+            Iterator<Map.Entry<Integer, CreatureObjModel>> iterator = entities.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<Integer, CreatureObjModel> entityMap = iterator.next();
                 Entity entity = player.level().getEntity(entityMap.getKey());
                 var context = animationContexts.get(entityMap.getKey());
+
                 if (entity == null) {
-                    entities.remove(entityMap.getKey());
+                    iterator.remove();
+                    animationContexts.remove(entityMap.getKey());
+                    continue;
                 }
+
                 if (entity instanceof BaseCreatureEntity baseCreature) {
                     if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
                         entityMap.getValue().generateAnimationFrames(context.entity, context.time, context.distance, context.loop, context.lookY, context.lookX, context.scale, context.brightness);
-                        RenderHelper.renderModel(entityMap.getValue().animator, poseStack, buffer, entityMap.getValue(), color, baseCreature);
+                        RenderHelper.renderModel(buffer, entityMap.getValue(), color, baseCreature);
                         entityMap.getValue().clearAnimationFrames();
+
                     }
                 }
             }
 
-
             // Render legacy models
-            /*for (Map.Entry<Integer, CreatureObjModelOld> entityMap : entitiesLegacy.entrySet()) {
-                Entity entity = player.level().getEntity(entityMap.getKey());
+    /*
+    Iterator<Map.Entry<Integer, CreatureObjModelOld>> legacyIterator = entitiesLegacy.entrySet().iterator();
+    while (legacyIterator.hasNext()) {
+        Map.Entry<Integer, CreatureObjModelOld> entityMap = legacyIterator.next();
+        Entity entity = player.level().getEntity(entityMap.getKey());
+        if (entity == null) {
+            legacyIterator.remove();
+            continue;
+        }
+        if (entity instanceof BaseCreatureEntity baseCreature) {
+            if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
                 var context = animationContexts.get(entityMap.getKey());
-                if (entity == null) {
-                    entitiesLegacy.remove(entityMap.getKey());
-                }
-                if (entity instanceof BaseCreatureEntity baseCreature) {
-                    if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
-                        entityMap.getValue().generateAnimationFrames(context.entity, context.time, context.distance, context.loop, context.lookY, context.lookX, context.scale, context.brightness);
-                        RenderHelper.renderLegacyModel(buffer, entityMap.getValue(), color, baseCreature);
-                        entityMap.getValue().clearAnimationFrames();
-                    }
-                }
-            }*/
+                entityMap.getValue().generateAnimationFrames(context.entity, context.time, context.distance, context.loop, context.lookY, context.lookX, context.scale, context.brightness);
+                RenderHelper.renderLegacyModel(buffer, entityMap.getValue(), color, baseCreature);
+                entityMap.getValue().clearAnimationFrames();
+            }
+        }
+    }
+    */
 
             RenderHelper.endTri(buffer);
         }
+
     }
 }

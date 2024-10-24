@@ -52,7 +52,6 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      */
     @Override
     public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
-
         // Get Model and Layers:
         try {
             this.layers.clear();
@@ -140,8 +139,8 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         var context = new ContextUtils.AnimationContext(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
         animationContexts.put(entity.getId(), context);
 
-
         // Render Model Layers:
+        //this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
         this.renderModel(entity, matrixStack, renderTypeBuffer, null, time, distance, loop, lookYaw, lookPitch, 1, brightness, fade, invisible, allyInvisible);
         for (RenderLayer<T, CreatureModel<T>> layer : this.layers) {
             if (!(layer instanceof LayerCreatureBase)) {
@@ -153,7 +152,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
             }
             this.renderModel(entity, matrixStack, renderTypeBuffer, layerCreatureBase, time, distance, loop, lookYaw, lookPitch, scale, brightness, fade, invisible, allyInvisible);
         }
-        this.getMainModel().clearAnimationFrames();
+        //this.getMainModel().clearAnimationFrames();
         matrixStack.popPose();
 
         VBOBatcher.getInstance().endBatches();

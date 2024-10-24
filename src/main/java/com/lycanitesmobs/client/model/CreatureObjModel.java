@@ -18,15 +18,19 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.apache.commons.io.IOUtils;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -351,6 +355,7 @@ public class CreatureObjModel extends CreatureModel {
         }
     }
 
+
     @Override
     public void render(BaseCreatureEntity entity, PoseStack matrixStack, VertexConsumer vertexBuilder, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade) {
 
@@ -370,10 +375,7 @@ public class CreatureObjModel extends CreatureModel {
                 scale *= entity.getScale();
             }
         }
-        // Adds the model + entity to the renderer's map to render during level rendering
-        if (!entities.containsKey(entity.getId())) {
-            entities.put(entity.getId(), this);
-        }
+
 
         for (ObjPart part : this.objParts) {
             String partName = part.getName().toLowerCase();
@@ -405,8 +407,36 @@ public class CreatureObjModel extends CreatureModel {
 
             matrixStack.popPose();
         }
+        // Adds the model + entity to the renderer's map to render during level rendering
+        if (!entities.containsKey(entity.getId())) {
+            entities.put(entity.getId(), this);
+        }
+    }
+/*
+    private Matrix4f projectionMatrix;
+    private Matrix4f viewMatrix;
+
+    public void setViewMatrix(Matrix4f viewMatrix) {
+        this.viewMatrix = viewMatrix;
     }
 
+    public void setProjectionMatrix(Matrix4f projectionMatrix) {
+        this.projectionMatrix = projectionMatrix;
+    }
+
+    public void renderMob(PoseStack poseStack, BaseCreatureEntity baseCreature) {
+        if (projectionMatrix == null || viewMatrix == null) return;
+        //Matrix4f projectionMatrix = RenderSystem.getProjectionMatrix();
+        // Matrix4f viewMatrix = poseStack.last().pose();
+        WorldBuffer buffer = RenderHelper.startTri(projectionMatrix, viewMatrix);
+
+        Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
+        final double extend = 25.0;
+        //this.generateAnimationFrames(baseCreature, context.time, context.distance, context.loop, context.lookY, context.lookX, context.scale, context.brightness);
+        RenderHelper.renderModel(this.animator, poseStack, buffer, this, color, baseCreature);
+        this.clearAnimationFrames();
+        RenderHelper.endTri(buffer);
+    }*/
 
     @Override
     public boolean canRenderPart(String partName, Entity entity, LayerCreatureBase layer, boolean trophy) {

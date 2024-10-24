@@ -8,8 +8,13 @@ import com.lycanitesmobs.client.obj.Vertex;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import com.lycanitesmobs.core.util.LMHelperClass;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 
@@ -30,14 +35,14 @@ public class RenderHelper {
 
     public static void endTri(WorldBuffer buffer) {
         //glDepthRange(0, 0.7);
-        glEnable(GL_BLEND);
-        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-        glDisable(GL_CULL_FACE);
-        glDepthMask(false);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        RenderSystem.disableCull();
+        RenderSystem.depthMask(false);
         buffer.draw();
-        glDepthMask(true);
-        glEnable(GL_CULL_FACE);
-        glDisable(GL_BLEND);
+        RenderSystem.depthMask(true);
+        RenderSystem.enableCull();
+        RenderSystem.disableBlend();
         glDepthRange(0, 1);
     }
 
@@ -47,57 +52,62 @@ public class RenderHelper {
         buffer.vert(x3, y3, z3, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
 
-    public static void renderModel(Animator animator, PoseStack poseStack, WorldBuffer buffer, CreatureObjModel objModel, Vector4f color, BaseCreatureEntity entity) {
-        poseStack.pushPose();
-
-        // Apply entity rotations
-        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot));
-        poseStack.mulPose(Axis.XP.rotationDegrees(entity.xRot));
-
-        // Iterate through each part and render them separately
-        for (ObjPart part : objModel.objParts) {
-            AnimationPart animationPart = objModel.animationParts.get(part.getName().toLowerCase());
-            renderPart(animator, animationPart, poseStack, buffer, part, color, entity);
+    public static void applyAnimationFrames(PoseStack poseStack, AnimationPart animationPart) {
+        if (animationPart.parent != null) {
+            applyAnimationFrames(poseStack, animationPart.parent);
         }
 
-        buffer.draw();
-        poseStack.popPose();
+        for (ModelObjAnimationFrame frame : animationPart.animationFrames) {
+            frame.apply(poseStack);
+        }
     }
 
 
-    public static void renderPart(Animator animator, AnimationPart animationPart, PoseStack poseStack, WorldBuffer buffer, ObjPart part, Vector4f color, BaseCreatureEntity entity) {
-        if (part.mesh == null) {
-            return;
-        }
-
-        poseStack.pushPose();
-        /*if ("head".equals(part.getName().toLowerCase())) {
-            poseStack.mulPose(Axis.YP.rotationDegrees(90)); // Rotating head part by 90 degrees on Y axis
+    public static void renderModel(WorldBuffer buffer, CreatureObjModel objModel, Vector4f color, BaseCreatureEntity entity) {
+        var poseStack = objModel.matrixStack;
+        var animator = objModel.animator;
+        var minecraft = Minecraft.getInstance();
+        var cameraYRot = minecraft.getCameraEntity().yRot;
+        var cameraXRot = minecraft.getCameraEntity().xRot;
+       /* if (entity.tickCount % 20 == 0 && player.getOffhandItem().is(Items.DIAMOND)) {
+            LMHelperClass.logInfoMessage("Camera: xRot: " + cameraXRot + "yRot: " + cameraYRot);
+            LMHelperClass.logInfoMessage("Entity: xRot: " + entity.xRot + "yRot: " + entity.yBodyRot);
         }*/
-        // Apply part-specific animation frames
-        if (animationPart != null) {
-            animationPart.applyAnimationFrames(animator);
-        }
-
-        // Rendering the part mesh
-        int[] indices = part.mesh.indices;
-        Vertex[] vertices = part.mesh.vertices;
-
-        for (int i = 0; i < indices.length; i += 3) {
-            for (int iv = 0; iv < 3; iv++) {
-                Vertex v = vertices[indices[i + iv]];
-                Vector4f transformedPos = transformVertex(poseStack, v.getPos().toVec3());
-                buffer.vert(
-                        (float) (transformedPos.x() + entity.position().x),
-                        (float) (transformedPos.y() + entity.position().y),
-                        (float) (transformedPos.z() + entity.position().z),
-                        color.x(), color.y(), color.z(), color.w()
-                );
+        poseStack.pushPose();
+        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yRot - cameraYRot));
+        poseStack.mulPose(Axis.XP.rotationDegrees(cameraXRot - entity.xRot));
+        poseStack.pushPose();
+        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot));
+        for (ObjPart part : objModel.objParts) {
+            if (part.mesh == null) {
+                continue;
             }
+            poseStack.pushPose();
+            AnimationPart animationPart = objModel.animationParts.get(part.getName().toLowerCase());
+            if (animationPart != null) {
+                animationPart.applyAnimationFrames(animator);
+            }
+            int[] indices = part.mesh.indices;
+            Vertex[] vertices = part.mesh.vertices;
+            for (int i = 0; i < indices.length; i += 3) {
+                for (int iv = 0; iv < 3; iv++) {
+                    Vertex v = vertices[indices[i + iv]];
+                    Vector4f transformedPos = transformVertex(poseStack, v.getPos().toVec3());
+                    buffer.vert(
+                            (float) (transformedPos.x() + entity.position().x),
+                            (float) (transformedPos.y() + entity.position().y),
+                            (float) (transformedPos.z() + entity.position().z),
+                            color.x(), color.y(), color.z(), color.w()
+                    );
+                }
+            }
+            poseStack.popPose();
         }
-
         poseStack.popPose();
+        poseStack.popPose();
+        buffer.draw();
     }
+
 
     public static void renderLegacyModel(WorldBuffer buffer, CreatureObjModelOld objModel, Vector4f color, BaseCreatureEntity entity) {
         PoseStack poseStack = new PoseStack();
