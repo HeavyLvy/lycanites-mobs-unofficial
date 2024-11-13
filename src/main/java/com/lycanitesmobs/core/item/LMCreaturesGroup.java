@@ -2,10 +2,12 @@ package com.lycanitesmobs.core.item;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
+import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.ItemInfo;
 import com.lycanitesmobs.core.info.ItemManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
@@ -28,9 +30,14 @@ public class LMCreaturesGroup {
         builder = builder.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".creatures"))
                 .icon(this::getIconItem)
                 .displayItems((enabledFeatures, entries) -> {
-                    for (String info : creatureNames) {
-                        if (ObjectManager.getItem(info) != null) {
-                            entries.accept(ObjectManager.getItem(info));
+                    for (String item : creatureNames) {
+                        var i = ObjectManager.getItem(item);
+                        if (i instanceof ItemCustomSpawnEgg spawnEgg) {
+                            for (CreatureInfo creatureInfo : spawnEgg.creatureType.creatures.values()) {
+                                ItemStack itemstack = new ItemStack(i, 1);
+                                spawnEgg.applyCreatureInfoToItemStack(itemstack, creatureInfo);
+                                entries.accept(itemstack);
+                            }
                         }
                     }
                 });

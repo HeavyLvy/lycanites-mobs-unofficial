@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static com.lycanitesmobs.core.info.ItemManager.itemsGroup;
 import static com.lycanitesmobs.core.item.LMCreaturesGroup.creatureNames;
 
 public class CreatureType {
@@ -231,6 +232,7 @@ public class CreatureType {
         this.spawnEgg = () -> new ItemCustomSpawnEgg(spawnEggProperties, this);
         ObjectManager.addItem(this.getSpawnEggName(), this.spawnEgg);
         creatureNames.add(this.getSpawnEggName());
+
         // Soulstone:
         this.soulstone = () -> new ItemSoulstoneFilled(standardItemProperties, this);
         ObjectManager.addItem(this.getSoulstoneName(), this.soulstone);
