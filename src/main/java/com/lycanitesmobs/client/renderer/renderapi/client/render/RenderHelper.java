@@ -181,17 +181,21 @@ public class RenderHelper {
     }
 
 
-    /*public static void renderModel(WorldBuffer buffer, CreatureObjModel objModel, Vector4f color, BaseCreatureEntity entity) {
+    public static void renderModel(WorldBuffer buffer, CreatureObjModel objModel, Vector4f color, BaseCreatureEntity entity) {
         var poseStack = objModel.matrixStack;
         var animator = objModel.animator;
         var minecraft = Minecraft.getInstance();
         var cameraYRot = minecraft.getCameraEntity().yRot;
         var cameraXRot = minecraft.getCameraEntity().xRot;
+       /* if (entity.tickCount % 20 == 0 && player.getOffhandItem().is(Items.DIAMOND)) {
+            LMHelperClass.logInfoMessage("Camera: xRot: " + cameraXRot + "yRot: " + cameraYRot);
+            LMHelperClass.logInfoMessage("Entity: xRot: " + entity.xRot + "yRot: " + entity.yBodyRot);
+        }*/
         poseStack.pushPose();
-        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot - cameraYRot));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yRot - cameraYRot));
         poseStack.mulPose(Axis.XP.rotationDegrees(cameraXRot - entity.xRot));
         poseStack.pushPose();
-        poseStack.mulPose(Axis.XP.rotationDegrees(0));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot));
         for (ObjPart part : objModel.objParts) {
             if (part.mesh == null) {
                 continue;
@@ -220,7 +224,7 @@ public class RenderHelper {
         poseStack.popPose();
         poseStack.popPose();
         buffer.draw();
-    }*/
+    }
 
 
     public static void renderLegacyModel(WorldBuffer buffer, CreatureObjModelOld objModel, Vector4f color, BaseCreatureEntity entity) {

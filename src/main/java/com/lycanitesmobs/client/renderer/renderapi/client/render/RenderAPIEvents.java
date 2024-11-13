@@ -98,7 +98,7 @@ public class RenderAPIEvents {
                     if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
                         entityMap.getValue().generateAnimationFrames(context.entity, context.time, context.distance, context.loop, context.lookY, context.lookX, context.scale, context.brightness);
 
-                        RenderHelper.renderModel(buffer, entityMap.getValue(), color, baseCreature, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/bobeko.png"));
+                        RenderHelper.renderModel(buffer, entityMap.getValue(), color, baseCreature);
 
                         //VBOBatcher.getInstance().endBatches(buffer);
                         entityMap.getValue().clearAnimationFrames();

@@ -72,15 +72,26 @@ public class WorldBuffer {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         applyProjectionMatrix();
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0); // For position
 
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES); // For color
+        glEnableVertexAttribArray(1);
+
+/*
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0);         // Position
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES); // Color
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(2, 2, GL_FLOAT, false, 7 * Float.BYTES, 7 * Float.BYTES); // Texture Coord
-        glEnableVertexAttribArray(2);
-
+        glEnableVertexAttribArray(2);*/
         if (shader != null) {
+            shader.bind();
+            glDrawArrays(drawMode, 0, vertices.size());
+            shader.unbind();
+        }
+
+        /*if (shader != null) {
             var location = new ResourceLocation(LycanitesMobs.MODID, "textures/entity/bobeko.png");
             int textureID = loadTexture(location);
             glBindTexture(GL_TEXTURE_2D, textureID);
@@ -92,7 +103,7 @@ public class WorldBuffer {
             glDrawArrays(drawMode, 0, vertices.size());
             shader.unbind();
         }
-
+*/
         BufferManager.unbindBuffer();
         BufferManager.unbind();
 
@@ -103,7 +114,7 @@ public class WorldBuffer {
     }
 
 
-    public FloatBuffer getBuffer() {
+    /*public FloatBuffer getBuffer() {
         FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(vertices.size() * 9);
         for (Vertex vertex : vertices) {
             floatBuffer.put(vertex.getX()).put(vertex.getY()).put(vertex.getZ());
@@ -112,9 +123,9 @@ public class WorldBuffer {
         }
         floatBuffer.flip();
         return floatBuffer;
-    }
+    }*/
 
-   /* public FloatBuffer getBuffer() {
+    public FloatBuffer getBuffer() {
         FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(vertices.size() * 7);
         for (Vertex vertex : vertices) {
             floatBuffer.put(vertex.getX()).put(vertex.getY()).put(vertex.getZ());
@@ -122,7 +133,7 @@ public class WorldBuffer {
         }
         floatBuffer.flip();
         return floatBuffer;
-    }*/
+    }
 
     public void applyProjectionMatrix() {
         if (shader != null) {
