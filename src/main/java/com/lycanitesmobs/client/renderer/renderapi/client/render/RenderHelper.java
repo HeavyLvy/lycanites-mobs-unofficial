@@ -10,16 +10,26 @@ import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderMa
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.joml.*;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL33;
+import org.lwjgl.stb.STBImage;
 
 import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.Math;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL33.*;
 
@@ -33,7 +43,61 @@ public class RenderHelper {
         return new WorldBuffer(GL_TRIANGLES, ShaderManager.getPositionColorShader(), modelViewMatrix, viewMatrix);
     }
 
+    /*public static int loadTexture(ResourceLocation textureLocation) {
+        var textureManager = Minecraft.getInstance().getTextureManager();
+        var texture = textureManager.getTexture(textureLocation);
+        if (texture == null) {
+            textureManager.register(textureLocation, new SimpleTexture(textureLocation));
+            texture = textureManager.getTexture(textureLocation);
+        }
+        return texture.getId();
+    }*/
+    public static int loadTexture(ResourceLocation location) {
+        // Get the texture file from Minecraft's resource manager
+        try {
+            var resource = Minecraft.getInstance().getResourceManager().getResource(location);
+            InputStream inputStream = resource.get().open();
+            NativeImage nativeImage = NativeImage.read(inputStream);
+
+            int textureID = GL33.glGenTextures();
+            GL33.glBindTexture(GL33.GL_TEXTURE_2D, textureID);
+
+            GL33.glTexImage2D(
+                    GL33.GL_TEXTURE_2D,
+                    0,
+                    GL33.GL_RGBA,
+                    nativeImage.getWidth(),
+                    nativeImage.getHeight(),
+                    0,
+                    GL33.GL_RGBA,
+                    GL33.GL_UNSIGNED_BYTE,
+                    nativeImage.getPixelsRGBA()
+            );
+            GL33.glGenerateMipmap(GL33.GL_TEXTURE_2D);
+
+            nativeImage.close(); // Clean up the native image
+            return textureID;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load texture: " + location, e);
+        }
+    }
+
     public static void endTri(WorldBuffer buffer) {
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        RenderSystem.disableCull();
+        RenderSystem.depthMask(false);
+
+        buffer.draw();
+
+        RenderSystem.depthMask(true);
+        RenderSystem.enableCull();
+        RenderSystem.disableBlend();
+        glBindTexture(GL_TEXTURE_2D, 0);  // Unbind texture
+        glDepthRange(0, 1);
+    }
+
+    /*public static void endTri(WorldBuffer buffer) {
         //glDepthRange(0, 0.7);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -44,7 +108,7 @@ public class RenderHelper {
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
         glDepthRange(0, 1);
-    }
+    }*/
 
     public static void drawTri(WorldBuffer buffer, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, Color color) {
         buffer.vert(x1, y1, z1, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
@@ -62,22 +126,72 @@ public class RenderHelper {
         }
     }
 
-
-    public static void renderModel(WorldBuffer buffer, CreatureObjModel objModel, Vector4f color, BaseCreatureEntity entity) {
+    public static void renderModel(WorldBuffer buffer, CreatureObjModel objModel, Vector4f color, BaseCreatureEntity entity, ResourceLocation texture) {
         var poseStack = objModel.matrixStack;
         var animator = objModel.animator;
         var minecraft = Minecraft.getInstance();
         var cameraYRot = minecraft.getCameraEntity().yRot;
         var cameraXRot = minecraft.getCameraEntity().xRot;
-       /* if (entity.tickCount % 20 == 0 && player.getOffhandItem().is(Items.DIAMOND)) {
-            LMHelperClass.logInfoMessage("Camera: xRot: " + cameraXRot + "yRot: " + cameraYRot);
-            LMHelperClass.logInfoMessage("Entity: xRot: " + entity.xRot + "yRot: " + entity.yBodyRot);
-        }*/
+
+       /* int textureId = loadTexture(texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureId);*/
+        /*var shader = ShaderManager.getPositionColorShader();
+        shader.bind();
+        shader.uniform1i("u_texture", 0); // Assuming u_texture is the sampler uniform name
+        shader.unbind();*/
+
         poseStack.pushPose();
-        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yRot - cameraYRot));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot - cameraYRot));
         poseStack.mulPose(Axis.XP.rotationDegrees(cameraXRot - entity.xRot));
         poseStack.pushPose();
-        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot));
+
+        for (ObjPart part : objModel.objParts) {
+            if (part.mesh == null) {
+                continue;
+            }
+            poseStack.pushPose();
+            AnimationPart animationPart = objModel.animationParts.get(part.getName().toLowerCase());
+            if (animationPart != null) {
+                animationPart.applyAnimationFrames(animator);
+            }
+
+            int[] indices = part.mesh.indices;
+            Vertex[] vertices = part.mesh.vertices;
+            for (int i = 0; i < indices.length; i += 3) {
+                for (int iv = 0; iv < 3; iv++) {
+                    Vertex v = vertices[indices[i + iv]];
+                    Vector4f transformedPos = transformVertex(poseStack, v.getPos().toVec3());
+                    buffer.vert(
+                            (float) (transformedPos.x() + entity.position().x),
+                            (float) (transformedPos.y() + entity.position().y),
+                            (float) (transformedPos.z() + entity.position().z),
+                            color.x(), color.y(), color.z(), color.w()/*,
+                            v.getU(), v.getV()*/
+                    );
+                }
+            }
+            poseStack.popPose();
+        }
+        poseStack.popPose();
+        poseStack.popPose();
+
+        buffer.draw();
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+
+    /*public static void renderModel(WorldBuffer buffer, CreatureObjModel objModel, Vector4f color, BaseCreatureEntity entity) {
+        var poseStack = objModel.matrixStack;
+        var animator = objModel.animator;
+        var minecraft = Minecraft.getInstance();
+        var cameraYRot = minecraft.getCameraEntity().yRot;
+        var cameraXRot = minecraft.getCameraEntity().xRot;
+        poseStack.pushPose();
+        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot - cameraYRot));
+        poseStack.mulPose(Axis.XP.rotationDegrees(cameraXRot - entity.xRot));
+        poseStack.pushPose();
+        poseStack.mulPose(Axis.XP.rotationDegrees(0));
         for (ObjPart part : objModel.objParts) {
             if (part.mesh == null) {
                 continue;
@@ -106,7 +220,7 @@ public class RenderHelper {
         poseStack.popPose();
         poseStack.popPose();
         buffer.draw();
-    }
+    }*/
 
 
     public static void renderLegacyModel(WorldBuffer buffer, CreatureObjModelOld objModel, Vector4f color, BaseCreatureEntity entity) {

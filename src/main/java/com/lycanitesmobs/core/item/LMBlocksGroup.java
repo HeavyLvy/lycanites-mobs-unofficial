@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.item;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
+import com.lycanitesmobs.core.block.BlockBase;
 import com.lycanitesmobs.core.info.ItemInfo;
 import com.lycanitesmobs.core.info.ItemManager;
 import net.minecraft.network.chat.Component;
@@ -12,35 +13,44 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class LMBlocksGroup{
-	public CreativeModeTab.Builder builder = CreativeModeTab.builder();
+import java.util.ArrayList;
+import java.util.List;
 
-	// ========== Constructor ==========
-	public LMBlocksGroup() {
-		init();
-	}
-	public void init() {
-		builder.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".blocks"))
-				.icon(this::getIconItem)
-				.displayItems((enabledFeatures, entries) -> {
-					for(ItemInfo info : ItemManager.items.values()) {
-						entries.accept(info.getItem());
-					}
-				}).build();
-	}
-	public static CreativeModeTab.Builder getBuilder() {
-		return new LMBlocksGroup().builder;
-	}
-	// ========== Tab Icon ==========
-	@OnlyIn(Dist.CLIENT)
-	public ItemStack getIconItem() {
-		if(ObjectManager.getBlock("shadowcrystal") != null)
-			return new ItemStack(Item.byBlock(ObjectManager.getBlock("shadowcrystal")));
-		else if(ObjectManager.getBlock("summoningpedestal") != null)
-			return new ItemStack(Item.byBlock(ObjectManager.getBlock("summoningpedestal")));
-		else if(ObjectManager.getBlock("demoncrystal") != null)
-			return new ItemStack(Item.byBlock(ObjectManager.getBlock("demoncrystal")));
-		else
-			return new ItemStack(Item.byBlock(Blocks.OBSIDIAN));
-	}
+public class LMBlocksGroup {
+    public static final List<String> blockNames = new ArrayList<>();
+    public CreativeModeTab.Builder builder = CreativeModeTab.builder();
+
+    // ========== Constructor ==========
+    public LMBlocksGroup() {
+        init();
+    }
+
+    public void init() {
+        builder.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".blocks"))
+                .icon(this::getIconItem)
+                .displayItems((enabledFeatures, entries) -> {
+                    for (String info : blockNames) {
+                        if (ObjectManager.getBlock(info) != null) {
+                            entries.accept(ObjectManager.getBlock(info));
+                        }
+                    }
+                }).build();
+    }
+
+    public static CreativeModeTab.Builder getBuilder() {
+        return new LMBlocksGroup().builder;
+    }
+
+    // ========== Tab Icon ==========
+    @OnlyIn(Dist.CLIENT)
+    public ItemStack getIconItem() {
+        if (ObjectManager.getBlock("shadowcrystal") != null)
+            return new ItemStack(Item.byBlock(ObjectManager.getBlock("shadowcrystal")));
+        else if (ObjectManager.getBlock("summoningpedestal") != null)
+            return new ItemStack(Item.byBlock(ObjectManager.getBlock("summoningpedestal")));
+        else if (ObjectManager.getBlock("demoncrystal") != null)
+            return new ItemStack(Item.byBlock(ObjectManager.getBlock("demoncrystal")));
+        else
+            return new ItemStack(Item.byBlock(Blocks.OBSIDIAN));
+    }
 }

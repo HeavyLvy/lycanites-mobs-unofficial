@@ -10,11 +10,30 @@ public class Vertex {
     private Vector3o normal;
     private Vector3f tangent;
 
+    public Vertex(Vector3o pos, Vector2f texCoords, Vector3o normal, Vector3f tangent, float r, float g, float b, float a) {
+        this.pos = pos;
+        this.texCoords = texCoords;
+        this.normal = normal;
+        this.tangent = tangent;
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
+    }
+
     public Vertex(Vector3o pos, Vector2f texCoords, Vector3o normal, Vector3f tangent) {
         this.pos = pos;
         this.texCoords = texCoords;
         this.normal = normal;
         this.tangent = tangent;
+    }
+
+    public float getU() {
+        return texCoords.x;
+    }
+
+    public float getV() {
+        return texCoords.y;
     }
 
     public Vector3o getPos() {
@@ -25,7 +44,9 @@ public class Vertex {
         return this.texCoords;
     }
 
-    /** Returns per vertex normal for smoother shading. **/
+    /**
+     * Returns per vertex normal for smoother shading.
+     **/
     public Vector3o getNormal() {
         return this.normal;
     }
@@ -33,6 +54,7 @@ public class Vertex {
     public Vector3f getTangent() {
         return tangent;
     }
+
     private float x;
 
     private float y;

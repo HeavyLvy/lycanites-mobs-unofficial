@@ -412,6 +412,7 @@ public class CreatureObjModel extends CreatureModel {
             entities.put(entity.getId(), this);
         }
     }
+
 /*
     private Matrix4f projectionMatrix;
     private Matrix4f viewMatrix;

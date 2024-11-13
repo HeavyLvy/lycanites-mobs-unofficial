@@ -31,6 +31,7 @@ import net.minecraftforge.client.event.RenderNameTagEvent;
 import org.joml.Matrix4f;
 
 import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.animationContexts;
+import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper.startTri;
 
 @OnlyIn(Dist.CLIENT)
 public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<T, CreatureModel<T>> {
@@ -136,8 +137,6 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         boolean invisible = !this.isBodyVisible(entity);
         boolean allyInvisible = invisible && !entity.isInvisibleTo(Minecraft.getInstance().player);
 
-        var context = new ContextUtils.AnimationContext(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
-        animationContexts.put(entity.getId(), context);
 
         // Render Model Layers:
         //this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
@@ -150,12 +149,17 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
             if (!layerCreatureBase.canRenderLayer(entity, scale)) {
                 continue;
             }
+            texture = this.getEntityTexture(entity, layerCreatureBase);
             this.renderModel(entity, matrixStack, renderTypeBuffer, layerCreatureBase, time, distance, loop, lookYaw, lookPitch, scale, brightness, fade, invisible, allyInvisible);
         }
+        var context = new ContextUtils.AnimationContext(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness, texture);
+        animationContexts.put(entity.getId(), context);
+
+
         //this.getMainModel().clearAnimationFrames();
         matrixStack.popPose();
-
-        VBOBatcher.getInstance().endBatches();
+        /*var buffer = startTri();
+        VBOBatcher.getInstance().endBatches(buffer);*/
 
         // Render Name Tag
         if (!invisible) {
@@ -169,6 +173,8 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
             }
         }
     }
+
+    public ResourceLocation texture;
 
     /**
      * Renders the main model.
@@ -189,7 +195,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      * @param allyInvisible    If true, the entity has invisibility or some form of stealth but is allied to the player so should be translucent, etc.
      */
     protected void renderModel(BaseCreatureEntity entity, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade, boolean invisible, boolean allyInvisible) {
-        ResourceLocation texture = this.getEntityTexture(entity, layer);
+        texture = this.getEntityTexture(entity, layer);
 
         // Render Model
         // TODO allyInvisible lower color alpha

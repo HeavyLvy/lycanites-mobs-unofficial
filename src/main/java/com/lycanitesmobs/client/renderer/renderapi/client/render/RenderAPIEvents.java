@@ -7,6 +7,7 @@ import com.lycanitesmobs.client.model.CreatureObjModelOld;
 import com.lycanitesmobs.client.model.creature.ModelAbaia;
 import com.lycanitesmobs.client.model.creature.ModelBobeko;
 import com.lycanitesmobs.client.obj.ObjPart;
+import com.lycanitesmobs.client.renderer.VBOBatcher;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
@@ -20,6 +21,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
@@ -95,7 +97,10 @@ public class RenderAPIEvents {
                 if (entity instanceof BaseCreatureEntity baseCreature) {
                     if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
                         entityMap.getValue().generateAnimationFrames(context.entity, context.time, context.distance, context.loop, context.lookY, context.lookX, context.scale, context.brightness);
-                        RenderHelper.renderModel(buffer, entityMap.getValue(), color, baseCreature);
+
+                        RenderHelper.renderModel(buffer, entityMap.getValue(), color, baseCreature, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/bobeko.png"));
+
+                        //VBOBatcher.getInstance().endBatches(buffer);
                         entityMap.getValue().clearAnimationFrames();
 
                     }

@@ -76,6 +76,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+
 @Mod(LycanitesMobs.MODID)
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class LycanitesMobs {
@@ -173,6 +174,7 @@ public class LycanitesMobs {
         modEventBus.register(WorldGenManager.getInstance());
 //		modEventBus.register(StatManager.getInstance()); TODO Stats
         PROXY.registerEvents();
+        ItemManager.register(modEventBus);
 
         // Game Event Listeners:
         MinecraftForge.EVENT_BUS.register(this);
@@ -207,7 +209,7 @@ public class LycanitesMobs {
         // Creatures:
         CreatureManager.getInstance().startup(modInfo);
         // Projectiles:
-        //ProjectileManager.getInstance().startup(modInfo);
+        // ProjectileManager.getInstance().startup(modInfo);
     }
 
     /**

@@ -19,62 +19,71 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static com.lycanitesmobs.core.item.LMEquipmentPartsGroup.equipmentNames;
+
 public class EquipmentPartManager extends JSONLoader {
 
-	public static EquipmentPartManager INSTANCE;
+    public static EquipmentPartManager INSTANCE;
 
-	public Map<String, Supplier<ItemEquipmentPart>> equipmentParts = new HashMap<>();
+    public Map<String, Supplier<ItemEquipmentPart>> equipmentParts = new HashMap<>();
 
-	/** A list of mod groups that have loaded with this Equipment Part Manager. **/
-	public List<ModInfo> loadedGroups = new ArrayList<>();
+    /**
+     * A list of mod groups that have loaded with this Equipment Part Manager.
+     **/
+    public List<ModInfo> loadedGroups = new ArrayList<>();
 
-	/** Returns the main EquipmentPartManager INSTANCE or creates it and returns it. **/
-	public static EquipmentPartManager getInstance() {
-		if(INSTANCE == null) {
-			INSTANCE = new EquipmentPartManager();
-		}
-		return INSTANCE;
-	}
+    /**
+     * Returns the main EquipmentPartManager INSTANCE or creates it and returns it.
+     **/
+    public static EquipmentPartManager getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new EquipmentPartManager();
+        }
+        return INSTANCE;
+    }
 
-	/** Loads all JSON Equipment Parts. **/
-	public void loadAllFromJson(ModInfo modInfo) {
-		if(!loadedGroups.contains(modInfo)) {
-			loadedGroups.add(modInfo);
-		}
-		loadAllJson(modInfo, "Equipment", "equipment", "itemName", false, null, FileLoader.COMMON, StreamLoader.COMMON);
-		LycanitesMobs.logDebug("Equipment", "Complete! " + equipmentParts.size() + " JSON Equipment Parts Loaded In Total.");
-	}
+    /**
+     * Loads all JSON Equipment Parts.
+     **/
+    public void loadAllFromJson(ModInfo modInfo) {
+        if (!loadedGroups.contains(modInfo)) {
+            loadedGroups.add(modInfo);
+        }
+        loadAllJson(modInfo, "Equipment", "equipment", "itemName", false, null, FileLoader.COMMON, StreamLoader.COMMON);
+        LycanitesMobs.logDebug("Equipment", "Complete! " + equipmentParts.size() + " JSON Equipment Parts Loaded In Total.");
+    }
 
-	@Override
-	public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
-		Item.Properties properties = new Item.Properties().stacksTo(1).setNoRepair();
-		Supplier<ItemEquipmentPart> equipmentPart = () -> new ItemEquipmentPart(properties,json);
-		String name = ItemEquipmentPart.getPartName(json);
-		//RegistryObject<Item> partObject = LycanitesMobs.ITEMS.register(name, equipmentPart);
-		//equipmentPart.loadFromJSON(json);
-		if(this.equipmentParts.containsKey(name)) {
-			LycanitesMobs.logWarning("", "[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
-			throw new RuntimeException("[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
-		}
+    @Override
+    public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
+        Item.Properties properties = new Item.Properties().stacksTo(1).setNoRepair();
+        Supplier<ItemEquipmentPart> equipmentPart = () -> new ItemEquipmentPart(properties, json);
+        String name = ItemEquipmentPart.getPartName(json);
+        //RegistryObject<Item> partObject = LycanitesMobs.ITEMS.register(name, equipmentPart);
+        //equipmentPart.loadFromJSON(json);
+        if (this.equipmentParts.containsKey(name)) {
+            LycanitesMobs.logWarning("", "[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
+            throw new RuntimeException("[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
+        }
 		/*if(this.equipmentParts.values().contains(equipmentPart)) {
 			LycanitesMobs.logWarning("", "[Equipment] Tried to add a Equipment Part that is already added: " + name);
 			throw new RuntimeException("[Equipment] Tried to add a Equipment Part that is already added: " + name);
 		}*/
-		this.equipmentParts.put(name, equipmentPart);
-		/* Creative Tab Builder **/
+        this.equipmentParts.put(name, equipmentPart);
+        equipmentNames.add(name);
+        /* Creative Tab Builder **/
 		/*ItemManager.getInstance().equipmentPartsGroup.displayItems((enabledFeatures, entries) -> {
 			entries.accept(equipmentPart::get);
 		});*/
-		ObjectManager.addItem(name,equipmentPart);
-	}
+        ObjectManager.addItem(name, equipmentPart);
+    }
 
-	/**
-	 * Reloads all Equipment part JSON.
-	 */
-	public void reload() {
-		this.equipmentParts.clear();
-		for(ModInfo group : this.loadedGroups) {
-			this.loadAllFromJson(group);
-		}
-	}
+    /**
+     * Reloads all Equipment part JSON.
+     */
+    public void reload() {
+        this.equipmentParts.clear();
+        for (ModInfo group : this.loadedGroups) {
+            this.loadAllFromJson(group);
+        }
+    }
 }

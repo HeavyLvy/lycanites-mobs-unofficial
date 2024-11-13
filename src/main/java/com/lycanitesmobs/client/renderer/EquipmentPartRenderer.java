@@ -78,7 +78,7 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
         itemObjModel.clearAnimationFrames();
         matrixStack.popPose();
 
-        VBOBatcher.getInstance().endBatches();
+        //VBOBatcher.getInstance().endBatches();
     }
 
     /**

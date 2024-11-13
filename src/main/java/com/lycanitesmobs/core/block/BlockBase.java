@@ -35,6 +35,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
+import static com.lycanitesmobs.core.item.LMBlocksGroup.blockNames;
+
 public class BlockBase extends BaseEntityBlock implements BlockTypeGetter {
 
     public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
@@ -68,6 +70,7 @@ public class BlockBase extends BaseEntityBlock implements BlockTypeGetter {
         super(properties);
         this.blockName = name;
         this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
+        blockNames.add(name);
     }
 
     @org.jetbrains.annotations.Nullable

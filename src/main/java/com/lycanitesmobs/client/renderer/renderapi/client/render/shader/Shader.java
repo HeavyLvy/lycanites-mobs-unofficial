@@ -1,7 +1,6 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render.shader;
 
 
-
 import com.lycanitesmobs.LycanitesMobs;
 
 import java.nio.FloatBuffer;
@@ -22,9 +21,20 @@ public class Shader {
             glAttachShader(id, v);
             glAttachShader(id, f);
             glLinkProgram(id);
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void uniform1i(String name, int value) {
+        bind();
+        int location = glGetUniformLocation(id, name);
+        if (location != -1) { // Check if the uniform location is valid
+            glUniform1i(location, value);
+        } else {
+            System.err.println("Could not find uniform variable '" + name + "' in shader program.");
+        }
+        unbind(); // Unbind after setting the uniform
     }
 
     public void bind() {

@@ -42,6 +42,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static com.lycanitesmobs.core.item.LMItemsGroup.itemNames;
+
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ObjectManager {
@@ -124,6 +126,7 @@ public class ObjectManager {
         RegistryObject<Item> item = LycanitesMobs.ITEMS.register(name, itemSupplier);
         //LycanitesMobs.ITEMS.register(name,item);
         items.put(name, item);
+        itemNames.add(name);
     }
 
     // ========== Tile Entity ==========
@@ -294,7 +297,6 @@ public class ObjectManager {
                     for (Map.Entry<String, Lazy<? extends BlockItem>> entry : ObjectManager.blockItems.entrySet()) {
                         String name = entry.getKey();
                         Supplier<? extends BlockItem> blockItem = entry.getValue();
-
                         LycanitesMobs.logDebug("Item", "Registering item block: " + name);
                         if (name == null) {
                             LycanitesMobs.logWarning("", "Block Item: " + name + " has no Registry Name!");

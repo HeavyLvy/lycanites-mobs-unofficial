@@ -1,28 +1,52 @@
 package com.lycanitesmobs.client.renderer;
 
+import java.nio.FloatBuffer;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.client.obj.Vertex;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
+import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.Shader;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 
 import static com.lycanitesmobs.LycanitesMobs.logError;
 import static com.lycanitesmobs.LycanitesMobs.logInfo;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_LEQUAL;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glDepthFunc;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL11C.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL20.*;
 
 public class VBOBatcher {
 
@@ -37,7 +61,7 @@ public class VBOBatcher {
         batchedDrawCommands.computeIfAbsent(renderType, k -> new LinkedList<>()).add(drawCommand);
     }
 
-    public void endBatches() {
+    public void endBatches(WorldBuffer worldBuffer) {
         batchedDrawCommands.forEach((renderType, drawCommands) -> {
             if (drawCommands.isEmpty()) {
                 return;
@@ -45,7 +69,7 @@ public class VBOBatcher {
 
             renderType.setupRenderState();
             for (VBODrawCommand drawCommand : drawCommands) {
-                drawCommand.draw();
+                drawCommand.draw(worldBuffer);
                 RenderSystem.setTextureMatrix(drawCommand.matrix);
             }
 
@@ -128,72 +152,94 @@ public class VBOBatcher {
             return this;
         }
 
-        public void draw() {
+        public void draw(WorldBuffer worldBuffer) {
+            if (true) return;
             try {
-                if (true) return;
-                RenderSystem.assertOnRenderThread();
+                Shader shader = worldBuffer.shader;
+                List<Vertex> vertices = worldBuffer.vertices;
+                int drawMode = worldBuffer.drawMode;
 
-                Minecraft.getInstance().getTextureManager().bindForSetup(texLocation);
+                // Bind buffers
+                BufferManager.bind();
+                BufferManager.bindBuffer();
 
-                RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
-                RenderSystem.setShaderColor(correctedColor(red), correctedColor(green), correctedColor(blue), correctedColor(alpha));
+                // Prepare and send vertex data
+                FloatBuffer buffer = getBuffer(vertices);
+                BufferManager.writeBuffer(buffer);
 
-                if (textureOffsetX != 0.0F || textureOffsetY != 0.0F) {
-                    Matrix4f textureMatrix = new Matrix4f().translation(textureOffsetX, textureOffsetY, 0.0F);
-                    RenderSystem.setTextureMatrix(textureMatrix);
-                }
+                glEnable(GL_DEPTH_TEST);
+                glDepthFunc(GL_LEQUAL);
 
-                RenderSystem.setShaderTexture(1, OverlayTexture.pack((int) overlayOffsetX, (int) overlayOffsetY));
-                RenderSystem.setShaderTexture(2, LightTexture.pack((int) lightOffsetX, (int) lightOffsetY));
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-                final int vao = GL30.glGenVertexArrays();
-                GL30.glBindVertexArray(vao);
+                shader.bind();
+                worldBuffer.applyProjectionMatrix();
 
-                RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> vbo);
+                // Set up vertex attribute pointers
+                int stride = 9 * Float.BYTES; // x, y, z, r, g, b, a, u, v
 
-                format.setupBufferState();
+                glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0); // Position
+                glEnableVertexAttribArray(0);
 
-                GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
-                int error = GL11.glGetError();
-                if (error != GL11.GL_NO_ERROR) {
-                    logError("Error after glDrawArrays: " + error);
-                }
+                glVertexAttribPointer(1, 4, GL_FLOAT, false, stride, 3 * Float.BYTES); // Color
+                glEnableVertexAttribArray(1);
 
-                format.clearBufferState();
-                RenderSystem.glBindBuffer(GL21.GL_ARRAY_BUFFER, () -> 0);
+                glVertexAttribPointer(2, 2, GL_FLOAT, false, stride, 7 * Float.BYTES); // Texture coords
+                glEnableVertexAttribArray(2);
+                glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0); // For position
 
-                GL30.glBindVertexArray(0);
-                GL30.glDeleteVertexArrays(vao);
+                glEnableVertexAttribArray(0);
+                glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES); // For color
+                glEnableVertexAttribArray(1);
+                // Bind texture
+                int textureId = loadTexture(texLocation);
+                glActiveTexture(GL_TEXTURE0);
+                GlStateManager._bindTexture(textureId);
+                GlStateManager._glUniform1i(GL_TEXTURE_2D, 0);
 
-                if (textureOffsetX != 0.0F || textureOffsetY != 0.0F) {
-                    RenderSystem.resetTextureMatrix();
-                }
+                // Draw
+                glDrawArrays(drawMode, 0, vertices.size());
 
+                // Cleanup
+                GL11.glBindTexture(GL_TEXTURE_2D, 0);
+                glDisableVertexAttribArray(0);
+                glDisableVertexAttribArray(1);
+                glDisableVertexAttribArray(2);
+
+                shader.unbind();
+                BufferManager.unbindBuffer();
+                BufferManager.unbind();
+
+                glDisable(GL_BLEND);
+                glDisable(GL_DEPTH_TEST);
+
+                vertices.clear();
             } catch (Exception e) {
                 logError("Exception in draw method: " + e.getMessage());
             }
-
-            flushBufferBuilder();
         }
 
-        private void flushBufferBuilder() {
-            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-
-            if (bufferBuilder.building()) {
-                try {
-                    BufferBuilder.RenderedBuffer renderedBuffer = bufferBuilder.end();
-
-                    VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
-                    vertexBuffer.upload(renderedBuffer);
-
-                    vertexBuffer.draw();
-                    vertexBuffer.close();
-                } catch (Exception e) {
-                    logError("Exception in flushBufferBuilder: " + e.getMessage());
-                }
+        public static int loadTexture(ResourceLocation textureLocation) {
+            TextureManager textureManager = Minecraft.getInstance().getTextureManager();
+            AbstractTexture texture = textureManager.getTexture(textureLocation);
+            if (texture == null) {
+                textureManager.register(textureLocation, new SimpleTexture(textureLocation));
+                texture = textureManager.getTexture(textureLocation);
             }
+            return texture.getId();
         }
 
+        private FloatBuffer getBuffer(List<Vertex> vertices) {
+            FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(vertices.size() * 9);
+            for (Vertex vertex : vertices) {
+                floatBuffer.put(vertex.getX()).put(vertex.getY()).put(vertex.getZ());
+                floatBuffer.put(vertex.getR()).put(vertex.getG()).put(vertex.getB()).put(vertex.getA());
+                //floatBuffer.put(vertex.getU()).put(vertex.getV());
+            }
+            floatBuffer.flip();
+            return floatBuffer;
+        }
 
     }
 }

@@ -22,6 +22,7 @@ import com.lycanitesmobs.core.item.special.ItemSoulstone;
 import com.lycanitesmobs.core.item.summoningstaff.*;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
@@ -30,6 +31,8 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
@@ -45,6 +48,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static com.lycanitesmobs.core.item.LMEquipmentPartsGroup.equipmentNames;
+
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ItemManager extends JSONLoader {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LycanitesMobs.MODID);
@@ -58,12 +63,17 @@ public class ItemManager extends JSONLoader {
     public static final CreativeModeTab.Builder creaturesGroups = LMCreaturesGroup.getBuilder();
     public static final RegistryObject<CreativeModeTab> creaturesTab = TABS.register(LycanitesMobs.MODID + ".creatures", creaturesGroups::build);
     public static final CreativeModeTab.Builder chargesGroup = LMChargesGroup.getBuilder();
-    public static final RegistryObject<CreativeModeTab> chargesTab = TABS.register(LycanitesMobs.MODID + ".charges", chargesGroup::build);
+    //public static final RegistryObject<CreativeModeTab> chargesTab = TABS.register(LycanitesMobs.MODID + ".charges", chargesGroup::build);
     public static final CreativeModeTab.Builder equipmentPartsGroup = LMEquipmentPartsGroup.getBuilder();
     public static final RegistryObject<CreativeModeTab> equipmentPartsTab = TABS.register(LycanitesMobs.MODID + ".equipmentparts", equipmentPartsGroup::build);
     public static final Map<String, Item.Properties> registryItems = new HashMap<>();
     public static ItemManager INSTANCE;
     public static Map<String, ItemInfo> items = new HashMap<>();
+
+    public static void register(IEventBus modEventBus) {
+        TABS.register(modEventBus);
+    }
+
     /**
      * A list of blocks that need to use the cutout renderer.
      **/
@@ -111,13 +121,15 @@ public class ItemManager extends JSONLoader {
         this.loadAllJson(modInfo, "Items", "items", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
         LycanitesMobs.logDebug("Items", "Complete! " + this.items.size() + " JSON Items Loaded In Total.");
     }
-	/*private static final DeferredRegister<Item> ITEM_DEFERRED_REGISTER = DeferredRegister.create(ForgeRegistries.ITEMS, LycanitesMobs.MODID);
+
+    /*private static final DeferredRegister<Item> ITEM_DEFERRED_REGISTER = DeferredRegister.create(ForgeRegistries.ITEMS, LycanitesMobs.MODID);
 
 
-	public static void registerItem(IEventBus event) {
-		ITEM_DEFERRED_REGISTER.register(event);
-		ITEM_DEFERRED_REGISTER.register("soulgazer", () -> new ItemSoulgazer(new Item.Properties()));
-	}*/
+    public static void registerItem(IEventBus event) {
+        ITEM_DEFERRED_REGISTER.register(event);
+        ITEM_DEFERRED_REGISTER.register("soulgazer", () -> new ItemSoulgazer(new Item.Properties()));
+    }*/
+
 
     @Override
     public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
@@ -139,19 +151,13 @@ public class ItemManager extends JSONLoader {
      * Called during early start up, loads all non-json items.
      **/
     public void loadItems() {
-
-        //CreativeModeTab.Builder itemTab = this.itemsGroup;
         Item.Properties itemProperties = new Item.Properties();
         Item.Properties itemPropertiesNoStack = new Item.Properties().stacksTo(1);
-        //registryItems.put("soulgazer", new ItemSoulgazer(itemPropertiesNoStack));
 
         ObjectManager.addItem("soulgazer", () -> new ItemSoulgazer(itemPropertiesNoStack));
         ObjectManager.addItem("soul_contract", () -> new ItemSoulContract(itemPropertiesNoStack));
         ObjectManager.addItem("mobtoken", () -> new ItemMobToken(new Item.Properties()));
         ObjectManager.addItem("soulstone", () -> new ItemSoulstone(itemProperties, null));
-		/*this.itemsGroup.displayItems((enabledFeatures, entries) -> {
-			entries.accept(this.item);
-		});*/
         // Equipment Pieces:
         Item.Properties equipmentProperties = new Item.Properties().stacksTo(1).setNoRepair();
         ObjectManager.addItem("equipment", () -> new ItemEquipment(equipmentProperties));
