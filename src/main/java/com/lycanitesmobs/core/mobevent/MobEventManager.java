@@ -236,7 +236,7 @@ public class MobEventManager extends JSONLoader {
         worldExt.lastEventUpdateTime = world.getGameTime();
 
         // Only Run If Players Are Present:
-        if (world.getPlayers().size() < 1) {
+        if (world.players().isEmpty()) {
             return;
         }
 
