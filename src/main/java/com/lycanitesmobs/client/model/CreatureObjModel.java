@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.entities;
+import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.getTextureId;
+import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper.precomputeColors;
 
 @OnlyIn(Dist.CLIENT)
 public class CreatureObjModel extends CreatureModel {
@@ -74,6 +76,7 @@ public class CreatureObjModel extends CreatureModel {
      * A list of all part definitions that this model will use when animating.
      **/
     public Map<String, AnimationPart> animationParts = new HashMap<>();
+    public Map<ObjPart, float[][]> colorCache = new HashMap<>();
 
     // Looking and Head:
     /**
@@ -160,6 +163,16 @@ public class CreatureObjModel extends CreatureModel {
         // Here a model should get its model, collect its parts into a list and then create ModelObjPart objects for each part.
     }
 
+    private boolean colorsPrecomputed = false;
+
+    public boolean areColorsPrecomputed() {
+        return colorsPrecomputed;
+    }
+
+    public void setColorsPrecomputed(boolean precomputed) {
+        this.colorsPrecomputed = precomputed;
+    }
+
     /**
      * Initializes this model, loading model data, etc.
      *
@@ -170,11 +183,10 @@ public class CreatureObjModel extends CreatureModel {
      */
     public CreatureObjModel initModel(String name, ModInfo modInfo, String path) {
         // Check If Enabled:
-        CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(name);
+        /*CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(name);
         if (creatureInfo != null && !creatureInfo.enabled) {
             return this;
-        }
-
+        }*/
         // Load Obj Model:
         this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "models/" + path + ".obj"));
         this.objParts = this.objModel.objParts;

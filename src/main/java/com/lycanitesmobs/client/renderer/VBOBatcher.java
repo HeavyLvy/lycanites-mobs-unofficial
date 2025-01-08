@@ -154,70 +154,7 @@ public class VBOBatcher {
 
         public void draw(WorldBuffer worldBuffer) {
             if (true) return;
-            try {
-                Shader shader = worldBuffer.shader;
-                List<Vertex> vertices = worldBuffer.vertices;
-                int drawMode = worldBuffer.drawMode;
-
-                // Bind buffers
-                BufferManager.bind();
-                BufferManager.bindBuffer();
-
-                // Prepare and send vertex data
-                FloatBuffer buffer = getBuffer(vertices);
-                BufferManager.writeBuffer(buffer);
-
-                glEnable(GL_DEPTH_TEST);
-                glDepthFunc(GL_LEQUAL);
-
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-                shader.bind();
-                worldBuffer.applyProjectionMatrix();
-
-                // Set up vertex attribute pointers
-                int stride = 9 * Float.BYTES; // x, y, z, r, g, b, a, u, v
-
-                glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0); // Position
-                glEnableVertexAttribArray(0);
-
-                glVertexAttribPointer(1, 4, GL_FLOAT, false, stride, 3 * Float.BYTES); // Color
-                glEnableVertexAttribArray(1);
-
-                glVertexAttribPointer(2, 2, GL_FLOAT, false, stride, 7 * Float.BYTES); // Texture coords
-                glEnableVertexAttribArray(2);
-                glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0); // For position
-
-                glEnableVertexAttribArray(0);
-                glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES); // For color
-                glEnableVertexAttribArray(1);
-                // Bind texture
-                int textureId = loadTexture(texLocation);
-                glActiveTexture(GL_TEXTURE0);
-                GlStateManager._bindTexture(textureId);
-                GlStateManager._glUniform1i(GL_TEXTURE_2D, 0);
-
-                // Draw
-                glDrawArrays(drawMode, 0, vertices.size());
-
-                // Cleanup
-                GL11.glBindTexture(GL_TEXTURE_2D, 0);
-                glDisableVertexAttribArray(0);
-                glDisableVertexAttribArray(1);
-                glDisableVertexAttribArray(2);
-
-                shader.unbind();
-                BufferManager.unbindBuffer();
-                BufferManager.unbind();
-
-                glDisable(GL_BLEND);
-                glDisable(GL_DEPTH_TEST);
-
-                vertices.clear();
-            } catch (Exception e) {
-                logError("Exception in draw method: " + e.getMessage());
-            }
+            //not implemented
         }
 
         public static int loadTexture(ResourceLocation textureLocation) {

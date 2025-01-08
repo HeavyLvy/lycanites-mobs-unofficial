@@ -1,14 +1,11 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render.buffer;
 
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.obj.Vector3o;
 import com.lycanitesmobs.client.obj.Vertex;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.Shader;
-import com.lycanitesmobs.core.util.LMHelperClass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -18,7 +15,6 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper.loadTexture;
 import static org.lwjgl.opengl.GL33.*;
 
 public class WorldBuffer {
@@ -43,7 +39,6 @@ public class WorldBuffer {
     }
 
     public void vert(float x, float y, float z, float r, float g, float b, float a) {
-        // Subtract camera position for view-relative coordinates
         vertices.add(new Vertex(x - (float) cameraPos.x, y - (float) cameraPos.y, z - (float) cameraPos.z, r, g, b, a));
     }
 

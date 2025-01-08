@@ -1,31 +1,23 @@
 package com.lycanitesmobs.client.renderer.renderapi.client.render;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.model.AnimationPart;
 import com.lycanitesmobs.client.model.CreatureObjModel;
 import com.lycanitesmobs.client.model.CreatureObjModelOld;
-import com.lycanitesmobs.client.model.creature.ModelAbaia;
-import com.lycanitesmobs.client.model.creature.ModelBobeko;
-import com.lycanitesmobs.client.obj.ObjPart;
-import com.lycanitesmobs.client.renderer.VBOBatcher;
+import com.lycanitesmobs.client.model.creature.TestModel;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.ShaderManager;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.util.ContextUtils;
-import com.lycanitesmobs.core.util.LMHelperClass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -37,7 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper.precomputeColors;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
@@ -60,6 +52,8 @@ public class RenderAPIEvents {
         }
     }
 
+    public static CreatureObjModel testModel = new TestModel();
+
     @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeAPIEvents {
         @SubscribeEvent
@@ -70,10 +64,6 @@ public class RenderAPIEvents {
             if (player == null) {
                 return;
             }
-            if (player.getMainHandItem().getItem() != Items.ANVIL) {
-                return;
-            }
-
             var poseStack = event.getPoseStack();
             Matrix4f projectionMatrix = event.getProjectionMatrix();
             Matrix4f viewMatrix = event.getPoseStack().last().pose();
@@ -82,6 +72,16 @@ public class RenderAPIEvents {
             frustum.prepare(player.getX(), player.getY(), player.getZ());
             Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
             final double extend = 25.0;
+
+
+            /*if (player.getMainHandItem().getItem() == Items.APPLE) {
+                // This is the test method for the test model
+                RenderHelper.renderModel(buffer, testModel, poseStack);
+            }*/
+            if (player.getMainHandItem().getItem() != Items.ANVIL) {
+                return;
+            }
+
             Iterator<Map.Entry<Integer, CreatureObjModel>> iterator = entities.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<Integer, CreatureObjModel> entityMap = iterator.next();
@@ -97,39 +97,30 @@ public class RenderAPIEvents {
                 if (entity instanceof BaseCreatureEntity baseCreature) {
                     if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
                         entityMap.getValue().generateAnimationFrames(context.entity, context.time, context.distance, context.loop, context.lookY, context.lookX, context.scale, context.brightness);
-
-                        RenderHelper.renderModel(buffer, entityMap.getValue(), color, baseCreature);
-
-                        //VBOBatcher.getInstance().endBatches(buffer);
+                        var objModel = entityMap.getValue();
+                        if (!objModel.areColorsPrecomputed()) {
+                            ResourceLocation texture = context.texture;
+                            int textureID = getTextureId(texture);
+                            precomputeColors(objModel, textureID);
+                            objModel.setColorsPrecomputed(true);
+                        }
+                        RenderHelper.renderModel(buffer, entityMap.getValue(), baseCreature);
                         entityMap.getValue().clearAnimationFrames();
-
                     }
                 }
             }
-
-            // Render legacy models
-    /*
-    Iterator<Map.Entry<Integer, CreatureObjModelOld>> legacyIterator = entitiesLegacy.entrySet().iterator();
-    while (legacyIterator.hasNext()) {
-        Map.Entry<Integer, CreatureObjModelOld> entityMap = legacyIterator.next();
-        Entity entity = player.level().getEntity(entityMap.getKey());
-        if (entity == null) {
-            legacyIterator.remove();
-            continue;
-        }
-        if (entity instanceof BaseCreatureEntity baseCreature) {
-            if (frustum.isVisible(entity.getBoundingBox().inflate(extend))) {
-                var context = animationContexts.get(entityMap.getKey());
-                entityMap.getValue().generateAnimationFrames(context.entity, context.time, context.distance, context.loop, context.lookY, context.lookX, context.scale, context.brightness);
-                RenderHelper.renderLegacyModel(buffer, entityMap.getValue(), color, baseCreature);
-                entityMap.getValue().clearAnimationFrames();
-            }
-        }
-    }
-    */
-
             RenderHelper.endTri(buffer);
         }
 
+    }
+
+    public static int getTextureId(ResourceLocation texture) {
+        TextureManager textureManager = Minecraft.getInstance().getTextureManager();
+        AbstractTexture abstractTexture = textureManager.getTexture(texture);
+        if (abstractTexture == null) {
+            textureManager.register(texture, new SimpleTexture(texture));
+            abstractTexture = textureManager.getTexture(texture);
+        }
+        return abstractTexture.getId();
     }
 }
