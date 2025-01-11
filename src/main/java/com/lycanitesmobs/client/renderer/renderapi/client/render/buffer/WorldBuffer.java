@@ -54,71 +54,59 @@ public class WorldBuffer {
     }
 
     public void draw() {
+        if (vertices.isEmpty()) {
+            return;
+        }
+
         BufferManager.bind();
         BufferManager.bindBuffer();
 
-        FloatBuffer buffer = getBuffer();
-        BufferManager.writeBuffer(buffer);
+        BufferManager.writeBuffer(getBuffer());
 
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        setupOpenGLState();
 
         applyProjectionMatrix();
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0); // For position
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES); // For color
-        glEnableVertexAttribArray(1);
+        configureVertexAttributes();
 
-/*
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0);         // Position
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES); // Color
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(2, 2, GL_FLOAT, false, 7 * Float.BYTES, 7 * Float.BYTES); // Texture Coord
-        glEnableVertexAttribArray(2);*/
         if (shader != null) {
             shader.bind();
             glDrawArrays(drawMode, 0, vertices.size());
             shader.unbind();
         }
 
-        /*if (shader != null) {
-            var location = new ResourceLocation(LycanitesMobs.MODID, "textures/entity/bobeko.png");
-            int textureID = loadTexture(location);
-            glBindTexture(GL_TEXTURE_2D, textureID);
-            shader.bind();
-            shader.uniform1i("u_texture", 0);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, textureID);
+        resetOpenGLState();
 
-            glDrawArrays(drawMode, 0, vertices.size());
-            shader.unbind();
-        }
-*/
         BufferManager.unbindBuffer();
         BufferManager.unbind();
-
-        glDisable(GL_BLEND);
-        glDisable(GL_DEPTH_TEST);
 
         vertices.clear();
     }
 
+    private void setupOpenGLState() {
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
 
-    /*public FloatBuffer getBuffer() {
-        FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(vertices.size() * 9);
-        for (Vertex vertex : vertices) {
-            floatBuffer.put(vertex.getX()).put(vertex.getY()).put(vertex.getZ());
-            floatBuffer.put(vertex.getR()).put(vertex.getG()).put(vertex.getB()).put(vertex.getA());
-            //floatBuffer.put(vertex.getU()).put(vertex.getV());
-        }
-        floatBuffer.flip();
-        return floatBuffer;
-    }*/
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    private void configureVertexAttributes() {
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0); // Position
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES); // Color (including alpha)
+        glEnableVertexAttribArray(1);
+    }
+
+    private void resetOpenGLState() {
+        glDisable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+    }
+
 
     public FloatBuffer getBuffer() {
         FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(vertices.size() * 7);

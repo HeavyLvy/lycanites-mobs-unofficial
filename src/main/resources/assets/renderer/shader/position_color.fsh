@@ -5,7 +5,7 @@ in vec4 vertexColor;
 out vec4 fragmentColor;
 
 void main() {
-    if (vertexColor.a == 0.0f) {
+    if (vertexColor.a < 0.01f) {
         discard;
     }
     fragmentColor = vertexColor;

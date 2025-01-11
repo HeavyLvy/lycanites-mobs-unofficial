@@ -24,6 +24,8 @@ import java.lang.Math;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import static com.lycanitesmobs.client.model.CreatureObjModel.MODEL_OFFSET_POS_Y;
+import static com.lycanitesmobs.client.model.CreatureObjModel.MODEL_OFFSET_ROT_X;
 import static org.lwjgl.opengl.GL33.*;
 
 
@@ -151,7 +153,6 @@ public class RenderHelper {
             if (cachedColors == null) {
                 continue;
             }
-
             poseStack.pushPose();
 
             AnimationPart animationPart = objModel.animationParts.get(part.getName().toLowerCase());
@@ -177,7 +178,6 @@ public class RenderHelper {
                     );
                 }
             }
-
             poseStack.popPose();
         }
 
@@ -238,6 +238,80 @@ public class RenderHelper {
 
         return new float[]{r, g, b, a};
     }
+
+    /**
+     * Logs the color at a given texture coordinate on a PNG texture.
+     *
+     * @param textureID The OpenGL texture ID.
+     * @param texCoord  The texture coordinate (normalized between 0 and 1).
+     */
+    public static void logColorAtTexCoord(int textureID, Vector2f texCoord) {
+        glBindTexture(GL_TEXTURE_2D, textureID);
+
+        // Get texture dimensions
+        int width = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH);
+        int height = glGetTexLevelParameteri(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT);
+
+        if (width == 0 || height == 0) {
+            LMHelperClass.logInfoMessage("Failed to retrieve texture dimensions for texture ID: " + textureID);
+            return;
+        }
+
+        // Read the texture data
+        ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4); // RGBA = 4 bytes per pixel
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+        // Calculate pixel position
+        int x = (int) (texCoord.x * (width - 1));
+        int y = (int) (texCoord.y * (height - 1));
+        int pixelIndex = (y * width + x) * 4;
+
+        // Retrieve color values
+        float r = (buffer.get(pixelIndex) & 0xFF) / 255.0f;
+        float g = (buffer.get(pixelIndex + 1) & 0xFF) / 255.0f;
+        float b = (buffer.get(pixelIndex + 2) & 0xFF) / 255.0f;
+        float a = (buffer.get(pixelIndex + 3) & 0xFF) / 255.0f;
+
+        // Determine general color name
+        String colorName = determineColorName(r, g, b);
+
+        // Log the color
+        LMHelperClass.logInfoMessage(String.format(
+                "Color at texCoord (%.2f, %.2f): R=%.2f, G=%.2f, B=%.2f, A=%.2f - %s",
+                texCoord.x, texCoord.y, r, g, b, a, colorName
+        ));
+    }
+
+    /**
+     * Determines a general color name based on RGB values.
+     *
+     * @param r Red component (0.0 - 1.0).
+     * @param g Green component (0.0 - 1.0).
+     * @param b Blue component (0.0 - 1.0).
+     * @return A general color name.
+     */
+    private static String determineColorName(float r, float g, float b) {
+        if (r > 0.8f && g < 0.2f && b < 0.2f) {
+            return "Red";
+        } else if (g > 0.8f && r < 0.2f && b < 0.2f) {
+            return "Green";
+        } else if (b > 0.8f && r < 0.2f && g < 0.2f) {
+            return "Blue";
+        } else if (r > 0.8f && g > 0.8f && b < 0.2f) {
+            return "Yellow";
+        } else if (r > 0.8f && b > 0.8f && g < 0.2f) {
+            return "Magenta";
+        } else if (g > 0.8f && b > 0.8f && r < 0.2f) {
+            return "Cyan";
+        } else if (r > 0.6f && g > 0.6f && b > 0.6f) {
+            return "White";
+        } else if (r < 0.2f && g < 0.2f && b < 0.2f) {
+            return "Black";
+        } else {
+            return "Unknown";
+        }
+    }
+
 
     public static void renderLegacyModel(WorldBuffer buffer, CreatureObjModelOld objModel, Vector4f color, BaseCreatureEntity entity) {
         PoseStack poseStack = new PoseStack();
