@@ -137,12 +137,14 @@ public class RenderHelper {
         var minecraft = Minecraft.getInstance();
         var cameraYRot = minecraft.getCameraEntity().yRot;
         var cameraXRot = minecraft.getCameraEntity().xRot;
-
         poseStack.pushPose();
-        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yRot - cameraYRot));
-        poseStack.mulPose(Axis.XP.rotationDegrees(cameraXRot - entity.xRot));
-        poseStack.pushPose();
-        poseStack.mulPose(Axis.YP.rotationDegrees(-entity.yBodyRot));
+        // poseStack.mulPose(Axis.YP.rotationDegrees(0));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-cameraYRot));
+        poseStack.mulPose(Axis.XP.rotationDegrees(cameraXRot));
+        poseStack.mulPose(Axis.YP.rotationDegrees(180));
+        var rot = -entity.yBodyRot;
+        //LMHelperClass.logInfoMessageOnce("yrot: " + rot);
+        poseStack.mulPose(Axis.YP.rotationDegrees(rot));
 
         for (ObjPart part : objModel.objParts) {
             if (part.mesh == null) {
@@ -180,8 +182,6 @@ public class RenderHelper {
             }
             poseStack.popPose();
         }
-
-        poseStack.popPose();
         poseStack.popPose();
 
         buffer.draw();

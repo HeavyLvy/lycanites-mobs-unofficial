@@ -66,9 +66,12 @@ public class RenderAPIEvents {
         @SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
             if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
-
+            //if (true) return;
             var player = Minecraft.getInstance().player;
             if (player == null) {
+                return;
+            }
+            if (player.getMainHandItem().getItem() != Items.ANVIL) {
                 return;
             }
             var poseStack = event.getPoseStack();
@@ -77,7 +80,6 @@ public class RenderAPIEvents {
             WorldBuffer buffer = RenderHelper.startTri(projectionMatrix, viewMatrix);
             Frustum frustum = event.getFrustum();
             frustum.prepare(player.getX(), player.getY(), player.getZ());
-            Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
             final double extend = 25.0;
 
 
@@ -85,10 +87,8 @@ public class RenderAPIEvents {
                 // This is the test method for the test model
                 RenderHelper.renderModel(buffer, testModel, poseStack);
             }*/
-            if (player.getMainHandItem().getItem() != Items.ANVIL) {
-                return;
-            }
 
+            // poseStack.pushPose();
             Iterator<Map.Entry<Integer, CreatureObjModel>> iterator = entities.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<Integer, CreatureObjModel> entityMap = iterator.next();
@@ -117,6 +117,8 @@ public class RenderAPIEvents {
                 }
             }
             RenderHelper.endTri(buffer);
+
+            //poseStack.popPose();
         }
 
         /**
