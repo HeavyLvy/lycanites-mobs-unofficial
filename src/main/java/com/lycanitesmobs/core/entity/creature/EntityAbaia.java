@@ -25,11 +25,11 @@ public class EntityAbaia extends TameableCreatureEntity implements Enemy {
     protected short aoeAttackTick = 0;
 
     // ==================================================
- 	//                    Constructor
- 	// ==================================================
+    //                    Constructor
+    // ==================================================
     public EntityAbaia(EntityType<? extends EntityAbaia> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEFINED;
         this.spawnsOnLand = false;
@@ -40,7 +40,6 @@ public class EntityAbaia extends TameableCreatureEntity implements Enemy {
         this.canGrow = true;
         this.setupMob();
     }
-
 
 
     // ========== Init AI ==========
@@ -54,95 +53,103 @@ public class EntityAbaia extends TameableCreatureEntity implements Enemy {
     // ==================================================
     //                      Updates
     // ==================================================
-	// ========== Living Update ==========
-	@Override
+    // ========== Living Update ==========
+    @Override
     public void aiStep() {
         super.aiStep();
 
         // Static Aura Attack:
-        if(!this.getCommandSenderWorld().isClientSide && this.hasAttackTarget() && ++this.aoeAttackTick == (this.isPetType("familiar") ? 100 : 40)) {
+        if (!this.getCommandSenderWorld().isClientSide && this.hasAttackTarget() && ++this.aoeAttackTick == (this.isPetType("familiar") ? 100 : 40)) {
             this.aoeAttackTick = 0;
-            List aoeTargets = this.getNearbyEntities(LivingEntity.class, null, 4);
-            for(Object entityObj : aoeTargets) {
-                LivingEntity target = (LivingEntity)entityObj;
-                if(target != this && this.canAttackType(target.getType()) && this.canAttack(target) && this.getSensing().hasLineOfSight(target) && (target.isInWater() || this.isRareVariant())) {
+            List aoeTargets = this.getNearbyEntities(LivingEntity.class, e -> true, 4);
+            for (Object entityObj : aoeTargets) {
+                LivingEntity target = (LivingEntity) entityObj;
+                if (target != this && this.canAttackType(target.getType()) && this.canAttack(target) && this.getSensing().hasLineOfSight(target) && (target.isInWater() || this.isRareVariant())) {
                     //target.hurt(ElementDamageSource.causeElementDamage(this, ElementManager.getInstance().getElement("lightning")), this.getAttackDamage(1));
                 }
             }
         }
 
         // Particles:
-        if(this.getCommandSenderWorld().isClientSide && this.hasAttackTarget()) {
+        if (this.getCommandSenderWorld().isClientSide && this.hasAttackTarget()) {
             this.getCommandSenderWorld().addParticle(ParticleTypes.CRIT, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
 
-            List aoeTargets = this.getNearbyEntities(LivingEntity.class, null, 4);
-            for(Object entityObj : aoeTargets) {
-                LivingEntity target = (LivingEntity)entityObj;
-                if(this.canAttackType(target.getType()) && this.canAttack(target) && this.getSensing().hasLineOfSight(target)) {
+            List<LivingEntity> aoeTargets = this.getNearbyEntities(LivingEntity.class, (e) -> true, 4);
+            for (Object entityObj : aoeTargets) {
+                LivingEntity target = (LivingEntity) entityObj;
+                if (this.canAttackType(target.getType()) && this.canAttack(target) && this.getSensing().hasLineOfSight(target)) {
                     this.getCommandSenderWorld().addParticle(ParticleTypes.CRIT, target.position().x() + (this.random.nextDouble() - 0.5D) * (double) target.getDimensions(Pose.STANDING).width, target.position().y() + this.random.nextDouble() * (double) target.getDimensions(Pose.STANDING).height, target.position().z() + (this.random.nextDouble() - 0.5D) * (double) target.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
                 }
             }
         }
     }
 
-	
+
     // ==================================================
     //                      Movement
     // ==================================================
-	// Pathing Weight:
-	@Override
-	public float getBlockPathWeight(int x, int y, int z) {
+    // Pathing Weight:
+    @Override
+    public float getBlockPathWeight(int x, int y, int z) {
         int waterWeight = 10;
 
         Block block = this.getCommandSenderWorld().getBlockState(new BlockPos(x, y, z)).getBlock();
-        if(block == Blocks.WATER)
+        if (block == Blocks.WATER)
             return (super.getBlockPathWeight(x, y, z) + 1) * (waterWeight + 1);
-        if(this.getCommandSenderWorld().isRaining() && this.getCommandSenderWorld().canSeeSkyFromBelowWater(new BlockPos(x, y, z)))
+        if (this.getCommandSenderWorld().isRaining() && this.getCommandSenderWorld().canSeeSkyFromBelowWater(new BlockPos(x, y, z)))
             return (super.getBlockPathWeight(x, y, z) + 1) * (waterWeight + 1);
 
-        if(this.getTarget() != null)
+        if (this.getTarget() != null)
             return super.getBlockPathWeight(x, y, z);
-        if(this.waterContact())
+        if (this.waterContact())
             return -999999.0F;
 
         return super.getBlockPathWeight(x, y, z);
     }
-	
-	// Swimming:
-	@Override
-	public boolean isStrongSwimmer() {
-		return true;
-	}
-	
-	// Walking:
-	@Override
-	public boolean canWalk() {
-		return false;
-	}
+
+    // Swimming:
+    @Override
+    public boolean isStrongSwimmer() {
+        return true;
+    }
+
+    // Walking:
+    @Override
+    public boolean canWalk() {
+        return false;
+    }
 
     // ==================================================
     //                     Equipment
     // ==================================================
     @Override
-    public int getNoBagSize() { return 0; }
+    public int getNoBagSize() {
+        return 0;
+    }
+
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() {
+        return this.creatureInfo.bagSize;
+    }
     // ==================================================
-   	//                     Immunities
-   	// ==================================================
+    //                     Immunities
+    // ==================================================
     // ========== Damage ==========
-    /** Returns whether or not the given damage type is applicable, if not no damage will be taken. **/
+
+    /**
+     * Returns whether or not the given damage type is applicable, if not no damage will be taken.
+     **/
     public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if("lightning".equalsIgnoreCase(type))
+        if ("lightning".equalsIgnoreCase(type))
             return false;
         return super.isVulnerableTo(type, source, damage);
     }
-    
+
     @Override
     public boolean canBreatheUnderwater() {
         return true;
     }
-    
+
     @Override
     public boolean canBreatheAir() {
         return false;

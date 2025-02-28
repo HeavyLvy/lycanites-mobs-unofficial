@@ -22,7 +22,9 @@ import org.lwjgl.BufferUtils;
 import java.awt.*;
 import java.lang.Math;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.lycanitesmobs.client.model.CreatureObjModel.MODEL_OFFSET_POS_Y;
 import static com.lycanitesmobs.client.model.CreatureObjModel.MODEL_OFFSET_ROT_X;
@@ -187,8 +189,9 @@ public class RenderHelper {
         buffer.draw();
     }
 
-
     public static void precomputeColors(CreatureObjModel objModel, int textureID) {
+        Map<Vector2f, float[]> colorCache = new HashMap<>();
+
         for (ObjPart part : objModel.objParts) {
             if (part.mesh == null) {
                 continue;
@@ -206,7 +209,14 @@ public class RenderHelper {
 
             for (int i = 0; i < indices.length; i++) {
                 Vector2f texCoord = texCoords.get(indices[i]);
-                colors[i] = readColorAtTexCoord(textureID, texCoord);
+
+                float[] cachedColor = colorCache.get(texCoord);
+                if (cachedColor == null) {
+                    cachedColor = readColorAtTexCoord(textureID, texCoord);
+                    colorCache.put(texCoord, cachedColor);
+                }
+
+                colors[i] = cachedColor;
             }
 
             objModel.colorCache.put(part, colors);
