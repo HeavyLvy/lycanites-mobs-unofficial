@@ -4,6 +4,7 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.info.ModInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +38,7 @@ import java.util.List;
 
 import static com.lycanitesmobs.core.item.LMBlocksGroup.blockNames;
 
-public class BlockBase extends BaseEntityBlock implements BlockTypeGetter {
+public class BlockBase extends Block implements BlockTypeGetter {
 
     public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
     // Properties:
@@ -74,7 +75,7 @@ public class BlockBase extends BaseEntityBlock implements BlockTypeGetter {
     }
 
     @org.jetbrains.annotations.Nullable
-    @Override
+    /*@Override*/
     public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
         return null;
     }
