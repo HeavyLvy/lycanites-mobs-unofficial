@@ -55,8 +55,8 @@ public class DrawHelper {
         this.drawString(matrixStack, text, x, y, color, false);
     }
 
-    public void drawCenteredString(GuiGraphics p_238471_0_, Font p_238471_1_, Component p_238471_2_, int p_238471_3_, int p_238471_4_, int p_238471_5_) {
-        draw(p_238471_0_, String.valueOf(p_238471_2_), (float) (p_238471_3_ - p_238471_1_.width(p_238471_2_) / 2), (float) p_238471_4_, p_238471_5_);
+    public void drawCenteredString(GuiGraphics g, Font f, Component text, int x, int y, int color) {
+        g.drawString(f, text, x - f.width(text) / 2, y, color, false);
     }
 
     public void drawStringCentered(GuiGraphics matrixStack, String text, int x, int y, int color, boolean shadow) {
@@ -75,15 +75,11 @@ public class DrawHelper {
         return this.getFontRenderer().drawInBatch(string, p_238421_3_, p_238421_4_, p_238421_5_, true, guiGraphics.pose().last().pose(), guiGraphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
     }
 
-    public void drawStringWrapped(GuiGraphics guiGraphics, String text, int x, int y, int wrapWidth, int color, boolean shadow) {
-        List<FormattedCharSequence> textLines = this.getFontRenderer().split(FormattedText.of(text), wrapWidth);
+    public void drawStringWrapped(GuiGraphics g, String text, int x, int y, int wrapWidth, int color, boolean shadow) {
+        List<FormattedCharSequence> lines = this.getFontRenderer().split(Component.literal(text), wrapWidth);
         int lineY = y;
-        for (FormattedCharSequence textLine : textLines) {
-            if (shadow) {
-                this.drawShadow(guiGraphics, textLine.toString(), x, lineY, color);
-            } else {
-                this.draw(guiGraphics, textLine.toString(), x, lineY, color);
-            }
+        for (FormattedCharSequence line : lines) {
+            g.drawString(this.getFontRenderer(), line, x, lineY, color, shadow);
             lineY += 10;
         }
     }
