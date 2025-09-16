@@ -62,7 +62,7 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
         if (pet.isFollowing() && !pet.isSitting()) {
             button.active = false;
         }
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         buttonText = Component.translatable("gui.pet.wander").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
@@ -70,7 +70,7 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
         if (!pet.isFollowing() && !pet.isSitting()) {
             button.active = false;
         }
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         buttonText = Component.translatable("gui.pet.sit").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
@@ -78,7 +78,7 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
         if (!pet.isFollowing() && pet.isSitting()) {
             button.active = false;
         }
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         buttonText = Component.translatable("gui.pet.passive").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
@@ -86,7 +86,7 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
         if (pet.isPassive()) {
             button.active = false;
         }
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         buttonText = Component.translatable("gui.pet.defensive").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
@@ -94,7 +94,7 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
         if (!pet.isPassive() && !pet.isAssisting() && !pet.isAggressive()) {
             button.active = false;
         }
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         buttonText = Component.translatable("gui.pet.assist").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
@@ -102,7 +102,7 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
         if (!pet.isPassive() && pet.isAssisting() && !pet.isAggressive()) {
             button.active = false;
         }
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         buttonText = Component.translatable("gui.pet.aggressive").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
@@ -110,11 +110,11 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
         if (!pet.isPassive() && pet.isAggressive()) {
             button.active = false;
         }
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         buttonText = Component.translatable("gui.pet.pvp").append(": ").append(pet.isPVP() ? Component.translatable("common.yes") : Component.translatable("common.no")).getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
-        this.addWidget(new ButtonBase(BaseCreatureEntity.PET_COMMAND_ID.PVP.id, buttonX + buttonSpacing, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), this));
+        this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.PET_COMMAND_ID.PVP.id, buttonX + buttonSpacing, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), this));
     }
 
     @Override

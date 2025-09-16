@@ -22,14 +22,21 @@ import net.minecraft.world.entity.player.Player;
 
 public abstract class BeastiaryScreen extends BaseScreen {
     public enum Page {
-        INDEX((byte)0), CREATURES((byte)1), PETS((byte)2), SUMMONING((byte)3), ELEMENTS((byte)4);
+        INDEX((byte) 0), CREATURES((byte) 1), PETS((byte) 2), SUMMONING((byte) 3), ELEMENTS((byte) 4);
         public byte id;
-        Page(byte i) { id = i; }
+
+        Page(byte i) {
+            id = i;
+        }
     }
 
-    /** A snapshot of the users GUI Scale setting so it can be restored on closing the Beastiary. **/
+    /**
+     * A snapshot of the users GUI Scale setting so it can be restored on closing the Beastiary.
+     **/
     static int OPENED_GUI_SCALE;
-    /** Set to true when any Beastiary GUI is active in order to prevent the GUI Scaling going out of sync. **/
+    /**
+     * Set to true when any Beastiary GUI is active in order to prevent the GUI Scaling going out of sync.
+     **/
     static boolean GUI_ACTIVE;
 
     public Minecraft mc;
@@ -66,6 +73,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
 
     /**
      * Constructor
+     *
      * @param player The player to create the GUI instance for.
      */
     public BeastiaryScreen(Player player) {
@@ -99,14 +107,14 @@ public abstract class BeastiaryScreen extends BaseScreen {
 
     @Override
     public void init() {
-        super.init();
-        if(this.scaledResolution == null) {
+        // 1) Make sure scaledResolution is set
+        if (this.scaledResolution == null) {
             this.scaledResolution = this.mc.getWindow();
         }
 
         this.zLevel = -1000F;
 
-        // Main Window:
+        // 2) Compute geometry first
         this.windowWidth = this.getScaledX(0.95F);
         this.windowHeight = this.getScaledY(0.95F);
         this.halfX = this.windowWidth / 2;
@@ -116,7 +124,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
         this.centerX = this.windowX + (this.windowWidth / 2);
         this.centerY = this.windowY + (this.windowHeight / 2);
 
-        // Left Column:
+        // columns...
         this.colLeftX = this.windowX + this.getScaledX(80F / 1920F);
         this.colLeftY = this.windowY + this.getScaledY(460F / 1080F);
         this.colLeftWidth = this.getScaledX(320F / 1920F);
@@ -124,41 +132,44 @@ public abstract class BeastiaryScreen extends BaseScreen {
         this.colLeftCenterX = this.colLeftX + Math.round(this.colLeftWidth / 2);
         this.colLeftCenterY = this.colLeftY + Math.round(this.colLeftHeight / 2);
 
-        // Right Column:
         this.colRightX = this.windowX + this.getScaledX(480F / 1920F);
         this.colRightY = this.windowY + this.getScaledY(420F / 1080F);
         this.colRightWidth = this.getScaledX(1260F / 1920F);
         this.colRightHeight = this.getScaledX(400F / 1080F);
         this.colRightCenterX = this.colRightX + Math.round(this.colRightWidth / 2);
         this.colRightCenterY = this.colRightY + Math.round(this.colRightHeight / 2);
+
+        // 3) Now let BaseScreen set drawHelper and call initWidgets()
+        super.init();
     }
+
 
     @Override
     protected void initWidgets() {
         int menuPadding = 6;
-        int menuX = this.centerX - Math.round((float)this.windowWidth / 2) + menuPadding;
+        int menuX = this.centerX - Math.round((float) this.windowWidth / 2) + menuPadding;
         int menuY = this.windowY + menuPadding;
         int menuWidth = this.windowWidth - (menuPadding * 2);
 
         int buttonCount = 5;
         int buttonPadding = 2;
         int buttonX = menuX + buttonPadding;
-        int buttonWidth = Math.round((float)(menuWidth / buttonCount)) - (buttonPadding * 2);
+        int buttonWidth = Math.round((float) (menuWidth / buttonCount)) - (buttonPadding * 2);
         int buttonWidthPadded = buttonWidth + (buttonPadding * 2);
         int buttonHeight = 20;
         ButtonBase button;
 
         // Top Menu:
         button = new ButtonBase(Page.INDEX.id, buttonX + (buttonWidthPadded * this.renderables.size()), menuY, buttonWidth, buttonHeight, Component.translatable("gui.beastiary.index.title"), this);
-        this.addWidget(button);
+        this.addRenderableWidget(button);
         button = new ButtonBase(Page.CREATURES.id, buttonX + (buttonWidthPadded * this.renderables.size()), menuY, buttonWidth, buttonHeight, Component.translatable("gui.beastiary.creatures"), this);
-        this.addWidget(button);
+        this.addRenderableWidget(button);
         button = new ButtonBase(Page.PETS.id, buttonX + (buttonWidthPadded * this.renderables.size()), menuY, buttonWidth, buttonHeight, Component.translatable("gui.beastiary.pets"), this);
-        this.addWidget(button);
+        this.addRenderableWidget(button);
         button = new ButtonBase(Page.SUMMONING.id, buttonX + (buttonWidthPadded * this.renderables.size()), menuY, buttonWidth, buttonHeight, Component.translatable("gui.beastiary.summoning"), this);
-        this.addWidget(button);
+        this.addRenderableWidget(button);
         button = new ButtonBase(Page.ELEMENTS.id, buttonX + (buttonWidthPadded * this.renderables.size()), menuY, buttonWidth, buttonHeight, Component.translatable("gui.beastiary.elements"), this);
-        this.addWidget(button);
+        this.addRenderableWidget(button);
     }
 
     @Override
@@ -175,23 +186,24 @@ public abstract class BeastiaryScreen extends BaseScreen {
 
     /**
      * Called when a GUI button is interacted with.
+     *
      * @param buttonId The button that was interacted with.
      */
     @Override
     public void actionPerformed(int buttonId) {
-        if(buttonId == Page.INDEX.id) {
+        if (buttonId == Page.INDEX.id) {
             this.mc.setScreen(new IndexBeastiaryScreen(Minecraft.getInstance().player));
         }
-        if(buttonId == Page.CREATURES.id) {
+        if (buttonId == Page.CREATURES.id) {
             this.mc.setScreen(new CreaturesBeastiaryScreen(Minecraft.getInstance().player));
         }
-        if(buttonId == Page.PETS.id) {
+        if (buttonId == Page.PETS.id) {
             this.mc.setScreen(new PetsBeastiaryScreen(Minecraft.getInstance().player));
         }
-        if(buttonId == Page.SUMMONING.id) {
+        if (buttonId == Page.SUMMONING.id) {
             this.mc.setScreen(new SummoningBeastiaryScreen(Minecraft.getInstance().player));
         }
-        if(buttonId == Page.ELEMENTS.id) {
+        if (buttonId == Page.ELEMENTS.id) {
             this.mc.setScreen(new ElementsBeastiaryScreen(Minecraft.getInstance().player));
         }
     }
@@ -201,7 +213,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
      */
     @Override
     public boolean keyReleased(int keyCode, int keyCodeB, int keyCodeC) {
-        if(keyCode == 1 || keyCode == this.mc.options.keyInventory.getKey().getValue()) {
+        if (keyCode == 1 || keyCode == this.mc.options.keyInventory.getKey().getValue()) {
             this.mc.player.closeContainer();
         }
         return super.keyReleased(keyCode, keyCodeB, keyCodeC);
@@ -209,6 +221,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
 
     /**
      * Returns the title of this Beastiary Page.
+     *
      * @return The title text string to display.
      */
     public MutableComponent getTitle() {
@@ -217,22 +230,23 @@ public abstract class BeastiaryScreen extends BaseScreen {
 
     /**
      * Draws a level bar for the provided creature info.
-     * @param matrixStack The matrix stack to draw with.
+     *
+     * @param matrixStack  The matrix stack to draw with.
      * @param creatureInfo The creature info to get stats from.
-     * @param texture The texture to use as a level dot/star.
-     * @param x The x position to draw from.
-     * @param y The y position to draw from.
+     * @param texture      The texture to use as a level dot/star.
+     * @param x            The x position to draw from.
+     * @param y            The y position to draw from.
      */
     public void drawLevel(GuiGraphics matrixStack, CreatureInfo creatureInfo, ResourceLocation texture, int x, int y) {
         int level = creatureInfo.summonCost;
-        if(level <= 10) {
+        if (level <= 10) {
             this.drawHelper.drawBar(matrixStack, texture, x, y, 0, 9, 9, level, 10);
         }
     }
 
     public void renderCreature(GuiGraphics matrixStack, CreatureInfo creatureInfo, int x, int y, int mouseX, int mouseY, float partialTicks) {
         // Clear:
-        if(creatureInfo == null) {
+        if (creatureInfo == null) {
             this.creaturePreviewEntity = null;
             return;
         }
@@ -240,15 +254,15 @@ public abstract class BeastiaryScreen extends BaseScreen {
         try {
             // Subspecies:
             boolean subspeciesMatch = true;
-            if(this.creaturePreviewEntity instanceof BaseCreatureEntity) {
-                subspeciesMatch = ((BaseCreatureEntity)this.creaturePreviewEntity).getSubspeciesIndex() == this.getDisplaySubspecies(creatureInfo);
-                if(subspeciesMatch) {
-                    subspeciesMatch = ((BaseCreatureEntity)this.creaturePreviewEntity).getVariantIndex() == this.getDisplayVariant(creatureInfo);
+            if (this.creaturePreviewEntity instanceof BaseCreatureEntity) {
+                subspeciesMatch = ((BaseCreatureEntity) this.creaturePreviewEntity).getSubspeciesIndex() == this.getDisplaySubspecies(creatureInfo);
+                if (subspeciesMatch) {
+                    subspeciesMatch = ((BaseCreatureEntity) this.creaturePreviewEntity).getVariantIndex() == this.getDisplayVariant(creatureInfo);
                 }
             }
 
             // Create New:
-            if(this.creaturePreviewEntity == null || this.creaturePreviewEntity.getClass() != creatureInfo.entityClass || !subspeciesMatch) {
+            if (this.creaturePreviewEntity == null || this.creaturePreviewEntity.getClass() != creatureInfo.entityClass || !subspeciesMatch) {
                 this.creaturePreviewEntity = creatureInfo.createEntity(this.player.getCommandSenderWorld());
                 this.creaturePreviewEntity.onGround();
                 if (this.creaturePreviewEntity instanceof BaseCreatureEntity) {
@@ -263,18 +277,18 @@ public abstract class BeastiaryScreen extends BaseScreen {
             }
 
             // Render:
-            if(this.creaturePreviewEntity != null) {
-                int creatureSize = Math.round((float)this.windowHeight / 6);
+            if (this.creaturePreviewEntity != null) {
+                int creatureSize = Math.round((float) this.windowHeight / 6);
                 double creatureWidth = creatureInfo.width;
                 double creatureHeight = creatureInfo.height;
-                int scale = (int)Math.round((2.5F / Math.max(creatureWidth, creatureHeight)) * creatureSize);
+                int scale = (int) Math.round((2.5F / Math.max(creatureWidth, creatureHeight)) * creatureSize);
                 int posX = x;
                 int posY = y + 80;
-                float lookX = (float)posX - mouseX;
-                float lookY = (float)posY - mouseY;
+                float lookX = (float) posX - mouseX;
+                float lookY = (float) posY - mouseY;
                 this.creaturePreviewTicks += partialTicks;
-                if(this.creaturePreviewEntity instanceof BaseCreatureEntity) {
-                    BaseCreatureEntity previewCreatureBase = (BaseCreatureEntity)this.creaturePreviewEntity;
+                if (this.creaturePreviewEntity instanceof BaseCreatureEntity) {
+                    BaseCreatureEntity previewCreatureBase = (BaseCreatureEntity) this.creaturePreviewEntity;
                     previewCreatureBase.onlyRenderTicks = this.creaturePreviewTicks;
                 }
 
@@ -283,8 +297,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
                 BaseGui.renderLivingEntity(matrixStack, posX, posY, scale, lookX, lookY, this.creaturePreviewEntity);
                 matrixStack.pose().popPose();
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LycanitesMobs.logWarning("", "An exception occurred when trying to preview a creature in the Beastiary.");
             e.printStackTrace();
         }
@@ -292,6 +305,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
 
     /**
      * Gets the Subspecies to use for the display creature.
+     *
      * @param creatureInfo The Creature Info being displayed.
      */
     public int getDisplaySubspecies(CreatureInfo creatureInfo) {
@@ -301,6 +315,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
 
     /**
      * Gets the Variant to use for the display creature.
+     *
      * @param creatureInfo The Creature Info being displayed.
      */
     public int getDisplayVariant(CreatureInfo creatureInfo) {
@@ -309,11 +324,12 @@ public abstract class BeastiaryScreen extends BaseScreen {
 
     /**
      * Plays an idle or tame sound of the provided creature when it is selected in the GUI.
+     *
      * @param creatureInfo The creature to play the sound from.
      */
     public void playCreatureSelectSound(CreatureInfo creatureInfo) {
         String soundSuffix = "";
-        if(creatureInfo.getSubspecies(this.playerExt.selectedSubspecies).name != null) {
+        if (creatureInfo.getSubspecies(this.playerExt.selectedSubspecies).name != null) {
             soundSuffix += "." + creatureInfo.getSubspecies(this.playerExt.selectedSubspecies).name;
         }
         SoundEvent soundEvent = ObjectManager.getSound(creatureInfo.getName() + soundSuffix + "_say");
@@ -322,8 +338,10 @@ public abstract class BeastiaryScreen extends BaseScreen {
 
     /**
      * Called when a display entity is created.
+     *
      * @param creatureInfo The Creature Info used to create the entity.
-     * @param entity The display entity instance.
+     * @param entity       The display entity instance.
      */
-    public void onCreateDisplayEntity(CreatureInfo creatureInfo, LivingEntity entity) {}
+    public void onCreateDisplayEntity(CreatureInfo creatureInfo, LivingEntity entity) {
+    }
 }
