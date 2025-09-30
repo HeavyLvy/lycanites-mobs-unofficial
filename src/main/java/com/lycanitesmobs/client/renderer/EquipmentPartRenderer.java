@@ -56,8 +56,7 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
         pose.mulPose(Axis.XP.rotationDegrees(190f));
         pose.mulPose(Axis.YP.rotationDegrees(-45f));
         pose.mulPose(Axis.ZP.rotationDegrees(10f));
-        pose.translate(0f, -1.7f, 0f);
-
+        pose.translate(-0.5f, 0f, 0f);
         pose.pushPose();
         if ("head".equalsIgnoreCase(part.slotType)) {
             pose.translate(0f, 0f, 0.5f);
@@ -65,22 +64,23 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 || "pike".equalsIgnoreCase(part.slotType)
                 || "axe".equalsIgnoreCase(part.slotType)
                 || "jewel".equalsIgnoreCase(part.slotType)) {
-            pose.translate(0f, 0f, 1f);
+            pose.translate(0f, 0.5f, 1f);
         }
 
         if (ctx == ItemDisplayContext.GUI) {
+            // Fix upside-down items in inventory: rotate 180° around Z
+            pose.mulPose(Axis.ZP.rotationDegrees(180.0F));
+
+            // Now compute the AABB and center/offset as you already do
             org.joml.Matrix4f matSoFar = new org.joml.Matrix4f(pose.last().pose());
             AA2D aabb = aabb2DInPose(model, matSoFar);
             if (aabb.valid()) {
                 float cx = 0.5f * (aabb.minX + aabb.maxX);
                 float cy = 0.5f * (aabb.minY + aabb.maxY);
-
                 float maxNudge = 0.25f;
                 float dx = Mth.clamp(-cx, -maxNudge, maxNudge);
                 float dy = Mth.clamp(-cy, -maxNudge, maxNudge);
-
                 pose.translate(dx, dy, 0f);
-
             }
         }
 

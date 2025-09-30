@@ -109,7 +109,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         float loop = this.getBob(entity, partialTicks % 1.0F);
         float facingFix = 180.0F;
         this.setupRotations(entity, matrixStack, loop, Mth.wrapDegrees(renderYaw + facingFix), yaw);
-        matrixStack.mulPose(Axis.XP.rotationDegrees(120.0F));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(133.0F));
         this.scale(entity, matrixStack, yaw);
         float distance = 0.0F;
         float time = 0.0F;
