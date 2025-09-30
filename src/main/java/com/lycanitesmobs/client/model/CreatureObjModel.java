@@ -7,9 +7,6 @@ import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.obj.VBOObjModel;
 import com.lycanitesmobs.client.renderer.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
@@ -44,10 +41,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.entities;
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.getTextureId;
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper.precomputeColors;
 
 @OnlyIn(Dist.CLIENT)
 public class CreatureObjModel extends CreatureModel {
@@ -367,8 +360,66 @@ public class CreatureObjModel extends CreatureModel {
         }
     }
 
-
     @Override
+    public void render(BaseCreatureEntity entity, PoseStack matrixStack, VertexConsumer vertexBuilder, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade) {
+        this.matrixStack = matrixStack;
+
+        // Assess Scale and Check if Trophy:
+        boolean renderAsTrophy = false;
+        this.young = false;
+        if (entity != null) {
+            this.young = entity.isBaby();
+        }
+        if (scale < 0) {
+            renderAsTrophy = true;
+            scale = -scale;
+        } else {
+            if (entity != null) {
+                scale *= entity.getScale();
+            }
+        }
+
+        // Render Parts:
+        for (ObjPart part : this.objParts) {
+            String partName = part.getName().toLowerCase();
+            if (!this.canRenderPart(partName, entity, layer, renderAsTrophy))
+                continue;
+
+            this.currentAnimationPart = this.animationParts.get(partName);
+            if (this.currentAnimationPart == null) {
+                continue;
+            }
+
+            matrixStack.pushPose();
+
+            // Apply Initial Offsets: (To Match Blender OBJ Export)
+            this.doAngle(MODEL_OFFSET_ROT_X, 1F, 0F, 0F);
+            this.doTranslate(0F, 0, 0F);
+
+            // Child Scaling:
+            if (this.young && !renderAsTrophy) {
+                this.childScale(partName);
+                if (this.bigChildHead && (partName.contains("head") || partName.contains("mouth")))
+                    this.doTranslate(-(this.currentAnimationPart.centerX / 2), -(this.currentAnimationPart.centerY / 2), -(this.currentAnimationPart.centerZ / 2));
+            }
+
+            // Trophy Scaling:
+            if (renderAsTrophy)
+                this.doScale(this.trophyScale, this.trophyScale, this.trophyScale);
+
+            // Apply Entity Scaling:
+            this.doScale(scale, scale, scale);
+
+            // Apply Animation Frames:
+            this.currentAnimationPart.applyAnimationFrames(this.animator);
+
+            // Render Part:
+            this.objModel.renderPart(vertexBuilder, matrixStack.last().normal(), matrixStack.last().pose(), this.getBrightness(partName, layer, entity, brightness), fade, part, this.getPartColor(partName, entity, layer, renderAsTrophy, loop), this.getPartTextureOffset(partName, entity, layer, renderAsTrophy, loop));
+            matrixStack.popPose();
+        }
+
+    }
+   /* @Override
     public void render(BaseCreatureEntity entity, PoseStack matrixStack, VertexConsumer vertexBuilder, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade) {
 
         this.matrixStack = matrixStack;
@@ -423,7 +474,7 @@ public class CreatureObjModel extends CreatureModel {
         if (!entities.containsKey(entity.getId())) {
             entities.put(entity.getId(), this);
         }
-    }
+    }*/
 
 /*
     private Matrix4f projectionMatrix;

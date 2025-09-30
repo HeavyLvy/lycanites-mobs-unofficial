@@ -1,7 +1,6 @@
-package com.lycanitesmobs.client.renderer.renderapi.client.render;
+package com.lycanitesmobs.client.renderer;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.renderer.CustomRenderStates;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -20,7 +19,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.ClientModEvents.POS_TEX_NORMAL_SHADER;
+import static com.lycanitesmobs.client.renderer.ClientModEvents.POS_TEX_NORMAL_SHADER;
 
 public class VBOBatcher {
 

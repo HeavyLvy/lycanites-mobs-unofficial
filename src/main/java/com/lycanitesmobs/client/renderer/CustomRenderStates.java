@@ -1,6 +1,5 @@
 package com.lycanitesmobs.client.renderer;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -15,11 +14,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.ClientModEvents.POS_TEX_NORMAL_SHADER;
+import static com.lycanitesmobs.client.renderer.ClientModEvents.POS_TEX_NORMAL_SHADER;
 
 public class CustomRenderStates extends RenderStateShard {
     public static final TransparencyStateShard DEFAULT_ALPHA = RenderStateShard.NO_TRANSPARENCY;
@@ -36,20 +33,7 @@ public class CustomRenderStates extends RenderStateShard {
                     .put("Padding", DefaultVertexFormat.ELEMENT_PADDING)
                     .build()
     );
-    public static final RenderType OBJ_RENDER_TYPE = RenderType.create(
-            "lm_obj_pos_tex_normal",
-            POS_TEX_NORMAL,
-            VertexFormat.Mode.TRIANGLES,
-            65536,
-            true,
-            false,
-            RenderType.CompositeState.builder()
-                    .setShaderState(new RenderStateShard.ShaderStateShard(() -> POS_TEX_NORMAL_SHADER))
-                    .setCullState(RenderStateShard.NO_CULL)
-                    .setLightmapState(RenderStateShard.LIGHTMAP)
-                    .setTransparencyState(RenderStateShard.NO_TRANSPARENCY)
-                    .createCompositeState(true)
-    );
+
 
     public enum BLEND {
         NORMAL(0), ADD(1), SUB(2);
@@ -81,6 +65,37 @@ public class CustomRenderStates extends RenderStateShard {
     });
 
     private static final RenderType[] OBJ_RENDER_TYPES = new RenderType[BLEND.values().length * 2];
+    public static final RenderType OBJ_RENDER_TYPE = RenderType.create(
+            "lm_obj_pos_tex_normal",
+            POS_TEX_NORMAL,
+            VertexFormat.Mode.TRIANGLES,
+            65536,
+            true,
+            false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(new ShaderStateShard(() -> POS_TEX_NORMAL_SHADER))
+                    .setCullState(NO_CULL)
+                    .setLightmapState(LIGHTMAP)
+                    .setOverlayState(OVERLAY)
+                    .setDepthTestState(LEQUAL_DEPTH_TEST)
+                    .setWriteMaskState(COLOR_DEPTH_WRITE)
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .createCompositeState(true)
+    );
+    public static final RenderType OBJ_CUTOUT = RenderType.create(
+            "lm_obj_cutout",
+            POS_TEX_NORMAL,
+            VertexFormat.Mode.TRIANGLES, 256, true, false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(new ShaderStateShard(() -> POS_TEX_NORMAL_SHADER))
+                    .setCullState(NO_CULL)
+                    .setLightmapState(LIGHTMAP)
+                    .setOverlayState(OVERLAY)
+                    .setDepthTestState(LEQUAL_DEPTH_TEST)
+                    .setWriteMaskState(COLOR_DEPTH_WRITE)
+                    .setTransparencyState(NO_TRANSPARENCY)
+                    .createCompositeState(true)
+    );
 
     static {
         for (BLEND blend : BLEND.values()) {
@@ -93,16 +108,18 @@ public class CustomRenderStates extends RenderStateShard {
                         true,
                         false,
                         RenderType.CompositeState.builder()
-                                .setShaderState(new RenderStateShard.ShaderStateShard(() -> POS_TEX_NORMAL_SHADER))
-                                .setTransparencyState(
-                                        blend == BLEND.ADD ? ADDITIVE_TRANSPARENCY :
-                                                blend == BLEND.SUB ? SUBTRACTIVE_TRANSPARENCY :
-                                                        TRANSLUCENT_TRANSPARENCY
-                                )
+                                .setShaderState(new ShaderStateShard(() -> POS_TEX_NORMAL_SHADER))
                                 .setCullState(NO_CULL)
-                                .setLightmapState(glow == 1 ? NO_LIGHTMAP : LIGHTMAP)
+                                .setLightmapState(LIGHTMAP)
                                 .setOverlayState(OVERLAY)
-                                .createCompositeState(false)
+                                .setDepthTestState(LEQUAL_DEPTH_TEST)
+                                .setWriteMaskState(COLOR_DEPTH_WRITE)
+                                .setTransparencyState(
+                                        blend == BLEND.ADD ? ADDITIVE_TRANSPARENCY
+                                                : blend == BLEND.SUB ? SUBTRACTIVE_TRANSPARENCY
+                                                : TRANSLUCENT_TRANSPARENCY
+                                )
+                                .createCompositeState(true)
                 );
             }
         }

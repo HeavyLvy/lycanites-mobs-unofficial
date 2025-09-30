@@ -5,9 +5,6 @@ import com.lycanitesmobs.client.obj.ObjModel;
 import com.lycanitesmobs.client.obj.ObjPart;
 import com.lycanitesmobs.client.obj.VBOObjModel;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.info.CreatureInfo;
 import com.lycanitesmobs.core.info.CreatureManager;
@@ -151,10 +148,7 @@ public class CreatureObjModelOld extends CreatureModel {
                 loop = entity.onlyRenderTicks;
             }
         }
-        // Adds the model + entity to the renderer's map to render during level rendering
-        if (!RenderAPIEvents.entities.containsKey(entity.getId())) {
-            RenderAPIEvents.entitiesLegacy.put(entity.getId(), this);
-        }
+    
         // Render and Animate Each Part:
         for (ObjPart part : this.wavefrontParts) {
             if (part.getName() == null)

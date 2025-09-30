@@ -1,7 +1,7 @@
 package com.lycanitesmobs.client.obj;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
+import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -91,40 +91,6 @@ public class ObjModel {
                 renderPart(vertexBuilder, matrix3f, matrix4f, brightness, fade, objPart, color, textureOffset);
             }
         }
-    }
-
-    public void renderPart(VertexConsumer vertexBuilder, WorldBuffer buffer, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
-        if (objPart.mesh == null) {
-            return;
-        }
-
-        int[] indices = objPart.mesh.indices;
-        Vertex[] vertices = objPart.mesh.vertices;
-        if (objPart.mesh.normals == null) {
-            objPart.mesh.normals = new Vector3o[indices.length];
-        }
-
-        for (int i = 0; i < indices.length; i += 3) {
-            Vector3o normal = objPart.mesh.normals[i];
-            if (normal == null) {
-                normal = this.getNormal(vertices[indices[i]].getPos(), vertices[indices[i + 1]].getPos(), vertices[indices[i + 2]].getPos());
-                objPart.mesh.normals[i] = normal;
-            }
-
-            for (int iv = 0; iv < 3; iv++) {
-                Vertex v = objPart.mesh.vertices[indices[i + iv]];
-                vertexBuilder
-                        .vertex(matrix4f, v.getPos().x(), v.getPos().y(), v.getPos().z())
-                        .color(color.x(), color.y(), color.z(), color.w())
-                        .uv(v.getTexCoords().x + (textureOffset.x * 0.01f), 1f - (v.getTexCoords().y + (textureOffset.y * 0.01f)))
-                        .overlayCoords(0, 10 - fade)
-                        .uv2(brightness)
-                        .normal(matrix3f, normal.x(), normal.y(), normal.z())
-                        .endVertex();
-            }
-        }
-
-        buffer.draw();
     }
 
     public void renderPart(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {

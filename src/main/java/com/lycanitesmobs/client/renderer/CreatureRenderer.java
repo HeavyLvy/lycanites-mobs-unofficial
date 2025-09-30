@@ -5,14 +5,13 @@ import com.lycanitesmobs.client.model.CreatureModel;
 import com.lycanitesmobs.client.model.CreatureObjModel;
 import com.lycanitesmobs.client.obj.VBOObjModel;
 import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.util.ContextUtils;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -29,9 +28,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderNameTagEvent;
 import org.joml.Matrix4f;
-
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents.animationContexts;
-import static com.lycanitesmobs.client.renderer.renderapi.client.render.RenderHelper.startTri;
 
 @OnlyIn(Dist.CLIENT)
 public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<T, CreatureModel<T>> {
@@ -52,127 +48,9 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      * @param brightness       The brightness of the mob based on block location, etc.
      */
     @Override
-    /*public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
-        try {
-            this.layers.clear();
-            this.model = ModelManager.getInstance().getCreatureModel(entity.creatureInfo, entity.subspecies);
-            if (this.model == null) {
-                return;
-            }
-            this.model.addCustomLayers(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Get Entity States:
-        float scale = 1;
-        boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
-        this.model.riding = shouldSit;
-        this.model.young = entity.isBaby();
-        float renderYaw = LMHelperClass.convertToFloat(LMHelperClass.clamp(yaw, entity.yBodyRotO, entity.yBodyRot));
-        float renderYawHead = LMHelperClass.convertToFloat(LMHelperClass.clamp(yaw, entity.yHeadRotO, entity.yHeadRot));
-
-        // Looking Yaw:
-        float lookYaw = renderYawHead - renderYaw;
-        if (shouldSit && entity.getVehicle() instanceof LivingEntity) {
-            LivingEntity livingentity = (LivingEntity) entity.getVehicle();
-            renderYaw = LMHelperClass.convertToFloat(LMHelperClass.clamp(yaw, livingentity.yBodyRotO, livingentity.yBodyRot));
-            lookYaw = renderYawHead - renderYaw;
-            float renderYawMountOffset = LMHelperClass.convertToFloat(LMHelperClass.wrapDegrees(lookYaw));
-            if (renderYawMountOffset < -85.0F) {
-                renderYawMountOffset = -85.0F;
-            }
-
-            if (renderYawMountOffset >= 85.0F) {
-                renderYawMountOffset = 85.0F;
-            }
-
-            renderYaw = renderYawHead - renderYawMountOffset;
-            if (renderYawMountOffset * renderYawMountOffset > 2500.0F) {
-                renderYaw += renderYawMountOffset * 0.2F;
-            }
-
-            lookYaw = renderYawHead - renderYaw;
-        }
-
-        // Looking Pitch:
-        matrixStack.pushPose();
-        float lookPitch = Mth.lerp(yaw, entity.xRotO, entity.xRotO);
-        if (entity.getPose() == Pose.SLEEPING) {
-            Direction direction = entity.getBedOrientation();
-            if (direction != null) {
-                float f4 = entity.getEyeHeight(Pose.STANDING) - 0.1F;
-                matrixStack.translate((double) ((float) (-direction.getStepX()) * f4), 0.0D, (double) ((float) (-direction.getStepZ()) * f4));
-            }
-        }
-
-        // Animation Ticks:
-        float loop = this.getBob(entity, partialTicks % 1.0F);
-        this.setupRotations(entity, matrixStack, loop, renderYaw, yaw);
-        matrixStack.scale(-1.0F, -1.0F, 1.0F);
-        this.scale(entity, matrixStack, yaw);
-        matrixStack.translate(0.0D, (double) -1.501F, 0.0D);
-        float distance = 0.0F;
-        float time = 0.0F;
-        if (!shouldSit && entity.isAlive()) {
-            distance = entity.walkAnimation.speed(yaw);
-            time = entity.walkAnimation.position() - entity.walkAnimation.speed() * (1.0F - yaw);
-            if (entity.isBaby()) {
-                time *= 3.0F;
-            }
-
-            if (distance > 1.0F) {
-                distance = 1.0F;
-            }
-        }
-
-        // Damage Fade:
-        int fade = 0;
-        if (entity.hurtTime > 0) {
-            fade = 10;
-        }
-
-        // Entity Visibility:
-        boolean invisible = !this.isBodyVisible(entity);
-        boolean allyInvisible = invisible && !entity.isInvisibleTo(Minecraft.getInstance().player);
-
-
-        // Render Model Layers:
-        this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
-        this.renderModel(entity, matrixStack, renderTypeBuffer, null, time, distance, loop, lookYaw, lookPitch, 1, brightness, fade, invisible, allyInvisible);
-        for (RenderLayer<T, CreatureModel<T>> layer : this.layers) {
-            if (!(layer instanceof LayerCreatureBase)) {
-                continue;
-            }
-            LayerCreatureBase<T> layerCreatureBase = (LayerCreatureBase<T>) layer;
-            if (!layerCreatureBase.canRenderLayer(entity, scale)) {
-                continue;
-            }
-            texture = this.getEntityTexture(entity, layerCreatureBase);
-            this.renderModel(entity, matrixStack, renderTypeBuffer, layerCreatureBase, time, distance, loop, lookYaw, lookPitch, scale, brightness, fade, invisible, allyInvisible);
-        }
-        var context = new ContextUtils.AnimationContext(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness, texture);
-        animationContexts.put(entity.getId(), context);
-
-
-        this.getMainModel().clearAnimationFrames();
-        matrixStack.popPose();
-        VBOBatcher.getInstance().endBatches();
-
-        // Render Name Tag
-        if (!invisible) {
-            RenderNameTagEvent renderNameplateEvent = new RenderNameTagEvent(entity, entity.getDisplayName(), this, matrixStack, renderTypeBuffer, fade, time);
-            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(renderNameplateEvent);
-            if (renderNameplateEvent.getResult() != net.minecraftforge.eventbus.api.Event.Result.DENY && (renderNameplateEvent.getResult() == net.minecraftforge.eventbus.api.Event.Result.ALLOW || this.shouldShowName(entity))) {
-                MutableComponent entityName = entity.getName().copy();
-                if (entityName != null) {
-                    this.renderNameTag(entity, entityName, matrixStack, renderTypeBuffer, brightness);
-                }
-            }
-        }
-    }*/
-
     public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
+
+
         // Get Model and Layers:
         try {
             this.layers.clear();
@@ -223,16 +101,16 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
             Direction direction = entity.getBedOrientation();
             if (direction != null) {
                 float f4 = entity.getEyeHeight(Pose.STANDING) - 0.1F;
-                matrixStack.translate((double) ((float) (-direction.getStepX()) * f4), 0.0D, (double) ((float) (-direction.getStepZ()) * f4));
+                // matrixStack.translate((double) ((float) (-direction.getStepX()) * f4), 0.0D, (double) ((float) (-direction.getStepZ()) * f4));
             }
         }
-
+        //matrixStack.translate(0.0D, 0.0D, -1.8f);
         // Animation Ticks:
         float loop = this.getBob(entity, partialTicks % 1.0F);
-        this.setupRotations(entity, matrixStack, loop, renderYaw, yaw);
-        matrixStack.scale(-1.0F, -1.0F, 1.0F);
+        float facingFix = 180.0F;
+        this.setupRotations(entity, matrixStack, loop, Mth.wrapDegrees(renderYaw + facingFix), yaw);
+        matrixStack.mulPose(Axis.XP.rotationDegrees(120.0F));
         this.scale(entity, matrixStack, yaw);
-        matrixStack.translate(0.0D, (double) -1.501F, 0.0D);
         float distance = 0.0F;
         float time = 0.0F;
         if (!shouldSit && entity.isAlive()) {
@@ -271,10 +149,8 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
             this.renderModel(entity, matrixStack, renderTypeBuffer, layerCreatureBase, time, distance, loop, lookYaw, lookPitch, scale, brightness, fade, invisible, allyInvisible);
         }
         var context = new ContextUtils.AnimationContext(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness, texture);
-        animationContexts.put(entity.getId(), context);
         this.getMainModel().clearAnimationFrames();
         matrixStack.popPose();
-
         VBOBatcher.getInstance().endBatches();
 
         // Render Name Tag
@@ -313,7 +189,6 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      */
     protected void renderModel(BaseCreatureEntity entity, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade, boolean invisible, boolean allyInvisible) {
         texture = this.getEntityTexture(entity, layer);
-
         // Render Model
         // TODO allyInvisible lower color alpha
         if (!invisible || allyInvisible) {

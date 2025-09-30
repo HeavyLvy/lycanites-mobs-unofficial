@@ -9,7 +9,6 @@ import com.lycanitesmobs.api.IGroupBoss;
 import com.lycanitesmobs.api.IGroupHeavy;
 import com.lycanitesmobs.api.Targeting;
 import com.lycanitesmobs.client.TextureManager;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.RenderAPIEvents;
 import com.lycanitesmobs.core.container.CreatureContainer;
 import com.lycanitesmobs.core.container.CreatureContainerProvider;
 import com.lycanitesmobs.core.entity.creature.EntityRemobra;
@@ -51,6 +50,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -626,7 +626,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     protected void onKillEntity(LivingEntity entityLivingBase) {
     }
-    
+
     public boolean getDistanceSq(Vector3f vector3f) {
         return false;
     }
@@ -2093,6 +2093,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         super.aiStep();
+
         if (this.creatureInfo.dummy) {
             return;
         }
@@ -5664,7 +5665,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * Get entities that are near this entity.
      **/
     public <T extends Entity> List<T> getNearbyEntities(Class<? extends T> clazz, Predicate<Entity> predicate, double range) {
-        return (List<T>) this.getCommandSenderWorld().getEntitiesOfClass(clazz, this.getBoundingBox().inflate(range, range, range), predicate);
+        return (List<T>) this.getCommandSenderWorld().getEntitiesOfClass(clazz, this.getBoundingBox().inflate(range, range, range), predicate != null ? predicate : (e) -> true);
     }
 
     // ========== Creature Attribute ==========
@@ -6248,6 +6249,14 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if (!this.hasAttackSound) return;
         this.playSound(ObjectManager.getSound(this.getSoundName() + "_attack"), this.getSoundVolume(), 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
     }
+
+    public float getMeleeAttackAnim(float pt) {
+        int max = Math.max(1, this.getAttackCooldownMax());
+        float cur = this.attackCooldown;
+        float t = (max - (cur - pt)) / (float) max;
+        return Mth.clamp(t, 0F, 1F);
+    }
+
 
     /**
      * Plays a sound for when this mob changes battle phase, normally used by bosses.
