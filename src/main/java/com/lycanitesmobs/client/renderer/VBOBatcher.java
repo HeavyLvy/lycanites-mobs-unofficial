@@ -1,54 +1,175 @@
 package com.lycanitesmobs.client.renderer;
 
-import java.nio.FloatBuffer;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.obj.Vertex;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.BufferManager;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.buffer.WorldBuffer;
-import com.lycanitesmobs.client.renderer.renderapi.client.render.shader.Shader;
-import com.lycanitesmobs.core.util.LMHelperClass;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.Minecraft;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.*;
 
-import static com.lycanitesmobs.LycanitesMobs.logError;
-import static com.lycanitesmobs.LycanitesMobs.logInfo;
-import static org.lwjgl.opengl.GL11.GL_BLEND;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_LEQUAL;
-import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.glBlendFunc;
-import static org.lwjgl.opengl.GL11.glDepthFunc;
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glDrawArrays;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11C.*;
-import static org.lwjgl.opengl.GL11C.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL20.*;
+import static com.lycanitesmobs.client.renderer.renderapi.client.render.ClientModEvents.POS_TEX_NORMAL_SHADER;
 
 public class VBOBatcher {
+
+    public static class VBODrawCommand {
+        private final VertexBuffer vbo;
+        private final int vertexCount;
+        private final VertexFormat format;
+        private final Matrix4f modelMatrix;
+        private final ResourceLocation texLocation;
+
+        private float red = 1.0F, green = 1.0F, blue = 1.0F, alpha = 1.0F;
+        private float textureOffsetX, textureOffsetY;
+        private float overlayOffsetX, overlayOffsetY;
+        private float lightOffsetX, lightOffsetY;
+
+        /**
+         * Keeps the old ctor shape: (vbo, vertexCount, format, matrix, tex)
+         */
+        public VBODrawCommand(VertexBuffer vbo,
+                              int vertexCount,
+                              VertexFormat format,
+                              Matrix4f matrix,
+                              ResourceLocation texLocation) {
+            this.vbo = vbo;
+            this.vertexCount = vertexCount;
+            this.format = format;
+            this.modelMatrix = new Matrix4f(matrix);
+            this.texLocation = texLocation;
+        }
+
+        public VBODrawCommand setColor(Vector4f color) {
+            return setColor(color.x, color.y, color.z, color.w);
+        }
+
+        public VBODrawCommand setColor(float r, float g, float b, float a) {
+            this.red = r; this.green = g; this.blue = b; this.alpha = a;
+            return this;
+        }
+
+        public VBODrawCommand setTextureOffset(Vector2f offset) {
+            return setTextureOffset(offset.x * 0.01F, -offset.y * 0.01F);
+        }
+
+        public VBODrawCommand setTextureOffset(float u, float v) {
+            this.textureOffsetX = u;
+            this.textureOffsetY = v;
+            return this;
+        }
+
+        public VBODrawCommand setOverlayOffset(float white, boolean red) {
+            return setOverlayOffset(OverlayTexture.u(white), OverlayTexture.v(red));
+        }
+
+        public VBODrawCommand setOverlayOffset(float u, float v) {
+            this.overlayOffsetX = u;
+            this.overlayOffsetY = v;
+            return this;
+        }
+
+        public VBODrawCommand setLightOffset(int packed) {
+            return setLightOffset(LightTexture.block(packed) << 4, LightTexture.sky(packed) << 4);
+        }
+
+        public VBODrawCommand setLightOffset(float u, float v) {
+            this.lightOffsetX = u;
+            this.lightOffsetY = v;
+            return this;
+        }
+
+        private static boolean loggedOnce;
+
+        private static void logShaderMissingOnce(VertexFormat fmt) {
+            if (!loggedOnce) {
+                loggedOnce = true;
+                org.apache.logging.log4j.LogManager.getLogger().warn(
+                        "[Lycanites Mobs] No shader bound for format '{}'. " +
+                                "Bind a shader in RenderType or switch to a vanilla format (e.g. POSITION_TEX_COLOR_NORMAL). Skipping draw to avoid crash.",
+                        fmt);
+            }
+        }
+
+        private static java.util.function.Supplier<ShaderInstance> pickShaderForFormat(VertexFormat fmt) {
+            if (fmt == DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL)
+                return GameRenderer::getPositionTexColorNormalShader;
+            if (fmt == DefaultVertexFormat.POSITION_COLOR)
+                return GameRenderer::getPositionColorShader;
+            if (fmt == DefaultVertexFormat.POSITION_TEX)
+                return GameRenderer::getPositionTexShader;
+            if (fmt == DefaultVertexFormat.POSITION_COLOR_TEX)
+                return GameRenderer::getPositionColorTexShader;
+            if (fmt == DefaultVertexFormat.POSITION_TEX_COLOR)
+                return GameRenderer::getPositionTexColorShader;
+            if (fmt == DefaultVertexFormat.POSITION)
+                return GameRenderer::getPositionShader;
+            if (fmt == com.lycanitesmobs.client.renderer.CustomRenderStates.POS_TEX_NORMAL
+                    && POS_TEX_NORMAL_SHADER != null) {
+                return () -> POS_TEX_NORMAL_SHADER;
+            }
+            return null;
+        }
+
+        public void draw() {
+            if (vbo == null) return;
+
+            RenderSystem.setShaderTexture(0, texLocation);
+            RenderSystem.setShaderColor(corrected(red), corrected(green), corrected(blue), corrected(alpha));
+
+            ShaderInstance shader = RenderSystem.getShader();
+
+            if (format == CustomRenderStates.POS_TEX_NORMAL && POS_TEX_NORMAL_SHADER != null) {
+                if (shader != POS_TEX_NORMAL_SHADER) {
+                    RenderSystem.setShader(() -> POS_TEX_NORMAL_SHADER);
+                    shader = POS_TEX_NORMAL_SHADER;
+                }
+            } else if (shader == null) {
+                var pick = pickShaderForFormat(format);
+                if (pick != null) {
+                    RenderSystem.setShader(pick);
+                    shader = pick.get();
+                }
+            }
+
+            if (shader == null) {
+                logShaderMissingOnce(format);
+                return;
+            }
+
+            var uv = shader.getUniform("UvOffset");
+            if (uv != null) uv.set(textureOffsetX, textureOffsetY);
+            var overlay = shader.getUniform("OverlayUv");
+            if (overlay != null) overlay.set(overlayOffsetX, overlayOffsetY);
+            var light = shader.getUniform("LightUv");
+            if (light != null) light.set(lightOffsetX, lightOffsetY);
+
+            var modelView = new org.joml.Matrix4f(RenderSystem.getModelViewMatrix()).mul(this.modelMatrix);
+            var projection = RenderSystem.getProjectionMatrix();
+
+            vbo.bind();
+            int id = RenderSystem.getShaderTexture(0);
+            // LycanitesMobs.logInfo("", "Tex unit0 id = " + id + " for " + texLocation);
+            vbo.drawWithShader(modelView, projection, shader);
+            VertexBuffer.unbind();
+        }
+
+
+        private static float corrected(float f) {
+            return ((int) (f * 255.0F) & 0xFF) / 255.0F;
+        }
+    }
 
     private static final VBOBatcher INSTANCE = new VBOBatcher();
     private final Map<RenderType, List<VBODrawCommand>> batchedDrawCommands = new LinkedHashMap<>();
@@ -61,16 +182,14 @@ public class VBOBatcher {
         batchedDrawCommands.computeIfAbsent(renderType, k -> new LinkedList<>()).add(drawCommand);
     }
 
-    public void endBatches(WorldBuffer worldBuffer) {
+    public void endBatches() {
         batchedDrawCommands.forEach((renderType, drawCommands) -> {
-            if (drawCommands.isEmpty()) {
-                return;
-            }
+            if (drawCommands.isEmpty()) return;
 
             renderType.setupRenderState();
-            for (VBODrawCommand drawCommand : drawCommands) {
-                drawCommand.draw(worldBuffer);
-                RenderSystem.setTextureMatrix(drawCommand.matrix);
+
+            for (VBODrawCommand cmd : drawCommands) {
+                cmd.draw();
             }
 
             renderType.clearRenderState();
@@ -78,105 +197,5 @@ public class VBOBatcher {
         });
 
         batchedDrawCommands.clear();
-    }
-
-    public static class VBODrawCommand {
-
-        public final Matrix4f matrix;
-        private final int vbo;
-        private final int vertexCount;
-        private final VertexFormat format;
-        private final ResourceLocation texLocation;
-        private float red = 1.0F;
-        private float green = 1.0F;
-        private float blue = 1.0F;
-        private float alpha = 1.0F;
-        private float textureOffsetX;
-        private float textureOffsetY;
-        private float overlayOffsetX;
-        private float overlayOffsetY;
-        private float lightOffsetX;
-        private float lightOffsetY;
-
-        public VBODrawCommand(int vbo, int vertexCount, VertexFormat format, Matrix4f matrix, ResourceLocation texLocation) {
-            this.vbo = vbo;
-            this.vertexCount = vertexCount;
-            this.format = format;
-            this.matrix = matrix;
-            this.texLocation = texLocation;
-        }
-
-        private static float correctedColor(float f) {
-            return ((int) (f * 255.0F) & 0xFF) / 255.0F;
-        }
-
-        public VBODrawCommand setColor(Vector4f color) {
-            return setColor(color.x(), color.y(), color.z(), color.w());
-        }
-
-        public VBODrawCommand setColor(float red, float green, float blue, float alpha) {
-            this.red = red;
-            this.green = green;
-            this.blue = blue;
-            this.alpha = alpha;
-            return this;
-        }
-
-        public VBODrawCommand setTextureOffset(Vector2f textureOffset) {
-            return setTextureOffset(textureOffset.x() * 0.01F, -textureOffset.y() * 0.01F);
-        }
-
-        public VBODrawCommand setTextureOffset(float textureOffsetX, float textureOffsetY) {
-            this.textureOffsetX = textureOffsetX;
-            this.textureOffsetY = textureOffsetY;
-            return this;
-        }
-
-        public VBODrawCommand setOverlayOffset(float white, boolean red) {
-            return setOverlayOffset(OverlayTexture.u(white), OverlayTexture.v(red));
-        }
-
-        public VBODrawCommand setOverlayOffset(float overlayOffsetX, float overlayOffsetY) {
-            this.overlayOffsetX = overlayOffsetX;
-            this.overlayOffsetY = overlayOffsetY;
-            return this;
-        }
-
-        public VBODrawCommand setLightOffset(int packed) {
-            return setLightOffset(LightTexture.block(packed) << 4, LightTexture.sky(packed) << 4);
-        }
-
-        public VBODrawCommand setLightOffset(float lightOffsetX, float lightOffsetY) {
-            this.lightOffsetX = lightOffsetX;
-            this.lightOffsetY = lightOffsetY;
-            return this;
-        }
-
-        public void draw(WorldBuffer worldBuffer) {
-            if (true) return;
-            //not implemented
-        }
-
-        public static int loadTexture(ResourceLocation textureLocation) {
-            TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-            AbstractTexture texture = textureManager.getTexture(textureLocation);
-            if (texture == null) {
-                textureManager.register(textureLocation, new SimpleTexture(textureLocation));
-                texture = textureManager.getTexture(textureLocation);
-            }
-            return texture.getId();
-        }
-
-        private FloatBuffer getBuffer(List<Vertex> vertices) {
-            FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(vertices.size() * 9);
-            for (Vertex vertex : vertices) {
-                floatBuffer.put(vertex.getX()).put(vertex.getY()).put(vertex.getZ());
-                floatBuffer.put(vertex.getR()).put(vertex.getG()).put(vertex.getB()).put(vertex.getA());
-                //floatBuffer.put(vertex.getU()).put(vertex.getV());
-            }
-            floatBuffer.flip();
-            return floatBuffer;
-        }
-
     }
 }

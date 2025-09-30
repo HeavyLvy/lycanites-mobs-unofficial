@@ -52,8 +52,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      * @param brightness       The brightness of the mob based on block location, etc.
      */
     @Override
-    public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
-        // Get Model and Layers:
+    /*public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
         try {
             this.layers.clear();
             this.model = ModelManager.getInstance().getCreatureModel(entity.creatureInfo, entity.subspecies);
@@ -139,7 +138,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
 
 
         // Render Model Layers:
-        //this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
+        this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
         this.renderModel(entity, matrixStack, renderTypeBuffer, null, time, distance, loop, lookYaw, lookPitch, 1, brightness, fade, invisible, allyInvisible);
         for (RenderLayer<T, CreatureModel<T>> layer : this.layers) {
             if (!(layer instanceof LayerCreatureBase)) {
@@ -156,10 +155,127 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         animationContexts.put(entity.getId(), context);
 
 
-        //this.getMainModel().clearAnimationFrames();
+        this.getMainModel().clearAnimationFrames();
         matrixStack.popPose();
-        /*var buffer = startTri();
-        VBOBatcher.getInstance().endBatches(buffer);*/
+        VBOBatcher.getInstance().endBatches();
+
+        // Render Name Tag
+        if (!invisible) {
+            RenderNameTagEvent renderNameplateEvent = new RenderNameTagEvent(entity, entity.getDisplayName(), this, matrixStack, renderTypeBuffer, fade, time);
+            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(renderNameplateEvent);
+            if (renderNameplateEvent.getResult() != net.minecraftforge.eventbus.api.Event.Result.DENY && (renderNameplateEvent.getResult() == net.minecraftforge.eventbus.api.Event.Result.ALLOW || this.shouldShowName(entity))) {
+                MutableComponent entityName = entity.getName().copy();
+                if (entityName != null) {
+                    this.renderNameTag(entity, entityName, matrixStack, renderTypeBuffer, brightness);
+                }
+            }
+        }
+    }*/
+
+    public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
+        // Get Model and Layers:
+        try {
+            this.layers.clear();
+            this.model = ModelManager.getInstance().getCreatureModel(entity.creatureInfo, entity.subspecies);
+            if (this.model == null) {
+                return;
+            }
+            this.model.addCustomLayers(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Get Entity States:
+        float scale = 1;
+        boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
+        this.model.riding = shouldSit;
+        this.model.young = entity.isBaby();
+        float renderYaw = Mth.clamp(yaw, entity.yBodyRotO, entity.yBodyRot);
+        float renderYawHead = Mth.clamp(yaw, entity.yHeadRotO, entity.yHeadRot);
+
+        // Looking Yaw:
+        float lookYaw = renderYawHead - renderYaw;
+        if (shouldSit && entity.getVehicle() instanceof LivingEntity) {
+            LivingEntity livingentity = (LivingEntity) entity.getVehicle();
+            renderYaw = Mth.clamp(yaw, livingentity.yBodyRotO, livingentity.yBodyRot);
+            lookYaw = renderYawHead - renderYaw;
+            float renderYawMountOffset = Mth.wrapDegrees(lookYaw);
+            if (renderYawMountOffset < -85.0F) {
+                renderYawMountOffset = -85.0F;
+            }
+
+            if (renderYawMountOffset >= 85.0F) {
+                renderYawMountOffset = 85.0F;
+            }
+
+            renderYaw = renderYawHead - renderYawMountOffset;
+            if (renderYawMountOffset * renderYawMountOffset > 2500.0F) {
+                renderYaw += renderYawMountOffset * 0.2F;
+            }
+
+            lookYaw = renderYawHead - renderYaw;
+        }
+
+        // Looking Pitch:
+        matrixStack.pushPose();
+        float lookPitch = Mth.lerp(yaw, entity.xRotO, entity.xRot);
+        if (entity.getPose() == Pose.SLEEPING) {
+            Direction direction = entity.getBedOrientation();
+            if (direction != null) {
+                float f4 = entity.getEyeHeight(Pose.STANDING) - 0.1F;
+                matrixStack.translate((double) ((float) (-direction.getStepX()) * f4), 0.0D, (double) ((float) (-direction.getStepZ()) * f4));
+            }
+        }
+
+        // Animation Ticks:
+        float loop = this.getBob(entity, partialTicks % 1.0F);
+        this.setupRotations(entity, matrixStack, loop, renderYaw, yaw);
+        matrixStack.scale(-1.0F, -1.0F, 1.0F);
+        this.scale(entity, matrixStack, yaw);
+        matrixStack.translate(0.0D, (double) -1.501F, 0.0D);
+        float distance = 0.0F;
+        float time = 0.0F;
+        if (!shouldSit && entity.isAlive()) {
+            distance = entity.walkAnimation.speed(yaw);
+            time = entity.walkAnimation.position() - entity.walkAnimation.speed() * (1.0F - yaw);
+            if (entity.isBaby()) {
+                time *= 3.0F;
+            }
+
+            if (distance > 1.0F) {
+                distance = 1.0F;
+            }
+        }
+
+        // Damage Fade:
+        int fade = 0;
+        if (entity.hurtTime > 0) {
+            fade = 10;
+        }
+
+        // Entity Visibility:
+        boolean invisible = !this.isBodyVisible(entity);
+        boolean allyInvisible = invisible && !entity.isInvisibleTo(Minecraft.getInstance().player);
+
+        // Render Model Layers:
+        this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
+        this.renderModel(entity, matrixStack, renderTypeBuffer, null, time, distance, loop, lookYaw, lookPitch, 1, brightness, fade, invisible, allyInvisible);
+        for (RenderLayer<T, CreatureModel<T>> layer : this.layers) {
+            if (!(layer instanceof LayerCreatureBase)) {
+                continue;
+            }
+            LayerCreatureBase layerCreatureBase = (LayerCreatureBase) layer;
+            if (!layerCreatureBase.canRenderLayer(entity, scale)) {
+                continue;
+            }
+            this.renderModel(entity, matrixStack, renderTypeBuffer, layerCreatureBase, time, distance, loop, lookYaw, lookPitch, scale, brightness, fade, invisible, allyInvisible);
+        }
+        var context = new ContextUtils.AnimationContext(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness, texture);
+        animationContexts.put(entity.getId(), context);
+        this.getMainModel().clearAnimationFrames();
+        matrixStack.popPose();
+
+        VBOBatcher.getInstance().endBatches();
 
         // Render Name Tag
         if (!invisible) {
@@ -173,6 +289,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
             }
         }
     }
+
 
     public ResourceLocation texture;
 

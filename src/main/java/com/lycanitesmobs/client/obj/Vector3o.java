@@ -6,6 +6,8 @@ import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 
 public class Vector3o {
@@ -32,6 +34,12 @@ public class Vector3o {
     // Forge start
     public Vector3o(float[] values) {
         set(values);
+    }
+
+    public Vector3o(Vector3o copy) {
+        this.x = copy.x;
+        this.y = copy.y;
+        this.z = copy.z;
     }
 
     public boolean equals(Object p_equals_1_) {
@@ -105,10 +113,11 @@ public class Vector3o {
         this.z += p_229189_1_.z;
     }
 
-    public void sub(Vector3o p_195897_1_) {
+    public Vector3o sub(Vector3o p_195897_1_) {
         this.x -= p_195897_1_.x;
         this.y -= p_195897_1_.y;
         this.z -= p_195897_1_.z;
+        return this;
     }
 
     public float dot(Vector3o p_195903_1_) {

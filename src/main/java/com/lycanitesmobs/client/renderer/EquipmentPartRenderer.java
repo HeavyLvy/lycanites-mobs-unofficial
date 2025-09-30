@@ -5,8 +5,10 @@ import com.lycanitesmobs.client.model.AnimationPart;
 import com.lycanitesmobs.client.model.ItemObjModel;
 import com.lycanitesmobs.client.obj.VBOObjModel;
 import com.lycanitesmobs.client.renderer.layer.LayerItem;
+import com.lycanitesmobs.client.renderer.layer.LayerItemDye;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -14,6 +16,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -34,52 +37,94 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
     }
 
-
     @Override
-    public void renderByItem(ItemStack itemStack, ItemDisplayContext transformType, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness, int unknown) {
-        if (!(itemStack.getItem() instanceof ItemEquipmentPart)) {
-            return;
-        }
+    public void renderByItem(ItemStack itemStack, ItemDisplayContext ctx, PoseStack pose,
+                             MultiBufferSource buffers, int packedLight, int packedOverlay) {
+        if (!(itemStack.getItem() instanceof ItemEquipmentPart part)) return;
 
-        InteractionHand hand = null;
+        ItemObjModel model = ModelManager.getInstance().getEquipmentPartModel(part);
+        if (model == null) return;
 
-        ItemEquipmentPart itemEquipmentPart = (ItemEquipmentPart) itemStack.getItem();
-        ItemObjModel itemObjModel = ModelManager.getInstance().getEquipmentPartModel(itemEquipmentPart);
-        if (itemObjModel == null) {
-            return;
-        }
         this.renderLayers.clear();
-        itemObjModel.addCustomLayers(this);
+        model.addCustomLayers(this);
 
-        float loop = 0;
-        if (Minecraft.getInstance().player != null) {
-            loop = Minecraft.getInstance().player.tickCount;
+        float loop = Minecraft.getInstance().player != null ? Minecraft.getInstance().player.tickCount : 0f;
+
+        pose.pushPose();
+
+        pose.translate(1.7F, -0.5F, 0.5F);
+        pose.mulPose(Axis.XP.rotationDegrees(190f));
+        pose.mulPose(Axis.YP.rotationDegrees(-45f));
+        pose.mulPose(Axis.ZP.rotationDegrees(10f));
+        pose.translate(0f, -1.7f, 0f);
+
+        pose.pushPose();
+        if ("head".equalsIgnoreCase(part.slotType)) {
+            pose.translate(0f, 0f, 0.5f);
+        } else if ("blade".equalsIgnoreCase(part.slotType)
+                || "pike".equalsIgnoreCase(part.slotType)
+                || "axe".equalsIgnoreCase(part.slotType)
+                || "jewel".equalsIgnoreCase(part.slotType)) {
+            pose.translate(0f, 0f, 1f);
         }
 
-        matrixStack.translate(0.6F, 0.35F, 0.5F); // translate
-        matrixStack.mulPose(new Quaternionf(new AxisAngle4f(190, 1.0F, 0.0F, 0.0F)));
-        matrixStack.mulPose(new Quaternionf(new AxisAngle4f(-45, 0.0F, 1.0F, 0.0F)));
-        matrixStack.mulPose(new Quaternionf(new AxisAngle4f(10, 0.0F, 0.0F, 1.0F)));
-        matrixStack.translate(0F, -1.7F, 0F);
+        if (ctx == ItemDisplayContext.GUI) {
+            org.joml.Matrix4f matSoFar = new org.joml.Matrix4f(pose.last().pose());
+            AA2D aabb = aabb2DInPose(model, matSoFar);
+            if (aabb.valid()) {
+                float cx = 0.5f * (aabb.minX + aabb.maxX);
+                float cy = 0.5f * (aabb.minY + aabb.maxY);
 
-        matrixStack.pushPose();
-        if ("head".equalsIgnoreCase(itemEquipmentPart.slotType)) {
-            matrixStack.translate(0F, 0F, 0.5F);
-        } else if ("blade".equalsIgnoreCase(itemEquipmentPart.slotType) || "pike".equalsIgnoreCase(itemEquipmentPart.slotType) || "axe".equalsIgnoreCase(itemEquipmentPart.slotType) || "jewel".equalsIgnoreCase(itemEquipmentPart.slotType)) {
-            matrixStack.translate(0F, 0F, 1F);
+                float maxNudge = 0.25f;
+                float dx = Mth.clamp(-cx, -maxNudge, maxNudge);
+                float dy = Mth.clamp(-cy, -maxNudge, maxNudge);
+
+                pose.translate(dx, dy, 0f);
+
+            }
         }
 
-        itemObjModel.generateAnimationFrames(itemStack, null, loop, null);
-        this.renderModel(itemObjModel, itemStack, hand, matrixStack, renderTypeBuffer, null, null, loop, brightness);
-        for (LayerItem renderLayer : this.renderLayers) {
-            this.renderModel(itemObjModel, itemStack, hand, matrixStack, renderTypeBuffer, renderLayer, null, loop, brightness);
+        model.generateAnimationFrames(itemStack, null, loop, null);
+        this.renderModel(model, itemStack, null, pose, buffers, null, null, loop, packedLight);
+        for (LayerItem layer : this.renderLayers) {
+            this.renderModel(model, itemStack, null, pose, buffers, layer, null, loop, packedLight);
         }
-        //this.renderModel(itemObjModel, itemStack, hand, matrixStack, renderTypeBuffer, new LayerItemDye(this, "dye"),null, loop, brightness);
-        itemObjModel.clearAnimationFrames();
-        matrixStack.popPose();
+        this.renderModel(model, itemStack, null, pose, buffers, new LayerItemDye(this, "dye"), null, loop, packedLight);
+        model.clearAnimationFrames();
 
-        //VBOBatcher.getInstance().endBatches();
+        pose.popPose();
+        pose.popPose();
+
+        VBOBatcher.getInstance().endBatches();
     }
+
+
+    private static final class AA2D {
+        float minX = Float.POSITIVE_INFINITY, minY = Float.POSITIVE_INFINITY;
+        float maxX = Float.NEGATIVE_INFINITY, maxY = Float.NEGATIVE_INFINITY;
+
+        boolean valid() {
+            return minX <= maxX && minY <= maxY;
+        }
+    }
+
+    private static AA2D aabb2DInPose(ItemObjModel model, org.joml.Matrix4f poseMat) {
+        AA2D a = new AA2D();
+        for (var part : model.objParts) {
+            var mesh = part.mesh;
+            if (mesh == null || mesh.vertices == null || mesh.indices == null) continue;
+            for (int idx : mesh.indices) {
+                var p = mesh.vertices[idx].getPos();
+                float x = p.x(), y = p.y(), z = p.z();
+                float tx = poseMat.m00() * x + poseMat.m10() * y + poseMat.m20() * z + poseMat.m30();
+                float ty = poseMat.m01() * x + poseMat.m11() * y + poseMat.m21() * z + poseMat.m31();
+                if (tx < a.minX) a.minX = tx; if (tx > a.maxX) a.maxX = tx;
+                if (ty < a.minY) a.minY = ty; if (ty > a.maxY) a.maxY = ty;
+            }
+        }
+        return a;
+    }
+
 
     /**
      * Renders the main model.
