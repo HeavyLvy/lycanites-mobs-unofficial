@@ -9,6 +9,8 @@ import com.lycanitesmobs.core.StreamLoader;
 import com.lycanitesmobs.core.entity.*;
 import com.lycanitesmobs.core.entity.projectile.*;
 import com.lycanitesmobs.core.info.ModInfo;
+import com.lycanitesmobs.core.util.EntityTypeGetter;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -72,16 +74,15 @@ public class ProjectileManager extends JSONLoader {
     public void startup(ModInfo modInfo) {
         this.loadAllFromJSON(modInfo);
         for (ProjectileInfo projectileInfo : this.projectiles.values()) {
-            EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
-            entityTypeBuilder.setTrackingRange(40);
-            entityTypeBuilder.setUpdateInterval(3);
-            entityTypeBuilder.setShouldReceiveVelocityUpdates(true);
-            entityTypeBuilder.sized(projectileInfo.width, projectileInfo.height);
-            LycanitesMobs.ENTITY_TYPES.register(projectileInfo.getName(), () -> entityTypeBuilder.build(projectileInfo.getName()));
-            projectileInfo.load();
+            EntityType.Builder<?> b = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC)
+                    .setTrackingRange(40).setUpdateInterval(3).setShouldReceiveVelocityUpdates(true)
+                    .sized(projectileInfo.width, projectileInfo.height);
+            LycanitesMobs.ENTITY_TYPES.register(projectileInfo.getName(), () -> (EntityType<?>) b.build(projectileInfo.getName()));
+            projectileInfo.registerDeferred();
         }
         this.loadOldProjectiles();
     }
+
 
     /**
      * Loads all JSON Creature Types. Should be done before creatures are loaded so that they can find their type on load.
@@ -110,6 +111,17 @@ public class ProjectileManager extends JSONLoader {
         return;
     }
 
+    public void bindRegisteredTypes() {
+        for (ProjectileInfo projectileInfo : this.projectiles.values()) {
+            ResourceLocation id = new ResourceLocation(LycanitesMobs.MODID, projectileInfo.getName());
+            EntityType<?> t = ForgeRegistries.ENTITY_TYPES.getValue(id);
+            if (t == null || !id.equals(ForgeRegistries.ENTITY_TYPES.getKey(t))) continue;
+            projectileInfo.entityType = (EntityType<? extends BaseProjectileEntity>) t;
+            EntityFactory.getInstance().addEntityType(projectileInfo.entityType, projectileInfo.entityConstructor, projectileInfo.getName());
+            projectileInfo.initAfterRegistry();
+        }
+    }
+
     /**
      * Registers all creatures added to this creature manager, called from the registry event.
      *
@@ -119,35 +131,19 @@ public class ProjectileManager extends JSONLoader {
     public void registerEntities(RegisterEvent event) {
         LycanitesMobs.logDebug("Projectile", "Forge registering all " + this.projectiles.size() + " projectiles...");
 
-        // New JSON Projectiles:
-        event.register(ForgeRegistries.Keys.ENTITY_TYPES,
-                helper -> {
-                    for (ProjectileInfo projectileInfo : this.projectiles.values()) {
-                        helper.register(new ResourceLocation(LycanitesMobs.MODID, projectileInfo.name), projectileInfo.getEntityType());
-                    }
-                }
-        );
+        event.register(ForgeRegistries.Keys.ENTITY_TYPES, helper -> {
+            for (String entityName : this.oldSpriteProjectiles.keySet()) {
+                helper.register(new ResourceLocation(LycanitesMobs.MODID, entityName), this.createEntityType(entityName, this.oldSpriteProjectiles.get(entityName)));
+            }
+        });
 
-        // Old Sprite Projectiles:
-        event.register(ForgeRegistries.Keys.ENTITY_TYPES,
-                helper -> {
-                    for (String entityName : this.oldSpriteProjectiles.keySet()) {
-                        helper.register(new ResourceLocation(LycanitesMobs.MODID, entityName), this.createEntityType(entityName, this.oldSpriteProjectiles.get(entityName)));
-
-                    }
-                }
-        );
-
-        // Old Model Projectiles:
-        event.register(ForgeRegistries.Keys.ENTITY_TYPES,
-                helper -> {
-                    for (String entityName : this.oldModelProjectiles.keySet()) {
-                        helper.register(new ResourceLocation(LycanitesMobs.MODID, entityName), this.createEntityType(entityName, this.oldModelProjectiles.get(entityName)));
-
-                    }
-                }
-        );
+        event.register(ForgeRegistries.Keys.ENTITY_TYPES, helper -> {
+            for (String entityName : this.oldModelProjectiles.keySet()) {
+                helper.register(new ResourceLocation(LycanitesMobs.MODID, entityName), this.createEntityType(entityName, this.oldModelProjectiles.get(entityName)));
+            }
+        });
     }
+
 
     /**
      * Creates an Entity Type for older projectiles.

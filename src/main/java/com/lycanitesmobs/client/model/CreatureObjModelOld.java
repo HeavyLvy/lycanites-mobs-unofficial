@@ -114,7 +114,7 @@ public class CreatureObjModelOld extends CreatureModel {
             return this;
         }
 
-        this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "models/" + path + ".obj"));
+        this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"));
         this.wavefrontParts = this.objModel.objParts;
         if (this.wavefrontParts.isEmpty())
             LycanitesMobs.logWarning("", "Unable to load (old format) model obj for: " + name + "");

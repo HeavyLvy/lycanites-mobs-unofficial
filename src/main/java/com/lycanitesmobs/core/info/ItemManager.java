@@ -9,7 +9,7 @@ import com.lycanitesmobs.core.StreamLoader;
 import com.lycanitesmobs.core.block.*;
 import com.lycanitesmobs.core.block.building.HiveBlock;
 import com.lycanitesmobs.core.block.effect.*;
-import com.lycanitesmobs.core.block.fluid.BaseFluidBlock;
+import com.lycanitesmobs.core.block.fluid.*;
 import com.lycanitesmobs.core.block.fluid.type.BaseFluidType;
 import com.lycanitesmobs.core.item.*;
 import com.lycanitesmobs.core.item.consumable.*;
@@ -24,6 +24,7 @@ import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -260,16 +261,16 @@ public class ItemManager extends JSONLoader {
         Block.Properties lavaBlockProperties = Block.Properties.of().mapColor(MapColor.FIRE).noCollission().randomTicks().strength(100).noLootTable().lightLevel((BlockState blockState) -> {
             return 15;
         });
-		/*this.addFluid("ooze", 0x009F9F, 3000, 3000, 0, 10, false, OozeFluidBlock, waterBrightBlockProperties, "frost", false, true);
-		this.addFluid("rabbitooze", 0x00AFAF, 3000, 3000, 0, 10, true, OozeFluidBlock, waterBrightBlockProperties, "frost", false, false);
-		this.addFluid("moglava", 0xFF5722, 3000, 5000, 1100, 15, true, MoglavaFluidBlock, lavaBlockProperties, "lava", false, true);
-		this.addFluid("acid", 0x8BC34A, 1000, 10, 40, 10, false, AcidFluidBlock, waterBrightBlockProperties, "acid", true, true);
-		this.addFluid("sharacid", 0x8BB35A, 1000, 10, 40, 10, true, AcidFluidBlock, waterBrightBlockProperties, "acid", false, false);
-		this.addFluid("poison", 0x9C27B0, 1000, 8, 20, 0, false, PoisonFluidBlock, waterBlockProperties, "poison", false, true);
-		this.addFluid("vesspoison", 0xAC27A0, 1000, 8, 20, 0, true, PoisonFluidBlock, waterBlockProperties, "poison", false, false);
-		this.addFluid("veshoney", 0xCEBC39, 4000, 4000, 0, 0, false, VeshoneyFluidBlock, waterBlockProperties, "fae", false, false);
-		ObjectManager.addDamageSource("ooze", new DamageSource("ooze"));
-		ObjectManager.addDamageSource("acid", new DamageSource("acid"));*/
+      /*  this.addFluid("ooze", 0x009F9F, 3000, 3000, 0, 10, false, OozeFluidBlock, waterBrightBlockProperties, "frost", false, true);
+        this.addFluid("rabbitooze", 0x00AFAF, 3000, 3000, 0, 10, true, OozeFluidBlock, waterBrightBlockProperties, "frost", false, false);
+        this.addFluid("moglava", 0xFF5722, 3000, 5000, 1100, 15, true, MoglavaFluidBlock, lavaBlockProperties, "lava", false, true);
+        this.addFluid("acid", 0x8BC34A, 1000, 10, 40, 10, false, AcidFluidBlock, waterBrightBlockProperties, "acid", true, true);
+        this.addFluid("sharacid", 0x8BB35A, 1000, 10, 40, 10, true, AcidFluidBlock, waterBrightBlockProperties, "acid", false, false);
+        this.addFluid("poison", 0x9C27B0, 1000, 8, 20, 0, false, PoisonFluidBlock, waterBlockProperties, "poison", false, true);
+        this.addFluid("vesspoison", 0xAC27A0, 1000, 8, 20, 0, true, PoisonFluidBlock, waterBlockProperties, "poison", false, false);
+        this.addFluid("veshoney", 0xCEBC39, 4000, 4000, 0, 0, false, VeshoneyFluidBlock, waterBlockProperties, "fae", false, false);
+        ObjectManager.addDamageSource("ooze", new DamageSource("ooze"));
+        ObjectManager.addDamageSource("acid", new DamageSource("acid"));*/
     }
 
     public void addFluid(String fluidName, Vector3f fogColor, int tintColor, int fluidTickRate, int density, int viscosity, int temperature, int luminosity, boolean multiply, Constructor<? extends BaseFluidBlock> blockClass, BlockBehaviour.Properties blockProperties, String elementName, boolean destroyItems, boolean worldgen) {

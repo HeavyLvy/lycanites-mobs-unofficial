@@ -18,8 +18,7 @@ import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public class MtlMaterialLib
-{
+public class MtlMaterialLib {
 
     public static final String COMMENT = "#";
     public static final String NEW_MATERIAL = "newmtl";
@@ -38,91 +37,68 @@ public class MtlMaterialLib
     private String path;
     private String startPath;
 
-    public MtlMaterialLib(String path)
-    {
+    public MtlMaterialLib(String path) {
         this.path = path;
-        this.startPath = path.substring(0, path.lastIndexOf('/')+1);
+        this.startPath = path.substring(0, path.lastIndexOf('/') + 1);
         materials = new ArrayList<Material>();
     }
 
-    public void parse(String content)
-    {
+    public void parse(String content) {
         String[] lines = content.split("\n");
         Material current = null;
-        for(int i = 0; i < lines.length; i++)
-        {
+        for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
             String[] parts = line.split(" ");
-            if(parts[0].equals(COMMENT))
-            {
+            if (parts[0].equals(COMMENT)) {
                 ;
-            }
-            else if(parts[0].equals(NEW_MATERIAL))
-            {
+            } else if (parts[0].equals(NEW_MATERIAL)) {
                 Material material = new Material(parts[1]);
                 materials.add(material);
                 current = material;
-            }
-            else if(parts[0].equals(AMBIENT_COLOR))
-            {
+            } else if (parts[0].equals(AMBIENT_COLOR)) {
                 current.ambientColor = new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3]));
-            }
-            else if(parts[0].equals(DIFFUSE_COLOR))
-            {
+            } else if (parts[0].equals(DIFFUSE_COLOR)) {
                 current.diffuseColor = new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3]));
-            }
-            else if(parts[0].equals(TEXTURE_DIFFUSE))
-            {
-                current.diffuseTexture = loadTexture(startPath+parts[1]);
-            }
-            else if(parts[0].equals(TEXTURE_AMBIENT))
-            {
-                current.ambientTexture = loadTexture(startPath+parts[1]);
-            }
-            else if(parts[0].equals(TRANSPARENCY_D) || parts[0].equals(TRANSPARENCY_TR))
-            {
-                current.transparency = (float)Double.parseDouble(parts[1]);
+            } else if (parts[0].equals(TEXTURE_DIFFUSE)) {
+                current.diffuseTexture = loadTexture(startPath + parts[1]);
+            } else if (parts[0].equals(TEXTURE_AMBIENT)) {
+                current.ambientTexture = loadTexture(startPath + parts[1]);
+            } else if (parts[0].equals(TRANSPARENCY_D) || parts[0].equals(TRANSPARENCY_TR)) {
+                current.transparency = (float) Double.parseDouble(parts[1]);
             }
         }
     }
 
-    private int loadTexture(String string)
-    {
-        try
-        {
-            string = string.replace("models/", "textures/"); // Search for textures in textures directory instead of models.
+    private int loadTexture(String string) {
+        try {
+            string = string.replace("modelparts/", "textures/"); // Search for textures in textures directory instead of models.
             ResourceLocation resourceLocation = new ResourceLocation(string);
             InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(resourceLocation).get().open();
             return loadTexture(ImageIO.read(inputStream));
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             LycanitesMobs.logWarning("", "Unable to load a texture from the obj material file.");
             e.printStackTrace();
         }
         return 0;
     }
 
-    public static ByteBuffer imageToByteBuffer(BufferedImage img)
-    {
+    public static ByteBuffer imageToByteBuffer(BufferedImage img) {
         int[] pixels = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
 
         int bufLen = pixels.length * 4;
         ByteBuffer oglPixelBuf = BufferUtils.createByteBuffer(bufLen);
 
-        for(int y = 0; y < img.getHeight(); y++ )
-        {
-            for(int x = 0; x < img.getWidth(); x++ )
-            {
+        for (int y = 0; y < img.getHeight(); y++) {
+            for (int x = 0; x < img.getWidth(); x++) {
                 int rgb = pixels[y * img.getWidth() + x];
                 float a = ((rgb >> 24) & 0xFF) / 255f;
                 float r = ((rgb >> 16) & 0xFF) / 255f;
                 float g = ((rgb >> 8) & 0xFF) / 255f;
                 float b = ((rgb >> 0) & 0xFF) / 255f;
-                oglPixelBuf.put((byte)(r * 255f));
-                oglPixelBuf.put((byte)(g * 255f));
-                oglPixelBuf.put((byte)(b * 255f));
-                oglPixelBuf.put((byte)(a * 255f));
+                oglPixelBuf.put((byte) (r * 255f));
+                oglPixelBuf.put((byte) (g * 255f));
+                oglPixelBuf.put((byte) (b * 255f));
+                oglPixelBuf.put((byte) (a * 255f));
             }
         }
 
@@ -130,8 +106,7 @@ public class MtlMaterialLib
         return oglPixelBuf;
     }
 
-    public static int loadTexture(BufferedImage img)
-    {
+    public static int loadTexture(BufferedImage img) {
         ByteBuffer oglPixelBuf = imageToByteBuffer(img);
         int id = glGenTextures();
         int target = GL_TEXTURE_2D;
@@ -148,8 +123,7 @@ public class MtlMaterialLib
         return id;
     }
 
-    public List<Material> getMaterials()
-    {
+    public List<Material> getMaterials() {
         return materials;
     }
 

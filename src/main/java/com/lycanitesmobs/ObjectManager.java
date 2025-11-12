@@ -287,7 +287,7 @@ public class ObjectManager {
                 helper -> {
                     for (Supplier<? extends Block> block : blocks.values()) {
                         BlockTypeGetter getter = (BlockTypeGetter) block.get();
-                        LycanitesMobs.LOGGER.info("Registering block: " + getter.getRegistryName());
+                        // LycanitesMobs.LOGGER.info("Registering block: " + getter.getRegistryName());
                         helper.register(getter.getRegistryName(), block.get());
                     }
                 }

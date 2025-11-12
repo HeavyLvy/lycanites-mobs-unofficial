@@ -129,7 +129,7 @@ public abstract class ItemObjModel implements IAnimationModel {
         }
 
         // Load Animations:
-        ResourceLocation animationLocation = new ResourceLocation(LycanitesMobs.MODID, "models/" + path + "_animation.json");
+        ResourceLocation animationLocation = new ResourceLocation(LycanitesMobs.MODID, "modelparts/" + path + "_animation.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
             InputStream in = Minecraft.getInstance().getResourceManager().getResource(animationLocation).get().open();

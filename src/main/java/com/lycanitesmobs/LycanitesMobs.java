@@ -14,9 +14,11 @@ import com.lycanitesmobs.core.config.ConfigDebug;
 import com.lycanitesmobs.core.config.CoreConfig;
 import com.lycanitesmobs.core.container.*;
 import com.lycanitesmobs.core.dungeon.DungeonManager;
+import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.EntityFactory;
 import com.lycanitesmobs.core.helpers.LMReflectionHelper;
 import com.lycanitesmobs.core.info.*;
+import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.info.projectile.ProjectileManager;
 import com.lycanitesmobs.core.item.consumable.ItemHalloweenTreat;
 import com.lycanitesmobs.core.item.consumable.ItemWinterGift;
@@ -205,21 +207,18 @@ public class LycanitesMobs {
      * Some initialization must be done after registries have been initialized so we do them on common setup
      */
     public static void loadValues() {
-        /**
-         * Creature Manager Values
-         */
         var creatureManager = CreatureManager.getInstance();
         for (CreatureInfo creatureInfo : creatureManager.creatures.values()) {
-            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
-            LycanitesMobs.logInfo("", "Registeredcreature: " + entityType);
-            creatureInfo.entityType = (EntityType<? extends LivingEntity>) entityType;
-            if (creatureInfo.entityType instanceof EntityTypeGetter getter) {
-                getter.setRegistryName(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
-            }
+            ResourceLocation id = new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName());
+            EntityType<?> t = ForgeRegistries.ENTITY_TYPES.getValue(id);
+            if (t == null || !id.equals(ForgeRegistries.ENTITY_TYPES.getKey(t))) continue;
+            creatureInfo.entityType = (EntityType<? extends LivingEntity>) t;
             EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor, creatureInfo.getName());
             creatureInfo.init();
         }
+        ProjectileManager.getInstance().bindRegisteredTypes();
     }
+
 
     /**
      * Prints an info message into the console.

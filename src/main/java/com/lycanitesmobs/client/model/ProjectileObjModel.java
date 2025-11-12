@@ -141,7 +141,7 @@ public class ProjectileObjModel extends ProjectileModel {
         }
 
         // Load Animations:
-        ResourceLocation animationLocation = new ResourceLocation(modInfo.modid, "models/" + path + "_animation.json");
+        ResourceLocation animationLocation = new ResourceLocation(modInfo.modid, "modelparts/" + path + "_animation.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
             InputStream in = Minecraft.getInstance().getResourceManager().getResource(animationLocation).get().open();

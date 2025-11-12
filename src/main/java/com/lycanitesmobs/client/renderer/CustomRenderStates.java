@@ -9,12 +9,14 @@ import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 import static com.lycanitesmobs.client.renderer.ClientModEvents.POS_TEX_NORMAL_SHADER;
@@ -183,23 +185,23 @@ public class CustomRenderStates extends RenderStateShard {
     /**
      * End of old rendering logic, subject to be removed once I understand render states more
      */
-
     public static final RenderType OBJ_OUTLINE_RENDER_TYPE = RenderType.create(
             "lm_obj_outline_no_cull",
             POS_TEX_NORMAL,
             VertexFormat.Mode.TRIANGLES,
             256,
-            true,
+            false,
             false,
             RenderType.CompositeState.builder()
-                    .setShaderState(new RenderStateShard.ShaderStateShard(() -> POS_TEX_NORMAL_SHADER))
-                    .setTransparencyState(DEFAULT_ALPHA)
+                    .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorShader))
+                    .setTransparencyState(NO_TRANSPARENCY)
                     .setDepthTestState(NO_DEPTH_TEST)
                     .setCullState(NO_CULL)
-                    .setTexturingState(OUTLINE_TEXTURING)
+                    .setWriteMaskState(COLOR_WRITE)
                     .setOutputState(OUTLINE_TARGET)
                     .createCompositeState(false)
     );
+
 
     public CustomRenderStates(String p_i225973_1_, Runnable p_i225973_2_, Runnable p_i225973_3_) {
         super(p_i225973_1_, p_i225973_2_, p_i225973_3_);
@@ -301,7 +303,9 @@ public class CustomRenderStates extends RenderStateShard {
         return RenderType.create("lm_obj_outline_no_cull", POS_COL_TEX_LIGHT_FADE_NORMAL, VertexFormat.Mode.TRIANGLES, 256, true, false, renderTypeState);
     }
 
-    public static RenderType getSpriteRenderType(ResourceLocation texture) {
+
+    public static RenderType getSpriteRenderType(@Nullable ResourceLocation texture) {
+        if (texture == null) texture = MissingTextureAtlasSprite.getLocation();
         RenderType.CompositeState state = RenderType.CompositeState.builder()
                 .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorTexShader))
                 .setTextureState(new TextureStateShard(texture, false, false))
