@@ -6271,7 +6271,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     @Override
     public void playSound(SoundEvent sound, float volume, float pitch) {
         if (sound == null) {
-            LMHelperClass.logErrorMessage("Null Sound trying to be played by: " + this.getType());
+            LMHelperClass.logErrorMessageOnce("Null Sound trying to be played by: " + this.getType());
             return;
         }
         super.playSound(sound, volume, pitch);
