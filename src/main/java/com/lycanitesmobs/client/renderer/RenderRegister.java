@@ -5,6 +5,7 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.client.model.blocky.Balayang;
 import com.lycanitesmobs.client.model.blocky.GrueModel;
 import com.lycanitesmobs.client.model.blocky.NymphModel;
+import com.lycanitesmobs.client.model.blocky.WraithModel;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.CustomProjectileEntity;
@@ -53,6 +54,7 @@ public class RenderRegister {
         event.registerLayerDefinition(Balayang.LAYER_LOCATION, Balayang::createBodyLayer);
         event.registerLayerDefinition(NymphModel.LAYER_LOCATION, NymphModel::createBodyLayer);
         event.registerLayerDefinition(GrueModel.LAYER_LOCATION, GrueModel::createBodyLayer);
+        event.registerLayerDefinition(WraithModel.LAYER_LOCATION, WraithModel::createBodyLayer);
     }
 
     @SubscribeEvent
@@ -69,6 +71,10 @@ public class RenderRegister {
             } else if (Objects.equals(creatureInfo.getName(), "grue")) {
                 LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
                 event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/grue.png"), new GrueModel<>(context.bakeLayer(GrueModel.LAYER_LOCATION))));
+                continue;
+            } else if (Objects.equals(creatureInfo.getName(), "wraith")) {
+                LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
+                event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/wraith.png"), new WraithModel<>(context.bakeLayer(WraithModel.LAYER_LOCATION))));
                 continue;
             }
             event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new CreatureRenderer<>(creatureInfo.getName(), dispatcher, (float) creatureInfo.width / 2));

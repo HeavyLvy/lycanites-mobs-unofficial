@@ -148,7 +148,6 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
             }
             this.renderModel(entity, matrixStack, renderTypeBuffer, layerCreatureBase, time, distance, loop, lookYaw, lookPitch, scale, brightness, fade, invisible, allyInvisible);
         }
-        var context = new ContextUtils.AnimationContext(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness, texture);
         this.getMainModel().clearAnimationFrames();
         matrixStack.popPose();
         VBOBatcher.getInstance().endBatches();

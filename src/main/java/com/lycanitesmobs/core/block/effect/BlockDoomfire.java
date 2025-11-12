@@ -27,18 +27,18 @@ import java.util.Random;
 
 public class BlockDoomfire extends BlockFireBase {
 
-	public BlockDoomfire(Block.Properties properties) {
-		super(properties, "doomfire");
+    public BlockDoomfire(Block.Properties properties) {
+        super(properties, "doomfire");
 
         // Stats:
-        this.tickRate = 30;
+        this.tickRate = 100;
         this.dieInRain = false;
         this.triggerTNT = false;
-        this.agingRate = 8;
-        this.spreadChance = 3;
+        this.agingRate = 2;
+        this.spreadChance = 0.6f;
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;
-	}
+    }
 
     /*@Override
     public Item getItemDropped(BlockState state, Random random, int zero) {
@@ -49,20 +49,20 @@ public class BlockDoomfire extends BlockFireBase {
     public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
         super.entityInside(blockState, world, pos, entity);
 
-        if(entity instanceof LivingEntity) {
+        if (entity instanceof LivingEntity) {
             MobEffect decay = ObjectManager.getEffect("decay");
-            if(decay != null) {
+            if (decay != null) {
                 MobEffectInstance effect = new MobEffectInstance(decay, 5 * 20, 0);
-                LivingEntity entityLiving = (LivingEntity)entity;
-                if(entityLiving.canBeAffected(effect))
+                LivingEntity entityLiving = (LivingEntity) entity;
+                if (entityLiving.canBeAffected(effect))
                     entityLiving.addEffect(effect);
             }
         }
 
-        if(entity instanceof ItemEntity)
-            if(((ItemEntity)entity).getItem().getItem() == ObjectManager.getItem("doomfirecharge"))
+        if (entity instanceof ItemEntity)
+            if (((ItemEntity) entity).getItem().getItem() == ObjectManager.getItem("doomfirecharge"))
                 return;
-        if(entity.isInvulnerableTo(DamageSourceHelper.IN_FIRE))
+        if (entity.isInvulnerableTo(DamageSourceHelper.IN_FIRE))
             return;
 
         entity.hurt(DamageSourceHelper.IN_FIRE, 1);

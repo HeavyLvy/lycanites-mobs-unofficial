@@ -1,8 +1,12 @@
 package com.lycanitesmobs.client;
 
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.renderer.EquipmentPartRenderer;
 import com.lycanitesmobs.core.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.info.CreatureManager;
+import com.lycanitesmobs.core.info.CreatureType;
 import com.lycanitesmobs.core.info.ItemManager;
+import com.lycanitesmobs.core.item.ItemColorCustomSpawnEgg;
 import com.lycanitesmobs.core.item.special.ItemSoulgazer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -16,13 +20,16 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RenderBlockScreenEffectEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.awt.*;
 
+@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ClientEventListener {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
@@ -42,7 +49,7 @@ public class ClientEventListener {
         if (event.getItemStack().getItem() instanceof ItemSoulgazer) {
             ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(event.getEntity());
             if (extendedPlayer != null && extendedPlayer.creatureStudyCooldown > 0) {
-                event.getToolTip().add(Component.translatable("message.beastiary.study.cooldown").append(" " + String.format("%.0f", (float)extendedPlayer.creatureStudyCooldown / 20) + "s").withStyle(ChatFormatting.BLUE));
+                event.getToolTip().add(Component.translatable("message.beastiary.study.cooldown").append(" " + String.format("%.0f", (float) extendedPlayer.creatureStudyCooldown / 20) + "s").withStyle(ChatFormatting.BLUE));
             }
         }
     }
@@ -55,7 +62,7 @@ public class ClientEventListener {
         if (entityLiving == null) {
             return;
         }
-        if(entityLiving.isInLava() && (!entityLiving.isOnFire() || entityLiving.hasEffect(MobEffects.FIRE_RESISTANCE))) {
+        if (entityLiving.isInLava() && (!entityLiving.isOnFire() || entityLiving.hasEffect(MobEffects.FIRE_RESISTANCE))) {
             event.scaleNearPlaneDistance(0.5F);
             event.setCanceled(true);
         }
@@ -64,8 +71,21 @@ public class ClientEventListener {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void onBlockOverlay(RenderBlockScreenEffectEvent event) {
-        if(event.getBlockState().getBlock() == Blocks.FIRE && (!event.getPlayer().isOnFire() || event.getPlayer().hasEffect(MobEffects.FIRE_RESISTANCE))) {
+        if (event.getBlockState().getBlock() == Blocks.FIRE && (!event.getPlayer().isOnFire() || event.getPlayer().hasEffect(MobEffects.FIRE_RESISTANCE))) {
             event.setCanceled(true);
+        }
+    }
+
+    /**
+     * Registers Colored Items
+     */
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        for (CreatureType creatureType : CreatureManager.getInstance().creatureTypes.values()) {
+            if (creatureType.spawnEgg.get() != null) {
+                event.getItemColors().register(new ItemColorCustomSpawnEgg(), creatureType.spawnEgg.get());
+            }
         }
     }
 }

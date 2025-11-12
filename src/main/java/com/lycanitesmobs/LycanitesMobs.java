@@ -6,6 +6,7 @@ import com.lycanitesmobs.client.ModelManager;
 import com.lycanitesmobs.client.TextureManager;
 import com.lycanitesmobs.client.gui.*;
 import com.lycanitesmobs.core.*;
+import com.lycanitesmobs.core.block.BlockFireBase;
 import com.lycanitesmobs.core.capabilities.*;
 import com.lycanitesmobs.core.command.CommandManager;
 import com.lycanitesmobs.core.compatibility.DLDungeons;
@@ -32,6 +33,8 @@ import com.lycanitesmobs.core.worldgen.WorldGeneratorBiomeModifier;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -59,6 +62,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import static com.lycanitesmobs.ObjectManager.blocks;
 
 
 @Mod(LycanitesMobs.MODID)
@@ -193,7 +198,7 @@ public class LycanitesMobs {
         // Creatures:
         CreatureManager.getInstance().startup(modInfo);
         // Projectiles:
-        // ProjectileManager.getInstance().startup(modInfo);
+        ProjectileManager.getInstance().startup(modInfo);
     }
 
     /**
@@ -315,6 +320,7 @@ public class LycanitesMobs {
         TextureManager.getInstance().createTextures(modInfo);
         ModelManager.getInstance().createModels();
         ClientManager.getInstance().initRenderRegister();
+        ClientManager.getInstance().initBlockRenderTypes();
         //New menu screen registration
 
         event.enqueueWork(

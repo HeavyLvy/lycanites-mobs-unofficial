@@ -42,11 +42,11 @@ public class BlockFrostfire extends BlockFireBase {
         super(properties, name);
 
         // Stats:
-        this.tickRate = 30;
+        this.tickRate = 100;
         this.dieInRain = false;
         this.triggerTNT = false;
         this.agingRate = 3;
-        this.spreadChance = 1;
+        this.spreadChance = 0.6f;
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;
 
@@ -60,16 +60,15 @@ public class BlockFrostfire extends BlockFireBase {
     @Override
     public boolean canCatchFire(BlockGetter world, BlockPos pos, Direction face) {
         Block block = world.getBlockState(pos).getBlock();
-        if(block ==  Blocks.ICE || block == Blocks.PACKED_ICE)
+        if (block == Blocks.ICE || block == Blocks.PACKED_ICE)
             return true;
         return false;
     }
 
 
-
     @Override
     public boolean isBlockFireSource(BlockState state, LevelAccessor world, BlockPos pos, Direction side) {
-        if(state.getBlock() == Blocks.PACKED_ICE || state.getBlock() == Blocks.SNOW_BLOCK)
+        if (state.getBlock() == Blocks.PACKED_ICE || state.getBlock() == Blocks.SNOW_BLOCK)
             return true;
         return false;
     }
@@ -77,7 +76,7 @@ public class BlockFrostfire extends BlockFireBase {
     @Override
     public int getBlockFlammability(BlockGetter world, BlockPos pos, Direction face) {
         Block block = world.getBlockState(pos).getBlock();
-        if(block ==  Blocks.ICE)
+        if (block == Blocks.ICE)
             return 20;
         return 0;
     }
@@ -89,7 +88,7 @@ public class BlockFrostfire extends BlockFireBase {
 
     @Override
     public void burnBlockReplace(Level world, BlockPos pos, int newFireAge) {
-        if(world.getBlockState(pos).getBlock() == Blocks.ICE) {
+        if (world.getBlockState(pos).getBlock() == Blocks.ICE) {
             world.setBlock(pos, Blocks.PACKED_ICE.defaultBlockState(), 3);
             return;
         }
@@ -98,7 +97,7 @@ public class BlockFrostfire extends BlockFireBase {
 
     @Override
     public void burnBlockDestroy(Level world, BlockPos pos) {
-        if(world.getBlockState(pos).getBlock() == Blocks.ICE) {
+        if (world.getBlockState(pos).getBlock() == Blocks.ICE) {
             world.setBlock(pos, Blocks.PACKED_ICE.defaultBlockState(), 3);
             return;
         }
@@ -109,16 +108,16 @@ public class BlockFrostfire extends BlockFireBase {
     public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
         super.entityInside(blockState, world, pos, entity);
 
-        if(entity instanceof LivingEntity) {
+        if (entity instanceof LivingEntity) {
             MobEffectInstance effect = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 3 * 20, 0);
-            LivingEntity entityLiving = (LivingEntity)entity;
-            if(entityLiving.canBeAffected(effect))
+            LivingEntity entityLiving = (LivingEntity) entity;
+            if (entityLiving.canBeAffected(effect))
                 entityLiving.addEffect(effect);
             else
                 return; // Entities immune to slow are immune to frostfire damage.
         }
 
-        if(entity instanceof ItemEntity)
+        if (entity instanceof ItemEntity)
             return;
         entity.hurt(DamageSourceHelper.MAGIC, 2);
     }

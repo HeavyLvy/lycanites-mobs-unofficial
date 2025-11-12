@@ -68,10 +68,8 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
         }
 
         if (ctx == ItemDisplayContext.GUI) {
-            // Fix upside-down items in inventory: rotate 180° around Z
             pose.mulPose(Axis.ZP.rotationDegrees(180.0F));
 
-            // Now compute the AABB and center/offset as you already do
             org.joml.Matrix4f matSoFar = new org.joml.Matrix4f(pose.last().pose());
             AA2D aabb = aabb2DInPose(model, matSoFar);
             if (aabb.valid()) {
@@ -82,6 +80,8 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 float dy = Mth.clamp(-cy, -maxNudge, maxNudge);
                 pose.translate(dx, dy, 0f);
             }
+        } else {
+            pose.translate(-0.5, -2.5, -0.5);
         }
 
         model.generateAnimationFrames(itemStack, null, loop, null);
@@ -144,7 +144,6 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
 //		if(layer instanceof LayerItemDye) {
 //			renderType = CustomRenderStates.getObjColorOnlyRenderType(texture, model.getBlending(itemStack, layer), model.getGlow(itemStack, layer));
 //		}
-
         VBOObjModel.renderType = renderType;
         VBOObjModel.renderNormal = true;
         VBOObjModel.tex = texture;

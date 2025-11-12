@@ -32,11 +32,11 @@ public class BlockSmitefire extends BlockFireBase {
         super(properties, name);
 
         // Stats:
-        this.tickRate = 30;
+        this.tickRate = 100;
         this.dieInRain = false;
         this.triggerTNT = false;
-        this.agingRate = 3;
-        this.spreadChance = 2;
+        this.agingRate = 2;
+        this.spreadChance = 0.6f;
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;
     }
@@ -50,21 +50,21 @@ public class BlockSmitefire extends BlockFireBase {
     public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
         super.entityInside(blockState, world, pos, entity);
 
-        if(entity instanceof LivingEntity) {
+        if (entity instanceof LivingEntity) {
             MobEffect effect = ObjectManager.getEffect("smited");
-            if(effect != null) {
+            if (effect != null) {
                 MobEffectInstance effectInstance = new MobEffectInstance(effect, 10 * 20, 0);
-                LivingEntity entityLiving = (LivingEntity)entity;
-                if(entityLiving.canBeAffected(effectInstance))
+                LivingEntity entityLiving = (LivingEntity) entity;
+                if (entityLiving.canBeAffected(effectInstance))
                     entityLiving.addEffect(effectInstance);
             }
         }
 
-        if(entity instanceof ItemEntity)
-            if(((ItemEntity)entity).getItem().getItem() == ObjectManager.getItem("aetherwavecharge"))
+        if (entity instanceof ItemEntity)
+            if (((ItemEntity) entity).getItem().getItem() == ObjectManager.getItem("aetherwavecharge"))
                 return;
 
-        if(entity.isInvulnerableTo(DamageSourceHelper.IN_FIRE))
+        if (entity.isInvulnerableTo(DamageSourceHelper.IN_FIRE))
             return;
 
         entity.hurt(DamageSourceHelper.IN_FIRE, 1);
@@ -73,7 +73,7 @@ public class BlockSmitefire extends BlockFireBase {
 
     @Override
     public boolean isBlockFireSource(BlockState state, LevelAccessor world, BlockPos pos, Direction side) {
-        if(state.getBlock() == Blocks.DIAMOND_BLOCK || state.getBlock() == Blocks.GOLD_BLOCK) {
+        if (state.getBlock() == Blocks.DIAMOND_BLOCK || state.getBlock() == Blocks.GOLD_BLOCK) {
             return true;
         }
         return super.isBlockFireSource(state, world, pos, side);

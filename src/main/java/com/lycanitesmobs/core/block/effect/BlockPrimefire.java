@@ -28,14 +28,14 @@ public class BlockPrimefire extends BlockFireBase {
     }
 
     public BlockPrimefire(Properties properties, String name) {
-        super(properties,  name);
+        super(properties, name);
 
         // Stats:
-        this.tickRate = 30;
+        this.tickRate = 100;
         this.dieInRain = false;
         this.triggerTNT = true;
         this.agingRate = 2;
-        this.spreadChance = 6;
+        this.spreadChance = 0.6f;
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;
     }
@@ -49,21 +49,21 @@ public class BlockPrimefire extends BlockFireBase {
     public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
         super.entityInside(blockState, world, pos, entity);
 
-        if(entity instanceof LivingEntity) {
+        if (entity instanceof LivingEntity) {
             MobEffect effect = ObjectManager.getEffect("smouldering");
-            if(effect != null) {
+            if (effect != null) {
                 MobEffectInstance effectInstance = new MobEffectInstance(effect, 10 * 20, 0);
-                LivingEntity entityLiving = (LivingEntity)entity;
-                if(entityLiving.canBeAffected(effectInstance))
+                LivingEntity entityLiving = (LivingEntity) entity;
+                if (entityLiving.canBeAffected(effectInstance))
                     entityLiving.addEffect(effectInstance);
             }
         }
 
-        if(entity instanceof ItemEntity)
-            if(((ItemEntity)entity).getItem().getItem() == ObjectManager.getItem("primeembercharge"))
+        if (entity instanceof ItemEntity)
+            if (((ItemEntity) entity).getItem().getItem() == ObjectManager.getItem("primeembercharge"))
                 return;
 
-        if(entity.isInvulnerableTo(DamageSourceHelper.IN_FIRE))
+        if (entity.isInvulnerableTo(DamageSourceHelper.IN_FIRE))
             return;
 
         entity.hurt(DamageSourceHelper.IN_FIRE, 2);

@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -301,19 +302,21 @@ public class CustomRenderStates extends RenderStateShard {
     }
 
     public static RenderType getSpriteRenderType(ResourceLocation texture) {
-        if (POS_COL_TEX_NORMAL == null) {
-            ImmutableMap.Builder<String, VertexFormatElement> vertexFormatMapBuilder = ImmutableMap.builder();
-            vertexFormatMapBuilder.put("Position", DefaultVertexFormat.ELEMENT_POSITION);
-            vertexFormatMapBuilder.put("Color", DefaultVertexFormat.ELEMENT_COLOR);
-            vertexFormatMapBuilder.put("UV0", DefaultVertexFormat.ELEMENT_UV0);
-            vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
-            vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
-
-            POS_COL_TEX_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
-        }
-        RenderType.CompositeState renderTypeState = RenderType.CompositeState.builder()
-                .setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
+        RenderType.CompositeState state = RenderType.CompositeState.builder()
+                .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorTexShader))
+                .setTextureState(new TextureStateShard(texture, false, false))
+                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .setLightmapState(LIGHTMAP)
+                .setOverlayState(OVERLAY)
+                .setCullState(NO_CULL)
                 .createCompositeState(true);
-        return RenderType.create("lm_sprite", POS_COL_TEX_NORMAL, VertexFormat.Mode.QUADS, 256, true, false, renderTypeState);
+
+        return RenderType.create(
+                "lm_sprite",
+                DefaultVertexFormat.POSITION_COLOR_TEX,
+                VertexFormat.Mode.QUADS,
+                256, true, false, state
+        );
     }
+
 }
