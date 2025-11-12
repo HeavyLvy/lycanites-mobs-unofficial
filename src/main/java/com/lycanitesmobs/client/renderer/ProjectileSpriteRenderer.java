@@ -30,18 +30,13 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
 
     @Override
     public void render(BaseProjectileEntity entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
-        if (entity instanceof CustomProjectileEntity && ((CustomProjectileEntity) entity).projectileInfo == null) {
+        if (entity instanceof CustomProjectileEntity && ((CustomProjectileEntity) entity).projectileInfo == null)
             return;
-        }
-        if (entity.getClass() == LaserEndProjectileEntity.class) {
-            return;
-        }
+        if (entity.getClass() == LaserEndProjectileEntity.class) return;
 
-        // Render States:
         float loop = (float) entity.tickCount + Math.min(1, partialTicks);
         float scale = entity.getProjectileScale();
 
-        // Render Laser:
         if (entity instanceof CustomProjectileEntity && ((CustomProjectileEntity) entity).getLaserEnd() != null) {
             matrixStack.pushPose();
             this.renderLaser((CustomProjectileEntity) entity, matrixStack, renderTypeBuffer, ((CustomProjectileEntity) entity).laserWidth / 4, loop);
@@ -49,18 +44,18 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
             return;
         }
 
-        // Render Projectile Sprite:
         matrixStack.pushPose();
         matrixStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-        matrixStack.mulPose(new Quaternionf(new AxisAngle4f(180.0F, 0.0F, 1.0F, 0.0F)));
-        matrixStack.translate(0, entity.getTextureOffsetY(), 0); // translate
-        matrixStack.mulPose(new Quaternionf(new AxisAngle4f(loop * entity.rollSpeed * 4, 0, 0, 1))); // Projectile Spinning
-        matrixStack.scale(scale, scale, scale); // Projectile Scaling
+        matrixStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F));
+        matrixStack.translate(0, entity.getTextureOffsetY(), 0);
+        if (entity.rollSpeed != 0) matrixStack.mulPose(com.mojang.math.Axis.ZP.rotation(loop * entity.rollSpeed * 4));
+        matrixStack.scale(scale, scale, scale);
         ResourceLocation texture = this.getTextureLocation(entity);
         RenderType rendertype = CustomRenderStates.getSpriteRenderType(texture);
         this.renderSprite(entity, matrixStack, renderTypeBuffer, rendertype, entity.textureScale);
         matrixStack.popPose();
     }
+
 
     public void renderSprite(BaseProjectileEntity entity, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, RenderType rendertype, float scale) {
         float textureWidth = 0.25F;
@@ -109,24 +104,25 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
         double laserSize = entity.position().distanceTo(entity.getLaserEnd());
         float spacing = 1;
         double factor = spacing / laserSize;
-        if (laserSize <= 0) {
-            return;
-        }
+        if (laserSize <= 0) return;
+
         ResourceLocation texture = this.getTextureLocation(entity);
         RenderType rendertype = CustomRenderStates.getSpriteRenderType(texture);
         Vec3 direction = entity.getLaserEnd().subtract(entity.position()).normalize();
+
         for (float segment = 0; segment <= laserSize; segment += factor) {
             matrixStack.pushPose();
             matrixStack.translate(segment * direction.x() * spacing, segment * direction.y() * spacing, segment * direction.z() * spacing);
-            matrixStack.translate(0, entity.getTextureOffsetY(), 0); // translate
+            matrixStack.translate(0, entity.getTextureOffsetY(), 0);
             matrixStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-            matrixStack.mulPose(new Quaternionf(new AxisAngle4f(180.0F, 0.0F, 1.0F, 0.0F)));
-            matrixStack.scale(scale, scale, scale); // Laser Scaling
-            matrixStack.mulPose(new Quaternionf(new AxisAngle4f(loop * entity.rollSpeed, 0, 0, 1))); // Projectile Spinning
+            matrixStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F));
+            if (entity.rollSpeed != 0) matrixStack.mulPose(com.mojang.math.Axis.ZP.rotation(loop * entity.rollSpeed));
+            matrixStack.scale(scale, scale, scale);
             this.renderSprite(entity, matrixStack, renderTypeBuffer, rendertype, scale);
             matrixStack.popPose();
         }
     }
+
 
     @Override
     public ResourceLocation getTextureLocation(BaseProjectileEntity entity) {
