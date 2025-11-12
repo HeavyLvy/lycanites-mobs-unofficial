@@ -189,13 +189,12 @@ public class ItemManager extends JSONLoader {
         //if (true) return;
         //.tab(this.itemsGroup)
         // Summoning Staves:
-        /*Item.Properties summoningStaffProperties = new Item.Properties().stacksTo(1).durability(500);
+        Item.Properties summoningStaffProperties = new Item.Properties().stacksTo(1).durability(500);
         ObjectManager.addItem("summoningstaff", () -> new ItemStaffSummoning(summoningStaffProperties, "summoningstaff", "summoningstaff"));
         ObjectManager.addItem("stablesummoningstaff", () -> new ItemStaffStable(summoningStaffProperties, "stablesummoningstaff", "staffstable"));
         ObjectManager.addItem("bloodsummoningstaff", () -> new ItemStaffBlood(summoningStaffProperties, "bloodsummoningstaff", "staffblood"));
         ObjectManager.addItem("sturdysummoningstaff", () -> new ItemStaffSturdy(summoningStaffProperties, "sturdysummoningstaff", "staffsturdy"));
         ObjectManager.addItem("savagesummoningstaff", () -> new ItemStaffSavage(summoningStaffProperties, "savagesummoningstaff", "staffsavage"));
-*/
         // Utilities:
         ObjectManager.addBlock("summoningpedestal", () -> new BlockSummoningPedestal(Block.Properties.of().sound(SoundType.METAL).strength(5, 10)), false);
         ObjectManager.addBlock("equipmentforge_lesser", () -> new BlockEquipmentForge(Block.Properties.of().sound(SoundType.WOOD).strength(5, 10), 1), false);
@@ -261,49 +260,52 @@ public class ItemManager extends JSONLoader {
         Block.Properties lavaBlockProperties = Block.Properties.of().mapColor(MapColor.FIRE).noCollission().randomTicks().strength(100).noLootTable().lightLevel((BlockState blockState) -> {
             return 15;
         });
-      /*  this.addFluid("ooze", 0x009F9F, 3000, 3000, 0, 10, false, OozeFluidBlock, waterBrightBlockProperties, "frost", false, true);
-        this.addFluid("rabbitooze", 0x00AFAF, 3000, 3000, 0, 10, true, OozeFluidBlock, waterBrightBlockProperties, "frost", false, false);
-        this.addFluid("moglava", 0xFF5722, 3000, 5000, 1100, 15, true, MoglavaFluidBlock, lavaBlockProperties, "lava", false, true);
-        this.addFluid("acid", 0x8BC34A, 1000, 10, 40, 10, false, AcidFluidBlock, waterBrightBlockProperties, "acid", true, true);
-        this.addFluid("sharacid", 0x8BB35A, 1000, 10, 40, 10, true, AcidFluidBlock, waterBrightBlockProperties, "acid", false, false);
-        this.addFluid("poison", 0x9C27B0, 1000, 8, 20, 0, false, PoisonFluidBlock, waterBlockProperties, "poison", false, true);
-        this.addFluid("vesspoison", 0xAC27A0, 1000, 8, 20, 0, true, PoisonFluidBlock, waterBlockProperties, "poison", false, false);
-        this.addFluid("veshoney", 0xCEBC39, 4000, 4000, 0, 0, false, VeshoneyFluidBlock, waterBlockProperties, "fae", false, false);
-        ObjectManager.addDamageSource("ooze", new DamageSource("ooze"));
-        ObjectManager.addDamageSource("acid", new DamageSource("acid"));*/
+       /* this.addFluid("ooze", 0x009F9F, 3000, 3000, 0, 10, false, OozeFluidBlock.class, waterBrightBlockProperties, "frost", false, true);
+        this.addFluid("rabbitooze", 0x00AFAF, 3000, 3000, 0, 10, true, OozeFluidBlock.class, waterBrightBlockProperties, "frost", false, false);
+        this.addFluid("moglava", 0xFF5722, 3000, 5000, 1100, 15, true, MoglavaFluidBlock.class, lavaBlockProperties, "lava", false, true);
+        this.addFluid("acid", 0x8BC34A, 1000, 10, 40, 10, false, AcidFluidBlock.class, waterBrightBlockProperties, "acid", true, true);
+        this.addFluid("sharacid", 0x8BB35A, 1000, 10, 40, 10, true, AcidFluidBlock.class, waterBrightBlockProperties, "acid", false, false);
+        this.addFluid("poison", 0x9C27B0, 1000, 8, 20, 0, false, PoisonFluidBlock.class, waterBlockProperties, "poison", false, true);
+        this.addFluid("vesspoison", 0xAC27A0, 1000, 8, 20, 0, true, PoisonFluidBlock.class, waterBlockProperties, "poison", false, false);
+        this.addFluid("veshoney", 0xCEBC39, 4000, 4000, 0, 0, false, VeshoneyFluidBlock.class, waterBlockProperties, "fae", false, false);
+*/
+        ObjectManager.addDamageType("ooze");
+        ObjectManager.addDamageType("acid");
     }
 
-    public void addFluid(String fluidName, Vector3f fogColor, int tintColor, int fluidTickRate, int density, int viscosity, int temperature, int luminosity, boolean multiply, Constructor<? extends BaseFluidBlock> blockClass, BlockBehaviour.Properties blockProperties, String elementName, boolean destroyItems, boolean worldgen) {
+    public void addFluid(String fluidName, int fluidColor, int density, int viscosity, int temperature, int luminosity, boolean multiply, Class<? extends BaseFluidBlock> blockClass, BlockBehaviour.Properties blockProperties, String elementName, boolean destroyItems, boolean worldgen) {
         ElementInfo element = ElementManager.getInstance().getElement(elementName);
-        FluidBuilder builder = new FluidBuilder(fluidName, new ResourceLocation(LycanitesMobs.MODID, fluidName));
-        FluidType fluidType = builder.createFluidType(new ResourceLocation(LycanitesMobs.MODID, "block/" + fluidName + "_still"), new ResourceLocation(LycanitesMobs.MODID, "block/" + fluidName + "_flowing"), null,
-                tintColor, fogColor, density, viscosity, temperature, luminosity, multiply);
-        ForgeFlowingFluid.Properties fluidProperties = builder.fluidProperties(fluidType, fluidTickRate, ObjectManager.getFluidBlock(fluidName));
+        Vector3f fogColor = new Vector3f(((fluidColor >> 16) & 0xFF) / 255f, ((fluidColor >> 8) & 0xFF) / 255f, (fluidColor & 0xFF) / 255f);
+        int tickRate = (viscosity >= 4000) ? 30 : 5;
 
+        FluidBuilder builder = new FluidBuilder(fluidName, new ResourceLocation(LycanitesMobs.MODID, fluidName));
+        FluidType fluidType = builder.createFluidType(
+                new ResourceLocation(LycanitesMobs.MODID, "block/" + fluidName + "_still"),
+                new ResourceLocation(LycanitesMobs.MODID, "block/" + fluidName + "_flowing"),
+                null,
+                fluidColor, fogColor, density, viscosity, temperature, luminosity, multiply
+        );
+        ForgeFlowingFluid.Properties fluidProperties = builder.fluidProperties(fluidType, tickRate, () -> ObjectManager.getFluidBlock(fluidName));
 
         ObjectManager.addFluid(fluidName, new CustomFluid.Still(fluidProperties, fluidName));
         ObjectManager.addFluid(fluidName + "_flowing", new CustomFluid.Flowing(fluidProperties, fluidName + "_flowing"));
         ObjectManager.addSound(fluidName, "block." + fluidName);
-        //TODO: add bucket to itemsGroup
-        //.tab(this.itemsGroup)
+
         Item.Properties bucketProperties = new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1);
-        //.setRegistryName(LycanitesMobs.MODID, fluidName + "_bucket")
         ObjectManager.addItem(fluidName + "_bucket", () -> new BucketItem(() -> builder.stillFluid, bucketProperties));
 
         try {
             Supplier<ForgeFlowingFluid> stillFluidSupplier = () -> builder.stillFluid;
-            Constructor<? extends BaseFluidBlock> blockConstructor = blockClass.getDeclaringClass().getConstructor(Supplier.class, BlockBehaviour.Properties.class, String.class, ElementInfo.class, boolean.class);
-            BaseFluidBlock fluidBlock = blockConstructor.newInstance(stillFluidSupplier, blockProperties, fluidName, element, destroyItems);
+            var ctor = blockClass.getConstructor(Supplier.class, BlockBehaviour.Properties.class, String.class, ElementInfo.class, boolean.class);
+            BaseFluidBlock fluidBlock = ctor.newInstance(stillFluidSupplier, blockProperties, fluidName, element, destroyItems);
             ObjectManager.addBlock(fluidName, () -> fluidBlock, true);
-            if (worldgen) {
-                this.worldgenFluidBlocks.put(fluidName, fluidBlock);
-            }
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
-                 IllegalAccessException e) {
+            if (worldgen) this.worldgenFluidBlocks.put(fluidName, fluidBlock);
+        } catch (Exception e) {
             LycanitesMobs.logError("Error loading fluid: " + fluidName);
             throw new RuntimeException(e);
         }
     }
+
 
     /**
      * Determines the Equipment Sharpness repair amount of the provided itemstack. Stack size is not taken into account.
@@ -437,14 +439,15 @@ public class ItemManager extends JSONLoader {
         /**
          * Generates fluid properties for creating fluids.
          */
-        public ForgeFlowingFluid.Properties fluidProperties(FluidType fT, int fluidTickRate, LiquidBlock fluidBlock) {
-            ForgeFlowingFluid.Properties fluidProperties = new ForgeFlowingFluid.Properties(() -> fT, () -> stillFluid, () -> flowingFluid);
-            fluidProperties.tickRate(fluidTickRate);
-            fluidProperties.bucket(() -> bucketItem);
-            fluidProperties.block(() -> fluidBlock);
-            this.fluidProperties = fluidProperties;
-            return fluidProperties;
+        public ForgeFlowingFluid.Properties fluidProperties(FluidType fT, int fluidTickRate, Supplier<? extends LiquidBlock> blockSupplier) {
+            ForgeFlowingFluid.Properties p = new ForgeFlowingFluid.Properties(() -> fT, () -> stillFluid, () -> flowingFluid);
+            p.tickRate(fluidTickRate);
+            p.bucket(() -> bucketItem);
+            p.block(() -> blockSupplier.get());
+            this.fluidProperties = p;
+            return p;
         }
+
 
         public ForgeFlowingFluid.Properties getFluidProperties() {
             return fluidProperties;

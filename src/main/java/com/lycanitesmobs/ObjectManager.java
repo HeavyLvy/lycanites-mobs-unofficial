@@ -14,13 +14,18 @@ import com.lycanitesmobs.core.tileentity.TileEntityEquipmentForge;
 import com.lycanitesmobs.core.tileentity.TileEntitySummoningPedestal;
 import com.lycanitesmobs.core.block.BlockTypeGetter;
 import com.lycanitesmobs.core.util.LMHelperClass;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -37,6 +42,7 @@ import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +79,25 @@ public class ObjectManager {
     public static Map<String, Class<? extends Entity>> specialEntities = new HashMap<>();
     public static Map<Class<? extends Entity>, Constructor<? extends Entity>> specialEntityConstructors = new HashMap<>();
     public static Map<Class<? extends Entity>, EntityType<? extends Entity>> specialEntityTypes = new HashMap<>();
+
+    public static Map<String, ResourceKey<DamageType>> damageTypeKeys = new HashMap<>();
+
+    public static void addDamageType(String name) {
+        ResourceKey<DamageType> key = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(LycanitesMobs.MODID, name.toLowerCase()));
+        damageTypeKeys.put(name.toLowerCase(), key);
+    }
+
+    public static DamageSource getDamageSource(Level level, String name) {
+        ResourceKey<DamageType> key = damageTypeKeys.get(name.toLowerCase());
+        Holder<DamageType> holder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key);
+        return new DamageSource(holder);
+    }
+
+    public static DamageSource getDamageSource(Level level, String name, @Nullable Entity direct, @Nullable Entity causing) {
+        ResourceKey<DamageType> key = damageTypeKeys.get(name.toLowerCase());
+        Holder<DamageType> holder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key);
+        return new DamageSource(holder, direct, causing);
+    }
 
     /**
      * The next available network id for special entities to register by.
