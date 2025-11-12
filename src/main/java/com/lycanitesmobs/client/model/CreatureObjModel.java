@@ -391,10 +391,11 @@ public class CreatureObjModel extends CreatureModel {
             }
 
             matrixStack.pushPose();
-
+            float uprightFixDeg = -0.1f;
+            float leanFromPitch = 0f;
             // Apply Initial Offsets: (To Match Blender OBJ Export)
-            this.doAngle(MODEL_OFFSET_ROT_X, 1F, 0F, 0F);
-            this.doTranslate(0F, 0, 0F);
+            this.doAngle(MODEL_OFFSET_ROT_X + (entity != null ? (-entity.getXRot()) * leanFromPitch : 0f) + uprightFixDeg, 1F, 0F, 0F);
+            this.doTranslate(0F, -0.1F, 0F);
 
             // Child Scaling:
             if (this.young && !renderAsTrophy) {
@@ -419,88 +420,7 @@ public class CreatureObjModel extends CreatureModel {
         }
 
     }
-   /* @Override
-    public void render(BaseCreatureEntity entity, PoseStack matrixStack, VertexConsumer vertexBuilder, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade) {
 
-        this.matrixStack = matrixStack;
-
-        boolean renderAsTrophy = false;
-        this.young = false;
-        if (entity != null) {
-            this.young = entity.isBaby();
-        }
-
-        if (scale < 0) {
-            renderAsTrophy = true;
-            scale = -scale;
-        } else {
-            if (entity != null) {
-                scale *= entity.getScale();
-            }
-        }
-
-
-        for (ObjPart part : this.objParts) {
-            String partName = part.getName().toLowerCase();
-            if (!this.canRenderPart(partName, entity, layer, renderAsTrophy))
-                continue;
-
-            this.currentAnimationPart = this.animationParts.get(partName);
-            if (this.currentAnimationPart == null) {
-                continue;
-            }
-
-            matrixStack.pushPose();
-
-            this.doAngle(MODEL_OFFSET_ROT_X, 1F, 0F, 0F);
-            this.doTranslate(0F, MODEL_OFFSET_POS_Y, 0F);
-
-            if (this.young && !renderAsTrophy) {
-                this.childScale(partName);
-                if (this.bigChildHead && (partName.contains("head") || partName.contains("mouth")))
-                    this.doTranslate(-(this.currentAnimationPart.centerX / 2), -(this.currentAnimationPart.centerY / 2), -(this.currentAnimationPart.centerZ / 2));
-            }
-
-            if (renderAsTrophy)
-                this.doScale(this.trophyScale, this.trophyScale, this.trophyScale);
-
-            this.doScale(scale, scale, scale);
-
-            this.currentAnimationPart.applyAnimationFrames(this.animator);
-
-            matrixStack.popPose();
-        }
-        // Adds the model + entity to the renderer's map to render during level rendering
-        if (!entities.containsKey(entity.getId())) {
-            entities.put(entity.getId(), this);
-        }
-    }*/
-
-/*
-    private Matrix4f projectionMatrix;
-    private Matrix4f viewMatrix;
-
-    public void setViewMatrix(Matrix4f viewMatrix) {
-        this.viewMatrix = viewMatrix;
-    }
-
-    public void setProjectionMatrix(Matrix4f projectionMatrix) {
-        this.projectionMatrix = projectionMatrix;
-    }
-
-    public void renderMob(PoseStack poseStack, BaseCreatureEntity baseCreature) {
-        if (projectionMatrix == null || viewMatrix == null) return;
-        //Matrix4f projectionMatrix = RenderSystem.getProjectionMatrix();
-        // Matrix4f viewMatrix = poseStack.last().pose();
-        WorldBuffer buffer = RenderHelper.startTri(projectionMatrix, viewMatrix);
-
-        Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
-        final double extend = 25.0;
-        //this.generateAnimationFrames(baseCreature, context.time, context.distance, context.loop, context.lookY, context.lookX, context.scale, context.brightness);
-        RenderHelper.renderModel(this.animator, poseStack, buffer, this, color, baseCreature);
-        this.clearAnimationFrames();
-        RenderHelper.endTri(buffer);
-    }*/
 
     @Override
     public boolean canRenderPart(String partName, Entity entity, LayerCreatureBase layer, boolean trophy) {

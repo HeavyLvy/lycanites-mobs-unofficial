@@ -127,70 +127,46 @@ public class CreatureObjModelOld extends CreatureModel {
         this.matrixStack = matrixStack;
 
         boolean isChild = false;
-        if (entity != null) {
-            isChild = entity.isBaby();
-        }
+        if (entity != null) isChild = entity.isBaby();
 
-        // Assess Scale and Check if Trophy:
         boolean trophyModel = false;
         if (scale < 0) {
             trophyModel = true;
             scale = -scale;
         } else {
-            if (entity != null) {
-                scale *= entity.getScale();
-            }
+            if (entity != null) scale *= entity.getScale();
         }
 
-        // GUI Render:
         if (entity != null) {
-            if (entity.onlyRenderTicks >= 0) {
-                loop = entity.onlyRenderTicks;
-            }
+            if (entity.onlyRenderTicks >= 0) loop = entity.onlyRenderTicks;
         }
-    
-        // Render and Animate Each Part:
+
         for (ObjPart part : this.wavefrontParts) {
-            if (part.getName() == null)
-                continue;
+            if (part.getName() == null) continue;
             String partName = part.getName().toLowerCase();
 
-            // Trophy - Check if Trophy Part:
             boolean isTrophyPart = this.isTrophyPart(partName);
-            if (this.bodyIsTrophy && partName.contains("body")) {
-                isTrophyPart = true;
-            }
+            if (this.bodyIsTrophy && partName.contains("body")) isTrophyPart = true;
 
-            // Skip Part If Not Rendered:
-            if (!this.canRenderPart(partName, entity, layer, trophyModel) || (trophyModel && !isTrophyPart))
-                continue;
+            if (!this.canRenderPart(partName, entity, layer, trophyModel) || (trophyModel && !isTrophyPart)) continue;
 
-            // Begin Rendering Part:
             matrixStack.pushPose();
+            float uprightFixDeg = -0.1f;
+            float leanFromPitch = 0f;
+            this.doAngle(modelXRotOffset + (entity != null ? (-entity.getXRot()) * leanFromPitch : 0f) + uprightFixDeg, 1F, 0F, 0F);
+            this.doTranslate(0F, 0F, 0F);
 
-            // Apply Initial Offsets: (To Match Blender OBJ Export)
-            this.doAngle(modelXRotOffset, 1F, 0F, 0F);
-            this.doTranslate(0F, modelYPosOffset, 0F);
 
-            // Baby Heads:
-            if (isChild && !trophyModel)
-                this.childScale(partName);
+            if (isChild && !trophyModel) this.childScale(partName);
 
-            // Apply Scales:
             this.doScale(scale, scale, scale);
-            if (trophyModel)
-                this.doScale(this.trophyScale, this.trophyScale, this.trophyScale);
+            if (trophyModel) this.doScale(this.trophyScale, this.trophyScale, this.trophyScale);
 
-            // perching:
-            if (entity != null && entity.hasPerchTarget()) {
-                distance = 0;
-            }
+            if (entity != null && entity.hasPerchTarget()) distance = 0;
 
-            // Animate (Part is centered and then animated):
             this.centerPart(partName);
             this.animatePart(partName, entity, time, distance, loop, -lookY, lookX, scale);
 
-            // Trophy - Positioning:
             if (trophyModel) {
                 if (!partName.contains("head") && !partName.contains("body")) {
                     float[] mouthOffset = this.comparePartCenters(this.bodyIsTrophy ? "body" : "head", partName);
@@ -200,12 +176,10 @@ public class CreatureObjModelOld extends CreatureModel {
                 }
                 if (partName.contains("head")) {
                     if (!partName.contains("left")) {
-                        this.doTranslate(-0.3F, 0, 0);
-                        this.doAngle(5F, 0, 1, 0);
+                        this.doTranslate(-0.3F, 0, 0); this.doAngle(5F, 0, 1, 0);
                     }
                     if (!partName.contains("right")) {
-                        this.doTranslate(0.3F, 0, 0);
-                        this.doAngle(-5F, 0, 1, 0);
+                        this.doTranslate(0.3F, 0, 0); this.doAngle(-5F, 0, 1, 0);
                     }
                 }
                 this.uncenterPart(partName);
@@ -213,15 +187,19 @@ public class CreatureObjModelOld extends CreatureModel {
                     this.doTranslate(this.trophyOffset[0], this.trophyOffset[1], this.trophyOffset[2]);
             }
 
-            // Render:
-            /*this.uncenterPart(partName);
-			this.objModel.renderPart(vertexBuilder, matrixStack.last().normal(), matrixStack.last().pose(), this.getBrightness(partName, layer, entity, brightness), fade, part, this.getPartColor(partName, entity, layer, trophyModel, loop), this.getPartTextureOffset(partName, entity, layer, trophyModel, loop));
-			matrixStack.popPose();*/
+            this.uncenterPart(partName);
 
+            VertexConsumer vb = (VBOObjModel.renderType != null) ? null : vertexBuilder;
+            this.objModel.renderPart(vb, matrixStack.last().normal(), matrixStack.last().pose(),
+                    this.getBrightness(partName, layer, entity, brightness),
+                    fade, part,
+                    this.getPartColor(partName, entity, layer, trophyModel, loop),
+                    this.getPartTextureOffset(partName, entity, layer, trophyModel, loop));
 
             matrixStack.popPose();
         }
     }
+
 
     /**
      * Returns true if the provided part name should be shown for the trophy model.
