@@ -34,6 +34,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
@@ -71,7 +72,6 @@ public class ObjectManager {
     // ========== Creative Mode Tabs ==========
     public static Map<Item, ModInfo> itemGroups = new HashMap<>();
     // ========== Damage Sources/Effects ==========
-    public static Map<String, DamageSource> damageSources = new HashMap<>();
     public static Map<String, EffectBase> effects = new HashMap<>();
     // ========== Sounds ==========
     public static Map<String, ResourceLocation> soundNames = new HashMap<>();
@@ -82,22 +82,6 @@ public class ObjectManager {
 
     public static Map<String, ResourceKey<DamageType>> damageTypeKeys = new HashMap<>();
 
-    public static void addDamageType(String name) {
-        ResourceKey<DamageType> key = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(LycanitesMobs.MODID, name.toLowerCase()));
-        damageTypeKeys.put(name.toLowerCase(), key);
-    }
-
-    public static DamageSource getDamageSource(Level level, String name) {
-        ResourceKey<DamageType> key = damageTypeKeys.get(name.toLowerCase());
-        Holder<DamageType> holder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key);
-        return new DamageSource(holder);
-    }
-
-    public static DamageSource getDamageSource(Level level, String name, @Nullable Entity direct, @Nullable Entity causing) {
-        ResourceKey<DamageType> key = damageTypeKeys.get(name.toLowerCase());
-        Holder<DamageType> holder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key);
-        return new DamageSource(holder, direct, causing);
-    }
 
     /**
      * The next available network id for special entities to register by.
@@ -177,9 +161,9 @@ public class ObjectManager {
     }
 
     // ========== Damage Source ==========
-    public static void addDamageSource(String name, DamageSource damageSource) {
-        name = name.toLowerCase();
-        damageSources.put(name, damageSource);
+    public static void addDamageType(String name) {
+        ResourceKey<DamageType> key = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(LycanitesMobs.MODID, name.toLowerCase()));
+        damageTypeKeys.put(name.toLowerCase(), key);
     }
 
     // ========== Sound ==========
@@ -239,10 +223,16 @@ public class ObjectManager {
     }
 
     // ========== Damage Source ==========
-    public static DamageSource getDamageSource(String name) {
-        name = name.toLowerCase();
-        if (!damageSources.containsKey(name)) return null;
-        return damageSources.get(name);
+    public static DamageSource getDamageSource(Level level, String name) {
+        ResourceKey<DamageType> key = damageTypeKeys.get(name.toLowerCase());
+        Holder<DamageType> holder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key);
+        return new DamageSource(holder);
+    }
+
+    public static DamageSource getDamageSource(Level level, String name, @Nullable Entity direct, @Nullable Entity causing) {
+        ResourceKey<DamageType> key = damageTypeKeys.get(name.toLowerCase());
+        Holder<DamageType> holder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key);
+        return new DamageSource(holder, direct, causing);
     }
 
     // ========== Sound ==========
@@ -308,15 +298,17 @@ public class ObjectManager {
      */
     @SubscribeEvent
     public void registerBlocks(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.BLOCKS,
-                helper -> {
-                    for (Supplier<? extends Block> block : blocks.values()) {
-                        BlockTypeGetter getter = (BlockTypeGetter) block.get();
-                        // LycanitesMobs.LOGGER.info("Registering block: " + getter.getRegistryName());
-                        helper.register(getter.getRegistryName(), block.get());
-                    }
-                }
-        );
+        event.register(ForgeRegistries.Keys.BLOCKS, helper -> {
+            for (Supplier<? extends Block> block : blocks.values()) {
+                BlockTypeGetter getter = (BlockTypeGetter) block.get();
+                helper.register(getter.getRegistryName(), block.get());
+            }
+            for (Lazy<? extends LiquidBlock> lazy : liquidBlocks.values()) {
+                LiquidBlock lb = lazy.get();
+                BlockTypeGetter getter = (BlockTypeGetter) lb;
+                helper.register(getter.getRegistryName(), lb);
+            }
+        });
         event.register(ForgeRegistries.Keys.ITEMS,
                 helper -> {
                     for (Map.Entry<String, Lazy<? extends BlockItem>> entry : ObjectManager.blockItems.entrySet()) {
@@ -405,26 +397,26 @@ public class ObjectManager {
     // ========== Fluids ==========
     @SubscribeEvent
     public void registerFluids(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.FLUIDS,
-                helper -> {
-                    for (Fluid fluid : fluids.values()) {
-                        if (fluid instanceof CustomFluid customFluid) {
-                            helper.register(customFluid.getRegistryName(), fluid);
-                        }
-
+        event.register(ForgeRegistries.Keys.FLUIDS, helper -> {
+            ItemManager.getInstance().defineFluids();
+            for (Fluid fluid : fluids.values()) {
+                if (fluid instanceof CustomFluid customFluid) {
+                    helper.register(customFluid.getRegistryName(), fluid);
+                }
+            }
+        });
+        event.register(ForgeRegistries.Keys.FLUID_TYPES, helper -> {
+            java.util.Set<ResourceLocation> seen = new java.util.HashSet<>();
+            for (Fluid fluid : fluids.values()) {
+                FluidType ft = fluid.getFluidType();
+                if (ft instanceof BaseFluidType bft) {
+                    ResourceLocation id = bft.getRegistryName();
+                    if (seen.add(id)) {
+                        helper.register(id, bft);
                     }
                 }
-        );
-        event.register(ForgeRegistries.Keys.FLUID_TYPES,
-                helper -> {
-                    for (Fluid fluid : fluids.values()) {
-                        if (fluid.getFluidType() instanceof BaseFluidType fluidType) {
-                            helper.register(fluidType.getRegistryName(), fluidType);
-                        }
-                    }
-                }
-        );
-
+            }
+        });
     }
 
     // ========== Tile Entities ==========

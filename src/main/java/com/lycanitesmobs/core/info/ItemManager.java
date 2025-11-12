@@ -273,6 +273,20 @@ public class ItemManager extends JSONLoader {
         ObjectManager.addDamageType("acid");
     }
 
+    public void defineFluids() {
+        Block.Properties waterBrightBlockProperties = Block.Properties.of().mapColor(MapColor.WATER).noCollission().randomTicks().strength(100).noLootTable().lightLevel(s -> 10);
+        Block.Properties lavaBlockProperties = Block.Properties.of().mapColor(MapColor.FIRE).noCollission().randomTicks().strength(100).noLootTable().lightLevel(s -> 15);
+
+        this.addFluid("ooze", 0x009F9F, 3000, 3000, 0, 10, false, OozeFluidBlock.class, waterBrightBlockProperties, "frost", false, true);
+        this.addFluid("rabbitooze", 0x00AFAF, 3000, 3000, 0, 10, true, OozeFluidBlock.class, waterBrightBlockProperties, "frost", false, false);
+        this.addFluid("moglava", 0xFF5722, 3000, 5000, 1100, 15, true, MoglavaFluidBlock.class, lavaBlockProperties, "lava", false, true);
+        this.addFluid("acid", 0x8BC34A, 1000, 10, 40, 10, false, AcidFluidBlock.class, waterBrightBlockProperties, "acid", true, true);
+        this.addFluid("sharacid", 0x8BB35A, 1000, 10, 40, 10, true, AcidFluidBlock.class, waterBrightBlockProperties, "acid", false, false);
+        this.addFluid("poison", 0x9C27B0, 1000, 8, 20, 0, false, PoisonFluidBlock.class, Block.Properties.of().mapColor(MapColor.WATER).noCollission().randomTicks().strength(100).noLootTable(), "poison", false, true);
+        this.addFluid("vesspoison", 0xAC27A0, 1000, 8, 20, 0, true, PoisonFluidBlock.class, Block.Properties.of().mapColor(MapColor.WATER).noCollission().randomTicks().strength(100).noLootTable(), "poison", false, false);
+        this.addFluid("veshoney", 0xCEBC39, 4000, 4000, 0, 0, false, VeshoneyFluidBlock.class, Block.Properties.of().mapColor(MapColor.WATER).noCollission().randomTicks().strength(100).noLootTable(), "fae", false, false);
+    }
+
     public void addFluid(String fluidName, int fluidColor, int density, int viscosity, int temperature, int luminosity, boolean multiply, Class<? extends BaseFluidBlock> blockClass, BlockBehaviour.Properties blockProperties, String elementName, boolean destroyItems, boolean worldgen) {
         ElementInfo element = ElementManager.getInstance().getElement(elementName);
         Vector3f fogColor = new Vector3f(((fluidColor >> 16) & 0xFF) / 255f, ((fluidColor >> 8) & 0xFF) / 255f, (fluidColor & 0xFF) / 255f);
@@ -285,27 +299,27 @@ public class ItemManager extends JSONLoader {
                 null,
                 fluidColor, fogColor, density, viscosity, temperature, luminosity, multiply
         );
-        ForgeFlowingFluid.Properties fluidProperties = builder.fluidProperties(fluidType, tickRate, () -> ObjectManager.getFluidBlock(fluidName));
+        ForgeFlowingFluid.Properties fluidProps = builder.fluidProperties(fluidType, tickRate, () -> ObjectManager.getFluidBlock(fluidName));
 
-        ObjectManager.addFluid(fluidName, new CustomFluid.Still(fluidProperties, fluidName));
-        ObjectManager.addFluid(fluidName + "_flowing", new CustomFluid.Flowing(fluidProperties, fluidName + "_flowing"));
+        ObjectManager.addFluid(fluidName, new CustomFluid.Still(fluidProps, fluidName));
+        ObjectManager.addFluid(fluidName + "_flowing", new CustomFluid.Flowing(fluidProps, fluidName + "_flowing"));
         ObjectManager.addSound(fluidName, "block." + fluidName);
 
-        Item.Properties bucketProperties = new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1);
-        ObjectManager.addItem(fluidName + "_bucket", () -> new BucketItem(() -> builder.stillFluid, bucketProperties));
+        Item.Properties bucketProps = new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1);
+        ObjectManager.addItem(fluidName + "_bucket", () -> new BucketItem(builder::getStillFluid, bucketProps));
 
-        try {
-            Supplier<ForgeFlowingFluid> stillFluidSupplier = () -> builder.stillFluid;
-            var ctor = blockClass.getConstructor(Supplier.class, BlockBehaviour.Properties.class, String.class, ElementInfo.class, boolean.class);
-            BaseFluidBlock fluidBlock = ctor.newInstance(stillFluidSupplier, blockProperties, fluidName, element, destroyItems);
-            ObjectManager.addBlock(fluidName, () -> fluidBlock, true);
-            if (worldgen) this.worldgenFluidBlocks.put(fluidName, fluidBlock);
-        } catch (Exception e) {
-            LycanitesMobs.logError("Error loading fluid: " + fluidName);
-            throw new RuntimeException(e);
-        }
+        ObjectManager.addBlock(fluidName, () -> {
+            try {
+                Supplier<ForgeFlowingFluid> still = builder::getStillFluid;
+                Constructor<? extends BaseFluidBlock> ctor = blockClass.getConstructor(Supplier.class, BlockBehaviour.Properties.class, String.class, ElementInfo.class, boolean.class);
+                BaseFluidBlock block = ctor.newInstance(still, blockProperties, fluidName, element, destroyItems);
+                if (worldgen) this.worldgenFluidBlocks.put(fluidName, block);
+                return block;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, true);
     }
-
 
     /**
      * Determines the Equipment Sharpness repair amount of the provided itemstack. Stack size is not taken into account.
@@ -406,48 +420,49 @@ public class ItemManager extends JSONLoader {
     }
 
     public static class FluidBuilder {
-        private final BucketItem bucketItem;
-        private final ForgeFlowingFluid flowingFluid;
-        private final ForgeFlowingFluid stillFluid;
+        private final String baseName;
         private final ResourceLocation registryName;
         private FluidType fluidType;
         private ForgeFlowingFluid.Properties fluidProperties;
 
         public FluidBuilder(String fluidName, ResourceLocation registryLocation) {
-            stillFluid = ObjectManager.getFluid(fluidName);
-            flowingFluid = ObjectManager.getFluid(fluidName + "_flowing");
-            bucketItem = (BucketItem) ObjectManager.getItem(fluidName + "_bucket");
+            this.baseName = fluidName;
             this.registryName = registryLocation;
         }
 
         public FluidType createFluidType(final ResourceLocation stillTexture, final ResourceLocation flowingTexture, final ResourceLocation overlayTexture,
                                          final int tintColor, final Vector3f fogColor, int fluidDensity, int fluidViscosity, int fluidTemperature, int fluidLuminosity,
                                          boolean fluidMultiply) {
-            FluidType.Properties fluidBuilder = FluidType.Properties.create();
-            fluidBuilder.density(fluidDensity);
-            fluidBuilder.viscosity(fluidViscosity);
-            fluidBuilder.temperature(fluidTemperature);
-            fluidBuilder.lightLevel(fluidLuminosity);
-            if (fluidMultiply) {
-                fluidBuilder.canConvertToSource(true);
-            }
-            fluidType = new BaseFluidType(registryName, stillTexture, flowingTexture, overlayTexture,
-                    tintColor, fogColor, fluidBuilder);
+            FluidType.Properties props = FluidType.Properties.create();
+            props.density(fluidDensity);
+            props.viscosity(fluidViscosity);
+            props.temperature(fluidTemperature);
+            props.lightLevel(fluidLuminosity);
+            if (fluidMultiply) props.canConvertToSource(true);
+            fluidType = new BaseFluidType(registryName, stillTexture, flowingTexture, overlayTexture, tintColor, fogColor, props);
             return fluidType;
         }
 
-        /**
-         * Generates fluid properties for creating fluids.
-         */
         public ForgeFlowingFluid.Properties fluidProperties(FluidType fT, int fluidTickRate, Supplier<? extends LiquidBlock> blockSupplier) {
-            ForgeFlowingFluid.Properties p = new ForgeFlowingFluid.Properties(() -> fT, () -> stillFluid, () -> flowingFluid);
+            ForgeFlowingFluid.Properties p = new ForgeFlowingFluid.Properties(() -> fT, this::getStillFluid, this::getFlowingFluid);
             p.tickRate(fluidTickRate);
-            p.bucket(() -> bucketItem);
-            p.block(() -> blockSupplier.get());
+            p.bucket(this::getBucketItem);
+            p.block(blockSupplier);
             this.fluidProperties = p;
             return p;
         }
 
+        public ForgeFlowingFluid getStillFluid() {
+            return ObjectManager.getFluid(baseName);
+        }
+
+        public ForgeFlowingFluid getFlowingFluid() {
+            return ObjectManager.getFluid(baseName + "_flowing");
+        }
+
+        public BucketItem getBucketItem() {
+            return (BucketItem) ObjectManager.getItem(baseName + "_bucket");
+        }
 
         public ForgeFlowingFluid.Properties getFluidProperties() {
             return fluidProperties;
@@ -456,17 +471,6 @@ public class ItemManager extends JSONLoader {
         public FluidType getFluidType() {
             return fluidType;
         }
-
-        public BucketItem getBucketItem() {
-            return bucketItem;
-        }
-
-        public ForgeFlowingFluid getStillFluid() {
-            return stillFluid;
-        }
-
-        public ForgeFlowingFluid getFlowingFluid() {
-            return flowingFluid;
-        }
     }
+
 }

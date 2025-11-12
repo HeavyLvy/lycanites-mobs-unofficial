@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block.effect;
 
+import com.lycanitesmobs.core.info.ItemManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -14,28 +15,29 @@ import java.util.Random;
 
 public class BlockIcefire extends BlockFrostfire {
 
-	// ==================================================
-	//                   Constructor
-	// ==================================================
-	public BlockIcefire(Block.Properties properties) {
+    // ==================================================
+    //                   Constructor
+    // ==================================================
+    public BlockIcefire(Block.Properties properties) {
         super(properties, "icefire");
-	}
+        ItemManager.getInstance().cutoutBlocks.add(this);
+    }
 
 
-	// ==================================================
-	//                      Particles
-	// ==================================================
-	@Override
-	@OnlyIn(Dist.CLIENT)
-	public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
-		double x = pos.getX();
-		double y = pos.getY();
-		double z = pos.getZ();
-		if (random.nextInt(100) == 0) {
-			x = pos.getX() + random.nextFloat();
-			z = pos.getZ() + random.nextFloat();
-			world.addParticle(ParticleTypes.ITEM_SNOWBALL, x, y, z, 0.0D, 0.0D, 0.0D);
-		}
-		super.animateTick(state, world, pos, random);
-	}
+    // ==================================================
+    //                      Particles
+    // ==================================================
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
+        double x = pos.getX();
+        double y = pos.getY();
+        double z = pos.getZ();
+        if (random.nextInt(100) == 0) {
+            x = pos.getX() + random.nextFloat();
+            z = pos.getZ() + random.nextFloat();
+            world.addParticle(ParticleTypes.ITEM_SNOWBALL, x, y, z, 0.0D, 0.0D, 0.0D);
+        }
+        super.animateTick(state, world, pos, random);
+    }
 }

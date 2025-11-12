@@ -23,9 +23,9 @@ import java.util.Random;
 import java.util.function.Supplier;
 
 public class AcidFluidBlock extends BaseFluidBlock {
-	public AcidFluidBlock(Supplier<? extends FlowingFluid> fluidSupplier, Properties properties, String name, ElementInfo element, boolean destroyItems) {
+    public AcidFluidBlock(Supplier<? extends FlowingFluid> fluidSupplier, Properties properties, String name, ElementInfo element, boolean destroyItems) {
         super(fluidSupplier, properties, name, element, destroyItems);
-	}
+    }
 
     @Override
     public boolean shouldSpreadLiquid(Level world, BlockPos neighborBlockPos, BlockState blockState) {
@@ -46,17 +46,18 @@ public class AcidFluidBlock extends BaseFluidBlock {
         return super.shouldSpreadLiquid(world, neighborBlockPos, blockState);
     }
 
+
     @Override
     public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
         // Damage:
         if (!(entity instanceof ItemEntity) && !(entity instanceof ExperienceOrb)) {
-            entity.hurt(ObjectManager.getDamageSource("acid"), 1F);
+            entity.hurt(ObjectManager.getDamageSource(world, "acid"), 1F);
         }
 
         // Effects:
-        if(entity instanceof LivingEntity) {
+        if (entity instanceof LivingEntity) {
             MobEffect effect = ObjectManager.getEffect("penetration");
-            if(effect != null) {
+            if (effect != null) {
                 ((LivingEntity) entity).addEffect(new MobEffectInstance(effect, 5 * 20, 0));
             }
         }
@@ -66,15 +67,15 @@ public class AcidFluidBlock extends BaseFluidBlock {
 
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
-        float f; 
+        float f;
         float f1;
         float f2;
-        
+
         if (random.nextInt(100) == 0) {
-            f = (float)pos.getX() + random.nextFloat();
-            f1 = (float)pos.getY() + random.nextFloat() * 0.5F;
-            f2 = (float)pos.getZ() + random.nextFloat();
-	        world.addParticle(ParticleTypes.RAIN, (double)f, (double)f1, (double)f2, 0.0D, 0.0D, 0.0D);
+            f = (float) pos.getX() + random.nextFloat();
+            f1 = (float) pos.getY() + random.nextFloat() * 0.5F;
+            f2 = (float) pos.getZ() + random.nextFloat();
+            world.addParticle(ParticleTypes.RAIN, (double) f, (double) f1, (double) f2, 0.0D, 0.0D, 0.0D);
         }
         super.animateTick(state, world, pos, random);
     }

@@ -122,12 +122,11 @@ public class BlockBase extends Block implements BlockTypeGetter {
     // ==================================================
     @Override
     public void onPlace(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean isMoving) {
-        // Initial Block Ticking:
-        if (this.tickRate > 0) {
-
-            world.getBlockTicks().schedule(new ScheduledTick<>(this, pos, this.tickRate(world), TickPriority.LOW, 0L));
+        if (this.tickRate > 0 && world instanceof ServerLevel server) {
+            server.scheduleTick(pos, this, this.tickRate(world), TickPriority.LOW);
         }
     }
+
 
     // ==================================================
     //                     Ticking
@@ -139,18 +138,12 @@ public class BlockBase extends Block implements BlockTypeGetter {
 
     // ========== Tick Update ==========
     @Override
-    public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) { //tick()
-        if (world.isClientSide)
-            return;
-
-        // Remove On Tick:
-        if (this.removeOnTick && this.canRemove(world, pos, state, random))
+    public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+        if (this.removeOnTick && this.canRemove(world, pos, state, random)) {
             world.removeBlock(pos, true);
-
-            // Looping Tick:
-        else if (this.tickRate > 0 && this.loopTicks)
-
-            world.getBlockTicks().schedule(new ScheduledTick<>(this, pos, this.tickRate(world), TickPriority.LOW, 0L));
+        } else if (this.tickRate > 0 && this.loopTicks) {
+            world.scheduleTick(pos, this, this.tickRate(world), TickPriority.LOW);
+        }
     }
 
     /**

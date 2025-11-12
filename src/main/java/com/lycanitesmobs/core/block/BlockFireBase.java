@@ -78,21 +78,24 @@ public class BlockFireBase extends BlockBase {
         return this.getStateForPlacement(context.getLevel(), context.getClickedPos());
     }
 
-
     public BlockState getStateForPlacement(BlockGetter world, BlockPos blockPos) {
         BlockPos lowerBlockPos = blockPos.below();
         BlockState lowerBlockState = world.getBlockState(lowerBlockPos);
         if (!this.canCatchFire(world, blockPos, Direction.UP) && lowerBlockState.isFaceSturdy(world, lowerBlockPos, Direction.UP)) {
-            BlockState s = this.defaultBlockState();
-            for (Direction d : Direction.values()) {
-                BooleanProperty p = FACING_TO_PROPERTY_MAP.get(d);
-                if (p != null) s = s.setValue(p, this.canCatchFire(world, blockPos.relative(d), d.getOpposite()));
+            BlockState placementState = this.defaultBlockState();
+
+            for (Direction direction : Direction.values()) {
+                BooleanProperty booleanproperty = FACING_TO_PROPERTY_MAP.get(direction);
+                if (booleanproperty != null) {
+                    placementState = placementState.setValue(booleanproperty, this.canCatchFire(world, blockPos.relative(direction), direction.getOpposite()));
+                }
             }
-            return s.setValue(PERMANENT, false);
+
+            return placementState.setValue(PERMANENT, false);
         }
+
         return this.defaultBlockState();
     }
-
 
     /**
      * Returns true if this block can place another block at the specified location.
@@ -115,34 +118,22 @@ public class BlockFireBase extends BlockBase {
 
     @Override
     public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor worldIn, BlockPos currentPos, BlockPos facingPos) {
-        if (!this.canSurvive(state, worldIn, currentPos)) return Blocks.AIR.defaultBlockState();
-        return this.getStateForPlacement(worldIn, currentPos)
-                .setValue(AGE, state.getValue(AGE))
-                .setValue(PERMANENT, state.getValue(PERMANENT))
-                .setValue(STATIC, state.getValue(STATIC));
+        //return this.isValidPosition(state, worldIn, currentPos) ? this.getStateForPlacement(worldIn, currentPos).with(AGE, state.get(AGE)) : Blocks.AIR.getDefaultState();
+        return this.getStateForPlacement(worldIn, currentPos).setValue(AGE, state.getValue(AGE));
     }
-
 
     @Override
     public int tickRate(LevelAccessor world) {
         return this.tickRate;
     }
 
-    @Override
-    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
-        super.onPlace(state, level, pos, oldState, isMoving);
-        if (this.tickRate > 0) level.scheduleTick(pos, this, getFireTickDelay(level.random));
-    }
-
-    private int getFireTickDelay(RandomSource rand) {
-        return this.tickRate + rand.nextInt(10);
-    }
 
     @Override
     public void tick(BlockState blockState, ServerLevel world, BlockPos pos, RandomSource rand) {
         if (blockState.getValue(STATIC) || !world.isAreaLoaded(pos, 2)) return;
 
         boolean permanent = blockState.getValue(PERMANENT);
+
         if (!world.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
             if (this.removeOnNoFireTick && !permanent) world.removeBlock(pos, false);
             return;
@@ -153,28 +144,33 @@ public class BlockFireBase extends BlockBase {
             return;
         }
 
-        int age = blockState.getValue(AGE);
         BlockState below = world.getBlockState(pos.below());
-        boolean isOnFireSource = permanent || this.isBlockFireSource(below, world, pos.below(), Direction.UP);
+        if (below.getBlock() == Blocks.AIR) {
+            world.removeBlock(pos, false);
+            return;
+        }
 
-        if (!isOnFireSource && this.canDie(world, pos) && rand.nextFloat() < 0.2F + age * 0.03F) {
+        boolean onSource = permanent || this.isBlockFireSource(below, world, pos.below(), Direction.UP);
+        int age = blockState.getValue(AGE);
+
+        if (!onSource && this.canDie(world, pos) && rand.nextFloat() < 0.2F + age * 0.03F) {
             world.removeBlock(pos, false);
             return;
         }
 
         if (age < 15) {
-            int inc = Math.round((float) rand.nextInt(this.agingRate) / 2F);
-            int nextAge = Math.min(age + inc, 15);
-            if (nextAge != age) {
-                blockState = blockState.setValue(AGE, nextAge);
-                world.setBlock(pos, blockState, 4);
-                age = nextAge;
-            }
+            int inc = rand.nextInt(this.agingRate + 1);
+            blockState = blockState.setValue(AGE, Math.min(15, age + inc));
+            world.setBlock(pos, blockState, 4);
+            age = blockState.getValue(AGE);
         }
 
-        if (this.loopTicks) world.scheduleTick(pos, this, getFireTickDelay(rand));
+        if (this.loopTicks) {
+            int delay = Math.max(1, this.tickRate(world) + rand.nextInt(10));
+            world.scheduleTick(pos, this, delay, TickPriority.LOW);
+        }
 
-        if (!isOnFireSource) {
+        if (!onSource) {
             if (!this.canNeighborCatchFire(world, pos)) {
                 if (age > 3) world.removeBlock(pos, false);
                 return;
@@ -188,39 +184,33 @@ public class BlockFireBase extends BlockBase {
         if (this.spreadChance <= 0 || permanent) return;
 
         boolean highHumidity = world.getBiome(pos).get().getModifiedClimateSettings().downfall() > 0.85F;
-        int humidityChance = highHumidity ? -50 : 0;
+        int humidity = highHumidity ? -50 : 0;
+        this.tryCatchFire(world, pos.east(), 300 + humidity, rand, age, Direction.WEST);
+        this.tryCatchFire(world, pos.west(), 300 + humidity, rand, age, Direction.EAST);
+        this.tryCatchFire(world, pos.below(), 250 + humidity, rand, age, Direction.UP);
+        this.tryCatchFire(world, pos.above(), 250 + humidity, rand, age, Direction.DOWN);
+        this.tryCatchFire(world, pos.north(), 300 + humidity, rand, age, Direction.SOUTH);
+        this.tryCatchFire(world, pos.south(), 300 + humidity, rand, age, Direction.NORTH);
 
-        this.tryCatchFire(world, pos.east(), 300 + humidityChance, rand, age, Direction.WEST);
-        this.tryCatchFire(world, pos.west(), 300 + humidityChance, rand, age, Direction.EAST);
-        this.tryCatchFire(world, pos.below(), 250 + humidityChance, rand, age, Direction.UP);
-        this.tryCatchFire(world, pos.above(), 250 + humidityChance, rand, age, Direction.DOWN);
-        this.tryCatchFire(world, pos.north(), 300 + humidityChance, rand, age, Direction.SOUTH);
-        this.tryCatchFire(world, pos.south(), 300 + humidityChance, rand, age, Direction.NORTH);
-
-        for (int ox = -1; ox <= 1; ++ox) {
-            for (int oz = -1; oz <= 1; ++oz) {
-                for (int oy = -1; oy <= 4; ++oy) {
-                    if (ox == 0 && oy == 0 && oz == 0) continue;
-
-                    int chance = 100;
-                    if (oy > 1) chance += (oy - 1) * 100;
-
-                    BlockPos p = pos.offset(ox, oy, oz);
+        for (int dx = -1; dx <= 1; ++dx) {
+            for (int dz = -1; dz <= 1; ++dz) {
+                for (int dy = -1; dy <= 4; ++dy) {
+                    if (dx == 0 && dy == 0 && dz == 0) continue;
+                    int chance = 100 + Math.max(0, dy - 1) * 100;
+                    BlockPos p = pos.offset(dx, dy, dz);
                     int enc = this.getNeighborEncouragement(world, p);
-                    if (enc <= 0) continue;
-
-                    int i2 = (enc + 40 + world.getDifficulty().getId() * 7) / (age + 30);
-                    if (highHumidity) i2 /= 2;
-
-                    if (i2 > 0 && rand.nextInt(chance) <= i2 && (!world.isRaining() || !this.canDie(world, p))) {
-                        int newAge = Math.min(15, age + rand.nextInt(5) / 4);
-                        this.burnBlockReplace(world, p, newAge);
+                    if (enc > 0) {
+                        int flam = (enc + 40 + world.getDifficulty().getId() * 7) / (age + 30);
+                        if (highHumidity) flam /= 2;
+                        if (flam > 0 && rand.nextInt(chance) <= flam && (!world.isRaining() || !this.canDie(world, p))) {
+                            int newAge = Math.min(15, age + rand.nextInt(5) / 4);
+                            this.burnBlockReplace(world, p, newAge);
+                        }
                     }
                 }
             }
         }
     }
-
 
     /**
      * Returns true if any adjacent blocks can catch fire.
@@ -238,51 +228,46 @@ public class BlockFireBase extends BlockBase {
      * Gets the flammability of nearby blocks, highly flammable blocks that are near each other will help spread fire faster.
      **/
     protected int getNeighborEncouragement(Level worldIn, BlockPos pos) {
-        if (!worldIn.isEmptyBlock(pos)) return 0;
-        int i = 0;
-        for (Direction d : Direction.values()) {
-            BlockPos n = pos.relative(d);
-            i = Math.max(worldIn.getBlockState(n).getFireSpreadSpeed(worldIn, n, d.getOpposite()), i);
+        if (!worldIn.isEmptyBlock(pos))
+            return 0;
+        else {
+            int i = 0;
+            for (Direction direction : Direction.values()) {
+                i = Math.max(worldIn.getBlockState(pos.relative(direction)).getFlammability(worldIn, pos.relative(direction), direction.getOpposite()), i);
+            }
+            return i;
         }
-        return i;
     }
-
 
     /**
      * Attempts to ignite the position.
      **/
-    protected void tryCatchFire(Level world, BlockPos pos, int chance, RandomSource random, int age, Direction face) {
-        BlockState target = world.getBlockState(pos);
-        int flammability = target.getFlammability(world, pos, face);
+    private void tryCatchFire(Level world, BlockPos pos, int chance, RandomSource random, int age, Direction face) {
+        int flammability = this.getBlockFlammability(world, pos, face);
+        if (Math.round(random.nextInt(chance) / this.spreadChance) < flammability) {
+            BlockState blockState = world.getBlockState(pos);
 
-        int chanceAdj = chance;
-        if (this.spreadChance != 1f) {
-            float f = Math.max(0.001f, this.spreadChance);
-            chanceAdj = (int) Math.max(1, Math.round(chance / f));
-        }
-
-        if (random.nextInt(chanceAdj) < flammability) {
-            target.onCaughtFire(world, pos, face, null);
-            if (random.nextInt(chanceAdj + 10) < 5 && !world.isRainingAt(pos)) {
-                int newAge = Math.min(15, age + random.nextInt(5) / 4);
-                this.burnBlockReplace(world, pos, newAge);
+            if (random.nextInt(age + 10) < 5 && !world.isRainingAt(pos)) {
+                int newFireAge = age + random.nextInt(5) / 4;
+                if (newFireAge > 15)
+                    newFireAge = 15;
+                this.burnBlockReplace(world, pos, newFireAge);
             } else {
                 this.burnBlockDestroy(world, pos);
             }
-            if (this.triggerTNT && target.getBlock() instanceof TntBlock) {
+
+            if (this.triggerTNT && blockState.getBlock() instanceof TntBlock) {
                 TntBlock.explode(world, pos);
             }
         }
     }
 
-
     /**
      * Burns away a block, typically replacing it with this fire block, but can change it to other things depending on the type of fire block.
      **/
     public void burnBlockReplace(Level world, BlockPos pos, int newFireAge) {
-        world.setBlock(pos, this.defaultBlockState().setValue(AGE, newFireAge).setValue(PERMANENT, false).setValue(STATIC, false), 3);
+        world.setBlock(pos, this.defaultBlockState().setValue(AGE, newFireAge).setValue(PERMANENT, false), 3);
     }
-
 
     /**
      * Burns away a block, typically setting it to air but can change it to other things depending on the type of fire block.

@@ -5,6 +5,7 @@ import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.block.BlockFireBase;
 import com.lycanitesmobs.core.entity.BaseCreatureEntity;
 import com.lycanitesmobs.core.info.ElementManager;
+import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.util.DamageSourceHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -30,19 +31,21 @@ import java.util.Random;
 public class BlockShadowfire extends BlockFireBase {
     public boolean blindness;
 
-	public BlockShadowfire(Block.Properties properties) {
-		super(properties,  "shadowfire");
-		
-		// Stats:
-		this.tickRate = 30;
+    public BlockShadowfire(Block.Properties properties) {
+        super(properties, "shadowfire");
+
+        // Stats:
+        this.tickRate = 30;
         this.dieInRain = false;
         this.triggerTNT = false;
         this.agingRate = 3;
         this.spreadChance = 0;
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;
-		this.blindness = true;
-	}
+        this.blindness = true;
+
+        ItemManager.getInstance().cutoutBlocks.add(this);
+    }
 
     protected boolean canNeighborCatchFire(Level worldIn, BlockPos pos) {
         return false;
@@ -52,61 +55,61 @@ public class BlockShadowfire extends BlockFireBase {
         return 0;
     }
 
-	public boolean canCatchFire(BlockGetter world, BlockPos pos, Direction face) {
+    public boolean canCatchFire(BlockGetter world, BlockPos pos, Direction face) {
         return false;
     }
 
-	@Override
-	public boolean isBlockFireSource(BlockState state, LevelAccessor world, BlockPos pos, Direction side) {
-		if(state.getBlock() == Blocks.OBSIDIAN || state.getBlock() == Blocks.CRYING_OBSIDIAN)
-			return true;
-		return true; // TODO Figure out why the PERMANENT property isn't working consistently.
-	}
+    @Override
+    public boolean isBlockFireSource(BlockState state, LevelAccessor world, BlockPos pos, Direction side) {
+        if (state.getBlock() == Blocks.OBSIDIAN || state.getBlock() == Blocks.CRYING_OBSIDIAN)
+            return true;
+        return true; // TODO Figure out why the PERMANENT property isn't working consistently.
+    }
 
     protected boolean canDie(Level world, BlockPos pos) {
         return false;
     }
 
     @Override
-	public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
-		super.entityInside(blockState, world, pos, entity);
+    public void entityInside(BlockState blockState, Level world, BlockPos pos, Entity entity) {
+        super.entityInside(blockState, world, pos, entity);
 
-		if(entity instanceof ItemEntity)
-			return;
+        if (entity instanceof ItemEntity)
+            return;
 
-		if(entity instanceof LivingEntity) {
-			LivingEntity livingEntity = (LivingEntity)entity;
+        if (entity instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) entity;
 
-			MobEffect decay = ObjectManager.getEffect("decay");
-			if(decay != null) {
-				MobEffectInstance effect = new MobEffectInstance(decay, 5 * 20, 0);
-				if(livingEntity.canBeAffected(effect))
-					livingEntity.addEffect(effect);
-			}
+            MobEffect decay = ObjectManager.getEffect("decay");
+            if (decay != null) {
+                MobEffectInstance effect = new MobEffectInstance(decay, 5 * 20, 0);
+                if (livingEntity.canBeAffected(effect))
+                    livingEntity.addEffect(effect);
+            }
 
-			MobEffectInstance blindness = new MobEffectInstance(MobEffects.BLINDNESS, 5 * 20, 0);
-			if(this.blindness && livingEntity.canBeAffected(blindness)) {
-				livingEntity.addEffect(blindness);
-			}
-		}
+            MobEffectInstance blindness = new MobEffectInstance(MobEffects.BLINDNESS, 5 * 20, 0);
+            if (this.blindness && livingEntity.canBeAffected(blindness)) {
+                livingEntity.addEffect(blindness);
+            }
+        }
 
-		if(entity instanceof BaseCreatureEntity && ((BaseCreatureEntity)entity).hasElement(ElementManager.getInstance().getElement("shadow")))
-			return;
+        if (entity instanceof BaseCreatureEntity && ((BaseCreatureEntity) entity).hasElement(ElementManager.getInstance().getElement("shadow")))
+            return;
 
-		entity.hurt(DamageSourceHelper.WITHER, 1);
-	}
+        entity.hurt(DamageSourceHelper.WITHER, 1);
+    }
 
     @Override
-	@OnlyIn(Dist.CLIENT)
-	public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
-		double x = pos.getX();
-		double y = pos.getY();
-		double z = pos.getZ();
-		if (random.nextInt(100) == 0) {
-			x = pos.getX() + random.nextFloat();
-			z = pos.getZ() + random.nextFloat();
-			world.addParticle(ParticleTypes.WITCH, x, y, z, 0.0D, 0.0D, 0.0D);
-		}
-		super.animateTick(state, world, pos, random);
-	}
+    @OnlyIn(Dist.CLIENT)
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
+        double x = pos.getX();
+        double y = pos.getY();
+        double z = pos.getZ();
+        if (random.nextInt(100) == 0) {
+            x = pos.getX() + random.nextFloat();
+            z = pos.getZ() + random.nextFloat();
+            world.addParticle(ParticleTypes.WITCH, x, y, z, 0.0D, 0.0D, 0.0D);
+        }
+        super.animateTick(state, world, pos, random);
+    }
 }

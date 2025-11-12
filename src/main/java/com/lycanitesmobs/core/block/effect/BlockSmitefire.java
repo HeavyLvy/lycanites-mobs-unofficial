@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.block.effect;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.block.BlockFireBase;
+import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.util.DamageSourceHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -32,13 +33,15 @@ public class BlockSmitefire extends BlockFireBase {
         super(properties, name);
 
         // Stats:
-        this.tickRate = 100;
+        this.tickRate = 30;
         this.dieInRain = false;
         this.triggerTNT = false;
-        this.agingRate = 2;
-        this.spreadChance = 0.6f;
+        this.agingRate = 3;
+        this.spreadChance = 2;
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;
+
+        ItemManager.getInstance().cutoutBlocks.add(this);
     }
 
     /*@Override

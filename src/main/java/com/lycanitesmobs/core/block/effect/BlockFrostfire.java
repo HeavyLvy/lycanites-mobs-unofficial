@@ -42,13 +42,15 @@ public class BlockFrostfire extends BlockFireBase {
         super(properties, name);
 
         // Stats:
-        this.tickRate = 100;
+        this.tickRate = 30;
         this.dieInRain = false;
         this.triggerTNT = false;
         this.agingRate = 3;
-        this.spreadChance = 0.6f;
+        this.spreadChance = 1;
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;
+
+        ItemManager.getInstance().cutoutBlocks.add(this);
 
     }
 

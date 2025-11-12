@@ -41,13 +41,15 @@ public class BlockHellfire extends BlockFireBase {
         super(properties, "hellfire");
 
         // Stats:
-        this.tickRate = 100;
+        this.tickRate = 30;
         this.dieInRain = false;
         this.triggerTNT = false;
-        this.agingRate = 2;
-        this.spreadChance = 0.6f;
+        this.agingRate = 1;
+        this.spreadChance = 1;
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;
+
+        ItemManager.getInstance().cutoutBlocks.add(this);
     }
 
     /*@Override

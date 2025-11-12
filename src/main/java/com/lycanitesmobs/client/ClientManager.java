@@ -11,6 +11,7 @@ import com.lycanitesmobs.core.block.BlockFireBase;
 import com.lycanitesmobs.core.container.*;
 import com.lycanitesmobs.core.info.CreatureManager;
 import com.lycanitesmobs.core.info.CreatureType;
+import com.lycanitesmobs.core.info.ItemManager;
 import com.lycanitesmobs.core.item.ItemColorCustomSpawnEgg;
 import com.mojang.blaze3d.platform.ScreenManager;
 import net.minecraft.client.Minecraft;
@@ -23,6 +24,7 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RenderBlockScreenEffectEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
@@ -115,12 +117,8 @@ public class ClientManager {
 
 
     public void initBlockRenderTypes() {
-        for (String s : blocks.keySet()) {
-            var block = ObjectManager.getBlock(s);
-            // Fire blocks
-            if (block instanceof BlockFireBase base) {
-                ItemBlockRenderTypes.setRenderLayer(base, RenderType.cutout());
-            }
+        for (Block block : ItemManager.getInstance().cutoutBlocks) {
+            ItemBlockRenderTypes.setRenderLayer(block, RenderType.cutout());
         }
     }
 }
