@@ -181,7 +181,7 @@ public class CreatureObjModel extends CreatureModel {
             return this;
         }*/
         // Load Obj Model:
-        this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "models/" + path + ".obj"));
+        this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"));
         this.objParts = this.objModel.objParts;
         if (this.objParts.isEmpty())
             LycanitesMobs.logWarning("", "Unable to load model obj for: " + name + "");
@@ -190,7 +190,7 @@ public class CreatureObjModel extends CreatureModel {
         this.animator = new Animator(this);
 
         // Load Model Parts:
-        ResourceLocation modelPartsLocation = new ResourceLocation(modInfo.modid, "models/" + path + "_parts.json");
+        ResourceLocation modelPartsLocation = new ResourceLocation(modInfo.modid, "modelparts/" + path + "_parts.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
             InputStream in = Minecraft.getInstance().getResourceManager().getResource(modelPartsLocation).get().open();
