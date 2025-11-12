@@ -34,7 +34,7 @@ public class LMChargesGroup {
                 .displayItems((enabledFeatures, entries) -> {
                     for (String info : chargeNames) {
                         if (ObjectManager.getItem(info) != null) {
-                            LMHelperClass.logInfoMessage("Are charges empty?: " + String.valueOf(chargeNames.isEmpty()));
+                            //LMHelperClass.logInfoMessage("Are charges empty?: " + String.valueOf(chargeNames.isEmpty()));
                             entries.accept(ObjectManager.getItem(info));
                         }
                     }

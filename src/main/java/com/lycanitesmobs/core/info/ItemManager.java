@@ -14,7 +14,6 @@ import com.lycanitesmobs.core.block.fluid.type.BaseFluidType;
 import com.lycanitesmobs.core.item.*;
 import com.lycanitesmobs.core.item.consumable.*;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
-import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.item.special.ItemSoulContract;
 import com.lycanitesmobs.core.item.special.ItemSoulgazer;
 import com.lycanitesmobs.core.item.special.ItemSoulkey;
@@ -22,9 +21,7 @@ import com.lycanitesmobs.core.item.special.ItemSoulstone;
 import com.lycanitesmobs.core.item.summoningstaff.*;
 import com.lycanitesmobs.core.util.LMHelperClass;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -32,24 +29,18 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 import org.joml.Vector3f;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Supplier;
-
-import static com.lycanitesmobs.core.item.LMEquipmentPartsGroup.equipmentNames;
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ItemManager extends JSONLoader {
@@ -57,14 +48,13 @@ public class ItemManager extends JSONLoader {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, LycanitesMobs.MODID);
     // Creative Tabs:
     public static final CreativeModeTab.Builder itemsGroup = LMItemsGroup.getBuilder();
-    //	public static final DeferredRegister<Fluid> FLUIDS = new DeferredRegister<>(ForgeRegistries.FLUIDS, LycanitesMobs.MODID); TODO Probably moved to a reg event finally...
     public static final RegistryObject<CreativeModeTab> itemTab = TABS.register(LycanitesMobs.MODID + ".items", itemsGroup::build);
     public static final CreativeModeTab.Builder blocksGroup = LMBlocksGroup.getBuilder();
     public static final RegistryObject<CreativeModeTab> blockTab = TABS.register(LycanitesMobs.MODID + ".blocks", blocksGroup::build);
     public static final CreativeModeTab.Builder creaturesGroups = LMCreaturesGroup.getBuilder();
     public static final RegistryObject<CreativeModeTab> creaturesTab = TABS.register(LycanitesMobs.MODID + ".creatures", creaturesGroups::build);
     public static final CreativeModeTab.Builder chargesGroup = LMChargesGroup.getBuilder();
-    //public static final RegistryObject<CreativeModeTab> chargesTab = TABS.register(LycanitesMobs.MODID + ".charges", chargesGroup::build);
+    public static final RegistryObject<CreativeModeTab> chargesTab = TABS.register(LycanitesMobs.MODID + ".charges", chargesGroup::build);
     public static final CreativeModeTab.Builder equipmentPartsGroup = LMEquipmentPartsGroup.getBuilder();
     public static final RegistryObject<CreativeModeTab> equipmentPartsTab = TABS.register(LycanitesMobs.MODID + ".equipmentparts", equipmentPartsGroup::build);
     public static final Map<String, Item.Properties> registryItems = new HashMap<>();
