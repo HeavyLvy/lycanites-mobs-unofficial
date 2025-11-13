@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.block;
 
 
+import com.google.common.collect.ImmutableMap;
 import com.lycanitesmobs.ObjectManager;
 import com.lycanitesmobs.core.info.ItemManager;
 import net.minecraft.Util;
@@ -11,13 +12,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.*;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.PipeBlock;
-import net.minecraft.world.level.block.TntBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraft.world.ticks.TickPriority;
 import net.minecraftforge.api.distmarker.Dist;
@@ -25,6 +26,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class BlockFireBase extends BlockBase {
     public static final BooleanProperty PERMANENT = BooleanProperty.create("permanent");
@@ -35,12 +38,18 @@ public class BlockFireBase extends BlockBase {
     public static final BooleanProperty WEST = PipeBlock.WEST;
     public static final BooleanProperty UP = PipeBlock.UP;
     private static final Map<Direction, BooleanProperty> FACING_TO_PROPERTY_MAP = PipeBlock.PROPERTY_BY_DIRECTION.entrySet().stream().filter((p_199776_0_) -> p_199776_0_.getKey() != Direction.DOWN).collect(Util.toMap());
-
+    private final Map<BlockState, VoxelShape> shapesCache;
     public boolean dieInRain = true;
     public boolean triggerTNT = true;
     public int agingRate = 3;
     public float spreadChance = 1;
     public boolean removeOnNoFireTick;
+    private static final VoxelShape UP_AABB = Block.box(0.0D, 15.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+    private static final VoxelShape WEST_AABB = Block.box(0.0D, 0.0D, 0.0D, 1.0D, 16.0D, 16.0D);
+    private static final VoxelShape EAST_AABB = Block.box(15.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+    private static final VoxelShape NORTH_AABB = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 1.0D);
+    private static final VoxelShape SOUTH_AABB = Block.box(0.0D, 0.0D, 15.0D, 16.0D, 16.0D, 16.0D);
+    protected static final VoxelShape DOWN_AABB = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 1.0D, 16.0D);
 
     public BlockFireBase(Block.Properties properties, String name) {
         super(properties, name);
@@ -63,8 +72,40 @@ public class BlockFireBase extends BlockBase {
                 .setValue(SOUTH, false)
                 .setValue(WEST, false)
                 .setValue(UP, false));
-
+        this.shapesCache = ImmutableMap.copyOf(this.stateDefinition.getPossibleStates().stream().filter((p_53497_) -> {
+            return p_53497_.getValue(AGE) == 0;
+        }).collect(Collectors.toMap(Function.identity(), BlockFireBase::calculateShape)));
         ItemManager.getInstance().cutoutBlocks.add(this);
+    }
+
+    private static VoxelShape calculateShape(BlockState p_53491_) {
+        VoxelShape voxelshape = Shapes.empty();
+        if (p_53491_.getValue(UP)) {
+            voxelshape = UP_AABB;
+        }
+
+        if (p_53491_.getValue(NORTH)) {
+            voxelshape = Shapes.or(voxelshape, NORTH_AABB);
+        }
+
+        if (p_53491_.getValue(SOUTH)) {
+            voxelshape = Shapes.or(voxelshape, SOUTH_AABB);
+        }
+
+        if (p_53491_.getValue(EAST)) {
+            voxelshape = Shapes.or(voxelshape, EAST_AABB);
+        }
+
+        if (p_53491_.getValue(WEST)) {
+            voxelshape = Shapes.or(voxelshape, WEST_AABB);
+        }
+
+        return voxelshape.isEmpty() ? DOWN_AABB : voxelshape;
+    }
+
+
+    public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return this.shapesCache.get(pState.setValue(AGE, Integer.valueOf(0)));
     }
 
     @Override
@@ -78,24 +119,42 @@ public class BlockFireBase extends BlockBase {
         return this.getStateForPlacement(context.getLevel(), context.getClickedPos());
     }
 
-    public BlockState getStateForPlacement(BlockGetter world, BlockPos blockPos) {
-        BlockPos lowerBlockPos = blockPos.below();
-        BlockState lowerBlockState = world.getBlockState(lowerBlockPos);
-        if (!this.canCatchFire(world, blockPos, Direction.UP) && lowerBlockState.isFaceSturdy(world, lowerBlockPos, Direction.UP)) {
-            BlockState placementState = this.defaultBlockState();
+    public BlockState getStateForPlacement(BlockGetter world, BlockPos pos) {
+        BlockPos belowPos = pos.below();
+        BlockState belowState = world.getBlockState(belowPos);
 
-            for (Direction direction : Direction.values()) {
-                BooleanProperty booleanproperty = FACING_TO_PROPERTY_MAP.get(direction);
-                if (booleanproperty != null) {
-                    placementState = placementState.setValue(booleanproperty, this.canCatchFire(world, blockPos.relative(direction), direction.getOpposite()));
-                }
-            }
+        boolean hasSupportBelow = belowState.isFaceSturdy(world, belowPos, Direction.UP);
+        BlockState state = this.defaultBlockState();
 
-            return placementState.setValue(PERMANENT, false);
+        if (hasSupportBelow) {
+            state = state.setValue(UP, false)
+                    .setValue(NORTH, false)
+                    .setValue(EAST, false)
+                    .setValue(SOUTH, false)
+                    .setValue(WEST, false)
+                    .setValue(PERMANENT, false);
+            return state;
         }
 
-        return this.defaultBlockState();
+        boolean anySide = false;
+
+        for (Direction dir : Direction.values()) {
+            if (dir == Direction.DOWN) continue;
+            BooleanProperty prop = FACING_TO_PROPERTY_MAP.get(dir);
+            if (prop != null) {
+                boolean flammable = this.canCatchFire(world, pos.relative(dir), dir.getOpposite());
+                if (flammable) anySide = true;
+                state = state.setValue(prop, flammable);
+            }
+        }
+
+        if (!anySide) {
+            state = state.setValue(UP, true);
+        }
+
+        return state.setValue(PERMANENT, false);
     }
+
 
     /**
      * Returns true if this block can place another block at the specified location.
@@ -265,8 +324,13 @@ public class BlockFireBase extends BlockBase {
     /**
      * Burns away a block, typically replacing it with this fire block, but can change it to other things depending on the type of fire block.
      **/
+
     public void burnBlockReplace(Level world, BlockPos pos, int newFireAge) {
-        world.setBlock(pos, this.defaultBlockState().setValue(AGE, newFireAge).setValue(PERMANENT, false), 3);
+        BlockState placement = this.getStateForPlacement(world, pos)
+                .setValue(AGE, newFireAge)
+                .setValue(PERMANENT, false);
+
+        world.setBlock(pos, placement, 3);
     }
 
     /**
