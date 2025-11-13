@@ -1,6 +1,6 @@
 {
 	"parent": "lycanitesmobs:item/savagesummoningstaff",
 	"textures": {
-		"layer0": "lycanitesmobs:item/savagesummoningstaff_fire"
+		"layer0": "lycanitesmobs:item/staffs/savagesummoningstaff_fire"
 	}
 }

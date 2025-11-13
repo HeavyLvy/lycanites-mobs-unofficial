@@ -1,7 +1,7 @@
 {
 	"parent": "item/generated",
 	"textures": {
-		"layer0": "lycanitesmobs:item/wintergift"
+		"layer0": "lycanitesmobs:item/events/wintergift"
 	},
 	"display": {
 		"thirdperson": {
