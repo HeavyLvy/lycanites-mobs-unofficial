@@ -200,6 +200,7 @@ public class ItemManager extends JSONLoader {
         BlockMaker.addDungeonBlocks("demon");
         BlockMaker.addDungeonBlocks("aberrant");
         BlockMaker.addDungeonBlocks("ashen");
+        BlockMaker.addDungeonBlocks("stream");
         ObjectManager.addBlock("soulcubedemonic", () -> new BlockBase(Block.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE).strength(2F, 1200.0F), "soulcubedemonic"), false);
         ObjectManager.addBlock("soulcubeundead", () -> new BlockBase(Block.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE).strength(2F, 1200.0F), "soulcubeundead"), false);
         ObjectManager.addBlock("soulcubeaberrant", () -> new BlockBase(Block.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE).strength(2F, 1200.0F), "soulcubeaberrant"), false);
