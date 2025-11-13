@@ -120,10 +120,7 @@ public class CreatureMoveController extends MoveControl {
             double distanceXZ = distanceX * distanceX + distanceZ * distanceZ;
             double distanceSq = distanceX * distanceX + distanceY * distanceY + distanceZ * distanceZ;
 
-            double stopRadius = (double) this.mob.getDimensions(Pose.STANDING).width * 0.75D;
-            double stopRadiusSq = stopRadius * stopRadius;
-
-            if (distanceSq < stopRadiusSq) {
+            if (distanceSq < 2.500000277905201E-7D) {
                 this.mob.setZza(0.0F);
                 return;
             }
