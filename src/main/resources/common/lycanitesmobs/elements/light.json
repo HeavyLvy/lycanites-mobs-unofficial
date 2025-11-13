@@ -2,7 +2,7 @@
 	"name": "light",
 	"loadDefault": true,
 	"debuffDurationMultiplier": 2,
-	"cabBurn": false,
+	"canBurn": false,
 	"buffs": [
 		"minecraft:night_vision"
 	],
