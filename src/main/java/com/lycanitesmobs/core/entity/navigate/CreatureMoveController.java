@@ -222,10 +222,7 @@ public class CreatureMoveController extends MoveControl {
             double zDistance = this.wantedZ - this.entityCreature.position().z();
             double distanceSq = xDistance * xDistance + yDistance * yDistance + zDistance * zDistance;
 
-            double stopRadius = (double) this.entityCreature.getDimensions(Pose.STANDING).width * 0.75D;
-            double stopRadiusSq = stopRadius * stopRadius;
-
-            if (distanceSq <= stopRadiusSq) {
+            if (distanceSq < 2.500000277905201E-7D) {
                 this.operation = MoveControl.Operation.WAIT;
             } else if (this.courseChangeCooldown-- <= 0) {
                 this.courseChangeCooldown += this.entityCreature.getRandom().nextInt(5) + 2;
@@ -262,5 +259,6 @@ public class CreatureMoveController extends MoveControl {
             }
         }
     }
+
 
 }
