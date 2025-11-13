@@ -4,6 +4,7 @@ import com.lycanitesmobs.core.entity.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.CustomProjectileEntity;
 import com.lycanitesmobs.core.entity.LaserEndProjectileEntity;
 import com.lycanitesmobs.core.entity.LaserProjectileEntity;
+import com.lycanitesmobs.core.util.LMHelperClass;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -127,6 +128,7 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
     @Override
     public ResourceLocation getTextureLocation(BaseProjectileEntity entity) {
         ResourceLocation tex = entity.getTexture();
+        LMHelperClass.logErrorMessageOnce("Missing texture from entity: " + entity.getType());
         return tex != null ? tex : MissingTextureAtlasSprite.getLocation();
     }
 
