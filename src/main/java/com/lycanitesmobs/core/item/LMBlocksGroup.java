@@ -14,6 +14,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class LMBlocksGroup {
@@ -29,6 +30,8 @@ public class LMBlocksGroup {
         builder.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".blocks"))
                 .icon(this::getIconItem)
                 .displayItems((enabledFeatures, entries) -> {
+                    // Sort the blockNames list alphabetically
+                    Collections.sort(blockNames);
                     for (String info : blockNames) {
                         if (ObjectManager.getBlock(info) != null) {
                             entries.accept(ObjectManager.getBlock(info));

@@ -14,6 +14,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class LMCreaturesGroup {
@@ -30,6 +31,8 @@ public class LMCreaturesGroup {
         builder = builder.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".creatures"))
                 .icon(this::getIconItem)
                 .displayItems((enabledFeatures, entries) -> {
+                    // Sort the creatureNames list alphabetically
+                    Collections.sort(creatureNames);
                     for (String item : creatureNames) {
                         var i = ObjectManager.getItem(item);
                         if (i instanceof ItemCustomSpawnEgg spawnEgg) {

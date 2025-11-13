@@ -13,6 +13,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class LMChargesGroup {
@@ -32,6 +33,8 @@ public class LMChargesGroup {
         builder = builder.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".charges"))
                 .icon(this::getIconItem)
                 .displayItems((enabledFeatures, entries) -> {
+                    // Sort the chargeNames list alphabetically
+                    Collections.sort(chargeNames);
                     for (String info : chargeNames) {
                         if (ObjectManager.getItem(info) != null) {
                             //LMHelperClass.logInfoMessage("Are charges empty?: " + String.valueOf(chargeNames.isEmpty()));

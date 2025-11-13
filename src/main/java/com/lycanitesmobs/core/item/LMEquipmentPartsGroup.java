@@ -12,6 +12,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class LMEquipmentPartsGroup {
@@ -33,6 +34,8 @@ public class LMEquipmentPartsGroup {
         builder = builder.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".equipmentparts"))
                 .icon(this::getIconItem)
                 .displayItems((enabledFeatures, entries) -> {
+                    // Sort the equipmentNames list alphabetically
+                    Collections.sort(equipmentNames);
                     for (String info : equipmentNames) {
                         if (ObjectManager.getItem(info) != null) {
                             entries.accept(ObjectManager.getItem(info));

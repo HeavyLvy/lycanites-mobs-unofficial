@@ -16,6 +16,7 @@ import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -38,7 +39,10 @@ public class LMItemsGroup {
         builder = builder
                 .title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".items"))
                 .icon(this::getIconItem)
+
                 .displayItems((enabledFeatures, entries) -> {
+                    // Sort the itemNames list alphabetically
+                    Collections.sort(itemNames);
                     for (String name : itemNames) {
                         if (ObjectManager.getItem(name) != null) {
                             entries.accept(ObjectManager.getItem(name));
