@@ -1,6 +1,6 @@
 {
 	"parent": "item/generated",
 	"textures": {
-		"layer0": "lycanitesmobs:items/smitefireball"
+		"layer0": "lycanitesmobs:items/charges/smitefireball"
 	}
 }

@@ -1,7 +1,7 @@
 {
 	"parent": "item/generated",
 	"textures": {
-		"layer0": "lycanitesmobs:item/battleburrito"
+		"layer0": "lycanitesmobs:item/foods/battleburrito"
 	},
 	"display": {
 		"thirdperson": {
