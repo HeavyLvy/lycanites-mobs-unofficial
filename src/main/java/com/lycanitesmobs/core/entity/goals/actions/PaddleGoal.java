@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.entity.goals.actions;
 
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.navigate.CreaturePathNavigator;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.navigation.CreaturePathNavigator;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.player.Player;

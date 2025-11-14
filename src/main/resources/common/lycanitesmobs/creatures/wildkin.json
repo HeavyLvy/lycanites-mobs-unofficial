@@ -4,8 +4,8 @@
     "groups": [
         "raider"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityWildkin",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelWildkin",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.anthronian.EntityWildkin",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelWildkin",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -51,7 +51,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 1,
-	"bagSize": 10,
+    "bagSize": 10,
     "tamingReputation": 500,
     "eggBackColor": "#433929",
     "eggForeColor": "#766f5a",

@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.entity.goals.targeting;
 
 import com.lycanitesmobs.api.Targeting;
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.TameableCreatureEntity;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.monster.Enemy;
 

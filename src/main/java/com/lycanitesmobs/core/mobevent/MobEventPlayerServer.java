@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.mobevent;
 
-import com.lycanitesmobs.ExtendedWorld;
+import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

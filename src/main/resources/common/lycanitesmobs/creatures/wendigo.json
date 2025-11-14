@@ -5,8 +5,8 @@
         "monster",
         "frozen"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityWendigo",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelWendigo",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.undead.EntityWendigo",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelWendigo",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -54,7 +54,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 1,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#CCCCFF",
     "eggForeColor": "#0055FF",
     "subspecies": [

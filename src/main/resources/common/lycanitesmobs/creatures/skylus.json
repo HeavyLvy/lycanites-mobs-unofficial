@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntitySkylus",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelSkylus",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.aquatic.EntitySkylus",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelSkylus",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -51,7 +51,7 @@
     "pierce": 1,
     "sight": 32,
     "knockbackResistance": 0.5,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#FFCCDD",
     "eggForeColor": "#BB2299",
     "subspecies": [

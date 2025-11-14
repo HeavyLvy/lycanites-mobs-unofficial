@@ -1,10 +1,8 @@
 package com.lycanitesmobs.core.entity.goals.targeting;
 
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.TameableCreatureEntity;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import net.minecraft.world.entity.LivingEntity;
-
-import java.util.EnumSet;
 
 public class FindAvoidTargetGoal extends TargetingGoal {
 	// Targets:

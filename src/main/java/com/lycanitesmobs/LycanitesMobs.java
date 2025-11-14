@@ -1,43 +1,47 @@
 package com.lycanitesmobs;
 
-import com.lycanitesmobs.client.ClientManager;
-import com.lycanitesmobs.client.ClientProxy;
-import com.lycanitesmobs.client.ModelManager;
-import com.lycanitesmobs.client.TextureManager;
-import com.lycanitesmobs.client.gui.*;
-import com.lycanitesmobs.core.*;
-import com.lycanitesmobs.core.block.BlockFireBase;
-import com.lycanitesmobs.core.capabilities.*;
-import com.lycanitesmobs.core.command.CommandManager;
+import com.lycanitesmobs.client.gui.screen.block.EquipmentForgeScreen;
+import com.lycanitesmobs.client.gui.screen.block.EquipmentInfuserScreen;
+import com.lycanitesmobs.client.gui.screen.block.EquipmentStationScreen;
+import com.lycanitesmobs.client.gui.screen.block.SummoningPedestalScreen;
+import com.lycanitesmobs.client.gui.screen.creature.CreatureInventoryScreen;
+import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.core.data.info.ModInfo;
+import com.lycanitesmobs.core.data.info.ObjectLists;
+import com.lycanitesmobs.core.event.GameEventListener;
+import com.lycanitesmobs.core.data.info.altar.AltarInfo;
+import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.manager.*;
+import com.lycanitesmobs.core.network.proxy.ClientProxy;
+import com.lycanitesmobs.client.manager.ModelManager;
+import com.lycanitesmobs.client.manager.TextureManager;
+import com.lycanitesmobs.core.manager.CommandManager;
 import com.lycanitesmobs.core.compatibility.DLDungeons;
-import com.lycanitesmobs.core.config.ConfigDebug;
-import com.lycanitesmobs.core.config.CoreConfig;
-import com.lycanitesmobs.core.container.*;
-import com.lycanitesmobs.core.dungeon.DungeonManager;
-import com.lycanitesmobs.core.entity.BaseProjectileEntity;
-import com.lycanitesmobs.core.entity.EntityFactory;
-import com.lycanitesmobs.core.helpers.LMReflectionHelper;
-import com.lycanitesmobs.core.info.*;
-import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
-import com.lycanitesmobs.core.info.projectile.ProjectileManager;
-import com.lycanitesmobs.core.item.consumable.ItemHalloweenTreat;
-import com.lycanitesmobs.core.item.consumable.ItemWinterGift;
+import com.lycanitesmobs.core.data.config.ConfigDebug;
+import com.lycanitesmobs.core.data.config.CoreConfig;
+import com.lycanitesmobs.core.container.block.EquipmentForgeContainer;
+import com.lycanitesmobs.core.container.block.EquipmentInfuserContainer;
+import com.lycanitesmobs.core.container.block.EquipmentStationContainer;
+import com.lycanitesmobs.core.container.block.SummoningPedestalContainer;
+import com.lycanitesmobs.core.container.creature.CreatureContainer;
+import com.lycanitesmobs.core.manager.DungeonManager;
+import com.lycanitesmobs.core.effect.EffectManager;
+import com.lycanitesmobs.core.entity.util.EntityFactory;
+import com.lycanitesmobs.core.data.loaders.FileLoader;
+import com.lycanitesmobs.core.data.loaders.StreamLoader;
+import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.item.consumable.holiday.ItemHalloweenTreat;
+import com.lycanitesmobs.core.item.consumable.holiday.ItemWinterGift;
 import com.lycanitesmobs.core.item.equipment.EquipmentPartManager;
-import com.lycanitesmobs.core.mobevent.MobEventListener;
-import com.lycanitesmobs.core.mobevent.MobEventManager;
-import com.lycanitesmobs.core.network.PacketHandler;
-import com.lycanitesmobs.core.spawner.SpawnerEventListener;
-import com.lycanitesmobs.core.spawner.SpawnerManager;
-import com.lycanitesmobs.core.util.EntityTypeGetter;
-import com.lycanitesmobs.core.worldgen.WorldGenManager;
+import com.lycanitesmobs.core.event.MobEventListener;
+import com.lycanitesmobs.core.network.proxy.IProxy;
+import com.lycanitesmobs.core.network.proxy.ServerProxy;
+import com.lycanitesmobs.core.event.SpawnerEventListener;
 import com.lycanitesmobs.core.worldgen.WorldGenerator;
 import com.lycanitesmobs.core.worldgen.WorldGeneratorBiomeModifier;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -65,7 +69,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.lycanitesmobs.ObjectManager.blocks;
+import static com.lycanitesmobs.core.util.helpers.LMHelperClass.fixMaxHealth;
 
 
 @Mod(LycanitesMobs.MODID)
@@ -85,7 +89,7 @@ public class LycanitesMobs {
     public static final String guilded = "https://www.guilded.gg/i/jpLvd6J2";
     public static final String discord = "https://discord.gg/bFpV3z4";
 
-    public static final PacketHandler packetHandler = new PacketHandler();
+    public static final PacketManager PACKET_MANAGER = new PacketManager();
     // Biome Management:
     public static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS =
             DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MODID);
@@ -127,7 +131,7 @@ public class LycanitesMobs {
     // Proxy:
     public static IProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
     // Potion Effects:
-    public static Effects EFFECTS;
+    public static EffectManager EffectManager;
 
     /**
      * Constructor
@@ -177,7 +181,7 @@ public class LycanitesMobs {
         MinecraftForge.EVENT_BUS.register(new WorldGenerator());
 
         // Network:
-        packetHandler.register();
+        PACKET_MANAGER.register();
         // Load Content:
         this.loadContent();
 
@@ -274,7 +278,7 @@ public class LycanitesMobs {
         ObjectLists.createVanillaLists();
 
         // Potion Effects:
-        EFFECTS = new Effects();
+        EffectManager = new EffectManager();
 
         // Spawners:
         SpawnerManager.getInstance().loadAllFromJson(modInfo);
@@ -305,7 +309,7 @@ public class LycanitesMobs {
         ObjectManager.setCurrentModInfo(modInfo);
         this.loadConfigs();
         // Fix Health Limit:
-        LMReflectionHelper.fixMaxHealth();
+        fixMaxHealth();
         // Mod Support:
         DLDungeons.init();
         loadValues();

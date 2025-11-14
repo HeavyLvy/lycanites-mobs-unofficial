@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.spawner.Spawner;
-import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;

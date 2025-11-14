@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityKathoga",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelKathoga",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.demon.EntityKathoga",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelKathoga",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -55,7 +55,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.25,
-	"bagSize": 10,
+    "bagSize": 10,
     "tamingReputation": 500,
     "packSize": 1,
     "eggBackColor": "#FF0099",
@@ -85,7 +85,7 @@
             "index": 1,
             "priority": 1,
             "name": "moloch",
-            "modelClass": "com.lycanitesmobs.client.model.creature.ModelKathogaMoloch",
+            "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelKathogaMoloch",
             "elements": [
                 "void"
             ],

@@ -1,9 +1,9 @@
 package com.lycanitesmobs.core.entity.goals.actions.abilities;
 
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.TameableCreatureEntity;
-import com.lycanitesmobs.core.entity.goals.TargetSorterNearest;
-import com.lycanitesmobs.core.info.ObjectLists;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
+import com.lycanitesmobs.core.entity.goals.util.TargetSorterNearest;
+import com.lycanitesmobs.core.data.info.ObjectLists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.GameRules;

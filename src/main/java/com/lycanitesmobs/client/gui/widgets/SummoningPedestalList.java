@@ -1,15 +1,13 @@
 package com.lycanitesmobs.client.gui.widgets;
 
-import com.lycanitesmobs.client.TextureManager;
-import com.lycanitesmobs.client.gui.SummoningPedestalScreen;
-import com.lycanitesmobs.core.entity.ExtendedPlayer;
-import com.lycanitesmobs.core.info.CreatureInfo;
-import com.lycanitesmobs.core.info.CreatureManager;
+import com.lycanitesmobs.client.manager.TextureManager;
+import com.lycanitesmobs.client.gui.screen.block.SummoningPedestalScreen;
+import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.manager.CreatureManager;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-
-import java.util.List;
 
 public class SummoningPedestalList extends BaseList<SummoningPedestalScreen> {
 	public ExtendedPlayer playerExt;

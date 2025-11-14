@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityBanshee",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelBanshee",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.elemental.EntityBanshee",
+    "modelClass": "com.lycanitesmobs.client.model.creature.elemental.ModelBanshee",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -47,7 +47,7 @@
     "pierce": 1,
     "sight": 10,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#7d8d9e",
     "eggForeColor": "#0d1014",
     "subspecies": [

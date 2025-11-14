@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.entity.goals.actions.abilities;
 
-import com.lycanitesmobs.ObjectManager;
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.TameableCreatureEntity;
+import com.lycanitesmobs.core.manager.ObjectManager;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.BaseGoal;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;

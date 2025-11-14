@@ -4,8 +4,8 @@
     "groups": [
         "frozen"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityArix",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelArix",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.imp.EntityArix",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelArix",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -53,7 +53,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 250,
     "eggBackColor": "#DDDDFF",
     "eggForeColor": "#9999FF",

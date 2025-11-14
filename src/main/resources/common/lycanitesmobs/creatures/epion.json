@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityEpion",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelEpion",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.beast.EntityEpion",
+    "modelClass": "com.lycanitesmobs.client.model.creature.generic.ModelEpion",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -48,7 +48,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 1000,
     "eggBackColor": "#553300",
     "eggForeColor": "#FF22DD",
@@ -75,8 +75,8 @@
         }
     ],
     "elements": [
-		"shadow"
-	],
+        "shadow"
+    ],
     "diets": [
         "carnivore",
         "insectivore",

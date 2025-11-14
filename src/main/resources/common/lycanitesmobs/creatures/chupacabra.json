@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityChupacabra",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelChupacabra",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.beast.EntityChupacabra",
+    "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelChupacabra",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -46,7 +46,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 250,
     "eggBackColor": "#36251b",
     "eggForeColor": "#aa8c63",

@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.command;
 
 import com.lycanitesmobs.core.spawner.Spawner;
-import com.lycanitesmobs.core.spawner.SpawnerEventListener;
-import com.lycanitesmobs.core.spawner.SpawnerManager;
+import com.lycanitesmobs.core.event.SpawnerEventListener;
+import com.lycanitesmobs.core.manager.SpawnerManager;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;

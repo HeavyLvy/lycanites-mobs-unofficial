@@ -1,8 +1,8 @@
 package com.lycanitesmobs.client.gui.widgets;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.gui.DrawHelper;
-import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.helpers.DrawHelper;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;

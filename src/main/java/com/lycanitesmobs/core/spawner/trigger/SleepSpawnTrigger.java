@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.spawner.trigger;
 
-import com.lycanitesmobs.core.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.spawner.Spawner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

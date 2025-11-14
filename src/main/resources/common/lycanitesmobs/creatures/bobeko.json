@@ -4,8 +4,8 @@
     "groups": [
         "animal"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityBobeko",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelBobeko",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.beast.EntityBobeko",
+    "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelBobeko",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -52,7 +52,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.5,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#EEEEFF",
     "eggForeColor": "#000099",
     "subspecies": [

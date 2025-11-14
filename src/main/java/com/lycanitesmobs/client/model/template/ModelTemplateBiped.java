@@ -1,7 +1,7 @@
 package com.lycanitesmobs.client.model.template;
 
-import com.lycanitesmobs.client.model.CreatureObjModel;
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import com.lycanitesmobs.client.model.creature.base.CreatureObjModel;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 

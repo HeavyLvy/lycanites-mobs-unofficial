@@ -4,8 +4,8 @@
     "groups": [
         "opportunist"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityRemobra",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelRemobra",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.dragon.EntityRemobra",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelRemobra",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#440066",
     "eggForeColor": "#DD00FF",
     "subspecies": [

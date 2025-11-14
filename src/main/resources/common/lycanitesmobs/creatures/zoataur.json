@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityZoataur",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelZoataur",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.dragon.EntityZoataur",
+    "modelClass": "com.lycanitesmobs.client.model.creature.dragon.ModelZoataur",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -55,7 +55,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.25,
-	"bagSize": 20,
+    "bagSize": 20,
     "tamingReputation": 2000,
     "packSize": 1,
     "eggBackColor": "#442200",

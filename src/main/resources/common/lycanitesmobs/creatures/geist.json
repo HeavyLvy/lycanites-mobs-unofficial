@@ -4,8 +4,8 @@
     "groups": [
         "raider"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityGeist",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelGeist",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.undead.EntityGeist",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelGeist",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -47,7 +47,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#705449",
     "eggForeColor": "#310e08",
     "subspecies": [

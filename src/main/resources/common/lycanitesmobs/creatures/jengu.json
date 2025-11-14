@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityJengu",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelJengu",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.elemental.EntityJengu",
+    "modelClass": "com.lycanitesmobs.client.model.creature.elemental.ModelJengu",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -44,7 +44,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#000099",
     "eggForeColor": "#4444FF",
     "subspecies": [

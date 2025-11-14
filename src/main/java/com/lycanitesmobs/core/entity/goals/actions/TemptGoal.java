@@ -1,10 +1,10 @@
 package com.lycanitesmobs.core.entity.goals.actions;
 
-import com.lycanitesmobs.core.entity.AgeableCreatureEntity;
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.TameableCreatureEntity;
-import com.lycanitesmobs.core.entity.navigate.CreaturePathNavigator;
-import com.lycanitesmobs.core.info.ObjectLists;
+import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
+import com.lycanitesmobs.core.entity.navigation.CreaturePathNavigator;
+import com.lycanitesmobs.core.data.info.ObjectLists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -12,7 +12,6 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-import java.nio.file.Path;
 import java.util.EnumSet;
 
 public class TemptGoal extends Goal {

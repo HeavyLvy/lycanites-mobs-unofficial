@@ -2,7 +2,7 @@ package com.lycanitesmobs.core.spawner.trigger;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.spawner.Spawner;
-import com.lycanitesmobs.core.spawner.SpawnerEventListener;
+import com.lycanitesmobs.core.event.SpawnerEventListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 

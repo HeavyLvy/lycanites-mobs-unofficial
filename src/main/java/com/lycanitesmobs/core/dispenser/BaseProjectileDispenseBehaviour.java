@@ -1,9 +1,9 @@
 package com.lycanitesmobs.core.dispenser;
 
-import com.lycanitesmobs.ObjectManager;
-import com.lycanitesmobs.core.entity.BaseProjectileEntity;
-import com.lycanitesmobs.core.info.projectile.ProjectileInfo;
-import com.lycanitesmobs.core.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ObjectManager;
+import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
+import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;

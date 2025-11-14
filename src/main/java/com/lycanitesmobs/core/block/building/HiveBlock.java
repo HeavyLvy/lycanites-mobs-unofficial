@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.block.building;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.block.BlockBase;
-import com.lycanitesmobs.core.entity.creature.EntityVespidQueen;
+import com.lycanitesmobs.core.block.base.BlockBase;
+import com.lycanitesmobs.core.entity.creature.insect.EntityVespidQueen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -10,42 +10,39 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.AABB;
 
-import java.util.Random;
-
 public class HiveBlock extends BlockBase {
-	// ==================================================
-	//                   Constructor
-	// ==================================================
-	public HiveBlock(Block.Properties properties, String name) {
-		super(properties,name);
+    // ==================================================
+    //                   Constructor
+    // ==================================================
+    public HiveBlock(Block.Properties properties, String name) {
+        super(properties, name);
 
-		this.blockName = name;
-		
-		// Stats:
-		this.tickRate = 100;
-		this.removeOnTick = true;
+        this.blockName = name;
 
-		this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
-		this.registerDefaultState(this.getStateDefinition().any().setValue(AGE, 0));
-	}
+        // Stats:
+        this.tickRate = 100;
+        this.removeOnTick = true;
 
-	@Override
-	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(AGE);
-	}
+        this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
+        this.registerDefaultState(this.getStateDefinition().any().setValue(AGE, 0));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(AGE);
+    }
 
 
     // ==================================================
     //                   Placement
     // ==================================================
     @Override
-	public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
         int orientationMeta = placer.getDirection().getOpposite().get3DDataValue();
         orientationMeta += 8;
         world.setBlock(pos, state.setValue(AGE, orientationMeta), 1);
@@ -63,17 +60,17 @@ public class HiveBlock extends BlockBase {
 
 
     @Override
-	public boolean isRandomlyTicking(BlockState state) {
-		return state.getValue(AGE) < 8;
-	}
+    public boolean isRandomlyTicking(BlockState state) {
+        return state.getValue(AGE) < 8;
+    }
 
     // ========== Tick Update ==========
-	@Override
-	public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
-        if(world.isClientSide || state.getValue(AGE) >= 8)
+    @Override
+    public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+        if (world.isClientSide || state.getValue(AGE) >= 8)
             return;
         double range = 32D;
-        if(!world.getEntitiesOfClass(EntityVespidQueen.class, new AABB(pos.getX() - range, pos.getY() - range, pos.getZ() - range, pos.getX() + range, pos.getY() + range, pos.getZ() + range)).isEmpty())
+        if (!world.getEntitiesOfClass(EntityVespidQueen.class, new AABB(pos.getX() - range, pos.getY() - range, pos.getZ() - range, pos.getX() + range, pos.getY() + range, pos.getZ() + range)).isEmpty())
             return;
         super.tick(state, world, pos, random);
     }

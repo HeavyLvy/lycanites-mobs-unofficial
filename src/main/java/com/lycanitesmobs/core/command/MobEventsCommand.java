@@ -1,12 +1,11 @@
 package com.lycanitesmobs.core.command;
 
-import com.lycanitesmobs.core.config.ConfigMobEvent;
+import com.lycanitesmobs.core.data.config.ConfigMobEvent;
 import com.lycanitesmobs.core.mobevent.MobEvent;
-import com.lycanitesmobs.core.mobevent.MobEventManager;
+import com.lycanitesmobs.core.manager.MobEventManager;
 import com.lycanitesmobs.core.mobevent.MobEventPlayerServer;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;

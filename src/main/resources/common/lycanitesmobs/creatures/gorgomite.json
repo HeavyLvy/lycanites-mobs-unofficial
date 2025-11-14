@@ -6,8 +6,8 @@
         "critter",
         "hardy"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityGorgomite",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelGorgomite",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.insect.EntityGorgomite",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelGorgomite",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -55,7 +55,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#CC9900",
     "eggForeColor": "#884400",
     "subspecies": [

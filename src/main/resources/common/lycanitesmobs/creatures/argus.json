@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityArgus",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelArgus",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.elemental.EntityArgus",
+    "modelClass": "com.lycanitesmobs.client.model.creature.elemental.ModelArgus",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -49,7 +49,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 1,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#10df00",
     "eggForeColor": "#e305dc",
     "subspecies": [

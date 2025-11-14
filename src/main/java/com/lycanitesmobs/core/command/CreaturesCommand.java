@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.command;
 
-import com.lycanitesmobs.core.info.CreatureManager;
+import com.lycanitesmobs.core.manager.CreatureManager;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;

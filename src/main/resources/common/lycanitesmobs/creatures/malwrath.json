@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityMalwrath",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelMalwrath",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.demon.EntityMalwrath",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelMalwrath",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 32,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#FF0000",
     "eggForeColor": "#000099",
     "subspecies": [

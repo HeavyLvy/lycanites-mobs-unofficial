@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.mixin;
 
-import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.commands.ReloadCommand;
 import org.spongepowered.asm.mixin.Mixin;

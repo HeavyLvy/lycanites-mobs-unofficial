@@ -2,9 +2,9 @@ package com.lycanitesmobs.core.entity.goals.targeting;
 
 import com.google.common.base.Predicate;
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.ExtendedEntity;
-import com.lycanitesmobs.core.entity.TameableCreatureEntity;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 

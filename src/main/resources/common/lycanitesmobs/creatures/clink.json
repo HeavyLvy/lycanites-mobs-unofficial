@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityClink",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelClink",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.imp.EntityClink",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelClink",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -53,7 +53,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#FFAAAA",
     "eggForeColor": "#999999",
     "subspecies": [

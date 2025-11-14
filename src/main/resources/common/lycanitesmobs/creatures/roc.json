@@ -4,8 +4,8 @@
     "groups": [
         "opportunist"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityRoc",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelRoc",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.avian.EntityRoc",
+    "modelClass": "com.lycanitesmobs.client.model.creature.generic.ModelRoc",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -52,7 +52,7 @@
     "pierce": 1,
     "sight": 32,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 1000,
     "eggBackColor": "#AA0000",
     "eggForeColor": "#00DD44",

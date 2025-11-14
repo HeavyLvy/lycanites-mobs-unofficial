@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityUmibas",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelUmibas",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.worm.EntityUmibas",
+    "modelClass": "com.lycanitesmobs.client.model.creature.generic.ModelUmibas",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -46,7 +46,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.5,
-	"bagSize": 15,
+    "bagSize": 15,
     "tamingReputation": 500,
     "packSize": 1,
     "eggBackColor": "#DE2A00",

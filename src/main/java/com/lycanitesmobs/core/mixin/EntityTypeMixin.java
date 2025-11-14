@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.mixin;
 
-import com.lycanitesmobs.core.util.EntityTypeGetter;
+import com.lycanitesmobs.core.entity.EntityTypeGetter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;

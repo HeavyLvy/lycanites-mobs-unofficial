@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.command;
 
-import com.lycanitesmobs.core.spawner.SpawnerManager;
+import com.lycanitesmobs.core.manager.SpawnerManager;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;

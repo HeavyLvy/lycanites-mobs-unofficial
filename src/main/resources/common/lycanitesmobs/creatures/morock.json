@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityMorock",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelMorock",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.dragon.EntityMorock",
+    "modelClass": "com.lycanitesmobs.client.model.creature.dragon.ModelMorock",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -51,7 +51,7 @@
     "pierce": 2,
     "sight": 24,
     "knockbackResistance": 0.75,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 2000,
     "eggBackColor": "#222211",
     "eggForeColor": "#554444",
@@ -73,9 +73,9 @@
         }
     ],
     "elements": [
-		"quake",
-		"earth"
-	],
+        "quake",
+        "earth"
+    ],
     "diets": [
         "carnivore",
         "piscivore",

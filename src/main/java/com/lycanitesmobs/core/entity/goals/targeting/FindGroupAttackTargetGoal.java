@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.entity.goals.targeting;
 
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.CreatureRelationshipEntry;
-import com.lycanitesmobs.core.info.CreatureGroup;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.util.CreatureRelationshipEntry;
+import com.lycanitesmobs.core.data.info.creature.CreatureGroup;
 import net.minecraft.world.entity.LivingEntity;
 
 public class FindGroupAttackTargetGoal extends FindAttackTargetGoal {

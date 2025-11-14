@@ -4,8 +4,8 @@
     "groups": [
         "nature"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityTpumpkyn",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelTpumpkyn",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.plant.EntityTpumpkyn",
+    "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelTpumpkyn",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -49,7 +49,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 250,
     "eggBackColor": "#f17728",
     "eggForeColor": "#592503",

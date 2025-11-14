@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.dungeon.instance;
 
-import com.lycanitesmobs.ExtendedWorld;
+import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.dungeon.DungeonManager;
+import com.lycanitesmobs.core.manager.DungeonManager;
 import com.lycanitesmobs.core.dungeon.definition.DungeonSchematic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -10,11 +10,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraftforge.common.extensions.IForgeLevel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 public class DungeonInstance {

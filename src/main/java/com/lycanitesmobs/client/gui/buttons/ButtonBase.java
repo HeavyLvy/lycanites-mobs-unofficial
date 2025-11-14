@@ -1,12 +1,9 @@
 package com.lycanitesmobs.client.gui.buttons;
 
-import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.gui.DrawHelper;
+import com.lycanitesmobs.core.util.helpers.DrawHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraftforge.client.event.InputEvent;
 
 public class ButtonBase extends Button {
     public DrawHelper drawHelper;

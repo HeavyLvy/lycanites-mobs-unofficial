@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityIoray",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelIoray",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.aquatic.EntityIoray",
+    "modelClass": "com.lycanitesmobs.client.model.creature.aquatic.ModelIoray",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 32,
     "knockbackResistance": 0,
-	"bagSize": 10,
+    "bagSize": 10,
     "tamingReputation": 500,
     "eggBackColor": "#5247ca",
     "eggForeColor": "#ccd6ec",
@@ -72,9 +72,9 @@
         }
     ],
     "elements": [
-		"arcane",
-		"water"
-	],
+        "arcane",
+        "water"
+    ],
     "diets": [
         "piscivore"
     ],

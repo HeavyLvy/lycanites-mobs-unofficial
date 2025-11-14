@@ -1,10 +1,10 @@
 package com.lycanitesmobs.client.renderer.layer.specific;
 
-import com.lycanitesmobs.client.renderer.CreatureRenderer;
-import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
+import com.lycanitesmobs.client.renderer.layer.creature.LayerCreatureBase;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 
-import com.lycanitesmobs.core.entity.creature.EntityRoa;
+import com.lycanitesmobs.core.entity.creature.aquatic.EntityRoa;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;

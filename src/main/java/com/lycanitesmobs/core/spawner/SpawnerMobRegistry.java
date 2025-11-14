@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.spawner;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.info.CreatureInfo;
+import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -1,12 +1,10 @@
 package com.lycanitesmobs.core.entity.damagesources;
 
-import com.lycanitesmobs.core.info.ElementInfo;
+import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import net.minecraft.core.Holder;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
 public class ElementDamageSource extends DamageSource {

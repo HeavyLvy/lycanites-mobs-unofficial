@@ -4,8 +4,8 @@
     "groups": [
         "animal"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityMaka",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelMaka",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.beast.EntityMaka",
+    "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelMaka",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -51,7 +51,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 1,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#AA8855",
     "eggForeColor": "#221100",
     "subspecies": [

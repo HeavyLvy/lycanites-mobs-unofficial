@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityApollyon",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelApollyon",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.demon.EntityApollyon",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelApollyon",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.25,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#473816",
     "eggForeColor": "#A3964B",
     "subspecies": [

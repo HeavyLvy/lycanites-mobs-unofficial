@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityCrusk",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelCrusk",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.worm.EntityCrusk",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelCrusk",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -53,7 +53,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 1,
-	"bagSize": 15,
+    "bagSize": 15,
     "tamingReputation": 500,
     "packSize": 1,
     "eggBackColor": "#FFDDAA",

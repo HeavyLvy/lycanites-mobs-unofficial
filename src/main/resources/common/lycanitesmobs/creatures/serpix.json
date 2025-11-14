@@ -5,8 +5,8 @@
         "predator",
         "frozen"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntitySerpix",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelSerpix",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.worm.EntitySerpix",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelSerpix",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -54,7 +54,7 @@
     "pierce": 2,
     "sight": 24,
     "knockbackResistance": 1,
-	"bagSize": 15,
+    "bagSize": 15,
     "tamingReputation": 500,
     "eggBackColor": "#CCEEFF",
     "eggForeColor": "#0000BB",

@@ -1,13 +1,11 @@
 package com.lycanitesmobs.core.entity.goals.actions;
 
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.joml.Vector3d;
-
-import java.util.Random;
 
 public class RandomPositionGenerator {
 	private static Vector3d staticVector = new Vector3d(0.0D, 0.0D, 0.0D);

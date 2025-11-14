@@ -4,8 +4,8 @@
     "groups": [
         "animal"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityYale",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelYale",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.aberration.EntityYale",
+    "modelClass": "com.lycanitesmobs.client.model.creature.generic.ModelYale",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -49,7 +49,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.25,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#FFEEAA",
     "eggForeColor": "#FFDD77",
     "subspecies": [

@@ -5,8 +5,8 @@
         "predator",
         "dark"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityDarkling",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelDarkling",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.insect.EntityDarkling",
+    "modelClass": "com.lycanitesmobs.client.model.creature.insect.ModelDarkling",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -47,7 +47,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#10191a",
     "eggForeColor": "#9dfbcd",
     "subspecies": [

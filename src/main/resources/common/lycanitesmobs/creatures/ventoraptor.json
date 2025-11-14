@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityVentoraptor",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelVentoraptor",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.avian.EntityVentoraptor",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelVentoraptor",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -51,7 +51,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.25,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 500,
     "eggBackColor": "#99BBFF",
     "eggForeColor": "#0033FF",

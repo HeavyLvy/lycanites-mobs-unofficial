@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityGrell",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelGrell",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.aberration.EntityGrell",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelGrell",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -49,7 +49,7 @@
     "pierce": 1,
     "sight": 32,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 1000,
     "eggBackColor": "#FF0000",
     "eggForeColor": "#000099",

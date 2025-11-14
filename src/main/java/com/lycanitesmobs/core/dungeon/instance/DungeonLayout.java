@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.dungeon.instance;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.config.ConfigDungeons;
+import com.lycanitesmobs.core.data.config.ConfigDungeons;
 import com.lycanitesmobs.core.dungeon.definition.DungeonSector;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;

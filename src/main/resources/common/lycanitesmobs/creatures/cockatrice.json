@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityCockatrice",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelCockatrice",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.dragon.EntityCockatrice",
+    "modelClass": "com.lycanitesmobs.client.model.creature.dragon.ModelCockatrice",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 2,
     "sight": 24,
     "knockbackResistance": 0.75,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 500,
     "eggBackColor": "#be3500",
     "eggForeColor": "#1e781e",

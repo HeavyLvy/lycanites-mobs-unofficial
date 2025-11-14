@@ -4,8 +4,8 @@
     "groups": [
         "inferno"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityIgnibus",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelIgnibus",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.dragon.EntityIgnibus",
+    "modelClass": "com.lycanitesmobs.client.model.creature.dragon.ModelIgnibus",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -119,5 +119,9 @@
     ],
     "sizeScale": 1,
     "hitboxScale": 1,
-    "mountOffset": [0, 0.58, 0.1]
+    "mountOffset": [
+        0,
+        0.58,
+        0.1
+    ]
 }

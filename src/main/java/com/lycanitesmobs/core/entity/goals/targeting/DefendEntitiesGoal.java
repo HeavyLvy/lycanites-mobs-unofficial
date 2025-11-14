@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.entity.goals.targeting;
 
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import net.minecraft.world.entity.*;
 
 public class DefendEntitiesGoal extends TargetingGoal {

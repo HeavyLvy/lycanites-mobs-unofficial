@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityAglebemu",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelAglebemu",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.amphibian.EntityAglebemu",
+    "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelAglebemu",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -51,7 +51,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#047f0a",
     "eggForeColor": "#c3a85b",
     "subspecies": [

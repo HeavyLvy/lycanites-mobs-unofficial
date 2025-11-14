@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityWarg",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelWarg",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.beast.EntityWarg",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelWarg",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.5,
-	"bagSize": 10,
+    "bagSize": 10,
     "tamingReputation": 500,
     "eggBackColor": "#321806",
     "eggForeColor": "#68523b",

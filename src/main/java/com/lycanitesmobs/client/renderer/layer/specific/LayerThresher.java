@@ -1,9 +1,9 @@
 package com.lycanitesmobs.client.renderer.layer.specific;
 
-import com.lycanitesmobs.client.renderer.CreatureRenderer;
-import com.lycanitesmobs.client.renderer.layer.LayerCreatureBase;
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.creature.EntityThresher;
+import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
+import com.lycanitesmobs.client.renderer.layer.creature.LayerCreatureBase;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.creature.reptile.EntityThresher;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;

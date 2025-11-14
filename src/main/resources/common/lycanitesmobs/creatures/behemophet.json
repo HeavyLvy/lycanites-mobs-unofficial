@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityBehemophet",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelBehemophet",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.demon.EntityBehemophet",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelBehemophet",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.25,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#FF2222",
     "eggForeColor": "#FF9900",
     "subspecies": [

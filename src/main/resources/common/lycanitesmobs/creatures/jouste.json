@@ -5,8 +5,8 @@
         "animal",
         "hardy"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityJouste",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelJouste",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.insect.EntityJouste",
+    "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelJouste",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -54,7 +54,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.25,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#FF9900",
     "eggForeColor": "#FFFF00",
     "subspecies": [

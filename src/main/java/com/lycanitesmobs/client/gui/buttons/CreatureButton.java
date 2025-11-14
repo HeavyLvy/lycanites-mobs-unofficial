@@ -1,13 +1,11 @@
 package com.lycanitesmobs.client.gui.buttons;
 
-import com.lycanitesmobs.client.TextureManager;
-import com.lycanitesmobs.core.entity.ExtendedPlayer;
-import com.lycanitesmobs.core.info.CreatureInfo;
-import net.minecraft.client.Minecraft;
+import com.lycanitesmobs.client.manager.TextureManager;
+import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.MutableComponent;
-import org.lwjgl.opengl.GL11;
 
 public class CreatureButton extends ButtonBase {
     public CreatureInfo creatureInfo;
@@ -32,10 +30,10 @@ public class CreatureButton extends ButtonBase {
         int buttonX = this.getX();
         int buttonY = this.getY();
 
-        net.minecraft.resources.ResourceLocation bg = com.lycanitesmobs.client.TextureManager.getTexture("GUIInventoryCreature");
+        net.minecraft.resources.ResourceLocation bg = TextureManager.getTexture("GUIInventoryCreature");
         int stateVOffset = 0;
         if (this.isHovered()) stateVOffset = 64;
-        com.lycanitesmobs.core.entity.ExtendedPlayer playerExt = com.lycanitesmobs.core.entity.ExtendedPlayer.getForPlayer(net.minecraft.client.Minecraft.getInstance().player);
+        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(net.minecraft.client.Minecraft.getInstance().player);
         if (playerExt != null && playerExt.selectedSummonSet == this.summonSetId) stateVOffset = 32;
 
         g.blit(bg, buttonX, buttonY, 193, 187 - stateVOffset, this.width, this.height);

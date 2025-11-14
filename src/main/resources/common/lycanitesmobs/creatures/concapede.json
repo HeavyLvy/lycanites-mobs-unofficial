@@ -4,8 +4,8 @@
     "groups": [
         "alpha"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityConcapedeHead",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelConcapedeHead",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.insect.EntityConcapedeHead",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelConcapedeHead",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -49,7 +49,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#111144",
     "eggForeColor": "#DD0000",
     "subspecies": [

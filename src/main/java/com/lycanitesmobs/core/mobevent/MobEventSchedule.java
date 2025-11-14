@@ -1,7 +1,9 @@
 package com.lycanitesmobs.core.mobevent;
 
 import com.google.gson.JsonObject;
-import com.lycanitesmobs.ExtendedWorld;
+import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
+import com.lycanitesmobs.core.event.MobEventListener;
+import com.lycanitesmobs.core.manager.MobEventManager;
 import net.minecraft.world.level.Level;
 
 public class MobEventSchedule {

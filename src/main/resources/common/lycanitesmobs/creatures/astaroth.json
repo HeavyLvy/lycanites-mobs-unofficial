@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityAstaroth",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelAstaroth",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.aberration.EntityAstaroth",
+    "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelAstaroth",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -54,7 +54,7 @@
     "pierce": 1,
     "sight": 40,
     "knockbackResistance": 1,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#999944",
     "eggForeColor": "#0000FF",
     "subspecies": [
@@ -77,7 +77,7 @@
             "index": 1,
             "priority": 1,
             "name": "void",
-            "modelClass": "com.lycanitesmobs.client.model.creature.ModelAstarothVoid",
+            "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelAstarothVoid",
             "elements": [
                 "void"
             ],

@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.spawner.Spawner;
 import com.lycanitesmobs.core.spawner.condition.SpawnCondition;
 import net.minecraft.core.BlockPos;

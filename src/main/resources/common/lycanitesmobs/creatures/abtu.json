@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityAbtu",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelAbtu",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.aquatic.EntityAbtu",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelAbtu",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 32,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#FFBB00",
     "eggForeColor": "#44AAFF",
     "subspecies": [

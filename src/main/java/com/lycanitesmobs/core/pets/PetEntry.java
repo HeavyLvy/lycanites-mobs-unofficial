@@ -2,11 +2,16 @@ package com.lycanitesmobs.core.pets;
 
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.entity.*;
-import com.lycanitesmobs.core.info.CreatureInfo;
-import com.lycanitesmobs.core.info.CreatureManager;
-import com.lycanitesmobs.core.info.Subspecies;
-import com.lycanitesmobs.core.info.Variant;
+import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
+import com.lycanitesmobs.core.entity.util.CreatureStats;
+import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.data.info.creature.Subspecies;
+import com.lycanitesmobs.core.data.info.Variant;
+import com.lycanitesmobs.core.manager.PetManager;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

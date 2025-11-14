@@ -1,15 +1,14 @@
 package com.lycanitesmobs.core.entity.goals.actions.abilities;
 
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 
 import java.util.EnumSet;
 
-import com.lycanitesmobs.core.util.Material;
+import com.lycanitesmobs.core.block.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3d;
 
 public class PlaceBlockGoal extends Goal {
 	// Targets:

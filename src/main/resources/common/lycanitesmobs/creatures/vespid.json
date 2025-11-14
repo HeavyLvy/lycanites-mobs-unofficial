@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityVespid",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelVespid",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.insect.EntityVespid",
+    "modelClass": "com.lycanitesmobs.client.model.creature.insect.ModelVespid",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#112200",
     "eggForeColor": "#998800",
     "subspecies": [

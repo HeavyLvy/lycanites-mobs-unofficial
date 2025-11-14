@@ -1,8 +1,12 @@
 package com.lycanitesmobs.core.pets;
 
-import com.lycanitesmobs.core.entity.ExtendedPlayer;
-import com.lycanitesmobs.core.entity.TameableCreatureEntity;
-import com.lycanitesmobs.core.info.*;
+import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.data.info.Variant;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
+import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
+import com.lycanitesmobs.core.data.info.creature.Subspecies;
+import com.lycanitesmobs.core.manager.CreatureManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 

@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityBelphegor",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelBelphegor",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.demon.EntityBelphegor",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelBelphegor",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#992222",
     "eggForeColor": "#000000",
     "subspecies": [

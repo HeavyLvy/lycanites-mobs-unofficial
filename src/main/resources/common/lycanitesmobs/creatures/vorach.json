@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityVorach",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelVorach",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.demon.EntityVorach",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelVorach",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.25,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#4E5567",
     "eggForeColor": "#49005C",
     "subspecies": [

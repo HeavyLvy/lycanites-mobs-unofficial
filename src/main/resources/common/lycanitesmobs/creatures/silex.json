@@ -4,8 +4,8 @@
     "groups": [
         "animal"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntitySilex",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelSilex",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.aquatic.EntitySilex",
+    "modelClass": "com.lycanitesmobs.client.model.creature.legacy.ModelSilex",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -51,7 +51,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#263abd",
     "eggForeColor": "#040e75",
     "subspecies": [

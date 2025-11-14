@@ -4,8 +4,8 @@
     "groups": [
         "opportunist"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityBalayang",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelBalayang",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.beast.EntityBalayang",
+    "modelClass": "com.lycanitesmobs.client.model.creature.biped.ModelBalayang",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -53,7 +53,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#191513",
     "eggForeColor": "#7b7b7b",
     "subspecies": [

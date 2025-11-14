@@ -2,16 +2,12 @@ package com.lycanitesmobs.core.item.equipment;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.ObjectManager;
-import com.lycanitesmobs.core.FileLoader;
-import com.lycanitesmobs.core.JSONLoader;
-import com.lycanitesmobs.core.StreamLoader;
-import com.lycanitesmobs.core.info.ItemInfo;
-import com.lycanitesmobs.core.info.ItemManager;
-import com.lycanitesmobs.core.info.ModInfo;
-import com.lycanitesmobs.core.item.GenericItem;
+import com.lycanitesmobs.core.manager.ObjectManager;
+import com.lycanitesmobs.core.data.loaders.FileLoader;
+import com.lycanitesmobs.core.data.loaders.JSONLoader;
+import com.lycanitesmobs.core.data.loaders.StreamLoader;
+import com.lycanitesmobs.core.data.info.ModInfo;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static com.lycanitesmobs.core.item.LMEquipmentPartsGroup.equipmentNames;
+import static com.lycanitesmobs.core.tabs.LMEquipmentPartsGroup.equipmentNames;
 
 public class EquipmentPartManager extends JSONLoader {
 

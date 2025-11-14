@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityDawon",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelDawon",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.beast.EntityDawon",
+    "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelDawon",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -49,7 +49,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 500,
     "eggBackColor": "#49e554",
     "eggForeColor": "#030601",

@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityRoa",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelRoa",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.aquatic.EntityRoa",
+    "modelClass": "com.lycanitesmobs.client.model.creature.aquatic.ModelRoa",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -50,7 +50,7 @@
     "pierce": 1,
     "sight": 32,
     "knockbackResistance": 0,
-	"bagSize": 10,
+    "bagSize": 10,
     "tamingReputation": 500,
     "eggBackColor": "#222288",
     "eggForeColor": "#222233",

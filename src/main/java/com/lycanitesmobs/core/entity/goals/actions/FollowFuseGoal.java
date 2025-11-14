@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.api.IFusable;
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import net.minecraft.world.entity.Entity;
 
 public class FollowFuseGoal extends FollowGoal {

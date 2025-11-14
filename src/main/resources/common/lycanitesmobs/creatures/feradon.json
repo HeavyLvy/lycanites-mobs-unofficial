@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityFeradon",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelFeradon",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.beast.EntityFeradon",
+    "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelFeradon",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -51,7 +51,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.25,
-	"bagSize": 10,
+    "bagSize": 10,
     "tamingReputation": 500,
     "eggBackColor": "#e4a23d",
     "eggForeColor": "#552d0e",

@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityVapula",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelVapula",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.elemental.EntityVapula",
+    "modelClass": "com.lycanitesmobs.client.model.creature.elemental.ModelVapula",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -42,7 +42,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 1,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#7b8d95",
     "eggForeColor": "#9be0ea",
     "subspecies": [

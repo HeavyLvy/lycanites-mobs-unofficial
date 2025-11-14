@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityAbaia",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelAbaia",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.aquatic.EntityAbaia",
+    "modelClass": "com.lycanitesmobs.client.model.creature.aquatic.ModelAbaia",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -49,7 +49,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#537d41",
     "eggForeColor": "#dfb752",
     "subspecies": [

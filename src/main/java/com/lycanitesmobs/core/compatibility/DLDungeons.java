@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.compatibility;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.info.CreatureInfo;
-import com.lycanitesmobs.core.info.CreatureManager;
+import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.manager.CreatureManager;
 import net.minecraftforge.fml.ModList;
 
 import java.lang.reflect.Method;

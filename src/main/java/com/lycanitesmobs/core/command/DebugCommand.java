@@ -1,16 +1,14 @@
 package com.lycanitesmobs.core.command;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.config.ConfigDebug;
+import com.lycanitesmobs.core.data.config.ConfigDebug;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.common.BiomeManager;
 import net.minecraftforge.registries.ForgeRegistries;

@@ -1,7 +1,9 @@
 package com.lycanitesmobs.core.util;
 
-import com.lycanitesmobs.core.entity.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class ContextUtils {
     public static class AnimationContext {
@@ -25,6 +27,17 @@ public class ContextUtils {
             this.scale = scale;
             this.brightness = brightness;
             this.texture = texture;
+        }
+    }
+    public static class CreatureBuildTask {
+        public BlockState blockState;
+        public BlockPos pos;
+        public int phase;
+
+        public CreatureBuildTask(BlockState blockState, BlockPos pos, int phase) {
+            this.blockState = blockState;
+            this.pos = pos;
+            this.phase = phase;
         }
     }
 }

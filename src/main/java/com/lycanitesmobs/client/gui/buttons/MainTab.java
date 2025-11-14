@@ -1,7 +1,7 @@
 package com.lycanitesmobs.client.gui.buttons;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.gui.beastiary.IndexBeastiaryScreen;
+import com.lycanitesmobs.client.gui.screen.beastiary.IndexBeastiaryScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

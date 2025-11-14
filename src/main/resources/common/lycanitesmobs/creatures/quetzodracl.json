@@ -4,8 +4,8 @@
     "groups": [
         "monster"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityQuetzodracl",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelQuetzodracl",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.dragon.EntityQuetzodracl",
+    "modelClass": "com.lycanitesmobs.client.model.creature.dragon.ModelQuetzodracl",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -49,7 +49,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0,
-	"bagSize": 5,
+    "bagSize": 5,
     "tamingReputation": 2000,
     "eggBackColor": "#229944",
     "eggForeColor": "#99FFBB",

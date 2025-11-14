@@ -1,10 +1,10 @@
 package com.lycanitesmobs.core.command;
 
-import com.lycanitesmobs.ExtendedWorld;
-import com.lycanitesmobs.core.config.ConfigDungeons;
-import com.lycanitesmobs.core.dungeon.DungeonManager;
+import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
+import com.lycanitesmobs.core.data.config.ConfigDungeons;
+import com.lycanitesmobs.core.manager.DungeonManager;
 import com.lycanitesmobs.core.dungeon.instance.DungeonInstance;
-import com.lycanitesmobs.core.util.LMHelperClass;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;

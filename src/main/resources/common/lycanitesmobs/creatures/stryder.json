@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityStryder",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelStryder",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.aquatic.EntityStryder",
+    "modelClass": "com.lycanitesmobs.client.model.creature.generic.ModelStryder",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -51,7 +51,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 1,
-	"bagSize": 15,
+    "bagSize": 15,
     "tamingReputation": 500,
     "eggBackColor": "#2c90cd",
     "eggForeColor": "#13ddf1",

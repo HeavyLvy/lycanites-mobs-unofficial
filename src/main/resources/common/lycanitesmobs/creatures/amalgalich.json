@@ -4,8 +4,8 @@
     "groups": [
         "boss"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityAmalgalich",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelAmalgalich",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.undead.EntityAmalgalich",
+    "modelClass": "com.lycanitesmobs.client.model.creature.generic.ModelAmalgalich",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -44,7 +44,7 @@
     "pierce": 2,
     "sight": 64,
     "knockbackResistance": 1,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#340101",
     "eggForeColor": "#960000",
     "boss": true,

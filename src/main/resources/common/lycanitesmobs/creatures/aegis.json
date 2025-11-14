@@ -4,8 +4,8 @@
     "groups": [
         "guardian"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityAegis",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelAegis",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.elemental.EntityAegis",
+    "modelClass": "com.lycanitesmobs.client.model.creature.elemental.ModelAegis",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -42,7 +42,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 1,
-	"bagSize": 5,
+    "bagSize": 5,
     "eggBackColor": "#37c8e3",
     "eggForeColor": "#f1f0dc",
     "subspecies": [

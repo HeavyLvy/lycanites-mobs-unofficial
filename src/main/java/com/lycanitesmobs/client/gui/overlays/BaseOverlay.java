@@ -1,22 +1,25 @@
 package com.lycanitesmobs.client.gui.overlays;
 
-import com.lycanitesmobs.client.ClientManager;
-import com.lycanitesmobs.ExtendedWorld;
-import com.lycanitesmobs.client.KeyHandler;
-import com.lycanitesmobs.client.TextureManager;
-import com.lycanitesmobs.client.gui.BaseGui;
-import com.lycanitesmobs.client.gui.DrawHelper;
-import com.lycanitesmobs.core.config.ConfigDebug;
-import com.lycanitesmobs.core.entity.*;
-import com.lycanitesmobs.core.info.CreatureInfo;
+import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
+import com.lycanitesmobs.client.manager.KeyManager;
+import com.lycanitesmobs.client.manager.TextureManager;
+import com.lycanitesmobs.client.gui.screen.base.BaseGui;
+import com.lycanitesmobs.core.util.helpers.DrawHelper;
+import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.data.config.ConfigDebug;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
+import com.lycanitesmobs.core.entity.util.CreatureRelationshipEntry;
+import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.item.summoningstaff.ItemStaffSummoning;
-import com.lycanitesmobs.client.mobevent.MobEventPlayerClient;
+import com.lycanitesmobs.client.event.mobevent.MobEventPlayerClient;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -35,249 +38,247 @@ import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 
 public class BaseOverlay extends BaseGui {
-	public DrawHelper drawHelper;
-	public Minecraft minecraft;
-	
-	private int mountMessageTimeMax = 10 * 20;
-	private int mountMessageTime = 0;
-	
+    public DrawHelper drawHelper;
+    public Minecraft minecraft;
+
+    private int mountMessageTimeMax = 10 * 20;
+    private int mountMessageTime = 0;
+
     // ==================================================
     //                     Constructor
     // ==================================================
-	public BaseOverlay(Minecraft minecraft) {
-		super(Component.translatable("gui.overlay"));
-		this.minecraft = Minecraft.getInstance();
-		this.drawHelper = new DrawHelper(minecraft, minecraft.font);
-	}
+    public BaseOverlay(Minecraft minecraft) {
+        super(Component.translatable("gui.overlay"));
+        this.minecraft = Minecraft.getInstance();
+        this.drawHelper = new DrawHelper(minecraft, minecraft.font);
+    }
 
-	protected static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
+    protected static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
+
     // ==================================================
     //                  Draw Game Overlay
     // ==================================================
-	@SubscribeEvent(priority = EventPriority.HIGH)
-	public void onRenderExperienceBar(RenderGuiOverlayEvent event) {
-        if(ClientManager.getInstance().getClientPlayer() == null)
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public void onRenderExperienceBar(RenderGuiOverlayEvent event) {
+        if (ClientManager.getInstance().getClientPlayer() == null)
             return;
         Player player = ClientManager.getInstance().getClientPlayer();
 
-		if(event.isCancelable() || event.getOverlay() != VanillaGuiOverlay.EXPERIENCE_BAR.type()) {
-			return;
-		}
-		PoseStack matrixStack = event.getGuiGraphics().pose();
+        if (event.isCancelable() || event.getOverlay() != VanillaGuiOverlay.EXPERIENCE_BAR.type()) {
+            return;
+        }
+        PoseStack matrixStack = event.getGuiGraphics().pose();
 
-		matrixStack.pushPose();
-		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        matrixStack.pushPose();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-		int sWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth(); // getMainWindow()
+        int sWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth(); // getMainWindow()
         int sHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
 
         // ========== Mob/World Events Title ==========
         ExtendedWorld worldExt = ExtendedWorld.getForWorld(player.getCommandSenderWorld());
-        if(worldExt != null) {
-            for(MobEventPlayerClient mobEventPlayerClient : worldExt.clientMobEventPlayers.values()) {
-				matrixStack.pushPose();
-				mobEventPlayerClient.onGUIUpdate(event.getGuiGraphics(), this, sWidth, sHeight);
-				matrixStack.popPose();
-			}
-            if(worldExt.clientWorldEventPlayer != null) {
-				matrixStack.pushPose();
-				worldExt.clientWorldEventPlayer.onGUIUpdate(event.getGuiGraphics(), this, sWidth, sHeight);
-				matrixStack.popPose();
-			}
+        if (worldExt != null) {
+            for (MobEventPlayerClient mobEventPlayerClient : worldExt.clientMobEventPlayers.values()) {
+                matrixStack.pushPose();
+                mobEventPlayerClient.onGUIUpdate(event.getGuiGraphics(), this, sWidth, sHeight);
+                matrixStack.popPose();
+            }
+            if (worldExt.clientWorldEventPlayer != null) {
+                matrixStack.pushPose();
+                worldExt.clientWorldEventPlayer.onGUIUpdate(event.getGuiGraphics(), this, sWidth, sHeight);
+                matrixStack.popPose();
+            }
         }
-		
-		// ========== Summoning Focus Bar ==========
+
+        // ========== Summoning Focus Bar ==========
         ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
-		if(playerExt != null && !this.minecraft.player.getAbilities().instabuild && (
+        if (playerExt != null && !this.minecraft.player.getAbilities().instabuild && (
                 (this.minecraft.player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof ItemStaffSummoning)
-                || (this.minecraft.player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof ItemStaffSummoning)
-                )) {
+                        || (this.minecraft.player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof ItemStaffSummoning)
+        )) {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			this.minecraft.getTextureManager().bindForSetup(TextureManager.getTexture("GUIInventoryCreature"));
-			
-			int barYSpace = 10;
-			int barXSpace = -1;
-			
+            this.minecraft.getTextureManager().bindForSetup(TextureManager.getTexture("GUIInventoryCreature"));
+
+            int barYSpace = 10;
+            int barXSpace = -1;
+
             int summonBarWidth = 9;
             int summonBarHeight = 9;
             int summonBarX = (sWidth / 2) + 10;
             int summonBarY = sHeight - 30 - summonBarHeight;
             int summonBarU = 256 - summonBarWidth;
             int summonBarV = 256 - summonBarHeight;
-            
+
             summonBarY -= barYSpace;
-            if(this.minecraft.player.isEyeInFluid(FluidTags.WATER))
-            	summonBarY -= barYSpace;
-            
-            for(int summonBarEnergyN = 0; summonBarEnergyN < 10; summonBarEnergyN++) {
-            	this.drawHelper.drawTexturedModalRect(event.getGuiGraphics(), summonBarX + ((summonBarWidth + barXSpace) * summonBarEnergyN), summonBarY, summonBarU, summonBarV, summonBarWidth, summonBarHeight);
-            	if(playerExt.summonFocus >= playerExt.summonFocusMax - (summonBarEnergyN * playerExt.summonFocusCharge)) {
-                	this.drawHelper.drawTexturedModalRect(event.getGuiGraphics(), summonBarX + ((summonBarWidth + barXSpace) * summonBarEnergyN), summonBarY, summonBarU - summonBarWidth, summonBarV, summonBarWidth, summonBarHeight);
-            	}
-                else if(playerExt.summonFocus + playerExt.summonFocusCharge > playerExt.summonFocusMax - (summonBarEnergyN * playerExt.summonFocusCharge)) {
-            		float summonChargeScale = (float)(playerExt.summonFocus % playerExt.summonFocusCharge) / (float)playerExt.summonFocusCharge;
-            		this.drawHelper.drawTexturedModalRect(event.getGuiGraphics(), (summonBarX + ((summonBarWidth + barXSpace) * summonBarEnergyN)) + (summonBarWidth - Math.round((float)summonBarWidth * summonChargeScale)), summonBarY, summonBarU - Math.round((float)summonBarWidth * summonChargeScale), summonBarV, Math.round((float)summonBarWidth * summonChargeScale), summonBarHeight);
-            	}
+            if (this.minecraft.player.isEyeInFluid(FluidTags.WATER))
+                summonBarY -= barYSpace;
+
+            for (int summonBarEnergyN = 0; summonBarEnergyN < 10; summonBarEnergyN++) {
+                this.drawHelper.drawTexturedModalRect(event.getGuiGraphics(), summonBarX + ((summonBarWidth + barXSpace) * summonBarEnergyN), summonBarY, summonBarU, summonBarV, summonBarWidth, summonBarHeight);
+                if (playerExt.summonFocus >= playerExt.summonFocusMax - (summonBarEnergyN * playerExt.summonFocusCharge)) {
+                    this.drawHelper.drawTexturedModalRect(event.getGuiGraphics(), summonBarX + ((summonBarWidth + barXSpace) * summonBarEnergyN), summonBarY, summonBarU - summonBarWidth, summonBarV, summonBarWidth, summonBarHeight);
+                } else if (playerExt.summonFocus + playerExt.summonFocusCharge > playerExt.summonFocusMax - (summonBarEnergyN * playerExt.summonFocusCharge)) {
+                    float summonChargeScale = (float) (playerExt.summonFocus % playerExt.summonFocusCharge) / (float) playerExt.summonFocusCharge;
+                    this.drawHelper.drawTexturedModalRect(event.getGuiGraphics(), (summonBarX + ((summonBarWidth + barXSpace) * summonBarEnergyN)) + (summonBarWidth - Math.round((float) summonBarWidth * summonChargeScale)), summonBarY, summonBarU - Math.round((float) summonBarWidth * summonChargeScale), summonBarV, Math.round((float) summonBarWidth * summonChargeScale), summonBarHeight);
+                }
             }
-		}
-		
-		// ========== Mount Stamina Bar ==========
-		if(this.minecraft.player.getVehicle() != null && this.minecraft.player.getVehicle() instanceof RideableCreatureEntity) {
-			RideableCreatureEntity mount = (RideableCreatureEntity)this.minecraft.player.getVehicle();
+        }
+
+        // ========== Mount Stamina Bar ==========
+        if (this.minecraft.player.getVehicle() != null && this.minecraft.player.getVehicle() instanceof RideableCreatureEntity) {
+            RideableCreatureEntity mount = (RideableCreatureEntity) this.minecraft.player.getVehicle();
             float mountStamina = mount.getStaminaPercent();
-            
+
             // Mount Controls Message:
-            if(this.mountMessageTime > 0) {
-            	MutableComponent mountMessage = Component.translatable("gui.mount.controls.prefix")
-						.append(" ").append(KeyHandler.instance.mountAbility.getTranslatedKeyMessage())
-						.append(" ").append(Component.translatable("gui.mount.controls.ability"));
+            if (this.mountMessageTime > 0) {
+                MutableComponent mountMessage = Component.translatable("gui.mount.controls.prefix")
+                        .append(" ").append(KeyManager.instance.mountAbility.getTranslatedKeyMessage())
+                        .append(" ").append(Component.translatable("gui.mount.controls.ability"));
 //						.append(" ").append(KeyHandler.instance.dismount.getTranslatedKeyMessage())
 //						.append(" ").append(Component.translatable("gui.mount.controls.dismount"));
-				this.minecraft.gui.setOverlayMessage(mountMessage, false);
+                this.minecraft.gui.setOverlayMessage(mountMessage, false);
             }
-            
+
             // Mount Ability Stamina Bar:
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			this.minecraft.getTextureManager().bindForSetup(GUI_ICONS_LOCATION);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            this.minecraft.getTextureManager().bindForSetup(GUI_ICONS_LOCATION);
             int staminaBarWidth = 182;
             int staminaBarHeight = 5;
-            int staminaEnergyWidth = (int)((float)(staminaBarWidth + 1) * mountStamina);
+            int staminaEnergyWidth = (int) ((float) (staminaBarWidth + 1) * mountStamina);
             int staminaBarX = (sWidth / 2) - (staminaBarWidth / 2);
             int staminaBarY = sHeight - 32 + 3;
             int staminaTextureY = 84;
-            if("toggle".equals(mount.getStaminaType()))
-            	staminaTextureY -= staminaBarHeight * 2;
+            if ("toggle".equals(mount.getStaminaType()))
+                staminaTextureY -= staminaBarHeight * 2;
             int staminaEnergyY = staminaTextureY + staminaBarHeight;
-            
+
             this.drawHelper.drawTexturedModalRect(event.getGuiGraphics(), staminaBarX, staminaBarY, 0, staminaTextureY, staminaBarWidth, staminaBarHeight);
-            if(staminaEnergyWidth > 0)
+            if (staminaEnergyWidth > 0)
                 this.drawHelper.drawTexturedModalRect(event.getGuiGraphics(), staminaBarX, staminaBarY, 0, staminaEnergyY, staminaEnergyWidth, staminaBarHeight);
-            
-            if(this.mountMessageTime > 0)
-            	this.mountMessageTime--;
-		}
-		else
-			this.mountMessageTime = this.mountMessageTimeMax;
 
-		// ========== Taming Reputation Bar ==========
-		HitResult mouseOver = Minecraft.getInstance().hitResult;
-		if(mouseOver instanceof EntityHitResult) {
-			Entity mouseOverEntity = ((EntityHitResult) mouseOver).getEntity();
-			if (mouseOverEntity instanceof BaseCreatureEntity) {
-				BaseCreatureEntity creatureEntity = (BaseCreatureEntity)mouseOverEntity;
-				CreatureInfo creatureInfo = creatureEntity.creatureInfo;
-				CreatureRelationshipEntry relationshipEntry = creatureEntity.relationships.getEntry(player);
-				if (relationshipEntry != null && relationshipEntry.getReputation() > 0 && !creatureEntity.isTamed()) {
-					float barWidth = 100;
-					float barHeight = 11;
-					float barX = ((float) this.minecraft.getWindow().getGuiScaledWidth() / 2) - (barWidth / 2);
-					float barY = (float) this.minecraft.getWindow().getGuiScaledHeight() * 0.75F;
-					float barCenter = barX + (barWidth / 2);
+            if (this.mountMessageTime > 0)
+                this.mountMessageTime--;
+        } else
+            this.mountMessageTime = this.mountMessageTimeMax;
 
-					this.drawHelper.drawTexture(event.getGuiGraphics(), TextureManager.getTexture("GUIPetBarEmpty"), barX, barY, 0, 1, 1, barWidth, barHeight);
-					float reputationNormal = Math.min(1, (float)relationshipEntry.getReputation() / creatureInfo.getTamingReputation());
-					String barFillTexture = "GUIPetBarRespawn";
-					if (relationshipEntry.getReputation() >= creatureInfo.getFriendlyReputation()) {
-						barFillTexture = "GUIPetBarHealth";
-					}
-					this.drawHelper.drawTexture(event.getGuiGraphics(), TextureManager.getTexture(barFillTexture), barX, barY, 0, reputationNormal, 1, barWidth * reputationNormal, barHeight);
-					String reputationText = Component.translatable("entity.reputation").getString() + ": " + relationshipEntry.getReputation() + "/" + creatureInfo.getTamingReputation();
-					this.drawHelper.draw(event.getGuiGraphics(), reputationText, barCenter - ((float) this.drawHelper.getStringWidth(reputationText) / 2), barY + 2, 0xFFFFFF);
-				}
-			}
-		}
+        // ========== Taming Reputation Bar ==========
+        HitResult mouseOver = Minecraft.getInstance().hitResult;
+        if (mouseOver instanceof EntityHitResult) {
+            Entity mouseOverEntity = ((EntityHitResult) mouseOver).getEntity();
+            if (mouseOverEntity instanceof BaseCreatureEntity) {
+                BaseCreatureEntity creatureEntity = (BaseCreatureEntity) mouseOverEntity;
+                CreatureInfo creatureInfo = creatureEntity.creatureInfo;
+                CreatureRelationshipEntry relationshipEntry = creatureEntity.relationships.getEntry(player);
+                if (relationshipEntry != null && relationshipEntry.getReputation() > 0 && !creatureEntity.isTamed()) {
+                    float barWidth = 100;
+                    float barHeight = 11;
+                    float barX = ((float) this.minecraft.getWindow().getGuiScaledWidth() / 2) - (barWidth / 2);
+                    float barY = (float) this.minecraft.getWindow().getGuiScaledHeight() * 0.75F;
+                    float barCenter = barX + (barWidth / 2);
 
-		matrixStack.popPose();
-		this.minecraft.getTextureManager().bindForSetup(GUI_ICONS_LOCATION);
-	}
+                    this.drawHelper.drawTexture(event.getGuiGraphics(), TextureManager.getTexture("GUIPetBarEmpty"), barX, barY, 0, 1, 1, barWidth, barHeight);
+                    float reputationNormal = Math.min(1, (float) relationshipEntry.getReputation() / creatureInfo.getTamingReputation());
+                    String barFillTexture = "GUIPetBarRespawn";
+                    if (relationshipEntry.getReputation() >= creatureInfo.getFriendlyReputation()) {
+                        barFillTexture = "GUIPetBarHealth";
+                    }
+                    this.drawHelper.drawTexture(event.getGuiGraphics(), TextureManager.getTexture(barFillTexture), barX, barY, 0, reputationNormal, 1, barWidth * reputationNormal, barHeight);
+                    String reputationText = Component.translatable("entity.reputation").getString() + ": " + relationshipEntry.getReputation() + "/" + creatureInfo.getTamingReputation();
+                    this.drawHelper.draw(event.getGuiGraphics(), reputationText, barCenter - ((float) this.drawHelper.getStringWidth(reputationText) / 2), barY + 2, 0xFFFFFF);
+                }
+            }
+        }
 
-	/**
-	 * Custom Debug Text Gui Event because the old one was removed
-	 */
-	public static class Text extends RenderGuiOverlayEvent.Pre {
-		private final ArrayList<String> left;
-		private final ArrayList<String> right;
+        matrixStack.popPose();
+        this.minecraft.getTextureManager().bindForSetup(GUI_ICONS_LOCATION);
+    }
 
-		public Text(Window window, GuiGraphics guiGraphics, float partialTick, NamedGuiOverlay overlay, ArrayList<String> left, ArrayList<String> right) {
-			super(window, guiGraphics, partialTick, overlay);
-			this.left = left;
-			this.right = right;
-		}
+    /**
+     * Custom Debug Text Gui Event because the old one was removed
+     */
+    public static class Text extends RenderGuiOverlayEvent.Pre {
+        private final ArrayList<String> left;
+        private final ArrayList<String> right;
 
-
-		public ArrayList<String> getLeft() {
-			return this.left;
-		}
-
-		public ArrayList<String> getRight() {
-			return this.right;
-		}
-	}
+        public Text(Window window, GuiGraphics guiGraphics, float partialTick, NamedGuiOverlay overlay, ArrayList<String> left, ArrayList<String> right) {
+            super(window, guiGraphics, partialTick, overlay);
+            this.left = left;
+            this.right = right;
+        }
 
 
-	// ==================================================
-	//                 Debug Overlay
-	// ==================================================
-	@OnlyIn(Dist.CLIENT)
-	@SubscribeEvent
-	public void onGameOverlay(Text event) {
-		if(!ConfigDebug.INSTANCE.creatureOverlay.get()) {
-			return;
-		}
+        public ArrayList<String> getLeft() {
+            return this.left;
+        }
 
-		// Entity:
-		HitResult mouseOver = Minecraft.getInstance().hitResult;
-		if(mouseOver instanceof EntityHitResult) {
-			Entity mouseOverEntity = ((EntityHitResult)mouseOver).getEntity();
-			if(mouseOverEntity instanceof BaseCreatureEntity) {
-				BaseCreatureEntity mouseOverCreature = (BaseCreatureEntity)mouseOverEntity;
-				event.getLeft().add("");
-				event.getLeft().add("Target Creature: " + mouseOverCreature.getName().getString());
-				event.getLeft().add("Distance To player: " + mouseOverCreature.distanceTo(Minecraft.getInstance().player));
-				event.getLeft().add("Elements: " + mouseOverCreature.creatureInfo.getElementNames(mouseOverCreature.getSubspecies()).getString());
-				event.getLeft().add("Subspecies: " + mouseOverCreature.getSubspeciesIndex());
-				event.getLeft().add("Variant: " + mouseOverCreature.getVariantIndex());
-				event.getLeft().add("Level: " + mouseOverCreature.getMobLevel());
-				event.getLeft().add("Experience: " + mouseOverCreature.getExperience() + "/" + mouseOverCreature.creatureStats.getExperienceForNextLevel());
-				event.getLeft().add("Size: " + mouseOverCreature.sizeScale);
-				event.getLeft().add("");
-				event.getLeft().add("Health: " + mouseOverCreature.getHealth() + "/" + mouseOverCreature.getMaxHealth() + " Fresh: " + mouseOverCreature.creatureStats.getHealth());
-				event.getLeft().add("Speed: " + mouseOverCreature.getAttribute(Attributes.MOVEMENT_SPEED).getValue() + "/" + mouseOverCreature.creatureStats.getSpeed());
-				event.getLeft().add("");
-				event.getLeft().add("Defense: " + mouseOverCreature.creatureStats.getDefense());
-				event.getLeft().add("Armor: " + mouseOverCreature.getArmorValue());
-				event.getLeft().add("");
-				event.getLeft().add("Damage: " + mouseOverCreature.creatureStats.getDamage());
-				event.getLeft().add("Melee Speed: " + mouseOverCreature.creatureStats.getAttackSpeed());
-				event.getLeft().add("Melee Range: " + mouseOverCreature.getPhysicalRange());
-				event.getLeft().add("Ranged Speed: " + mouseOverCreature.creatureStats.getRangedSpeed());
-				event.getLeft().add("Pierce: " + mouseOverCreature.creatureStats.getPierce());
-				event.getLeft().add("");
-				event.getLeft().add("Effect Duration: " + mouseOverCreature.creatureStats.getEffect() + " Base Seconds");
-				event.getLeft().add("Effect Amplifier: x" + mouseOverCreature.creatureStats.getAmplifier());
-				event.getLeft().add("");
-				event.getLeft().add("Has Attack Target: " + mouseOverCreature.hasAttackTarget());
-				event.getLeft().add("Has Avoid Target: " + mouseOverCreature.hasAvoidTarget());
-				event.getLeft().add("Has Master Target: " + mouseOverCreature.hasMaster());
-				event.getLeft().add("Has Parent Target: " + mouseOverCreature.hasParent());
+        public ArrayList<String> getRight() {
+            return this.right;
+        }
+    }
 
-				event.getLeft().add("");
-				CreatureRelationshipEntry relationshipEntry = mouseOverCreature.relationships.getEntry(this.minecraft.player);
-				event.getLeft().add("Reputation with Player: " + (relationshipEntry != null ? relationshipEntry.getReputation() : 0) + "/" + mouseOverCreature.creatureInfo.getTamingReputation());
 
-				if(mouseOverEntity instanceof TameableCreatureEntity) {
-					TameableCreatureEntity mouseOverTameable = (TameableCreatureEntity)mouseOverCreature;
-					event.getLeft().add("Owner ID: " + (mouseOverTameable.getOwnerId() != null ? mouseOverTameable.getOwnerId().toString() : "None"));
-					event.getLeft().add("Owner Name: " + mouseOverTameable.getOwnerName().getString());
-				}
-			}
-		}
-	}
+    // ==================================================
+    //                 Debug Overlay
+    // ==================================================
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public void onGameOverlay(Text event) {
+        if (!ConfigDebug.INSTANCE.creatureOverlay.get()) {
+            return;
+        }
+
+        // Entity:
+        HitResult mouseOver = Minecraft.getInstance().hitResult;
+        if (mouseOver instanceof EntityHitResult) {
+            Entity mouseOverEntity = ((EntityHitResult) mouseOver).getEntity();
+            if (mouseOverEntity instanceof BaseCreatureEntity) {
+                BaseCreatureEntity mouseOverCreature = (BaseCreatureEntity) mouseOverEntity;
+                event.getLeft().add("");
+                event.getLeft().add("Target Creature: " + mouseOverCreature.getName().getString());
+                event.getLeft().add("Distance To player: " + mouseOverCreature.distanceTo(Minecraft.getInstance().player));
+                event.getLeft().add("Elements: " + mouseOverCreature.creatureInfo.getElementNames(mouseOverCreature.getSubspecies()).getString());
+                event.getLeft().add("Subspecies: " + mouseOverCreature.getSubspeciesIndex());
+                event.getLeft().add("Variant: " + mouseOverCreature.getVariantIndex());
+                event.getLeft().add("Level: " + mouseOverCreature.getMobLevel());
+                event.getLeft().add("Experience: " + mouseOverCreature.getExperience() + "/" + mouseOverCreature.creatureStats.getExperienceForNextLevel());
+                event.getLeft().add("Size: " + mouseOverCreature.sizeScale);
+                event.getLeft().add("");
+                event.getLeft().add("Health: " + mouseOverCreature.getHealth() + "/" + mouseOverCreature.getMaxHealth() + " Fresh: " + mouseOverCreature.creatureStats.getHealth());
+                event.getLeft().add("Speed: " + mouseOverCreature.getAttribute(Attributes.MOVEMENT_SPEED).getValue() + "/" + mouseOverCreature.creatureStats.getSpeed());
+                event.getLeft().add("");
+                event.getLeft().add("Defense: " + mouseOverCreature.creatureStats.getDefense());
+                event.getLeft().add("Armor: " + mouseOverCreature.getArmorValue());
+                event.getLeft().add("");
+                event.getLeft().add("Damage: " + mouseOverCreature.creatureStats.getDamage());
+                event.getLeft().add("Melee Speed: " + mouseOverCreature.creatureStats.getAttackSpeed());
+                event.getLeft().add("Melee Range: " + mouseOverCreature.getPhysicalRange());
+                event.getLeft().add("Ranged Speed: " + mouseOverCreature.creatureStats.getRangedSpeed());
+                event.getLeft().add("Pierce: " + mouseOverCreature.creatureStats.getPierce());
+                event.getLeft().add("");
+                event.getLeft().add("Effect Duration: " + mouseOverCreature.creatureStats.getEffect() + " Base Seconds");
+                event.getLeft().add("Effect Amplifier: x" + mouseOverCreature.creatureStats.getAmplifier());
+                event.getLeft().add("");
+                event.getLeft().add("Has Attack Target: " + mouseOverCreature.hasAttackTarget());
+                event.getLeft().add("Has Avoid Target: " + mouseOverCreature.hasAvoidTarget());
+                event.getLeft().add("Has Master Target: " + mouseOverCreature.hasMaster());
+                event.getLeft().add("Has Parent Target: " + mouseOverCreature.hasParent());
+
+                event.getLeft().add("");
+                CreatureRelationshipEntry relationshipEntry = mouseOverCreature.relationships.getEntry(this.minecraft.player);
+                event.getLeft().add("Reputation with Player: " + (relationshipEntry != null ? relationshipEntry.getReputation() : 0) + "/" + mouseOverCreature.creatureInfo.getTamingReputation());
+
+                if (mouseOverEntity instanceof TameableCreatureEntity) {
+                    TameableCreatureEntity mouseOverTameable = (TameableCreatureEntity) mouseOverCreature;
+                    event.getLeft().add("Owner ID: " + (mouseOverTameable.getOwnerId() != null ? mouseOverTameable.getOwnerId().toString() : "None"));
+                    event.getLeft().add("Owner Name: " + mouseOverTameable.getOwnerName().getString());
+                }
+            }
+        }
+    }
 }

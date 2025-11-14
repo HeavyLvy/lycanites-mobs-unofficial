@@ -4,8 +4,8 @@
     "groups": [
         "predator"
     ],
-    "entityClass": "com.lycanitesmobs.core.entity.creature.EntityMaug",
-    "modelClass": "com.lycanitesmobs.client.model.creature.ModelMaug",
+    "entityClass": "com.lycanitesmobs.core.entity.creature.beast.EntityMaug",
+    "modelClass": "com.lycanitesmobs.client.model.creature.quadruped.ModelMaug",
     "loadDefault": true,
     "enabled": true,
     "spawning": {
@@ -52,7 +52,7 @@
     "pierce": 1,
     "sight": 24,
     "knockbackResistance": 0.25,
-	"bagSize": 10,
+    "bagSize": 10,
     "tamingReputation": 500,
     "eggBackColor": "#c9cccd",
     "eggForeColor": "#52504e",
