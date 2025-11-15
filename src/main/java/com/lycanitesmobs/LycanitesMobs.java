@@ -70,6 +70,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.fixMaxHealth;
+import static com.lycanitesmobs.core.worldgen.WorldGeneratorBiomeModifier.BIOME_MODIFIER_SERIALIZERS;
 
 
 @Mod(LycanitesMobs.MODID)
@@ -90,25 +91,7 @@ public class LycanitesMobs {
     public static final String discord = "https://discord.gg/bFpV3z4";
 
     public static final PacketManager PACKET_MANAGER = new PacketManager();
-    // Biome Management:
-    public static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS =
-            DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MODID);
 
-    public static final RegistryObject<Codec<WorldGeneratorBiomeModifier>> WORLD_GENERATOR_CODEC = BIOME_MODIFIER_SERIALIZERS.register("world_generator", () ->
-            RecordCodecBuilder.create(instance -> instance.group(
-                    Biome.LIST_CODEC.fieldOf("biomes").forGetter(WorldGeneratorBiomeModifier::biomes),
-                    PlacedFeature.CODEC.fieldOf("chunk_spawn_feature").forGetter(WorldGeneratorBiomeModifier::chunkSpawnFeature),
-                    PlacedFeature.CODEC.fieldOf("dungeon_feature").forGetter(WorldGeneratorBiomeModifier::dungeonFeature),
-                    PlacedFeature.CODEC.fieldOf("poison_lake_feature").forGetter(WorldGeneratorBiomeModifier::poisonLakeFeature),
-                    PlacedFeature.CODEC.fieldOf("poison_spring_feature").forGetter(WorldGeneratorBiomeModifier::poisonSpringFeature),
-                    PlacedFeature.CODEC.fieldOf("acid_lake_feature").forGetter(WorldGeneratorBiomeModifier::acidLakeFeature),
-                    PlacedFeature.CODEC.fieldOf("acid_spring_feature").forGetter(WorldGeneratorBiomeModifier::acidSpringFeature),
-                    PlacedFeature.CODEC.fieldOf("ooze_lake_feature").forGetter(WorldGeneratorBiomeModifier::oozeLakeFeature),
-                    PlacedFeature.CODEC.fieldOf("ooze_spring_feature").forGetter(WorldGeneratorBiomeModifier::oozeSpringFeature),
-                    PlacedFeature.CODEC.fieldOf("moglava_lake_feature").forGetter(WorldGeneratorBiomeModifier::moglavaLakeFeature),
-                    PlacedFeature.CODEC.fieldOf("moglava_spring_feature").forGetter(WorldGeneratorBiomeModifier::moglavaSpringFeature)
-            ).apply(instance, WorldGeneratorBiomeModifier::new))
-    );
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.Keys.BLOCKS, MODID);
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
@@ -116,9 +99,7 @@ public class LycanitesMobs {
     public static boolean configReady = false;
     public static boolean earlyDebug = false;
     // Proxy:
-    public static IProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
-    // Potion Effects:
-    public static EffectManager effectManager;
+    public static IProxy PROXY = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
 
     /**
      * Constructor
@@ -143,18 +124,12 @@ public class LycanitesMobs {
 
         WorldGenManager.registerPlacements(modEventBus);
         ObjectManager.registerContainers(modEventBus);
-        //ItemManager.registerItem(modEventBus);
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::clientSetup);
-//		modEventBus.addListener(this::serverStarting);
         modEventBus.addListener(this::enqueueIMC);
         modEventBus.addListener(this::processIMC);
-        modEventBus.register(ObjectManager.getInstance());
-        modEventBus.register(ItemManager.getInstance());
-        modEventBus.register(CreatureManager.getInstance());
         modEventBus.register(ProjectileManager.getInstance());
         modEventBus.register(RegistryEvents.getInstance());
-        modEventBus.register(WorldGenManager.getInstance());
 //		modEventBus.register(StatManager.getInstance()); TODO Stats
         PROXY.registerEvents();
         ItemManager.register(modEventBus);
@@ -210,8 +185,6 @@ public class LycanitesMobs {
         // Vanilla Item Lists:
         ObjectLists.createVanillaLists();
 
-        // Potion Effects:
-        effectManager = EffectManager.getInstance();
 
         // Spawners:
         SpawnerManager.getInstance().loadAllFromJson(modInfo);
@@ -250,15 +223,14 @@ public class LycanitesMobs {
 
     @SubscribeEvent
     public void clientSetup(final FMLClientSetupEvent event) {
-
         ClientManager.getInstance().initLanguageManager();
         ClientManager.getInstance().registerEvents();
         TextureManager.getInstance().createTextures(modInfo);
         ModelManager.getInstance().createModels();
         ClientManager.getInstance().initRenderRegister();
         ClientManager.getInstance().initBlockRenderTypes();
-        //New menu screen registration
 
+        //New menu screen registration
         event.enqueueWork(
                 () -> {
                     MenuScreens.register(CreatureContainer.TYPE, CreatureInventoryScreen::new);
@@ -272,13 +244,9 @@ public class LycanitesMobs {
 
     }
 
-    @SubscribeEvent
-    public void serverStarting(final ServerStartingEvent event) {
-
-    }
 
     public void loadConfigs() {
-        //ItemManager.getInstance().loadConfig();
+        ItemManager.getInstance().loadConfig();
         CreatureManager.getInstance().loadConfig();
         MobEventManager.getInstance().loadConfig();
         AltarInfo.loadGlobalSettings();
