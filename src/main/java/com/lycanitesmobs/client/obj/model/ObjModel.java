@@ -6,6 +6,7 @@ import com.lycanitesmobs.client.obj.geometry.Mesh;
 import com.lycanitesmobs.client.obj.geometry.ObjPart;
 import com.lycanitesmobs.client.obj.geometry.Vertex;
 import com.lycanitesmobs.client.loader.OBJLoader;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.util.math.Vector3o;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -47,6 +48,16 @@ public class ObjModel {
             LMHelperClass.logWarning("", "Unable to load model: " + resourceLocation);
             e.printStackTrace();
         }
+    }
+
+    private BaseCreatureEntity creature;
+
+    public BaseCreatureEntity getCreature() {
+        return creature;
+    }
+
+    public void setCreature(BaseCreatureEntity creature) {
+        this.creature = creature;
     }
 
     protected byte[] read(InputStream resource) throws IOException {

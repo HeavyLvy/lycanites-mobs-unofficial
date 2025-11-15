@@ -34,6 +34,12 @@ public class VBOBatcher {
         private float textureOffsetX, textureOffsetY;
         private float overlayOffsetX, overlayOffsetY;
         private float lightOffsetX, lightOffsetY;
+        private float baseR = 1.0F, baseG = 1.0F, baseB = 1.0F, baseRange = 0.1F;
+        private float variantR = 1.0F, variantG = 1.0F, variantB = 1.0F, variantAmount = 0.0F;
+        private float tintR = 1.0F;
+        private float tintG = 1.0F;
+        private float tintB = 1.0F;
+        private float tintAmount = 0.0F;
 
         /**
          * Keeps the old ctor shape: (vbo, vertexCount, format, matrix, tex)
@@ -59,6 +65,37 @@ public class VBOBatcher {
 
         public VBODrawCommand setColor(Vector4f color) {
             return setColor(color.x, color.y, color.z, color.w);
+        }
+
+        public VBODrawCommand setVariantPalette(
+                float baseR, float baseG, float baseB, float baseRange,
+                float variantR, float variantG, float variantB, float variantAmount
+        ) {
+            this.baseR = baseR;
+            this.baseG = baseG;
+            this.baseB = baseB;
+            this.baseRange = baseRange;
+            this.variantR = variantR;
+            this.variantG = variantG;
+            this.variantB = variantB;
+            this.variantAmount = variantAmount;
+            return this;
+        }
+
+        public VBODrawCommand setVariantTint(float r, float g, float b, float amount) {
+            this.tintR = r;
+            this.tintG = g;
+            this.tintB = b;
+            this.tintAmount = amount;
+            return this;
+        }
+
+        public VBODrawCommand setRecolorBand(float r, float g, float b, float range) {
+            this.baseR = r;
+            this.baseG = g;
+            this.baseB = b;
+            this.baseRange = range;
+            return this;
         }
 
         public VBODrawCommand setColor(float r, float g, float b, float a) {
@@ -163,13 +200,20 @@ public class VBOBatcher {
             var cutoff = shader.getUniform("AlphaCutoff");
             if (cutoff != null) cutoff.set(alphaCutoff);
 
+            var baseColor = shader.getUniform("BaseColor");
+            if (baseColor != null) baseColor.set(baseR, baseG, baseB);
+            var baseRangeUni = shader.getUniform("BaseRange");
+            if (baseRangeUni != null) baseRangeUni.set(baseRange);
+
+            var tintColor = shader.getUniform("VariantColor");
+            if (tintColor != null) tintColor.set(tintR, tintG, tintB);
+            var tintAmt = shader.getUniform("VariantAmount");
+            if (tintAmt != null) tintAmt.set(tintAmount);
 
             var modelView = new org.joml.Matrix4f(RenderSystem.getModelViewMatrix()).mul(this.modelMatrix);
             var projection = RenderSystem.getProjectionMatrix();
 
             vbo.bind();
-            int id = RenderSystem.getShaderTexture(0);
-            // LycanitesMobs.logInfo("", "Tex unit0 id = " + id + " for " + texLocation);
             vbo.drawWithShader(modelView, projection, shader);
             VertexBuffer.unbind();
         }

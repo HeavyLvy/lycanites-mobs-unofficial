@@ -254,7 +254,6 @@ public class CreatureObjModel extends CreatureModel {
 
     @Override
     public void generateAnimationFrames(BaseCreatureEntity entity, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness) {
-        // Assess Scale and Check if Trophy:
         boolean renderAsTrophy = false;
         this.young = false;
         if (entity != null) {
@@ -269,33 +268,49 @@ public class CreatureObjModel extends CreatureModel {
             }
         }
 
-        // GUI Render:
         if (entity != null) {
             if (entity.onlyRenderTicks >= 0) {
                 loop = entity.onlyRenderTicks;
             }
         }
 
-        // Animation States:
         this.currentModelState = this.getModelState(entity);
         this.updateAttackProgress(entity);
 
-        // Perching:
+
+        if (this.currentModelState != null) {
+            com.lycanitesmobs.client.gui.screen.creature.RecolorDebug.applyToState(this.currentModelState, entity);
+
+            if (!this.currentModelState.variantInit) {
+        /*
+        this.currentModelState.baseR = 1.0F;
+        this.currentModelState.baseG = 0.0F;
+        this.currentModelState.baseB = 0.0F;
+        this.currentModelState.baseRange = 0.35F;
+
+        this.currentModelState.variantR = 0.0F;
+        this.currentModelState.variantG = 0.0F;
+        this.currentModelState.variantB = 1.0F;
+        this.currentModelState.variantAmount = 1.0F;
+
+        this.currentModelState.variantInit = true;
+        */
+            }
+        }
+
+
         if (entity != null && entity.hasPerchTarget()) {
             distance = 0;
         }
 
-        // Generate Animation Frames:
         for (ObjPart part : this.objParts) {
             String partName = part.getName().toLowerCase();
             this.currentAnimationPart = this.animationParts.get(partName);
             if (this.currentAnimationPart == null)
                 continue;
 
-            // Animate:
             this.animatePart(partName, entity, time, distance, loop, -lookY, lookX, scale);
 
-            // Trophy Positioning:
             if (renderAsTrophy) {
                 if (partName.contains("head")) {
                     if (!partName.contains("left")) {
@@ -355,7 +370,6 @@ public class CreatureObjModel extends CreatureModel {
     public void render(BaseCreatureEntity entity, PoseStack matrixStack, VertexConsumer vertexBuilder, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade) {
         this.matrixStack = matrixStack;
 
-        // Assess Scale and Check if Trophy:
         boolean renderAsTrophy = false;
         this.young = false;
         if (entity != null) {
@@ -370,7 +384,10 @@ public class CreatureObjModel extends CreatureModel {
             }
         }
 
-        // Render Parts:
+        if (this.objModel instanceof VBOObjModel vbo && this.currentModelState != null) {
+            vbo.applyVariantFromState(this.currentModelState);
+        }
+
         for (ObjPart part : this.objParts) {
             String partName = part.getName().toLowerCase();
             if (!this.canRenderPart(partName, entity, layer, renderAsTrophy))
@@ -384,32 +401,38 @@ public class CreatureObjModel extends CreatureModel {
             matrixStack.pushPose();
             float uprightFixDeg = -0.1f;
             float leanFromPitch = 0f;
-            // Apply Initial Offsets: (To Match Blender OBJ Export)
             this.doAngle(MODEL_OFFSET_ROT_X + (entity != null ? (-entity.getXRot()) * leanFromPitch : 0f) + uprightFixDeg, 1F, 0F, 0F);
             this.doTranslate(0F, -0.1F, 0F);
 
-            // Child Scaling:
             if (this.young && !renderAsTrophy) {
                 this.childScale(partName);
                 if (this.bigChildHead && (partName.contains("head") || partName.contains("mouth")))
                     this.doTranslate(-(this.currentAnimationPart.centerX / 2), -(this.currentAnimationPart.centerY / 2), -(this.currentAnimationPart.centerZ / 2));
             }
 
-            // Trophy Scaling:
             if (renderAsTrophy)
                 this.doScale(this.trophyScale, this.trophyScale, this.trophyScale);
 
-            // Apply Entity Scaling:
             this.doScale(scale, scale, scale);
 
-            // Apply Animation Frames:
             this.currentAnimationPart.applyAnimationFrames(this.animator);
 
-            // Render Part:
-            this.objModel.renderPart(vertexBuilder, matrixStack.last().normal(), matrixStack.last().pose(), this.getBrightness(partName, layer, entity, brightness), fade, part, this.getPartColor(partName, entity, layer, renderAsTrophy, loop), this.getPartTextureOffset(partName, entity, layer, renderAsTrophy, loop));
+            if (this.objModel.getCreature() == null) {
+                this.objModel.setCreature(entity);
+            }
+
+            this.objModel.renderPart(
+                    vertexBuilder,
+                    matrixStack.last().normal(),
+                    matrixStack.last().pose(),
+                    this.getBrightness(partName, layer, entity, brightness),
+                    fade,
+                    part,
+                    this.getPartColor(partName, entity, layer, renderAsTrophy, loop),
+                    this.getPartTextureOffset(partName, entity, layer, renderAsTrophy, loop)
+            );
             matrixStack.popPose();
         }
-
     }
 
 

@@ -7,46 +7,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ModelObjState {
-    /**
-     * The entity that this model state is for.
-     **/
     public Entity entity;
 
-    // Attack Animation:
-    /**
-     * The current progress on an attack animation, increases to 1.0 and then decreases back down to 0.0.
-     **/
+    public float baseR = 1.0F;
+    public float baseG = 1.0F;
+    public float baseB = 1.0F;
+    public float baseRange = 0.1F;
+
+    public float variantR = 1.0F;
+    public float variantG = 1.0F;
+    public float variantB = 1.0F;
+    public float variantAmount = 0.0F;
+    public boolean variantInit = false;
+
     public float attackAnimationProgress = 0.0F;
-    /**
-     * The current direction that the attack animation progress is going in.
-     **/
     public boolean attackAnimationIncreasing = false;
-    /**
-     * Set to true when the attack animation starts, set to false when finished, prevents the attack from resetting mid animation.
-     **/
     public boolean attackAnimationPlaying = false;
-    /**
-     * How much the animation progress increases or decreases by each tick. This will have to count up to 1 and back down to 0 again.
-     **/
     public float attackAnimationSpeed = 1F / 10;
 
-    /**
-     * Additional state data.
-     **/
     protected Map<String, Boolean> additionalBooleans = new HashMap<>();
     protected Map<String, Float> additionalFloats = new HashMap<>();
 
-    // ==================================================
-    //                    Constructor
-    // ==================================================
     public ModelObjState(Entity entity) {
         this.entity = entity;
     }
 
-
-    // ==================================================
-    //                  Additional Data
-    // ==================================================
     public void setBoolean(String key, boolean value) {
         this.additionalBooleans.put(key, value);
     }
@@ -56,7 +41,6 @@ public class ModelObjState {
             return this.additionalBooleans.get(key);
         return false;
     }
-
 
     public void setFloat(String key, float value) {
         this.additionalFloats.put(key, value);

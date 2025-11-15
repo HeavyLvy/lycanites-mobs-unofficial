@@ -31,6 +31,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         super(renderManager, ModelManager.getInstance().getCreatureModel(CreatureManager.getInstance().getCreature(entityID), null), shadowSize);
         if (this.model == null)
             return;
+
     }
 
     /**
@@ -45,8 +46,6 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      */
     @Override
     public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
-
-
         // Get Model and Layers:
         try {
             this.layers.clear();
@@ -183,6 +182,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      * @param allyInvisible    If true, the entity has invisibility or some form of stealth but is allied to the player so should be translucent, etc.
      */
     protected void renderModel(BaseCreatureEntity entity, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade, boolean invisible, boolean allyInvisible) {
+
         texture = this.getEntityTexture(entity, layer);
         // Render Model
         // TODO allyInvisible lower color alpha

@@ -14,6 +14,42 @@
   ],
   "uniforms": [
     {
+      "name": "BaseColor",
+      "type": "float",
+      "count": 3,
+      "values": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "BaseRange",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.25
+      ]
+    },
+    {
+      "name": "VariantColor",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.2,
+        0.4,
+        1.0
+      ]
+    },
+    {
+      "name": "VariantAmount",
+      "type": "float",
+      "count": 1,
+      "values": [
+        1.0
+      ]
+    },
+    {
       "name": "AlphaCutoff",
       "type": "float",
       "count": 1,

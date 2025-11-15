@@ -1,5 +1,7 @@
 package com.lycanitesmobs.client.gui.screen.base;
 
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
@@ -16,12 +18,69 @@ public abstract class BaseGui extends Screen {
         super(screenName);
     }
 
+    public static void renderLivingEntityRotated(
+            GuiGraphics guiGraphics,
+            int x,
+            int y,
+            int scale,
+            float yawDegrees,
+            float pitchDegrees,
+            LivingEntity entity
+    ) {
+        var mc = Minecraft.getInstance();
+        var dispatcher = mc.getEntityRenderDispatcher();
+        var pose = guiGraphics.pose();
+
+        float oldBodyRot = entity.yBodyRot;
+        float oldYRot = entity.getYRot();
+        float oldXRot = entity.getXRot();
+        float oldHeadO = entity.yHeadRotO;
+        float oldHead = entity.yHeadRot;
+
+        pose.pushPose();
+        pose.translate(x, y, 50.0D);
+        pose.scale(scale, scale, scale);
+
+        var qBase = Axis.ZP.rotationDegrees(180.0F);
+
+        float yawRad = (float) (yawDegrees * Math.PI / 180.0);
+        float pitchRad = (float) (pitchDegrees * Math.PI / 180.0);
+        org.joml.Quaternionf qView = new org.joml.Quaternionf().rotateYXZ(yawRad, pitchRad, 0.0F);
+
+        pose.mulPose(qBase);
+        pose.mulPose(qView);
+
+        entity.yBodyRot = 0.0F;
+        entity.setYRot(0.0F);
+        entity.setXRot(0.0F);
+        entity.yHeadRotO = 0.0F;
+        entity.yHeadRot = 0.0F;
+
+        Lighting.setupForEntityInInventory();
+        dispatcher.setRenderShadow(false);
+        var buffer = guiGraphics.bufferSource();
+        RenderSystem.runAsFancy(() ->
+                dispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, pose, buffer, 15728880)
+        );
+        buffer.endBatch();
+        dispatcher.setRenderShadow(true);
+        pose.popPose();
+        Lighting.setupFor3DItems();
+
+        entity.yBodyRot = oldBodyRot;
+        entity.setYRot(oldYRot);
+        entity.setXRot(oldXRot);
+        entity.yHeadRotO = oldHeadO;
+        entity.yHeadRot = oldHead;
+    }
+
+
     public static void renderLivingEntity(GuiGraphics guiGraphics, int x, int y, float scale, float lookX, float lookY, LivingEntity entity) {
         PoseStack matrixStack = guiGraphics.pose();
-        float lookXRot = (float)Math.atan((double)(lookX / 40.0F));
-        float lookYRot = (float)Math.atan((double)(lookY / 40.0F));
+        float lookXRot = (float) Math.atan((double) (lookX / 40.0F));
+        float lookYRot = (float) Math.atan((double) (lookY / 40.0F));
         matrixStack.pushPose();
-        matrixStack.translate((float)x, (float)y, 1500.0F);
+        matrixStack.translate((float) x, (float) y, 1500.0F);
         matrixStack.scale(1.0F, 1.0F, -1.0F);
         matrixStack.translate(0.0D, 0.0D, 1000.0D);
         matrixStack.scale(scale, scale, scale);

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.obj.model;
 
+import com.lycanitesmobs.client.model.creature.base.ModelObjState;
 import com.lycanitesmobs.client.obj.geometry.ObjPart;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
 import com.lycanitesmobs.client.renderer.util.VBOBatcher;
@@ -20,8 +21,23 @@ public class VBOObjModel extends ObjModel {
     public static boolean renderNormal;
     public static boolean renderOutline;
 
+    public float baseR = 1.0F, baseG = 1.0F, baseB = 1.0F, baseRange = 0.1F;
+    public float variantR = 1.0F, variantG = 1.0F, variantB = 1.0F, variantAmount = 0.0F;
+
     public VBOObjModel(ResourceLocation resourceLocation) {
         super(resourceLocation);
+    }
+
+    public void applyVariantFromState(ModelObjState state) {
+        if (state == null) return;
+        this.baseR = state.baseR;
+        this.baseG = state.baseG;
+        this.baseB = state.baseB;
+        this.baseRange = state.baseRange;
+        this.variantR = state.variantR;
+        this.variantG = state.variantG;
+        this.variantB = state.variantB;
+        this.variantAmount = state.variantAmount;
     }
 
     @Override
@@ -43,7 +59,19 @@ public class VBOObjModel extends ObjModel {
                     .setColor(color)
                     .setTextureOffset(textureOffset)
                     .setOverlayOffset(0.0F, 10.0F - fade)
-                    .setLightOffset(brightness);
+                    .setLightOffset(brightness)
+                    .setRecolorBand(
+                            baseR,
+                            baseG,
+                            baseB,
+                            baseRange
+                    )
+                    .setVariantTint(
+                            variantR,
+                            variantG,
+                            variantB,
+                            variantAmount
+                    );
 
             if (renderType == CustomRenderStates.OBJ_CUTOUT) {
                 cmd.setAlphaCutoff(0.1F);
@@ -51,11 +79,26 @@ public class VBOObjModel extends ObjModel {
 
             VBOBatcher.getInstance().queue(renderType, cmd);
         }
+
         if (renderOutline) {
-            VBOBatcher.getInstance().queue(CustomRenderStates.OBJ_OUTLINE_RENDER_TYPE,
-                    new VBODrawCommand(objPart.mesh.getVbo(), objPart.mesh.indices.length,
-                            renderType.format(), matrix4f, tex));
+            VBOBatcher.getInstance().queue(
+                    CustomRenderStates.OBJ_OUTLINE_RENDER_TYPE,
+                    new VBODrawCommand(
+                            objPart.mesh.getVbo(),
+                            objPart.mesh.indices.length,
+                            renderType.format(),
+                            matrix4f,
+                            tex
+                    )
+            );
         }
+    }
+
+    public static float[] hexToRGB(int hex) {
+        float r = ((hex >> 16) & 0xFF) / 255.0F;
+        float g = ((hex >> 8) & 0xFF) / 255.0F;
+        float b = (hex & 0xFF) / 255.0F;
+        return new float[]{r, g, b};
     }
 
 

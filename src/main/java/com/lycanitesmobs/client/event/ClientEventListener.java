@@ -204,12 +204,23 @@ public class ClientEventListener {
         // Left (Attack):
         if (event.getButton() == 0) {
             // Disable attack for large entity reach override:
-            if (!mc.player.isSpectator() && !mc.player.isHandsBusy() && mc.hitResult.getType() == HitResult.Type.ENTITY) {
+            if (!mc.player.isSpectator() && !mc.player.isHandsBusy() && mc.hitResult.getType() == HitResult.Type.ENTITY && mc.screen == null) {
                 Entity entityHit = ((EntityHitResult) mc.hitResult).getEntity();
                 if (playerExt.canMeleeBigEntity(entityHit)) {
                     MessagePlayerAttack message = new MessagePlayerAttack(entityHit);
                     LycanitesMobs.PACKET_MANAGER.sendToServer(message);
                     //event.setCanceled(true);
+                }
+            }
+        }
+        if (event.getButton() == 1 && event.getAction() == GLFW.GLFW_PRESS) {
+            if (mc.hitResult.getType() == HitResult.Type.ENTITY) {
+                Entity entityHit = ((EntityHitResult) mc.hitResult).getEntity();
+                if (entityHit instanceof com.lycanitesmobs.core.entity.base.BaseCreatureEntity creature) {
+                    var held = mc.player.getMainHandItem();
+                    if (held.getItem() == net.minecraft.world.item.Items.STICK) {
+                        mc.setScreen(new com.lycanitesmobs.client.gui.screen.creature.CreatureRecolorScreen(creature));
+                    }
                 }
             }
         }
