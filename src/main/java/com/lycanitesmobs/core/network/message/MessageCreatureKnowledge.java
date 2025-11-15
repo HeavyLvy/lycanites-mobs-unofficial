@@ -4,6 +4,7 @@ import com.lycanitesmobs.client.manager.ClientManager;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
@@ -52,7 +53,7 @@ public class MessageCreatureKnowledge {
             message.rank = packet.readInt();
             message.experience = packet.readInt();
         } catch (Exception e) {
-            LycanitesMobs.logWarning("", "There was a problem decoding the packet: " + packet + ".");
+            LMHelperClass.logWarning("", "There was a problem decoding the packet: " + packet + ".");
             e.printStackTrace();
         }
         return message;

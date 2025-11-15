@@ -9,6 +9,7 @@ import com.lycanitesmobs.core.util.helpers.JSONHelper;
 import com.lycanitesmobs.core.data.info.item.ItemDrop;
 import com.lycanitesmobs.core.spawner.MobSpawn;
 import com.lycanitesmobs.core.spawner.condition.SpawnCondition;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -367,7 +368,7 @@ public class DungeonSchematic {
             }
         }
         if (sectors.isEmpty()) {
-            LycanitesMobs.logWarning("Dungeon", "Unable to find any " + type + " sectors for the dungeon: " + this.name);
+            LMHelperClass.logWarning("Dungeon", "Unable to find any " + type + " sectors for the dungeon: " + this.name);
             return null;
         }
         if (sectors.size() == 1) {
@@ -423,7 +424,7 @@ public class DungeonSchematic {
         }
 
         if (themes.isEmpty()) {
-            LycanitesMobs.logWarning("Dungeon", "No Dungeon Themes Found For " + this.name);
+            LMHelperClass.logWarning("Dungeon", "No Dungeon Themes Found For " + this.name);
             return null;
         }
 

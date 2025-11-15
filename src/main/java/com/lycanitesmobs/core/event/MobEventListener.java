@@ -217,7 +217,7 @@ public class MobEventListener {
         for (Object potionEffectObj : entity.getActiveEffects()) {
             if (potionEffectObj == null) {
                 entity.removeAllEffects();
-                LycanitesMobs.logWarning("EffectsSetup", "Found a null potion effect on entity: " + entity + " all effects have been removed from this entity.");
+                LMHelperClass.logWarning("EffectsSetup", "Found a null potion effect on entity: " + entity + " all effects have been removed from this entity.");
             }
         }
 
@@ -300,7 +300,7 @@ public class MobEventListener {
                             LycanitesMobs.PACKET_MANAGER.sendToPlayer(messageEntityVelocity, player);
                         }
                     } catch (Exception e) {
-                        LycanitesMobs.logWarning("", "Failed to create and send a network packet for instability velocity!");
+                        LMHelperClass.logWarning("", "Failed to create and send a network packet for instability velocity!");
                         e.printStackTrace();
                     }
                 }

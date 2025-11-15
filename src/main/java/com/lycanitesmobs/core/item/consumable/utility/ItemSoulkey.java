@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.item.consumable.utility;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.info.altar.AltarInfo;
 import com.lycanitesmobs.core.item.base.BaseItem;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -49,7 +50,7 @@ public class ItemSoulkey extends BaseItem {
         // Get Possible Altars:
         List<AltarInfo> possibleAltars = new ArrayList<>();
         if (AltarInfo.altars.isEmpty())
-            LycanitesMobs.logWarning("", "No altars have been registered, Soulkeys will not work at all.");
+            LMHelperClass.logWarning("", "No altars have been registered, Soulkeys will not work at all.");
         for (AltarInfo altarInfo : AltarInfo.altars.values()) {
             if (altarInfo.checkBlockEvent(player, world, pos) && altarInfo.quickCheck(player, world, pos)) {
                 possibleAltars.add(altarInfo);

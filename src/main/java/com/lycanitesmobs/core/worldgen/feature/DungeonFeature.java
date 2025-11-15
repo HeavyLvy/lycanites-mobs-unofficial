@@ -4,6 +4,7 @@ import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.config.ConfigDungeons;
 import com.lycanitesmobs.core.dungeon.instance.DungeonInstance;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
@@ -45,7 +46,7 @@ public class DungeonFeature extends Feature<NoneFeatureConfiguration> {
                         if (x != 0 && z != 0) {
                             continue;
                         }
-                        LycanitesMobs.logDebug("Dungeon", "Creating A New Dungeon At Chunk: X" + (chunkPos.x + (dungeonSizeMax * x)) + " Z" + (chunkPos.z + (dungeonSizeMax * z)));
+                        LMHelperClass.logDebug("Dungeon", "Creating A New Dungeon At Chunk: X" + (chunkPos.x + (dungeonSizeMax * x)) + " Z" + (chunkPos.z + (dungeonSizeMax * z)));
                         DungeonInstance dungeonInstance = new DungeonInstance();
                         int yPos = context.level().getSeaLevel();
                         if (yPos < 64) {
@@ -55,7 +56,7 @@ public class DungeonFeature extends Feature<NoneFeatureConfiguration> {
                         dungeonInstance.setOrigin(dungeonPos);
                         if (dungeonInstance.init(world)) {
                             extendedWorld.addDungeonInstance(dungeonInstance, new UUID(context.random().nextLong(), context.random().nextLong()));
-                            LycanitesMobs.logDebug("Dungeon", "Feature Created: " + dungeonInstance.toString());
+                            LMHelperClass.logDebug("Dungeon", "Feature Created: " + dungeonInstance.toString());
                         }
                     }
                 }

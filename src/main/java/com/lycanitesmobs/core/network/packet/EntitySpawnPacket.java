@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
 import com.lycanitesmobs.core.entity.util.EntityFactory;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -64,13 +65,13 @@ public class EntitySpawnPacket implements Packet<ClientPacketListener> {
     @Override
     public void handle(ClientPacketListener handler) {
         if (!EntityFactory.getInstance().entityTypeNetworkMap.containsKey(this.entityTypeName)) {
-            LycanitesMobs.logWarning("", "Unable to find entity type from packet: " + this.entityTypeName);
+            LMHelperClass.logWarning("", "Unable to find entity type from packet: " + this.entityTypeName);
             return;
         }
         EntityType entityType = EntityFactory.getInstance().entityTypeNetworkMap.get(this.entityTypeName);
         Entity entity = EntityFactory.getInstance().create(entityType, LycanitesMobs.PROXY.getWorld());
         if (entity == null) {
-            LycanitesMobs.logWarning("", "Unable to create client entity from packet: " + this.entityTypeName);
+            LMHelperClass.logWarning("", "Unable to create client entity from packet: " + this.entityTypeName);
             return;
         }
         entity.setPos(this.pos.x(), this.pos.y(), this.pos.z());

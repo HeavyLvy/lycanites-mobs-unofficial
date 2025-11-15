@@ -9,6 +9,7 @@ import com.lycanitesmobs.core.dungeon.definition.DungeonTheme;
 import com.lycanitesmobs.core.dungeon.definition.SectorLayer;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.spawner.MobSpawn;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -986,7 +987,7 @@ public class SectorInstance {
         }
 
         // Spawn Mob:
-        LycanitesMobs.logDebug("Dungeon", "Spawning mob " + mobSpawn + " at: " + blockPos + " level: " + this.parentConnector.level);
+        LMHelperClass.logDebug("Dungeon", "Spawning mob " + mobSpawn + " at: " + blockPos + " level: " + this.parentConnector.level);
         LivingEntity entityLiving = mobSpawn.createEntity(world);
         entityLiving.setPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 

@@ -13,6 +13,7 @@ import com.lycanitesmobs.core.entity.util.CreatureStats;
 import com.lycanitesmobs.core.entity.util.EntityFactory;
 import com.lycanitesmobs.core.spawner.SpawnerMobRegistry;
 import com.lycanitesmobs.core.entity.EntityTypeGetter;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -144,7 +145,7 @@ public class CreatureManager extends JSONLoader {
      **/
     public void loadCreatureTypesFromJSON(ModInfo modInfo) {
         this.loadAllJson(modInfo, "Creature Type", "creaturetypes", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
-        LycanitesMobs.logDebug("Creature", "Complete! " + this.creatureTypes.size() + " JSON Creature Types Loaded In Total.");
+        LMHelperClass.logDebug("Creature", "Complete! " + this.creatureTypes.size() + " JSON Creature Types Loaded In Total.");
     }
 
     /**
@@ -152,7 +153,7 @@ public class CreatureManager extends JSONLoader {
      **/
     public void loadCreatureGroupsFromJSON(ModInfo modInfo) {
         this.loadAllJson(modInfo, "Creature Group", "creaturegroups", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
-        LycanitesMobs.logDebug("Creature", "Complete! " + this.creatureGroups.size() + " JSON Creature Groups Loaded In Total.");
+        LMHelperClass.logDebug("Creature", "Complete! " + this.creatureGroups.size() + " JSON Creature Groups Loaded In Total.");
     }
 
     /**
@@ -164,9 +165,9 @@ public class CreatureManager extends JSONLoader {
                 this.loadedMods.add(modInfo);
             }
             this.loadAllJson(modInfo, "Creature", "creatures", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
-            LycanitesMobs.logDebug("Creature", "Complete! " + this.creatures.size() + " JSON Creatures Loaded In Total.");
+            LMHelperClass.logDebug("Creature", "Complete! " + this.creatures.size() + " JSON Creatures Loaded In Total.");
         } catch (Exception e) {
-            LycanitesMobs.logError("Error loading Creatures for: " + modInfo.name);
+            LMHelperClass.logError("Error loading Creatures for: " + modInfo.name);
             throw (e);
         }
     }

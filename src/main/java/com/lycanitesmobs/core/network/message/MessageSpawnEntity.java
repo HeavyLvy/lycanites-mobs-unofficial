@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
 import com.lycanitesmobs.core.entity.util.EntityFactory;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -54,13 +55,13 @@ public class MessageSpawnEntity {
 
         ctx.get().enqueueWork(() -> {
             if (!EntityFactory.getInstance().entityTypeNetworkMap.containsKey(message.entityTypeName)) {
-                LycanitesMobs.logWarning("", "Unable to find entity type from packet: " + message.entityTypeName);
+                LMHelperClass.logWarning("", "Unable to find entity type from packet: " + message.entityTypeName);
                 return;
             }
             EntityType entityType = EntityFactory.getInstance().entityTypeNetworkMap.get(message.entityTypeName);
             Entity entity = EntityFactory.getInstance().create(entityType, LycanitesMobs.PROXY.getWorld());
             if (entity == null) {
-                LycanitesMobs.logWarning("", "Unable to create client entity from packet: " + message.entityTypeName);
+                LMHelperClass.logWarning("", "Unable to create client entity from packet: " + message.entityTypeName);
                 return;
             }
             entity.setPos(message.x, message.y, message.z);

@@ -16,6 +16,7 @@ import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -112,7 +113,7 @@ public class ProjectileObjModel extends ProjectileModel {
         this.wavefrontObject = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"));
         this.objParts = this.wavefrontObject.objParts;
         if (this.objParts.isEmpty())
-            LycanitesMobs.logWarning("", "Unable to load any parts for the " + name + " model!");
+            LMHelperClass.logWarning("", "Unable to load any parts for the " + name + " model!");
 
         // Create Animator:
         this.animator = new Animator(this);
@@ -136,7 +137,7 @@ public class ProjectileObjModel extends ProjectileModel {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LycanitesMobs.logWarning("", "There was a problem loading animation parts for " + name + ":");
+            LMHelperClass.logWarning("", "There was a problem loading animation parts for " + name + ":");
             e.toString();
         }
 
@@ -159,7 +160,7 @@ public class ProjectileObjModel extends ProjectileModel {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LycanitesMobs.logWarning("Models", "Unable to load animation json for " + name + ".");
+            LMHelperClass.logWarning("Models", "Unable to load animation json for " + name + ".");
         }
 
         return this;
@@ -172,7 +173,7 @@ public class ProjectileObjModel extends ProjectileModel {
      */
     public void addAnimationPart(AnimationPart animationPart) {
         if (this.animationParts.containsKey(animationPart.name)) {
-            LycanitesMobs.logWarning("", "Tried to add an animation part that already exists: " + animationPart.name + ".");
+            LMHelperClass.logWarning("", "Tried to add an animation part that already exists: " + animationPart.name + ".");
             return;
         }
         if (animationPart.parentName != null) {

@@ -9,6 +9,7 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.ModInfo;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.resources.ResourceLocation;
@@ -116,7 +117,7 @@ public class CreatureObjModelOld extends CreatureModel {
         this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"));
         this.wavefrontParts = this.objModel.objParts;
         if (this.wavefrontParts.isEmpty())
-            LycanitesMobs.logWarning("", "Unable to load (old format) model obj for: " + name + "");
+            LMHelperClass.logWarning("", "Unable to load (old format) model obj for: " + name + "");
 
         return this;
     }

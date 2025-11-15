@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
 import com.lycanitesmobs.core.entity.EntityTypeGetter;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -217,7 +218,7 @@ public class CreatureGroup {
                 this.ignoreGroups.add(group);
         }
 
-        LycanitesMobs.logDebug("Creature Group", "Loaded Creature Group: " + this.getName());
+        LMHelperClass.logDebug("Creature Group", "Loaded Creature Group: " + this.getName());
     }
 
     /**

@@ -10,6 +10,7 @@ import com.lycanitesmobs.client.obj.model.VBOObjModel;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
 import com.lycanitesmobs.client.renderer.item.IItemModelRenderer;
 import com.lycanitesmobs.client.renderer.layer.item.LayerItem;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -95,7 +96,7 @@ public abstract class ItemObjModel implements IAnimationModel {
         this.objModel = new VBOObjModel(new ResourceLocation(LycanitesMobs.MODID, "modelparts/" + path + ".obj"));
         this.objParts = this.objModel.objParts;
         if (this.objParts.isEmpty())
-            LycanitesMobs.logWarning("", "Unable to load any parts for the " + name + " model!");
+            LMHelperClass.logWarning("", "Unable to load any parts for the " + name + " model!");
 
         // Create Animator:
         this.animator = new Animator(this);
@@ -119,7 +120,7 @@ public abstract class ItemObjModel implements IAnimationModel {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LycanitesMobs.logWarning("", "There was a problem loading animation parts for " + name + ":");
+            LMHelperClass.logWarning("", "There was a problem loading animation parts for " + name + ":");
             e.toString();
         }
 
@@ -142,7 +143,7 @@ public abstract class ItemObjModel implements IAnimationModel {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LycanitesMobs.logWarning("Model", "Unable to load animation json for " + name + ".");
+            LMHelperClass.logWarning("Model", "Unable to load animation json for " + name + ".");
         }
 
         return this;
@@ -155,7 +156,7 @@ public abstract class ItemObjModel implements IAnimationModel {
      */
     public void addAnimationPart(AnimationPart animationPart) {
         if (this.animationParts.containsKey(animationPart.name)) {
-            LycanitesMobs.logWarning("", "Tried to add an animation part that already exists: " + animationPart.name + ".");
+            LMHelperClass.logWarning("", "Tried to add an animation part that already exists: " + animationPart.name + ".");
             return;
         }
         if (animationPart.parentName != null) {

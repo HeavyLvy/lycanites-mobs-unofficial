@@ -1,6 +1,7 @@
 package com.lycanitesmobs.client.obj.material;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
@@ -76,7 +77,7 @@ public class MtlMaterialLib {
             InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(resourceLocation).get().open();
             return loadTexture(ImageIO.read(inputStream));
         } catch (IOException e) {
-            LycanitesMobs.logWarning("", "Unable to load a texture from the obj material file.");
+            LMHelperClass.logWarning("", "Unable to load a texture from the obj material file.");
             e.printStackTrace();
         }
         return 0;

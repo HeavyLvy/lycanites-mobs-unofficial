@@ -202,51 +202,6 @@ public class LycanitesMobs {
     }
 
 
-    /**
-     * Prints an info message into the console.
-     *
-     * @param key     The debug config key to use, if empty, the message is always printed.
-     * @param message The message to print.
-     */
-    public static void logInfo(String key, String message) {
-        if ("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
-            LOGGER.info("[LycanitesMobs] [Info] [" + key + "] " + message);
-        }
-    }
-
-    /**
-     * Prints an info debug into the console.
-     *
-     * @param key     The debug config key to use, if empty, the message is always printed.
-     * @param message The message to print.
-     */
-    public static void logDebug(String key, String message) {
-        if ("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
-            LOGGER.debug("[LycanitesMobs] [Debug] [" + key + "] " + message);
-        }
-    }
-
-    /**
-     * Prints an info warning into the console.
-     *
-     * @param key     The debug config key to use, if empty, the message is always printed.
-     * @param message The message to print.
-     */
-    public static void logWarning(String key, String message) {
-        if ("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
-            LOGGER.warn("[LycanitesMobs] [WARNING] [" + key + "] " + message);
-        }
-    }
-
-    /**
-     * Prints an error message into the console.
-     *
-     * @param message The error message to print.
-     */
-    public static void logError(String message) {
-        LOGGER.error("[LycanitesMobs] " + message);
-    }
-
     // Content Loading:
     public void loadContent() {
         // Elements:

@@ -126,7 +126,7 @@ public class GameEventListener {
         // ========== Force Remove Entity ==========
         if (!(event.getEntity() instanceof LivingEntity)) {
             if (ExtendedEntity.FORCE_REMOVE_ENTITY_IDS != null && !ExtendedEntity.FORCE_REMOVE_ENTITY_IDS.isEmpty()) {
-                LycanitesMobs.logDebug("ForceRemoveEntity", "Forced entity removal, checking: " + event.getEntity().getName());
+                LMHelperClass.logDebug("ForceRemoveEntity", "Forced entity removal, checking: " + event.getEntity().getName());
                 for (String forceRemoveID : ExtendedEntity.FORCE_REMOVE_ENTITY_IDS) {
                     if (forceRemoveID.equalsIgnoreCase(LMHelperClass.convertToResourceLocation(event.getEntity()).toString())) {
                         event.getEntity().remove(Entity.RemovalReason.DISCARDED);

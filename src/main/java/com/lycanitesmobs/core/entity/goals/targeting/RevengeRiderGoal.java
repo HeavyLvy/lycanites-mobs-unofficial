@@ -5,6 +5,7 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -12,64 +13,67 @@ import java.util.Iterator;
 import java.util.List;
 
 public class RevengeRiderGoal extends FindAttackTargetGoal {
-	
-	// Targets:
-	private TameableCreatureEntity host;
-	
-	// Properties:
+
+    // Targets:
+    private TameableCreatureEntity host;
+
+    // Properties:
     private int revengeTime;
-	
-	// ==================================================
- 	//                    Constructor
- 	// ==================================================
+
+    // ==================================================
+    //                    Constructor
+    // ==================================================
     public RevengeRiderGoal(TameableCreatureEntity setHost) {
         super(setHost);
-    	this.host = setHost;
-    	this.tameTargeting = true;
+        this.host = setHost;
+        this.tameTargeting = true;
     }
-    
-    
+
+
     // ==================================================
-  	//                  Set Properties
-  	// ==================================================
+    //                  Set Properties
+    // ==================================================
     public RevengeRiderGoal setHelpCall(boolean setHelp) {
-    	this.callForHelp = setHelp;
-    	return this;
+        this.callForHelp = setHelp;
+        return this;
     }
+
     public RevengeRiderGoal setSightCheck(boolean setSightCheck) {
-    	this.checkSight = setSightCheck;
-    	return this;
+        this.checkSight = setSightCheck;
+        return this;
     }
+
     public RevengeRiderGoal setOnlyNearby(boolean setNearby) {
-    	this.nearbyOnly = setNearby;
-    	return this;
+        this.nearbyOnly = setNearby;
+        return this;
     }
+
     public RevengeRiderGoal setCantSeeTimeMax(int setCantSeeTimeMax) {
-    	this.cantSeeTimeMax = setCantSeeTimeMax;
-    	return this;
+        this.cantSeeTimeMax = setCantSeeTimeMax;
+        return this;
     }
-	
-    
-	// ==================================================
- 	//                  Should Execute
- 	// ==================================================
+
+
+    // ==================================================
+    //                  Should Execute
+    // ==================================================
     public boolean canUse() {
-    	if(!this.host.hasRiderTarget())
-    		return false;
-    	if(this.host.getRider() == null)
-    		return false;
+        if (!this.host.hasRiderTarget())
+            return false;
+        if (this.host.getRider() == null)
+            return false;
         int i = this.getRiderRevengeTime();
-        if(i == this.revengeTime)
-        	return false;
-        if(!this.isEntityTargetable(this.getRiderRevengeTarget(), false))
-        	return false;
+        if (i == this.revengeTime)
+            return false;
+        if (!this.isEntityTargetable(this.getRiderRevengeTarget(), false))
+            return false;
         return true;
     }
-	
-    
-	// ==================================================
- 	//                 Start Executing
- 	// ==================================================
+
+
+    // ==================================================
+    //                 Start Executing
+    // ==================================================
     public void start() {
         this.target = this.getRiderRevengeTarget();
         this.revengeTime = this.getRiderRevengeTime();
@@ -86,9 +90,8 @@ public class RevengeRiderGoal extends FindAttackTargetGoal {
                         possibleAlly.setTarget(this.target);
                 }
             }
-        }
-        catch(Exception e) {
-            LycanitesMobs.logWarning("", "An exception occurred when selecting help targets in rider revenge, this has been skipped to prevent a crash.");
+        } catch (Exception e) {
+            LMHelperClass.logWarning("", "An exception occurred when selecting help targets in rider revenge, this has been skipped to prevent a crash.");
             e.printStackTrace();
         }
 
@@ -96,31 +99,31 @@ public class RevengeRiderGoal extends FindAttackTargetGoal {
     }
 
 
-	// ==================================================
-	//                  Continue Executing
-	// ==================================================
-	@Override
-	public boolean shouldStopTargeting(LivingEntity target) {
-		return target != this.getRiderRevengeTarget();
-	}
+    // ==================================================
+    //                  Continue Executing
+    // ==================================================
+    @Override
+    public boolean shouldStopTargeting(LivingEntity target) {
+        return target != this.getRiderRevengeTarget();
+    }
 
 
-	// ==================================================
-	//                    Rider Revenge
-	// ==================================================
-	public LivingEntity getRiderRevengeTarget() {
-		ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(this.host.getRider());
-		if(extendedEntity != null) {
-			return extendedEntity.lastAttackedEntity;
-		}
-		return null;
-	}
+    // ==================================================
+    //                    Rider Revenge
+    // ==================================================
+    public LivingEntity getRiderRevengeTarget() {
+        ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(this.host.getRider());
+        if (extendedEntity != null) {
+            return extendedEntity.lastAttackedEntity;
+        }
+        return null;
+    }
 
-	public int getRiderRevengeTime() {
-		ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(this.host.getRider());
-		if(extendedEntity != null) {
-			return extendedEntity.lastAttackedTime;
-		}
-		return 0;
-	}
+    public int getRiderRevengeTime() {
+        ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(this.host.getRider());
+        if (extendedEntity != null) {
+            return extendedEntity.lastAttackedTime;
+        }
+        return 0;
+    }
 }

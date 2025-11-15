@@ -156,7 +156,7 @@ public class CreatureSpawn {
         if (json.has("spawners")) {
             this.spawners = JSONHelper.getJsonStrings(json.get("spawners").getAsJsonArray());
             for (String spawner : this.spawners) {
-                LycanitesMobs.logDebug("Creature", "Adding " + creatureInfo.getName() + " to " + spawner + " global spawn list.");
+                LMHelperClass.logDebug("Creature", "Adding " + creatureInfo.getName() + " to " + spawner + " global spawn list.");
                 SpawnerMobRegistry.createSpawn(creatureInfo, spawner);
 
                 if ("monster".equalsIgnoreCase(spawner))
@@ -232,7 +232,7 @@ public class CreatureSpawn {
         if (!CreatureManager.getInstance().spawnConfig.disableDungeonSpawners) {
             if (this.dungeonWeight > 0) {
                 DungeonHooks.addDungeonMob(creatureInfo.getEntityType(), this.dungeonWeight);
-                LycanitesMobs.logDebug("MobSetup", "Dungeon Spawn Added - Weight: " + this.dungeonWeight);
+                LMHelperClass.logDebug("MobSetup", "Dungeon Spawn Added - Weight: " + this.dungeonWeight);
             }
         }
     }
@@ -246,7 +246,7 @@ public class CreatureSpawn {
      */
     public boolean isAllowedDimension(Level world) {
         if (world == null) {
-            LycanitesMobs.logDebug("MobSpawns", "No world or dimension spawn settings were found, defaulting to valid.");
+            LMHelperClass.logDebug("MobSpawns", "No world or dimension spawn settings were found, defaulting to valid.");
             return true;
         }
 
@@ -287,7 +287,7 @@ public class CreatureSpawn {
         if (biomeRL != null) {
             biomeId = biomeRL.toString();
         } else {
-            LycanitesMobs.logWarning("", "Invalid biome: " + biome.toString());
+            LMHelperClass.logWarning("", "Invalid biome: " + biome.toString());
             return false;
         }
 

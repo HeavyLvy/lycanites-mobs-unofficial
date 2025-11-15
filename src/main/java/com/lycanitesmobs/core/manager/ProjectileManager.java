@@ -16,6 +16,7 @@ import com.lycanitesmobs.core.data.loaders.StreamLoader;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.util.EntityFactory;
 import com.lycanitesmobs.core.data.info.ModInfo;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -94,7 +95,7 @@ public class ProjectileManager extends JSONLoader {
      **/
     public void loadAllFromJSON(ModInfo groupInfo) {
         this.loadAllJson(groupInfo, "Projectile", "projectiles", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
-        LycanitesMobs.logDebug("Projectile", "Complete! " + this.projectiles.size() + " JSON Projectile Info Loaded In Total.");
+        LMHelperClass.logDebug("Projectile", "Complete! " + this.projectiles.size() + " JSON Projectile Info Loaded In Total.");
     }
 
     @Override
@@ -102,7 +103,7 @@ public class ProjectileManager extends JSONLoader {
         ProjectileInfo projectileInfo = new ProjectileInfo(modInfo);
         projectileInfo.loadFromJSON(json);
         if (projectileInfo.getName() == null) {
-            LycanitesMobs.logWarning("", "[Projectile] Unable to load " + loadGroup + " json due to missing name.");
+            LMHelperClass.logWarning("", "[Projectile] Unable to load " + loadGroup + " json due to missing name.");
             return;
         }
 
@@ -143,7 +144,7 @@ public class ProjectileManager extends JSONLoader {
 
     @SubscribeEvent
     public void registerProjectiles(RegisterEvent event) {
-        LycanitesMobs.logDebug("Projectile", "Forge registering all " + this.projectiles.size() + " projectiles...");
+        LMHelperClass.logDebug("Projectile", "Forge registering all " + this.projectiles.size() + " projectiles...");
 
         event.register(ForgeRegistries.Keys.ENTITY_TYPES, helper -> {
             for (String entityName : this.oldSpriteProjectiles.keySet()) {
@@ -179,7 +180,7 @@ public class ProjectileManager extends JSONLoader {
             throw new RuntimeException(e);
         }
 
-        LycanitesMobs.logDebug("Projectile", "Added (Projectile) Entity Type: " + entityName + " Type: " + entityType);
+        LMHelperClass.logDebug("Projectile", "Added (Projectile) Entity Type: " + entityName + " Type: " + entityType);
         this.oldProjectileTypes.put(entityClass, entityType);
         return entityType;
     }

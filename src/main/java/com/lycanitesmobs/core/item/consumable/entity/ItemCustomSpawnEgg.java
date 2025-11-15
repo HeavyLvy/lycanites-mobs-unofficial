@@ -50,7 +50,7 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
         super(properties, creatureType.getSpawnEggName(), creatureType);
         //this.setRegistryName(this.modInfo.modid, this.itemName);
         DispenserBlock.registerBehavior(this, new SpawnEggDispenseBehaviour());
-        LycanitesMobs.logDebug("Creature Type", "Created Creature Type Spawn Egg: " + this.itemName);
+        LMHelperClass.logDebug("Creature Type", "Created Creature Type Spawn Egg: " + this.itemName);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
         CreatureInfo creatureInfo = this.getCreatureInfo(itemStack);
         if (creatureInfo == null) {
             String creatureName = this.getCreatureName(itemStack);
-            LycanitesMobs.logWarning("Mob Spawn Egg", "Unable to get Creature Info for id: " + creatureName);
+            LMHelperClass.logWarning("Mob Spawn Egg", "Unable to get Creature Info for id: " + creatureName);
             return Component.translatable("Unable to get Creature Info for id: '" + creatureName + "' this spawn egg may have been created by a give command without NBT data.");
         }
         return creatureInfo.getDescription().plainCopy().withStyle(ChatFormatting.GREEN);

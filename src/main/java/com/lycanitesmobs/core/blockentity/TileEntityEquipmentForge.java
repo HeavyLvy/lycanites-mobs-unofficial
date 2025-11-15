@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -196,7 +197,7 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 
     @Override
     public void onGuiButton(int buttonId) {
-        LycanitesMobs.logDebug("", "Received button packet id: " + buttonId);
+        LMHelperClass.logDebug("", "Received button packet id: " + buttonId);
     }
 
 

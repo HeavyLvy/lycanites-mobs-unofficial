@@ -5,6 +5,7 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.pets.PetEntry;
 import com.lycanitesmobs.core.manager.PetManager;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
@@ -41,7 +42,7 @@ public class MessagePetEntryRemove {
                 PetManager petManager = playerExt.petManager;
                 PetEntry petEntry = petManager.getEntry(message.petEntryID);
                 if (petEntry == null) {
-                    LycanitesMobs.logWarning("", "Tried to remove a null PetEntry from server!");
+                    LMHelperClass.logWarning("", "Tried to remove a null PetEntry from server!");
                     return; // Nothing to remove!
                 }
                 petEntry.remove();
@@ -58,7 +59,7 @@ public class MessagePetEntryRemove {
         PetManager petManager = playerExt.petManager;
         PetEntry petEntry = petManager.getEntry(message.petEntryID);
         if (petEntry == null) {
-            LycanitesMobs.logWarning("", "Tried to remove a null PetEntry from client!");
+            LMHelperClass.logWarning("", "Tried to remove a null PetEntry from client!");
             return; // Nothing to remove!
         }
         petEntry.remove();
@@ -72,7 +73,7 @@ public class MessagePetEntryRemove {
         try {
             message.petEntryID = packet.readUUID();
         } catch (Exception e) {
-            LycanitesMobs.logWarning("", "There was a problem decoding the packet: " + packet + ".");
+            LMHelperClass.logWarning("", "There was a problem decoding the packet: " + packet + ".");
             e.printStackTrace();
         }
         return message;
@@ -85,7 +86,7 @@ public class MessagePetEntryRemove {
         try {
             packet.writeUUID(message.petEntryID);
         } catch (Exception e) {
-            LycanitesMobs.logWarning("", "There was a problem encoding the packet: " + packet + ".");
+            LMHelperClass.logWarning("", "There was a problem encoding the packet: " + packet + ".");
             e.printStackTrace();
         }
     }

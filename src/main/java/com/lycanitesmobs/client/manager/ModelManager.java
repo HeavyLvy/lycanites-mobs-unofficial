@@ -13,6 +13,7 @@ import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.manager.EquipmentPartManager;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -55,7 +56,7 @@ public class ModelManager {
             }
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException |
                  InstantiationException e) {
-            LycanitesMobs.logError("Unable to load a Creature model, check that the model class name(s) is correct in the associated creature json (check subspecies models if any too).");
+            LMHelperClass.logError("Unable to load a Creature model, check that the model class name(s) is correct in the associated creature json (check subspecies models if any too).");
             throw new RuntimeException(e);
         }
 
@@ -68,7 +69,7 @@ public class ModelManager {
             }
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException |
                  InstantiationException e) {
-            LycanitesMobs.logError("Unable to load a Projectile model, check that the model class name is correct in the associated projectile json.");
+            LMHelperClass.logError("Unable to load a Projectile model, check that the model class name is correct in the associated projectile json.");
             throw new RuntimeException(e);
         }
 

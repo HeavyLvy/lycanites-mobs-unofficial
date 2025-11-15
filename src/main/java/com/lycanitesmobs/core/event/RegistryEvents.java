@@ -15,6 +15,7 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.fluid.CustomFluid;
 import com.lycanitesmobs.core.fluid.type.BaseFluidType;
 import com.lycanitesmobs.core.manager.*;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -95,9 +96,9 @@ public class RegistryEvents {
                     for (Map.Entry<String, Lazy<? extends BlockItem>> entry : ObjectManager.blockItems.entrySet()) {
                         String name = entry.getKey();
                         Supplier<? extends BlockItem> blockItem = entry.getValue();
-                        LycanitesMobs.logDebug("Item", "Registering item block: " + name);
+                        LMHelperClass.logDebug("Item", "Registering item block: " + name);
                         if (name == null) {
-                            LycanitesMobs.logWarning("", "Block Item: " + name + " has no Registry Name!");
+                            LMHelperClass.logWarning("", "Block Item: " + name + " has no Registry Name!");
                             continue;
                         }
                         helper.register(new ResourceLocation(LycanitesMobs.MODID, name), blockItem.get());
@@ -118,7 +119,7 @@ public class RegistryEvents {
                             return;
                         }
 
-                        LycanitesMobs.logDebug("Item", "Registering general item: " + itemInfo.getName());
+                        LMHelperClass.logDebug("Item", "Registering general item: " + itemInfo.getName());
                         helper.register(new ResourceLocation(LycanitesMobs.MODID, itemInfo.getItem().itemName), itemInfo.getItem());
                     }
                     //Special Items
@@ -128,7 +129,7 @@ public class RegistryEvents {
                                 LycanitesMobs.LOGGER.info("Tried registering item in Item Manager's item list, skipping: " + name);
                                 return;
                             }
-                            LycanitesMobs.logDebug("Item", "Registering special item: " + name);
+                            LMHelperClass.logDebug("Item", "Registering special item: " + name);
                             helper.register(new ResourceLocation(LycanitesMobs.MODID, name), item.get());
                         }
                     }

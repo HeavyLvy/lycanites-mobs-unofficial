@@ -8,6 +8,7 @@ import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.client.gui.screen.base.BaseOverlayScreen;
 import com.lycanitesmobs.core.mobevent.MobEvent;
 import com.lycanitesmobs.core.mobevent.MobEventPlayerServer;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -44,7 +45,7 @@ public class MobEventPlayerClient {
         this.mobEvent = mobEvent;
         this.world = world;
         if (!world.isClientSide)
-            LycanitesMobs.logWarning("", "Created a MobEventClient with a server side world, this shouldn't happen, things are going to get weird!");
+            LMHelperClass.logWarning("", "Created a MobEventClient with a server side world, this shouldn't happen, things are going to get weird!");
     }
 
 
@@ -71,7 +72,7 @@ public class MobEventPlayerClient {
 
     public void playSound() {
         if (ObjectManager.getSound("mobevent_" + this.mobEvent.title.toLowerCase()) == null) {
-            LycanitesMobs.logWarning("MobEvent", "Sound missing for: " + this.mobEvent.getTitle());
+            LMHelperClass.logWarning("MobEvent", "Sound missing for: " + this.mobEvent.getTitle());
             return;
         }
         this.sound = new MobEventSound(ObjectManager.getSound("mobevent_" + this.mobEvent.title.toLowerCase()), SoundSource.RECORDS, ClientManager.getInstance().getClientPlayer(), this.world.random, 1.0F, 1.0F);

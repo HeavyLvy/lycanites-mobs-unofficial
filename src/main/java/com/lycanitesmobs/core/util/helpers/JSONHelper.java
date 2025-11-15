@@ -197,7 +197,7 @@ public class JSONHelper {
                 try {
                     biomeType = BiomeManager.BiomeType.valueOf(biomeEntry.toUpperCase(Locale.ENGLISH));
                 } catch (Exception e) {
-                    LycanitesMobs.logWarning("", "[Spawning] Unknown biome type " + biomeEntry + " this will be ignored and treated as NONE.");
+                    LMHelperClass.logWarning("", "[Spawning] Unknown biome type " + biomeEntry + " this will be ignored and treated as NONE.");
                 }
                 if (biomeType != null) {
                     ImmutableList<BiomeManager.BiomeEntry> selectedBiomesSet = BiomeManager.getBiomes(biomeType);

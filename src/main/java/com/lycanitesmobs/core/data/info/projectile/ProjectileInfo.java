@@ -16,6 +16,7 @@ import com.lycanitesmobs.core.manager.ElementManager;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.data.info.projectile.behaviours.ProjectileBehaviour;
 import com.lycanitesmobs.core.item.consumable.entity.ChargeItem;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.chat.Component;
@@ -246,7 +247,7 @@ public class ProjectileInfo {
             }
             this.entityConstructor = this.entityClass.getConstructor(EntityType.class, Level.class);
         } catch (Exception e) {
-            LycanitesMobs.logError("[Projectile] Unable to find the Java Entity Class: " + json.get("entityClass").getAsString() + " for " + this.getName());
+            LMHelperClass.logError("[Projectile] Unable to find the Java Entity Class: " + json.get("entityClass").getAsString() + " for " + this.getName());
             throw new RuntimeException(e);
         }
 
@@ -308,7 +309,7 @@ public class ProjectileInfo {
                 if (projectileBehaviour != null) {
                     this.behaviours.add(projectileBehaviour);
                 } else {
-                    LycanitesMobs.logWarning("", "Unable to load Projectile Behaviour: " + behaviorJson.get("type").getAsString());
+                    LMHelperClass.logWarning("", "Unable to load Projectile Behaviour: " + behaviorJson.get("type").getAsString());
                 }
             }
         }

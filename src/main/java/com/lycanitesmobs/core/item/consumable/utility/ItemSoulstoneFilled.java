@@ -4,6 +4,7 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureType;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -33,7 +34,7 @@ public class ItemSoulstoneFilled extends ItemSoulstone {
             return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
         }
         if (this.creatureType.tameableCreatures.isEmpty()) {
-            LycanitesMobs.logInfo("", "Tried to use a " + this.creatureType.getSoulstoneName() + " but there are no tameable creatures for this type yet.");
+            LMHelperClass.logInfo("", "Tried to use a " + this.creatureType.getSoulstoneName() + " but there are no tameable creatures for this type yet.");
             return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
         }
 

@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.util.helpers;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.core.data.config.ConfigDebug;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -64,11 +65,59 @@ import java.lang.reflect.Field;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import static com.lycanitesmobs.LycanitesMobs.configReady;
+import static com.lycanitesmobs.LycanitesMobs.earlyDebug;
+
 public class LMHelperClass {
     public static final Set<String> errorMessagesLogged = new HashSet<>();
     public static final Set<String> warningMessagesLogged = new HashSet<>();
     public static final Set<String> infoMessagesLogged = new HashSet<>();
     public static Logger LOGGER = LycanitesMobs.LOGGER;
+
+    /**
+     * Prints an info message into the console.
+     *
+     * @param key     The debug config key to use, if empty, the message is always printed.
+     * @param message The message to print.
+     */
+    public static void logInfo(String key, String message) {
+        if ("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
+            LOGGER.info("[LycanitesMobs] [Info] [" + key + "] " + message);
+        }
+    }
+
+    /**
+     * Prints an info debug into the console.
+     *
+     * @param key     The debug config key to use, if empty, the message is always printed.
+     * @param message The message to print.
+     */
+    public static void logDebug(String key, String message) {
+        if ("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
+            LOGGER.debug("[LycanitesMobs] [Debug] [" + key + "] " + message);
+        }
+    }
+
+    /**
+     * Prints an info warning into the console.
+     *
+     * @param key     The debug config key to use, if empty, the message is always printed.
+     * @param message The message to print.
+     */
+    public static void logWarning(String key, String message) {
+        if ("".equals(key) || (!configReady && earlyDebug) || ConfigDebug.INSTANCE.isEnabled(key.toLowerCase())) {
+            LOGGER.warn("[LycanitesMobs] [WARNING] [" + key + "] " + message);
+        }
+    }
+
+    /**
+     * Prints an error message into the console.
+     *
+     * @param message The error message to print.
+     */
+    public static void logError(String message) {
+        LOGGER.error("[LycanitesMobs] " + message);
+    }
 
     public static void logErrorMessageOnce(String errorMessage) {
         if (!errorMessagesLogged.contains(errorMessage)) {
@@ -409,7 +458,7 @@ public class LMHelperClass {
                 }
             }
         } catch (Exception e) {
-            LycanitesMobs.logError("Unable to fix the Maximum Mob health limit, all bosses will be capped at 1024 health, if you are using the latest version of Lycanites Mobs please report this as a bug with the following stack trace:");
+            logError("Unable to fix the Maximum Mob health limit, all bosses will be capped at 1024 health, if you are using the latest version of Lycanites Mobs please report this as a bug with the following stack trace:");
             e.printStackTrace();
         }
     }

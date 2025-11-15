@@ -1050,55 +1050,55 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             return true;
         }
 
-        LycanitesMobs.logDebug("MobSpawns", " ~O==================== Vanilla Spawn Check: " + this.creatureInfo.getName() + " ====================O~");
-        LycanitesMobs.logDebug("MobSpawns", "Attempting to Spawn: " + this.creatureInfo.getName());
-        LycanitesMobs.logDebug("MobSpawns", "Target Spawn Location: " + pos);
+        LMHelperClass.logDebug("MobSpawns", " ~O==================== Vanilla Spawn Check: " + this.creatureInfo.getName() + " ====================O~");
+        LMHelperClass.logDebug("MobSpawns", "Attempting to Spawn: " + this.creatureInfo.getName());
+        LMHelperClass.logDebug("MobSpawns", "Target Spawn Location: " + pos);
 
         // Enabled Check:
-        LycanitesMobs.logDebug("MobSpawns", "Checking if creature is enabled...");
+        LMHelperClass.logDebug("MobSpawns", "Checking if creature is enabled...");
         if (!this.creatureInfo.enabled || !this.creatureInfo.creatureSpawn.enabled) {
             return false;
         }
 
         // Peaceful Check:
-        LycanitesMobs.logDebug("MobSpawns", "Checking for peaceful difficulty...");
+        LMHelperClass.logDebug("MobSpawns", "Checking for peaceful difficulty...");
         if (!this.creatureInfo.peaceful && this.getCommandSenderWorld().getDifficulty() == Difficulty.PEACEFUL) {
             return false;
         }
 
         // Gamerule Check:
-        LycanitesMobs.logDebug("MobSpawns", "Checking gamerules...");
+        LMHelperClass.logDebug("MobSpawns", "Checking gamerules...");
         if (!this.getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
             return false;
         }
 
         // Fixed Spawning Checks:
-        LycanitesMobs.logDebug("MobSpawns", "Fixed spawn check (light level, collisions)...");
+        LMHelperClass.logDebug("MobSpawns", "Fixed spawn check (light level, collisions)...");
         if (!this.fixedSpawnCheck(world, pos)) {
             return false;
         }
 
         // Mob Spawner Check:
         if (spawnReason == MobSpawnType.SPAWNER) {
-            LycanitesMobs.logDebug("MobSpawns", "Spawned from Mob Spawner, skipping other checks.");
-            LycanitesMobs.logDebug("MobSpawns", "Vanilla Spawn Check Passed!");
+            LMHelperClass.logDebug("MobSpawns", "Spawned from Mob Spawner, skipping other checks.");
+            LMHelperClass.logDebug("MobSpawns", "Vanilla Spawn Check Passed!");
             return true;
         }
-        LycanitesMobs.logDebug("MobSpawns", "No Mob Spawner found.");
+        LMHelperClass.logDebug("MobSpawns", "No Mob Spawner found.");
 
         // Global Spawn Check:
-        LycanitesMobs.logDebug("MobSpawns", "Global Spawn Check (Master Dimension List, etc)...");
+        LMHelperClass.logDebug("MobSpawns", "Global Spawn Check (Master Dimension List, etc)...");
         if (!CreatureManager.getInstance().spawnConfig.isAllowedGlobal(world)) {
             return false;
         }
 
         // Environment Spawning Checks:
-        LycanitesMobs.logDebug("MobSpawns", "Environment spawn check (dimension, group limit, ground type, water, lava, underground)...");
+        LMHelperClass.logDebug("MobSpawns", "Environment spawn check (dimension, group limit, ground type, water, lava, underground)...");
         if (!this.environmentSpawnCheck(world, pos)) {
             return false;
         }
 
-        LycanitesMobs.logDebug("MobSpawns", "Vanilla Spawn Check Passed!");
+        LMHelperClass.logDebug("MobSpawns", "Vanilla Spawn Check Passed!");
         return true;
     }
 
@@ -1110,12 +1110,12 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             return false;
         }
 
-        LycanitesMobs.logDebug("MobSpawns", "Checking collision...");
+        LMHelperClass.logDebug("MobSpawns", "Checking collision...");
         if (!this.checkSpawnCollision(world, pos)) {
             return false;
         }
 
-        LycanitesMobs.logDebug("MobSpawns", "Counting mobs of the same kind, max allowed is: " + this.creatureInfo.creatureSpawn.spawnAreaLimit);
+        LMHelperClass.logDebug("MobSpawns", "Counting mobs of the same kind, max allowed is: " + this.creatureInfo.creatureSpawn.spawnAreaLimit);
         if (!this.checkSpawnGroupLimit(world, pos, CreatureManager.getInstance().spawnConfig.spawnLimitRange))
             return false;
 
@@ -1128,22 +1128,22 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     public boolean environmentSpawnCheck(Level world, BlockPos pos) {
         if (this.creatureInfo.creatureSpawn.worldDayMin > 0) {
             int currentDay = (int) Math.floor(world.getGameTime() / 24000D);
-            LycanitesMobs.logDebug("MobSpawns", "Checking game time, currently on day: " + currentDay + ", must be at least day: " + this.creatureInfo.creatureSpawn.worldDayMin + ".");
+            LMHelperClass.logDebug("MobSpawns", "Checking game time, currently on day: " + currentDay + ", must be at least day: " + this.creatureInfo.creatureSpawn.worldDayMin + ".");
             if (currentDay < this.creatureInfo.creatureSpawn.worldDayMin)
                 return false;
         }
-        LycanitesMobs.logDebug("MobSpawns", "Checking dimension.");
+        LMHelperClass.logDebug("MobSpawns", "Checking dimension.");
         if (!this.isNativeDimension(this.getCommandSenderWorld()))
             return false;
-        LycanitesMobs.logDebug("MobSpawns", "Checking for liquid (water, lava, ooze, etc).");
+        LMHelperClass.logDebug("MobSpawns", "Checking for liquid (water, lava, ooze, etc).");
         if (!this.spawnsInWater && this.getCommandSenderWorld().containsAnyLiquid(this.getBoundingBox()))
             return false;
         else if (!this.spawnsOnLand && !this.getCommandSenderWorld().containsAnyLiquid(this.getBoundingBox()))
             return false;
-        LycanitesMobs.logDebug("MobSpawns", "Checking for underground.");
+        LMHelperClass.logDebug("MobSpawns", "Checking for underground.");
         if (!this.spawnsUnderground && this.isBlockUnderground(pos.getX(), pos.getY() + 1, pos.getZ()))
             return false;
-        LycanitesMobs.logDebug("MobSpawns", "Checking for nearby bosses.");
+        LMHelperClass.logDebug("MobSpawns", "Checking for nearby bosses.");
         if (!this.checkSpawnBoss(world, pos))
             return false;
 
@@ -1618,7 +1618,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     public void getRandomSubspecies() {
         if (!this.isMinion()) {
             this.subspecies = this.creatureInfo.getRandomSubspecies(this);
-            LycanitesMobs.logDebug("Subspecies", "Setting " + this.getSpeciesName().getString() + " subspecies to " + this.subspecies.getTitle().getString());
+            LMHelperClass.logDebug("Subspecies", "Setting " + this.getSpeciesName().getString() + " subspecies to " + this.subspecies.getTitle().getString());
         }
     }
 
@@ -1627,10 +1627,10 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if (!this.isMinion()) {
             Variant randomVariant = this.getSubspecies().getRandomVariant(this, this.spawnedRare);
             if (randomVariant != null) {
-                LycanitesMobs.logDebug("Subspecies", "Setting " + this.getSpeciesName().getString() + " to " + randomVariant.getTitle().getString());
+                LMHelperClass.logDebug("Subspecies", "Setting " + this.getSpeciesName().getString() + " to " + randomVariant.getTitle().getString());
                 this.applyVariant(randomVariant.index);
             } else {
-                LycanitesMobs.logDebug("Subspecies", "Setting " + this.getSpeciesName().getString() + " to base variant.");
+                LMHelperClass.logDebug("Subspecies", "Setting " + this.getSpeciesName().getString() + " to base variant.");
                 this.applyVariant(0);
             }
         }
@@ -5912,7 +5912,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         try {
             this.getAttributes().save();
         } catch (Throwable t) {
-            LycanitesMobs.logError(t.getMessage());
+            LMHelperClass.logError(t.getMessage());
             t.printStackTrace();
         }
 

@@ -250,7 +250,7 @@ public class ObjectManager {
     @Nonnull
     public static EntityType<? extends LivingEntity> getEntityType(String name) {
         LMHelperClass.environmentRunnable(false, () -> {
-            LycanitesMobs.logInfo("", "EntityType: " + name);
+            LMHelperClass.logInfo("", "EntityType: " + name);
         });
         return (EntityType<? extends LivingEntity>) entityTypes.get(name).get();
     }

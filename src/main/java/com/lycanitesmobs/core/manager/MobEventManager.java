@@ -14,6 +14,7 @@ import com.lycanitesmobs.core.mobevent.MobEvent;
 import com.lycanitesmobs.core.mobevent.MobEventPlayerServer;
 import com.lycanitesmobs.core.mobevent.MobEventSchedule;
 import com.lycanitesmobs.core.spawner.condition.SpawnCondition;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -59,7 +60,7 @@ public class MobEventManager extends JSONLoader {
      * Called during early start up, loads all global event configs into the manager.
      **/
     public void loadConfig() {
-        LycanitesMobs.logDebug("", "Config Test: " + ConfigMobEvent.INSTANCE.mobEventsEnabled.get());
+        LMHelperClass.logDebug("", "Config Test: " + ConfigMobEvent.INSTANCE.mobEventsEnabled.get());
         this.mobEventsEnabled = ConfigMobEvent.INSTANCE.mobEventsEnabled.get();
         this.mobEventsRandom = ConfigMobEvent.INSTANCE.mobEventsRandom.get();
         this.defaultMobDuration = ConfigMobEvent.INSTANCE.defaultMobDuration.get();
@@ -75,7 +76,7 @@ public class MobEventManager extends JSONLoader {
     public void loadAllFromJson(ModInfo groupInfo) {
         try {
             this.loadAllJson(groupInfo, "Mob Event", "mobevents", "name", true, "event", FileLoader.COMMON, StreamLoader.COMMON);
-            LycanitesMobs.logDebug("MobEvents", "Complete! " + this.mobEvents.size() + " JSON Mob Events Loaded In Total.");
+            LMHelperClass.logDebug("MobEvents", "Complete! " + this.mobEvents.size() + " JSON Mob Events Loaded In Total.");
         } catch (Exception e) {
         }
 
@@ -91,13 +92,13 @@ public class MobEventManager extends JSONLoader {
         JsonObject defaultGlobalJson;
         if (FileLoader.SERVER.ready) {
             Path defaultGlobalPath = FileLoader.SERVER.getPath("globalmobevent.json");
-            LycanitesMobs.logDebug("", "Global Mob Event JSON Path:" + defaultGlobalPath);
+            LMHelperClass.logDebug("", "Global Mob Event JSON Path:" + defaultGlobalPath);
             defaultGlobalJson = this.loadJsonObject(gson, defaultGlobalPath);
         } else {
             defaultGlobalJson = this.loadJsonObject(gson, StreamLoader.SERVER.getStream("globalmobevent.json"));
         }
         if (defaultGlobalJson == null) {
-            LycanitesMobs.logWarning("", "Could not find Global Mob Event JSON.");
+            LMHelperClass.logWarning("", "Could not find Global Mob Event JSON.");
         }
 
         File customGlobalFile = new File(configPath + "globalmobevent.json");
@@ -117,7 +118,7 @@ public class MobEventManager extends JSONLoader {
             }
         }
         if (this.globalEventConditions.size() > 0) {
-            LycanitesMobs.logDebug("JSONSpawner", "Loaded " + this.globalEventConditions.size() + " Global Mob Event Conditions.");
+            LMHelperClass.logDebug("JSONSpawner", "Loaded " + this.globalEventConditions.size() + " Global Mob Event Conditions.");
         }
     }
 
@@ -151,13 +152,13 @@ public class MobEventManager extends JSONLoader {
             }
         }
         if (this.mobEventSchedules.size() > 0) {
-            LycanitesMobs.logDebug("MobEvents", "Loaded " + this.mobEventSchedules.size() + " Mob Event Schedules.");
+            LMHelperClass.logDebug("MobEvents", "Loaded " + this.mobEventSchedules.size() + " Mob Event Schedules.");
         }
     }
 
     @Override
     public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
-        LycanitesMobs.logDebug("MobEvents", "Loading Mob Event JSON: " + json);
+        LMHelperClass.logDebug("MobEvents", "Loading Mob Event JSON: " + json);
         MobEvent mobEvent = new MobEvent();
         mobEvent.loadFromJSON(json);
         this.addMobEvent(mobEvent);
@@ -168,7 +169,7 @@ public class MobEventManager extends JSONLoader {
      * Reloads all JSON Mob Events.
      **/
     public void reload() {
-        LycanitesMobs.logDebug("MobEvents", "Destroying JSON Mob Events!");
+        LMHelperClass.logDebug("MobEvents", "Destroying JSON Mob Events!");
         for (MobEvent mobEvent : this.mobEvents.values().toArray(new MobEvent[this.mobEvents.size()])) {
             mobEvent.destroy();
         }
@@ -198,7 +199,7 @@ public class MobEventManager extends JSONLoader {
      **/
     public void removeMobEvent(MobEvent mobEvent) {
         if (!this.mobEvents.containsKey(mobEvent.name)) {
-            LycanitesMobs.logWarning("", "[MobEvents] Tried to remove a Mob Event that hasn't been added: " + mobEvent.name);
+            LMHelperClass.logWarning("", "[MobEvents] Tried to remove a Mob Event that hasn't been added: " + mobEvent.name);
             return;
         }
         this.mobEvents.remove(mobEvent.name);

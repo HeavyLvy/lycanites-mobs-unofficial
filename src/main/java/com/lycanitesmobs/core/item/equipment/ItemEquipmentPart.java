@@ -12,6 +12,7 @@ import com.lycanitesmobs.core.manager.ElementManager;
 import com.lycanitesmobs.core.item.base.BaseItem;
 import com.lycanitesmobs.core.item.consumable.entity.ChargeItem;
 import com.lycanitesmobs.core.item.equipment.features.EquipmentFeature;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.nbt.CompoundTag;
@@ -135,7 +136,7 @@ public class ItemEquipmentPart extends BaseItem {
             while (jsonIterator.hasNext()) {
                 JsonObject featureJson = jsonIterator.next().getAsJsonObject();
                 if (!this.addFeature(EquipmentFeature.createFromJSON(featureJson))) {
-                    LycanitesMobs.logWarning("", "[Equipment] The feature " + featureJson.toString() + " was unable to be added, check the JSON format.");
+                    LMHelperClass.logWarning("", "[Equipment] The feature " + featureJson.toString() + " was unable to be added, check the JSON format.");
                 }
             }
         }
@@ -235,11 +236,11 @@ public class ItemEquipmentPart extends BaseItem {
      **/
     public boolean addFeature(EquipmentFeature feature) {
         if (feature == null) {
-            LycanitesMobs.logWarning("", "[Equipment] Unable to add a null feature to " + this);
+            LMHelperClass.logWarning("", "[Equipment] Unable to add a null feature to " + this);
             return false;
         }
         if (feature.featureType == null) {
-            LycanitesMobs.logWarning("", "[Equipment] Feature type not set for part " + this);
+            LMHelperClass.logWarning("", "[Equipment] Feature type not set for part " + this);
             return false;
         }
         this.features.add(feature);

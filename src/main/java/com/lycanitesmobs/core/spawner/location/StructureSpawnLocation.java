@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.spawner.location;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -49,7 +50,7 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
     @Override
     public List<BlockPos> getSpawnPositions(Level world, Player player, BlockPos triggerPos) {
         if (!(world instanceof ServerLevel)) {
-            LycanitesMobs.logWarning("", "[JSONSpawner] Structure spawn location was called with a non ServerWorld World instance.");
+            LMHelperClass.logWarning("", "[JSONSpawner] Structure spawn location was called with a non ServerWorld World instance.");
             return new ArrayList<>();
         }
 
@@ -65,7 +66,7 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
             if (spawnStructure == null) {
                 continue;
             }
-            LycanitesMobs.logDebug("JSONSpawner", "Getting Nearest " + structureId + " Structures Within Range");
+            LMHelperClass.logDebug("JSONSpawner", "Getting Nearest " + structureId + " Structures Within Range");
 
             BlockPos structurePos = null;
             try {
@@ -75,19 +76,19 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
 
             // No Structure:
             if (structurePos == null) {
-                LycanitesMobs.logDebug("JSONSpawner", "No " + structureId + " Structures found.");
+                LMHelperClass.logDebug("JSONSpawner", "No " + structureId + " Structures found.");
                 continue;
             }
 
             // Too Far:
             double structureDistance = Math.sqrt(structurePos.distSqr(triggerPos));
             if (structureDistance > this.structureRange) {
-                LycanitesMobs.logDebug("JSONSpawner", "No " + structureId + " Structures within range, nearest was: " + structureDistance + "/" + this.structureRange + " at: " + structurePos);
+                LMHelperClass.logDebug("JSONSpawner", "No " + structureId + " Structures within range, nearest was: " + structureDistance + "/" + this.structureRange + " at: " + structurePos);
                 continue;
             }
 
             // Structure Found:
-            LycanitesMobs.logDebug("JSONSpawner", "Found a " + structureId + " Structure within range, at: " + structurePos + " distance: " + structureDistance + "/" + this.structureRange);
+            LMHelperClass.logDebug("JSONSpawner", "Found a " + structureId + " Structure within range, at: " + structurePos + " distance: " + structureDistance + "/" + this.structureRange);
             spawnPositions.addAll(super.getSpawnPositions(world, player, structurePos));
         }
 

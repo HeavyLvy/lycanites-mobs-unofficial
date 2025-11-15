@@ -5,6 +5,7 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.gui.Beastiary;
 import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
@@ -69,7 +70,7 @@ public class MessageBeastiary {
         MessageBeastiary message = new MessageBeastiary();
         message.entryAmount = Math.min(300, packet.readInt());
         if (message.entryAmount == 300) {
-            LycanitesMobs.logWarning("", "Received 300 or more creature entries, something went wrong with the Beastiary packet! Addition entries will be skipped to prevent OOM!");
+            LMHelperClass.logWarning("", "Received 300 or more creature entries, something went wrong with the Beastiary packet! Addition entries will be skipped to prevent OOM!");
         }
         if (message.entryAmount > 0) {
             message.creatureNames = new String[message.entryAmount];

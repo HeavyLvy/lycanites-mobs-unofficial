@@ -191,16 +191,16 @@ public class Subspecies {
      * @return A Variant or null if using the base variant.
      */
     public Variant getRandomVariant(LivingEntity entity, boolean rare) {
-        LycanitesMobs.logDebug("Subspecies", "~0===== Variant =====0~");
-        LycanitesMobs.logDebug("Subspecies", "Selecting random variant for: " + entity);
+        LMHelperClass.logDebug("Subspecies", "~0===== Variant =====0~");
+        LMHelperClass.logDebug("Subspecies", "Selecting random variant for: " + entity);
         if (rare) {
-            LycanitesMobs.logDebug("Subspecies", "The conditions have been set to rare increasing the chances of a variant being picked.");
+            LMHelperClass.logDebug("Subspecies", "The conditions have been set to rare increasing the chances of a variant being picked.");
         }
         if (this.variants.isEmpty()) {
-            LycanitesMobs.logDebug("Subspecies", "No variants available, will be base variant.");
+            LMHelperClass.logDebug("Subspecies", "No variants available, will be base variant.");
             return null;
         }
-        LycanitesMobs.logDebug("Subspecies", "Variants Available: " + this.variants.size());
+        LMHelperClass.logDebug("Subspecies", "Variants Available: " + this.variants.size());
 
         // Get Weights:
         int baseSpeciesWeightScaled = Variant.BASE_WEIGHT;
@@ -211,13 +211,13 @@ public class Subspecies {
         for (Variant variant : this.variants.values()) {
             totalWeight += variant.weight;
         }
-        LycanitesMobs.logDebug("Subspecies", "Total Weight: " + totalWeight);
+        LMHelperClass.logDebug("Subspecies", "Total Weight: " + totalWeight);
 
         // Roll and Check Default:
         int roll = entity.getRandom().nextInt(totalWeight) + 1;
-        LycanitesMobs.logDebug("Subspecies", "Rolled: " + roll);
+        LMHelperClass.logDebug("Subspecies", "Rolled: " + roll);
         if (roll <= baseSpeciesWeightScaled) {
-            LycanitesMobs.logDebug("Subspecies", "Base variant selected: " + baseSpeciesWeightScaled);
+            LMHelperClass.logDebug("Subspecies", "Base variant selected: " + baseSpeciesWeightScaled);
             return null;
         }
 
@@ -226,12 +226,12 @@ public class Subspecies {
         for (Variant variant : this.variants.values()) {
             checkWeight += variant.weight;
             if (roll <= checkWeight) {
-                LycanitesMobs.logDebug("Subspecies", "Variant selected: " + variant.toString());
+                LMHelperClass.logDebug("Subspecies", "Variant selected: " + variant.toString());
                 return variant;
             }
         }
 
-        LycanitesMobs.logWarning("", "The roll was higher than the Total Weight, this shouldn't happen.");
+        LMHelperClass.logWarning("", "The roll was higher than the Total Weight, this shouldn't happen.");
         return null;
     }
 

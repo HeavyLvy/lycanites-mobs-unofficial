@@ -16,6 +16,7 @@ import com.lycanitesmobs.core.pets.PetEntry;
 import com.lycanitesmobs.core.manager.PetManager;
 import com.lycanitesmobs.core.pets.PlayerFamiliars;
 import com.lycanitesmobs.core.pets.SummonSet;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -316,10 +317,10 @@ public class ExtendedPlayer {
     // ==================================================
     public SummonSet getSummonSet(int setID) {
         if (setID <= 0) {
-            LycanitesMobs.logWarning("", "Attempted to access set " + setID + " but the minimum ID is 1. Player: " + this.player);
+            LMHelperClass.logWarning("", "Attempted to access set " + setID + " but the minimum ID is 1. Player: " + this.player);
             return this.getSummonSet(1);
         } else if (setID > this.summonSetMax) {
-            LycanitesMobs.logWarning("", "Attempted to access set " + setID + " but the maximum set ID is " + this.summonSetMax + ". Player: " + this.player);
+            LMHelperClass.logWarning("", "Attempted to access set " + setID + " but the maximum set ID is " + this.summonSetMax + ". Player: " + this.player);
             return this.getSummonSet(this.summonSetMax);
         }
         if (!this.summonSets.containsKey(setID)) {

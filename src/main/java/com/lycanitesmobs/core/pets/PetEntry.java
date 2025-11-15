@@ -12,6 +12,7 @@ import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.creature.Subspecies;
 import com.lycanitesmobs.core.data.info.Variant;
 import com.lycanitesmobs.core.manager.PetManager;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -25,78 +26,137 @@ import net.minecraft.world.level.Level;
 import java.util.UUID;
 
 public class PetEntry {
-    /** The Pet Manager that this entry is added to, this can also be null. **/
+    /**
+     * The Pet Manager that this entry is added to, this can also be null.
+     **/
     public PetManager petManager;
-    /** The ID given to this entry by the PetManager. **/
+    /**
+     * The ID given to this entry by the PetManager.
+     **/
     public UUID petEntryID;
-    /** The type of entry this is. This should really always be set if this entry is to be added to a manager. This should only be set when the entry is instantiated and then kept the same. **/
+    /**
+     * The type of entry this is. This should really always be set if this entry is to be added to a manager. This should only be set when the entry is instantiated and then kept the same.
+     **/
     private String type;
-    /** This is set to false if this entry has been removed. Used by PetManagers to auto-remove finished temporary entries. **/
+    /**
+     * This is set to false if this entry has been removed. Used by PetManagers to auto-remove finished temporary entries.
+     **/
     public boolean active = true;
 
-    /** A timer used to count down to 0 for respawning. **/
+    /**
+     * A timer used to count down to 0 for respawning.
+     **/
     public int respawnTime = 0;
-    /** The amount of time until respawn. **/
+    /**
+     * The amount of time until respawn.
+     **/
     public int respawnTimeMax;
-    /** True if the entity has died and must wait to respawn. **/
+    /**
+     * True if the entity has died and must wait to respawn.
+     **/
     public boolean isRespawning = false;
-    /** Counts how many times this entry has summoned its entity. **/
+    /**
+     * Counts how many times this entry has summoned its entity.
+     **/
     public int spawnCount = 0;
-    /** If true, this entry and it's entity will be marked as temporary where once the entity is gone, it will not respawn. The minion type sets this to true. **/
+    /**
+     * If true, this entry and it's entity will be marked as temporary where once the entity is gone, it will not respawn. The minion type sets this to true.
+     **/
     public boolean temporary = false;
-    /** For temporary entities, this will set how the long the entity will last before it despawns. **/
+    /**
+     * For temporary entities, this will set how the long the entity will last before it despawns.
+     **/
     public int temporaryDuration = 5 * 20;
-    /** True if this entry should keep its entity spawned/respawned. False if the entity should be removed and not spawned. This can be turned on and off (such as for familiars). **/
+    /**
+     * True if this entry should keep its entity spawned/respawned. False if the entity should be removed and not spawned. This can be turned on and off (such as for familiars).
+     **/
     public boolean spawningActive = true;
 
-    /** The entity that this entry belongs to. **/
+    /**
+     * The entity that this entry belongs to.
+     **/
     public LivingEntity host;
-    /** The summon set to use when spawning, etc. **/
+    /**
+     * The summon set to use when spawning, etc.
+     **/
     public SummonSet summonSet;
-    /** The current entity instance that this entry is using. **/
+    /**
+     * The current entity instance that this entry is using.
+     **/
     public Entity entity;
-    /** The current entity NBT data. **/
+    /**
+     * The current entity NBT data.
+     **/
     public CompoundTag entityNBT;
-    /** Entity update tick, this counts up each tick as the entity is spawned and active and is paused when the entity is inactive. **/
+    /**
+     * Entity update tick, this counts up each tick as the entity is spawned and active and is paused when the entity is inactive.
+     **/
     public int entityTick = 0;
-    /** Entity Health **/
+    /**
+     * Entity Health
+     **/
     public float entityHealth = 1;
-    /** Entity Max Health **/
+    /**
+     * Entity Max Health
+     **/
     public float entityMaxHealth = 1;
-    /** Entity Level **/
+    /**
+     * Entity Level
+     **/
     public int entityLevel = 1;
-    /** Entity Experience **/
+    /**
+     * Entity Experience
+     **/
     public int entityExperience = 0;
-    /** Entity Max Experience **/
+    /**
+     * Entity Max Experience
+     **/
     public int entityMaxExperience = CreatureStats.BASE_LEVELUP_EXPERIENCE;
 
-    /** The name to use for the entity. Leave empty/null "" for no name. **/
+    /**
+     * The name to use for the entity. Leave empty/null "" for no name.
+     **/
     public String entityName = "";
-    /** The Subspecies to use for the entity. **/
+    /**
+     * The Subspecies to use for the entity.
+     **/
     public int subspeciesIndex = 0;
-    /** The Variant to use for the entity. **/
+    /**
+     * The Variant to use for the entity.
+     **/
     public int variantIndex = 0;
-    /** The size scale to use for the entity. **/
+    /**
+     * The size scale to use for the entity.
+     **/
     public double entitySize = 1.0D;
-    /** Coloring for this entity such as collar coloring. **/
+    /**
+     * Coloring for this entity such as collar coloring.
+     **/
     public String color = "000000";
 
-    /** If true, a teleport has been requested to teleport the entity (if active) to the host entity. **/
+    /**
+     * If true, a teleport has been requested to teleport the entity (if active) to the host entity.
+     **/
     public boolean teleportEntity = false;
 
-    /** If true, a release is pending where the player must confirm the release. This will not release the entity, instead the player must confirm that. Only used client side. **/
+    /**
+     * If true, a release is pending where the player must confirm the release. This will not release the entity, instead the player must confirm that. Only used client side.
+     **/
     public boolean releaseEntity = false;
 
     // ==================================================
     //                 Create from Entity
     // ==================================================
-    /** Returns a new PetEntry based off the provided entity for the provided player. **/
+
+    /**
+     * Returns a new PetEntry based off the provided entity for the provided player.
+     **/
     public static PetEntry createFromEntity(Player player, BaseCreatureEntity entity, String petType) {
         CreatureInfo creatureInfo = entity.creatureInfo;
         PetEntry petEntry = new PetEntry(UUID.randomUUID(), petType, player, creatureInfo.getName());
         if (entity.hasCustomName()) {
-			petEntry.setEntityName(entity.getCustomName().getString());
-		}
+            petEntry.setEntityName(entity.getCustomName().getString());
+        }
         petEntry.setEntitySubspecies(entity.getSubspeciesIndex());
         petEntry.setEntityVariant(entity.getVariantIndex());
         petEntry.setEntitySize(entity.sizeScale);
@@ -104,18 +164,18 @@ public class PetEntry {
         return petEntry;
     }
 
-	
+
     // ==================================================
     //                     Constructor
     // ==================================================
-	public PetEntry(UUID petEntryID, String type, LivingEntity host, String summonType) {
+    public PetEntry(UUID petEntryID, String type, LivingEntity host, String summonType) {
         this.petEntryID = petEntryID;
         this.type = type;
         this.host = host;
 
         ExtendedPlayer playerExt = null;
         if (host instanceof Player)
-            playerExt = ExtendedPlayer.getForPlayer((Player)host);
+            playerExt = ExtendedPlayer.getForPlayer((Player) host);
         this.summonSet = new SummonSet(playerExt);
         this.summonSet.summonableOnly = false;
         this.summonSet.setSummonType(summonType);
@@ -123,7 +183,7 @@ public class PetEntry {
         this.respawnTimeMax = CreatureManager.getInstance().config.petRespawnTime;
         if ("minion".equalsIgnoreCase(this.type))
             this.temporary = true;
-	}
+    }
 
     public PetEntry setEntityName(String name) {
         this.entityName = name;
@@ -159,7 +219,9 @@ public class PetEntry {
         return this;
     }
 
-    /** Used to set whether this PetEntry spawns mobs, this will also take a Spirit cost if Spirit is used (server side). use a direct spawningActive = true/false to avoid the Spirit cost. **/
+    /**
+     * Used to set whether this PetEntry spawns mobs, this will also take a Spirit cost if Spirit is used (server side). use a direct spawningActive = true/false to avoid the Spirit cost.
+     **/
     public PetEntry setSpawningActive(boolean spawningActive) {
         if (this.spawningActive == spawningActive) {
             return this;
@@ -170,8 +232,7 @@ public class PetEntry {
             }
             if (!spawningActive) {
                 this.despawnEntity();
-            }
-            else if (this.usesSpirit() && this.summonSet.playerExt != null) {
+            } else if (this.usesSpirit() && this.summonSet.playerExt != null) {
                 if (this.summonSet.playerExt.spirit < this.getSpiritCost()) {
                     this.spawningActive = false;
                     return this;
@@ -186,25 +247,25 @@ public class PetEntry {
 
     public void setLevel(int level) {
         if (this.entity != null && this.entity instanceof BaseCreatureEntity)
-            ((BaseCreatureEntity)this.entity).setLevel(level);
+            ((BaseCreatureEntity) this.entity).setLevel(level);
         this.entityLevel = level;
     }
 
     public int getLevel() {
         if (this.entity != null && this.entity instanceof BaseCreatureEntity)
-            this.entityLevel = ((BaseCreatureEntity)this.entity).getMobLevel();
+            this.entityLevel = ((BaseCreatureEntity) this.entity).getMobLevel();
         return this.entityLevel;
     }
 
     public int getExperience() {
         if (this.entity != null && this.entity instanceof BaseCreatureEntity)
-            this.entityExperience = ((BaseCreatureEntity)this.entity).getExperience();
+            this.entityExperience = ((BaseCreatureEntity) this.entity).getExperience();
         return this.entityExperience;
     }
 
     public void setExperience(int experience) {
         if (this.entity != null && this.entity instanceof BaseCreatureEntity)
-            ((BaseCreatureEntity)this.entity).setExperience(experience);
+            ((BaseCreatureEntity) this.entity).setExperience(experience);
         this.entityExperience = experience;
     }
 
@@ -220,13 +281,13 @@ public class PetEntry {
 
     public float getHealth() {
         if (this.entity != null && this.entity instanceof LivingEntity)
-            this.entityHealth = ((LivingEntity)this.entity).getHealth();
+            this.entityHealth = ((LivingEntity) this.entity).getHealth();
         return this.entityHealth;
     }
 
     public float getMaxHealth() {
         if (this.entity != null && this.entity instanceof LivingEntity)
-            this.entityMaxHealth = ((LivingEntity)this.entity).getMaxHealth();
+            this.entityMaxHealth = ((LivingEntity) this.entity).getMaxHealth();
         return this.entityMaxHealth;
     }
 
@@ -234,7 +295,10 @@ public class PetEntry {
     // ==================================================
     //                     Copy Entry
     // ==================================================
-    /** Makes this entry copy all information from another entry, useful for updating entries. Does not copy over the owner, ID or entry name and will only copy the SummonSet's summon type. **/
+
+    /**
+     * Makes this entry copy all information from another entry, useful for updating entries. Does not copy over the owner, ID or entry name and will only copy the SummonSet's summon type.
+     **/
     public void copy(PetEntry copyEntry) {
         this.setEntityName(copyEntry.entityName);
         this.setEntitySubspecies(copyEntry.subspeciesIndex);
@@ -270,7 +334,10 @@ public class PetEntry {
     // ==================================================
     //                       On Add
     // ==================================================
-    /** Called when this entry is first added. A Pet Manager is passed if added to one, otherwise null. **/
+
+    /**
+     * Called when this entry is first added. A Pet Manager is passed if added to one, otherwise null.
+     **/
     public void onAdd(PetManager petManager) {
         this.petManager = petManager;
     }
@@ -279,18 +346,24 @@ public class PetEntry {
     // ==================================================
     //                       Remove
     // ==================================================
-    /** Called when this entry is finished and should be removed. Note: The PetManager will auto remove any inactive entries it might have. **/
+
+    /**
+     * Called when this entry is finished and should be removed. Note: The PetManager will auto remove any inactive entries it might have.
+     **/
     public void remove() {
         this.setSpawningActive(false);
         this.active = false;
     }
-	
-	
-	// ==================================================
+
+
+    // ==================================================
     //                       Update
     // ==================================================
-	/** Called by the PetManager, runs any logic for this entry. This is normally called from an entity update. **/
-	public void onUpdate(Level world) {
+
+    /**
+     * Called by the PetManager, runs any logic for this entry. This is normally called from an entity update.
+     **/
+    public void onUpdate(Level world) {
         // Client Side Update:
         if (world.isClientSide) {
             if (this.isRespawning && this.respawnTime > 0) {
@@ -300,7 +373,7 @@ public class PetEntry {
         }
 
         // Active Checks:
-		if (!this.active) {
+        if (!this.active) {
             return;
         }
         if (!this.isActive()) {
@@ -314,7 +387,7 @@ public class PetEntry {
         // Active Spawning:
         if (this.spawningActive) {
             // Dead Check:
-            if (this.entity != null && !this.entity.isAlive() && this.entity instanceof Mob && ((Mob)this.entity).getHealth() <= 0) {
+            if (this.entity != null && !this.entity.isAlive() && this.entity instanceof Mob && ((Mob) this.entity).getHealth() <= 0) {
                 this.saveEntityNBT();
                 this.entity = null;
                 this.isRespawning = true;
@@ -348,14 +421,13 @@ public class PetEntry {
                             this.entity.changeDimension(this.host.getServer().getLevel(this.host.getCommandSenderWorld().dimension()));
                         this.entity.setPos(this.host.position().x(), this.host.position().y(), this.host.position().z());
                     }
-                }
-                catch(Exception e) {
-                    LycanitesMobs.logDebug("Pet", "Unable to teleport a pet.");
+                } catch (Exception e) {
+                    LMHelperClass.logDebug("Pet", "Unable to teleport a pet.");
                 }
 
                 if (this.entity instanceof LivingEntity) {
                     // Passive Healing:
-                    LivingEntity entityLiving = (LivingEntity)this.entity;
+                    LivingEntity entityLiving = (LivingEntity) this.entity;
                     if (this.entityTick % 60 == 0 && entityLiving.getHealth() < entityLiving.getMaxHealth()) {
                         entityLiving.setHealth(Math.min(entityLiving.getHealth() + 1, entityLiving.getMaxHealth()));
                     }
@@ -364,8 +436,8 @@ public class PetEntry {
                 }
 
                 if (entity.hasCustomName()) {
-                	this.entityName = this.entity.getCustomName().getString();
-				}
+                    this.entityName = this.entity.getCustomName().getString();
+                }
             }
         }
 
@@ -384,23 +456,29 @@ public class PetEntry {
         }
 
         this.teleportEntity = false;
-	}
+    }
 
 
     // ==================================================
     //                 On Behaviour Update
     // ==================================================
-    /** Called when this entry's entity behaviour has been changed by the client. **/
+
+    /**
+     * Called when this entry's entity behaviour has been changed by the client.
+     **/
     public void onBehaviourUpdate() {
         if (this.entity != null && this.entity instanceof TameableCreatureEntity)
-            this.summonSet.applyBehaviour((TameableCreatureEntity)this.entity);
+            this.summonSet.applyBehaviour((TameableCreatureEntity) this.entity);
     }
 
 
     // ==================================================
     //                    Active Check
     // ==================================================
-    /** Called every update, if this returns false this entry will call onRemove(). **/
+
+    /**
+     * Called every update, if this returns false this entry will call onRemove().
+     **/
     public boolean isActive() {
         if (this.entity == null && this.temporary && this.spawnCount > 0)
             return false;
@@ -411,15 +489,17 @@ public class PetEntry {
     // ==================================================
     //                    Spawn Entity
     // ==================================================
-    /** Spawns and sets this entry's entity if it isn't active already. **/
+
+    /**
+     * Spawns and sets this entry's entity if it isn't active already.
+     **/
     public void spawnEntity() {
         if (this.entity != null || this.host == null)
             return;
         try {
             this.entity = this.summonSet.getCreatureType().create(this.host.getCommandSenderWorld());
-        }
-        catch (Exception e) {
-            LycanitesMobs.logWarning("Pets", "[Pet Entry] Unable to find an entity class for pet entry. " + " Type: " + this.summonSet.summonType + " Class: " + this.summonSet.getCreatureType() + " UUID: " + this.petEntryID);
+        } catch (Exception e) {
+            LMHelperClass.logWarning("Pets", "[Pet Entry] Unable to find an entity class for pet entry. " + " Type: " + this.summonSet.summonType + " Class: " + this.summonSet.getCreatureType() + " UUID: " + this.petEntryID);
             //e.printStackTrace();
         }
 
@@ -433,14 +513,14 @@ public class PetEntry {
         this.entity.moveTo(this.host.position().x(), this.host.position().y(), this.host.position().z(), this.host.yRotO, 0.0F);
 
         if (this.entity instanceof BaseCreatureEntity) {
-            BaseCreatureEntity entityCreature = (BaseCreatureEntity)this.entity;
+            BaseCreatureEntity entityCreature = (BaseCreatureEntity) this.entity;
             entityCreature.applyLevel(this.entityLevel);
             entityCreature.setExperience(this.entityExperience);
             entityCreature.setMinion(true);
             entityCreature.setPetEntry(this);
 
             if (entityCreature instanceof TameableCreatureEntity) {
-                TameableCreatureEntity entityTameable = (TameableCreatureEntity)entityCreature;
+                TameableCreatureEntity entityTameable = (TameableCreatureEntity) entityCreature;
                 this.summonSet.applyBehaviour(entityTameable);
             }
 
@@ -463,16 +543,16 @@ public class PetEntry {
 
             // Entity Name and Appearance:
             if (this.entityName != null && !"".equals(this.entityName)) {
-				entityCreature.setCustomName(Component.literal(this.entityName));
-			}
+                entityCreature.setCustomName(Component.literal(this.entityName));
+            }
             entityCreature.setSizeScale(this.entitySize);
             entityCreature.setSubspecies(this.subspeciesIndex);
             entityCreature.applyVariant(this.variantIndex);
 
             // Tamed Behaviour:
             if (entityCreature instanceof TameableCreatureEntity && this.host instanceof Player) {
-                TameableCreatureEntity entityTameable = (TameableCreatureEntity)entityCreature;
-                entityTameable.setPlayerOwner((Player)this.host);
+                TameableCreatureEntity entityTameable = (TameableCreatureEntity) entityCreature;
+                entityTameable.setPlayerOwner((Player) this.host);
                 this.summonSet.applyBehaviour(entityTameable);
             }
         }
@@ -481,7 +561,7 @@ public class PetEntry {
 
         // Respawn with half health:
         if (this.entity instanceof LivingEntity && this.isRespawning) {
-            LivingEntity entityLiving = (LivingEntity)this.entity;
+            LivingEntity entityLiving = (LivingEntity) this.entity;
             entityLiving.setHealth(entityLiving.getMaxHealth() / 2);
         }
 
@@ -491,7 +571,9 @@ public class PetEntry {
             this.summonSet.playerExt.sendPetEntryToPlayer(this);
     }
 
-    /** Called when the entity for this entry is spawned just before it is added to the world. **/
+    /**
+     * Called when the entity for this entry is spawned just before it is added to the world.
+     **/
     public void onSpawnEntity(Entity entity) {
         // This can be used on extensions of this class for NBT data, etc.
     }
@@ -500,7 +582,10 @@ public class PetEntry {
     // ==================================================
     //                    Despawn Entity
     // ==================================================
-    /** Despawns this entry's entity if it isn't already. This entry will still be active even if the entity is despawned so that it may be spawned again in the future. **/
+
+    /**
+     * Despawns this entry's entity if it isn't already. This entry will still be active even if the entity is despawned so that it may be spawned again in the future.
+     **/
     public void despawnEntity() {
         if (this.entity == null)
             return;
@@ -510,7 +595,9 @@ public class PetEntry {
         this.entity = null;
     }
 
-    /** Called when the entity for this entry is despawned. **/
+    /**
+     * Called when the entity for this entry is despawned.
+     **/
     public void onDespawnEntity(Entity entity) {
         // This can be used on extensions of this class for NBT data, etc.
     }
@@ -519,7 +606,10 @@ public class PetEntry {
     // ==================================================
     //                    Assign Entity
     // ==================================================
-    /** Connects this PetEntry to the provided entity. If there is already an entity attached then the attached entity will be despawned. **/
+
+    /**
+     * Connects this PetEntry to the provided entity. If there is already an entity attached then the attached entity will be despawned.
+     **/
     public void assignEntity(Entity entity) {
         if (this.entity != null)
             this.despawnEntity();
@@ -532,7 +622,7 @@ public class PetEntry {
             entityCreature.setPetEntry(this);
 
             if (entityCreature instanceof TameableCreatureEntity) {
-                TameableCreatureEntity entityTameable = (TameableCreatureEntity)entityCreature;
+                TameableCreatureEntity entityTameable = (TameableCreatureEntity) entityCreature;
                 this.summonSet.updateBehaviour(entityTameable);
             }
 
@@ -555,7 +645,10 @@ public class PetEntry {
     // ==================================================
     //                    Get Type
     // ==================================================
-    /** Returns the type of this entry. This should always be accurate else PetManagers could have inactive entries stuck in their lists! **/
+
+    /**
+     * Returns the type of this entry. This should always be accurate else PetManagers could have inactive entries stuck in their lists!
+     **/
     public String getType() {
         return this.type;
     }
@@ -564,12 +657,17 @@ public class PetEntry {
     // ==================================================
     //                    Spirit Cost
     // ==================================================
-    /** Returns true if this PetEntry uses spirit to summon. **/
+
+    /**
+     * Returns true if this PetEntry uses spirit to summon.
+     **/
     public boolean usesSpirit() {
         return "pet".equals(this.getType()) || "mount".equals(this.getType());
     }
 
-    /** Returns the spirit cost of this entity. **/
+    /**
+     * Returns the spirit cost of this entity.
+     **/
     public int getSpiritCost() {
         if (this.summonSet.playerExt == null)
             return 0;
@@ -581,7 +679,10 @@ public class PetEntry {
     //                        NBT
     // ==================================================
     // ========== Read ===========
-    /** Reads pet entry from NBTTag. Should be called by PetManagers or other classes that store PetEntries and NBT Data for them. **/
+
+    /**
+     * Reads pet entry from NBTTag. Should be called by PetManagers or other classes that store PetEntries and NBT Data for them.
+     **/
     public void readFromNBT(CompoundTag nbtTagCompound) {
         if (nbtTagCompound.hasUUID("UUID"))
             this.petEntryID = nbtTagCompound.getUUID("UUID");
@@ -622,7 +723,10 @@ public class PetEntry {
     }
 
     // ========== Write ==========
-    /** Writes pet entry to NBTTag. **/
+
+    /**
+     * Writes pet entry to NBTTag.
+     **/
     public void writeToNBT(CompoundTag nbtTagCompound) {
         nbtTagCompound.putUUID("UUID", this.petEntryID);
         nbtTagCompound.putString("Type", this.getType());
@@ -646,7 +750,10 @@ public class PetEntry {
     }
 
     // ========== Save Entity NBT ==========
-    /** If this PetEntry currently has an active entity, this will save that entity's NBT data to this PetEntry's record of it. **/
+
+    /**
+     * If this PetEntry currently has an active entity, this will save that entity's NBT data to this PetEntry's record of it.
+     **/
     public void saveEntityNBT() {
         if (this.entityNBT == null) {
             this.entityNBT = new CompoundTag();
@@ -655,13 +762,13 @@ public class PetEntry {
         this.entityNBT.putInt("MobLevel", this.getLevel());
         this.entityNBT.putInt("Experience", this.getExperience());
 
-		// Creature Base:
+        // Creature Base:
         if (this.entity instanceof BaseCreatureEntity) {
-            BaseCreatureEntity baseCreatureEntity = (BaseCreatureEntity)this.entity;
+            BaseCreatureEntity baseCreatureEntity = (BaseCreatureEntity) this.entity;
             baseCreatureEntity.inventory.save(this.entityNBT);
 
             if (this.entity instanceof AgeableCreatureEntity) {
-                AgeableCreatureEntity ageableCreatureEntity = (AgeableCreatureEntity)this.entity;
+                AgeableCreatureEntity ageableCreatureEntity = (AgeableCreatureEntity) this.entity;
                 this.entityNBT.putInt("Age", ageableCreatureEntity.getGrowingAge());
             }
 
@@ -672,18 +779,20 @@ public class PetEntry {
 
             try {
                 this.entity.saveWithoutId(this.entityNBT);
-            }
-            catch (Throwable t) {
-                LycanitesMobs.logError("Failed to save data for a Pet Entry.");
+            } catch (Throwable t) {
+                LMHelperClass.logError("Failed to save data for a Pet Entry.");
                 if (t instanceof ReportedException) {
-                    LycanitesMobs.logError(((ReportedException)t).getCause().toString());
+                    LMHelperClass.logError(((ReportedException) t).getCause().toString());
                 }
             }
         }
     }
 
     // ========== Load Entity NBT ==========
-    /** If this PetEntry is spawning a new entity, this will load any saved entity NBT data onto it. **/
+
+    /**
+     * If this PetEntry is spawning a new entity, this will load any saved entity NBT data onto it.
+     **/
     public void loadEntityNBT() {
         if (this.entityNBT == null)
             return;
@@ -696,10 +805,10 @@ public class PetEntry {
         }
 
         if (this.entity instanceof BaseCreatureEntity) {
-            BaseCreatureEntity baseCreatureEntity = (BaseCreatureEntity)this.entity;
+            BaseCreatureEntity baseCreatureEntity = (BaseCreatureEntity) this.entity;
             baseCreatureEntity.inventory.load(this.entityNBT);
             if (this.entity instanceof AgeableCreatureEntity) {
-                AgeableCreatureEntity ageableCreatureEntity = (AgeableCreatureEntity)this.entity;
+                AgeableCreatureEntity ageableCreatureEntity = (AgeableCreatureEntity) this.entity;
                 if (this.entityNBT.contains("Age"))
                     ageableCreatureEntity.setGrowingAge(this.entityNBT.getInt("Age"));
                 else

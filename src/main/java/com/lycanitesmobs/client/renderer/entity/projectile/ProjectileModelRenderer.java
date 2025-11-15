@@ -12,6 +12,7 @@ import com.lycanitesmobs.client.renderer.layer.projectile.LayerProjectileBase;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -75,7 +76,7 @@ public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity
             matrixStack.mulPose(new Quaternionf(new AxisAngle4f(entity.yRotO, 0.0F, 1.0F, 0.0F))); // rotate
 
             if (this.getModel() == null) {
-                LycanitesMobs.logWarning("", "Missing Projectile Model: " + entity);
+                LMHelperClass.logWarning("", "Missing Projectile Model: " + entity);
             } else if (!(this.getModel() instanceof ProjectileObjModel)) {
                 ResourceLocation texture = this.getTextureLocation(entity);
                 if (texture == null) {

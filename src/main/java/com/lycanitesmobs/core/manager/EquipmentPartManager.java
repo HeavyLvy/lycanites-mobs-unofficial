@@ -7,6 +7,7 @@ import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.JSONLoader;
 import com.lycanitesmobs.core.data.loaders.StreamLoader;
 import com.lycanitesmobs.core.data.info.ModInfo;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.item.Item;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class EquipmentPartManager extends JSONLoader {
             loadedGroups.add(modInfo);
         }
         loadAllJson(modInfo, "Equipment", "equipment", "itemName", false, null, FileLoader.COMMON, StreamLoader.COMMON);
-        LycanitesMobs.logDebug("Equipment", "Complete! " + equipmentParts.size() + " JSON Equipment Parts Loaded In Total.");
+        LMHelperClass.logDebug("Equipment", "Complete! " + equipmentParts.size() + " JSON Equipment Parts Loaded In Total.");
     }
 
     @Override
@@ -57,7 +58,7 @@ public class EquipmentPartManager extends JSONLoader {
         //RegistryObject<Item> partObject = LycanitesMobs.ITEMS.register(name, equipmentPart);
         //equipmentPart.loadFromJSON(json);
         if (this.equipmentParts.containsKey(name)) {
-            LycanitesMobs.logWarning("", "[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
+            LMHelperClass.logWarning("", "[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
             throw new RuntimeException("[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
         }
 		/*if(this.equipmentParts.values().contains(equipmentPart)) {

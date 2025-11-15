@@ -144,7 +144,7 @@ public class ExtendedEntity {
         ExtendedEntity.FORCE_REMOVE_ENTITY_IDS = ConfigAdmin.INSTANCE.forceRemoveEntityIds.get();
         ExtendedEntity.FORCE_REMOVE_ENTITY_TICKS = 40;
         if (!this.entity.getCommandSenderWorld().isClientSide && FORCE_REMOVE_ENTITY_IDS != null && FORCE_REMOVE_ENTITY_IDS.size() > 0 && !this.forceRemoveChecked) {
-            LycanitesMobs.logDebug("ForceRemoveEntity", "Forced entity removal, checking: " + this.entity.getName());
+            LMHelperClass.logDebug("ForceRemoveEntity", "Forced entity removal, checking: " + this.entity.getName());
             for (String forceRemoveID : FORCE_REMOVE_ENTITY_IDS) {
                 if (forceRemoveID.equalsIgnoreCase(LMHelperClass.convertToResourceLocation(this.entity.getType()).toString())) {
                     this.forceRemove = true;

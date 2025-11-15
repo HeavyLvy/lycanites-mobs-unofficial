@@ -10,6 +10,7 @@ import com.lycanitesmobs.client.event.mobevent.MobEventPlayerClient;
 import com.lycanitesmobs.core.mobevent.MobEventPlayerServer;
 import com.lycanitesmobs.core.network.message.MessageMobEvent;
 import com.lycanitesmobs.core.network.message.MessageWorldEvent;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -174,7 +175,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
             this.setDirty();
         this.worldEventStartTargetTime = setLong;
         if (setLong > 0)
-            LycanitesMobs.logDebug("MobEvents", "Next random mob will start after " + ((this.worldEventStartTargetTime - this.world.getGameTime()) / 20) + "secs.");
+            LMHelperClass.logDebug("MobEvents", "Next random mob will start after " + ((this.worldEventStartTargetTime - this.world.getGameTime()) / 20) + "secs.");
     }
 
     public void setWorldEventLastStartedTime(long setLong) {
@@ -221,7 +222,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      **/
     public void startWorldEvent(MobEvent mobEvent) {
         if (mobEvent == null) {
-            LycanitesMobs.logWarning("", "Tried to start a null world event, stopping any event instead.");
+            LMHelperClass.logWarning("", "Tried to start a null world event, stopping any event instead.");
             this.stopWorldEvent();
             return;
         }
@@ -292,7 +293,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      **/
     public void startMobEvent(MobEvent mobEvent, Player player, BlockPos pos, int level, int variant) {
         if (mobEvent == null) {
-            LycanitesMobs.logWarning("", "Tried to start a null mob event.");
+            LMHelperClass.logWarning("", "Tried to start a null mob event.");
             return;
         }
 
@@ -331,11 +332,11 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
         if (MobEventManager.getInstance().mobEvents.containsKey(mobEventName)) {
             mobEvent = MobEventManager.getInstance().mobEvents.get(mobEventName);
             if (!mobEvent.isEnabled()) {
-                LycanitesMobs.logWarning("", "Tried to start a mob event that was disabled with the name: '" + mobEventName + "' on " + (this.world.isClientSide ? "Client" : "Server"));
+                LMHelperClass.logWarning("", "Tried to start a mob event that was disabled with the name: '" + mobEventName + "' on " + (this.world.isClientSide ? "Client" : "Server"));
                 return null;
             }
         } else {
-            LycanitesMobs.logWarning("", "Tried to start a mob event with the invalid name: '" + mobEventName + "' on " + (this.world.isClientSide ? "Client" : "Server"));
+            LMHelperClass.logWarning("", "Tried to start a mob event with the invalid name: '" + mobEventName + "' on " + (this.world.isClientSide ? "Client" : "Server"));
             return null;
         }
 
@@ -552,7 +553,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
                         this.dungeons.put(dungeonInstance.uuid, dungeonInstance);
                     }
                 } catch (Exception e) {
-                    LycanitesMobs.logWarning("Dungeon", "An exception occurred when loading a dungeon from NBT.");
+                    LMHelperClass.logWarning("Dungeon", "An exception occurred when loading a dungeon from NBT.");
                 }
             }
         }

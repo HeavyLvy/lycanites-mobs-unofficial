@@ -17,6 +17,7 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -257,7 +258,7 @@ public class CreatureInfo {
             this.entityClass = (Class<? extends BaseCreatureEntity>) Class.forName(json.get("entityClass").getAsString());
             this.entityConstructor = this.entityClass.getConstructor(EntityType.class, Level.class);
         } catch (Exception e) {
-            LycanitesMobs.logError("[Creature] Unable to find the Java Entity Class: " + json.get("entityClass").getAsString() + " for " + this.getName());
+            LMHelperClass.logError("[Creature] Unable to find the Java Entity Class: " + json.get("entityClass").getAsString() + " for " + this.getName());
             throw new RuntimeException("Creature config loading error, clear your config if updating from an older version of the mod. Missing Class: " + json.get("entityClass").getAsString() + " Creature: " + this.getName());
         }
 
@@ -276,7 +277,7 @@ public class CreatureInfo {
         if (json.has("creatureType")) {
             this.creatureType = CreatureManager.getInstance().getCreatureType(json.get("creatureType").getAsString());
             if (this.creatureType == null) {
-                LycanitesMobs.logWarning("", "Unable to find the creature type: " + json.get("creatureType").getAsString() + " for Creature: " + this.name);
+                LMHelperClass.logWarning("", "Unable to find the creature type: " + json.get("creatureType").getAsString() + " for Creature: " + this.name);
             }
         }
         if (this.creatureType == null) {
@@ -291,7 +292,7 @@ public class CreatureInfo {
                     this.groups.add(group);
                     group.addCreature(this);
                 } else {
-                    LycanitesMobs.logWarning("", "[Creature] Unable to find the Creature Group: " + groupName + " for Creature: " + this.name);
+                    LMHelperClass.logWarning("", "[Creature] Unable to find the Creature Group: " + groupName + " for Creature: " + this.name);
                 }
             }
         }
@@ -413,7 +414,7 @@ public class CreatureInfo {
                 if (itemDrop != null) {
                     this.drops.add(itemDrop);
                 } else {
-                    LycanitesMobs.logWarning("", "[Creature] Unable to add item drop to creature: " + getName() + ".");
+                    LMHelperClass.logWarning("", "[Creature] Unable to add item drop to creature: " + getName() + ".");
                 }
             }
         }
@@ -423,7 +424,7 @@ public class CreatureInfo {
             for (JsonElement flagJson : json.getAsJsonArray("flags")) {
                 JsonObject flagJsonObject = flagJson.getAsJsonObject();
                 if (!flagJsonObject.has("name") || !flagJsonObject.has("value")) {
-                    LycanitesMobs.logWarning("", "Invalid creature json flag, make sure that the flag has both a name and value, skipping this flag.");
+                    LMHelperClass.logWarning("", "Invalid creature json flag, make sure that the flag has both a name and value, skipping this flag.");
                     continue;
                 }
                 try {
@@ -471,7 +472,7 @@ public class CreatureInfo {
         // Vanilla Spawning:
         this.creatureSpawn.registerVanillaSpawns(this);
 
-        LycanitesMobs.logDebug("Creature", "Creature Loaded: " + this.getName() + " - " + this.entityClass + " (" + this.modInfo.name + ")");
+        LMHelperClass.logDebug("Creature", "Creature Loaded: " + this.getName() + " - " + this.entityClass + " (" + this.modInfo.name + ")");
     }
 
     /**
@@ -817,9 +818,9 @@ public class CreatureInfo {
      * @return The Subspecies to use.
      */
     public Subspecies getRandomSubspecies(LivingEntity entity) {
-        LycanitesMobs.logDebug("Subspecies", "~0===== Subspecies =====0~");
-        LycanitesMobs.logDebug("Subspecies", "Selecting subspecies for: " + entity);
-        LycanitesMobs.logDebug("Subspecies", "Subspecies Available: " + this.subspecies.size());
+        LMHelperClass.logDebug("Subspecies", "~0===== Subspecies =====0~");
+        LMHelperClass.logDebug("Subspecies", "Selecting subspecies for: " + entity);
+        LMHelperClass.logDebug("Subspecies", "Subspecies Available: " + this.subspecies.size());
 
         // Get Viable Subspecies:
         List<Subspecies> possibleSubspecies = new ArrayList<>();
@@ -833,7 +834,7 @@ public class CreatureInfo {
             }
         }
         if (possibleSubspecies.isEmpty()) {
-            LycanitesMobs.logWarning("", "[Subspecies] No subspecies allowed for " + this.getName() + ", there should always be a default subspecies, returning the first subspecies found for now.");
+            LMHelperClass.logWarning("", "[Subspecies] No subspecies allowed for " + this.getName() + ", there should always be a default subspecies, returning the first subspecies found for now.");
             return this.subspecies.get(0);
         }
 
@@ -845,7 +846,7 @@ public class CreatureInfo {
                 }
             }
         }
-        LycanitesMobs.logDebug("Subspecies", "Subspecies Allowed: " + possibleSubspecies.size() + " Highest Priority: " + highestPriority);
+        LMHelperClass.logDebug("Subspecies", "Subspecies Allowed: " + possibleSubspecies.size() + " Highest Priority: " + highestPriority);
 
         // Only One Viable:
         if (possibleSubspecies.size() == 1) {
@@ -889,7 +890,7 @@ public class CreatureInfo {
             ResourceLocation dietTagId = new ResourceLocation(LycanitesMobs.MODID, "diet_" + diet);
             TagKey<Item> dietTag = TagKey.create(Registries.ITEM, dietTagId);
             if (dietTag == null) {
-                LycanitesMobs.logWarning("", "[Creature] Cannot find diet: " + dietTagId);
+                LMHelperClass.logWarning("", "[Creature] Cannot find diet: " + dietTagId);
                 return false;
             }
             if (itemStack.is(dietTag)) {

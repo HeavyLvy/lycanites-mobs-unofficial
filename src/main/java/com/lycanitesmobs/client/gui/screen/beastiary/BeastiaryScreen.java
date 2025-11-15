@@ -10,6 +10,7 @@ import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -298,7 +299,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
                 matrixStack.pose().popPose();
             }
         } catch (Exception e) {
-            LycanitesMobs.logWarning("", "An exception occurred when trying to preview a creature in the Beastiary.");
+            LMHelperClass.logWarning("", "An exception occurred when trying to preview a creature in the Beastiary.");
             e.printStackTrace();
         }
     }

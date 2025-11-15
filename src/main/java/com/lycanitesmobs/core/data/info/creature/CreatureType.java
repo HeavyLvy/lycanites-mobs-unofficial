@@ -9,6 +9,7 @@ import com.lycanitesmobs.core.item.equipment.CreatureSaddleItem;
 import com.lycanitesmobs.core.item.consumable.entity.CreatureTreatItem;
 import com.lycanitesmobs.core.item.consumable.utility.ItemSoulstone;
 import com.lycanitesmobs.core.item.consumable.utility.ItemSoulstoneFilled;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.Item;
@@ -94,7 +95,7 @@ public class CreatureType {
      */
     public void init() {
         this.createItems();
-        LycanitesMobs.logDebug("Creature Type", "Loaded Creature Type: " + this.getName());
+        LMHelperClass.logDebug("Creature Type", "Loaded Creature Type: " + this.getName());
     }
 
     /**

@@ -8,6 +8,7 @@ import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.data.info.ObjectLists;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.item.base.GenericItem;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.food.FoodProperties;
@@ -99,7 +100,7 @@ public class ItemInfo {
                     else
                         effect = ObjectManager.getEffect(effectIds[1]);
                     if (effect == null) {
-                        LycanitesMobs.logWarning("", "Unable to add food effect: " + effectId);
+                        LMHelperClass.logWarning("", "Unable to add food effect: " + effectId);
                         continue;
                     }
                     MobEffectInstance effectInstance = new MobEffectInstance(effect, foodEffectJson.get("duration").getAsInt() * 20, foodEffectJson.get("amplifier").getAsInt());

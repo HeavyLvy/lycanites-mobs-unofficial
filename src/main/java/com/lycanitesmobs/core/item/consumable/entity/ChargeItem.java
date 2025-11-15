@@ -7,6 +7,7 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.item.base.BaseItem;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -49,7 +50,7 @@ public class ChargeItem extends BaseItem {
         this.projectileInfo = projectileInfo;
         if (this.projectileInfo != null) {
             this.itemName = projectileInfo.chargeItemName;
-            LycanitesMobs.logDebug("Projectile", "Created Charge Item: " + projectileInfo.chargeItemName);
+            LMHelperClass.logDebug("Projectile", "Created Charge Item: " + projectileInfo.chargeItemName);
         }
         // Dispenser:
         var dispenserBehaviour = new BaseProjectileDispenseBehaviour(projectileInfo);
@@ -98,7 +99,7 @@ public class ChargeItem extends BaseItem {
         if (!world.isClientSide && player.isShiftKeyDown()) { // isSneaking()
             BaseProjectileEntity projectile = this.createProjectile(itemStack, world, player);
             if (projectile == null) {
-                LycanitesMobs.logWarning("", "Failed to create projectile from Charge Item: " + this.itemName);
+                LMHelperClass.logWarning("", "Failed to create projectile from Charge Item: " + this.itemName);
                 return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
             }
             world.addFreshEntity(projectile);

@@ -13,6 +13,7 @@ import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.layer.creature.LayerCreatureBase;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.data.info.ModInfo;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -174,7 +175,7 @@ public class CreatureObjModel extends CreatureModel {
         this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"));
         this.objParts = this.objModel.objParts;
         if (this.objParts.isEmpty())
-            LycanitesMobs.logWarning("", "Unable to load model obj for: " + name + "");
+            LMHelperClass.logWarning("", "Unable to load model obj for: " + name + "");
 
         // Create Animator:
         this.animator = new Animator(this);
@@ -198,7 +199,7 @@ public class CreatureObjModel extends CreatureModel {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LycanitesMobs.logWarning("", "Unable to load model parts json for: " + name + "");
+            LMHelperClass.logWarning("", "Unable to load model parts json for: " + name + "");
         }
 
         // Assign Model Part Children:
@@ -220,7 +221,7 @@ public class CreatureObjModel extends CreatureModel {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LycanitesMobs.logWarning("Models", "Unable to load animation json for: " + name + ".");
+            LMHelperClass.logWarning("Models", "Unable to load animation json for: " + name + ".");
         }
 
         return this;

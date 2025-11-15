@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -240,7 +241,7 @@ public class AttackMeleeGoal extends Goal {
         }
 
         // Damage Target:
-        LycanitesMobs.logDebug("Attack", "Attack range: " + this.host.getMeleeAttackRange(this.attackTarget, this.attackRange) + "/" + this.host.distanceToSqr(this.attackTarget.position().x(), this.attackTarget.getBoundingBox().minY, this.attackTarget.position().z()));
+        //LMHelperClass.logDebug("Attack", "Attack range: " + this.host.getMeleeAttackRange(this.attackTarget, this.attackRange) + "/" + this.host.distanceToSqr(this.attackTarget.position().x(), this.attackTarget.getBoundingBox().minY, this.attackTarget.position().z()));
         if (this.host.distanceToSqr(this.attackTarget.position().x(), this.attackTarget.getBoundingBox().minY, this.attackTarget.position().z()) <= this.host.getMeleeAttackRange(this.attackTarget, this.attackRange)) {
             if (--this.attackTime <= 0) {
                 this.attackTime = this.host.getMeleeCooldown();

@@ -6,6 +6,7 @@ import com.lycanitesmobs.client.obj.geometry.Mesh;
 import com.lycanitesmobs.client.obj.geometry.ObjPart;
 import com.lycanitesmobs.client.obj.geometry.Vertex;
 import com.lycanitesmobs.client.loader.OBJLoader;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.util.math.Vector3o;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -43,7 +44,7 @@ public class ObjModel {
                 map.get(objPart).toMesh(mesh);
             }
         } catch (Exception e) {
-            LycanitesMobs.logWarning("", "Unable to load model: " + resourceLocation);
+            LMHelperClass.logWarning("", "Unable to load model: " + resourceLocation);
             e.printStackTrace();
         }
     }
