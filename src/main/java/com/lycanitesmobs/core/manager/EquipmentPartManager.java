@@ -1,8 +1,8 @@
-package com.lycanitesmobs.core.item.equipment;
+package com.lycanitesmobs.core.manager;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.manager.ObjectManager;
+import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.JSONLoader;
 import com.lycanitesmobs.core.data.loaders.StreamLoader;

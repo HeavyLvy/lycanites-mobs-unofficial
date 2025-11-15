@@ -3,7 +3,7 @@ package com.lycanitesmobs.client.manager;
 import com.lycanitesmobs.client.event.ClientEventListener;
 import com.lycanitesmobs.client.event.ClientModEvents;
 import com.lycanitesmobs.client.gui.screen.beastiary.SummoningBeastiaryScreen;
-import com.lycanitesmobs.client.gui.overlays.BaseOverlay;
+import com.lycanitesmobs.client.gui.screen.base.BaseOverlayScreen;
 import com.lycanitesmobs.client.loader.LanguageLoader;
 import com.lycanitesmobs.core.manager.ItemManager;
 import net.minecraft.client.Minecraft;
@@ -46,8 +46,8 @@ public class ClientManager {
      */
     public void registerEvents() {
         // Event Listeners:
-        MinecraftForge.EVENT_BUS.register(new KeyManager(Minecraft.getInstance()));
-        MinecraftForge.EVENT_BUS.register(new BaseOverlay(Minecraft.getInstance()));
+        MinecraftForge.EVENT_BUS.register(KeyManager.getInstance());
+        MinecraftForge.EVENT_BUS.register(new BaseOverlayScreen(Minecraft.getInstance()));
         MinecraftForge.EVENT_BUS.register(new ClientEventListener());
         ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
         if (resourceManager instanceof ReloadableResourceManager) {

@@ -30,7 +30,7 @@ import com.lycanitesmobs.core.entity.util.CreatureRelationshipEntry;
 import com.lycanitesmobs.core.entity.util.CreatureRelationships;
 import com.lycanitesmobs.core.entity.util.CreatureStats;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.container.creature.CreatureInventory;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.item.special.ItemSoulgazer;

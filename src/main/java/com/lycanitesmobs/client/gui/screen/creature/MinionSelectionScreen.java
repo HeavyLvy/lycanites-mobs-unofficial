@@ -1,4 +1,4 @@
-package com.lycanitesmobs.client.gui.overlays;
+package com.lycanitesmobs.client.gui.screen.creature;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.gui.screen.base.BaseScreen;
@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import org.lwjgl.opengl.GL11;
 
-public class MinionSelectionOverlay extends BaseScreen {
+public class MinionSelectionScreen extends BaseScreen {
     public Player player;
     public ExtendedPlayer playerExt;
 
@@ -30,7 +30,7 @@ public class MinionSelectionOverlay extends BaseScreen {
      *
      * @param player The player opening this Screen.
      */
-    public MinionSelectionOverlay(Player player) {
+    public MinionSelectionScreen(Player player) {
         super(Component.translatable("gui.minion.selection"));
         this.player = player;
         this.playerExt = ExtendedPlayer.getForPlayer(player);

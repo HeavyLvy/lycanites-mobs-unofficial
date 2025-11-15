@@ -9,7 +9,7 @@ import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.entity.special.PortalEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.network.message.MessageSummoningPedestalStats;
 import com.lycanitesmobs.core.network.message.MessageSummoningPedestalSummonSet;
 import com.lycanitesmobs.core.pets.SummonSet;

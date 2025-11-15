@@ -1,6 +1,7 @@
 package com.lycanitesmobs.client.event;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.client.manager.KeyManager;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.client.model.blocky.BalayangBlockyModel;
 import com.lycanitesmobs.client.model.blocky.GrueBlockyModel;
@@ -17,7 +18,7 @@ import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.manager.ItemManager;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -27,6 +28,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -123,5 +125,18 @@ public final class ClientModEvents {
         for (Block block : ItemManager.getInstance().cutoutBlocks) {
             ItemBlockRenderTypes.setRenderLayer(block, RenderType.cutout());
         }
+    }
+
+    @SubscribeEvent
+    public static void onKeyRegister(RegisterKeyMappingsEvent event) {
+        event.register(KeyManager.dismount);
+        event.register(KeyManager.descend);
+        event.register(KeyManager.mountAbility);
+        event.register(KeyManager.mountInventory);
+        event.register(KeyManager.index);
+        event.register(KeyManager.beastiary);
+        event.register(KeyManager.pets);
+        event.register(KeyManager.summoning);
+        event.register(KeyManager.minionSelection);
     }
 }

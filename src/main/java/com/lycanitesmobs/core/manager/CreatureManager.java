@@ -240,67 +240,6 @@ public class CreatureManager extends JSONLoader {
         }
     }
 
-    /**
-     * Registers all creatures added to this creature manager, called from the registry event.
-     *
-     * @param event The entity register event.
-     */
-    @SubscribeEvent
-    public void registerEntities(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.ENTITY_TYPES,
-                helper -> {
-                    LycanitesMobs.logDebug("Creature", "Forge registering all " + this.creatures.size() + " creatures...");
-                    for (CreatureInfo creatureInfo : this.creatures.values()) {
-                        if (creatureInfo.getEntityType() instanceof EntityTypeGetter getter) {
-                            //helper.register(getter.getRegistryName(), creatureInfo.getEntityType());
-
-                        }
-                    }
-                }
-        );
-
-    }
-
-    @SubscribeEvent
-    public void registerEntityAttributes(EntityAttributeCreationEvent event) {
-        for (CreatureInfo creatureInfo : this.creatures.values()) {
-            event.put(creatureInfo.getEntityType(), BaseCreatureEntity.registerCustomAttributes().build());
-        }
-    }
-
-    @SubscribeEvent
-    public void registerBlocks(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.ATTRIBUTES,
-                helper -> {
-                    helper.register(new ResourceLocation(LycanitesMobs.MODID, "defense"), BaseCreatureEntity.DEFENSE);
-                    helper.register(new ResourceLocation(LycanitesMobs.MODID, "ranged_speed"), BaseCreatureEntity.RANGED_SPEED);
-                }
-        );
-    }
-
-
-    /**
-     * Registers all stats for creatures added to this creature manager, called from the registry event.
-     * @param event The entity register event.
-     */
-	/*@SubscribeEvent
-	public void registerStats(RegistryEvent.Register<StatType<?>> event) {
-		LycanitesMobs.logDebug("Creature", "Forge registering all " + this.creatures.size() + " creatures...");
-		for(CreatureInfo creatureInfo : this.creatures.values()) {
-			event.getRegistry().register(creatureInfo.getStatTypeKill());
-			event.getRegistry().register(creatureInfo.getStatTypeKilledBy());
-		}
-
-
-		ObjectManager.addStat(this.getName() + ".kill", new Stat(this.getName() + ".kill", new TranslationTextComponent(this.getName() + ".kill")));
-		ObjectManager.addStat(this.getName() + ".learn", new Stat(this.getName() + ".learn", new TranslationTextComponent(this.getName() + ".learn")));
-		if(this.isSummonable()) {
-			ObjectManager.addStat(this.getName() + ".summon", new Stat(this.getName() + ".summon", new TranslationTextComponent(this.getName() + ".summon")));
-		}
-		if(this.isTameable()) {
-			ObjectManager.addStat(this.getName() + ".tame", new Stat(this.getName() + ".tame", new TranslationTextComponent(this.getName() + ".tame")));
-		}
-	}*/
 
     /**
      * Reloads all Creature JSON.

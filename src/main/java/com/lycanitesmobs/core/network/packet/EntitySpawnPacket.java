@@ -5,7 +5,7 @@ import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
 import com.lycanitesmobs.core.entity.util.EntityFactory;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;

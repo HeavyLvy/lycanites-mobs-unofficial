@@ -6,7 +6,7 @@ import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.special.PortalEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.manager.CreatureManager;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.item.base.BaseItem;
 import com.lycanitesmobs.core.pets.SummonSet;
 import net.minecraft.server.level.ServerPlayer;

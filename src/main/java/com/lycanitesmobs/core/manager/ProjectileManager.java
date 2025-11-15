@@ -1,7 +1,8 @@
-package com.lycanitesmobs.core.data.info.projectile;
+package com.lycanitesmobs.core.manager;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.entity.projectile.generic.ModelProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.RapidFireProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.hellfire.*;
@@ -9,7 +10,6 @@ import com.lycanitesmobs.core.entity.projectile.misc.EntityDevilGatling;
 import com.lycanitesmobs.core.entity.projectile.misc.EntityShadowfireBarrier;
 import com.lycanitesmobs.core.entity.projectile.misc.LaserEndProjectileEntity;
 import com.lycanitesmobs.core.entity.special.PortalEntity;
-import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.JSONLoader;
 import com.lycanitesmobs.core.data.loaders.StreamLoader;
@@ -101,18 +101,18 @@ public class ProjectileManager extends JSONLoader {
     public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
         ProjectileInfo projectileInfo = new ProjectileInfo(modInfo);
         projectileInfo.loadFromJSON(json);
-        if (projectileInfo.name == null) {
+        if (projectileInfo.getName() == null) {
             LycanitesMobs.logWarning("", "[Projectile] Unable to load " + loadGroup + " json due to missing name.");
             return;
         }
 
         // Already Exists:
-        if (this.projectiles.containsKey(projectileInfo.name)) {
-            projectileInfo = this.projectiles.get(projectileInfo.name);
+        if (this.projectiles.containsKey(projectileInfo.getName())) {
+            projectileInfo = this.projectiles.get(projectileInfo.getName());
             projectileInfo.loadFromJSON(json);
         }
 
-        this.projectiles.put(projectileInfo.name, projectileInfo);
+        this.projectiles.put(projectileInfo.getName(), projectileInfo);
         return;
     }
 
@@ -128,12 +128,21 @@ public class ProjectileManager extends JSONLoader {
     }
 
     /**
-     * Registers all creatures added to this creature manager, called from the registry event.
+     * This registration method is intentionally kept inside ProjectileManager rather than the
+     * RegistryEvents class. The old projectile maps (oldSpriteProjectiles and oldModelProjectiles)
+     * are populated during ProjectileManager startup, and this class is explicitly registered as
+     * an instance listener on the mod event bus. Moving this method to RegistryEvents would cause
+     * registration to run on a different instance or before these maps are initialized, resulting
+     * in no projectile entity types being registered and crashes due to missing types.
+     * <p>
+     * By keeping this handler here, the same initialized ProjectileManager instance that loaded
+     * the projectile data is also the one performing the registry work.
      *
-     * @param event The entity register event.
+     * @param event The Forge registry event for entity types.
      */
+
     @SubscribeEvent
-    public void registerEntities(RegisterEvent event) {
+    public void registerProjectiles(RegisterEvent event) {
         LycanitesMobs.logDebug("Projectile", "Forge registering all " + this.projectiles.size() + " projectiles...");
 
         event.register(ForgeRegistries.Keys.ENTITY_TYPES, helper -> {
@@ -148,7 +157,6 @@ public class ProjectileManager extends JSONLoader {
             }
         });
     }
-
 
     /**
      * Creates an Entity Type for older projectiles.

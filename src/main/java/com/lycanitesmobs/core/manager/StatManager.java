@@ -14,59 +14,49 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StatManager {
-	private static StatManager INSTANCE;
-	public static StatManager getInstance() {
-		if(INSTANCE == null) {
-			INSTANCE = new StatManager();
-		}
-		return INSTANCE;
-	}
+    private static StatManager INSTANCE;
 
-	public Map<String, StatType<ResourceLocation>> statTypes = new HashMap<>();
+    public static StatManager getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new StatManager();
+        }
+        return INSTANCE;
+    }
 
-	/**
-	 * Creates all base Stat Types.
-	 */
-	public void createStatTypes() {
-		StatManager.getInstance().addStatType("learn");
-		StatManager.getInstance().addStatType("summon");
-	}
+    public Map<String, StatType<ResourceLocation>> statTypes = new HashMap<>();
 
-	/**
-	 * Adds a new Stat Type. TODO Implement stats.
-	 * @param name The unique name of the stat type.
-	 */
-	public void addStatType(String name) {
+    /**
+     * Creates all base Stat Types.
+     */
+    public void createStatTypes() {
+        StatManager.getInstance().addStatType("learn");
+        StatManager.getInstance().addStatType("summon");
+    }
+
+    /**
+     * Adds a new Stat Type. TODO Implement stats.
+     *
+     * @param name The unique name of the stat type.
+     */
+    public void addStatType(String name) {
 //		Registry<ResourceLocation> statRegistry = new SimpleRegistry<>();
 //		StatType<ResourceLocation> statType = new StatType<>(statRegistry);
 //		statType.setRegistryName(LycanitesMobs.modInfo.modid, name);
 //		this.statTypes.put(name, statType);
-	}
+    }
 
-	/**
-	 * Gets a from a stat type.
-	 * @param typeName The stat type name.
-	 * @param name The stat name.
-	 * @return The stat instance or null.
-	 */
-	@Nullable
-	public Stat getStat(String typeName, String name) {
-		if(!this.statTypes.containsKey(typeName)) {
-			return null;
-		}
-		return this.statTypes.get(typeName).get(new ResourceLocation(LycanitesMobs.modInfo.modid, name), StatFormatter.DEFAULT);
-	}
-
-	@SubscribeEvent
-	public void registerStats(RegisterEvent event) {
-		this.createStatTypes();
-		for(StatType<?> statType : this.statTypes.values()) {
-			event.register(ForgeRegistries.Keys.STAT_TYPES,
-					helper -> {
-						helper.register(new ResourceLocation(LycanitesMobs.MODID, "stat type name"), statType);
-					}
-			);
-
-		}
-	}
+    /**
+     * Gets a from a stat type.
+     *
+     * @param typeName The stat type name.
+     * @param name     The stat name.
+     * @return The stat instance or null.
+     */
+    @Nullable
+    public Stat getStat(String typeName, String name) {
+        if (!this.statTypes.containsKey(typeName)) {
+            return null;
+        }
+        return this.statTypes.get(typeName).get(new ResourceLocation(LycanitesMobs.modInfo.modid, name), StatFormatter.DEFAULT);
+    }
 }

@@ -6,7 +6,7 @@ import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.data.info.ObjectLists;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -20,20 +20,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EntityNaxiris extends RideableCreatureEntity {
-	public boolean griefing = true;
-    
+    public boolean griefing = true;
+
     // ==================================================
- 	//                    Constructor
- 	// ==================================================
+    //                    Constructor
+    // ==================================================
     public EntityNaxiris(EntityType<? extends EntityNaxiris> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = false;
-        
+
         this.setAttackCooldownMax(20);
-		this.solidCollision = true;
+        this.solidCollision = true;
         this.setupMob();
 
         this.setMaxUpStep(1.0F);
@@ -45,10 +45,10 @@ public class EntityNaxiris extends RideableCreatureEntity {
         this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.25D).setRange(40.0F).setMinChaseDistance(10.0F).setLongMemory(false));
     }
 
-	@Override
-	public void loadCreatureFlags() {
-		this.griefing = this.creatureInfo.getFlag("griefing", this.griefing);
-	}
+    @Override
+    public void loadCreatureFlags() {
+        this.griefing = this.creatureInfo.getFlag("griefing", this.griefing);
+    }
 
 
     // ==================================================
@@ -56,90 +56,104 @@ public class EntityNaxiris extends RideableCreatureEntity {
     // ==================================================
     @Override
     public void riderEffects(LivingEntity rider) {
-        if(rider.hasEffect(MobEffects.DIG_SLOWDOWN))
+        if (rider.hasEffect(MobEffects.DIG_SLOWDOWN))
             rider.removeEffect(MobEffects.DIG_SLOWDOWN);
-        if(rider.hasEffect(ObjectManager.getEffect("weight")))
+        if (rider.hasEffect(ObjectManager.getEffect("weight")))
             rider.removeEffect(ObjectManager.getEffect("weight"));
     }
 
-    
+
     // ==================================================
-   	//                    Taking Damage
-   	// ==================================================
+    //                    Taking Damage
+    // ==================================================
     // ========== On Damage ==========
-    /** Called when this mob has received damage. **/
+
+    /**
+     * Called when this mob has received damage.
+     **/
     public void onDamage(DamageSource damageSrc, float damage) {
-    	super.onDamage(damageSrc, damage);
-    	
-    	Entity damageEntity = damageSrc.getEntity();
-    	if(damageEntity != null && ("mob".equals(damageSrc.getMsgId()) || "player".equals(damageSrc.getMsgId()))) {
-    		
-    		// Eat Buffs:
-        	if(damageEntity instanceof LivingEntity) {
-        		LivingEntity targetLiving = (LivingEntity)damageEntity;
-        		List<MobEffect> goodEffects = new ArrayList<>();
-        		for(MobEffectInstance effect : targetLiving.getActiveEffects()) {
-					if(ObjectLists.inEffectList("buffs", effect.getEffect()))
-						goodEffects.add(effect.getEffect());
-        		}
-        		if(goodEffects.size() > 0 && this.getRandom().nextBoolean()) {
-        			if(goodEffects.size() > 1)
-        				targetLiving.removeEffect(goodEffects.get(this.getRandom().nextInt(goodEffects.size())));
-        			else
-        				targetLiving.removeEffect(goodEffects.get(0));
-    		    	float leeching = damage * 1.1F;
-    		    	this.heal(leeching);
-        		}
-        	}
-    	}
+        super.onDamage(damageSrc, damage);
+
+        Entity damageEntity = damageSrc.getEntity();
+        if (damageEntity != null && ("mob".equals(damageSrc.getMsgId()) || "player".equals(damageSrc.getMsgId()))) {
+
+            // Eat Buffs:
+            if (damageEntity instanceof LivingEntity) {
+                LivingEntity targetLiving = (LivingEntity) damageEntity;
+                List<MobEffect> goodEffects = new ArrayList<>();
+                for (MobEffectInstance effect : targetLiving.getActiveEffects()) {
+                    if (ObjectLists.inEffectList("buffs", effect.getEffect()))
+                        goodEffects.add(effect.getEffect());
+                }
+                if (goodEffects.size() > 0 && this.getRandom().nextBoolean()) {
+                    if (goodEffects.size() > 1)
+                        targetLiving.removeEffect(goodEffects.get(this.getRandom().nextInt(goodEffects.size())));
+                    else
+                        targetLiving.removeEffect(goodEffects.get(0));
+                    float leeching = damage * 1.1F;
+                    this.heal(leeching);
+                }
+            }
+        }
     }
-	
-	
-	// ==================================================
-  	//                     Abilities
-  	// ==================================================
+
+
+    // ==================================================
+    //                     Abilities
+    // ==================================================
     // ========== Movement ==========
-    public boolean isFlying() { return true; }
-    
-    
+    public boolean isFlying() {
+        return true;
+    }
+
+
     // ==================================================
     //                     Pet Control
     // ==================================================
-    public boolean petControlsEnabled() { return true; }
+    public boolean petControlsEnabled() {
+        return true;
+    }
 
 
     // ==================================================
     //                     Equipment
     // ==================================================
     @Override
-    public int getNoBagSize() { return 0; }
+    public int getNoBagSize() {
+        return 0;
+    }
+
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
-	
-	
-	// ==================================================
-   	//                      Attacks
-   	// ==================================================
-	// ========== Ranged Attack ==========
+    public int getBagSize() {
+        return this.creatureInfo.bagSize;
+    }
+
+
+    // ==================================================
+    //                      Attacks
+    // ==================================================
+    // ========== Ranged Attack ==========
     @Override
     public void attackRanged(Entity target, float range) {
         this.fireProjectile("arcanelaserstorm", target, range, 0, new Vector3d(0, 0, 0), 0.6f, 2f, 1F);
         super.attackRanged(target, range);
     }
-    
-    
+
+
     // ==================================================
     //                     Immunities
     // ==================================================
     @Override
     public boolean isVulnerableTo(Entity entity) {
-    	if(entity instanceof EntityNaxiris)
-    		return false;
-    	return super.isVulnerableTo(entity);
+        if (entity instanceof EntityNaxiris)
+            return false;
+        return super.isVulnerableTo(entity);
     }
-    
+
     @Override
-    public boolean canBurn() { return false; }
+    public boolean canBurn() {
+        return false;
+    }
 
 
     // ==================================================
@@ -147,13 +161,13 @@ public class EntityNaxiris extends RideableCreatureEntity {
     // ==================================================
     @Override
     public double getPassengersRidingOffset() {
-        return (double)this.getDimensions(Pose.STANDING).height * 0.9D;
+        return (double) this.getDimensions(Pose.STANDING).height * 0.9D;
     }
 
-	@Override
-	public double getMountedZOffset() {
-		return (double)this.getDimensions(Pose.STANDING).width * -0.2D;
-	}
+    @Override
+    public double getMountedZOffset() {
+        return (double) this.getDimensions(Pose.STANDING).width * -0.2D;
+    }
 
 
     // ==================================================
@@ -161,29 +175,29 @@ public class EntityNaxiris extends RideableCreatureEntity {
     // ==================================================
     @Override
     public void mountAbility(Entity rider) {
-        if(this.getCommandSenderWorld().isClientSide)
+        if (this.getCommandSenderWorld().isClientSide)
             return;
 
-        if(this.abilityToggled)
+        if (this.abilityToggled)
             return;
 
-        if(this.hasPickupEntity()) {
+        if (this.hasPickupEntity()) {
             this.dropPickupEntity();
             return;
         }
 
-        if(this.getStamina() < this.getStaminaCost())
+        if (this.getStamina() < this.getStaminaCost())
             return;
 
-        if(rider instanceof Player) {
-            Player player = (Player)rider;
-			ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile("arcanelaserstorm");
-			if(projectileInfo != null) {
-				BaseProjectileEntity projectile = projectileInfo.createProjectile(this.getCommandSenderWorld(), player);
-				this.getCommandSenderWorld().addFreshEntity(projectile);
-				this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-				this.triggerAttackCooldown();
-			}
+        if (rider instanceof Player) {
+            Player player = (Player) rider;
+            ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile("arcanelaserstorm");
+            if (projectileInfo != null) {
+                BaseProjectileEntity projectile = projectileInfo.createProjectile(this.getCommandSenderWorld(), player);
+                this.getCommandSenderWorld().addFreshEntity(projectile);
+                this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+                this.triggerAttackCooldown();
+            }
         }
 
         this.applyStaminaCost();
@@ -200,16 +214,16 @@ public class EntityNaxiris extends RideableCreatureEntity {
     public float getStaminaRecoveryMax() {
         return 1.0F;
     }
-    
-    
+
+
     // ==================================================
     //                   Brightness
     // ==================================================
     @Override
     public float getBrightness() {
-        if(isAttackOnCooldown())
-        	return 1.0F;
+        if (isAttackOnCooldown())
+            return 1.0F;
         else
-        	return super.getBrightness();
+            return super.getBrightness();
     }
 }

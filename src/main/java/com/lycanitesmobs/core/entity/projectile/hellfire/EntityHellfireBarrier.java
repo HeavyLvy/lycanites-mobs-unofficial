@@ -5,7 +5,7 @@ import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.creature.demon.EntityRahovart;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;

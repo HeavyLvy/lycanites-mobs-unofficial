@@ -10,8 +10,8 @@ import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.creature.Subspecies;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
-import com.lycanitesmobs.core.item.equipment.EquipmentPartManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
+import com.lycanitesmobs.core.manager.EquipmentPartManager;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 
 import javax.annotation.Nullable;

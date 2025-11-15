@@ -6,7 +6,7 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -20,13 +20,13 @@ import com.lycanitesmobs.core.entity.creature.elemental.EntityWraith;
 
 public class EntityMalwrath extends RideableCreatureEntity {
     public boolean griefing = true;
-    
+
     // ==================================================
- 	//                    Constructor
- 	// ==================================================
+    //                    Constructor
+    // ==================================================
     public EntityMalwrath(EntityType<? extends EntityMalwrath> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEAD;
         this.hasAttackSound = false;
@@ -56,7 +56,7 @@ public class EntityMalwrath extends RideableCreatureEntity {
     // ========== Living Update ==========
     @Override
     public void aiStep() {
-        if(!this.getCommandSenderWorld().isClientSide && this.isRareVariant() && this.hasAttackTarget() && this.tickCount % 20 == 0) {
+        if (!this.getCommandSenderWorld().isClientSide && this.isRareVariant() && this.hasAttackTarget() && this.tickCount % 20 == 0) {
             this.allyUpdate();
         }
 
@@ -65,19 +65,19 @@ public class EntityMalwrath extends RideableCreatureEntity {
 
     @Override
     public void riderEffects(LivingEntity rider) {
-        if(rider.hasEffect(MobEffects.WITHER))
+        if (rider.hasEffect(MobEffects.WITHER))
             rider.removeEffect(MobEffects.WITHER);
-        if(rider.isOnFire())
+        if (rider.isOnFire())
             rider.clearFire();
     }
 
     // ========== Spawn Minions ==========
     public void allyUpdate() {
-        if(this.getCommandSenderWorld().isClientSide)
+        if (this.getCommandSenderWorld().isClientSide)
             return;
 
         // Spawn Minions:
-        if(CreatureManager.getInstance().getCreature("wraith").enabled) {
+        if (CreatureManager.getInstance().getCreature("wraith").enabled) {
             if (this.nearbyCreatureCount(CreatureManager.getInstance().getCreature("wraith").getEntityType(), 64D) < 10) {
                 float random = this.random.nextFloat();
                 if (random <= 0.1F) {
@@ -88,78 +88,89 @@ public class EntityMalwrath extends RideableCreatureEntity {
     }
 
     public void spawnAlly(double x, double y, double z) {
-        EntityWraith minion = (EntityWraith)CreatureManager.getInstance().getCreature("wraith").createEntity(this.getCommandSenderWorld());
+        EntityWraith minion = (EntityWraith) CreatureManager.getInstance().getCreature("wraith").createEntity(this.getCommandSenderWorld());
         minion.moveTo(x, y, z, this.yRot, this.xRot);
-		minion.setMinion(true);
-		minion.setMasterTarget(this);
+        minion.setMinion(true);
+        minion.setMasterTarget(this);
         this.getCommandSenderWorld().addFreshEntity(minion);
-        if(this.getTarget() != null) {
+        if (this.getTarget() != null) {
             minion.setLastHurtByMob(this.getTarget());
         }
         minion.setSizeScale(this.sizeScale);
     }
-	
-	
-	// ==================================================
-  	//                     Abilities
-  	// ==================================================
+
+
+    // ==================================================
+    //                     Abilities
+    // ==================================================
     // ========== Movement ==========
-    public boolean isFlying() { return true; }
-    
-    
+    public boolean isFlying() {
+        return true;
+    }
+
+
     // ==================================================
     //                     Pet Control
     // ==================================================
-    public boolean petControlsEnabled() { return true; }
+    public boolean petControlsEnabled() {
+        return true;
+    }
 
 
     // ==================================================
     //                     Equipment
     // ==================================================
     @Override
-    public int getNoBagSize() { return 0; }
+    public int getNoBagSize() {
+        return 0;
+    }
+
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
-	
-	
-	// ==================================================
-   	//                      Attacks
-   	// ==================================================
+    public int getBagSize() {
+        return this.creatureInfo.bagSize;
+    }
+
+
+    // ==================================================
+    //                      Attacks
+    // ==================================================
     // ========== Set Attack Target ==========
     @Override
     public boolean canAttack(LivingEntity target) {
-        if(target instanceof  EntityTrite || target instanceof  EntityAstaroth || target instanceof  EntityAsmodeus || target instanceof  EntityWraith)
+        if (target instanceof EntityTrite || target instanceof EntityAstaroth || target instanceof EntityAsmodeus || target instanceof EntityWraith)
             return false;
         return super.canAttack(target);
     }
 
-	// ========== Ranged Attack ==========
+    // ========== Ranged Attack ==========
     @Override
     public void attackRanged(Entity target, float range) {
         this.fireProjectile("demonicblast", target, range, 0, new Vector3d(0, 0, 0), 0.6f, 2f, 1F);
         super.attackRanged(target, range);
     }
-    
-    
+
+
     // ==================================================
     //                     Immunities
     // ==================================================
     @Override
     public boolean isVulnerableTo(Entity entity) {
-    	if(entity instanceof EntityMalwrath)
-    		return false;
-    	return super.isVulnerableTo(entity);
+        if (entity instanceof EntityMalwrath)
+            return false;
+        return super.isVulnerableTo(entity);
     }
 
     @Override
     public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if("explosion".equals(type))
+        if ("explosion".equals(type))
             return false;
         return super.isVulnerableTo(type, source, damage);
     }
-    
+
     @Override
-    public boolean canBurn() { return false; }
+    public boolean canBurn() {
+        return false;
+    }
 
 
     // ==================================================
@@ -167,7 +178,7 @@ public class EntityMalwrath extends RideableCreatureEntity {
     // ==================================================
     @Override
     public double getPassengersRidingOffset() {
-        return (double)this.getDimensions(Pose.STANDING).height * 0.9D;
+        return (double) this.getDimensions(Pose.STANDING).height * 0.9D;
     }
 
 
@@ -176,24 +187,24 @@ public class EntityMalwrath extends RideableCreatureEntity {
     // ==================================================
     @Override
     public void mountAbility(Entity rider) {
-        if(this.getCommandSenderWorld().isClientSide)
+        if (this.getCommandSenderWorld().isClientSide)
             return;
 
-        if(this.abilityToggled)
+        if (this.abilityToggled)
             return;
 
-        if(this.hasPickupEntity()) {
+        if (this.hasPickupEntity()) {
             this.dropPickupEntity();
             return;
         }
 
-        if(this.getStamina() < this.getStaminaCost())
+        if (this.getStamina() < this.getStaminaCost())
             return;
 
-        if(rider instanceof Player) {
-            Player player = (Player)rider;
+        if (rider instanceof Player) {
+            Player player = (Player) rider;
             ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile("demonicblast");
-            if(projectileInfo != null) {
+            if (projectileInfo != null) {
                 BaseProjectileEntity projectile = projectileInfo.createProjectile(this.getCommandSenderWorld(), player);
                 this.getCommandSenderWorld().addFreshEntity(projectile);
                 this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
@@ -222,7 +233,7 @@ public class EntityMalwrath extends RideableCreatureEntity {
     // ==================================================
     @Override
     public float getBrightness() {
-        if(isAttackOnCooldown())
+        if (isAttackOnCooldown())
             return 1.0F;
         else
             return super.getBrightness();

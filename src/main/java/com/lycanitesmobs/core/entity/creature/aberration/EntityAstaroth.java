@@ -6,7 +6,7 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.projectile.hellfire.EntityHellShield;
 import com.lycanitesmobs.core.manager.CreatureManager;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -17,13 +17,13 @@ import org.joml.Vector3d;
 import com.lycanitesmobs.core.entity.creature.demon.EntityMalwrath;
 
 public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
-    
+
     // ==================================================
- 	//                    Constructor
- 	// ==================================================
+    //                    Constructor
+    // ==================================================
     public EntityAstaroth(EntityType<? extends EntityAstaroth> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = false;
@@ -52,8 +52,8 @@ public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
         super.aiStep();
 
         // Asmodeus Master:
-        if(this.updateTick % 20 == 0) {
-            if (this.getMasterTarget() != null && this.getMasterTarget() instanceof EntityAsmodeus && ((BaseCreatureEntity)this.getMasterTarget()).getBattlePhase() > 0) {
+        if (this.updateTick % 20 == 0) {
+            if (this.getMasterTarget() != null && this.getMasterTarget() instanceof EntityAsmodeus && ((BaseCreatureEntity) this.getMasterTarget()).getBattlePhase() > 0) {
                 EntityHellShield projectile = new EntityHellShield(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellShield.class), this.getCommandSenderWorld(), this);
                 projectile.setProjectileScale(3f);
                 projectile.setPos(
@@ -71,40 +71,40 @@ public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
             }
         }
     }
-    
-    
-	// ==================================================
+
+
+    // ==================================================
     //                      Attacks
     // ==================================================
     @Override
     public boolean canAttack(LivingEntity target) {
-        if(target instanceof EntityTrite || target instanceof EntityMalwrath ||  target instanceof EntityAsmodeus)
+        if (target instanceof EntityTrite || target instanceof EntityMalwrath || target instanceof EntityAsmodeus)
             return false;
         return super.canAttack(target);
     }
-    
+
     // ========== Ranged Attack ==========
     @Override
     public void attackRanged(Entity target, float range) {
         this.fireProjectile("devilstar", target, range, 0, new Vector3d(0, 0, 0), 1.2f, 1f, 1F);
         super.attackRanged(target, range);
     }
-	
-	
-	// ==================================================
-   	//                      Death
-   	// ==================================================
-	@Override
-	public void die(DamageSource damageSource) {
-        if(!this.getCommandSenderWorld().isClientSide && CreatureManager.getInstance().getCreature("trite").enabled) {
+
+
+    // ==================================================
+    //                      Death
+    // ==================================================
+    @Override
+    public void die(DamageSource damageSource) {
+        if (!this.getCommandSenderWorld().isClientSide && CreatureManager.getInstance().getCreature("trite").enabled) {
             int j = 2 + this.random.nextInt(5) + getCommandSenderWorld().getDifficulty().getId() - 1;
-            if(this.isTamed()) {
+            if (this.isTamed()) {
                 j = 3;
             }
-            for(int k = 0; k < j; ++k) {
-                EntityTrite trite = (EntityTrite)CreatureManager.getInstance().getCreature("trite").createEntity(this.getCommandSenderWorld());
+            for (int k = 0; k < j; ++k) {
+                EntityTrite trite = (EntityTrite) CreatureManager.getInstance().getCreature("trite").createEntity(this.getCommandSenderWorld());
                 this.summonMinion(trite, this.random.nextFloat() * 360.0F, 0.5F);
-                if(this.isTamed()) {
+                if (this.isTamed()) {
                     trite.setTemporary(5 * 20);
                 }
             }
@@ -117,7 +117,12 @@ public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
     //                     Equipment
     // ==================================================
     @Override
-    public int getNoBagSize() { return 0; }
+    public int getNoBagSize() {
+        return 0;
+    }
+
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() {
+        return this.creatureInfo.bagSize;
+    }
 }

@@ -6,7 +6,7 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
@@ -20,7 +20,7 @@ public class EntityGrell extends RideableCreatureEntity {
 
     public EntityGrell(EntityType<? extends EntityGrell> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEAD;
         this.hasAttackSound = false;
@@ -40,44 +40,53 @@ public class EntityGrell extends RideableCreatureEntity {
         this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(Ghast.class));
     }
 
-    public boolean isFlying() { return true; }
+    public boolean isFlying() {
+        return true;
+    }
 
     @Override
-    public int getNoBagSize() { return 0; }
+    public int getNoBagSize() {
+        return 0;
+    }
+
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() {
+        return this.creatureInfo.bagSize;
+    }
 
     @Override
     public void attackRanged(Entity target, float range) {
         this.fireProjectile("acidglob", target, range, 0, new Vector3d(0, 0, 0), 0.6f, 2f, 1F);
         super.attackRanged(target, range);
     }
-    
+
     @Override
-    public boolean canBurn() { return false; }
+    public boolean canBurn() {
+        return false;
+    }
 
     @Override
     public double getPassengersRidingOffset() {
-        return (double)this.getDimensions(Pose.STANDING).height * 1.1D;
+        return (double) this.getDimensions(Pose.STANDING).height * 1.1D;
     }
 
     @Override
     public void mountAbility(Entity rider) {
-        if(this.getCommandSenderWorld().isClientSide)
+        if (this.getCommandSenderWorld().isClientSide)
             return;
 
-        if(this.hasPickupEntity()) {
+        if (this.hasPickupEntity()) {
             this.dropPickupEntity();
             return;
         }
 
-        if(this.getStamina() < this.getStaminaCost())
+        if (this.getStamina() < this.getStaminaCost())
             return;
 
-        if(rider instanceof Player) {
-            Player player = (Player)rider;
+        if (rider instanceof Player) {
+            Player player = (Player) rider;
             ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile("acidglob");
-            if(projectileInfo != null) {
+            if (projectileInfo != null) {
                 BaseProjectileEntity projectile = projectileInfo.createProjectile(this.getCommandSenderWorld(), player);
                 projectile.setProjectileScale(2F);
                 projectile.shootFromRotation(player, player.xRot, player.yRot, -1, 1, 10);

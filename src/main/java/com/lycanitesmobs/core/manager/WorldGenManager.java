@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
+
 public class WorldGenManager {
     private static WorldGenManager INSTANCE;
 
@@ -126,13 +126,5 @@ public class WorldGenManager {
 		CONFIGURED_FEATURES.register("moglava_spring",() -> fluidConfiguredFeatures.get("moglava_spring"));*/
     }
 
-    @SubscribeEvent
-    public void registerFeatures(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.FEATURES,
-                helper -> {
-                    helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "chunkspawn"), this.chunkSpawnFeature);
-                    helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "dungeon"), this.dungeonFeature);
-                }
-        );
-    }
+
 }

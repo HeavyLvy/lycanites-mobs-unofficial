@@ -7,7 +7,7 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.hellfire.EntityHellfireWall;
 import com.lycanitesmobs.core.manager.CreatureManager;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.mobevent.MobEventPlayerServer;
 import com.lycanitesmobs.core.mobevent.effects.StructureBuilder;
 import net.minecraft.core.BlockPos;

@@ -15,19 +15,5 @@ public class CommandManager {
         return INSTANCE;
     }
 
-    @SubscribeEvent
-    public void register(final RegisterCommandsEvent event) {
-        event.getDispatcher().register(
-                Commands.literal("lm")
-                        .then(CreaturesCommand.register())
-                        .then(BeastiaryCommand.register())
-                        .then(SpawnersCommand.register())
-                        .then(SpawnerCommand.register())
-                        .then(MobEventsCommand.register())
-                        .then(MobEventCommand.register())
-                        .then(EquipmentCommand.register())
-                        .then(DungeonsCommand.register())
-                        .then(DebugCommand.register())
-        );
-    }
+
 }

@@ -11,6 +11,7 @@ import com.lycanitesmobs.core.data.info.ObjectLists;
 import com.lycanitesmobs.core.event.GameEventListener;
 import com.lycanitesmobs.core.data.info.altar.AltarInfo;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.event.RegistryEvents;
 import com.lycanitesmobs.core.manager.*;
 import com.lycanitesmobs.core.network.proxy.ClientProxy;
 import com.lycanitesmobs.client.manager.ModelManager;
@@ -29,15 +30,14 @@ import com.lycanitesmobs.core.effect.EffectManager;
 import com.lycanitesmobs.core.entity.util.EntityFactory;
 import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.StreamLoader;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.item.consumable.holiday.ItemHalloweenTreat;
 import com.lycanitesmobs.core.item.consumable.holiday.ItemWinterGift;
-import com.lycanitesmobs.core.item.equipment.EquipmentPartManager;
+import com.lycanitesmobs.core.manager.EquipmentPartManager;
 import com.lycanitesmobs.core.event.MobEventListener;
 import com.lycanitesmobs.core.network.proxy.IProxy;
 import com.lycanitesmobs.core.network.proxy.ServerProxy;
 import com.lycanitesmobs.core.event.SpawnerEventListener;
-import com.lycanitesmobs.core.worldgen.WorldGenerator;
 import com.lycanitesmobs.core.worldgen.WorldGeneratorBiomeModifier;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -93,20 +93,7 @@ public class LycanitesMobs {
     // Biome Management:
     public static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS =
             DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MODID);
-    /*@SubscribeEvent
-    public static void onServerLoaded(ServerStartingEvent event) {
-        var creatureManager = CreatureManager.getInstance();
-        for(CreatureInfo creatureInfo : creatureManager.creatures.values()) {
-            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
-            LycanitesMobs.logInfo("", "Registeredcreature: " + entityType);
-            creatureInfo.entityType = (EntityType<? extends LivingEntity>) entityType;
-            if (creatureInfo.entityType instanceof EntityTypeGetter getter) {
-                getter.setRegistryName(new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName()));
-            }
-            EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor, creatureInfo.getName());
-            creatureInfo.init();
-        }
-    }*/
+
     public static final RegistryObject<Codec<WorldGeneratorBiomeModifier>> WORLD_GENERATOR_CODEC = BIOME_MODIFIER_SERIALIZERS.register("world_generator", () ->
             RecordCodecBuilder.create(instance -> instance.group(
                     Biome.LIST_CODEC.fieldOf("biomes").forGetter(WorldGeneratorBiomeModifier::biomes),
@@ -131,7 +118,7 @@ public class LycanitesMobs {
     // Proxy:
     public static IProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
     // Potion Effects:
-    public static EffectManager EffectManager;
+    public static EffectManager effectManager;
 
     /**
      * Constructor
@@ -166,6 +153,7 @@ public class LycanitesMobs {
         modEventBus.register(ItemManager.getInstance());
         modEventBus.register(CreatureManager.getInstance());
         modEventBus.register(ProjectileManager.getInstance());
+        modEventBus.register(RegistryEvents.getInstance());
         modEventBus.register(WorldGenManager.getInstance());
 //		modEventBus.register(StatManager.getInstance()); TODO Stats
         PROXY.registerEvents();
@@ -178,7 +166,6 @@ public class LycanitesMobs {
         MinecraftForge.EVENT_BUS.register(SpawnerEventListener.getInstance());
         MinecraftForge.EVENT_BUS.register(MobEventManager.getInstance());
         MinecraftForge.EVENT_BUS.register(MobEventListener.getInstance());
-        MinecraftForge.EVENT_BUS.register(new WorldGenerator());
 
         // Network:
         PACKET_MANAGER.register();
@@ -187,15 +174,6 @@ public class LycanitesMobs {
 
     }
 
-    /*public static final RegistryObject<EntityType> ABIA = ENTITY_TYPES.register("abia", LycanitesMobs::getAbia);
-        public static EntityType<?> getAbia() {
-            EntityType.EntityFactory factory = EntityAbaia::new;
-            return EntityType.Builder.of(factory, MobCategory.MONSTER)
-                    .setTrackingRange(10)
-                    .setUpdateInterval(3)
-                    .setShouldReceiveVelocityUpdates(false)
-                    .sized(2f, 1f).build("abia");
-        }*/
     public static void registryObjects() {
         // Blocks and Items:
         ItemManager.getInstance().startup(modInfo);
@@ -278,7 +256,7 @@ public class LycanitesMobs {
         ObjectLists.createVanillaLists();
 
         // Potion Effects:
-        EffectManager = new EffectManager();
+        effectManager = EffectManager.getInstance();
 
         // Spawners:
         SpawnerManager.getInstance().loadAllFromJson(modInfo);
@@ -297,7 +275,7 @@ public class LycanitesMobs {
         ItemWinterGift.createObjectLists();
 
         // World Gen:
-        WorldGenManager.getInstance().startup();
+        WorldGenManager.startup();
 
 
         //Registry Objects

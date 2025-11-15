@@ -3,7 +3,7 @@ package com.lycanitesmobs.core.entity.projectile.generic;
 import com.lycanitesmobs.core.entity.projectile.misc.LaserEndProjectileEntity;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
-import com.lycanitesmobs.core.data.info.projectile.ProjectileManager;
+import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
