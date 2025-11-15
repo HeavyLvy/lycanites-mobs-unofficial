@@ -16,16 +16,12 @@ import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
-import com.lycanitesmobs.core.manager.ItemManager;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -120,12 +116,6 @@ public final class ClientModEvents {
 
     }
 
-    public void registerBlockRenderLayers() {
-        if (true) return;
-        for (Block block : ItemManager.getInstance().cutoutBlocks) {
-            ItemBlockRenderTypes.setRenderLayer(block, RenderType.cutout());
-        }
-    }
 
     @SubscribeEvent
     public static void onKeyRegister(RegisterKeyMappingsEvent event) {

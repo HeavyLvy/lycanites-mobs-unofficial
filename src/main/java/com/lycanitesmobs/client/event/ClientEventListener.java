@@ -86,18 +86,6 @@ public class ClientEventListener {
         }
     }
 
-    /**
-     * Registers Colored Items
-     */
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public void registerItemColors(RegisterColorHandlersEvent.Item event) {
-        for (CreatureType creatureType : CreatureManager.getInstance().creatureTypes.values()) {
-            if (creatureType.spawnEgg.get() != null) {
-                event.getItemColors().register(new ItemColorCustomSpawnEgg(), creatureType.spawnEgg.get());
-            }
-        }
-    }
 
     @SubscribeEvent
     public void onPlayerTick(TickEvent.ClientTickEvent event) {

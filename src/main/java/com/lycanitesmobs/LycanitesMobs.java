@@ -8,17 +8,19 @@ import com.lycanitesmobs.client.gui.screen.creature.CreatureInventoryScreen;
 import com.lycanitesmobs.client.manager.ClientManager;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.data.info.ObjectLists;
+import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.event.GameEventListener;
 import com.lycanitesmobs.core.data.info.altar.AltarInfo;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.event.RegistryEvents;
+import com.lycanitesmobs.core.item.consumable.entity.ItemColorCustomSpawnEgg;
+import com.lycanitesmobs.core.item.consumable.entity.ItemCustomSpawnEgg;
 import com.lycanitesmobs.core.manager.*;
 import com.lycanitesmobs.core.network.proxy.ClientProxy;
 import com.lycanitesmobs.client.manager.ModelManager;
 import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.manager.CommandManager;
 import com.lycanitesmobs.core.compatibility.DLDungeons;
-import com.lycanitesmobs.core.data.config.ConfigDebug;
 import com.lycanitesmobs.core.data.config.CoreConfig;
 import com.lycanitesmobs.core.container.block.EquipmentForgeContainer;
 import com.lycanitesmobs.core.container.block.EquipmentInfuserContainer;
@@ -26,7 +28,6 @@ import com.lycanitesmobs.core.container.block.EquipmentStationContainer;
 import com.lycanitesmobs.core.container.block.SummoningPedestalContainer;
 import com.lycanitesmobs.core.container.creature.CreatureContainer;
 import com.lycanitesmobs.core.manager.DungeonManager;
-import com.lycanitesmobs.core.effect.EffectManager;
 import com.lycanitesmobs.core.entity.util.EntityFactory;
 import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.StreamLoader;
@@ -38,20 +39,15 @@ import com.lycanitesmobs.core.event.MobEventListener;
 import com.lycanitesmobs.core.network.proxy.IProxy;
 import com.lycanitesmobs.core.network.proxy.ServerProxy;
 import com.lycanitesmobs.core.event.SpawnerEventListener;
-import com.lycanitesmobs.core.worldgen.WorldGeneratorBiomeModifier;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.world.BiomeModifier;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -65,7 +61,6 @@ import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -130,6 +125,8 @@ public class LycanitesMobs {
         modEventBus.addListener(this::processIMC);
         modEventBus.register(ProjectileManager.getInstance());
         modEventBus.register(RegistryEvents.getInstance());
+        modEventBus.addListener(this::registerItemColors);
+
 //		modEventBus.register(StatManager.getInstance()); TODO Stats
         PROXY.registerEvents();
         ItemManager.register(modEventBus);
@@ -147,6 +144,28 @@ public class LycanitesMobs {
         // Load Content:
         this.loadContent();
 
+    }
+
+    private void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        var colors = event.getItemColors();
+
+        for (CreatureType creatureType : CreatureManager.getInstance().creatureTypes.values()) {
+            Item item = ObjectManager.getItem(creatureType.getSpawnEggName());
+            if (item == null) {
+                continue;
+            }
+
+            ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
+            if (key == null) {
+                continue;
+            }
+
+            if (!(item instanceof ItemCustomSpawnEgg)) {
+                continue;
+            }
+
+            colors.register(new ItemColorCustomSpawnEgg(), item);
+        }
     }
 
     public static void registryObjects() {
@@ -229,7 +248,6 @@ public class LycanitesMobs {
         ModelManager.getInstance().createModels();
         ClientManager.getInstance().initRenderRegister();
         ClientManager.getInstance().initBlockRenderTypes();
-
         //New menu screen registration
         event.enqueueWork(
                 () -> {
