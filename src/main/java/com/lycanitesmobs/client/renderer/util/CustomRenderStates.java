@@ -208,8 +208,12 @@ public class CustomRenderStates extends RenderStateShard {
     }
 
     public static RenderType getObjVBORenderType(int blending, boolean glow) {
+        if (blending == BLEND.NORMAL.getValue() && !glow) {
+            return OBJ_CUTOUT;
+        }
         return OBJ_RENDER_TYPES[(blending << 1) | (glow ? 1 : 0)];
     }
+
 
     public static RenderType getObjRenderType(ResourceLocation texture, int blending, boolean glow) {
         if (POS_COL_TEX_LIGHT_FADE_NORMAL == null) {

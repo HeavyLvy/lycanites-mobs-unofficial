@@ -50,6 +50,13 @@ public class VBOBatcher {
             this.texLocation = texLocation;
         }
 
+        private float alphaCutoff = 0.0F;
+
+        public VBODrawCommand setAlphaCutoff(float cutoff) {
+            this.alphaCutoff = cutoff;
+            return this;
+        }
+
         public VBODrawCommand setColor(Vector4f color) {
             return setColor(color.x, color.y, color.z, color.w);
         }
@@ -153,6 +160,9 @@ public class VBOBatcher {
             if (overlay != null) overlay.set(overlayOffsetX, overlayOffsetY);
             var light = shader.getUniform("LightUv");
             if (light != null) light.set(lightOffsetX, lightOffsetY);
+            var cutoff = shader.getUniform("AlphaCutoff");
+            if (cutoff != null) cutoff.set(alphaCutoff);
+
 
             var modelView = new org.joml.Matrix4f(RenderSystem.getModelViewMatrix()).mul(this.modelMatrix);
             var projection = RenderSystem.getProjectionMatrix();
