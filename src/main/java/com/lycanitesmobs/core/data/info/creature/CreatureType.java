@@ -1,7 +1,6 @@
 package com.lycanitesmobs.core.data.info.creature;
 
 import com.google.gson.JsonObject;
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.item.consumable.entity.ItemCustomSpawnEgg;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static com.lycanitesmobs.core.tabs.LMCreaturesGroup.creatureNames;
+import static com.lycanitesmobs.core.item.tabs.LMCreaturesGroup.creatureNames;
 
 public class CreatureType {
 

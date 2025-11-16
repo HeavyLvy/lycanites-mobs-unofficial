@@ -6,6 +6,7 @@ import com.lycanitesmobs.client.gui.screen.beastiary.CreaturesBeastiaryScreen;
 import com.lycanitesmobs.client.gui.screen.beastiary.IndexBeastiaryScreen;
 import com.lycanitesmobs.client.gui.screen.beastiary.PetsBeastiaryScreen;
 import com.lycanitesmobs.client.gui.screen.beastiary.SummoningBeastiaryScreen;
+import com.lycanitesmobs.client.loader.LanguageLoader;
 import com.lycanitesmobs.client.manager.KeyManager;
 import com.lycanitesmobs.client.manager.TabManager;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
@@ -29,10 +30,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.RenderBlockScreenEffectEvent;
-import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -41,6 +39,11 @@ import org.lwjgl.glfw.GLFW;
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT)
 public class ClientEventListener {
+    @SubscribeEvent
+    public static void onRegisterClientReloadListeners(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(LanguageLoader.getInstance());
+    }
+
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void onItemTooltip(ItemTooltipEvent event) {

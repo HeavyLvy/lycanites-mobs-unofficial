@@ -5,7 +5,7 @@ import com.lycanitesmobs.core.container.slot.EquipmentForgeSlot;
 import com.lycanitesmobs.core.container.base.BaseContainer;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
-import com.lycanitesmobs.core.blockentity.TileEntityEquipmentForge;
+import com.lycanitesmobs.core.block.blockentity.TileEntityEquipmentForge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;

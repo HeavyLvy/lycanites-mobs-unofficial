@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.container.provider;
 
-import com.lycanitesmobs.core.blockentity.TileEntitySummoningPedestal;
+import com.lycanitesmobs.core.block.blockentity.TileEntitySummoningPedestal;
 import com.lycanitesmobs.core.container.block.SummoningPedestalContainer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;

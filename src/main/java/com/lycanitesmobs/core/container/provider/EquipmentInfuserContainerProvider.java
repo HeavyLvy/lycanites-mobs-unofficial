@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.container.provider;
 
-import com.lycanitesmobs.core.blockentity.EquipmentInfuserTileEntity;
+import com.lycanitesmobs.core.block.blockentity.EquipmentInfuserTileEntity;
 import com.lycanitesmobs.core.container.block.EquipmentInfuserContainer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;

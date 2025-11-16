@@ -3,7 +3,7 @@ package com.lycanitesmobs.core.block.special;
 import com.lycanitesmobs.core.block.base.BlockBase;
 import com.lycanitesmobs.core.container.provider.SummoningPedestalContainerProvider;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
-import com.lycanitesmobs.core.blockentity.TileEntitySummoningPedestal;
+import com.lycanitesmobs.core.block.blockentity.TileEntitySummoningPedestal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;

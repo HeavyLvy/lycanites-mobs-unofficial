@@ -1,7 +1,6 @@
 package com.lycanitesmobs.core.item.consumable.entity;
 
-import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.dispenser.SpawnEggDispenseBehaviour;
+import com.lycanitesmobs.core.entity.dispenser.SpawnEggDispenseBehaviour;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.creature.CreatureType;

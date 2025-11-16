@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.core.blockentity.TileEntityBase;
+import com.lycanitesmobs.core.block.blockentity.TileEntityBase;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;

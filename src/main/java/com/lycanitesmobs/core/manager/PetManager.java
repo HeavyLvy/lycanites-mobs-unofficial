@@ -1,9 +1,8 @@
 package com.lycanitesmobs.core.manager;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
-import com.lycanitesmobs.core.pets.PetEntry;
-import com.lycanitesmobs.core.pets.PlayerFamiliars;
+import com.lycanitesmobs.core.entity.pets.PetEntry;
+import com.lycanitesmobs.core.entity.pets.PlayerFamiliars;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;

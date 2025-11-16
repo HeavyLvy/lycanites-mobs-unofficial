@@ -8,7 +8,7 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.item.base.BaseItem;
-import com.lycanitesmobs.core.pets.SummonSet;
+import com.lycanitesmobs.core.entity.pets.SummonSet;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;

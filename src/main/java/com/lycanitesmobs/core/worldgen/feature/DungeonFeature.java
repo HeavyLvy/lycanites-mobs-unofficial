@@ -1,9 +1,8 @@
 package com.lycanitesmobs.core.worldgen.feature;
 
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.config.ConfigDungeons;
-import com.lycanitesmobs.core.dungeon.instance.DungeonInstance;
+import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;

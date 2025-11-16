@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.container.block;
 
-import com.lycanitesmobs.core.blockentity.TileEntitySummoningPedestal;
+import com.lycanitesmobs.core.block.blockentity.TileEntitySummoningPedestal;
 import com.lycanitesmobs.core.container.base.BaseContainer;
 import com.lycanitesmobs.core.container.base.BaseSlot;
 import net.minecraft.core.BlockPos;

@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.manager;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.effect.EffectBase;
+import com.lycanitesmobs.core.entity.effect.EffectBase;
 import com.lycanitesmobs.core.container.block.EquipmentForgeContainer;
 import com.lycanitesmobs.core.container.block.EquipmentInfuserContainer;
 import com.lycanitesmobs.core.container.block.EquipmentStationContainer;
@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static com.lycanitesmobs.core.tabs.LMItemsGroup.itemNames;
+import static com.lycanitesmobs.core.item.tabs.LMItemsGroup.itemNames;
 
 
 public class ObjectManager {

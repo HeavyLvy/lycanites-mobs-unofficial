@@ -3,7 +3,7 @@ package com.lycanitesmobs.core.block.special;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.base.BlockBase;
 import com.lycanitesmobs.core.container.provider.EquipmentForgeContainerProvider;
-import com.lycanitesmobs.core.blockentity.TileEntityEquipmentForge;
+import com.lycanitesmobs.core.block.blockentity.TileEntityEquipmentForge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;

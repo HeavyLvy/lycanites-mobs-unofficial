@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static com.lycanitesmobs.core.tabs.LMBlocksGroup.blockNames;
+import static com.lycanitesmobs.core.item.tabs.LMBlocksGroup.blockNames;
 
 public class BlockBase extends Block implements BlockTypeGetter {
 

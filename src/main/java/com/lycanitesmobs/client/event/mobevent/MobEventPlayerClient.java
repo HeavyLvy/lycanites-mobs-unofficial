@@ -1,13 +1,12 @@
 package com.lycanitesmobs.client.event.mobevent;
 
 import com.lycanitesmobs.client.manager.ClientManager;
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.manager.OverlayManager;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.client.gui.screen.base.BaseOverlayScreen;
-import com.lycanitesmobs.core.mobevent.MobEvent;
-import com.lycanitesmobs.core.mobevent.MobEventPlayerServer;
+import com.lycanitesmobs.core.event.mobevent.MobEvent;
+import com.lycanitesmobs.core.event.mobevent.MobEventPlayerServer;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

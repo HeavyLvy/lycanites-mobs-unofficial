@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.client.manager.ModelManager;
-import com.lycanitesmobs.core.dispenser.BaseProjectileDispenseBehaviour;
+import com.lycanitesmobs.core.entity.dispenser.BaseProjectileDispenseBehaviour;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileModelEntity;

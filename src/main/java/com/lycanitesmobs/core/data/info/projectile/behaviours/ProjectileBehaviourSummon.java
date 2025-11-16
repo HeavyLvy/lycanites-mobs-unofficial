@@ -9,7 +9,7 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.network.packet.MessageScreenRequest;
-import com.lycanitesmobs.core.pets.SummonSet;
+import com.lycanitesmobs.core.entity.pets.SummonSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;

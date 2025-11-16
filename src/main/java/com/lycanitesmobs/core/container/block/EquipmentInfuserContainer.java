@@ -5,7 +5,7 @@ import com.lycanitesmobs.core.container.slot.EquipmentInfuserChargeSlot;
 import com.lycanitesmobs.core.container.slot.EquipmentInfuserPartSlot;
 import com.lycanitesmobs.core.item.consumable.entity.ChargeItem;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
-import com.lycanitesmobs.core.blockentity.EquipmentInfuserTileEntity;
+import com.lycanitesmobs.core.block.blockentity.EquipmentInfuserTileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;

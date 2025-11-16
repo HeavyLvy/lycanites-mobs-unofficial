@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.data.info.altar;
 
 import com.lycanitesmobs.core.data.config.ConfigMobEvent;
-import com.lycanitesmobs.core.mobevent.effects.StructureBuilder;
-import com.lycanitesmobs.core.mobevent.trigger.AltarMobEventTrigger;
+import com.lycanitesmobs.core.event.mobevent.effects.StructureBuilder;
+import com.lycanitesmobs.core.event.mobevent.trigger.AltarMobEventTrigger;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.worldgen.mobevents.AmalgalichStructureBuilder;
 import com.lycanitesmobs.core.worldgen.mobevents.AsmodeusStructureBuilder;

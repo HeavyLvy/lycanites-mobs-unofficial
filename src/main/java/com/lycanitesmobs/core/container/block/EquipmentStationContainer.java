@@ -5,7 +5,7 @@ import com.lycanitesmobs.core.container.slot.EquipmentStationEquipmentSlot;
 import com.lycanitesmobs.core.container.slot.EquipmentStationRepairSlot;
 import com.lycanitesmobs.core.manager.ItemManager;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
-import com.lycanitesmobs.core.blockentity.EquipmentStationTileEntity;
+import com.lycanitesmobs.core.block.blockentity.EquipmentStationTileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;

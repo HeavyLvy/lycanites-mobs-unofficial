@@ -5,7 +5,7 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.item.base.CreatureTypeItem;
-import com.lycanitesmobs.core.pets.PetEntry;
+import com.lycanitesmobs.core.entity.pets.PetEntry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;

@@ -1,10 +1,9 @@
 package com.lycanitesmobs.core.data.info.creature;
 
 import com.google.gson.JsonObject;
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
-import com.lycanitesmobs.core.spawner.SpawnerMobRegistry;
+import com.lycanitesmobs.core.entity.spawner.SpawnerMobRegistry;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;

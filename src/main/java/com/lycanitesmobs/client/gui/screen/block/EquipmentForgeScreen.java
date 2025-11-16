@@ -7,7 +7,7 @@ import com.lycanitesmobs.core.container.base.BaseContainer;
 import com.lycanitesmobs.core.container.block.EquipmentForgeContainer;
 import com.lycanitesmobs.core.container.slot.EquipmentForgeSlot;
 import com.lycanitesmobs.core.network.message.MessageTileEntityButton;
-import com.lycanitesmobs.core.blockentity.TileEntityEquipmentForge;
+import com.lycanitesmobs.core.block.blockentity.TileEntityEquipmentForge;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;

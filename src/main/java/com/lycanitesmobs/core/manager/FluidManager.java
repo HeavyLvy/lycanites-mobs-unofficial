@@ -8,14 +8,13 @@ import java.util.Map;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.liquid.AcidLiquidBlock;
-import com.lycanitesmobs.core.block.liquid.BaseLiquidBlock;
 import com.lycanitesmobs.core.block.liquid.MoglavaLiquidBlock;
 import com.lycanitesmobs.core.block.liquid.OozeLiquidBlock;
 import com.lycanitesmobs.core.block.liquid.PoisonLiquidBlock;
 import com.lycanitesmobs.core.block.liquid.VeshoneyLiquidBlock;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
-import com.lycanitesmobs.core.fluid.CustomFluid;
-import com.lycanitesmobs.core.fluid.type.BaseFluidType;
+import com.lycanitesmobs.core.block.fluid.CustomFluid;
+import com.lycanitesmobs.core.block.fluid.type.BaseFluidType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
@@ -29,8 +28,6 @@ import net.minecraftforge.fluids.ForgeFlowingFluid;
 import org.joml.Vector3f;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class FluidManager {

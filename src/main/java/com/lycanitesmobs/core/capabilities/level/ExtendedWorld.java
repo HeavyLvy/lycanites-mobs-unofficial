@@ -2,12 +2,12 @@ package com.lycanitesmobs.core.capabilities.level;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.manager.ClientManager;
-import com.lycanitesmobs.core.dungeon.instance.DungeonInstance;
+import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
 import com.lycanitesmobs.core.capabilities.util.BossEntry;
-import com.lycanitesmobs.core.mobevent.MobEvent;
+import com.lycanitesmobs.core.event.mobevent.MobEvent;
 import com.lycanitesmobs.core.manager.MobEventManager;
 import com.lycanitesmobs.client.event.mobevent.MobEventPlayerClient;
-import com.lycanitesmobs.core.mobevent.MobEventPlayerServer;
+import com.lycanitesmobs.core.event.mobevent.MobEventPlayerServer;
 import com.lycanitesmobs.core.network.message.MessageMobEvent;
 import com.lycanitesmobs.core.network.message.MessageWorldEvent;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;

@@ -7,10 +7,10 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.JSONLoader;
 import com.lycanitesmobs.core.data.loaders.StreamLoader;
-import com.lycanitesmobs.core.dungeon.definition.DungeonSchematic;
-import com.lycanitesmobs.core.dungeon.definition.DungeonSector;
-import com.lycanitesmobs.core.dungeon.definition.DungeonStructure;
-import com.lycanitesmobs.core.dungeon.definition.DungeonTheme;
+import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSchematic;
+import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSector;
+import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonStructure;
+import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonTheme;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 

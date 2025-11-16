@@ -6,8 +6,8 @@ import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.JSONLoader;
 import com.lycanitesmobs.core.data.loaders.StreamLoader;
 import com.lycanitesmobs.core.data.info.ModInfo;
-import com.lycanitesmobs.core.spawner.Spawner;
-import com.lycanitesmobs.core.spawner.condition.SpawnCondition;
+import com.lycanitesmobs.core.entity.spawner.Spawner;
+import com.lycanitesmobs.core.entity.spawner.condition.SpawnCondition;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 
 import java.io.File;

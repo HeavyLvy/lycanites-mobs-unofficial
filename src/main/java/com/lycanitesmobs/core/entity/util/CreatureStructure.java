@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.entity.util;
 
-import com.lycanitesmobs.core.dungeon.definition.DungeonTheme;
-import com.lycanitesmobs.core.dungeon.definition.ThemeBlock;
+import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonTheme;
+import com.lycanitesmobs.core.worldgen.dungeon.definition.ThemeBlock;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.util.ContextUtils;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;

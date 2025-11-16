@@ -8,7 +8,7 @@ import com.lycanitesmobs.client.gui.screen.beastiary.lists.PetTypeList;
 import com.lycanitesmobs.client.gui.buttons.ButtonBase;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
-import com.lycanitesmobs.core.pets.PetEntry;
+import com.lycanitesmobs.core.entity.pets.PetEntry;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.network.chat.Component;

@@ -8,7 +8,7 @@ import com.lycanitesmobs.core.container.slot.EquipmentInfuserChargeSlot;
 import com.lycanitesmobs.core.container.block.EquipmentInfuserContainer;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.network.message.MessageTileEntityButton;
-import com.lycanitesmobs.core.blockentity.EquipmentInfuserTileEntity;
+import com.lycanitesmobs.core.block.blockentity.EquipmentInfuserTileEntity;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;

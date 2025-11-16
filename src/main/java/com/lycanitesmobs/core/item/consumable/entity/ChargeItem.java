@@ -1,7 +1,6 @@
 package com.lycanitesmobs.core.item.consumable.entity;
 
-import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.dispenser.BaseProjectileDispenseBehaviour;
+import com.lycanitesmobs.core.entity.dispenser.BaseProjectileDispenseBehaviour;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
@@ -27,7 +26,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.lycanitesmobs.core.tabs.LMChargesGroup.chargeNames;
+import static com.lycanitesmobs.core.item.tabs.LMChargesGroup.chargeNames;
 
 public class ChargeItem extends BaseItem {
     /**

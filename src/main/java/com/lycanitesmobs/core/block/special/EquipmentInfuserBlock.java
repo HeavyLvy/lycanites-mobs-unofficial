@@ -2,7 +2,7 @@ package com.lycanitesmobs.core.block.special;
 
 import com.lycanitesmobs.core.block.base.BlockBase;
 import com.lycanitesmobs.core.container.provider.EquipmentInfuserContainerProvider;
-import com.lycanitesmobs.core.blockentity.EquipmentInfuserTileEntity;
+import com.lycanitesmobs.core.block.blockentity.EquipmentInfuserTileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;

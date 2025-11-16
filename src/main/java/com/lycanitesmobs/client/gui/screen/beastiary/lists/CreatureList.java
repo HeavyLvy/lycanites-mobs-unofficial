@@ -10,7 +10,7 @@ import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.creature.Subspecies;
 import com.lycanitesmobs.core.data.info.Variant;
 import com.lycanitesmobs.core.network.message.MessageSummonSetSelection;
-import com.lycanitesmobs.core.pets.PetEntry;
+import com.lycanitesmobs.core.entity.pets.PetEntry;
 import net.minecraft.client.gui.GuiGraphics;
 
 import javax.annotation.Nullable;

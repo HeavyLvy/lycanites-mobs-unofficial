@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.command;
 
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
-import com.lycanitesmobs.core.mobevent.MobEvent;
+import com.lycanitesmobs.core.event.mobevent.MobEvent;
 import com.lycanitesmobs.core.event.MobEventListener;
 import com.lycanitesmobs.core.manager.MobEventManager;
 import com.mojang.brigadier.arguments.IntegerArgumentType;

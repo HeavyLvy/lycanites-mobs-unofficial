@@ -2,9 +2,9 @@ package com.lycanitesmobs.core.network.message;
 
 import com.lycanitesmobs.client.manager.ClientManager;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
-import com.lycanitesmobs.core.pets.PetEntry;
+import com.lycanitesmobs.core.entity.pets.PetEntry;
 import com.lycanitesmobs.core.manager.PetManager;
-import com.lycanitesmobs.core.pets.SummonSet;
+import com.lycanitesmobs.core.entity.pets.SummonSet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;

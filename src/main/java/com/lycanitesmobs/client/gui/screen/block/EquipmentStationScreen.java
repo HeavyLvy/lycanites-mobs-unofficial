@@ -8,7 +8,7 @@ import com.lycanitesmobs.core.container.block.EquipmentStationContainer;
 import com.lycanitesmobs.core.container.slot.EquipmentStationRepairSlot;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.network.message.MessageTileEntityButton;
-import com.lycanitesmobs.core.blockentity.EquipmentStationTileEntity;
+import com.lycanitesmobs.core.block.blockentity.EquipmentStationTileEntity;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;

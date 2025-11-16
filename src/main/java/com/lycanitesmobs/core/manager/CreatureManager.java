@@ -9,7 +9,7 @@ import com.lycanitesmobs.core.data.loaders.StreamLoader;
 import com.lycanitesmobs.core.data.config.ConfigCreatures;
 import com.lycanitesmobs.core.entity.util.CreatureStats;
 import com.lycanitesmobs.core.entity.util.EntityFactory;
-import com.lycanitesmobs.core.spawner.SpawnerMobRegistry;
+import com.lycanitesmobs.core.entity.spawner.SpawnerMobRegistry;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;

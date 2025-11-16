@@ -2,11 +2,8 @@ package com.lycanitesmobs.client.event;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.manager.KeyManager;
+import com.lycanitesmobs.client.model.blocky.*;
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.client.model.blocky.BalayangBlockyModel;
-import com.lycanitesmobs.client.model.blocky.GrueBlockyModel;
-import com.lycanitesmobs.client.model.blocky.NymphBlockyModel;
-import com.lycanitesmobs.client.model.blocky.WraithBlockyModel;
 import com.lycanitesmobs.client.renderer.entity.creature.BlockyRenderer;
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.entity.projectile.ProjectileRenderFactory;
@@ -25,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -38,14 +36,13 @@ public final class ClientModEvents {
     public static ShaderInstance POS_TEX_NORMAL_SHADER;
 
     @SubscribeEvent
-    public static void onRegisterShaders(net.minecraftforge.client.event.RegisterShadersEvent event) throws java.io.IOException {
+    public static void onRegisterShaders(RegisterShadersEvent event) throws java.io.IOException {
         var rp = event.getResourceProvider();
         var shader = new ShaderInstance(rp, new net.minecraft.resources.ResourceLocation(LycanitesMobs.MODID, "pos_tex_normal"), CustomRenderStates.POS_TEX_NORMAL);
         event.registerShader(shader, s -> POS_TEX_NORMAL_SHADER = s);
     }
 
     public void registerModelLoaders() {
-        //ModelLoaderRegistry.registerLoader(new ResourceLocation(LycanitesMobs.MODID), new ModelLoader()); Not needed.
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(ClientModEvents::registerEntityRenders);
         modBus.addListener(ClientModEvents::registerLayers);
@@ -62,6 +59,7 @@ public final class ClientModEvents {
         event.registerLayerDefinition(NymphBlockyModel.LAYER_LOCATION, NymphBlockyModel::createBodyLayer);
         event.registerLayerDefinition(GrueBlockyModel.LAYER_LOCATION, GrueBlockyModel::createBodyLayer);
         event.registerLayerDefinition(WraithBlockyModel.LAYER_LOCATION, WraithBlockyModel::createBodyLayer);
+        event.registerLayerDefinition(HermaBlockyModel.LAYER_LOCATION, HermaBlockyModel::createBodyLayer);
     }
 
     @SubscribeEvent
@@ -70,7 +68,7 @@ public final class ClientModEvents {
         // Creatures:
         for (CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
             //LMHelperClass.logInfoMessage("CI Name: " + creatureInfo.getName());
-            var registerBlocky = false;
+            var registerBlocky = true;
             if (creatureInfo.dummy) {
                 event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
                 continue;
@@ -86,6 +84,10 @@ public final class ClientModEvents {
                 } else if (Objects.equals(creatureInfo.getName(), "wraith")) {
                     LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
                     event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/wraith.png"), new WraithBlockyModel<>(context.bakeLayer(WraithBlockyModel.LAYER_LOCATION))));
+                    continue;
+                } else if (Objects.equals(creatureInfo.getName(), "herma")) {
+                    LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
+                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/herma_white.png"), new HermaBlockyModel<>(context.bakeLayer(HermaBlockyModel.LAYER_LOCATION))));
                     continue;
                 }
             }

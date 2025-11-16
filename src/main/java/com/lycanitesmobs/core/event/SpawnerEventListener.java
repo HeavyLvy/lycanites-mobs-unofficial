@@ -3,7 +3,7 @@ package com.lycanitesmobs.core.event;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.data.info.block.BlockReference;
-import com.lycanitesmobs.core.spawner.trigger.*;
+import com.lycanitesmobs.core.entity.spawner.trigger.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;

@@ -171,7 +171,7 @@ public class EntityShadowfireBarrier extends BaseProjectileEntity {
 
     public ResourceLocation getTexture() {
         if (TextureManager.getTexture(this.entityName) == null)
-            TextureManager.addTexture(this.entityName, "textures/item/" + subTypeString() + "/" + this.entityName + ".png");
+            TextureManager.addTexture(this.entityName, "textures/particles/" + subTypeString() + "/" + this.entityName + ".png");
         return TextureManager.getTexture(this.entityName);
     }
 }

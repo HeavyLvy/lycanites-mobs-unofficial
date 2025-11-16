@@ -10,7 +10,7 @@ import com.lycanitesmobs.client.gui.buttons.CreatureButton;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.network.message.MessageSummonSetSelection;
-import com.lycanitesmobs.core.pets.SummonSet;
+import com.lycanitesmobs.core.entity.pets.SummonSet;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.network.chat.Component;

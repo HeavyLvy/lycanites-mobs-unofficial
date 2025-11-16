@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.insect;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.core.effect.EffectBase;
+import com.lycanitesmobs.core.entity.effect.EffectBase;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.StealthGoal;

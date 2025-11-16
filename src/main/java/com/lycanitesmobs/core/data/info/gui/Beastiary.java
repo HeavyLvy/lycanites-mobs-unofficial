@@ -10,7 +10,7 @@ import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.network.message.MessageBeastiary;
 import com.lycanitesmobs.core.network.message.MessageCreatureKnowledge;
-import com.lycanitesmobs.core.pets.SummonSet;
+import com.lycanitesmobs.core.entity.pets.SummonSet;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;

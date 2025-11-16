@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.core.pets.SummonSet;
-import com.lycanitesmobs.core.blockentity.TileEntitySummoningPedestal;
+import com.lycanitesmobs.core.entity.pets.SummonSet;
+import com.lycanitesmobs.core.block.blockentity.TileEntitySummoningPedestal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;

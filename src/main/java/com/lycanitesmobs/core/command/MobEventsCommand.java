@@ -1,9 +1,9 @@
 package com.lycanitesmobs.core.command;
 
 import com.lycanitesmobs.core.data.config.ConfigMobEvent;
-import com.lycanitesmobs.core.mobevent.MobEvent;
+import com.lycanitesmobs.core.event.mobevent.MobEvent;
 import com.lycanitesmobs.core.manager.MobEventManager;
-import com.lycanitesmobs.core.mobevent.MobEventPlayerServer;
+import com.lycanitesmobs.core.event.mobevent.MobEventPlayerServer;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
