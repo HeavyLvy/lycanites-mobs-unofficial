@@ -32,26 +32,16 @@ public class Mesh {
     public VertexBuffer getVbo() {
         try {
             if (this.vbo == null) {
-                if (this.normals == null) {
-                    this.normals = new Vector3o[this.indices.length];
-                    for (int tri = 0; tri < this.indices.length / 3; tri++) {
-                        Vector3o v1 = this.vertices[this.indices[tri * 3]].getPos();
-                        Vector3o v2 = this.vertices[this.indices[tri * 3 + 1]].getPos();
-                        Vector3o v3 = this.vertices[this.indices[tri * 3 + 2]].getPos();
-                        Vector3o normal = calcNormal(v1, v2, v3);
-                        this.normals[tri * 3] = normal;
-                        this.normals[tri * 3 + 1] = normal;
-                        this.normals[tri * 3 + 2] = normal;
-                    }
-                }
+                computeVertexNormalsIfNeeded();
 
                 Tesselator tess = Tesselator.getInstance();
                 BufferBuilder buf = tess.getBuilder();
                 buf.begin(VertexFormat.Mode.TRIANGLES, CustomRenderStates.POS_TEX_NORMAL);
 
                 for (int i = 0; i < this.indices.length; i++) {
-                    Vertex vertex = this.vertices[this.indices[i]];
-                    Vector3o normal = this.normals[i];
+                    int idx = this.indices[i];
+                    Vertex vertex = this.vertices[idx];
+                    Vector3o normal = this.normals != null && idx < this.normals.length ? this.normals[idx] : null;
 
                     float px = vertex.getPos().x();
                     float py = vertex.getPos().y();
@@ -88,6 +78,7 @@ public class Mesh {
         return this.vbo;
     }
 
+
     private static Vector3o calcNormal(Vector3o v1, Vector3o v2, Vector3o v3) {
         Vector3o u = new Vector3o(v2).sub(v1);
         Vector3o v = new Vector3o(v3).sub(v1);
@@ -106,4 +97,46 @@ public class Mesh {
             this.vbo = null;
         }
     }
+
+    public void computeVertexNormalsIfNeeded() {
+        if (this.normals != null && this.vertices != null && this.normals.length == this.vertices.length) {
+            return;
+        }
+        if (this.vertices == null || this.indices == null) {
+            this.normals = null;
+            return;
+        }
+
+        Vector3o[] vertexNormals = new Vector3o[this.vertices.length];
+        for (int i = 0; i < vertexNormals.length; i++) {
+            vertexNormals[i] = new Vector3o(0, 0, 0);
+        }
+
+        for (int i = 0; i < this.indices.length; i += 3) {
+            int i0 = this.indices[i];
+            int i1 = this.indices[i + 1];
+            int i2 = this.indices[i + 2];
+
+            Vector3o v1 = this.vertices[i0].getPos();
+            Vector3o v2 = this.vertices[i1].getPos();
+            Vector3o v3 = this.vertices[i2].getPos();
+
+            Vector3o faceNormal = calcNormal(v1, v2, v3);
+
+            Vector3o n0 = vertexNormals[i0];
+            Vector3o n1 = vertexNormals[i1];
+            Vector3o n2 = vertexNormals[i2];
+
+            n0.set(n0.x() + faceNormal.x(), n0.y() + faceNormal.y(), n0.z() + faceNormal.z());
+            n1.set(n1.x() + faceNormal.x(), n1.y() + faceNormal.y(), n1.z() + faceNormal.z());
+            n2.set(n2.x() + faceNormal.x(), n2.y() + faceNormal.y(), n2.z() + faceNormal.z());
+        }
+
+        for (int i = 0; i < vertexNormals.length; i++) {
+            vertexNormals[i].normalize();
+        }
+
+        this.normals = vertexNormals;
+    }
+
 }

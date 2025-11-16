@@ -70,19 +70,24 @@ public final class ClientModEvents {
         // Creatures:
         for (CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
             //LMHelperClass.logInfoMessage("CI Name: " + creatureInfo.getName());
+            var registerBlocky = false;
             if (creatureInfo.dummy) {
                 event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
-            } else if (Objects.equals(creatureInfo.getName(), "nymph")) {
-                event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/nymph.png"), new NymphBlockyModel<>(context.bakeLayer(NymphBlockyModel.LAYER_LOCATION))));
                 continue;
-            } else if (Objects.equals(creatureInfo.getName(), "grue")) {
-                LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
-                event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/grue.png"), new GrueBlockyModel<>(context.bakeLayer(GrueBlockyModel.LAYER_LOCATION))));
-                continue;
-            } else if (Objects.equals(creatureInfo.getName(), "wraith")) {
-                LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
-                event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/wraith.png"), new WraithBlockyModel<>(context.bakeLayer(WraithBlockyModel.LAYER_LOCATION))));
-                continue;
+            } else if (registerBlocky) {
+                if (Objects.equals(creatureInfo.getName(), "nymph")) {
+                    LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
+                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/nymph.png"), new NymphBlockyModel<>(context.bakeLayer(NymphBlockyModel.LAYER_LOCATION))));
+                    continue;
+                } else if (Objects.equals(creatureInfo.getName(), "grue")) {
+                    LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
+                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/grue.png"), new GrueBlockyModel<>(context.bakeLayer(GrueBlockyModel.LAYER_LOCATION))));
+                    continue;
+                } else if (Objects.equals(creatureInfo.getName(), "wraith")) {
+                    LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
+                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/wraith.png"), new WraithBlockyModel<>(context.bakeLayer(WraithBlockyModel.LAYER_LOCATION))));
+                    continue;
+                }
             }
             event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new CreatureRenderer<>(creatureInfo.getName(), dispatcher, (float) creatureInfo.width / 2));
         }

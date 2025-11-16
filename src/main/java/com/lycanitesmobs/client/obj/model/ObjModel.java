@@ -111,33 +111,46 @@ public class ObjModel {
     }
 
     public void renderPart(VertexConsumer vertexBuilder, Matrix3f matrix3f, Matrix4f matrix4f, int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
-        // Mesh data:
         if (objPart.mesh == null) {
             return;
         }
+
         int[] indices = objPart.mesh.indices;
         Vertex[] vertices = objPart.mesh.vertices;
-        if (objPart.mesh.normals == null) {
-            objPart.mesh.normals = new Vector3o[indices.length];
+
+        if (indices == null || vertices == null) {
+            return;
         }
 
-        // Invalid Builder:
+        if (objPart.mesh.normals == null || objPart.mesh.normals.length != vertices.length) {
+            objPart.mesh.computeVertexNormalsIfNeeded();
+        }
+
         if (vertexBuilder == null) {
             return;
         }
 
-        // Build:
         for (int i = 0; i < indices.length; i += 3) {
-
-            // Normal:
-            Vector3o normal = objPart.mesh.normals[i];
-            if (normal == null) {
-                normal = this.getNormal(vertices[indices[i]].getPos(), vertices[indices[i + 1]].getPos(), vertices[indices[i + 2]].getPos());
-                objPart.mesh.normals[i] = normal;
-            }
-
+            Vector3o fallbackNormal = null;
             for (int iv = 0; iv < 3; iv++) {
-                Vertex v = objPart.mesh.vertices[indices[i + iv]];
+                int idx = indices[i + iv];
+                Vertex v = vertices[idx];
+
+                Vector3o normal = objPart.mesh.normals != null && idx < objPart.mesh.normals.length
+                        ? objPart.mesh.normals[idx]
+                        : null;
+
+                if (normal == null) {
+                    if (fallbackNormal == null) {
+                        fallbackNormal = getNormal(
+                                vertices[indices[i]].getPos(),
+                                vertices[indices[i + 1]].getPos(),
+                                vertices[indices[i + 2]].getPos()
+                        );
+                    }
+                    normal = fallbackNormal;
+                }
+
                 vertexBuilder
                         .vertex(matrix4f, v.getPos().x(), v.getPos().y(), v.getPos().z())
                         .color(color.x(), color.y(), color.z(), color.w())
@@ -149,4 +162,5 @@ public class ObjModel {
             }
         }
     }
+
 }

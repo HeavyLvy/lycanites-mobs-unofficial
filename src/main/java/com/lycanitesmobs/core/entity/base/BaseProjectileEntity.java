@@ -678,9 +678,13 @@ public class BaseProjectileEntity extends ThrowableProjectile {
         return this.entityName.toLowerCase();
     }
 
+    public String subTypeString() {
+        return "charges";
+    }
+
     public ResourceLocation getTexture() {
         if (TextureManager.getTexture(this.getTextureName()) == null)
-            TextureManager.addTexture(this.getTextureName(), "textures/item/charges/" + this.getTextureName() + ".png");
+            TextureManager.addTexture(this.getTextureName(), "textures/item/" + subTypeString() + "/" + this.getTextureName() + ".png");
         return TextureManager.getTexture(this.getTextureName());
     }
 

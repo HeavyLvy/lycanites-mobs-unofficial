@@ -45,6 +45,7 @@ import static com.lycanitesmobs.core.tabs.LMItemsGroup.itemNames;
 
 
 public class ObjectManager {
+
     // ========== Items/Blocks ==========
     public static final Map<String, Supplier<? extends Item>> items = new HashMap<>();
     public static final Map<String, Lazy<? extends BlockItem>> blockItems = new HashMap<>();

@@ -366,17 +366,6 @@ public class ProjectileInfo {
         }
     }
 
-    public void registerDeferred() {
-        if (!this.noChargeItem) {
-            if (ObjectManager.getItem(this.chargeItemName) == null) {
-                Supplier<Item> sup = () -> new ChargeItem(new Item.Properties(), this);
-                ObjectManager.addItem(this.chargeItemName, sup);
-            }
-            this.chargeItem = () -> ObjectManager.getItem(this.chargeItemName);
-        }
-        ObjectManager.addSound(this.name, "projectile." + this.name);
-        if (this.impactSound) ObjectManager.addSound(this.name + "_impact", "projectile." + this.name + ".impact");
-    }
 
     public void initAfterRegistry() {
         if (!this.noChargeItem && this.dispenserBehaviour != null && this.chargeItem != null && this.chargeItem.get() != null) {

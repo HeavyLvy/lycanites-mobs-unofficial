@@ -33,7 +33,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class ProjectileManager extends JSONLoader {
     public static ProjectileManager INSTANCE;
 
@@ -80,13 +79,21 @@ public class ProjectileManager extends JSONLoader {
     public void startup(ModInfo modInfo) {
         this.loadAllFromJSON(modInfo);
         for (ProjectileInfo projectileInfo : this.projectiles.values()) {
+            projectileInfo.load();
+        }
+        this.loadOldProjectiles();
+        for (ProjectileInfo projectileInfo : this.projectiles.values()) {
             EntityType.Builder<?> b = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC)
                     .setTrackingRange(40).setUpdateInterval(3).setShouldReceiveVelocityUpdates(true)
                     .sized(projectileInfo.width, projectileInfo.height);
             LycanitesMobs.ENTITY_TYPES.register(projectileInfo.getName(), () -> (EntityType<?>) b.build(projectileInfo.getName()));
-            projectileInfo.registerDeferred();
         }
-        this.loadOldProjectiles();
+        for (String projectileInfo : this.oldSpriteProjectiles.keySet()) {
+            LycanitesMobs.ENTITY_TYPES.register(projectileInfo, () -> this.createEntityType(projectileInfo, this.oldSpriteProjectiles.get(projectileInfo)));
+        }
+        for (String projectileInfo : this.oldModelProjectiles.keySet()) {
+            LycanitesMobs.ENTITY_TYPES.register(projectileInfo, () -> this.createEntityType(projectileInfo, this.oldSpriteProjectiles.get(projectileInfo)));
+        }
     }
 
 
@@ -128,36 +135,6 @@ public class ProjectileManager extends JSONLoader {
         }
     }
 
-    /**
-     * This registration method is intentionally kept inside ProjectileManager rather than the
-     * RegistryEvents class. The old projectile maps (oldSpriteProjectiles and oldModelProjectiles)
-     * are populated during ProjectileManager startup, and this class is explicitly registered as
-     * an instance listener on the mod event bus. Moving this method to RegistryEvents would cause
-     * registration to run on a different instance or before these maps are initialized, resulting
-     * in no projectile entity types being registered and crashes due to missing types.
-     * <p>
-     * By keeping this handler here, the same initialized ProjectileManager instance that loaded
-     * the projectile data is also the one performing the registry work.
-     *
-     * @param event The Forge registry event for entity types.
-     */
-
-    @SubscribeEvent
-    public void registerProjectiles(RegisterEvent event) {
-        LMHelperClass.logDebug("Projectile", "Forge registering all " + this.projectiles.size() + " projectiles...");
-
-        event.register(ForgeRegistries.Keys.ENTITY_TYPES, helper -> {
-            for (String entityName : this.oldSpriteProjectiles.keySet()) {
-                helper.register(new ResourceLocation(LycanitesMobs.MODID, entityName), this.createEntityType(entityName, this.oldSpriteProjectiles.get(entityName)));
-            }
-        });
-
-        event.register(ForgeRegistries.Keys.ENTITY_TYPES, helper -> {
-            for (String entityName : this.oldModelProjectiles.keySet()) {
-                helper.register(new ResourceLocation(LycanitesMobs.MODID, entityName), this.createEntityType(entityName, this.oldModelProjectiles.get(entityName)));
-            }
-        });
-    }
 
     /**
      * Creates an Entity Type for older projectiles.
@@ -167,6 +144,7 @@ public class ProjectileManager extends JSONLoader {
      * @return The projectile's Entity Type.
      */
     public EntityType createEntityType(String entityName, Class<? extends Entity> entityClass) {
+        // LMHelperClass.logInfo("", "EntityClass: " + entityClass + ", EntityName: " + entityName);
         EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
         entityTypeBuilder.setTrackingRange(40);
         entityTypeBuilder.setUpdateInterval(3);

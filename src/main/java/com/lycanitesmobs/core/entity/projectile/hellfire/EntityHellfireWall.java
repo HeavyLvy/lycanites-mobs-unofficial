@@ -1,12 +1,14 @@
 package com.lycanitesmobs.core.entity.projectile.hellfire;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.api.IGroupBoss;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.creature.demon.EntityRahovart;
 import com.lycanitesmobs.core.data.info.ObjectLists;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -143,5 +145,16 @@ public class EntityHellfireWall extends BaseProjectileEntity {
     @OnlyIn(Dist.CLIENT)
     public int getBrightnessForRender() {
         return 15728880;
+    }
+
+    @Override
+    public String subTypeString() {
+        return "events";
+    }
+
+    public ResourceLocation getTexture() {
+        if (TextureManager.getTexture(this.entityName) == null)
+            TextureManager.addTexture(this.entityName, "textures/item/" + subTypeString() + "/" + this.entityName + ".png");
+        return TextureManager.getTexture(this.entityName);
     }
 }

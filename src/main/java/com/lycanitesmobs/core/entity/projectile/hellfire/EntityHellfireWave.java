@@ -161,9 +161,14 @@ public class EntityHellfireWave extends BaseProjectileEntity {
     // ==================================================
     //                      Visuals
     // ==================================================
+    @Override
+    public String subTypeString() {
+        return "events";
+    }
+
     public ResourceLocation getTexture() {
-        if (TextureManager.getTexture("hellfirewall") == null)
-            TextureManager.addTexture("hellfirewall", "textures/items/hellfirewall" + ".png");
-        return TextureManager.getTexture("hellfirewall");
+        if (TextureManager.getTexture(this.entityName) == null)
+            TextureManager.addTexture(this.entityName, "textures/item/" + subTypeString() + "/" + this.entityName + ".png");
+        return TextureManager.getTexture(this.entityName);
     }
 }

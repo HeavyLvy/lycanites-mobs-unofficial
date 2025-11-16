@@ -1,9 +1,11 @@
 package com.lycanitesmobs.core.entity.projectile.hellfire;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.creature.demon.EntityRahovart;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -98,5 +100,16 @@ public class EntityHellfireOrb extends BaseProjectileEntity {
     @OnlyIn(Dist.CLIENT)
     public int getBrightnessForRender() {
         return 15728880;
+    }
+
+    @Override
+    public String subTypeString() {
+        return "events";
+    }
+
+    public ResourceLocation getTexture() {
+        if (TextureManager.getTexture(this.entityName) == null)
+            TextureManager.addTexture(this.entityName, "textures/item/" + subTypeString() + "/" + this.entityName + ".png");
+        return TextureManager.getTexture(this.entityName);
     }
 }

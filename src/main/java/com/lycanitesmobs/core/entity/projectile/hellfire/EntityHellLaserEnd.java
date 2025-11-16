@@ -13,52 +13,57 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 public class EntityHellLaserEnd extends LaserEndProjectileEntity {
-    
+
     // ==================================================
- 	//                   Constructors
- 	// ==================================================
-	public EntityHellLaserEnd(EntityType<? extends BaseProjectileEntity> entityType, Level world) {
+    //                   Constructors
+    // ==================================================
+    public EntityHellLaserEnd(EntityType<? extends BaseProjectileEntity> entityType, Level world) {
         super(entityType, world);
     }
 
     public EntityHellLaserEnd(EntityType<? extends BaseProjectileEntity> entityType, Level world, double par2, double par4, double par6, LaserProjectileEntity laser) {
         super(entityType, world, par2, par4, par6, laser);
     }
-    
+
     public EntityHellLaserEnd(EntityType<? extends BaseProjectileEntity> entityType, Level world, LivingEntity shooter, LaserProjectileEntity laser) {
         super(entityType, world, shooter, laser);
     }
-    
+
     // ========== Setup Projectile ==========
     public void setup() {
-    	this.entityName = "helllaserend";
-    	this.modInfo = LycanitesMobs.modInfo;
+        this.entityName = "helllaserend";
+        this.modInfo = LycanitesMobs.modInfo;
     }
-    
+
     // ========== Stats ==========
     @Override
     public void setStats() {
-		super.setStats();
+        super.setStats();
         this.setSpeed(1.0D);
     }
-    
-	
-	// ==================================================
- 	//                      Visuals
- 	// ==================================================
+
+
+    // ==================================================
+    //                      Visuals
+    // ==================================================
+    @Override
+    public String subTypeString() {
+        return "events";
+    }
+
     @Override
     public ResourceLocation getTexture() {
-    	if(TextureManager.getTexture(this.entityName + "End") == null)
-    		TextureManager.addTexture(this.entityName + "End", "textures/item/" + this.entityName.toLowerCase() + ".png");
-    	return TextureManager.getTexture(this.entityName + "End");
+        if (TextureManager.getTexture(this.entityName + "End") == null)
+            TextureManager.addTexture(this.entityName + "End", "textures/item/" + subTypeString() + "/" + this.entityName.toLowerCase() + ".png");
+        return TextureManager.getTexture(this.entityName + "End");
     }
-    
-    
+
+
     // ==================================================
- 	//                      Sounds
- 	// ==================================================
-	@Override
-	public SoundEvent getLaunchSound() {
-    	return ObjectManager.getSound(entityName);
-	}
+    //                      Sounds
+    // ==================================================
+    @Override
+    public SoundEvent getLaunchSound() {
+        return ObjectManager.getSound(entityName);
+    }
 }

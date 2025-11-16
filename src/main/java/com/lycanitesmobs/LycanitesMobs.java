@@ -9,6 +9,7 @@ import com.lycanitesmobs.client.manager.ClientManager;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.data.info.ObjectLists;
 import com.lycanitesmobs.core.data.info.creature.CreatureType;
+import com.lycanitesmobs.core.effect.EffectManager;
 import com.lycanitesmobs.core.event.GameEventListener;
 import com.lycanitesmobs.core.data.info.altar.AltarInfo;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
@@ -90,6 +91,9 @@ public class LycanitesMobs {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.Keys.BLOCKS, MODID);
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
+
+    public static EffectManager effectManager;
+
     public static ModInfo modInfo;
     public static boolean configReady = false;
     public static boolean earlyDebug = false;
@@ -123,7 +127,6 @@ public class LycanitesMobs {
         modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::enqueueIMC);
         modEventBus.addListener(this::processIMC);
-        modEventBus.register(ProjectileManager.getInstance());
         modEventBus.register(RegistryEvents.getInstance());
         modEventBus.addListener(this::registerItemColors);
 
@@ -204,6 +207,8 @@ public class LycanitesMobs {
         // Vanilla Item Lists:
         ObjectLists.createVanillaLists();
 
+        // Mob Effects:
+        effectManager = EffectManager.getInstance();
 
         // Spawners:
         SpawnerManager.getInstance().loadAllFromJson(modInfo);
