@@ -16,6 +16,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -92,20 +93,29 @@ public abstract class ItemObjModel implements IAnimationModel {
      * @return
      */
     public ItemObjModel initModel(String name, String path) {
-        // Load Obj Model:
-        this.objModel = new VBOObjModel(new ResourceLocation(LycanitesMobs.MODID, "modelparts/" + path + ".obj"));
+        ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+        return initModel(name, path, resourceManager);
+    }
+
+    protected String modelName;
+    protected String modelPath;
+
+    public ItemObjModel initModel(String name, String path, ResourceManager resourceManager) {
+        this.modelName = name;
+        this.modelPath = path;
+
+        this.objModel = new VBOObjModel(new ResourceLocation(LycanitesMobs.MODID, "modelparts/" + path + ".obj"), resourceManager);
         this.objParts = this.objModel.objParts;
         if (this.objParts.isEmpty())
             LMHelperClass.logWarning("", "Unable to load any parts for the " + name + " model!");
 
-        // Create Animator:
         this.animator = new Animator(this);
 
-        // Load Model Parts:
+        this.animationParts.clear();
         ResourceLocation animPartsLoc = new ResourceLocation(LycanitesMobs.MODID, "modelparts/" + path + "_parts.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-            InputStream in = Minecraft.getInstance().getResourceManager().getResource(animPartsLoc).get().open();
+            InputStream in = resourceManager.getResource(animPartsLoc).get().open();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             try {
                 JsonArray jsonArray = GsonHelper.fromJson(gson, reader, JsonArray.class, false);
@@ -124,16 +134,14 @@ public abstract class ItemObjModel implements IAnimationModel {
             e.toString();
         }
 
-        // Assign Model Part Children:
         for (AnimationPart part : this.animationParts.values()) {
             part.addChildren(this.animationParts.values().toArray(new AnimationPart[this.animationParts.size()]));
         }
 
-        // Load Animations:
         ResourceLocation animationLocation = new ResourceLocation(LycanitesMobs.MODID, "modelparts/" + path + "_animation.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-            InputStream in = Minecraft.getInstance().getResourceManager().getResource(animationLocation).get().open();
+            InputStream in = resourceManager.getResource(animationLocation).get().open();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             try {
                 JsonObject json = GsonHelper.fromJson(gson, reader, JsonObject.class, false);
@@ -147,6 +155,28 @@ public abstract class ItemObjModel implements IAnimationModel {
         }
 
         return this;
+    }
+
+    public void reloadModel(ResourceManager resourceManager) {
+        LMHelperClass.logDebug("Resources", "ItemObjModel.reloadModel: disposing name=" + this.modelName + " path=" + this.modelPath);
+
+        if (this.objModel != null) {
+            this.objModel.dispose();
+            this.objModel = null;
+        }
+
+        this.objParts = null;
+        this.animationParts.clear();
+        this.animation = null;
+        this.animator = null;
+        this.currentAnimationPart = null;
+
+        if (this.modelName != null && this.modelPath != null) {
+            LMHelperClass.logDebug("Resources", "ItemObjModel.reloadModel: initModel name=" + this.modelName + " path=" + this.modelPath);
+            this.initModel(this.modelName, this.modelPath, resourceManager);
+        } else {
+            LMHelperClass.logDebug("Resources", "ItemObjModel.reloadModel: missing metadata");
+        }
     }
 
     /**

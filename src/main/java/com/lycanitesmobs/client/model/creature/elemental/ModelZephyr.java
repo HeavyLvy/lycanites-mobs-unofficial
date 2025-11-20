@@ -4,7 +4,7 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.model.template.ModelTemplateElemental;
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.layer.creature.LayerCreatureBase;
-import com.lycanitesmobs.client.renderer.layer.specific.LayerZephyr;
+import com.lycanitesmobs.client.renderer.layer.creature.specific.LayerZephyr;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;

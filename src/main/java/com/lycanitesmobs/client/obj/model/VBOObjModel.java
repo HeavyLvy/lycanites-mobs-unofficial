@@ -9,6 +9,7 @@ import com.lycanitesmobs.client.renderer.util.VBOBatcher.VBODrawCommand;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -24,8 +25,13 @@ public class VBOObjModel extends ObjModel {
     public float baseR = 1.0F, baseG = 1.0F, baseB = 1.0F, baseRange = 0.1F;
     public float variantR = 1.0F, variantG = 1.0F, variantB = 1.0F, variantAmount = 0.0F;
 
+
     public VBOObjModel(ResourceLocation resourceLocation) {
         super(resourceLocation);
+    }
+
+    public VBOObjModel(ResourceLocation resourceLocation, ResourceManager resourceManager) {
+        super(resourceLocation, resourceManager);
     }
 
     public void applyVariantFromState(ModelObjState state) {

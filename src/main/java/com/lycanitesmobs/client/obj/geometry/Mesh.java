@@ -32,6 +32,7 @@ public class Mesh {
     public VertexBuffer getVbo() {
         try {
             if (this.vbo == null) {
+                LMHelperClass.logDebug("Resources", "Mesh.getVbo: building new VBO");
                 computeVertexNormalsIfNeeded();
 
                 Tesselator tess = Tesselator.getInstance();

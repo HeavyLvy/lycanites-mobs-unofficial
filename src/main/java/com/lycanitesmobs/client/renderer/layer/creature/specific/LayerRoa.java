@@ -1,4 +1,4 @@
-package com.lycanitesmobs.client.renderer.layer.specific;
+package com.lycanitesmobs.client.renderer.layer.creature.specific;
 
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.layer.creature.LayerCreatureBase;
@@ -26,8 +26,8 @@ public class LayerRoa extends LayerCreatureBase {
     // ==================================================
     @Override
     public boolean canRenderLayer(BaseCreatureEntity entity, float scale) {
-        if(entity instanceof EntityRoa) {
-            EntityRoa entityRoa = (EntityRoa)entity;
+        if (entity instanceof EntityRoa) {
+            EntityRoa entityRoa = (EntityRoa) entity;
             return entityRoa.canWhirlpool();
         }
         return false;

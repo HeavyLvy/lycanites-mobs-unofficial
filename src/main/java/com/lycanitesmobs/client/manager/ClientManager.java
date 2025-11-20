@@ -6,6 +6,7 @@ import com.lycanitesmobs.client.gui.screen.beastiary.SummoningBeastiaryScreen;
 import com.lycanitesmobs.client.gui.screen.base.BaseOverlayScreen;
 import com.lycanitesmobs.client.loader.LanguageLoader;
 import com.lycanitesmobs.core.manager.ItemManager;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;

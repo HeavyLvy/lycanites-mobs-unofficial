@@ -1,6 +1,9 @@
 package com.lycanitesmobs.client.manager;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.client.model.creature.base.CreatureObjModel;
+import com.lycanitesmobs.client.model.creature.base.CreatureObjModelOld;
+import com.lycanitesmobs.client.model.projectile.base.ProjectileObjModel;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.client.model.creature.base.CreatureModel;
 import com.lycanitesmobs.client.model.item.EquipmentModel;
@@ -14,6 +17,7 @@ import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.manager.EquipmentPartManager;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -36,6 +40,52 @@ public class ModelManager {
     public Map<String, ProjectileModel> oldProjectileModels = new HashMap<>();
     public EquipmentModel equipmentModel;
     public Map<ItemEquipmentPart, ModelEquipmentPart> equipmentPartModels = new HashMap<>();
+
+    public void reloadModels(ResourceManager resourceManager) {
+        LMHelperClass.logDebug("Resources", "ModelManager.reloadModels: begin");
+        LMHelperClass.logDebug(
+                "Resources",
+                "ModelManager.reloadModels: base=" + this.creatureModels.size()
+                        + " subspecies=" + this.creatureSubspeciesModels.size()
+                        + " equipmentParts=" + this.equipmentPartModels.size()
+        );
+
+        for (CreatureModel model : this.creatureModels.values()) {
+            if (model instanceof CreatureObjModel obj) {
+                LMHelperClass.logDebug("Resources", "ModelManager.reloadModels: reloading base model " + obj.getClass().getName());
+                obj.reloadModel(resourceManager);
+            } else if (model instanceof CreatureObjModelOld old) {
+                LMHelperClass.logDebug("Resources", "ModelManager.reloadModels: reloading base old model " + old.getClass().getName());
+                old.reloadModel(resourceManager);
+            }
+        }
+
+        for (CreatureModel model : this.creatureSubspeciesModels.values()) {
+            if (model instanceof CreatureObjModel obj) {
+                LMHelperClass.logDebug("Resources", "ModelManager.reloadModels: reloading subspecies model " + obj.getClass().getName());
+                obj.reloadModel(resourceManager);
+            } else if (model instanceof CreatureObjModelOld old) {
+                LMHelperClass.logDebug("Resources", "ModelManager.reloadModels: reloading subspecies old model " + old.getClass().getName());
+                old.reloadModel(resourceManager);
+            }
+        }
+
+        for (ModelEquipmentPart itemModel : this.equipmentPartModels.values()) {
+            if (itemModel != null) {
+                LMHelperClass.logDebug("Resources", "ModelManager.reloadModels: reloading equipment model " + itemModel.getClass().getName());
+                itemModel.reloadModel(resourceManager);
+            }
+        }
+        for (ProjectileModel model : this.projectileModels.values()) {
+            if (model instanceof ProjectileObjModel obj) {
+                LMHelperClass.logDebug("Resources", "ModelManager.reloadModels: reloading projectile model " + obj.getClass().getName());
+                obj.reloadModel(resourceManager);
+            }
+        }
+
+        LMHelperClass.logDebug("Resources", "ModelManager.reloadModels: end");
+    }
+
 
     /**
      * Creates all models to be used.
@@ -144,5 +194,9 @@ public class ModelManager {
             return this.equipmentPartModels.get(equipmentPart);
         }
         return null;
+    }
+
+    public int getLoadedModelCount() {
+        return creatureModels.size();
     }
 }

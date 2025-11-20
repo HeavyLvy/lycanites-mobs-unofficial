@@ -18,6 +18,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -137,6 +138,9 @@ public class CreatureObjModel extends CreatureModel {
      * The current model state for the entity that is being animated and rendered.
      **/
     protected ModelObjState currentModelState;
+    protected ModInfo modelModInfo;
+    protected String modelName;
+    protected String modelPath;
 
 
     public CreatureObjModel() {
@@ -157,34 +161,64 @@ public class CreatureObjModel extends CreatureModel {
         this.colorsPrecomputed = precomputed;
     }
 
-    /**
-     * Initializes this model, loading model data, etc.
-     *
-     * @param name    The unique name this model should have.
-     * @param modInfo The mod this model belongs to.
-     * @param path    The path to load the model data from (no extension).
-     * @return This model instance.
-     */
+    public void reloadModel(ResourceManager resourceManager) {
+        LMHelperClass.logDebug(
+                "Resources",
+                "CreatureObjModel.reloadModel: disposing name=" + this.modelName + " path=" + this.modelPath
+        );
+
+        if (this.objModel != null) {
+            this.objModel.dispose();
+            this.objModel = null;
+        }
+
+        this.objParts = null;
+        this.animationParts.clear();
+        this.animation = null;
+        this.colorCache.clear();
+        this.modelStates.clear();
+        this.currentModelState = null;
+        this.currentAnimationPart = null;
+        this.colorsPrecomputed = false;
+
+        if (this.modelName != null && this.modelModInfo != null && this.modelPath != null) {
+            LMHelperClass.logDebug(
+                    "Resources",
+                    "CreatureObjModel.reloadModel: initModel name=" + this.modelName + " path=" + this.modelPath
+            );
+            this.initModel(this.modelName, this.modelModInfo, this.modelPath, resourceManager);
+        } else {
+            LMHelperClass.logDebug(
+                    "Resources",
+                    "CreatureObjModel.reloadModel: missing metadata for " + this.getClass().getName()
+            );
+        }
+    }
+
+
     public CreatureObjModel initModel(String name, ModInfo modInfo, String path) {
-        // Check If Enabled:
-        /*CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(name);
-        if (creatureInfo != null && !creatureInfo.enabled) {
-            return this;
-        }*/
-        // Load Obj Model:
-        this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"));
+        return initModel(name, modInfo, path, Minecraft.getInstance().getResourceManager());
+    }
+
+    public CreatureObjModel initModel(String name, ModInfo modInfo, String path, ResourceManager resourceManager) {
+        this.modelName = name;
+        this.modelModInfo = modInfo;
+        this.modelPath = path;
+
+        this.objModel = new VBOObjModel(
+                new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"),
+                resourceManager
+        );
         this.objParts = this.objModel.objParts;
         if (this.objParts.isEmpty())
             LMHelperClass.logWarning("", "Unable to load model obj for: " + name + "");
 
-        // Create Animator:
         this.animator = new Animator(this);
 
-        // Load Model Parts:
         ResourceLocation modelPartsLocation = new ResourceLocation(modInfo.modid, "modelparts/" + path + "_parts.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-            InputStream in = Minecraft.getInstance().getResourceManager().getResource(modelPartsLocation).get().open();
+            InputStream in = resourceManager.getResource(modelPartsLocation).get().open();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             try {
                 JsonArray jsonArray = GsonHelper.fromJson(gson, reader, JsonArray.class, false);
@@ -202,16 +236,14 @@ public class CreatureObjModel extends CreatureModel {
             LMHelperClass.logWarning("", "Unable to load model parts json for: " + name + "");
         }
 
-        // Assign Model Part Children:
         for (AnimationPart part : this.animationParts.values()) {
             part.addChildren(this.animationParts.values().toArray(new AnimationPart[this.animationParts.size()]));
         }
 
-        // Load Animations:
         ResourceLocation animationLocation = new ResourceLocation(modInfo.modid, "modelparts/" + path + "_animation.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-            InputStream in = Minecraft.getInstance().getResourceManager().getResource(animationLocation).get().open();
+            InputStream in = resourceManager.getResource(animationLocation).get().open();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             try {
                 JsonObject json = GsonHelper.fromJson(gson, reader, JsonObject.class, false);
@@ -226,6 +258,7 @@ public class CreatureObjModel extends CreatureModel {
 
         return this;
     }
+
 
     /**
      * Adds an animation part, these are used to animate each model part.

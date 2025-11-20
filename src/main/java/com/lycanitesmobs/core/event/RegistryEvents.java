@@ -172,7 +172,6 @@ public class RegistryEvents {
                     }
                 }
         );
-
     }
 
     // ========== Fluids ==========
@@ -237,6 +236,7 @@ public class RegistryEvents {
                 });
     }
 
+    // ========== Attributes ==========
     @SubscribeEvent
     public void registerEntityAttributes(EntityAttributeCreationEvent event) {
         for (CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
@@ -254,6 +254,7 @@ public class RegistryEvents {
         );
     }
 
+    // ========== Stats ==========
     @SubscribeEvent
     public void registerStats(RegisterEvent event) {
         StatManager.getInstance().createStatTypes();
@@ -266,6 +267,8 @@ public class RegistryEvents {
         }
     }
 
+
+    // ========== Commands ==========
     @SubscribeEvent
     public static void register(final RegisterCommandsEvent event) {
         event.getDispatcher().register(

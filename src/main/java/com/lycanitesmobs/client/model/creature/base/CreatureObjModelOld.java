@@ -12,7 +12,9 @@ import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -99,6 +101,10 @@ public class CreatureObjModelOld extends CreatureModel {
         // Here a model should get its model, collect its parts into a list and then set the centers for each part.
     }
 
+    protected ModInfo modelModInfo;
+    protected String modelName;
+    protected String modelPath;
+
     /**
      * Initializes this model, loading model data, etc.
      *
@@ -108,19 +114,55 @@ public class CreatureObjModelOld extends CreatureModel {
      * @return This model instance.
      */
     public CreatureObjModelOld initModel(String name, ModInfo modInfo, String path) {
-        // Check If Enabled:
+        ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+        return initModel(name, modInfo, path, resourceManager);
+    }
+
+    public CreatureObjModelOld initModel(String name, ModInfo modInfo, String path, ResourceManager resourceManager) {
         CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(name);
         if (creatureInfo != null && !creatureInfo.enabled) {
             return this;
         }
 
-        this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"));
+        this.modelName = name;
+        this.modelModInfo = modInfo;
+        this.modelPath = path;
+
+        this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"), resourceManager);
         this.wavefrontParts = this.objModel.objParts;
         if (this.wavefrontParts.isEmpty())
             LMHelperClass.logWarning("", "Unable to load (old format) model obj for: " + name + "");
 
         return this;
     }
+
+    public void reloadModel(ResourceManager resourceManager) {
+        LMHelperClass.logDebug(
+                "Resources",
+                "CreatureObjModelOld.reloadModel: disposing name=" + this.modelName + " path=" + this.modelPath
+        );
+
+        if (this.objModel != null) {
+            this.objModel.dispose();
+            this.objModel = null;
+        }
+
+        this.wavefrontParts = null;
+
+        if (this.modelName != null && this.modelModInfo != null && this.modelPath != null) {
+            LMHelperClass.logDebug(
+                    "Resources",
+                    "CreatureObjModelOld.reloadModel: initModel name=" + this.modelName + " path=" + this.modelPath
+            );
+            this.initModel(this.modelName, this.modelModInfo, this.modelPath, resourceManager);
+        } else {
+            LMHelperClass.logDebug(
+                    "Resources",
+                    "CreatureObjModelOld.reloadModel: missing metadata for " + this.getClass().getName()
+            );
+        }
+    }
+
 
     @Override
     public void render(BaseCreatureEntity entity, PoseStack matrixStack, VertexConsumer vertexBuilder, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade) {

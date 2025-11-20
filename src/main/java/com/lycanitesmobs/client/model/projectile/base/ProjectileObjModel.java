@@ -84,6 +84,9 @@ public class ProjectileObjModel extends ProjectileModel {
      * The current model state for the entity that is being animated and rendered.
      **/
     protected ModelObjState currentModelState;
+    protected String modelName;
+    protected ModInfo modelModInfo;
+    protected String modelPath;
 
 
     public ProjectileObjModel() {
@@ -103,67 +106,78 @@ public class ProjectileObjModel extends ProjectileModel {
      * @return This model instance.
      */
     public ProjectileObjModel initModel(String name, ModInfo modInfo, String path) {
-        // Check If Enabled:
         ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile(name);
         if (projectileInfo != null && !projectileInfo.enabled) {
             return this;
         }
 
-        // Load Obj Model:
-        this.wavefrontObject = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"));
-        this.objParts = this.wavefrontObject.objParts;
-        if (this.objParts.isEmpty())
-            LMHelperClass.logWarning("", "Unable to load any parts for the " + name + " model!");
+        this.modelName = name;
+        this.modelModInfo = modInfo;
+        this.modelPath = path;
 
-        // Create Animator:
+        this.reloadModel(Minecraft.getInstance().getResourceManager());
+
+        return this;
+    }
+
+    public void reloadModel(net.minecraft.server.packs.resources.ResourceManager resourceManager) {
+        if (this.modelModInfo == null || this.modelPath == null) {
+            return;
+        }
+
+        this.wavefrontObject = new VBOObjModel(new ResourceLocation(this.modelModInfo.modid, "modelparts/" + this.modelPath + ".obj"));
+        this.objParts = this.wavefrontObject.objParts;
+        if (this.objParts.isEmpty()) {
+            LMHelperClass.logWarning("Resources", "Unable to load any parts for the " + this.modelName + " model!");
+        }
+
+        this.animationParts.clear();
         this.animator = new Animator(this);
 
-        // Load Model Parts:
-        ResourceLocation modelPartsLocation = new ResourceLocation(modInfo.modid, "modelparts/" + path + "_parts.json");
+        ResourceLocation modelPartsLocation = new ResourceLocation(this.modelModInfo.modid, "modelparts/" + this.modelPath + "_parts.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-            InputStream in = Minecraft.getInstance().getResourceManager().getResource(modelPartsLocation).get().open();
+            InputStream in = resourceManager.getResource(modelPartsLocation).get().open();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             try {
                 JsonArray jsonArray = GsonHelper.fromJson(gson, reader, JsonArray.class, false);
-                Iterator<JsonElement> jsonIterator = jsonArray.iterator();
-                while (jsonIterator.hasNext()) {
-                    JsonObject partJson = jsonIterator.next().getAsJsonObject();
-                    AnimationPart animationPart = new AnimationPart();
-                    animationPart.loadFromJson(partJson);
-                    this.addAnimationPart(animationPart);
+                if (jsonArray != null) {
+                    Iterator<JsonElement> jsonIterator = jsonArray.iterator();
+                    while (jsonIterator.hasNext()) {
+                        JsonObject partJson = jsonIterator.next().getAsJsonObject();
+                        AnimationPart animationPart = new AnimationPart();
+                        animationPart.loadFromJson(partJson);
+                        this.addAnimationPart(animationPart);
+                    }
                 }
             } finally {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "There was a problem loading animation parts for " + name + ":");
-            e.toString();
+            LMHelperClass.logWarning("Resources", "There was a problem loading animation parts for " + this.modelName + ": " + e);
         }
 
-        // Assign Model Part Children:
         for (AnimationPart part : this.animationParts.values()) {
             part.addChildren(this.animationParts.values().toArray(new AnimationPart[this.animationParts.size()]));
         }
 
-        // Load Animations:
-        ResourceLocation animationLocation = new ResourceLocation(modInfo.modid, "modelparts/" + path + "_animation.json");
+        ResourceLocation animationLocation = new ResourceLocation(this.modelModInfo.modid, "modelparts/" + this.modelPath + "_animation.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-            InputStream in = Minecraft.getInstance().getResourceManager().getResource(animationLocation).get().open();
+            InputStream in = resourceManager.getResource(animationLocation).get().open();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             try {
                 JsonObject json = GsonHelper.fromJson(gson, reader, JsonObject.class, false);
-                this.animation = new ModelAnimation();
-                this.animation.loadFromJson(json);
+                if (json != null) {
+                    this.animation = new ModelAnimation();
+                    this.animation.loadFromJson(json);
+                }
             } finally {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("Models", "Unable to load animation json for " + name + ".");
+            LMHelperClass.logWarning("Models", "Unable to load animation json for " + this.modelName + ".");
         }
-
-        return this;
     }
 
     /**

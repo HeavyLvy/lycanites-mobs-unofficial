@@ -1,4 +1,4 @@
-package com.lycanitesmobs.client.renderer.layer.specific;
+package com.lycanitesmobs.client.renderer.layer.creature.specific;
 
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.layer.creature.LayerCreatureBase;
@@ -26,8 +26,8 @@ public class LayerThresher extends LayerCreatureBase {
     // ==================================================
     @Override
     public boolean canRenderLayer(BaseCreatureEntity entity, float scale) {
-        if(entity instanceof EntityThresher) {
-            EntityThresher entityThresher = (EntityThresher)entity;
+        if (entity instanceof EntityThresher) {
+            EntityThresher entityThresher = (EntityThresher) entity;
             return entityThresher.canWhirlpool();
         }
         return false;

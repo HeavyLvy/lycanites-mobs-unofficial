@@ -134,6 +134,7 @@ public class LycanitesMobs {
         ItemManager.register(modEventBus);
 
         // Game Event Listeners:
+        MinecraftForge.EVENT_BUS.register(SpawnerEventListener.getInstance());
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(CommandManager.getInstance());
         MinecraftForge.EVENT_BUS.register(new GameEventListener());

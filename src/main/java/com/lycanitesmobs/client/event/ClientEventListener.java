@@ -37,11 +37,16 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(
+        modid = LycanitesMobs.MODID,
+        value = Dist.CLIENT,
+        bus = Mod.EventBusSubscriber.Bus.MOD
+)
 public class ClientEventListener {
     @SubscribeEvent
     public static void onRegisterClientReloadListeners(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(LanguageLoader.getInstance());
+        event.registerReloadListener(com.lycanitesmobs.client.loader.ModelReloadListener.INSTANCE);
     }
 
     @SubscribeEvent

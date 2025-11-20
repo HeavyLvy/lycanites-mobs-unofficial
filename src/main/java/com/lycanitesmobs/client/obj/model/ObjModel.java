@@ -12,6 +12,7 @@ import com.lycanitesmobs.core.util.math.Vector3o;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.joml.*;
@@ -26,10 +27,26 @@ public class ObjModel {
     public HashMap<ObjPart, IndexedModel> partToIndexedModelMap = new HashMap<>();
 
     public ObjModel(ResourceLocation resourceLocation) {
+        LMHelperClass.logDebug("Resources", "ObjModel: 1-arg ctor " + resourceLocation);
         this.filename = resourceLocation.getPath();
+        this.objParts = new ArrayList<>();
+        this.partToIndexedModelMap = new HashMap<>();
+        ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+        initFromResource(resourceLocation, resourceManager);
+    }
+
+    public ObjModel(ResourceLocation resourceLocation, ResourceManager resourceManager) {
+        LMHelperClass.logDebug("Resources", "ObjModel: 2-arg ctor " + resourceLocation);
+        this.filename = resourceLocation.getPath();
+        this.objParts = new ArrayList<>();
+        this.partToIndexedModelMap = new HashMap<>();
+        initFromResource(resourceLocation, resourceManager);
+    }
+
+    private void initFromResource(ResourceLocation resourceLocation, ResourceManager resourceManager) {
         String path = resourceLocation.toString();
         try {
-            InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(resourceLocation).get().open();
+            InputStream inputStream = resourceManager.getResource(resourceLocation).get().open();
             String content = new String(read(inputStream), "UTF-8");
             String startPath = path.substring(0, path.lastIndexOf('/') + 1);
             HashMap<ObjPart, IndexedModel> map = new OBJLoader().loadModel(startPath, content);
@@ -48,6 +65,17 @@ public class ObjModel {
             LMHelperClass.logWarning("", "Unable to load model: " + resourceLocation);
             e.printStackTrace();
         }
+    }
+
+    public void dispose() {
+        for (ObjPart part : this.objParts) {
+            if (part.mesh != null) {
+                part.mesh.delete();
+                part.mesh = null;
+            }
+        }
+        this.objParts.clear();
+        this.partToIndexedModelMap.clear();
     }
 
     private BaseCreatureEntity creature;
