@@ -45,77 +45,141 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
         int backX = (this.width - this.imageWidth) / 2;
         int backY = (this.height - this.imageHeight) / 2;
 
-        if (!(this.creature instanceof TameableCreatureEntity))
+        if (!(this.creature instanceof TameableCreatureEntity)) {
             return;
+        }
+
         TameableCreatureEntity pet = (TameableCreatureEntity) this.creature;
-        if (!pet.petControlsEnabled())
+        if (!pet.petControlsEnabled()) {
             return;
+        }
+
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
         int buttonSpacing = 2;
         int buttonWidth = 128;
         int buttonHeight = 20;
         int buttonX = backX + this.imageWidth;
         int buttonY = backY;
 
-        String buttonText = Component.translatable("gui.pet.follow").getString();
         buttonY += buttonSpacing;
-        Button button = new ButtonBase(BaseCreatureEntity.PET_COMMAND_ID.FOLLOW.id, buttonX + buttonSpacing, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), this);
+        Button button = new ButtonBase(
+                BaseCreatureEntity.PET_COMMAND_ID.FOLLOW.id,
+                buttonX + buttonSpacing,
+                buttonY,
+                buttonWidth,
+                buttonHeight,
+                Component.translatable("gui.pet.follow"),
+                this
+        );
         if (pet.isFollowing() && !pet.isSitting()) {
             button.active = false;
         }
         this.addRenderableWidget(button);
 
-        buttonText = Component.translatable("gui.pet.wander").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
-        button = new ButtonBase(BaseCreatureEntity.PET_COMMAND_ID.WANDER.id, buttonX + buttonSpacing, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), this);
+        button = new ButtonBase(
+                BaseCreatureEntity.PET_COMMAND_ID.WANDER.id,
+                buttonX + buttonSpacing,
+                buttonY,
+                buttonWidth,
+                buttonHeight,
+                Component.translatable("gui.pet.wander"),
+                this
+        );
         if (!pet.isFollowing() && !pet.isSitting()) {
             button.active = false;
         }
         this.addRenderableWidget(button);
 
-        buttonText = Component.translatable("gui.pet.sit").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
-        button = new ButtonBase(BaseCreatureEntity.PET_COMMAND_ID.SIT.id, buttonX + buttonSpacing, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), this);
+        button = new ButtonBase(
+                BaseCreatureEntity.PET_COMMAND_ID.SIT.id,
+                buttonX + buttonSpacing,
+                buttonY,
+                buttonWidth,
+                buttonHeight,
+                Component.translatable("gui.pet.sit"),
+                this
+        );
         if (!pet.isFollowing() && pet.isSitting()) {
             button.active = false;
         }
         this.addRenderableWidget(button);
 
-        buttonText = Component.translatable("gui.pet.passive").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
-        button = new ButtonBase(BaseCreatureEntity.PET_COMMAND_ID.PASSIVE.id, buttonX + buttonSpacing, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), this);
+        button = new ButtonBase(
+                BaseCreatureEntity.PET_COMMAND_ID.PASSIVE.id,
+                buttonX + buttonSpacing,
+                buttonY,
+                buttonWidth,
+                buttonHeight,
+                Component.translatable("gui.pet.passive"),
+                this
+        );
         if (pet.isPassive()) {
             button.active = false;
         }
         this.addRenderableWidget(button);
 
-        buttonText = Component.translatable("gui.pet.defensive").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
-        button = new ButtonBase(BaseCreatureEntity.PET_COMMAND_ID.DEFENSIVE.id, buttonX + buttonSpacing, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), this);
+        button = new ButtonBase(
+                BaseCreatureEntity.PET_COMMAND_ID.DEFENSIVE.id,
+                buttonX + buttonSpacing,
+                buttonY,
+                buttonWidth,
+                buttonHeight,
+                Component.translatable("gui.pet.defensive"),
+                this
+        );
         if (!pet.isPassive() && !pet.isAssisting() && !pet.isAggressive()) {
             button.active = false;
         }
         this.addRenderableWidget(button);
 
-        buttonText = Component.translatable("gui.pet.assist").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
-        button = new ButtonBase(BaseCreatureEntity.PET_COMMAND_ID.ASSIST.id, buttonX + buttonSpacing, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), this);
+        button = new ButtonBase(
+                BaseCreatureEntity.PET_COMMAND_ID.ASSIST.id,
+                buttonX + buttonSpacing,
+                buttonY,
+                buttonWidth,
+                buttonHeight,
+                Component.translatable("gui.pet.assist"),
+                this
+        );
         if (!pet.isPassive() && pet.isAssisting() && !pet.isAggressive()) {
             button.active = false;
         }
         this.addRenderableWidget(button);
 
-        buttonText = Component.translatable("gui.pet.aggressive").getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
-        button = new ButtonBase(BaseCreatureEntity.PET_COMMAND_ID.AGGRESSIVE.id, buttonX + buttonSpacing, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), this);
+        button = new ButtonBase(
+                BaseCreatureEntity.PET_COMMAND_ID.AGGRESSIVE.id,
+                buttonX + buttonSpacing,
+                buttonY,
+                buttonWidth,
+                buttonHeight,
+                Component.translatable("gui.pet.aggressive"),
+                this
+        );
         if (!pet.isPassive() && pet.isAggressive()) {
             button.active = false;
         }
         this.addRenderableWidget(button);
 
-        buttonText = Component.translatable("gui.pet.pvp").append(": ").append(pet.isPVP() ? Component.translatable("common.yes") : Component.translatable("common.no")).getString();
         buttonY += buttonHeight + (buttonSpacing * 2);
-        this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.PET_COMMAND_ID.PVP.id, buttonX + buttonSpacing, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), this));
+        Component pvpLabel = Component.translatable("gui.pet.pvp")
+                .append(": ")
+                .append(pet.isPVP() ? Component.translatable("common.yes") : Component.translatable("common.no"));
+        this.addRenderableWidget(new ButtonBase(
+                BaseCreatureEntity.PET_COMMAND_ID.PVP.id,
+                buttonX + buttonSpacing,
+                buttonY,
+                buttonWidth,
+                buttonHeight,
+                pvpLabel,
+                this
+        ));
     }
 
     @Override
@@ -159,41 +223,82 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
     }
 
     @Override
-    protected void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
+    protected void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.getMinecraft().getTextureManager().bindForSetup(TextureManager.getTexture("GUIInventoryCreature"));
+
         this.imageWidth = 176;
         this.imageHeight = 166;
+
         int backX = (this.width - this.imageWidth) / 2;
         int backY = (this.height - this.imageHeight) / 2;
-        this.drawHelper.drawTexturedModalRect(matrixStack, backX, backY, 0, 0, this.imageWidth, this.imageHeight);
 
-        this.drawFrames(matrixStack, backX, backY, mouseX, mouseY);
-        this.drawSlots(matrixStack, backX, backY);
+        // Main GUI background (exactly like 1.16, but via GuiGraphics)
+        guiGraphics.blit(
+                TextureManager.getTexture("GUIInventoryCreature"),
+                backX,
+                backY,
+                0, 0,
+                this.imageWidth,
+                this.imageHeight,
+                256, 256
+        );
+
+        this.drawFrames(guiGraphics, backX, backY, mouseX, mouseY);
+        this.drawSlots(guiGraphics, backX, backY);
     }
 
-    protected void drawFrames(GuiGraphics matrixStack, int backX, int backY, int mouseX, int mouseY) {
+    protected void drawFrames(GuiGraphics guiGraphics, int backX, int backY, int mouseX, int mouseY) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.getMinecraft().getTextureManager().bindForSetup(TextureManager.getTexture("GUIInventoryCreature"));
+
+        var tex = TextureManager.getTexture("GUIInventoryCreature");
 
         // Status Frame:
         int statusWidth = 90;
         int statusHeight = 54;
-        this.drawHelper.drawTexturedModalRect(matrixStack, backX + 79, backY + 17, 0, 256 - statusHeight, statusWidth, statusHeight);
+        guiGraphics.blit(
+                tex,
+                backX + 79,
+                backY + 17,
+                0,
+                256 - statusHeight,
+                statusWidth,
+                statusHeight,
+                256, 256
+        );
 
         // Creature Frame:
         int creatureFrameWidth = 54;
         int creatureFrameHeight = 54;
-        this.drawHelper.drawTexturedModalRect(matrixStack, backX - creatureFrameWidth + 1, backY + 17, statusWidth, 256 - creatureFrameHeight, creatureFrameWidth, creatureFrameHeight);
+        guiGraphics.blit(
+                tex,
+                backX - creatureFrameWidth + 1,
+                backY + 17,
+                statusWidth,
+                256 - creatureFrameHeight,
+                creatureFrameWidth,
+                creatureFrameHeight,
+                256, 256
+        );
+
         double creatureWidth = creature.getBbWidth();
         double creatureHeight = creature.getBbHeight();
-        int scale = (int) Math.round((2.5F / Math.max(creatureWidth, creatureHeight)) * 6);
-        BaseGui.renderLivingEntity(matrixStack, backX + 26 - creatureFrameWidth + 1, backY + 60, scale, (float) backX - mouseX, (float) backY - mouseY, this.creature);
+        int scale = (int) Math.round((2.5F / Math.max(creatureWidth, creatureHeight)) * 10);
+
+        BaseGui.renderLivingEntity(
+                guiGraphics,
+                backX + 26 - creatureFrameWidth + 1,
+                backY + 60,
+                scale,
+                (float) backX - mouseX,
+                (float) backY - mouseY,
+                this.creature
+        );
     }
 
-    protected void drawSlots(GuiGraphics matrixStack, int backX, int backY) {
+    protected void drawSlots(GuiGraphics guiGraphics, int backX, int backY) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.getMinecraft().getTextureManager().bindForSetup(TextureManager.getTexture("GUIInventoryCreature"));
+
+        var tex = TextureManager.getTexture("GUIInventoryCreature");
 
         BaseContainer container = this.getMenu();
         List<Slot> creatureSlots = container.slots.subList(container.specialStart, container.inventoryFinish + 1);
@@ -201,22 +306,36 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
         int slotHeight = 18;
         int slotU = 238;
         int slotVBase = 0;
+
         for (Slot creatureSlot : creatureSlots) {
             int slotX = backX + creatureSlot.x - 1;
             int slotY = backY + creatureSlot.y - 1;
             int slotV = slotVBase;
+
             String slotType = creatureInventory.getTypeFromSlot(creatureSlot.getSlotIndex());
             if (slotType != null) {
-                if (slotType.equals("saddle"))
+                if (slotType.equals("saddle")) {
                     slotV += slotHeight;
-                else if (slotType.equals("bag"))
+                } else if (slotType.equals("bag")) {
                     slotV += slotHeight * 2;
-                else if (slotType.equals("chest"))
+                } else if (slotType.equals("chest")) {
                     slotV += slotHeight * 3;
+                }
             }
-            this.drawHelper.drawTexturedModalRect(matrixStack, slotX, slotY, slotU, slotV, slotWidth, slotHeight);
+
+            guiGraphics.blit(
+                    tex,
+                    slotX,
+                    slotY,
+                    slotU,
+                    slotV,
+                    slotWidth,
+                    slotHeight,
+                    256, 256
+            );
         }
     }
+
 
     @Override
     public void actionPerformed(int buttonId) {

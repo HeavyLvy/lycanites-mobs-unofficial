@@ -479,7 +479,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
             this.setFollowing(false);
         }
 
-        this.playTameSound();
+        // this.playTameSound();
 
         // Update Pet Entry Summon Set:
         if (this.petEntry != null && this.petEntry.summonSet != null) {
