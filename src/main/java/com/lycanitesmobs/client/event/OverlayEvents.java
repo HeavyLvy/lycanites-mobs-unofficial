@@ -83,11 +83,10 @@ public class OverlayEvents {
         // ========== Summoning Focus Bar ==========
         ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
         if (playerExt != null && !minecraft.player.getAbilities().instabuild && (
-                (minecraft.player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof ItemStaffSummoning)
-                        || (minecraft.player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof ItemStaffSummoning)
+                minecraft.player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof ItemStaffSummoning
+                        || minecraft.player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof ItemStaffSummoning
         )) {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            minecraft.getTextureManager().bindForSetup(TextureManager.getTexture("GUIInventoryCreature"));
 
             int barYSpace = 10;
             int barXSpace = -1;
@@ -96,23 +95,40 @@ public class OverlayEvents {
             int summonBarHeight = 9;
             int summonBarX = (sWidth / 2) + 10;
             int summonBarY = sHeight - 30 - summonBarHeight;
-            int summonBarU = 256 - summonBarWidth;
-            int summonBarV = 256 - summonBarHeight;
 
             summonBarY -= barYSpace;
             if (minecraft.player.isEyeInFluid(FluidTags.WATER))
                 summonBarY -= barYSpace;
 
-            for (int summonBarEnergyN = 0; summonBarEnergyN < 10; summonBarEnergyN++) {
-                drawhelper.drawTexturedModalRect(event.getGuiGraphics(), summonBarX + ((summonBarWidth + barXSpace) * summonBarEnergyN), summonBarY, summonBarU, summonBarV, summonBarWidth, summonBarHeight);
-                if (playerExt.summonFocus >= playerExt.summonFocusMax - (summonBarEnergyN * playerExt.summonFocusCharge)) {
-                    drawhelper.drawTexturedModalRect(event.getGuiGraphics(), summonBarX + ((summonBarWidth + barXSpace) * summonBarEnergyN), summonBarY, summonBarU - summonBarWidth, summonBarV, summonBarWidth, summonBarHeight);
-                } else if (playerExt.summonFocus + playerExt.summonFocusCharge > playerExt.summonFocusMax - (summonBarEnergyN * playerExt.summonFocusCharge)) {
-                    float summonChargeScale = (float) (playerExt.summonFocus % playerExt.summonFocusCharge) / (float) playerExt.summonFocusCharge;
-                    drawhelper.drawTexturedModalRect(event.getGuiGraphics(), (summonBarX + ((summonBarWidth + barXSpace) * summonBarEnergyN)) + (summonBarWidth - Math.round((float) summonBarWidth * summonChargeScale)), summonBarY, summonBarU - Math.round((float) summonBarWidth * summonChargeScale), summonBarV, Math.round((float) summonBarWidth * summonChargeScale), summonBarHeight);
+            var emptyTex = TextureManager.getTexture("GUIPetSpiritEmpty");
+            var fullTex = TextureManager.getTexture("GUIPetSpiritUsed");
+            var fillTex = TextureManager.getTexture("GUIPetSpiritFilling");
+
+            for (int n = 0; n < 10; n++) {
+                int x = summonBarX + ((summonBarWidth + barXSpace) * (9 - n));
+
+                minecraft.getTextureManager().bindForSetup(emptyTex);
+                drawhelper.drawTexture(event.getGuiGraphics(), emptyTex, x, summonBarY, 0, 1, 1, summonBarWidth, summonBarHeight);
+
+                int threshold = playerExt.summonFocusMax - (n * playerExt.summonFocusCharge);
+                if (playerExt.summonFocus >= threshold) {
+                    minecraft.getTextureManager().bindForSetup(fullTex);
+                    drawhelper.drawTexture(event.getGuiGraphics(), fullTex, x, summonBarY, 0, 1, 1, summonBarWidth, summonBarHeight);
+                } else if (playerExt.summonFocus + playerExt.summonFocusCharge > threshold) {
+                    float scale = (float) (playerExt.summonFocus % playerExt.summonFocusCharge)
+                            / (float) playerExt.summonFocusCharge;
+                    int w = Math.round(summonBarWidth * scale);
+                    if (w > 0) {
+                        minecraft.getTextureManager().bindForSetup(fillTex);
+                        drawhelper.drawTexture(event.getGuiGraphics(), fillTex,
+                                x, summonBarY,
+                                0, scale, 1,
+                                w, summonBarHeight);
+                    }
                 }
             }
         }
+
 
         // ========== Mount Stamina Bar ==========
         if (minecraft.player.getVehicle() != null && minecraft.player.getVehicle() instanceof RideableCreatureEntity) {
