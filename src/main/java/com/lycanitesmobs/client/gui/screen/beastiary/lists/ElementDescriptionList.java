@@ -25,6 +25,7 @@ public class ElementDescriptionList extends BaseList {
      */
     public ElementDescriptionList(BeastiaryScreen parentGui, int width, int height, int top, int bottom, int x) {
         super(parentGui, width, height, top, bottom, x, 500);
+        this.setRenderSelection(false);
     }
 
     public void setElementInfo(ElementInfo elementInfo) {
