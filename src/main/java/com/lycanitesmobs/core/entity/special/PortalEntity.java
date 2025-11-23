@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -112,7 +113,7 @@ public class PortalEntity extends BaseProjectileEntity {
         }
         super.tick();
 
-        // ==========Summoning Pedestal ==========
+        // ========= Summoning Pedestal sync on server =========
         if (!this.getCommandSenderWorld().isClientSide) {
             if (this.summoningPedestal != null) {
                 this.shootingEntity = this.summoningPedestal.getPlayer();
@@ -121,41 +122,36 @@ public class PortalEntity extends BaseProjectileEntity {
             }
         }
 
-        // ==========Sync Shooter Name ==========
-        if (!this.getCommandSenderWorld().isClientSide) {
-            // Summoning Staff or Summoning Pedestal (with active player):
-            if (this.shootingEntity != null) {
-                this.entityData.set(OWNER_UUID, Optional.of(this.shootingEntity.getUUID()));
-            }
-            // Summoning Pedestal:
-            else if (this.summoningPedestal != null && this.summoningPedestal.getOwnerUUID() != null) {
-                this.entityData.set(OWNER_UUID, Optional.of(this.summoningPedestal.getOwnerUUID()));
-            }
-            // Wild:
-            else {
-                this.entityData.set(OWNER_UUID, Optional.empty());
-            }
-        } else {
-            this.ownerUUID = this.entityData.get(OWNER_UUID).orElse(null);
-        }
-
-        // ========== Check for Despawn ==========
+        // ========= Check for despawn =========
         if (!this.getCommandSenderWorld().isClientSide && this.isAlive()) {
-            // Summoning Pedestal:
+            // From pedestal
             if (this.summoningPedestal != null) {
                 if (this.summonType == null) {
                     this.remove(RemovalReason.DISCARDED);
                     return;
                 }
             }
-
-            // Summoning Staff:
+            // From staff
             else {
                 if (this.shootingEntity == null || !this.shootingEntity.isAlive() || this.portalItem == null) {
                     this.remove(RemovalReason.DISCARDED);
                     return;
                 }
+
                 ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(this.shootingEntity);
+
+                boolean holdingStaff =
+                        this.shootingEntity.getMainHandItem().getItem() instanceof ItemStaffSummoning ||
+                                this.shootingEntity.getOffhandItem().getItem() instanceof ItemStaffSummoning;
+
+                if (!holdingStaff || !this.shootingEntity.isUsingItem()) {
+                    if (playerExt != null && playerExt.staffPortal == this) {
+                        playerExt.staffPortal = null;
+                    }
+                    this.remove(RemovalReason.DISCARDED);
+                    return;
+                }
+
                 if (playerExt != null && playerExt.staffPortal != this) {
                     this.remove(RemovalReason.DISCARDED);
                     return;
@@ -163,7 +159,20 @@ public class PortalEntity extends BaseProjectileEntity {
             }
         }
 
-        // ========== Move ==========
+        // ========= Sync owner UUID =========
+        if (!this.getCommandSenderWorld().isClientSide) {
+            if (this.shootingEntity != null) {
+                this.entityData.set(OWNER_UUID, Optional.of(this.shootingEntity.getUUID()));
+            } else if (this.summoningPedestal != null && this.summoningPedestal.getOwnerUUID() != null) {
+                this.entityData.set(OWNER_UUID, Optional.of(this.summoningPedestal.getOwnerUUID()));
+            } else {
+                this.entityData.set(OWNER_UUID, Optional.empty());
+            }
+        } else {
+            this.ownerUUID = this.entityData.get(OWNER_UUID).orElse(null);
+        }
+
+        // ========= Move to target and rest of your existing tick logic =========
         this.moveToTarget();
 
         // ========== Stat Sync ==========
@@ -288,25 +297,35 @@ public class PortalEntity extends BaseProjectileEntity {
     }
 
     // ========== Move to Target ==========
+
     public void moveToTarget() {
         if (this.shootingEntity != null && this.summoningPedestal == null) {
-            // Get Look Target
+            Vec3 eyePos = this.shootingEntity.getEyePosition(1.0F);
             Vec3 lookDirection = this.shootingEntity.getLookAngle();
-            this.targetX = this.shootingEntity.position().x() + (lookDirection.x * this.portalRange);
-            this.targetY = this.shootingEntity.position().y() + (lookDirection.y * this.portalRange);
-            this.targetZ = this.shootingEntity.position().z() + (lookDirection.z * this.portalRange);
 
-            // Apply Raytrace to Look Target:
-            HitResult target = LMHelperClass.raytrace(this.getCommandSenderWorld(), this.shootingEntity.position().x(), this.shootingEntity.position().y(), this.shootingEntity.position().z(), this.targetX, this.targetY, this.targetZ, 1.0F, this, null);
-            if (target != null) {
-                this.targetX = target.getLocation().x;
-                this.targetY = target.getLocation().y;
-                this.targetZ = target.getLocation().z;
+            Vec3 desiredEnd = eyePos.add(lookDirection.scale(this.portalRange));
+
+            HitResult hitResult = this.getCommandSenderWorld().clip(
+                    new ClipContext(
+                            eyePos,
+                            desiredEnd,
+                            ClipContext.Block.COLLIDER,
+                            ClipContext.Fluid.NONE,
+                            this.shootingEntity
+                    )
+            );
+
+            Vec3 hitPos;
+            if (hitResult.getType() != HitResult.Type.MISS) {
+                hitPos = hitResult.getLocation();
+            } else {
+                hitPos = desiredEnd;
             }
 
-            this.targetY += 1.0D;
+            this.targetX = hitPos.x;
+            this.targetY = hitPos.y + 1.0D;
+            this.targetZ = hitPos.z;
 
-            // Update Position to Target:
             this.setPos(this.targetX, this.targetY, this.targetZ);
         }
     }
