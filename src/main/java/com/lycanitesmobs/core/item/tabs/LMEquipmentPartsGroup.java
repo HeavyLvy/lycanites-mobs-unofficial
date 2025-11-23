@@ -32,15 +32,24 @@ public class LMEquipmentPartsGroup {
         builder = builder.title(Component.translatable("itemGroup." + LycanitesMobs.MODID + ".equipmentparts"))
                 .icon(this::getIconItem)
                 .displayItems((enabledFeatures, entries) -> {
-                    // Sort the equipmentNames list alphabetically
                     Collections.sort(equipmentNames);
-                    for (String info : equipmentNames) {
-                        if (ObjectManager.getItem(info) != null) {
-                            entries.accept(ObjectManager.getItem(info));
+                    for (String name : equipmentNames) {
+                        var item = ObjectManager.getItem(name);
+                        if (item == null) continue;
+
+                        if (item instanceof com.lycanitesmobs.core.item.equipment.ItemEquipmentPart part) {
+                            for (int level = 1; level <= part.levelMax; level++) {
+                                ItemStack stack = new ItemStack(part, 1);
+                                part.setLevel(stack, level);
+                                entries.accept(stack);
+                            }
+                        } else {
+                            entries.accept(item);
                         }
                     }
                 });
     }
+
 
     @OnlyIn(Dist.CLIENT)
     public ItemStack getIconItem() {

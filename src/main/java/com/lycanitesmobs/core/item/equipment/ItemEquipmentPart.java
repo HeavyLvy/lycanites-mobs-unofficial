@@ -15,9 +15,11 @@ import com.lycanitesmobs.core.item.equipment.features.EquipmentFeature;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -481,18 +483,18 @@ public class ItemEquipmentPart extends BaseItem {
         itemStack.setTag(nbt);
     }
 
-	/*@Override
-	public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
-		if(!this.allowdedIn(tab)) {
-			return;
-		}
+   /* @Override
+    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
+        if (!this.allowdedIn(tab)) {
+            return;
+        }
 
-		for(int level = 1; level <= this.levelMax; level++) {
-			ItemStack itemStack = new ItemStack(this, 1);
-			this.setLevel(itemStack, level);
-			items.add(itemStack);
-		}
-	}*/
+        for (int level = 1; level <= this.levelMax; level++) {
+            ItemStack itemStack = new ItemStack(this, 1);
+            this.setLevel(itemStack, level);
+            items.add(itemStack);
+        }
+    }*/
 
     /**
      * Returns if this Part has the provided element.

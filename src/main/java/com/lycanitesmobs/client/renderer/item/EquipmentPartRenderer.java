@@ -4,12 +4,13 @@ import com.lycanitesmobs.client.manager.ModelManager;
 import com.lycanitesmobs.client.model.animation.AnimationPart;
 import com.lycanitesmobs.client.model.item.ItemObjModel;
 import com.lycanitesmobs.client.obj.model.VBOObjModel;
+import com.lycanitesmobs.client.renderer.layer.item.LayerItem;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
 import com.lycanitesmobs.client.renderer.util.VBOBatcher;
-import com.lycanitesmobs.client.renderer.layer.item.LayerItem;
-import com.lycanitesmobs.client.renderer.layer.item.LayerItemDye;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -18,19 +19,22 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer implements IItemModelRenderer {
-    protected List<LayerItem> renderLayers = new ArrayList<>();
 
-    public EquipmentPartRenderer(BlockEntityRenderDispatcher p_172550_, EntityModelSet p_172551_) {
-        super(p_172550_, p_172551_);
+    protected final List<LayerItem> renderLayers = new ArrayList<>();
+
+    public EquipmentPartRenderer(BlockEntityRenderDispatcher dispatcher, EntityModelSet models) {
+        super(dispatcher, models);
     }
 
     public EquipmentPartRenderer() {
@@ -38,112 +42,176 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
     }
 
     @Override
-    public void renderByItem(ItemStack itemStack, ItemDisplayContext ctx, PoseStack pose,
-                             MultiBufferSource buffers, int packedLight, int packedOverlay) {
-        if (!(itemStack.getItem() instanceof ItemEquipmentPart part)) return;
+    public void renderByItem(ItemStack itemStack,
+                             ItemDisplayContext displayContext,
+                             PoseStack matrixStack,
+                             MultiBufferSource renderTypeBuffer,
+                             int brightness,
+                             int packedOverlay) {
+        if (!(itemStack.getItem() instanceof ItemEquipmentPart itemEquipmentPart)) {
+            return;
+        }
 
-        ItemObjModel model = ModelManager.getInstance().getEquipmentPartModel(part);
-        if (model == null) return;
+        InteractionHand hand = null;
+
+        ItemObjModel itemObjModel = ModelManager.getInstance().getEquipmentPartModel(itemEquipmentPart);
+        if (itemObjModel == null) {
+            return;
+        }
 
         this.renderLayers.clear();
-        model.addCustomLayers(this);
+        itemObjModel.addCustomLayers(this);
 
-        float loop = Minecraft.getInstance().player != null ? Minecraft.getInstance().player.tickCount : 0f;
-
-        pose.pushPose();
-
-        pose.translate(1.7F, -0.5F, 0.5F);
-        pose.mulPose(Axis.XP.rotationDegrees(190f));
-        pose.mulPose(Axis.YP.rotationDegrees(-45f));
-        pose.mulPose(Axis.ZP.rotationDegrees(10f));
-        pose.translate(-0.5f, 0f, 0f);
-        pose.pushPose();
-        if ("head".equalsIgnoreCase(part.slotType)) {
-            pose.translate(0f, 0f, 0.5f);
-        } else if ("blade".equalsIgnoreCase(part.slotType)
-                || "pike".equalsIgnoreCase(part.slotType)
-                || "axe".equalsIgnoreCase(part.slotType)
-                || "jewel".equalsIgnoreCase(part.slotType)) {
-            pose.translate(0f, 0.5f, 1f);
+        float loop = 0;
+        if (Minecraft.getInstance().player != null) {
+            loop = Minecraft.getInstance().player.tickCount;
         }
 
-        if (ctx == ItemDisplayContext.GUI) {
-            pose.mulPose(Axis.ZP.rotationDegrees(180.0F));
+        matrixStack.translate(0F, 0F, 0F);
 
-            org.joml.Matrix4f matSoFar = new org.joml.Matrix4f(pose.last().pose());
-            AA2D aabb = aabb2DInPose(model, matSoFar);
-            if (aabb.valid()) {
-                float cx = 0.5f * (aabb.minX + aabb.maxX);
-                float cy = 0.5f * (aabb.minY + aabb.maxY);
-                float maxNudge = 0.25f;
-                float dx = Mth.clamp(-cx, -maxNudge, maxNudge);
-                float dy = Mth.clamp(-cy, -maxNudge, maxNudge);
-                pose.translate(dx, dy, 0f);
+        matrixStack.mulPose(Axis.YN.rotationDegrees(45F));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(-90F));
+        matrixStack.mulPose(Axis.XN.rotationDegrees(-45F));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(0F));
+        matrixStack.mulPose(Axis.ZN.rotationDegrees(0F));
+        matrixStack.mulPose(Axis.ZP.rotationDegrees(-180F));
+
+
+        matrixStack.pushPose();
+        if (displayContext == ItemDisplayContext.GUI) {
+            var itemName = Arrays.stream(itemEquipmentPart.itemName.split("_")).toList().get(1);
+
+            if (itemName.equals("eechetikarm")) {
+                matrixStack.translate(1F, 0F, 0.3F);
+            } else if (itemName.equals("argustail")) {
+                matrixStack.translate(1F, 0.1F, 0.3F);
+                matrixStack.mulPose(Axis.ZP.rotationDegrees(30F));
+                matrixStack.mulPose(Axis.ZN.rotationDegrees(40F));
+            } else if (itemName.equals("belphegorarm")) {
+                matrixStack.translate(1F, 0F, 0.3F);
+            } else if (itemName.equals("cinderblade")) {
+                matrixStack.translate(0.5F, 0F, 0.3F);
+            } else if (itemName.equals("entarm")) {
+                matrixStack.translate(1F, 0F, 0.3F);
+            } else if (itemName.equals("epionwing")) {
+                matrixStack.scale(0.75f, 0.75f, 0.75f);
+                matrixStack.translate(0.3F, -0.4F, 0.1F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(-25F));
+            } else if (itemName.equals("woodenpaxel")) {
+                matrixStack.scale(0.75f, 0.75f, 0.75f);
+
+                matrixStack.translate(2F, -0.5F, 0.1F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
+            } else if (itemName.equals("wildkinarm")) {
+                matrixStack.scale(0.75f, 0.75f, 0.75f);
+
+                matrixStack.translate(2F, -0.5F, 0.1F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
+            } else if (itemName.equals("wendigoantler")) {
+                matrixStack.translate(1.5F, -0.7F, 0.8F);
+            } else if (itemName.equals("sutiramustinger")) {
+                matrixStack.scale(0.75f, 0.75f, 0.75f);
+
+                matrixStack.translate(3F, -2F, 0F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
+            } else if (itemName.equals("stryderheart")) {
+                matrixStack.scale(0.75f, 0.75f, 0.75f);
+
+                matrixStack.translate(1.5F, .2F, 0F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
+            } else if (itemName.equals("spectretendril")) {
+                matrixStack.scale(0.75f, 0.75f, 0.75f);
+
+                matrixStack.translate(1.1F, .2F, 0F);
+            } else if (itemName.equals("remobrawing")) {
+                matrixStack.translate(1F, .1F, .3F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(45F));
+            } else if (itemName.equals("reiverhorns")) {
+                matrixStack.translate(.4F, 0.5F, -1F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
+            } else if (itemName.equals("reaperclaw")) {
+                matrixStack.translate(.4F, 0.7F, -1F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
+            } else if (itemName.equals("raidrablade")) {
+                matrixStack.scale(0.8f, 0.8f, 0.8f);
+
+                matrixStack.translate(.8F, .5F, -.5F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
+                matrixStack.mulPose(Axis.ZP.rotationDegrees(90F));
+            } else if (itemName.equals("lacedonhead")) {
+                matrixStack.translate(0.2F, -.7F, .2F);
+                matrixStack.mulPose(Axis.ZP.rotationDegrees(90F));
+            } else if (itemName.equals("ironpaxel")) {
+                matrixStack.translate(0.2F, .8F, -1F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
+            } else if (itemName.equals("ioraystinger")) {
+                matrixStack.translate(-.2F, 1.5F, -.9F);
+            } else if (itemName.equals("frostweaverleg")) {
+                matrixStack.translate(-.3F, 0.2F, 0.1F);
+            } else if (itemName.equals("ettinclub")) {
+                matrixStack.scale(0.9f, 0.9f, 0.9f);
+
+                matrixStack.translate(-.2F, 0F, 0F);
+            } else if (itemName.equals("erepededrill")) {
+                matrixStack.scale(0.9f, 0.9f, 0.9f);
+
+                matrixStack.translate(0F, 0.1F, .2F);
+            } else if (itemName.equals("cherufecore")) {
+                matrixStack.scale(0.9f, 0.9f, 0.9f);
+
+                matrixStack.translate(0.1F, 0.1F, 0.05F);
+            } else if (itemName.equals("bruchaquill")) {
+                matrixStack.scale(0.9f, 0.9f, 0.9f);
+
+                matrixStack.translate(-.2F, 0F, 0F);
+            } else if (itemName.equals("behemophethand")) {
+                matrixStack.scale(0.9f, 0.9f, 0.9f);
+
+                matrixStack.translate(0F, 0.4F, -0.1F);
+            } else if (itemName.equals("apollyonclaw")) {
+                matrixStack.translate(0.1F, 0.3F, -0.8F);
+                matrixStack.mulPose(Axis.XP.rotationDegrees(45F));
+                matrixStack.mulPose(Axis.YP.rotationDegrees(45F));
+            } else if (itemName.equals("sylphwing")) {
+                matrixStack.scale(0.9f, 0.9f, 0.9f);
+
+                matrixStack.translate(0.5F, 0F, -.1F);
+            } else if (itemName.equals("astarothclaw")) {
+
+                matrixStack.translate(0F, 0.45F, 0F);
+            } else {
+                matrixStack.translate(.7F, .2F, 0.3F);
             }
-        } else {
-            pose.translate(-0.5, -2.5, -0.5);
+            matrixStack.translate(0F, -1.5F, -1.7F);
         }
 
-        model.generateAnimationFrames(itemStack, null, loop, null);
-        this.renderModel(model, itemStack, null, pose, buffers, null, null, loop, packedLight);
-        for (LayerItem layer : this.renderLayers) {
-            this.renderModel(model, itemStack, null, pose, buffers, layer, null, loop, packedLight);
+        itemObjModel.generateAnimationFrames(itemStack, null, loop, null);
+        this.renderModel(itemObjModel, itemStack, hand, matrixStack, renderTypeBuffer, null, null, loop, brightness);
+        for (LayerItem renderLayer : this.renderLayers) {
+            this.renderModel(itemObjModel, itemStack, hand, matrixStack, renderTypeBuffer, renderLayer, null, loop, brightness);
         }
-        this.renderModel(model, itemStack, null, pose, buffers, new LayerItemDye(this, "dye"), null, loop, packedLight);
-        model.clearAnimationFrames();
+        itemObjModel.clearAnimationFrames();
 
-        pose.popPose();
-        pose.popPose();
+        matrixStack.popPose();
 
         VBOBatcher.getInstance().endBatches();
     }
 
-
-    private static final class AA2D {
-        float minX = Float.POSITIVE_INFINITY, minY = Float.POSITIVE_INFINITY;
-        float maxX = Float.NEGATIVE_INFINITY, maxY = Float.NEGATIVE_INFINITY;
-
-        boolean valid() {
-            return minX <= maxX && minY <= maxY;
-        }
-    }
-
-    private static AA2D aabb2DInPose(ItemObjModel model, org.joml.Matrix4f poseMat) {
-        AA2D a = new AA2D();
-        for (var part : model.objParts) {
-            var mesh = part.mesh;
-            if (mesh == null || mesh.vertices == null || mesh.indices == null) continue;
-            for (int idx : mesh.indices) {
-                var p = mesh.vertices[idx].getPos();
-                float x = p.x(), y = p.y(), z = p.z();
-                float tx = poseMat.m00() * x + poseMat.m10() * y + poseMat.m20() * z + poseMat.m30();
-                float ty = poseMat.m01() * x + poseMat.m11() * y + poseMat.m21() * z + poseMat.m31();
-                if (tx < a.minX) a.minX = tx; if (tx > a.maxX) a.maxX = tx;
-                if (ty < a.minY) a.minY = ty; if (ty > a.maxY) a.maxY = ty;
-            }
-        }
-        return a;
-    }
-
-
-    /**
-     * Renders the main model.
-     *
-     * @param itemStack        The item stack to render.
-     * @param hand             The hand that is holding the item or null if in the inventory instead.
-     * @param matrixStack      The matrix stack for animation.
-     * @param renderTypeBuffer The render type buffer for rendering with.
-     * @param layer            The layer to render, the base layer is null.
-     * @param offsetObjPart    A ModelObjPart, if not null this model is offset by it, used by assembled equipment pieces to create a full model.
-     * @param loop             A constant tick for looping animations.
-     * @param brightness       The brightness of the mob based on block location, etc.
-     */
-    protected void renderModel(ItemObjModel model, ItemStack itemStack, InteractionHand hand, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, LayerItem layer, AnimationPart offsetObjPart, float loop, int brightness) {
+    protected void renderModel(ItemObjModel model,
+                               ItemStack itemStack,
+                               InteractionHand hand,
+                               PoseStack matrixStack,
+                               MultiBufferSource renderTypeBuffer,
+                               LayerItem layer,
+                               AnimationPart offsetObjPart,
+                               float loop,
+                               int brightness) {
         ResourceLocation texture = model.getTexture(itemStack, layer);
-        RenderType renderType = CustomRenderStates.getObjVBORenderType(model.getBlending(itemStack, layer), model.getGlow(itemStack, layer));
-//		if(layer instanceof LayerItemDye) {
-//			renderType = CustomRenderStates.getObjColorOnlyRenderType(texture, model.getBlending(itemStack, layer), model.getGlow(itemStack, layer));
-//		}
+        RenderType renderType = CustomRenderStates.getObjVBORenderType(
+                model.getBlending(itemStack, layer),
+                model.getGlow(itemStack, layer)
+        );
+
         VBOObjModel.renderType = renderType;
         VBOObjModel.renderNormal = true;
         VBOObjModel.tex = texture;

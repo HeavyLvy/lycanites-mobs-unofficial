@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.manager;
 
 import com.google.gson.JsonObject;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.JSONLoader;
@@ -55,22 +56,16 @@ public class EquipmentPartManager extends JSONLoader {
         Item.Properties properties = new Item.Properties().stacksTo(1).setNoRepair();
         Lazy<ItemEquipmentPart> equipmentPart = Lazy.of(() -> new ItemEquipmentPart(properties, json));
         String name = ItemEquipmentPart.getPartName(json);
-        //RegistryObject<Item> partObject = LycanitesMobs.ITEMS.register(name, equipmentPart);
-        //equipmentPart.loadFromJSON(json);
         if (this.equipmentParts.containsKey(name)) {
             LMHelperClass.logWarning("", "[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
             throw new RuntimeException("[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
         }
-		/*if(this.equipmentParts.values().contains(equipmentPart)) {
-			LycanitesMobs.logWarning("", "[Equipment] Tried to add a Equipment Part that is already added: " + name);
-			throw new RuntimeException("[Equipment] Tried to add a Equipment Part that is already added: " + name);
-		}*/
+        if (this.equipmentParts.values().contains(equipmentPart)) {
+            LMHelperClass.logWarning("", "[Equipment] Tried to add a Equipment Part that is already added: " + name);
+            throw new RuntimeException("[Equipment] Tried to add a Equipment Part that is already added: " + name);
+        }
         this.equipmentParts.put(name, equipmentPart);
         equipmentNames.add(name);
-        /* Creative Tab Builder **/
-		/*ItemManager.getInstance().equipmentPartsGroup.displayItems((enabledFeatures, entries) -> {
-			entries.accept(equipmentPart::get);
-		});*/
         ObjectManager.addItem(name, equipmentPart);
     }
 
