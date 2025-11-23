@@ -249,7 +249,7 @@ public class MobEventManager extends JSONLoader {
         }
 
         // Update Mob Event Players:
-        if (worldExt.serverMobEventPlayers.size() > 0) {
+        if (!worldExt.serverMobEventPlayers.isEmpty()) {
             for (MobEventPlayerServer mobEventPlayerServer : worldExt.serverMobEventPlayers.values().toArray(new MobEventPlayerServer[worldExt.serverMobEventPlayers.size()])) {
                 mobEventPlayerServer.onUpdate();
             }

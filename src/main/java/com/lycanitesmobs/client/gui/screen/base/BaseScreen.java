@@ -1,6 +1,5 @@
 package com.lycanitesmobs.client.gui.screen.base;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.gui.buttons.ButtonBase;
 import com.lycanitesmobs.core.util.helpers.DrawHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -18,7 +17,6 @@ public abstract class BaseScreen extends Screen implements Button.OnPress {
     public Window scaledResolution;
     public float zLevel = 0;
 
-
     public BaseScreen(MutableComponent screenName) {
         super(screenName);
     }
@@ -29,7 +27,6 @@ public abstract class BaseScreen extends Screen implements Button.OnPress {
     @Override
     public void init() {
         this.drawHelper = new DrawHelper(minecraft, minecraft.font);
-        //this.init(this.minecraft, width, height);
         this.initWidgets();
     }
 
@@ -48,8 +45,9 @@ public abstract class BaseScreen extends Screen implements Button.OnPress {
      */
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        super.render(guiGraphics, mouseX, mouseY, partialTicks); // background + renderables
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
         this.renderWidgets(guiGraphics, mouseX, mouseY, partialTicks);
+        super.render(guiGraphics, mouseX, mouseY, partialTicks);
         this.renderForeground(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
@@ -58,7 +56,7 @@ public abstract class BaseScreen extends Screen implements Button.OnPress {
      *
      * @param matrixStack  The matrix stack to draw with.
      * @param mouseX       The x position of the mouse cursor.
-     * @param mouseY       The y position of the mouse cursor.
+     * @param mouseY       The x position of the mouse cursor.
      * @param partialTicks Ticks for animation.
      */
     protected abstract void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks);
@@ -68,7 +66,7 @@ public abstract class BaseScreen extends Screen implements Button.OnPress {
      *
      * @param matrixStack  The matrix stack to draw with.
      * @param mouseX       The x position of the mouse cursor.
-     * @param mouseY       The y position of the mouse cursor.
+     * @param mouseY       The x position of the mouse cursor.
      * @param partialTicks Ticks for animation.
      */
     protected void renderWidgets(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
@@ -79,7 +77,7 @@ public abstract class BaseScreen extends Screen implements Button.OnPress {
      *
      * @param matrixStack  The matrix stack to draw with.
      * @param mouseX       The x position of the mouse cursor.
-     * @param mouseY       The y position of the mouse cursor.
+     * @param mouseY       The x position of the mouse cursor.
      * @param partialTicks Ticks for animation.
      */
     protected abstract void renderForeground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks);
@@ -110,19 +108,14 @@ public abstract class BaseScreen extends Screen implements Button.OnPress {
             this.scaledResolution = this.minecraft.getWindow();
         }
 
-        // Aspect Ratio:
-        float targetAspect = 0.5625f; // 16:9
+        float targetAspect = 0.5625f;
         float scaledHeight = scaledResolution.getGuiScaledHeight();
         float scaledWidth = scaledResolution.getGuiScaledWidth();
         float currentAspect = (scaledHeight * x) / (scaledWidth * x);
 
-        // Wider Than target:
         if (currentAspect < targetAspect) {
             scaledWidth = scaledHeight + (scaledHeight * targetAspect);
-        }
-
-        // Taller Than target:
-        else if (currentAspect > targetAspect) {
+        } else if (currentAspect > targetAspect) {
             scaledHeight = scaledWidth + (scaledWidth * targetAspect);
         }
 

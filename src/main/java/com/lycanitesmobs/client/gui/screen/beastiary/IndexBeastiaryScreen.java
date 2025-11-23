@@ -36,7 +36,6 @@ public class IndexBeastiaryScreen extends BeastiaryScreen {
         int buttonY = this.colRightY + this.colRightHeight - buttonHeight;
         ButtonBase button;
 
-        // Links:
         button = new ButtonBase(100, buttonX, buttonY, buttonWidth, buttonHeight, Component.translatable("Website"), this);
         this.addRenderableWidget(button);
         button = new ButtonBase(101, buttonX + buttonWidthPadded, buttonY, buttonWidth, buttonHeight, Component.translatable("Twitter"), this);
@@ -50,12 +49,37 @@ public class IndexBeastiaryScreen extends BeastiaryScreen {
         button = new ButtonBase(105, buttonX + (buttonWidthPadded * 5), buttonY, buttonWidth, buttonHeight, Component.translatable("Shard"), this);
         this.addRenderableWidget(button);
 
-        // Lists:
         if (this.versionInfo != null) {
-            this.indexList = new BeastiaryIndexList(this, this.colRightWidth, this.colRightHeight, this.colRightY + 93, buttonY - buttonPadding, this.colRightX + 2, this.versionInfo);
+            String info = Component.translatable("gui.beastiary.index.description").getString();
+            int yOffset = this.colRightY + 13;
+            yOffset += this.drawHelper.getWordWrappedHeight(info, this.colRightWidth);
+
+            String version = "\n\u00A7l" + Component.translatable("gui.beastiary.index.version").getString() + ": \u00A7r";
+            if (this.versionInfo.isNewer) {
+                version += "\u00A74";
+            }
+            version += LycanitesMobs.versionNumber + "\u00A7r";
+            if (this.versionInfo.isNewer) {
+                version += " \u00A7l" + Component.translatable("gui.beastiary.index.version.newer").getString()
+                        + ": \u00A7r\u00A72" + this.versionInfo.versionNumber + "\u00A7r";
+            }
+
+            int versionHeight = this.drawHelper.getWordWrappedHeight(version, this.colRightWidth);
+            int listTop = yOffset + versionHeight + 4;
+
+            this.indexList = new BeastiaryIndexList(
+                    this,
+                    this.colRightWidth,
+                    this.colRightHeight,
+                    listTop,
+                    buttonY - buttonPadding,
+                    this.colRightX + 2,
+                    this.versionInfo
+            );
             this.addRenderableWidget(this.indexList);
         }
     }
+
 
     @Override
     public void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {

@@ -251,7 +251,6 @@ public class LycanitesMobs {
         ClientManager.getInstance().registerEvents();
         TextureManager.getInstance().createTextures(modInfo);
         ModelManager.getInstance().createModels();
-        ClientManager.getInstance().initRenderRegister();
         ClientManager.getInstance().initBlockRenderTypes();
         //New menu screen registration
         event.enqueueWork(

@@ -8,8 +8,11 @@ import com.lycanitesmobs.core.container.block.EquipmentForgeContainer;
 import com.lycanitesmobs.core.container.slot.EquipmentForgeSlot;
 import com.lycanitesmobs.core.network.message.MessageTileEntityButton;
 import com.lycanitesmobs.core.block.blockentity.TileEntityEquipmentForge;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import org.lwjgl.opengl.GL11;
@@ -37,7 +40,6 @@ public class EquipmentForgeScreen extends BaseContainerScreen<EquipmentForgeCont
     protected void initWidgets() {
         int backX = (this.width - this.imageWidth) / 2;
         int backY = (this.height - this.imageHeight) / 2;
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         int buttonSpacing = 2;
         int buttonWidth = 128;
         int buttonHeight = 20;
@@ -56,11 +58,19 @@ public class EquipmentForgeScreen extends BaseContainerScreen<EquipmentForgeCont
 
     @Override
     protected void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.drawHelper.getMinecraft().getTextureManager().bindForSetup(TextureManager.getTexture("GUIEquipmentForge"));
+        this.imageWidth = 176;
+        this.imageHeight = 166;
+
         int backX = (this.width - this.imageWidth) / 2;
         int backY = (this.height - this.imageHeight) / 2;
-        this.drawHelper.drawTexturedModalRect(guiGraphics, backX, backY, 0, 0, this.imageWidth, this.imageHeight);
+
+        ResourceLocation texture = TextureManager.getTexture("GUIEquipmentForge");
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, texture);
+
+        guiGraphics.blit(texture, backX, backY, 0, 0, this.imageWidth, this.imageHeight);
 
         this.drawSlots(guiGraphics, backX, backY);
     }
@@ -71,9 +81,12 @@ public class EquipmentForgeScreen extends BaseContainerScreen<EquipmentForgeCont
      * @param backX
      * @param backY
      */
-    protected void drawSlots(GuiGraphics matrixStack, int backX, int backY) {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.getMinecraft().getTextureManager().bindForSetup(TextureManager.getTexture("GUIEquipmentForge"));
+    protected void drawSlots(GuiGraphics guiGraphics, int backX, int backY) {
+        ResourceLocation texture = TextureManager.getTexture("GUIEquipmentForge");
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, texture);
 
         BaseContainer container = this.getMenu();
         List<Slot> forgeSlots = container.slots.subList(container.inventoryStart, container.inventoryFinish);
@@ -81,13 +94,13 @@ public class EquipmentForgeScreen extends BaseContainerScreen<EquipmentForgeCont
         int slotHeight = 18;
         int slotU = 238;
         int slotVBase = 0;
+
         for (Slot forgeSlot : forgeSlots) {
             int slotX = backX + forgeSlot.x - 1;
             int slotY = backY + forgeSlot.y - 1;
             int slotV = slotVBase;
 
-            if (forgeSlot instanceof EquipmentForgeSlot) {
-                EquipmentForgeSlot equipmentSlot = (EquipmentForgeSlot) forgeSlot;
+            if (forgeSlot instanceof EquipmentForgeSlot equipmentSlot) {
                 if ("base".equals(equipmentSlot.type)) {
                     slotV += slotHeight;
                 } else if ("head".equals(equipmentSlot.type)) {
@@ -107,9 +120,10 @@ public class EquipmentForgeScreen extends BaseContainerScreen<EquipmentForgeCont
                 }
             }
 
-            this.drawHelper.drawTexturedModalRect(matrixStack, slotX, slotY, slotU, slotV, slotWidth, slotHeight);
+            guiGraphics.blit(texture, slotX, slotY, slotU, slotV, slotWidth, slotHeight);
         }
     }
+
 
     @Override
     protected void renderForeground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {

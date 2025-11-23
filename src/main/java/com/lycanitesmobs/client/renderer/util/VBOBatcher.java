@@ -19,7 +19,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
-import static com.lycanitesmobs.client.event.ClientModEvents.POS_TEX_NORMAL_SHADER;
+import static com.lycanitesmobs.client.renderer.util.CustomRenderStates.POS_TEX_NORMAL_SHADER;
+
 
 public class VBOBatcher {
 

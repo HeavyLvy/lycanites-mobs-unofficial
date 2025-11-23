@@ -38,7 +38,7 @@ import java.util.function.Supplier;
 
 import static com.lycanitesmobs.core.manager.ObjectManager.*;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
+@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class RegistryEvents {
     public static RegistryEvents INSTANCE;
 
@@ -200,7 +200,7 @@ public class RegistryEvents {
     }
 
     // ========== Tile Entities ==========
-    //@SubscribeEvent
+    @SubscribeEvent
     public void registerTileEntities(RegisterEvent event) {
         event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES,
                 helper -> {

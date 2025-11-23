@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -19,9 +20,9 @@ import org.lwjgl.opengl.GL11;
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
-import static com.lycanitesmobs.client.event.ClientModEvents.POS_TEX_NORMAL_SHADER;
 
 public class CustomRenderStates extends RenderStateShard {
+    public static ShaderInstance POS_TEX_NORMAL_SHADER;
     public static final TransparencyStateShard DEFAULT_ALPHA = RenderStateShard.NO_TRANSPARENCY;
     public static final Vector4f WHITE = new Vector4f(1.0F, 1.0F, 1.0F, 1.0F);
     public static LightmapStateShard DIFFUSE_LIGHTING = new LightmapStateShard(true);

@@ -10,9 +10,11 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.pets.SummonSet;
 import com.lycanitesmobs.core.block.blockentity.TileEntitySummoningPedestal;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -69,63 +71,58 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
 
     @Override
     protected void initWidgets() {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         int buttonSpacing = 2;
         int buttonWidth = (this.windowWidth / 4) - (buttonSpacing * 2);
         int buttonHeight = 20;
         int buttonX = this.windowX + 6;
         int buttonY = this.windowY;
 
-        //this.addButton(new MainTab(TAB_BUTTON_ID, buttonX, buttonY - 24, this)); TODO New Tabs
-
         buttonX = this.centerX + buttonSpacing;
         int buttonXRight = buttonX + buttonWidth + buttonSpacing;
         buttonY = this.windowY + 39 + buttonSpacing;
 
-        // Sitting and Following:
         buttonY += buttonHeight + (buttonSpacing * 2);
         this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.SITTING.id, buttonX, buttonY, buttonWidth * 2, buttonHeight, Component.translatable("..."), this));
 
-        // Passive and Stance:
         buttonY += buttonHeight + (buttonSpacing * 2);
         this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.PASSIVE.id, buttonX, buttonY, buttonWidth, buttonHeight, Component.translatable("..."), this));
         this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.STANCE.id, buttonXRight, buttonY, buttonWidth, buttonHeight, Component.translatable("..."), this));
 
-        // PVP:
         buttonY += buttonHeight + (buttonSpacing * 2);
         this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.PVP.id, buttonX, buttonY, buttonWidth * 2, buttonHeight, Component.translatable("..."), this));
 
-        // List:
         if (this.hasPets() && this.summoningPedestal.summonSet != null) {
             this.selectMinion(this.summoningPedestal.summonSet.summonType);
         }
         int listWidth = (this.windowWidth / 2) - (buttonSpacing * 4);
-        int listHeight = this.windowHeight - (39 + buttonSpacing) - 16; // 39 = Title Height + Spirit Height, 24 = Excess
-        int listTop = this.windowY + 39 + buttonSpacing; // 39 = Title Height + Spirit Height
+        int listHeight = this.windowHeight - (39 + buttonSpacing) - 16;
+        int listTop = this.windowY + 39 + buttonSpacing;
         int listBottom = listTop + listHeight;
         int listX = this.windowX + (buttonSpacing * 2);
         this.list = new SummoningPedestalList(this, this.playerExt, listWidth, listHeight, listTop, listBottom, listX);
         this.addRenderableWidget(this.list);
     }
 
-
     @Override
-    protected void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
+    protected void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        ResourceLocation texture = this.getTexture();
 
-        GL11.glColor4f(255, 255, 255, 1.0F);
-        Minecraft.getInstance().getTextureManager().bindForSetup(this.getTexture());
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, texture);
 
-        this.drawHelper.drawTexturedModalRect(matrixStack, this.windowX, this.windowY, 0, 0, this.windowWidth, this.windowHeight);
-        this.drawHelper.drawTexturedModalRect(matrixStack, this.windowX + 40, this.windowY + this.windowHeight, 40, 224, this.windowWidth - 80, 29);
+        guiGraphics.blit(texture, this.windowX, this.windowY, 0, 0, this.windowWidth, this.windowHeight);
+        guiGraphics.blit(texture, this.windowX + 40, this.windowY + this.windowHeight, 40, 224, this.windowWidth - 80, 29);
 
         if (!this.hasPets()) {
             return;
         }
 
-        this.drawFuel(matrixStack);
-        this.drawCapacityBar(matrixStack);
-        this.drawProgressBar(matrixStack);
+        this.drawFuel(guiGraphics);
+        this.drawCapacityBar(guiGraphics);
+        this.drawProgressBar(guiGraphics);
     }
+
 
     @Override
     public void renderWidgets(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
@@ -172,22 +169,16 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
 
     @Override
     protected void renderForeground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        GL11.glColor4f(255, 255, 255, 1.0F);
-        Minecraft.getInstance().getTextureManager().bindForSetup(this.getTexture());
-
-        // No Pets:
         if (!this.hasPets()) {
             this.drawHelper.drawString(guiGraphics, Component.translatable("gui.beastiary.summoning.empty.title").getString(), this.centerX - 96, this.windowY + 6, 0xFFFFFF);
             this.drawHelper.drawStringWrapped(guiGraphics, Component.translatable("gui.beastiary.summoning.empty.info").getString(), this.windowX + 16, this.windowY + 30, this.windowWidth - 32, 0xFFFFFF, false);
             return;
         }
 
-        // Title:
         this.drawHelper.drawStringCentered(guiGraphics, this.getTitle().getString(), this.centerX, this.windowY + 6, 0xFFFFFF, false);
-
-        // Spirit Title:
         this.drawHelper.drawString(guiGraphics, this.getEnergyTitle().getString(), this.windowX + 16, this.windowY + 20, 0xFFFFFF);
     }
+
 
     @Override
     public void actionPerformed(int buttonId) {
@@ -255,8 +246,6 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
     }
 
     public void drawProgressBar(GuiGraphics guiGraphics) {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-
         int barWidth = (256 / 4) + 16;
         int barHeight = (32 / 4) + 2;
         int barX = this.centerX + 2;

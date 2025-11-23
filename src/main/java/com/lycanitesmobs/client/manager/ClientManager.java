@@ -1,18 +1,13 @@
 package com.lycanitesmobs.client.manager;
 
 import com.lycanitesmobs.client.event.ClientEventListener;
-import com.lycanitesmobs.client.event.ClientModEvents;
 import com.lycanitesmobs.client.gui.screen.beastiary.SummoningBeastiaryScreen;
 import com.lycanitesmobs.client.gui.screen.base.BaseOverlayScreen;
-import com.lycanitesmobs.client.loader.LanguageLoader;
 import com.lycanitesmobs.core.manager.ItemManager;
-import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
@@ -52,13 +47,6 @@ public class ClientManager {
         MinecraftForge.EVENT_BUS.register(new ClientEventListener());
     }
 
-    /**
-     * Initialises the Render Register which loads and registers models and sets up render factories, etc.
-     */
-    public void initRenderRegister() {
-        ClientModEvents renderRegister = new ClientModEvents();
-        renderRegister.registerModelLoaders();
-    }
 
     /**
      * Returns the client player entity.

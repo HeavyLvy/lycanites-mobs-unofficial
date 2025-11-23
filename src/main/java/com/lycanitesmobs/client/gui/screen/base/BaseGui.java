@@ -74,16 +74,17 @@ public abstract class BaseGui extends Screen {
         entity.yHeadRot = oldHead;
     }
 
-
     public static void renderLivingEntity(GuiGraphics guiGraphics, int x, int y, float scale, float lookX, float lookY, LivingEntity entity) {
         PoseStack matrixStack = guiGraphics.pose();
-        float lookXRot = (float) Math.atan((double) (lookX / 40.0F));
-        float lookYRot = (float) Math.atan((double) (lookY / 40.0F));
+        float lookXRot = (float) Math.atan(lookX / 40.0F);
+        float lookYRot = (float) Math.atan(lookY / 40.0F);
+
         matrixStack.pushPose();
-        matrixStack.translate((float) x, (float) y, 1500.0F);
+        matrixStack.translate(x, y, 1500.0F);
         matrixStack.scale(1.0F, 1.0F, -1.0F);
         matrixStack.translate(0.0D, 0.0D, 1000.0D);
         matrixStack.scale(scale, scale, scale);
+
         Quaternionf modelRotationRoll = Axis.ZP.rotationDegrees(180.0F);
         Quaternionf modelRotationPitch = Axis.XP.rotationDegrees(lookYRot * 20.0F);
         modelRotationRoll.mul(modelRotationPitch);
@@ -91,15 +92,16 @@ public abstract class BaseGui extends Screen {
         matrixStack.mulPose(Axis.YN.rotationDegrees(180.0F));
 
         float renderYawOffset = entity.yBodyRot;
-        float rotationYaw = entity.yRotO;
-        float rotationPitch = entity.xRotO;
+        float rotationYaw = entity.getYRot();
+        float rotationPitch = entity.getXRot();
         float prevRotationYawHead = entity.yHeadRotO;
         float rotationYawHead = entity.yHeadRot;
+
         entity.yBodyRot = lookXRot * 20.0F;
-        entity.yRotO = lookXRot * 40.0F;
-        entity.xRotO = -lookYRot * 20.0F;
-        entity.yHeadRot = entity.yRotO;
-        entity.yHeadRotO = entity.yRotO;
+        entity.setYRot(lookXRot * 40.0F);
+        entity.setXRot(-lookYRot * 20.0F);
+        entity.yHeadRot = entity.getYRot();
+        entity.yHeadRotO = entity.getYRot();
         entity.setOnGround(true);
 
         EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
@@ -110,11 +112,14 @@ public abstract class BaseGui extends Screen {
         renderManager.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixStack, renderTypeBuffer, 15728880);
         renderTypeBuffer.endBatch();
         renderManager.setRenderShadow(true);
+
         entity.yBodyRot = renderYawOffset;
-        entity.yRotO = rotationYaw;
-        entity.xRotO = rotationPitch;
+        entity.setYRot(rotationYaw);
+        entity.setXRot(rotationPitch);
         entity.yHeadRotO = prevRotationYawHead;
         entity.yHeadRot = rotationYawHead;
+
         matrixStack.popPose();
     }
+
 }

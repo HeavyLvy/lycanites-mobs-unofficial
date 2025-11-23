@@ -39,13 +39,13 @@ import net.minecraftforge.fml.common.Mod;
 
 import static com.lycanitesmobs.client.gui.screen.base.BaseOverlayScreen.GUI_ICONS_LOCATION;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class OverlayEvents {
     // ==================================================
     //                  Draw Game Overlay
     // ==================================================
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public void onRenderExperienceBar(RenderGuiOverlayEvent event) {
+    public static void onRenderExperienceBar(RenderGuiOverlayEvent event) {
         if (ClientManager.getInstance().getClientPlayer() == null)
             return;
         Player player = ClientManager.getInstance().getClientPlayer();
@@ -188,7 +188,7 @@ public class OverlayEvents {
     // ==================================================
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public void onGameOverlay(OverlayManager.Text event) {
+    public static void onGameOverlay(OverlayManager.Text event) {
         if (!ConfigDebug.INSTANCE.creatureOverlay.get()) {
             return;
         }

@@ -209,9 +209,7 @@ public class ItemManager extends JSONLoader {
 
         // Effect Blocks:
         Block.Properties fireProperties = Block.Properties.of().mapColor(MapColor.FIRE).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion();
-        Block.Properties brightFireProperties = Block.Properties.of().mapColor(MapColor.FIRE).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion().lightLevel((BlockState blockState) -> {
-            return 15;
-        });
+        Block.Properties brightFireProperties = Block.Properties.of().mapColor(MapColor.FIRE).randomTicks().noCollission().dynamicShape().sound(SoundType.WOOL).noOcclusion().lightLevel((BlockState blockState) -> 15);
         ObjectManager.addSound("frostfire", "block.frostfire");
         ObjectManager.addBlock("frostfire", () -> new BlockFrostfire(fireProperties), false);
         ObjectManager.addSound("icefire", "block.icefire");

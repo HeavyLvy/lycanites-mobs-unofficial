@@ -53,7 +53,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
+@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class GameEventListener {
 
     // ==================================================
@@ -96,7 +96,7 @@ public class GameEventListener {
     //                Attach Capabilities
     // ==================================================
     @SubscribeEvent
-    public static void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
+    public void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof Player) {
             event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "player"), new CapabilityProviderPlayer());
         } else {
@@ -109,8 +109,7 @@ public class GameEventListener {
     // ==================================================
     //                Register Capabilities
     // ==================================================
-    @SubscribeEvent
-    public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
+    public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
         event.register(ExtendedEntity.class);
         event.register(ExtendedPlayer.class);
     }

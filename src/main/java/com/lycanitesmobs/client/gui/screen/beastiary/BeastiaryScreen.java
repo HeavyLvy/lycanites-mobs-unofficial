@@ -246,14 +246,12 @@ public abstract class BeastiaryScreen extends BaseScreen {
     }
 
     public void renderCreature(GuiGraphics matrixStack, CreatureInfo creatureInfo, int x, int y, int mouseX, int mouseY, float partialTicks) {
-        // Clear:
         if (creatureInfo == null) {
             this.creaturePreviewEntity = null;
             return;
         }
 
         try {
-            // Subspecies:
             boolean subspeciesMatch = true;
             if (this.creaturePreviewEntity instanceof BaseCreatureEntity) {
                 subspeciesMatch = ((BaseCreatureEntity) this.creaturePreviewEntity).getSubspeciesIndex() == this.getDisplaySubspecies(creatureInfo);
@@ -262,10 +260,9 @@ public abstract class BeastiaryScreen extends BaseScreen {
                 }
             }
 
-            // Create New:
             if (this.creaturePreviewEntity == null || this.creaturePreviewEntity.getClass() != creatureInfo.entityClass || !subspeciesMatch) {
                 this.creaturePreviewEntity = creatureInfo.createEntity(this.player.getCommandSenderWorld());
-                this.creaturePreviewEntity.onGround();
+                this.creaturePreviewEntity.setOnGround(true);
                 if (this.creaturePreviewEntity instanceof BaseCreatureEntity) {
                     ((BaseCreatureEntity) this.creaturePreviewEntity).setSubspecies(this.getDisplaySubspecies(creatureInfo));
                     ((BaseCreatureEntity) this.creaturePreviewEntity).setVariant(this.getDisplayVariant(creatureInfo));
@@ -277,7 +274,6 @@ public abstract class BeastiaryScreen extends BaseScreen {
                 this.playCreatureSelectSound(creatureInfo);
             }
 
-            // Render:
             if (this.creaturePreviewEntity != null) {
                 int creatureSize = Math.round((float) this.windowHeight / 6);
                 double creatureWidth = creatureInfo.width;
@@ -303,6 +299,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
             e.printStackTrace();
         }
     }
+
 
     /**
      * Gets the Subspecies to use for the display creature.

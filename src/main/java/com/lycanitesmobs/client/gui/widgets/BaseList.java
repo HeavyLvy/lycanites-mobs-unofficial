@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.GameRenderer;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
@@ -64,112 +65,103 @@ public abstract class BaseList<S> extends AbstractSelectionList<BaseListEntry> {
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         PoseStack matrixStack = guiGraphics.pose();
-        this.renderBackground(guiGraphics);
-
-        // Scissor Start:
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        double scaleFactor = Minecraft.getInstance().getWindow().getGuiScale();
-        int scissorX = (int) ((float) this.getLeft() * scaleFactor);
-        int scissorTop = Minecraft.getInstance().getWindow().getScreenHeight() - (int) ((float) this.getTop() * scaleFactor);
-        int scissorBottom = Minecraft.getInstance().getWindow().getScreenHeight() - (int) ((float) this.getBottom() * scaleFactor);
-        int scissorWidth = (int) ((float) this.getWidth() * scaleFactor);
-        int scissorHeight = scissorTop - scissorBottom;
-        GL11.glScissor(scissorX, scissorBottom, scissorWidth, scissorHeight); // Scissor starts at bottom right.
-
-        RenderSystem.disableCull();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.resetTextureMatrix();
-        RenderSystem.disableDepthTest();
-        RenderSystem.enableBlend();
-        RenderSystem.depthMask(true);
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-        //Shader model handled in native shader packs in recent versions
-        //RenderSystem.shadeModel(7425);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuilder();
-        Matrix4f matrix = matrixStack.last().pose();
-
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        bufferbuilder.vertex(matrix, (float) this.x0, (float) this.y1, 0.0F).color(0, 0, 0, 64).endVertex();
-        bufferbuilder.vertex(matrix, (float) this.x1, (float) this.y1, 0.0F).color(0, 0, 0, 64).endVertex();
-        bufferbuilder.vertex(matrix, (float) this.x1, (float) this.y0, 0.0F).color(0, 0, 0, 64).endVertex();
-        bufferbuilder.vertex(matrix, (float) this.x0, (float) this.y0, 0.0F).color(0, 0, 0, 64).endVertex();
-        tessellator.end();
-
-        // Test Box:
-		/*bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		bufferbuilder.pos(0, 10000, 0.0F).color(32, 255, 32, 128).endVertex();
-		bufferbuilder.pos(10000, 10000, 0.0F).color(32, 255, 32, 128).endVertex();
-		bufferbuilder.pos(10000, 0, 0.0F).color(32, 255, 32, 128).endVertex();
-		bufferbuilder.pos(0, 0, 0.0F).color(32, 255, 32, 128).endVertex();
-		tessellator.draw();*/
-
-        // Render Entries:
-//RenderSystem.enableTexture();
-        int listLeft = this.getRowLeft();
-        int listTop = this.y0 + 4 - (int) this.getScrollAmount();
-        if (this.isFocused()) { // was: this.renderHeader; may cause problems in the future
-            this.renderHeader(guiGraphics, listLeft, listTop);
-        }
 
         try {
-            this.renderList(guiGraphics, mouseX, mouseY, partialTicks);
-        } catch (Exception e) {
-            LMHelperClass.logError("MStack: " + matrixStack);
-        }
+            this.renderBackground(guiGraphics);
 
-        // Draw Gradients:
-        //RenderSystem.disableTexture();
+            double scaleFactor = Minecraft.getInstance().getWindow().getGuiScale();
+            int scissorX = (int) ((float) this.getLeft() * scaleFactor);
+            int scissorTop = Minecraft.getInstance().getWindow().getScreenHeight() - (int) ((float) this.getTop() * scaleFactor);
+            int scissorBottom = Minecraft.getInstance().getWindow().getScreenHeight() - (int) ((float) this.getBottom() * scaleFactor);
+            int scissorWidth = (int) ((float) this.getWidth() * scaleFactor);
+            int scissorHeight = scissorTop - scissorBottom;
 
-        // Draw Scrollbar:
-        int maxScroll = this.getMaxScroll();
-        if (maxScroll > 0) {
-            int contentMax = (int) ((float) ((this.y1 - this.y0) * (this.y1 - this.y0)) / (float) this.getMaxPosition());
-            contentMax = LMHelperClass.convertToInteger(LMHelperClass.clamp(contentMax, 32, this.y1 - this.y0 - 8));
-            int scrollY = (int) this.getScrollAmount() * (this.y1 - this.y0 - contentMax) / maxScroll + this.y0;
-            if (scrollY < this.y0) {
-                scrollY = this.y0;
+            RenderSystem.enableScissor(scissorX, scissorBottom, scissorWidth, scissorHeight);
+
+            RenderSystem.disableCull();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.resetTextureMatrix();
+            RenderSystem.disableDepthTest();
+            RenderSystem.enableBlend();
+            RenderSystem.depthMask(true);
+            RenderSystem.blendFuncSeparate(
+                    GlStateManager.SourceFactor.SRC_ALPHA,
+                    GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                    GlStateManager.SourceFactor.ZERO,
+                    GlStateManager.DestFactor.ONE
+            );
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+            Tesselator tessellator = Tesselator.getInstance();
+            BufferBuilder bufferbuilder = tessellator.getBuilder();
+            Matrix4f matrix = matrixStack.last().pose();
+
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            bufferbuilder.vertex(matrix, (float) this.x0, (float) this.y1, 0.0F).color(0, 0, 0, 64).endVertex();
+            bufferbuilder.vertex(matrix, (float) this.x1, (float) this.y1, 0.0F).color(0, 0, 0, 64).endVertex();
+            bufferbuilder.vertex(matrix, (float) this.x1, (float) this.y0, 0.0F).color(0, 0, 0, 64).endVertex();
+            bufferbuilder.vertex(matrix, (float) this.x0, (float) this.y0, 0.0F).color(0, 0, 0, 64).endVertex();
+            tessellator.end();
+
+            int listLeft = this.getRowLeft();
+            int listTop = this.y0 + 4 - (int) this.getScrollAmount();
+            if (this.isFocused()) {
+                this.renderHeader(guiGraphics, listLeft, listTop);
             }
-            int scrollbarLeft = this.getScrollbarPosition();
-            int scrollbarRight = scrollbarLeft + this.getScrollbarWidth();
 
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) this.y1, 0.0F).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-            bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) this.y1, 0.0F).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-            bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) this.y0, 0.0F).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-            bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) this.y0, 0.0F).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-            tessellator.end();
+            try {
+                this.renderList(guiGraphics, mouseX, mouseY, partialTicks);
+            } catch (Exception e) {
+                LMHelperClass.logError("BaseList renderList error: " + e.getMessage());
+            }
 
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) (scrollY + contentMax), 0.0F).uv(0.0F, 1.0F).color(128, 128, 128, 255).endVertex();
-            bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) (scrollY + contentMax), 0.0F).uv(1.0F, 1.0F).color(128, 128, 128, 255).endVertex();
-            bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) scrollY, 0.0F).uv(1.0F, 0.0F).color(128, 128, 128, 255).endVertex();
-            bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) scrollY, 0.0F).uv(0.0F, 0.0F).color(128, 128, 128, 255).endVertex();
-            tessellator.end();
+            int maxScroll = this.getMaxScroll();
+            if (maxScroll > 0) {
+                int trackHeight = this.y1 - this.y0;
+                int handleHeight = (int) ((float) trackHeight * trackHeight / (float) this.getMaxPosition());
+                handleHeight = LMHelperClass.convertToInteger(LMHelperClass.clamp(handleHeight, 32, trackHeight - 8));
+                int handleY = (int) this.getScrollAmount() * (trackHeight - handleHeight) / maxScroll + this.y0;
+                if (handleY < this.y0) {
+                    handleY = this.y0;
+                }
 
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) (scrollY + contentMax - 1), 0.0F).uv(0.0F, 1.0F).color(192, 192, 192, 255).endVertex();
-            bufferbuilder.vertex(matrix, (float) (scrollbarRight - 1), (float) (scrollY + contentMax - 1), 0.0F).uv(1.0F, 1.0F).color(192, 192, 192, 255).endVertex();
-            bufferbuilder.vertex(matrix, (float) (scrollbarRight - 1), (float) scrollY, 0.0F).uv(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
-            bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) scrollY, 0.0F).uv(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
-            tessellator.end();
+                int scrollbarLeft = this.getScrollbarPosition();
+                int scrollbarRight = scrollbarLeft + this.getScrollbarWidth();
+
+                RenderSystem.setShader(GameRenderer::getPositionColorShader);
+
+                bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) this.y1, 0.0F).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) this.y1, 0.0F).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) this.y0, 0.0F).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) this.y0, 0.0F).color(0, 0, 0, 255).endVertex();
+                tessellator.end();
+
+                bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) (handleY + handleHeight), 0.0F).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) (handleY + handleHeight), 0.0F).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) handleY, 0.0F).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) handleY, 0.0F).color(128, 128, 128, 255).endVertex();
+                tessellator.end();
+
+                bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) (handleY + handleHeight - 1), 0.0F).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.vertex(matrix, (float) (scrollbarRight - 1), (float) (handleY + handleHeight - 1), 0.0F).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.vertex(matrix, (float) (scrollbarRight - 1), (float) handleY, 0.0F).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) handleY, 0.0F).color(192, 192, 192, 255).endVertex();
+                tessellator.end();
+            }
+
+            this.renderDecorations(guiGraphics, mouseX, mouseY);
+        } finally {
+            RenderSystem.depthMask(true);
+            RenderSystem.enableDepthTest();
+            RenderSystem.disableBlend();
+            RenderSystem.disableScissor();
         }
-
-        //RenderSystem.enableTexture();
-        //Shader model handled in native shader packs in recent versions
-        //RenderSystem.shadeModel(7424);
-        //RenderSystem.enableAlphaTest();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
-        RenderSystem.disableBlend();
-
-        // Scissor Stop:
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
-
-        this.renderDecorations(guiGraphics, mouseX, mouseY);
     }
+
 
     public int getMaxScroll() {
         return Math.max(0, this.getMaxPosition() - (this.y1 - this.y0 - 4));

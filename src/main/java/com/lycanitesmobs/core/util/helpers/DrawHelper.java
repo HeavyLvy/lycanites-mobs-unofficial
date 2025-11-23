@@ -35,23 +35,11 @@ public class DrawHelper {
     }
 
     public void drawString(GuiGraphics guiGraphics, String text, float x, float y, int color, boolean shadow) {
-        //Lets hope this works..
-        if (shadow) {
-            this.getFontRenderer().drawInBatch(
-                    text, x, y, color, shadow, guiGraphics.pose().last().pose(), guiGraphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880
-            );
-            //this.getFontRenderer().drawInBatch(matrixStack, text, x, y, color);
-        } else {
-            RenderSystem.enableDepthTest();
-            this.getFontRenderer().drawInBatch(
-                    text, x, y, color, false, guiGraphics.pose().last().pose(), guiGraphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880
-            );
-            //this.getFontRenderer().draw(matrixStack, text, x, y, color);
-        }
+        guiGraphics.drawString(this.getFontRenderer(), text, (int) x, (int) y, color, shadow);
     }
 
-    public void drawString(GuiGraphics matrixStack, String text, int x, int y, int color) {
-        this.drawString(matrixStack, text, x, y, color, false);
+    public void drawString(GuiGraphics guiGraphics, String text, int x, int y, int color) {
+        this.drawString(guiGraphics, text, x, y, color, false);
     }
 
     public void drawCenteredString(GuiGraphics g, Font f, Component text, int x, int y, int color) {
@@ -64,14 +52,14 @@ public class DrawHelper {
         this.drawString(matrixStack, text, x - textOffset, y, color, shadow);
     }
 
-    public int draw(GuiGraphics guiGraphics, String string, float p_238421_3_, float p_238421_4_, int p_238421_5_) {
-        RenderSystem.enableDepthTest();
-        return this.getFontRenderer().drawInBatch(string, p_238421_3_, p_238421_4_, p_238421_5_, false, guiGraphics.pose().last().pose(), guiGraphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
+    public int draw(GuiGraphics guiGraphics, String string, float x, float y, int color) {
+        guiGraphics.drawString(this.getFontRenderer(), string, (int) x, (int) y, color, false);
+        return this.getStringWidth(string);
     }
 
-    public int drawShadow(GuiGraphics guiGraphics, String string, float p_238421_3_, float p_238421_4_, int p_238421_5_) {
-        RenderSystem.enableDepthTest();
-        return this.getFontRenderer().drawInBatch(string, p_238421_3_, p_238421_4_, p_238421_5_, true, guiGraphics.pose().last().pose(), guiGraphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
+    public int drawShadow(GuiGraphics guiGraphics, String string, float x, float y, int color) {
+        guiGraphics.drawString(this.getFontRenderer(), string, (int) x, (int) y, color, true);
+        return this.getStringWidth(string);
     }
 
     public void drawStringWrapped(GuiGraphics g, String text, int x, int y, int wrapWidth, int color, boolean shadow) {

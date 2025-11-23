@@ -8,6 +8,7 @@ import com.lycanitesmobs.client.gui.screen.base.BaseOverlayScreen;
 import com.lycanitesmobs.core.event.mobevent.MobEvent;
 import com.lycanitesmobs.core.event.mobevent.MobEventPlayerServer;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -123,6 +124,10 @@ public class MobEventPlayerClient {
         else if (this.ticks > introTime - stopTime)
             animation = ((float) (introTime - this.ticks) / (float) stopTime);
 
+        if (animation <= 0F) {
+            return;
+        }
+
         int width = 256;
         int height = 256;
         int x = (sWidth / 2) - (width / 2);
@@ -133,11 +138,17 @@ public class MobEventPlayerClient {
         y += 2 - (this.ticks % 4);
 
         gui.getMinecraft().getTextureManager().bindForSetup(this.getTexture());
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, animation);
-        if (animation > 0) {
-            OverlayManager.getInstance().drawHelper.drawTexturedModalRect(matrixStack, x, y, u, v, width, height);
-        }
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, animation);
+
+        OverlayManager.getInstance().drawHelper.drawTexturedModalRect(matrixStack, x, y, u, v, width, height);
+
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.disableBlend();
     }
+
 
     @OnlyIn(Dist.CLIENT)
     public ResourceLocation getTexture() {

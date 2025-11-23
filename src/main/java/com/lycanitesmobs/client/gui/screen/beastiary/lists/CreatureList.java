@@ -247,6 +247,29 @@ public class CreatureList extends BaseList<BeastiaryScreen> {
             }
         }
 
+        private String trimText(String text, int maxWidth) {
+            if (text == null) {
+                return "";
+            }
+            if (maxWidth <= 0) {
+                return "";
+            }
+            if (this.parentList.screen.drawHelper.getStringWidth(text) <= maxWidth) {
+                return text;
+            }
+
+            String ellipsis = "...";
+            int ellipsisWidth = this.parentList.screen.drawHelper.getStringWidth(ellipsis);
+            StringBuilder builder = new StringBuilder(text);
+
+            while (builder.length() > 0 && this.parentList.screen.drawHelper.getStringWidth(builder.toString()) + ellipsisWidth > maxWidth) {
+                builder.setLength(builder.length() - 1);
+            }
+
+            builder.append(ellipsis);
+            return builder.toString();
+        }
+
         @Override
         protected void onClicked() {
             this.parentList.setSelected(this);

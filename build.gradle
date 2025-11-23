@@ -15,11 +15,8 @@ archivesBaseName = 'lycanitesmobs'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
-
 minecraft {
-    //mappings channel: $mapping_channel, version: "${mapping_version}"
     mappings channel: mapping_channel, version: mapping_version
-    // makeObfSourceJar = false
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
@@ -28,6 +25,9 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+
+            //jvmArgs "-Xlog:gc*,safepoint:file=gc-client.log:time,uptime,level,tags"
+
             mods {
                 lycanitesmobs {
                     source sourceSets.main
@@ -39,6 +39,9 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+
+            //jvmArgs "-Xlog:gc*,safepoint:file=gc-server.log:time,uptime,level,tags"
+
             mods {
                 lycanitesmobs {
                     source sourceSets.main
@@ -52,6 +55,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             args '--mod', 'lycanitesmobs', '--all', '--output', file('src/generated/resources/')
 
+
             mods {
                 lycanitesmobs {
                     source sourceSets.main
@@ -60,6 +64,7 @@ minecraft {
         }
     }
 }
+
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 

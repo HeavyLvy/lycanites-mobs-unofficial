@@ -12,7 +12,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import org.lwjgl.opengl.GL11;
 
 public class MinionSelectionScreen extends BaseScreen {
     public Player player;
@@ -54,7 +53,6 @@ public class MinionSelectionScreen extends BaseScreen {
 
     @Override
     protected void initWidgets() {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         int buttonWidth = 32;
         int buttonHeight = 32;
         int buttonX = this.centerX - Math.round(buttonWidth / 2);
@@ -84,6 +82,7 @@ public class MinionSelectionScreen extends BaseScreen {
         this.addWidget(button);
     }
 
+
     @Override
     protected void renderForeground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
     }
@@ -101,8 +100,8 @@ public class MinionSelectionScreen extends BaseScreen {
 
     @Override
     protected void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
+
 
     @Override
     public void actionPerformed(int buttonId) {

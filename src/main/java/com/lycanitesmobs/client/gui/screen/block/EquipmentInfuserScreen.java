@@ -9,12 +9,14 @@ import com.lycanitesmobs.core.container.block.EquipmentInfuserContainer;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.network.message.MessageTileEntityButton;
 import com.lycanitesmobs.core.block.blockentity.EquipmentInfuserTileEntity;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -40,13 +42,19 @@ public class EquipmentInfuserScreen extends BaseContainerScreen<EquipmentInfuser
 
     @Override
     protected void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.getMinecraft().getTextureManager().bindForSetup(TextureManager.getTexture("GUIEquipmentForge"));
         this.imageWidth = 176;
         this.imageHeight = 166;
+
         int backX = (this.width - this.imageWidth) / 2;
         int backY = (this.height - this.imageHeight) / 2;
-        this.drawHelper.drawTexturedModalRect(guiGraphics, backX, backY, 0, 0, this.imageWidth, this.imageHeight);
+
+        ResourceLocation texture = TextureManager.getTexture("GUIEquipmentForge");
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, texture);
+
+        guiGraphics.blit(texture, backX, backY, 0, 0, this.imageWidth, this.imageHeight);
 
         this.drawSlots(guiGraphics, backX, backY);
     }
@@ -57,9 +65,12 @@ public class EquipmentInfuserScreen extends BaseContainerScreen<EquipmentInfuser
      * @param backX
      * @param backY
      */
-    protected void drawSlots(GuiGraphics matrixStack, int backX, int backY) {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.getMinecraft().getTextureManager().bindForSetup(TextureManager.getTexture("GUIEquipmentForge"));
+    protected void drawSlots(GuiGraphics guiGraphics, int backX, int backY) {
+        ResourceLocation texture = TextureManager.getTexture("GUIEquipmentForge");
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, texture);
 
         BaseContainer container = this.getMenu();
         List<Slot> forgeSlots = container.slots.subList(container.inventoryStart, container.inventoryFinish);
@@ -67,6 +78,7 @@ public class EquipmentInfuserScreen extends BaseContainerScreen<EquipmentInfuser
         int slotHeight = 18;
         int slotU = 238;
         int slotVBase = 0;
+
         for (Slot forgeSlot : forgeSlots) {
             int slotX = backX + forgeSlot.x - 1;
             int slotY = backY + forgeSlot.y - 1;
@@ -76,9 +88,10 @@ public class EquipmentInfuserScreen extends BaseContainerScreen<EquipmentInfuser
                 slotV += slotHeight * 9;
             }
 
-            this.drawHelper.drawTexturedModalRect(matrixStack, slotX, slotY, slotU, slotV, slotWidth, slotHeight);
+            guiGraphics.blit(texture, slotX, slotY, slotU, slotV, slotWidth, slotHeight);
         }
     }
+
 
     @Override
     protected void renderForeground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {

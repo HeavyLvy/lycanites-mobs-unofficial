@@ -27,24 +27,33 @@ public class CreaturesBeastiaryScreen extends BeastiaryScreen {
     public void initWidgets() {
         super.initWidgets();
 
-        this.creatureTypeList = new CreatureTypeList(this, this.colLeftWidth, this.colLeftHeight, this.colLeftY, this.colLeftY + this.colLeftHeight, this.colLeftX);
+        this.creatureTypeList = new CreatureTypeList(this, this.colLeftWidth, this.colLeftHeight,
+                this.colLeftY, this.colLeftY + this.colLeftHeight, this.colLeftX);
         this.addRenderableWidget(this.creatureTypeList);
 
         int selectionListsWidth = this.getScaledX(300F / 1920F);
 
         int creatureListY = this.colRightY;
         int creatureListHeight = Math.round((float) this.colRightHeight * 0.6f);
-        this.creatureList = new CreatureList(CreatureList.Type.KNOWLEDGE, this, this.creatureTypeList, selectionListsWidth, creatureListHeight, creatureListY, creatureListY + creatureListHeight, this.colRightX);
+        this.creatureList = new CreatureList(CreatureList.Type.KNOWLEDGE, this, this.creatureTypeList,
+                selectionListsWidth, creatureListHeight,
+                creatureListY, creatureListY + creatureListHeight, this.colRightX);
         this.addRenderableWidget(this.creatureList);
 
         int subspeciesListY = creatureListY + 2 + creatureListHeight;
         int subspeciesListHeight = Math.round((float) this.colRightHeight * 0.4f) - 2;
-        this.subspeciesList = new SubspeciesList(this, false, selectionListsWidth, subspeciesListHeight, subspeciesListY, subspeciesListY + subspeciesListHeight, this.colRightX);
+        this.subspeciesList = new SubspeciesList(this, false,
+                selectionListsWidth, subspeciesListHeight,
+                subspeciesListY, subspeciesListY + subspeciesListHeight, this.colRightX);
         this.addRenderableWidget(this.subspeciesList);
 
-        int newLine = this.drawHelper.getWordWrappedHeight("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA", this.colRightWidth - selectionListsWidth) + 2;
+        int newLine = this.drawHelper.getWordWrappedHeight("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                this.colRightWidth - selectionListsWidth) + 2;
         int descriptionListY = this.colRightY + (newLine * 3);
-        this.descriptionList = new CreatureDescriptionList(this, this.colRightWidth - selectionListsWidth, this.colRightHeight, descriptionListY, this.colRightY + this.colRightHeight, this.colRightX + selectionListsWidth + 2);
+        this.descriptionList = new CreatureDescriptionList(this,
+                this.colRightWidth - selectionListsWidth, this.colRightHeight,
+                descriptionListY, this.colRightY + this.colRightHeight,
+                this.colRightX + selectionListsWidth + 2);
         this.addRenderableWidget(this.descriptionList);
     }
 
@@ -61,21 +70,17 @@ public class CreaturesBeastiaryScreen extends BeastiaryScreen {
     }
 
     @Override
-    protected void renderWidgets(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
-        super.renderWidgets(matrixStack, mouseX, mouseY, partialTicks);
+    protected void renderWidgets(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        super.renderWidgets(guiGraphics, mouseX, mouseY, partialTicks);
 
-        if (this.playerExt.getBeastiary().creatureKnowledgeList.isEmpty()) {
-            return;
-        }
-
-        this.creatureTypeList.render(matrixStack, mouseX, mouseY, partialTicks);
-        if (this.playerExt.selectedCreatureType != null) {
-            this.creatureList.render(matrixStack, mouseX, mouseY, partialTicks);
-            this.subspeciesList.render(matrixStack, mouseX, mouseY, partialTicks);
-        }
-        if (this.playerExt.selectedCreature != null) {
-            this.descriptionList.setCreatureKnowledge(this.playerExt.beastiary.getCreatureKnowledge(this.playerExt.selectedCreature.getName()));
-            this.descriptionList.render(matrixStack, mouseX, mouseY, partialTicks);
+        if (!this.playerExt.getBeastiary().creatureKnowledgeList.isEmpty()
+                && this.playerExt.selectedCreature != null
+                && this.descriptionList != null) {
+            this.descriptionList.setCreatureKnowledge(
+                    this.playerExt.beastiary.getCreatureKnowledge(
+                            this.playerExt.selectedCreature.getName()
+                    )
+            );
         }
     }
 
