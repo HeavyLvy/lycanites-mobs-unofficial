@@ -42,14 +42,16 @@ public class MinionSelectionScreen extends BaseScreen {
 
     @Override
     public void init() {
-        super.init();
         this.centerX = this.width / 2;
         this.centerY = this.height / 2;
         this.windowWidth = 256;
         this.windowHeight = 256;
         this.windowX = this.centerX;
         this.windowY = this.centerY;
+
+        super.init();
     }
+
 
     @Override
     protected void initWidgets() {
@@ -63,23 +65,23 @@ public class MinionSelectionScreen extends BaseScreen {
 
         creatureInfo = this.playerExt.getSummonSet(1).getCreatureInfo();
         button = new CreatureButton(1, buttonX, buttonY - Math.round(offset * 2), buttonWidth, buttonHeight, Component.translatable("1"), 1, creatureInfo, this);
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         creatureInfo = this.playerExt.getSummonSet(2).getCreatureInfo();
         button = new CreatureButton(2, buttonX + Math.round(offset * 2), buttonY - Math.round(offset * 0.5F), buttonWidth, buttonHeight, Component.translatable("2"), 2, creatureInfo, this);
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         creatureInfo = this.playerExt.getSummonSet(3).getCreatureInfo();
         button = new CreatureButton(3, buttonX + Math.round(offset), buttonY + Math.round(offset * 1.75F), buttonWidth, buttonHeight, Component.translatable("3"), 3, creatureInfo, this);
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         creatureInfo = this.playerExt.getSummonSet(4).getCreatureInfo();
         button = new CreatureButton(4, buttonX - Math.round(offset), buttonY + Math.round(offset * 1.75F), buttonWidth, buttonHeight, Component.translatable("4"), 4, creatureInfo, this);
-        this.addWidget(button);
+        this.addRenderableWidget(button);
 
         creatureInfo = this.playerExt.getSummonSet(5).getCreatureInfo();
         button = new CreatureButton(5, buttonX - Math.round(offset * 2), buttonY - Math.round(offset * 0.5F), buttonWidth, buttonHeight, Component.translatable("5"), 5, creatureInfo, this);
-        this.addWidget(button);
+        this.addRenderableWidget(button);
     }
 
 
@@ -90,13 +92,13 @@ public class MinionSelectionScreen extends BaseScreen {
     @Override
     protected void renderWidgets(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
         for (Renderable buttonObj : this.renderables) {
-            if (buttonObj instanceof ButtonBase) {
-                ButtonBase button = (ButtonBase) buttonObj;
+            if (buttonObj instanceof ButtonBase button) {
                 button.visible = this.playerExt.getSummonSet(button.buttonId).isUseable();
                 button.active = button.buttonId != this.playerExt.selectedSummonSet;
             }
         }
     }
+
 
     @Override
     protected void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
