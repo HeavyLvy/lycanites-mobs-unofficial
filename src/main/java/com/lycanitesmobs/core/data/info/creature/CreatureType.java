@@ -12,6 +12,7 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.common.util.Lazy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,22 +48,22 @@ public class CreatureType {
     /**
      * The treat item this type uses.
      **/
-    public Supplier<Item> treat;
+    public Lazy<Item> treat;
 
     /**
      * The saddle item this type uses.
      **/
-    public Supplier<Item> saddle;
+    public Lazy<Item> saddle;
 
     /**
      * The soulstone item this type uses.
      **/
-    public Supplier<ItemSoulstone> soulstone;
+    public Lazy<ItemSoulstone> soulstone;
 
     /**
      * The spawn egg item this type uses.
      **/
-    public Supplier<Item> spawnEgg;
+    public Lazy<Item> spawnEgg;
 
     /**
      * The diet type this Creature Type provides as food for predators. "none" by default.
@@ -218,22 +219,22 @@ public class CreatureType {
         Item.Properties spawnEggProperties = new Item.Properties();
 
         // Treat:
-        this.treat = () -> new CreatureTreatItem(smallStackItemProperties, this);
+        this.treat = Lazy.of(() -> new CreatureTreatItem(smallStackItemProperties, this));
         ObjectManager.addItem(this.getTreatName(), this.treat);
 
         // Saddle:
-        this.saddle = () -> new CreatureSaddleItem(smallStackItemProperties, this);
+        this.saddle = Lazy.of(() -> new CreatureSaddleItem(smallStackItemProperties, this));
         //this.saddleItems.put(this.getName(),this.saddle);
         ObjectManager.addItem(this.getSaddleName(), this.saddle);
 
 
         // Spawn Eggs:
-        this.spawnEgg = () -> new ItemCustomSpawnEgg(spawnEggProperties, this);
+        this.spawnEgg = Lazy.of(() -> new ItemCustomSpawnEgg(spawnEggProperties, this));
         ObjectManager.addItem(this.getSpawnEggName(), this.spawnEgg);
         creatureNames.add(this.getSpawnEggName());
 
         // Soulstone:
-        this.soulstone = () -> new ItemSoulstoneFilled(standardItemProperties, this);
+        this.soulstone = Lazy.of(() -> new ItemSoulstoneFilled(standardItemProperties, this));
         ObjectManager.addItem(this.getSoulstoneName(), this.soulstone);
     }
 }

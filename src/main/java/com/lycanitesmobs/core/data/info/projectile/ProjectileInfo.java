@@ -27,6 +27,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
@@ -79,7 +80,7 @@ public class ProjectileInfo {
     /**
      * The item used to fire this projectile from a dispenser and on use.
      **/
-    public Supplier<Item> chargeItem;
+    public Lazy<Item> chargeItem;
     /**
      * The name of the charge item for this projectile. Can be automatically generated using the name of this projectile or overridden.
      **/
@@ -354,7 +355,7 @@ public class ProjectileInfo {
             if (this.chargeItem.get() == null) {
                 Item.Properties properties = new Item.Properties();
                 //properties.tab(ItemManager.getInstance().chargesGroup);
-                this.chargeItem = () -> new ChargeItem(properties, this);
+                this.chargeItem = Lazy.of(() -> new ChargeItem(properties, this));
                 ObjectManager.addItem(this.chargeItemName, this.chargeItem);
             }
         }

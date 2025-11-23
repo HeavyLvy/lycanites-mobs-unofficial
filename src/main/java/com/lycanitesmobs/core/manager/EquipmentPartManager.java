@@ -8,6 +8,7 @@ import com.lycanitesmobs.core.data.loaders.StreamLoader;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.common.util.Lazy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class EquipmentPartManager extends JSONLoader {
 
     public static EquipmentPartManager INSTANCE;
 
-    public Map<String, Supplier<ItemEquipmentPart>> equipmentParts = new HashMap<>();
+    public Map<String, Lazy<ItemEquipmentPart>> equipmentParts = new HashMap<>();
 
     /**
      * A list of mod groups that have loaded with this Equipment Part Manager.
@@ -52,7 +53,7 @@ public class EquipmentPartManager extends JSONLoader {
     @Override
     public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
         Item.Properties properties = new Item.Properties().stacksTo(1).setNoRepair();
-        Supplier<ItemEquipmentPart> equipmentPart = () -> new ItemEquipmentPart(properties, json);
+        Lazy<ItemEquipmentPart> equipmentPart = Lazy.of(() -> new ItemEquipmentPart(properties, json));
         String name = ItemEquipmentPart.getPartName(json);
         //RegistryObject<Item> partObject = LycanitesMobs.ITEMS.register(name, equipmentPart);
         //equipmentPart.loadFromJSON(json);

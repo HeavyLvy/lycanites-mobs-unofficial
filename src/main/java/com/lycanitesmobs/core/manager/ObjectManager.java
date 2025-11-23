@@ -123,11 +123,13 @@ public class ObjectManager {
     }
 
     // ========== Item ==========
-    public static void addItem(String name, Supplier<? extends Item> itemSupplier) {
-        RegistryObject<Item> item = LycanitesMobs.ITEMS.register(name, itemSupplier);
-        //LycanitesMobs.ITEMS.register(name,item);
-        items.put(name, item);
-        itemNames.add(name);
+    public static void addItem(String name, Lazy<? extends Item> itemSupplier) {
+        if (!items.containsKey(name)) {
+            RegistryObject<Item> item = LycanitesMobs.ITEMS.register(name, itemSupplier);
+            //LycanitesMobs.ITEMS.register(name,item);
+            items.put(name, item);
+            itemNames.add(name);
+        }
     }
 
     // ========== Tile Entity ==========

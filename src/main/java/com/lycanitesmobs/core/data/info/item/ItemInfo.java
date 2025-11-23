@@ -13,6 +13,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.common.util.Lazy;
 
 import java.util.Iterator;
 import java.util.function.Supplier;
@@ -127,7 +128,7 @@ public class ItemInfo {
 
         // Create Item:
         String finalModelName = modelName;
-        Supplier<Item> item = () -> new GenericItem(properties, this.name, finalModelName);
+        Lazy<Item> item = Lazy.of(() -> new GenericItem(properties, this.name, finalModelName));
         ObjectManager.addItem(name, item);
         //this.getItem().modelName = modelName;
         /*
