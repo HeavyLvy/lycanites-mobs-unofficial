@@ -215,7 +215,6 @@ public class CustomRenderStates extends RenderStateShard {
         return OBJ_RENDER_TYPES[(blending << 1) | (glow ? 1 : 0)];
     }
 
-
     public static RenderType getObjRenderType(ResourceLocation texture, int blending, boolean glow) {
         if (POS_COL_TEX_LIGHT_FADE_NORMAL == null) {
             ImmutableMap.Builder<String, VertexFormatElement> vertexFormatMapBuilder = ImmutableMap.builder();
@@ -226,10 +225,8 @@ public class CustomRenderStates extends RenderStateShard {
             vertexFormatMapBuilder.put("UV2", DefaultVertexFormat.ELEMENT_UV2);
             vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
             vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
-
             POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
         }
-
 
         RenderStateShard.TransparencyStateShard transparencyState = TRANSLUCENT_TRANSPARENCY;
         if (blending == BLEND.ADD.getValue()) {
@@ -237,18 +234,25 @@ public class CustomRenderStates extends RenderStateShard {
         } else if (blending == BLEND.SUB.getValue()) {
             transparencyState = SUBTRACTIVE_TRANSPARENCY;
         }
-        RenderStateShard.LightmapStateShard lightingState = DIFFUSE_LIGHTING;
-        if (glow) {
-            lightingState = NO_DIFFUSE_LIGHTING;
-        }
+
         RenderType.CompositeState renderTypeState = RenderType.CompositeState.builder()
+                .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorTexLightmapShader))
                 .setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
                 .setTransparencyState(transparencyState)
                 .setCullState(NO_CULL)
                 .setLightmapState(LIGHTMAP)
                 .setOverlayState(OVERLAY)
                 .createCompositeState(true);
-        return RenderType.create("lm_obj_translucent_no_cull", POS_COL_TEX_LIGHT_FADE_NORMAL, VertexFormat.Mode.TRIANGLES, 256, true, false, renderTypeState);
+
+        return RenderType.create(
+                "lm_obj_translucent_no_cull",
+                POS_COL_TEX_LIGHT_FADE_NORMAL,
+                VertexFormat.Mode.TRIANGLES,
+                256,
+                true,
+                false,
+                renderTypeState
+        );
     }
 
     public static RenderType getObjColorOnlyRenderType(ResourceLocation texture, int blending, boolean glow) {
@@ -258,10 +262,8 @@ public class CustomRenderStates extends RenderStateShard {
             vertexFormatMapBuilder.put("Color", DefaultVertexFormat.ELEMENT_COLOR);
             vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
             vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
-
             POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
         }
-
 
         RenderStateShard.TransparencyStateShard transparencyState = TRANSLUCENT_TRANSPARENCY;
         if (blending == BLEND.ADD.getValue()) {
@@ -269,18 +271,25 @@ public class CustomRenderStates extends RenderStateShard {
         } else if (blending == BLEND.SUB.getValue()) {
             transparencyState = SUBTRACTIVE_TRANSPARENCY;
         }
-        RenderStateShard.LightmapStateShard lightingState = DIFFUSE_LIGHTING;
-        if (glow) {
-            lightingState = NO_DIFFUSE_LIGHTING;
-        }
+
         RenderType.CompositeState renderTypeState = RenderType.CompositeState.builder()
+                .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorShader))
                 .setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
                 .setTransparencyState(transparencyState)
                 .setCullState(NO_CULL)
                 .setLightmapState(LIGHTMAP)
                 .setOverlayState(OVERLAY)
                 .createCompositeState(true);
-        return RenderType.create("lm_obj_translucent_no_cull", POS_COL_TEX_LIGHT_FADE_NORMAL, VertexFormat.Mode.TRIANGLES, 256, true, false, renderTypeState);
+
+        return RenderType.create(
+                "lm_obj_translucent_no_cull",
+                POS_COL_TEX_LIGHT_FADE_NORMAL,
+                VertexFormat.Mode.TRIANGLES,
+                256,
+                true,
+                false,
+                renderTypeState
+        );
     }
 
     public static RenderType getObjOutlineRenderType(ResourceLocation texture) {
@@ -293,19 +302,27 @@ public class CustomRenderStates extends RenderStateShard {
             vertexFormatMapBuilder.put("UV2", DefaultVertexFormat.ELEMENT_UV2);
             vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
             vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
-
             POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
         }
 
-
         RenderType.CompositeState renderTypeState = RenderType.CompositeState.builder()
+                .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorTexShader))
                 .setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
                 .setCullState(NO_CULL)
                 .setDepthTestState(NO_DEPTH_TEST)
                 .setTexturingState(OUTLINE_TEXTURING)
                 .setOutputState(OUTLINE_TARGET)
                 .createCompositeState(false);
-        return RenderType.create("lm_obj_outline_no_cull", POS_COL_TEX_LIGHT_FADE_NORMAL, VertexFormat.Mode.TRIANGLES, 256, true, false, renderTypeState);
+
+        return RenderType.create(
+                "lm_obj_outline_no_cull",
+                POS_COL_TEX_LIGHT_FADE_NORMAL,
+                VertexFormat.Mode.TRIANGLES,
+                256,
+                true,
+                false,
+                renderTypeState
+        );
     }
 
 
