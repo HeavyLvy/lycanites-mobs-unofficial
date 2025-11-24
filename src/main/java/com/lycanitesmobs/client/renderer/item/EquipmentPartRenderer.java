@@ -80,7 +80,6 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
         var itemName = Arrays.stream(itemEquipmentPart.itemName.split("_")).toList().get(1);
 
         if (displayContext == ItemDisplayContext.GUI) {
-
             if (itemName.equals("eechetikarm")) {
                 matrixStack.scale(0.9f, 0.9f, 0.9f);
                 matrixStack.translate(1F, 0F, 0.18F);
@@ -100,29 +99,24 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 matrixStack.mulPose(Axis.XN.rotationDegrees(-25F));
             } else if (itemName.equals("woodenpaxel")) {
                 matrixStack.scale(0.75f, 0.75f, 0.75f);
-
                 matrixStack.translate(2F, -0.5F, 0.1F);
                 matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
             } else if (itemName.equals("wildkinarm")) {
                 matrixStack.scale(0.75f, 0.75f, 0.75f);
-
                 matrixStack.translate(2F, -0.5F, 0.1F);
                 matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
             } else if (itemName.equals("wendigoantler")) {
                 matrixStack.translate(1.5F, -0.7F, 0.8F);
             } else if (itemName.equals("sutiramustinger")) {
                 matrixStack.scale(0.75f, 0.75f, 0.75f);
-
                 matrixStack.translate(3F, -2F, 0F);
                 matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
             } else if (itemName.equals("stryderheart")) {
                 matrixStack.scale(0.75f, 0.75f, 0.75f);
-
                 matrixStack.translate(1.5F, .2F, 0F);
                 matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
             } else if (itemName.equals("spectretendril")) {
                 matrixStack.scale(0.75f, 0.75f, 0.75f);
-
                 matrixStack.translate(1.1F, .2F, 0F);
             } else if (itemName.equals("remobrawing")) {
                 matrixStack.translate(1F, .1F, .3F);
@@ -135,7 +129,6 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
             } else if (itemName.equals("raidrablade")) {
                 matrixStack.scale(0.8f, 0.8f, 0.8f);
-
                 matrixStack.translate(.8F, .5F, -.5F);
                 matrixStack.mulPose(Axis.XN.rotationDegrees(90F));
                 matrixStack.mulPose(Axis.ZP.rotationDegrees(90F));
@@ -151,23 +144,18 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 matrixStack.translate(-.3F, 0.2F, 0.1F);
             } else if (itemName.equals("ettinclub")) {
                 matrixStack.scale(0.9f, 0.9f, 0.9f);
-
                 matrixStack.translate(-.2F, 0F, 0F);
             } else if (itemName.equals("erepededrill")) {
                 matrixStack.scale(0.9f, 0.9f, 0.9f);
-
                 matrixStack.translate(0F, 0.1F, .2F);
             } else if (itemName.equals("cherufecore")) {
                 matrixStack.scale(0.9f, 0.9f, 0.9f);
-
                 matrixStack.translate(0.1F, 0.1F, 0.05F);
             } else if (itemName.equals("bruchaquill")) {
                 matrixStack.scale(0.9f, 0.9f, 0.9f);
-
                 matrixStack.translate(-.2F, 0F, 0F);
             } else if (itemName.equals("behemophethand")) {
                 matrixStack.scale(0.9f, 0.9f, 0.9f);
-
                 matrixStack.translate(0F, 0.4F, -0.1F);
             } else if (itemName.equals("apollyonclaw")) {
                 matrixStack.translate(0.1F, 0.3F, -0.8F);
@@ -177,7 +165,6 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 matrixStack.scale(0.9f, 0.9f, 0.9f);
                 matrixStack.translate(0.5F, 0F, -.1F);
             } else if (itemName.equals("astarothclaw")) {
-
                 matrixStack.translate(0F, 0.45F, 0F);
             } else if (itemName.equals("vespidstinger")) {
                 matrixStack.translate(1.8F, 0F, 0.5F);
@@ -192,6 +179,58 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 matrixStack.translate(.7F, .2F, 0.3F);
             }
             matrixStack.translate(0F, -1.5F, -1.7F);
+        } else if (displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND || displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND) {
+            matrixStack.scale(0.7f, 0.7f, 0.7f);
+            if (itemName.equals("bansheeeye") ||
+                    itemName.equals("belphegorarm") ||
+                    itemName.equals("ironpikejoint") ||
+                    itemName.equals("reiverhorns") ||
+                    itemName.equals("wargskull")
+            ) {
+                matrixStack.translate(0F, 0.3F, -0.3F);
+            } else if (itemName.equals("bruchaquill") ||
+                    itemName.equals("ettinclub")
+            ) {
+                matrixStack.translate(0F, -0.3F, 0.7F);
+                matrixStack.scale(0.7f, 0.7f, 0.7f);
+            } else if (
+                    itemName.equals("cherufecore") ||
+                            itemName.equals("cinderblade") ||
+                            itemName.equals("erepededrill") ||
+                            itemName.equals("frostweaverleg") ||
+                            itemName.equals("sprigganheart") ||
+                            itemName.equals("stryderheart")
+            ) {
+                matrixStack.scale(0.7f, 0.7f, 0.7f);
+                matrixStack.translate(0.4F, 0F, 0.3F);
+            } else if (
+                    itemName.equals("darklingskull") ||
+                            itemName.equals("ironaxehead")
+            ) {
+                matrixStack.translate(-.1F, 2.5F, 1F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(-130F));
+            } else if (
+                    itemName.equals("epionwing")
+            ) {
+                matrixStack.scale(0.65f, 0.65f, 0.65f);
+                matrixStack.translate(0.8F, 0F, 0.7F);
+            } else if (
+                    itemName.equals("ioraystinger") ||
+                            itemName.equals("lacedonhead") ||
+                            itemName.equals("sutiramustinger") ||
+                            itemName.equals("vespidstinger")
+            ) {
+                matrixStack.translate(.4F, 2.2F, 1F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(-130F));
+            } else if (
+                    itemName.equals("ironguard") ||
+                            itemName.equals("woodenguard") ||
+                            itemName.equals("wraithskull")
+            ) {
+                matrixStack.translate(-.1F, 2.5F, 1.15F);
+                matrixStack.mulPose(Axis.XN.rotationDegrees(-130F));
+            }
+            matrixStack.translate(0.65F, -.1F, 0F);
         } else {
             var offSetZ = -.32F;
             var offSetY = -0.7F;
@@ -239,10 +278,7 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
             matrixStack.translate(-pivotX, -pivotY, -pivotZ);
             matrixStack.translate(offSetX, offSetY, offSetZ);
 
-            /*if (displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND || displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND) {
-                matrixStack.scale(0.8f, 0.8f, 0.8f);
-                matrixStack.translate(0.3F, 0.3F, -.1F);
-            }*/
+
         }
 
         itemObjModel.generateAnimationFrames(itemStack, null, loop, null);
@@ -253,16 +289,6 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
         itemObjModel.clearAnimationFrames();
 
         matrixStack.popPose();
-      /*  if (displayContext != ItemDisplayContext.GUI) {
-            matrixStack.pushPose();
-            matrixStack.mulPose(Axis.YN.rotationDegrees(0F));
-            matrixStack.mulPose(Axis.YP.rotationDegrees(0F));
-            matrixStack.mulPose(Axis.XN.rotationDegrees(0F));
-            matrixStack.mulPose(Axis.XP.rotationDegrees(0F));
-            matrixStack.mulPose(Axis.ZN.rotationDegrees(0F));
-            matrixStack.mulPose(Axis.ZP.rotationDegrees(180F));
-            matrixStack.popPose();
-        }*/
         VBOBatcher.getInstance().endBatches();
     }
 
