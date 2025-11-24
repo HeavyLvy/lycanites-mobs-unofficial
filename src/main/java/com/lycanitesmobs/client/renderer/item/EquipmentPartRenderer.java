@@ -67,28 +67,29 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
             loop = Minecraft.getInstance().player.tickCount;
         }
 
-        matrixStack.translate(0F, 0F, 0F);
 
-        matrixStack.mulPose(Axis.YN.rotationDegrees(45F));
-        matrixStack.mulPose(Axis.YP.rotationDegrees(-90F));
-        matrixStack.mulPose(Axis.XN.rotationDegrees(-45F));
-        matrixStack.mulPose(Axis.XP.rotationDegrees(0F));
-        matrixStack.mulPose(Axis.ZN.rotationDegrees(0F));
-        matrixStack.mulPose(Axis.ZP.rotationDegrees(-180F));
-
-
-        matrixStack.pushPose();
         if (displayContext == ItemDisplayContext.GUI) {
-            var itemName = Arrays.stream(itemEquipmentPart.itemName.split("_")).toList().get(1);
+            matrixStack.mulPose(Axis.YN.rotationDegrees(45F));
+            matrixStack.mulPose(Axis.YP.rotationDegrees(-90F));
+            matrixStack.mulPose(Axis.XN.rotationDegrees(-45F));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(0F));
+            matrixStack.mulPose(Axis.ZN.rotationDegrees(0F));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(-180F));
+        }
+        matrixStack.pushPose();
+        var itemName = Arrays.stream(itemEquipmentPart.itemName.split("_")).toList().get(1);
+
+        if (displayContext == ItemDisplayContext.GUI) {
 
             if (itemName.equals("eechetikarm")) {
-                matrixStack.translate(1F, 0F, 0.3F);
+                matrixStack.scale(0.9f, 0.9f, 0.9f);
+                matrixStack.translate(1F, 0F, 0.18F);
             } else if (itemName.equals("argustail")) {
                 matrixStack.translate(1F, 0.1F, 0.3F);
                 matrixStack.mulPose(Axis.ZP.rotationDegrees(30F));
                 matrixStack.mulPose(Axis.ZN.rotationDegrees(40F));
             } else if (itemName.equals("belphegorarm")) {
-                matrixStack.translate(1F, 0F, 0.3F);
+                matrixStack.translate(1.3F, 0F, 0.4F);
             } else if (itemName.equals("cinderblade")) {
                 matrixStack.translate(0.5F, 0F, 0.3F);
             } else if (itemName.equals("entarm")) {
@@ -174,15 +175,74 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 matrixStack.mulPose(Axis.YP.rotationDegrees(45F));
             } else if (itemName.equals("sylphwing")) {
                 matrixStack.scale(0.9f, 0.9f, 0.9f);
-
                 matrixStack.translate(0.5F, 0F, -.1F);
             } else if (itemName.equals("astarothclaw")) {
 
                 matrixStack.translate(0F, 0.45F, 0F);
+            } else if (itemName.equals("vespidstinger")) {
+                matrixStack.translate(1.8F, 0F, 0.5F);
+            } else if (itemName.equals("wraithskull")) {
+                matrixStack.mulPose(Axis.ZP.rotationDegrees(-100F));
+                matrixStack.mulPose(Axis.YN.rotationDegrees(-9F));
+                matrixStack.mulPose(Axis.YP.rotationDegrees(-140F));
+                matrixStack.mulPose(Axis.XP.rotationDegrees(-180F));
+                matrixStack.mulPose(Axis.XN.rotationDegrees(20F));
+                matrixStack.translate(-.35F, 0F, 0.15F);
             } else {
                 matrixStack.translate(.7F, .2F, 0.3F);
             }
             matrixStack.translate(0F, -1.5F, -1.7F);
+        } else {
+            var offSetZ = -.32F;
+            var offSetY = -0.7F;
+            var offSetX = .55F;
+            if (itemName.equals("bruchaquill") ||
+                    itemName.equals("cinderblade") ||
+                    itemName.equals("erepededrill") ||
+                    itemName.equals("ettinclub") ||
+                    itemName.equals("frostweaverleg") ||
+                    itemName.equals("goldscepterhead") ||
+                    itemName.equals("raidrablade") ||
+                    itemName.equals("sprigganheart") ||
+                    itemName.equals("stryderheart")
+            ) {
+                offSetX += 0f;
+                offSetY += -.8f;
+                offSetZ += .1f;
+            } if (itemName.equals("ioraystinger") ||
+                    itemName.equals("lacedonhead") ||
+                    itemName.equals("sutiramustinger") ||
+                    itemName.equals("vespidstinger")
+            ) {
+                offSetX += -.1f;
+                offSetY += 0.5f;
+                offSetZ += -.6f;
+            } else if (itemName.equals("wraithskull")) {
+                matrixStack.mulPose(Axis.ZP.rotationDegrees(-90F));
+                matrixStack.mulPose(Axis.YN.rotationDegrees(0F));
+                matrixStack.mulPose(Axis.YP.rotationDegrees(0F));
+                matrixStack.mulPose(Axis.XP.rotationDegrees(0F));
+                offSetX += -1f;
+                offSetY += 0f;
+                offSetZ += 0f;
+            }
+            offSetX += 0f;
+            offSetY += 0.5f;
+            offSetZ += -1.2f;
+
+            float pivotX = 0.0F;
+            float pivotY = 0.5F;
+            float pivotZ = 0.0F;
+
+            matrixStack.translate(pivotX, pivotY, pivotZ);
+            matrixStack.mulPose(Axis.XN.rotationDegrees(220F));
+            matrixStack.translate(-pivotX, -pivotY, -pivotZ);
+            matrixStack.translate(offSetX, offSetY, offSetZ);
+
+            /*if (displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND || displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND) {
+                matrixStack.scale(0.8f, 0.8f, 0.8f);
+                matrixStack.translate(0.3F, 0.3F, -.1F);
+            }*/
         }
 
         itemObjModel.generateAnimationFrames(itemStack, null, loop, null);
@@ -193,7 +253,16 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
         itemObjModel.clearAnimationFrames();
 
         matrixStack.popPose();
-
+      /*  if (displayContext != ItemDisplayContext.GUI) {
+            matrixStack.pushPose();
+            matrixStack.mulPose(Axis.YN.rotationDegrees(0F));
+            matrixStack.mulPose(Axis.YP.rotationDegrees(0F));
+            matrixStack.mulPose(Axis.XN.rotationDegrees(0F));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(0F));
+            matrixStack.mulPose(Axis.ZN.rotationDegrees(0F));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(180F));
+            matrixStack.popPose();
+        }*/
         VBOBatcher.getInstance().endBatches();
     }
 
