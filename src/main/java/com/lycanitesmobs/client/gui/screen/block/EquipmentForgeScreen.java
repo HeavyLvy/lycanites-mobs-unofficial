@@ -126,8 +126,14 @@ public class EquipmentForgeScreen extends BaseContainerScreen<EquipmentForgeCont
 
 
     @Override
-    protected void renderForeground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
-        this.drawHelper.drawString(matrixStack, this.playerInventoryTitle.toString(), this.leftPos + 8, this.topPos + this.imageHeight - 96 + 2, 4210752);
+    protected void renderForeground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        this.drawHelper.drawString(
+                guiGraphics,
+                this.playerInventoryTitle.getString(),
+                this.leftPos + 8,
+                this.topPos + this.imageHeight - 96 + 2,
+                4210752
+        );
     }
 
     @Override
