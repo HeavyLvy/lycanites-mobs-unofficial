@@ -175,11 +175,15 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 matrixStack.mulPose(Axis.XP.rotationDegrees(-180F));
                 matrixStack.mulPose(Axis.XN.rotationDegrees(20F));
                 matrixStack.translate(-.35F, 0F, 0.15F);
+            } else if (itemName.equals("sprigganheart")) {
+                matrixStack.translate(0F, 0.2F, 0.1F);
             } else {
                 matrixStack.translate(.7F, .2F, 0.3F);
             }
             matrixStack.translate(0F, -1.5F, -1.7F);
-        } else if (displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND || displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND) {
+        } else if (
+                displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND ||
+                        displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND) {
             matrixStack.scale(0.7f, 0.7f, 0.7f);
             if (itemName.equals("bansheeeye") ||
                     itemName.equals("belphegorarm") ||
@@ -229,6 +233,10 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
             ) {
                 matrixStack.translate(-.1F, 2.5F, 1.15F);
                 matrixStack.mulPose(Axis.XN.rotationDegrees(-130F));
+            } else if (
+                    itemName.equals("apollyonclaw")
+            ) {
+                matrixStack.translate(0F, -.3F, -0.3F);
             }
             matrixStack.translate(0.65F, -.1F, 0F);
         } else {
@@ -268,7 +276,86 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
             offSetX += 0f;
             offSetY += 0.5f;
             offSetZ += -1.2f;
-
+            if (displayContext == ItemDisplayContext.THIRD_PERSON_LEFT_HAND ||
+                    displayContext == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND) {
+                if (itemName.equals("bansheeeye") ||
+                        itemName.equals("darklingskull") ||
+                        itemName.equals("entarm") ||
+                        itemName.equals("gammasphere") ||
+                        itemName.equals("geonachfist") ||
+                        itemName.equals("ironaxehead") ||
+                        itemName.equals("ironguard") ||
+                        itemName.equals("woodenguard") ||
+                        itemName.equals("wraithskull")
+                ) {
+                    matrixStack.translate(0f, 0f, .5f);
+                } else if (
+                        itemName.equals("behemophethand") ||
+                                itemName.equals("clinkscythe") ||
+                                itemName.equals("conbabutt")
+                ) {
+                    matrixStack.translate(0f, 0f, .4f);
+                } else if (
+                        itemName.equals("belphegorarm")
+                ) {
+                    matrixStack.translate(0f, -0.1f, .9f);
+                } else if (
+                        itemName.equals("bruchaquill") ||
+                                itemName.equals("cinderblade") ||
+                                itemName.equals("ettinclub") ||
+                                itemName.equals("frostweaverleg")
+                ) {
+                    matrixStack.translate(0f, 1f, -.3f);
+                    matrixStack.mulPose(Axis.XP.rotationDegrees(90F));
+                } else if (
+                        itemName.equals("epionwing")
+                ) {
+                    matrixStack.scale(0.5f, 0.5f, 0.5f);
+                    matrixStack.translate(.6f, 1.7f, 0.1f);
+                    matrixStack.mulPose(Axis.XP.rotationDegrees(70F));
+                } else if (
+                        itemName.equals("erepededrill") ||
+                                itemName.equals("lacedonhead")
+                ) {
+                    matrixStack.translate(0f, .6f, -.4f);
+                    matrixStack.mulPose(Axis.XP.rotationDegrees(90F));
+                } else if (
+                        itemName.equals("eyewigeye") ||
+                                itemName.equals("geonachspear")
+                ) {
+                    matrixStack.translate(0f, 0f, .3f);
+                } else if (
+                        itemName.equals("goldscepterhead")
+                ) {
+                    matrixStack.translate(0f, -0.4f, .9f);
+                } else if (
+                        itemName.equals("grueclaw") ||
+                                itemName.equals("ironrod")
+                ) {
+                    matrixStack.translate(0f, 0.5f, 0f);
+                    matrixStack.mulPose(Axis.XP.rotationDegrees(90F));
+                } else if (
+                        itemName.equals("ironpikejoint") ||
+                                itemName.equals("reiverhorns")
+                ) {
+                    matrixStack.translate(0f, 0f, .7f);
+                } else if (
+                        itemName.equals("raidrablade") ||
+                                itemName.equals("stryderheart")
+                ) {
+                    matrixStack.translate(-0.15f, .8f, 1.55f);
+                    matrixStack.mulPose(Axis.XP.rotationDegrees(270F));
+                } else if (
+                        itemName.equals("sprigganheart")
+                ) {
+                    matrixStack.translate(-0.05f, .8f, 1.55f);
+                    matrixStack.mulPose(Axis.XP.rotationDegrees(270F));
+                } else {
+                    matrixStack.translate(0f, .3f, 1f);
+                    matrixStack.mulPose(Axis.XP.rotationDegrees(-90F));
+                }
+                matrixStack.translate(0f, 0f, -.5f);
+            }
             float pivotX = 0.0F;
             float pivotY = 0.5F;
             float pivotZ = 0.0F;
