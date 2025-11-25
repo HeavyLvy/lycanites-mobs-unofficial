@@ -462,7 +462,6 @@ public class MobEventListener {
     // ==================================================
     @SubscribeEvent
     public void onEntityJump(LivingEvent.LivingJumpEvent event) {
-        LMHelperClass.logInfoMessageOnce(blockItems.keySet().toString());
         LivingEntity entity = event.getEntity();
         if (entity == null)
             return;
