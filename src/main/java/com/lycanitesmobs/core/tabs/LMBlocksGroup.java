@@ -92,6 +92,33 @@ public class LMBlocksGroup {
                         ordered.addAll(shaped);
                     }
 
+                    List<String> webs = new ArrayList<>();
+                    List<String> fires = new ArrayList<>();
+                    List<String> clouds = new ArrayList<>();
+
+                    java.util.Iterator<String> itFireWebCloud = remaining.iterator();
+                    while (itFireWebCloud.hasNext()) {
+                        String name = itFireWebCloud.next();
+                        if (name.contains("web")) {
+                            webs.add(name);
+                            itFireWebCloud.remove();
+                        } else if (name.contains("fire")) {
+                            fires.add(name);
+                            itFireWebCloud.remove();
+                        } else if (name.contains("cloud")) {
+                            clouds.add(name);
+                            itFireWebCloud.remove();
+                        }
+                    }
+
+                    Collections.sort(webs);
+                    Collections.sort(fires);
+                    Collections.sort(clouds);
+
+                    ordered.addAll(webs);
+                    ordered.addAll(fires);
+                    ordered.addAll(clouds);
+
                     List<String> blockEntities = new ArrayList<>();
                     java.util.Iterator<String> it = remaining.iterator();
                     while (it.hasNext()) {
