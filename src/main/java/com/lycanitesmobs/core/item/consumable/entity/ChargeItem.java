@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.lycanitesmobs.core.item.tabs.LMChargesGroup.chargeNames;
+import static com.lycanitesmobs.core.tabs.LMChargesGroup.chargeNames;
 
 public class ChargeItem extends BaseItem {
     /**

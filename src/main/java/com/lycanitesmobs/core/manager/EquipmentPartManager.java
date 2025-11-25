@@ -1,7 +1,6 @@
 package com.lycanitesmobs.core.manager;
 
 import com.google.gson.JsonObject;
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.JSONLoader;
@@ -15,9 +14,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
-import static com.lycanitesmobs.core.item.tabs.LMEquipmentPartsGroup.equipmentNames;
+import static com.lycanitesmobs.core.tabs.LMEquipmentPartsGroup.equipmentNames;
 
 public class EquipmentPartManager extends JSONLoader {
 

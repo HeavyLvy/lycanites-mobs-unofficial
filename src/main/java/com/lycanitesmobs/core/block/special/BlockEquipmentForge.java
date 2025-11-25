@@ -28,6 +28,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
+import static com.lycanitesmobs.core.tabs.LMBlocksGroup.blockNames;
+
 public class BlockEquipmentForge extends BlockBase implements EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public int level;
@@ -47,7 +49,7 @@ public class BlockEquipmentForge extends BlockBase implements EntityBlock {
         } else {
             this.blockName = "equipmentforge_master";
         }
-
+        blockNames.add(this.blockName);
         this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
         this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
     }

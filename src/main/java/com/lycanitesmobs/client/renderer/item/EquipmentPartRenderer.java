@@ -167,7 +167,7 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
             }
             case "ioraystinger" -> matrixStack.translate(-.2F, 1.5F, -.9F);
             case "frostweaverleg" -> matrixStack.translate(-.3F, 0.2F, 0.1F);
-            case "ettinclub" -> {
+            case "ettinclub", "bruchaquill" -> {
                 matrixStack.scale(0.9f, 0.9f, 0.9f);
                 matrixStack.translate(-.2F, 0F, 0F);
             }
@@ -178,10 +178,6 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
             case "cherufecore" -> {
                 matrixStack.scale(0.9f, 0.9f, 0.9f);
                 matrixStack.translate(0.1F, 0.1F, 0.05F);
-            }
-            case "bruchaquill" -> {
-                matrixStack.scale(0.9f, 0.9f, 0.9f);
-                matrixStack.translate(-.2F, 0F, 0F);
             }
             case "behemophethand" -> {
                 matrixStack.scale(0.9f, 0.9f, 0.9f);

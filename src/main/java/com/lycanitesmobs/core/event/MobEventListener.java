@@ -18,6 +18,7 @@ import com.lycanitesmobs.core.event.mobevent.trigger.RandomMobEventTrigger;
 import com.lycanitesmobs.core.event.mobevent.trigger.TickMobEventTrigger;
 import com.lycanitesmobs.core.network.message.MessageEntityVelocity;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,6 +42,8 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static com.lycanitesmobs.core.manager.ObjectManager.blockItems;
 
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
@@ -459,6 +462,7 @@ public class MobEventListener {
     // ==================================================
     @SubscribeEvent
     public void onEntityJump(LivingEvent.LivingJumpEvent event) {
+        LMHelperClass.logInfoMessageOnce(blockItems.keySet().toString());
         LivingEntity entity = event.getEntity();
         if (entity == null)
             return;

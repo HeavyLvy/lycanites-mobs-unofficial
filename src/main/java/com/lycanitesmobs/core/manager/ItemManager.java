@@ -18,7 +18,6 @@ import com.lycanitesmobs.core.block.special.EquipmentInfuserBlock;
 import com.lycanitesmobs.core.block.special.EquipmentStationBlock;
 import com.lycanitesmobs.core.block.web.BlockFrostweb;
 import com.lycanitesmobs.core.block.web.BlockQuickWeb;
-import com.lycanitesmobs.core.item.tabs.*;
 import com.lycanitesmobs.core.item.consumable.entity.ChargeItem;
 import com.lycanitesmobs.core.item.block.ItemBlockPlacer;
 import com.lycanitesmobs.core.item.consumable.holiday.ItemHalloweenTreat;
@@ -31,6 +30,7 @@ import com.lycanitesmobs.core.item.consumable.utility.ItemSoulstone;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.special.*;
 import com.lycanitesmobs.core.item.summoningstaff.*;
+import com.lycanitesmobs.core.tabs.*;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -48,17 +48,26 @@ import java.util.*;
 
 public class ItemManager extends JSONLoader {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LycanitesMobs.MODID);
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, LycanitesMobs.MODID);
     // Creative Tabs:
-    public static final CreativeModeTab.Builder itemsGroup = LMItemsGroup.getBuilder();
+    public static final CreativeModeTab.Builder itemsGroup =
+            LMItemsGroup.getBuilder();
+
+    public static final CreativeModeTab.Builder blocksGroup =
+            LMBlocksGroup.getBuilder();
+
+    public static final CreativeModeTab.Builder creaturesGroups =
+            LMCreaturesGroup.getBuilder();
+
+    public static final CreativeModeTab.Builder equipmentPartsGroup =
+            LMEquipmentPartsGroup.getBuilder();
+
+    public static final CreativeModeTab.Builder chargesGroup =
+            LMChargesGroup.getBuilder();
+
     public static final RegistryObject<CreativeModeTab> itemTab = TABS.register(LycanitesMobs.MODID + ".items", itemsGroup::build);
-    public static final CreativeModeTab.Builder blocksGroup = LMBlocksGroup.getBuilder();
     public static final RegistryObject<CreativeModeTab> blockTab = TABS.register(LycanitesMobs.MODID + ".blocks", blocksGroup::build);
-    public static final CreativeModeTab.Builder creaturesGroups = LMCreaturesGroup.getBuilder();
     public static final RegistryObject<CreativeModeTab> creaturesTab = TABS.register(LycanitesMobs.MODID + ".creatures", creaturesGroups::build);
-    public static final CreativeModeTab.Builder chargesGroup = LMChargesGroup.getBuilder();
     public static final RegistryObject<CreativeModeTab> chargesTab = TABS.register(LycanitesMobs.MODID + ".charges", chargesGroup::build);
-    public static final CreativeModeTab.Builder equipmentPartsGroup = LMEquipmentPartsGroup.getBuilder();
     public static final RegistryObject<CreativeModeTab> equipmentPartsTab = TABS.register(LycanitesMobs.MODID + ".equipmentparts", equipmentPartsGroup::build);
     public static final Map<String, Item.Properties> registryItems = new HashMap<>();
     public static ItemManager INSTANCE;

@@ -1,4 +1,4 @@
-package com.lycanitesmobs.core.item.tabs;
+package com.lycanitesmobs.core.tabs;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;

@@ -18,9 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
-import static com.lycanitesmobs.core.item.tabs.LMCreaturesGroup.creatureNames;
+import static com.lycanitesmobs.core.tabs.LMCreaturesGroup.creatureNames;
 
 public class CreatureType {
 

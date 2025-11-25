@@ -4,6 +4,7 @@
   "package": "com.lycanitesmobs.core.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "CreativeModeTabRegistryMixin",
     "EntityTypeMixin",
     "ReloadCommandMixin"
   ],

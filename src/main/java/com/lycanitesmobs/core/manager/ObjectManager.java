@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static com.lycanitesmobs.core.item.tabs.LMItemsGroup.itemNames;
+import static com.lycanitesmobs.core.tabs.LMItemsGroup.itemNames;
 
 
 public class ObjectManager {
@@ -112,7 +112,7 @@ public class ObjectManager {
         } else {
             Item.Properties blockItemProperties = new Item.Properties();
             blocks.put(name, Lazy.of(block));
-            blockItems.put(name, () -> new BlockItem(blocks.get(name).get(), blockItemProperties));
+            blockItems.put(name, Lazy.of(() -> new BlockItem(blocks.get(name).get(), blockItemProperties)));
         }
     }
 
