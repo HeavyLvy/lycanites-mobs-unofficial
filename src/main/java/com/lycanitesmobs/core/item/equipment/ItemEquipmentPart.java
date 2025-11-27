@@ -13,7 +13,9 @@ import com.lycanitesmobs.core.item.base.BaseItem;
 import com.lycanitesmobs.core.item.consumable.entity.ChargeItem;
 import com.lycanitesmobs.core.item.equipment.features.EquipmentFeature;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +32,7 @@ import org.joml.Vector3d;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ItemEquipmentPart extends BaseItem {
     /**
@@ -157,11 +160,23 @@ public class ItemEquipmentPart extends BaseItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack itemStack, @Nullable Level world, List<Component> tooltip, TooltipFlag tooltipFlag) {
-        super.appendHoverText(itemStack, world, tooltip, tooltipFlag);
-        for (Component description : this.getAdditionalDescriptions(itemStack, world, tooltipFlag)) {
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
+        if (!Screen.hasShiftDown()) {
+            tooltip.add(Component.translatable("item.lycanitesmobs.equipment.shiftinfo").withStyle(ChatFormatting.GREEN));
+            return;
+        }
+
+        tooltip.add(Component.translatable("item.lycanitesmobs.equipmentpart.description").withStyle(ChatFormatting.DARK_GREEN));
+
+        for (Component description : this.getAdditionalDescriptions(stack, world, flag)) {
             tooltip.add(description);
         }
+    }
+
+
+    @Override
+    public Component getDescription(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+        return Component.translatable("item.lycanitesmobs.equipmentpart.description").withStyle(ChatFormatting.DARK_GREEN);
     }
 
     @Override
@@ -169,29 +184,34 @@ public class ItemEquipmentPart extends BaseItem {
         return Component.translatable("item.lycanitesmobs.equipmentpart.description").withStyle(ChatFormatting.DARK_GREEN);
     }
 
+    public static final Component SEPARATOR = Component.literal("[[SEP]]");
+
     public List<Component> getAdditionalDescriptions(ItemStack itemStack, @Nullable Level world, TooltipFlag tooltipFlag) {
         List<Component> descriptions = new ArrayList<>();
         int level = this.getPartLevel(itemStack);
         int experience = this.getExperience(itemStack);
         int experienceMax = this.getExperienceForNextLevel(itemStack);
 
-        // Condition:
-        descriptions.add(Component.literal("-------------------"));
-        descriptions.add(Component.translatable("equipment.sharpness").append(" " + this.getSharpness(itemStack) + "/" + ItemEquipment.SHARPNESS_MAX).withStyle(ChatFormatting.BLUE));
-        descriptions.add(Component.translatable("equipment.mana").append(" " + this.getMana(itemStack) + "/" + ItemEquipment.MANA_MAX).withStyle(ChatFormatting.BLUE));
+        descriptions.add(SEPARATOR);
+        descriptions.add(Component.literal("[[BAR:equipment.sharpness:" + this.getSharpness(itemStack) + ":" + ItemEquipment.SHARPNESS_MAX + "]]"));
+        descriptions.add(Component.literal("[[BAR:equipment.mana:" + this.getMana(itemStack) + ":" + ItemEquipment.MANA_MAX + "]]"));
 
-        // Base Stats:
-        descriptions.add(Component.literal("-------------------"));
-        descriptions.add(Component.translatable("equipment.slottype").append(" ").append(Component.translatable("equipment.slot." + this.slotType)).withStyle(ChatFormatting.GOLD));
-        descriptions.add(Component.translatable("equipment.level").append(" " + level + "/" + this.levelMax).withStyle(ChatFormatting.GOLD));
+        descriptions.add(SEPARATOR);
+        descriptions.add(Component.literal("[[SLOT_TITLE]]"));
+        descriptions.add(Component.literal("[[SLOT_ICON:" + this.slotType + "]]"));
+        descriptions.add(Component.literal("[[SLOT_ROW:" + this.slotType + ":" + level + ":" + this.levelMax + ":" + experience + ":" + experienceMax + "]]"));
+
         if (level < this.levelMax) {
-            descriptions.add(Component.translatable("entity.experience").append(": " + experience + "/" + experienceMax).withStyle(ChatFormatting.GOLD));
         }
         if (!this.elements.isEmpty()) {
-            descriptions.add(Component.translatable("equipment.element").append(" ").append(this.getElementNames()).withStyle(ChatFormatting.DARK_AQUA));
+            descriptions.add(Component.literal("[[ELEM_TITLE]]"));
+            String icons = this.elements.stream()
+                    .map(e -> e.getName())
+                    .collect(Collectors.joining(","));
+            descriptions.add(Component.literal("[[ELEM_ICONS:" + icons + "]]"));
         }
-        descriptions.add(Component.literal("-------------------"));
 
+        descriptions.add(SEPARATOR);
 
         for (EquipmentFeature feature : this.features) {
             Component featureDescription = feature.getDescription(itemStack, level);
@@ -201,6 +221,7 @@ public class ItemEquipmentPart extends BaseItem {
         }
         return descriptions;
     }
+
 
 	/*@OnlyIn(Dist.CLIENT)
 	@Nullable
