@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.anthronian;
 
 import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.BreakDoorGoal;
 import net.minecraft.world.entity.Entity;
@@ -12,7 +13,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 
-public class EntityEttin extends AgeableCreatureEntity implements Enemy {
+public class EntityEttin extends TameableCreatureEntity implements Enemy {
 	public boolean griefing = true;
     
     // ==================================================
@@ -25,8 +26,6 @@ public class EntityEttin extends AgeableCreatureEntity implements Enemy {
         this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
 
-        this.canGrow = true;
-        this.babySpawnChance = 0.1D;
         
         this.solidCollision = true;
         this.setupMob();
@@ -56,7 +55,7 @@ public class EntityEttin extends AgeableCreatureEntity implements Enemy {
     //                     Equipment
     // ==================================================
     @Override
-    public int getNoBagSize() { return 0; }
+    public int getNoBagSize() { return 10; }
     @Override
     public int getBagSize() { return this.creatureInfo.bagSize; }
     // ==================================================
@@ -88,4 +87,9 @@ public class EntityEttin extends AgeableCreatureEntity implements Enemy {
     		this.nextAttackPhase();
     	return success;
     }
+    // ==================================================
+    //                     Pet Control
+    // ==================================================
+    public boolean petControlsEnabled() { return true; }
 }
+
