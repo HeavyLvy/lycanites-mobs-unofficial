@@ -172,7 +172,6 @@ public class LMItemsGroup {
 
 
     // ========== Tab Icon ==========
-    @OnlyIn(Dist.CLIENT)
     public ItemStack getIconItem() {
         if (ObjectManager.getItem("soulgazer") != null)
             return new ItemStack(ObjectManager.getItem("soulgazer"));

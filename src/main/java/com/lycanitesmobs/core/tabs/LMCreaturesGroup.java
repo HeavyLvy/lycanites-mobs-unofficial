@@ -48,7 +48,6 @@ public class LMCreaturesGroup {
         return new LMCreaturesGroup().builder;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public ItemStack getIconItem() {
         this.fallbackIcon = false;
         if (ObjectManager.getItem("beastspawn") != null)

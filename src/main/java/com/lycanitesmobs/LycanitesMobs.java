@@ -127,7 +127,6 @@ public class LycanitesMobs {
         modEventBus.addListener(this::enqueueIMC);
         modEventBus.addListener(this::processIMC);
         modEventBus.register(RegistryEvents.getInstance());
-        modEventBus.addListener(this::registerItemColors);
 
 //		modEventBus.register(StatManager.getInstance()); TODO Stats
         PROXY.registerEvents();
@@ -149,27 +148,6 @@ public class LycanitesMobs {
 
     }
 
-    private void registerItemColors(RegisterColorHandlersEvent.Item event) {
-        var colors = event.getItemColors();
-
-        for (CreatureType creatureType : CreatureManager.getInstance().creatureTypes.values()) {
-            Item item = ObjectManager.getItem(creatureType.getSpawnEggName());
-            if (item == null) {
-                continue;
-            }
-
-            ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
-            if (key == null) {
-                continue;
-            }
-
-            if (!(item instanceof ItemCustomSpawnEgg)) {
-                continue;
-            }
-
-            colors.register(new ItemColorCustomSpawnEgg(), item);
-        }
-    }
 
     public static void registryObjects() {
         // Blocks and Items:

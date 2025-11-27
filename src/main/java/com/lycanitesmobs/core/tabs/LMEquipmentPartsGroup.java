@@ -51,7 +51,6 @@ public class LMEquipmentPartsGroup {
     }
 
 
-    @OnlyIn(Dist.CLIENT)
     public ItemStack getIconItem() {
         this.fallbackIcon = false;
         if (ObjectManager.getItem("equipmentpart_eechetikarm") != null)

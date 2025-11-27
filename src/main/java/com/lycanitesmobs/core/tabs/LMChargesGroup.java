@@ -42,7 +42,6 @@ public class LMChargesGroup {
     }
 
     // ========== Tab Icon ==========
-    @OnlyIn(Dist.CLIENT)
     public ItemStack getIconItem() {
         if (ObjectManager.getItem("hellfireballcharge") != null)
             return new ItemStack(ObjectManager.getItem("hellfireballcharge"));

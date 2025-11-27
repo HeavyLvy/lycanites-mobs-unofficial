@@ -17,9 +17,12 @@ import com.lycanitesmobs.client.renderer.misc.NoneRenderer;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
+import com.lycanitesmobs.core.item.consumable.entity.ItemColorCustomSpawnEgg;
+import com.lycanitesmobs.core.item.consumable.entity.ItemCustomSpawnEgg;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.manager.ItemManager;
 import com.lycanitesmobs.core.item.special.ItemSoulgazer;
@@ -39,6 +42,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -49,6 +53,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Objects;
@@ -59,6 +64,29 @@ import java.util.Objects;
         bus = Mod.EventBusSubscriber.Bus.MOD
 )
 public class ClientEventListener {
+    @SubscribeEvent
+    public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        var colors = event.getItemColors();
+
+        for (CreatureType creatureType : CreatureManager.getInstance().creatureTypes.values()) {
+            Item item = ObjectManager.getItem(creatureType.getSpawnEggName());
+            if (item == null) {
+                continue;
+            }
+
+            ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
+            if (key == null) {
+                continue;
+            }
+
+            if (!(item instanceof ItemCustomSpawnEgg)) {
+                continue;
+            }
+
+            colors.register(new ItemColorCustomSpawnEgg(), item);
+        }
+    }
+
     @SubscribeEvent
     public static void onRegisterClientReloadListeners(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(LanguageLoader.getInstance());

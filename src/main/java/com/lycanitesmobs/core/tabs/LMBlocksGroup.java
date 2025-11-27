@@ -149,7 +149,6 @@ public class LMBlocksGroup {
     }
 
     // ========== Tab Icon ==========
-    @OnlyIn(Dist.CLIENT)
     public ItemStack getIconItem() {
         if (ObjectManager.getBlock("shadowcrystal") != null)
             return new ItemStack(Item.byBlock(ObjectManager.getBlock("shadowcrystal")));
