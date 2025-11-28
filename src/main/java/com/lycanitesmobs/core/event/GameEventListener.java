@@ -30,6 +30,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.BlockHitResult;
@@ -470,12 +471,19 @@ public class GameEventListener {
     // ==================================================
     @SubscribeEvent
     public void onCheckSpawn(MobSpawnEvent.PositionCheck event) {
-        if (event.getSpawnType() == MobSpawnType.SPAWNER) {
-            LivingEntity entity = event.getEntity();
-            if (entity instanceof BaseCreatureEntity baseCreatureEntity && event.getLevel() instanceof Level) {
-                if (!baseCreatureEntity.checkSpawnGroupLimit((Level) event.getLevel(), event.getSpawner().getSpawnerEntity().blockPosition(), 16)) {
-                    event.setResult(Event.Result.DENY);
-                }
+        if (event.getSpawnType() != MobSpawnType.SPAWNER) {
+            return;
+        }
+
+        BaseSpawner spawner = event.getSpawner();
+        if (spawner == null || !(event.getLevel() instanceof Level level)) {
+            return;
+        }
+
+        LivingEntity entity = event.getEntity();
+        if (entity instanceof BaseCreatureEntity baseCreatureEntity) {
+            if (!baseCreatureEntity.checkSpawnGroupLimit(level, spawner.getSpawnerEntity().blockPosition(), 16)) {
+                event.setResult(Event.Result.DENY);
             }
         }
     }
