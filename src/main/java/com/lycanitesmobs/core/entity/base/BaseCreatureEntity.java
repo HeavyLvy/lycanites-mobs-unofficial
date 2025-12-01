@@ -4058,7 +4058,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     @Override
     public boolean isControlledByLocalInstance() {
-        return this.canBeControlledByRider() && super.isControlledByLocalInstance();
+        return super.isControlledByLocalInstance();
     }
 
     public boolean canBeControlledByRider() {
