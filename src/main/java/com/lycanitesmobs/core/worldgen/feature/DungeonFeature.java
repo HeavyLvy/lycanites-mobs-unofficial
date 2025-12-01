@@ -3,11 +3,13 @@ package com.lycanitesmobs.core.worldgen.feature;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.data.config.ConfigDungeons;
 import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
-import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -16,27 +18,35 @@ import java.util.List;
 import java.util.UUID;
 
 public class DungeonFeature extends Feature<NoneFeatureConfiguration> {
-    public DungeonFeature(Codec<NoneFeatureConfiguration> configFactory) {
-        super(configFactory);
+    public DungeonFeature(Codec<NoneFeatureConfiguration> codec) {
+        super(codec);
     }
 
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+        WorldGenLevel level = context.level();
+        if (!(level instanceof WorldGenRegion region)) {
+            return false;
+        }
+
+        ServerLevel serverLevel = region.getLevel();
         boolean enabled = ConfigDungeons.INSTANCE.dungeonsEnabled.get();
         int dungeonDistance = ConfigDungeons.INSTANCE.dungeonDistance.get();
 
-        Level world = context.level().getLevel();
-        ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(world);
+        ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(serverLevel);
         if (!enabled || extendedWorld == null) {
             return false;
         }
+
+        RandomSource random = context.random();
+        BlockPos origin = context.origin();
+
         try {
             int dungeonSizeMax = dungeonDistance;
-            ChunkPos chunkPos = new ChunkPos(context.origin());
+            ChunkPos chunkPos = new ChunkPos(origin);
             List<DungeonInstance> nearbyDungeons = extendedWorld.getNearbyDungeonInstances(chunkPos, dungeonSizeMax * 2);
 
-            // Create New Instances:
-            if (nearbyDungeons.isEmpty()) {
+            /*if (nearbyDungeons.isEmpty()) {
                 for (int x = -1; x <= 1; x++) {
                     for (int z = -1; z <= 1; z++) {
                         if (x == 0 && z == 0) {
@@ -45,33 +55,56 @@ public class DungeonFeature extends Feature<NoneFeatureConfiguration> {
                         if (x != 0 && z != 0) {
                             continue;
                         }
-                        LMHelperClass.logDebug("Dungeon", "Creating A New Dungeon At Chunk: X" + (chunkPos.x + (dungeonSizeMax * x)) + " Z" + (chunkPos.z + (dungeonSizeMax * z)));
+
                         DungeonInstance dungeonInstance = new DungeonInstance();
-                        int yPos = context.level().getSeaLevel();
+                        int yPos = region.getSeaLevel();
                         if (yPos < 64) {
                             yPos = 64;
                         }
-                        BlockPos dungeonPos = new ChunkPos(chunkPos.x + (dungeonSizeMax * x), chunkPos.z + (dungeonSizeMax * z)).getWorldPosition().offset(7, yPos, 7);
+
+                        ChunkPos center = new ChunkPos(
+                                chunkPos.x + (dungeonSizeMax * x),
+                                chunkPos.z + (dungeonSizeMax * z)
+                        );
+                        BlockPos dungeonPos = center.getWorldPosition().offset(7, yPos, 7);
+
                         dungeonInstance.setOrigin(dungeonPos);
-                        if (dungeonInstance.init(world)) {
-                            extendedWorld.addDungeonInstance(dungeonInstance, new UUID(context.random().nextLong(), context.random().nextLong()));
-                            LMHelperClass.logDebug("Dungeon", "Feature Created: " + dungeonInstance.toString());
+                        if (dungeonInstance.init(serverLevel)) {
+                            extendedWorld.addDungeonInstance(
+                                    dungeonInstance,
+                                    new UUID(random.nextLong(), random.nextLong())
+                            );
                         }
                     }
                 }
+            }*/
+            if (nearbyDungeons.isEmpty()) {
+                DungeonInstance dungeonInstance = new DungeonInstance();
+                int yPos = region.getSeaLevel();
+                if (yPos < 64) {
+                    yPos = 64;
+                }
+
+                ChunkPos center = chunkPos;
+                BlockPos dungeonPos = center.getWorldPosition().offset(7, yPos, 7);
+
+                dungeonInstance.setOrigin(dungeonPos);
+                if (dungeonInstance.init(serverLevel)) {
+                    extendedWorld.addDungeonInstance(
+                            dungeonInstance,
+                            new UUID(random.nextLong(), random.nextLong())
+                    );
+                }
             }
 
-            // Build Dungeons:
+
             nearbyDungeons = extendedWorld.getNearbyDungeonInstances(chunkPos, 0);
             for (DungeonInstance dungeonInstance : nearbyDungeons) {
-                dungeonInstance.buildChunk(context.level(), world, chunkPos, context.random());
+                dungeonInstance.buildChunk(region, serverLevel, chunkPos, random);
             }
         } catch (Exception e) {
-//			LycanitesMobs.logWarning("", "An exception occurred when trying to generate a dungeon.");
-//			e.printStackTrace();
         }
+
         return true;
     }
-
-
 }

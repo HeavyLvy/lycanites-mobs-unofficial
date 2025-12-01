@@ -286,7 +286,7 @@ public class CreatureSpawn {
         if (biomeRL != null) {
             biomeId = biomeRL.toString();
         } else {
-            LMHelperClass.logWarning("", "Invalid biome: " + biome.toString());
+            // LMHelperClass.logWarning("", "Invalid biome: " + biome.toString());
             return false;
         }
 

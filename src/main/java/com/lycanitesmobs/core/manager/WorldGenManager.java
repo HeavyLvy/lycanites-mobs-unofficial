@@ -1,130 +1,140 @@
 package com.lycanitesmobs.core.manager;
 
+import com.google.common.collect.ImmutableSet;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.liquid.BaseLiquidBlock;
-import com.lycanitesmobs.core.worldgen.AlwaysPlacement;
-import com.lycanitesmobs.core.event.BiomeModifierEventListener;
+import com.lycanitesmobs.core.manager.FluidManager;
 import com.lycanitesmobs.core.worldgen.feature.ChunkSpawnFeature;
 import com.lycanitesmobs.core.worldgen.feature.DungeonFeature;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.features.FeatureUtils;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.HolderSet;
+import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.LakeFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.*;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
-import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
+import net.minecraft.world.level.levelgen.placement.BiomeFilter;
+import net.minecraft.world.level.levelgen.placement.HeightRangePlacement;
+import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.minecraft.world.level.levelgen.placement.RarityFilter;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class WorldGenManager {
-    private static WorldGenManager INSTANCE;
+    private static final WorldGenManager INSTANCE = new WorldGenManager();
 
     public static WorldGenManager getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new WorldGenManager();
-        }
         return INSTANCE;
     }
 
-    // Placements:
-    public static AlwaysPlacement alwaysPlacement = new AlwaysPlacement();
+    public static final DeferredRegister<Feature<?>> FEATURES =
+            DeferredRegister.create(ForgeRegistries.FEATURES, LycanitesMobs.MODID);
 
-    // Features:
-    public ChunkSpawnFeature chunkSpawnFeature = new ChunkSpawnFeature(NoneFeatureConfiguration.CODEC);
-    public DungeonFeature dungeonFeature = new DungeonFeature(NoneFeatureConfiguration.CODEC);
-    public static Map<String, ConfiguredFeature<?, ?>> fluidConfiguredFeatures = new HashMap<>();
+    public static final RegistryObject<ChunkSpawnFeature> CHUNK_SPAWN_FEATURE =
+            FEATURES.register("chunkspawn", () -> new ChunkSpawnFeature(NoneFeatureConfiguration.CODEC));
 
+    public static final RegistryObject<DungeonFeature> DUNGEON_FEATURE =
+            FEATURES.register("dungeon", () -> new DungeonFeature(NoneFeatureConfiguration.CODEC));
 
-    /**
-     * Called on startup after all LM assets have been defined but before mob startup events.
-     */
-    public static void startup() {
-        if (FluidManager.getInstance().worldgenFluidBlocks == null) return;
+    public final Map<String, Holder<PlacedFeature>> fluidPlacedFeatures = new HashMap<>();
+
+    public static void register(IEventBus modBus) {
+        FEATURES.register(modBus);
+    }
+
+    public void setupFluidFeatures() {
         for (String fluidName : FluidManager.getInstance().worldgenFluidBlocks.keySet()) {
             BaseLiquidBlock fluidBlock = FluidManager.getInstance().worldgenFluidBlocks.get(fluidName);
+            BlockState state = fluidBlock.defaultBlockState();
 
-            List<Holder<Block>> list = new ArrayList<>();
+            LakeFeature.Configuration lakeConfig = new LakeFeature.Configuration(
+                    BlockStateProvider.simple(state),
+                    BlockStateProvider.simple(Blocks.STONE.defaultBlockState())
+            );
+            var list = new ArrayList<Holder<Block>>();
             list.add(Holder.direct(Blocks.STONE));
             list.add(Holder.direct(Blocks.GRANITE));
             list.add(Holder.direct(Blocks.DIORITE));
             list.add(Holder.direct(Blocks.ANDESITE));
-            LakeFeature.Configuration lakeConfiguration = new LakeFeature.Configuration(BlockStateProvider.simple(fluidBlock.defaultBlockState()), BlockStateProvider.simple(Blocks.BEDROCK.defaultBlockState()));
-            SpringConfiguration springConfig = new SpringConfiguration(fluidBlock.getFluid().defaultFluidState(), true, 4, 1, BiomeModifierEventListener.createDirectHolderSet(list));
-            ConfiguredFeature<?, ?> lakeFeature = new ConfiguredFeature<>(Feature.LAKE, lakeConfiguration);
-            ConfiguredFeature<?, ?> springFeature = new ConfiguredFeature<>(Feature.SPRING, springConfig);
-            ResourceKey<ConfiguredFeature<?, ?>> lakeFeatureKey = FeatureUtils.createKey(fluidName + "_lake");
-            ResourceKey<ConfiguredFeature<?, ?>> springFeatureKey = FeatureUtils.createKey(fluidName + "_spring");
+            SpringConfiguration springConfig = new SpringConfiguration(
+                    state.getFluidState(),
+                    true,
+                    4,
+                    1,
+                    HolderSet.direct(list)
+            );
 
-			/*if (Material.WATER.contains(fluidBlock.defaultBlockState().getBlock())) {
-				lakeFeature = new ConfiguredFeature<FeatureConfiguration, ?>(Feature.LAKE,lakeConfiguration);
-				springFeature = new ConfiguredFeature<FeatureConfiguration, ?>(Feature.SPRING,springConfig);
+            List<PlacementModifier> lakePlacement;
+            List<PlacementModifier> springPlacement;
 
-			} else {
-				lakeFeature = new ConfiguredFeature<FeatureConfiguration, ?>(Feature.LAKE,lakeConfiguration);
-				springFeature = new ConfiguredFeature<FeatureConfiguration, ?>(Feature.SPRING,springConfig);
-			}*/
-            fluidConfiguredFeatures.put(fluidName + "_lake", lakeFeature);
-            fluidConfiguredFeatures.put(fluidName + "_spring", springFeature);
+            boolean isWaterLike = state.getFluidState().isSource();
+
+            if (isWaterLike) {
+                lakePlacement = List.of(
+                        RarityFilter.onAverageOnceEvery(40),
+                        InSquarePlacement.spread(),
+                        HeightRangePlacement.uniform(
+                                VerticalAnchor.absolute(8),
+                                VerticalAnchor.absolute(256)
+                        ),
+                        BiomeFilter.biome()
+                );
+                springPlacement = List.of(
+                        InSquarePlacement.spread(),
+                        HeightRangePlacement.triangle(
+                                VerticalAnchor.absolute(8),
+                                VerticalAnchor.absolute(256)
+                        ),
+                        BiomeFilter.biome()
+                );
+            } else {
+                lakePlacement = List.of(
+                        RarityFilter.onAverageOnceEvery(40),
+                        InSquarePlacement.spread(),
+                        HeightRangePlacement.uniform(
+                                VerticalAnchor.absolute(8),
+                                VerticalAnchor.absolute(256)
+                        ),
+                        BiomeFilter.biome()
+                );
+                springPlacement = List.of(
+                        InSquarePlacement.spread(),
+                        HeightRangePlacement.triangle(
+                                VerticalAnchor.absolute(8),
+                                VerticalAnchor.absolute(256)
+                        ),
+                        BiomeFilter.biome()
+                );
+            }
+
+            Holder<PlacedFeature> lakePlaced = PlacementUtils.inlinePlaced(
+                    Feature.LAKE,
+                    lakeConfig,
+                    lakePlacement.toArray(new PlacementModifier[0])
+            );
+
+            Holder<PlacedFeature> springPlaced = PlacementUtils.inlinePlaced(
+                    Feature.SPRING,
+                    springConfig,
+                    springPlacement.toArray(new PlacementModifier[0])
+            );
+
+            fluidPlacedFeatures.put(fluidName + "_lake", lakePlaced);
+            fluidPlacedFeatures.put(fluidName + "_spring", springPlaced);
         }
     }
-
-
-    /**
-     * Called on startup after all LM assets have been defined but before mob startup events.
-     */
-	/*public void startup() {
-		for (String fluidName : ItemManager.getInstance().worldgenFluidBlocks.keySet()) {
-			BaseLiquidBlock fluidBlock = ItemManager.getInstance().worldgenFluidBlocks.get(fluidName);
-			ConfiguredFeature<?, ?> lakeFeature = null;
-			ConfiguredFeature<?, ?> springFeature = null;
-			LiquidsConfig springConfig = new LiquidsConfig(fluidBlock.getFluid().defaultFluidState(), true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE));
-
-			if (Material.WATER.contains(fluidBlock.defaultBlockState().getBlock())) {
-				lakeFeature = Feature.LAKE.configuredCodec(new BlockStateConfiguration(fluidBlock.defaultBlockState())).decorated(PlacementModifierType.SURFACE_WATER_DEPTH_FILTER.configured(new ChanceConfig(40)));
-				springFeature = Feature.SPRING.configuredCodec(springConfig).decorated(Placement.RANGE_BIASED.configured(new TopSolidRangeConfig(8, 8, 256))).squared().count(20);
-			}
-			else {
-				lakeFeature = Feature.LAKE.configuredCodec(new BlockStateFeatureConfig(fluidBlock.defaultBlockState())).decorated(Placement.LAVA_LAKE.configured(new ChanceConfig(40)));
-				springFeature = Feature.SPRING.configuredCodec(springConfig).decorated(Placement.RANGE_VERY_BIASED.configured(new TopSolidRangeConfig(8, 16, 256))).squared().count(20);
-			}
-
-			fluidConfiguredFeatures.put(fluidName + "_lake", lakeFeature);
-			fluidConfiguredFeatures.put(fluidName + "_spring", springFeature);
-		}
-	}*/
-    public static final DeferredRegister<ConfiguredFeature<?, ?>> CONFIGURED_FEATURES = DeferredRegister.create(Registries.CONFIGURED_FEATURE, LycanitesMobs.MODID);
-
-    private static final DeferredRegister<PlacementModifierType<?>> PLACEMENT_MODIFIERS = DeferredRegister.create(Registries.PLACEMENT_MODIFIER_TYPE, LycanitesMobs.MODID);
-
-    public static void registerPlacements(IEventBus event) {
-        PLACEMENT_MODIFIERS.register(event);
-        PLACEMENT_MODIFIERS.register("always", () -> alwaysPlacement);
-        CONFIGURED_FEATURES.register(event);
-		/*CONFIGURED_FEATURES.register("poison_lake",() -> fluidConfiguredFeatures.get("poison_lake"));CONFIGURED_FEATURES.register("poison_spring",() -> fluidConfiguredFeatures.get("poison_spring"));
-		CONFIGURED_FEATURES.register("acid_lake",() -> fluidConfiguredFeatures.get("acid_lake"));
-		CONFIGURED_FEATURES.register("acid_spring",() -> fluidConfiguredFeatures.get("acid_spring"));
-		CONFIGURED_FEATURES.register("ooze_lake",() -> fluidConfiguredFeatures.get("ooze_lake"));
-		CONFIGURED_FEATURES.register("ooze_spring",() -> fluidConfiguredFeatures.get("ooze_spring"));
-		CONFIGURED_FEATURES.register("acid_lake",() -> fluidConfiguredFeatures.get("acid_lake"));
-		CONFIGURED_FEATURES.register("moglava_lake",() -> fluidConfiguredFeatures.get("moglava_lake"));
-		CONFIGURED_FEATURES.register("moglava_spring",() -> fluidConfiguredFeatures.get("moglava_spring"));*/
-    }
-
-
 }

@@ -40,12 +40,15 @@ import com.lycanitesmobs.core.event.MobEventListener;
 import com.lycanitesmobs.core.network.proxy.IProxy;
 import com.lycanitesmobs.core.network.proxy.ServerProxy;
 import com.lycanitesmobs.core.event.SpawnerEventListener;
+import com.lycanitesmobs.core.worldgen.data.WorldgenJsonDumper;
+import com.lycanitesmobs.core.worldgen.feature.DungeonFeature;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -61,11 +64,12 @@ import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static com.lycanitesmobs.core.manager.WorldGenManager.FEATURES;
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.fixMaxHealth;
-import static com.lycanitesmobs.core.worldgen.WorldGeneratorBiomeModifier.BIOME_MODIFIER_SERIALIZERS;
 
 
 @Mod(LycanitesMobs.MODID)
@@ -102,9 +106,10 @@ public class LycanitesMobs {
     /**
      * Constructor
      **/
+
     public LycanitesMobs() {
         modInfo = new ModInfo(this, name, 1000);
-        // Config:
+
         CoreConfig.buildSpec();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CoreConfig.SPEC);
 
@@ -113,26 +118,22 @@ public class LycanitesMobs {
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        //Biome Management
-        BIOME_MODIFIER_SERIALIZERS.register(modEventBus);
 
-        // Setup Event Listeners:
         ITEMS.register(modEventBus);
+        BLOCKS.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
-
-        WorldGenManager.registerPlacements(modEventBus);
+        WorldGenManager.register(modEventBus);
         ObjectManager.registerContainers(modEventBus);
+
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::enqueueIMC);
         modEventBus.addListener(this::processIMC);
         modEventBus.register(RegistryEvents.getInstance());
 
-//		modEventBus.register(StatManager.getInstance()); TODO Stats
         PROXY.registerEvents();
         ItemManager.register(modEventBus);
 
-        // Game Event Listeners:
         MinecraftForge.EVENT_BUS.register(SpawnerEventListener.getInstance());
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(CommandManager.getInstance());
@@ -140,11 +141,9 @@ public class LycanitesMobs {
         MinecraftForge.EVENT_BUS.register(MobEventManager.getInstance());
         MinecraftForge.EVENT_BUS.register(MobEventListener.getInstance());
 
-        // Network:
         PACKET_MANAGER.register();
-        // Load Content:
-        this.loadContent();
 
+        this.loadContent();
     }
 
 
@@ -203,12 +202,10 @@ public class LycanitesMobs {
         ItemHalloweenTreat.createObjectLists();
         ItemWinterGift.createObjectLists();
 
-        // World Gen:
-        WorldGenManager.startup();
-
-
         //Registry Objects
         LycanitesMobs.registryObjects();
+        // World Gen:
+        WorldGenManager.getInstance().setupFluidFeatures();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -220,6 +217,11 @@ public class LycanitesMobs {
         // Mod Support:
         DLDungeons.init();
         loadValues();
+
+        event.enqueueWork(() -> {
+            WorldGenManager.getInstance().setupFluidFeatures();
+            WorldgenJsonDumper.dumpIfDev();
+        });
     }
 
     @SubscribeEvent

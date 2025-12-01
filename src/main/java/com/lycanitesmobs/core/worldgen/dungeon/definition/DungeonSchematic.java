@@ -15,6 +15,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
@@ -34,12 +35,12 @@ public class DungeonSchematic {
     /**
      * The minimum amount of sectors this dungeon should have in total.
      **/
-    public int sectorCountMin = 30;
+    public int sectorCountMin = 5;
 
     /**
      * The maximum amount of sectors this dungeon should have in total.
      **/
-    public int sectorCountMax = 50;
+    public int sectorCountMax = 8;
 
     /**
      * The chance of a corridor connecting to another corridor.
@@ -307,12 +308,14 @@ public class DungeonSchematic {
         if (this.biomeIds.isEmpty()) {
             return true;
         }
-        if (this.biomeIds.contains(biome)) {
-            return true;
-        }
-        return false;
-    }
 
+        ResourceLocation biomeId = ForgeRegistries.BIOMES.getKey(biome);
+        if (biomeId == null) {
+            return false;
+        }
+
+        return this.biomeIds.contains(biomeId.toString());
+    }
 
     /**
      * Returns a random number of sectors to generate.

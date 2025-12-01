@@ -335,20 +335,15 @@ public class SectorInstance {
      */
     public List<SectorInstance> getNearbySectors() {
         List<SectorInstance> nearbySectors = new ArrayList<>();
-        for (SectorInstance nearbySector : this.layout.sectors) {
-            if (!nearbySectors.contains(nearbySector)) {
-                nearbySectors.add(nearbySector);
+        for (ChunkPos chunkPos : this.getChunkPositions()) {
+            if (this.layout.sectorChunkMap.containsKey(chunkPos)) {
+                for (SectorInstance nearbySector : this.layout.sectorChunkMap.get(chunkPos)) {
+                    if (!nearbySectors.contains(nearbySector)) {
+                        nearbySectors.add(nearbySector);
+                    }
+                }
             }
         }
-		/*for(ChunkPos chunkPos : this.getChunkPositions()) {
-			if(this.layout.sectorChunkMap.containsKey(chunkPos)) {
-				for(SectorInstance nearbySector : this.layout.sectorChunkMap.get(chunkPos)) {
-					if(!nearbySectors.contains(nearbySector)) {
-						nearbySectors.add(nearbySector);
-					}
-				}
-			}
-		}*/
         return nearbySectors;
     }
 
@@ -370,7 +365,7 @@ public class SectorInstance {
         BlockPos targetMax = sectorInstance.getOccupiedBoundsMax();
 
         if (boundsMin.getY() != targetMin.getY() && !sectorInstance.dungeonSector.type.equals("stairs")) {
-            return false; // Temporary simple y collision check (y doesn't take negative layer padding into account yet).
+            return false;
         }
 
         boolean withinX = boundsMin.getX() >= targetMin.getX() && boundsMin.getX() <= targetMax.getX();

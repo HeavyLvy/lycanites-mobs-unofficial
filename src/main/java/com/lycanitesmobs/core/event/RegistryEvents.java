@@ -285,7 +285,7 @@ public class RegistryEvents {
         );
     }
 
-    @SubscribeEvent
+ /*   @SubscribeEvent
     public void registerFeatures(RegisterEvent event) {
         event.register(ForgeRegistries.Keys.FEATURES,
                 helper -> {
@@ -293,5 +293,5 @@ public class RegistryEvents {
                     helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "dungeon"), WorldGenManager.getInstance().dungeonFeature);
                 }
         );
-    }
+    }*/
 }

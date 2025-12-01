@@ -233,8 +233,8 @@ public class DungeonInstance {
         nbtTagCompound.putBoolean("Complete", this.complete);
         nbtTagCompound.putInt("ChunksBuilt", this.chunksBuilt);
         nbtTagCompound.putIntArray("OriginPos", new int[]{this.originPos.getX(), this.originPos.getY(), this.originPos.getZ()});
-        nbtTagCompound.putIntArray("ChunkMin", new int[]{this.chunkMin.z, this.chunkMin.z});
-        nbtTagCompound.putIntArray("ChunkMax", new int[]{this.chunkMax.z, this.chunkMax.z});
+        nbtTagCompound.putIntArray("ChunkMin", new int[]{this.chunkMin.x, this.chunkMin.z});
+        nbtTagCompound.putIntArray("ChunkMax", new int[]{this.chunkMax.x, this.chunkMax.z});
 
         LMHelperClass.logDebug("Dungeon", "Saved Dungeon Instance to NBT: " + this);
         return nbtTagCompound;

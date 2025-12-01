@@ -134,9 +134,10 @@ public class DungeonSector {
         int y = this.sizeMin.getY();
         if (this.sizeMax.getY() > y)
             y += random.nextInt(this.sizeMax.getY() - y + 1);
-        int z = this.sizeMin.getY();
+        int z = this.sizeMin.getZ();
         if (this.sizeMax.getZ() > z)
             z += random.nextInt(this.sizeMax.getZ() - z + 1);
         return new Vector3i(x, y, z);
     }
+
 }
