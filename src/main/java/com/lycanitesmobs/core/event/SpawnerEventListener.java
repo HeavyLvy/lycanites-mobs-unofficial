@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.event;
 
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.data.info.block.BlockReference;
 import com.lycanitesmobs.core.entity.spawner.trigger.*;
@@ -24,6 +25,7 @@ import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;

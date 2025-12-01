@@ -54,7 +54,7 @@ public class EntityHellLaserEnd extends LaserEndProjectileEntity {
     @Override
     public ResourceLocation getTexture() {
         if (TextureManager.getTexture(this.entityName + "End") == null)
-            TextureManager.addTexture(this.entityName + "End", "textures/item/" + subTypeString() + "/" + this.entityName.toLowerCase() + ".png");
+            TextureManager.addTexture(this.entityName + "End", "textures/item/" + subTypeString() + "/" + this.entityName.toLowerCase() + "_end.png");
         return TextureManager.getTexture(this.entityName + "End");
     }
 

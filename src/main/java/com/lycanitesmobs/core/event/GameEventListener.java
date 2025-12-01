@@ -17,14 +17,14 @@ import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.network.message.MessagePlayerLeftClick;
 
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
@@ -475,16 +475,32 @@ public class GameEventListener {
             return;
         }
 
-        BaseSpawner spawner = event.getSpawner();
-        if (spawner == null || !(event.getLevel() instanceof Level level)) {
+        Mob mob = event.getEntity();
+        if (!(mob instanceof BaseCreatureEntity baseCreatureEntity)) {
             return;
         }
 
-        LivingEntity entity = event.getEntity();
-        if (entity instanceof BaseCreatureEntity baseCreatureEntity) {
-            if (!baseCreatureEntity.checkSpawnGroupLimit(level, spawner.getSpawnerEntity().blockPosition(), 16)) {
-                event.setResult(Event.Result.DENY);
+        if (!(event.getLevel() instanceof Level level)) {
+            return;
+        }
+
+        BaseSpawner spawner = event.getSpawner();
+        BlockPos originPos;
+
+        if (spawner != null) {
+            BlockPos pos = null;
+            if (spawner.getSpawnerBlockEntity() != null) {
+                pos = spawner.getSpawnerBlockEntity().getBlockPos();
+            } else if (spawner.getSpawnerEntity() != null) {
+                pos = spawner.getSpawnerEntity().blockPosition();
             }
+            originPos = pos != null ? pos : mob.blockPosition();
+        } else {
+            originPos = mob.blockPosition();
+        }
+
+        if (!baseCreatureEntity.checkSpawnGroupLimit(level, originPos, 16)) {
+            event.setResult(Event.Result.DENY);
         }
     }
 

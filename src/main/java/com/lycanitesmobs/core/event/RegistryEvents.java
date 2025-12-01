@@ -284,4 +284,14 @@ public class RegistryEvents {
                         .then(DebugCommand.register())
         );
     }
+
+    @SubscribeEvent
+    public void registerFeatures(RegisterEvent event) {
+        event.register(ForgeRegistries.Keys.FEATURES,
+                helper -> {
+                    helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "chunkspawn"), WorldGenManager.getInstance().chunkSpawnFeature);
+                    helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "dungeon"), WorldGenManager.getInstance().dungeonFeature);
+                }
+        );
+    }
 }

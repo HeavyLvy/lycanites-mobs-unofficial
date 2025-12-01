@@ -18,7 +18,6 @@ import com.lycanitesmobs.core.event.mobevent.trigger.RandomMobEventTrigger;
 import com.lycanitesmobs.core.event.mobevent.trigger.TickMobEventTrigger;
 import com.lycanitesmobs.core.network.message.MessageEntityVelocity;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
-import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,16 +36,12 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.lycanitesmobs.core.manager.ObjectManager.blockItems;
 
-
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class MobEventListener {
     // Global:
     protected static MobEventListener INSTANCE;
