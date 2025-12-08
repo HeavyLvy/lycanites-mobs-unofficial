@@ -9,11 +9,11 @@
     {
       "type": "world",
       "dimensionIds": [
-        0
+        "minecraft:overworld"
       ],
       "dimensionListType": "whitelist",
       "biomeTags": [
-        "ocean"
+        "minecraft:is_ocean"
       ],
       "biomeTagListType": "whitelist"
     }

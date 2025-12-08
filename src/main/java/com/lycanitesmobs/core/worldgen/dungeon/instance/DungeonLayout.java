@@ -130,7 +130,12 @@ public class DungeonLayout {
      * @return The generated entrance sector.
      */
     public SectorInstance start(RandomSource random) {
-        this.originConnector = new SectorConnector(this.dungeonInstance.originPos, null, 0, Direction.from2DDataValue(random.nextInt(100)));
+        this.originConnector = new SectorConnector(
+                this.dungeonInstance.originPos,
+                null,
+                0,
+                Direction.from2DDataValue(random.nextInt(4))
+        );
         DungeonSector entranceDungeonSector = this.dungeonInstance.schematic.getRandomSector("entrance", random);
         SectorInstance entranceSector = new SectorInstance(this, entranceDungeonSector, random);
         entranceSector.connect(this.originConnector);
@@ -156,20 +161,34 @@ public class DungeonLayout {
      * @return The end sector or null if it is the finish sector.
      */
     public SectorInstance snake(RandomSource random, SectorInstance startSector, int length) {
+        if (startSector == null) {
+            return null;
+        }
+
         SectorInstance lastSector = startSector;
-        for (int i = 0; i < length; i++) {
+
+        for (int i = 0; i < length && lastSector != null; i++) {
             String nextType = this.dungeonInstance.schematic.getNextConnectingSector(lastSector.dungeonSector.type, random);
             if (i == length - 2) {
                 nextType = "bossRoom";
             } else if (i == length - 1) {
                 nextType = "stairs";
             }
+
             DungeonSector dungeonSector = this.dungeonInstance.schematic.getRandomSector(nextType, random);
             SectorInstance sectorInstance = new SectorInstance(this, dungeonSector, random);
+
             SectorConnector sectorConnector = lastSector.getRandomConnector(random, sectorInstance);
+            if (sectorConnector == null) {
+                com.lycanitesmobs.core.util.helpers.LMHelperClass.logDebug(
+                        "Dungeon",
+                        "snake: no connector available from " + lastSector + " at step " + i + " (type " + nextType + "), aborting chain"
+                );
+                return lastSector;
+            }
+
             sectorInstance.connect(sectorConnector);
 
-            // Finish Sector:
             if ("stairs".equals(nextType) && sectorInstance.getOccupiedBoundsMin().getY() <= 1) {
                 nextType = "finish";
                 dungeonSector = this.dungeonInstance.schematic.getRandomSector(nextType, random);
@@ -180,6 +199,7 @@ public class DungeonLayout {
             sectorInstance.init(random);
             this.addSectorInstance(sectorInstance);
             lastSector = sectorInstance;
+
             if ("finish".equalsIgnoreCase(nextType)) {
                 lastSector = null;
             }

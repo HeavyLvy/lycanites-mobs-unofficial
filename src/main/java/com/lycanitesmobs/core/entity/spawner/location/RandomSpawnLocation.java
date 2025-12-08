@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +79,7 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         return this.sortSpawnPositions(spawnPositions, world, triggerPos);
     }
 
+
     /**
      * Gets a random spawn position.
      *
@@ -90,8 +92,78 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         int[] xz = this.getRandomXZCoord(world, triggerPos);
         int x = xz[0];
         int z = xz[1];
+
+        // Surface-only spawners: use heightmap and place mob in air above ground.
+        if (this.surface && !this.underground) {
+            BlockPos groundPos = world.getHeightmapPos(
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    new BlockPos(x, 0, z)
+            );
+            int feetY = groundPos.getY() + 1;
+
+            LMHelperClass.logDebug("JSONSpawner", "Random candidate (surface) XZ: " + x + ", " + z + " groundY=" + groundPos.getY() + " feetY=" + feetY);
+
+            if (feetY < world.getMinBuildHeight() || feetY >= world.getMaxBuildHeight()) {
+                LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (surface): Y out of bounds");
+                return null;
+            }
+
+            if (this.yMin >= 0 && feetY < this.yMin) {
+                LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (surface): below yMin (" + feetY + " < " + this.yMin + ")");
+                return null;
+            }
+            if (this.yMax >= 0 && feetY > this.yMax) {
+                LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (surface): above yMax (" + feetY + " > " + this.yMax + ")");
+                return null;
+            }
+
+            BlockPos feetPos = new BlockPos(x, feetY, z);
+            BlockPos headPos = feetPos.above();
+
+            BlockState feetState = world.getBlockState(feetPos);
+            BlockState headState = world.getBlockState(headPos);
+            LMHelperClass.logDebug("JSONSpawner", "Feet block: " + feetState.getBlock() + " Head block: " + headState.getBlock());
+
+            if (!this.isValidBlock(world, feetPos)) {
+                LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (surface): feetPos invalid " + feetPos);
+                return null;
+            }
+
+            if (!super.isValidBlock(world, headPos)) {
+                LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (surface): headPos invalid " + headPos);
+                return null;
+            }
+
+            LMHelperClass.logDebug("JSONSpawner", "Accepted surface spawn at " + feetPos);
+            return feetPos;
+        }
+
+        // Non-surface / underground / mixed: use the original Y scan logic.
         int y = this.getRandomYCoord(world, new BlockPos(x, triggerPos.getY(), z));
-        return y > -1 ? new BlockPos(x, y, z) : null;
+        if (y <= -1) {
+            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (non-surface): no valid Y at XZ " + x + ", " + z);
+            return null;
+        }
+
+        BlockPos feetPos = new BlockPos(x, y, z);
+        BlockPos headPos = feetPos.above();
+
+        BlockState feetState = world.getBlockState(feetPos);
+        BlockState headState = world.getBlockState(headPos);
+        LMHelperClass.logDebug("JSONSpawner", "Feet block (non-surface): " + feetState.getBlock() + " Head block: " + headState.getBlock());
+
+        if (!this.isValidBlock(world, feetPos)) {
+            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (non-surface): feetPos invalid " + feetPos);
+            return null;
+        }
+
+        if (!super.isValidBlock(world, headPos)) {
+            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (non-surface): headPos invalid " + headPos);
+            return null;
+        }
+
+        LMHelperClass.logDebug("JSONSpawner", "Accepted non-surface spawn at " + feetPos);
+        return feetPos;
     }
 
     /**
@@ -233,13 +305,19 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
     @Override
     public boolean isValidBlock(Level world, BlockPos blockPos) {
         if (!super.isValidBlock(world, blockPos)) {
+            //LMHelperClass.logDebug("JSONSpawner", "isValidBlock: super rejected " + blockPos);
             return false;
         }
         if (this.solidGround) {
-            return this.posHasGround(world, blockPos);
+            boolean groundOk = this.posHasGround(world, blockPos);
+           /* if (!groundOk) {
+                LMHelperClass.logDebug("JSONSpawner", "isValidBlock: no solid ground under " + blockPos);
+            }*/
+            return groundOk;
         }
         return true;
     }
+
 
     /**
      * Returns true if the specified position has a block underneath it that a mob can safely stand on.

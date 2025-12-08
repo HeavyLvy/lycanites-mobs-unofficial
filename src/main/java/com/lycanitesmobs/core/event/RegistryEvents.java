@@ -270,7 +270,7 @@ public class RegistryEvents {
 
     // ========== Commands ==========
     @SubscribeEvent
-    public static void register(final RegisterCommandsEvent event) {
+    public static void registerCommands(final RegisterCommandsEvent event) {
         event.getDispatcher().register(
                 Commands.literal("lm")
                         .then(CreaturesCommand.register())
@@ -284,6 +284,7 @@ public class RegistryEvents {
                         .then(DebugCommand.register())
         );
     }
+
 
  /*   @SubscribeEvent
     public void registerFeatures(RegisterEvent event) {

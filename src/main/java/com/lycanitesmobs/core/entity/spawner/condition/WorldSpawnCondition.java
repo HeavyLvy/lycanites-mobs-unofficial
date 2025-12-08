@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -39,11 +40,13 @@ public class WorldSpawnCondition extends SpawnCondition {
      * The list of biome tags to filter this condition by.
      **/
     public List<String> biomeTags = new ArrayList<>();
-
     /**
      * The list of biomes generated from the list of biome tags.
      **/
     public List<String> biomesFromTags = null;
+    public List<String> biomeTagBlacklist = new ArrayList<>();
+
+    public List<String> biomesFromTagBlacklist = null;
 
     /**
      * How the biomes from the biome ids list works. Can be whitelist or blacklist.
@@ -100,6 +103,13 @@ public class WorldSpawnCondition extends SpawnCondition {
      **/
     public float moonPhase = -1;
 
+    public long salt = 0L;
+    public int spacing = 32;
+    public int separation = 8;
+    public int minY = 4;
+    public int maxY = 64;
+    public int maxDistanceFromCenter = 48;
+    public int estimatedHeight = 32;
 
     @Override
     public void loadFromJSON(JsonObject json) {
@@ -114,12 +124,34 @@ public class WorldSpawnCondition extends SpawnCondition {
 
         if (json.has("biomeTags")) {
             this.biomeTags.clear();
+            this.biomeTagBlacklist.clear();
             this.biomesFromTags = null;
-            this.biomeTags = JSONHelper.getJsonStrings(json.get("biomeTags").getAsJsonArray());
+
+            List<String> rawTags = JSONHelper.getJsonStrings(json.get("biomeTags").getAsJsonArray());
+            for (String raw : rawTags) {
+                if (raw != null && !raw.isEmpty() && raw.charAt(0) == '-') {
+                    String stripped = raw.substring(1);
+                    if (!stripped.isEmpty()) {
+                        this.biomeTagBlacklist.add(stripped);
+                    }
+                }
+                this.biomeTags.add(raw);
+            }
         } else if (json.has("biomes")) {
             this.biomeTags.clear();
+            this.biomeTagBlacklist.clear();
             this.biomesFromTags = null;
-            this.biomeTags = JSONHelper.getJsonStrings(json.get("biomes").getAsJsonArray());
+
+            List<String> rawTags = JSONHelper.getJsonStrings(json.get("biomes").getAsJsonArray());
+            for (String raw : rawTags) {
+                if (raw != null && !raw.isEmpty() && raw.charAt(0) == '-') {
+                    String stripped = raw.substring(1);
+                    if (!stripped.isEmpty()) {
+                        this.biomeTagBlacklist.add(stripped);
+                    }
+                }
+                this.biomeTags.add(raw);
+            }
         }
 
         if (json.has("biomeTagListType"))
@@ -160,17 +192,70 @@ public class WorldSpawnCondition extends SpawnCondition {
         if (json.has("moonPhase"))
             this.moonPhase = json.get("moonPhase").getAsFloat();
 
+        if (json.has("salt"))
+            this.salt = json.get("salt").getAsLong();
+
+        if (json.has("spacing"))
+            this.spacing = json.get("spacing").getAsInt();
+
+        if (json.has("separation"))
+            this.separation = json.get("separation").getAsInt();
+
+        if (json.has("minY"))
+            this.minY = json.get("minY").getAsInt();
+
+        if (json.has("maxY"))
+            this.maxY = json.get("maxY").getAsInt();
+
+        if (json.has("maxDistanceFromCenter"))
+            this.maxDistanceFromCenter = json.get("maxDistanceFromCenter").getAsInt();
+
+        if (json.has("estimatedHeight"))
+            this.estimatedHeight = json.get("estimatedHeight").getAsInt();
+
         super.loadFromJSON(json);
     }
 
 
+    public long getSalt() {
+        return this.salt;
+    }
+
+    public int getSpacing() {
+        return this.spacing;
+    }
+
+    public int getSeparation() {
+        return this.separation;
+    }
+
+    public int getMinY() {
+        return this.minY;
+    }
+
+    public int getMaxY() {
+        return this.maxY;
+    }
+
+    public int getMaxDistanceFromCenter() {
+        return this.maxDistanceFromCenter;
+    }
+
+    public int getEstimatedHeight() {
+        return this.estimatedHeight;
+    }
+
     @Override
     public boolean isMet(Level world, Player player, BlockPos position) {
         ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
-        int time = (int) Math.floor(world.getDayTime() % 24000D);
-        int day = (int) Math.floor((worldExt.useTotalWorldTime ? world.getGameTime() : world.getDayTime()) / 23999D);
 
-        // Check Day:
+        long baseTime = worldExt != null && worldExt.useTotalWorldTime
+                ? world.getGameTime()
+                : world.getDayTime();
+
+        int time = (int) (world.getDayTime() % 24000L);
+        int day = (int) (baseTime / 24000L);
+
         if (this.worldDayMin >= 0 && day < this.worldDayMin) {
             return false;
         }
@@ -181,7 +266,6 @@ public class WorldSpawnCondition extends SpawnCondition {
             return false;
         }
 
-        // Check Time:
         if (this.dayTimeMin >= 0 && time < this.dayTimeMin) {
             return false;
         }
@@ -189,7 +273,6 @@ public class WorldSpawnCondition extends SpawnCondition {
             return false;
         }
 
-        // Check Weather:
         if ("clear".equalsIgnoreCase(this.weather) && (world.isRaining() || world.isThundering())) {
             return false;
         } else if ("rain".equalsIgnoreCase(this.weather) && (!world.isRaining() || world.isThundering())) {
@@ -202,7 +285,6 @@ public class WorldSpawnCondition extends SpawnCondition {
             return false;
         }
 
-        // Check Difficulty:
         if (this.difficultyMin >= 0 && world.getDifficulty().getId() < this.difficultyMin) {
             return false;
         }
@@ -210,17 +292,14 @@ public class WorldSpawnCondition extends SpawnCondition {
             return false;
         }
 
-        // Check Moon Phase:
         if (this.moonPhase >= 0 && world.dimensionType().moonPhase(world.dayTime()) != this.moonPhase) {
             return false;
         }
 
-        // Check Dimensions:
         if (!this.isAllowedDimension(world)) {
             return false;
         }
 
-        // Check Biomes:
         if (!this.isAllowedBiome(world, position)) {
             return false;
         }
@@ -238,16 +317,19 @@ public class WorldSpawnCondition extends SpawnCondition {
     public boolean isAllowedDimension(Level world) {
         String dimension = world.dimension().location().toString();
 
-        // Dimension IDs:
-        if (!this.dimensionIds.isEmpty()) {
-            for (String dimensionId : this.dimensionIds) {
-                if (dimensionId.equals(dimension)) {
-                    return !"blacklist".equalsIgnoreCase(this.dimensionListType);
-                }
+        if (this.dimensionIds.isEmpty()) {
+            return true;
+        }
+
+        for (String dimensionId : this.dimensionIds) {
+            if (dimensionId.equals(dimension)) {
+                boolean allowed = !"blacklist".equalsIgnoreCase(this.dimensionListType);
+                return allowed;
             }
         }
 
-        return "blacklist".equalsIgnoreCase(this.dimensionListType);
+        boolean allowed = "blacklist".equalsIgnoreCase(this.dimensionListType);
+        return allowed;
     }
 
 
@@ -260,27 +342,42 @@ public class WorldSpawnCondition extends SpawnCondition {
      */
     public boolean isAllowedBiome(Level world, BlockPos position) {
         if (position != null) {
-            Object biome = LMHelperClass.convertToResourceLocation(world.getBiomeManager().getBiome(position).get());
-            String biomeId;
-            if (biome != null) {
-                biomeId = ((ResourceLocation) biome).toString();
-            } else {
-                //LycanitesMobs.logWarning("", "Biome: " + ForgeRegistries.BIOMES.getKey(world.getBiomeManager().getBiome(position).get()));
+            ResourceLocation biomeId = world
+                    .getBiome(position)
+                    .unwrapKey()
+                    .map(ResourceKey::location)
+                    .orElse(null);
+
+            if (biomeId == null) {
+                LMHelperClass.logDebug("Dungeon", "WorldSpawnCondition biome check: biome ResourceLocation is null at " + position);
+                if (this.biomeIds.isEmpty() && this.biomeTags.isEmpty()) {
+                    return true;
+                }
                 return false;
             }
-            // Biome IDs:
+
+            String biomeIdString = biomeId.toString();
+
+            if (!this.biomeTagBlacklist.isEmpty()) {
+                if (this.biomesFromTagBlacklist == null) {
+                    this.biomesFromTagBlacklist = JSONHelper.getBiomesFromTags(world, this.biomeTagBlacklist);
+                }
+                if (this.biomesFromTagBlacklist.contains(biomeIdString)) {
+                    return false;
+                }
+            }
+
             if (!this.biomeIds.isEmpty()) {
-                if (this.biomeIds.contains(biomeId)) {
+                if (this.biomeIds.contains(biomeIdString)) {
                     return !"blacklist".equalsIgnoreCase(this.biomeIdListType);
                 }
             }
 
-            // Biome Tags:
             if (!this.biomeTags.isEmpty()) {
                 if (this.biomesFromTags == null) {
-                    this.biomesFromTags = JSONHelper.getBiomesFromTags(this.biomeTags);
+                    this.biomesFromTags = JSONHelper.getBiomesFromTags(world, this.biomeTags);
                 }
-                if (this.biomesFromTags.contains(biomeId)) {
+                if (this.biomesFromTags.contains(biomeIdString)) {
                     return !"blacklist".equalsIgnoreCase(this.biomeTagListType);
                 }
             }
@@ -290,6 +387,73 @@ public class WorldSpawnCondition extends SpawnCondition {
             return true;
         }
 
-        return "blacklist".equalsIgnoreCase(this.biomeIdListType) && "blacklist".equalsIgnoreCase(this.biomeTagListType);
+        return "blacklist".equalsIgnoreCase(this.biomeIdListType)
+                && "blacklist".equalsIgnoreCase(this.biomeTagListType);
     }
+
+
+    public void collectDebugFailures(Level world, Player player, BlockPos position, List<String> reasons) {
+        ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
+
+        long baseTime = worldExt != null && worldExt.useTotalWorldTime
+                ? world.getGameTime()
+                : world.getDayTime();
+
+        int time = (int) (world.getDayTime() % 24000L);
+        int day = (int) (baseTime / 24000L);
+
+        if (this.worldDayMin >= 0 && day < this.worldDayMin) {
+            reasons.add("day " + day + " < worldDayMin " + this.worldDayMin);
+        }
+        if (this.worldDayMax >= 0 && day > this.worldDayMax) {
+            reasons.add("day " + day + " > worldDayMax " + this.worldDayMax);
+        }
+        if (this.worldDayN >= 0 && (day == 0 || day % this.worldDayN != 0)) {
+            reasons.add("day " + day + " not on interval worldDayN " + this.worldDayN);
+        }
+
+        if (this.dayTimeMin >= 0 && time < this.dayTimeMin) {
+            reasons.add("time " + time + " < dayTimeMin " + this.dayTimeMin);
+        }
+        if (this.dayTimeMax >= 0 && time > this.dayTimeMax) {
+            reasons.add("time " + time + " > dayTimeMax " + this.dayTimeMax);
+        }
+
+        if ("clear".equalsIgnoreCase(this.weather) && (world.isRaining() || world.isThundering())) {
+            reasons.add("weather=clear but raining=" + world.isRaining() + " thundering=" + world.isThundering());
+        } else if ("rain".equalsIgnoreCase(this.weather) && (!world.isRaining() || world.isThundering())) {
+            reasons.add("weather=rain but raining=" + world.isRaining() + " thundering=" + world.isThundering());
+        } else if ("storm".equalsIgnoreCase(this.weather) && !world.isThundering()) {
+            reasons.add("weather=storm but not thundering");
+        } else if ("rainstorm".equalsIgnoreCase(this.weather) && (!world.isRaining() || !world.isThundering())) {
+            reasons.add("weather=rainstorm but raining=" + world.isRaining() + " thundering=" + world.isThundering());
+        } else if ("notclear".equalsIgnoreCase(this.weather) && (!world.isRaining() && !world.isThundering())) {
+            reasons.add("weather=notclear but world is clear");
+        }
+
+        if (this.difficultyMin >= 0 && world.getDifficulty().getId() < this.difficultyMin) {
+            reasons.add("difficulty " + world.getDifficulty().getId() + " < difficultyMin " + this.difficultyMin);
+        }
+        if (this.difficultyMax >= 0 && world.getDifficulty().getId() > this.difficultyMax) {
+            reasons.add("difficulty " + world.getDifficulty().getId() + " > difficultyMax " + this.difficultyMax);
+        }
+
+        if (this.moonPhase >= 0 && world.dimensionType().moonPhase(world.dayTime()) != this.moonPhase) {
+            reasons.add("moonPhase " + world.dimensionType().moonPhase(world.dayTime()) + " != required " + this.moonPhase);
+        }
+
+        if (!this.isAllowedDimension(world)) {
+            reasons.add("dimension " + world.dimension().location() + " disallowed (dimensionIds=" + this.dimensionIds + ", type=" + this.dimensionListType + ")");
+        }
+
+        if (position != null && !this.isAllowedBiome(world, position)) {
+            reasons.add("biome disallowed at " + position +
+                    " (biomeIds=" + this.biomeIds +
+                    ", biomeTags=" + this.biomeTags +
+                    ", biomeIdListType=" + this.biomeIdListType +
+                    ", biomeTagListType=" + this.biomeTagListType + ")");
+        }
+    }
+
+
 }

@@ -71,6 +71,9 @@ public class CreatureSpawn {
      **/
     public List<String> biomesFromTags = null;
 
+    public List<String> biomeTagBlacklist = new ArrayList<>();
+    public List<String> biomesFromTagBlacklist = null;
+
     /**
      * The list of specific biome ids that this creature spawns in.
      **/
@@ -149,7 +152,6 @@ public class CreatureSpawn {
         if (json.has("disableSubspecies"))
             this.disableVariants = json.get("disableSubspecies").getAsBoolean();
 
-        // Spawners:
         this.spawners.clear();
         this.vanillaSpawnerTypes.clear();
         if (json.has("spawners")) {
@@ -169,7 +171,6 @@ public class CreatureSpawn {
             }
         }
 
-        // Dimensions:
         if (json.has("dimensionIds")) {
             this.dimensionIds.clear();
             this.dimensions = null;
@@ -178,18 +179,39 @@ public class CreatureSpawn {
         if (json.has("dimensionListType"))
             this.dimensionListType = json.get("dimensionListType").getAsString();
 
-        // Biomes:
         if (json.has("ignoreBiome"))
             this.ignoreBiome = json.get("ignoreBiome").getAsBoolean();
 
         if (json.has("biomeTags")) {
             this.biomeTags.clear();
+            this.biomeTagBlacklist.clear();
             this.biomesFromTags = null;
-            this.biomeTags = JSONHelper.getJsonStrings(json.get("biomeTags").getAsJsonArray());
+
+            List<String> rawTags = JSONHelper.getJsonStrings(json.get("biomeTags").getAsJsonArray());
+            for (String raw : rawTags) {
+                if (raw != null && !raw.isEmpty() && raw.charAt(0) == '-') {
+                    String stripped = raw.substring(1);
+                    if (!stripped.isEmpty()) {
+                        this.biomeTagBlacklist.add(stripped);
+                    }
+                }
+                this.biomeTags.add(raw);
+            }
         } else if (json.has("biomes")) {
             this.biomeTags.clear();
+            this.biomeTagBlacklist.clear();
             this.biomesFromTags = null;
-            this.biomeTags = JSONHelper.getJsonStrings(json.get("biomes").getAsJsonArray());
+
+            List<String> rawTags = JSONHelper.getJsonStrings(json.get("biomes").getAsJsonArray());
+            for (String raw : rawTags) {
+                if (raw != null && !raw.isEmpty() && raw.charAt(0) == '-') {
+                    String stripped = raw.substring(1);
+                    if (!stripped.isEmpty()) {
+                        this.biomeTagBlacklist.add(stripped);
+                    }
+                }
+                this.biomeTags.add(raw);
+            }
         }
 
         if (json.has("biomeIds")) {
@@ -276,7 +298,7 @@ public class CreatureSpawn {
      * @param biome The biome to check.
      * @return True if a valid biome.
      */
-    public boolean isValidBiome(Biome biome) {
+    public boolean isValidBiome(Level level, Biome biome) {
         if (this.ignoreBiome) {
             return true;
         }
@@ -286,21 +308,27 @@ public class CreatureSpawn {
         if (biomeRL != null) {
             biomeId = biomeRL.toString();
         } else {
-            // LMHelperClass.logWarning("", "Invalid biome: " + biome.toString());
             return false;
         }
 
-        // Biome Tags:
+        if (!this.biomeTagBlacklist.isEmpty()) {
+            if (this.biomesFromTagBlacklist == null) {
+                this.biomesFromTagBlacklist = JSONHelper.getBiomesFromTags(level, this.biomeTagBlacklist);
+            }
+            if (this.biomesFromTagBlacklist.contains(biomeId)) {
+                return false;
+            }
+        }
+
         if (!this.biomeTags.isEmpty()) {
             if (this.biomesFromTags == null) {
-                this.biomesFromTags = JSONHelper.getBiomesFromTags(this.biomeTags);
+                this.biomesFromTags = JSONHelper.getBiomesFromTags(level, this.biomeTags);
             }
             if (this.biomesFromTags.contains(biomeId)) {
                 return true;
             }
         }
 
-        // Biome IDs:
         if (!this.biomeIds.isEmpty()) {
             if (this.biomeIds.contains(biomeId)) {
                 return true;
@@ -309,4 +337,5 @@ public class CreatureSpawn {
 
         return false;
     }
+
 }

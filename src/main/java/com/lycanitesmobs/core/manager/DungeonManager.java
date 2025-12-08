@@ -16,6 +16,7 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -286,4 +287,9 @@ public class DungeonManager extends JSONLoader {
         }
         return this.schematics.get(name);
     }
+
+    public Collection<DungeonSchematic> getSchematics() {
+        return this.schematics.values();
+    }
+
 }

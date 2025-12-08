@@ -3,22 +3,14 @@
   "placement": [
     {
       "type": "minecraft:rarity_filter",
-      "chance": 40
+      "chance": 120
     },
     {
       "type": "minecraft:in_square"
     },
     {
-      "type": "minecraft:height_range",
-      "height": {
-        "type": "minecraft:uniform",
-        "min_inclusive": {
-          "absolute": 8
-        },
-        "max_inclusive": {
-          "absolute": 256
-        }
-      }
+      "type": "minecraft:heightmap",
+      "heightmap": "WORLD_SURFACE_WG"
     },
     {
       "type": "minecraft:biome"

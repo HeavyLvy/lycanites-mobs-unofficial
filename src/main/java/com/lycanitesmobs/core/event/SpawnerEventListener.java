@@ -4,7 +4,9 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.data.info.block.BlockReference;
 import com.lycanitesmobs.core.entity.spawner.trigger.*;
+import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -307,15 +309,40 @@ public class SpawnerEventListener {
      * Called every time a new chunk is generated. Adds the chunk to a list for spawning in later when ready.
      **/
     public void onChunkGenerate(String dimensionId, ChunkPos chunkPos) {
-        // Add To Fresh Chunks Map:
+        if (dimensionId == null || chunkPos == null) {
+            return;
+        }
+
         if (!this.freshChunks.containsKey(dimensionId)) {
             this.freshChunks.put(dimensionId, new ArrayList<>());
         }
-        if (this.freshChunks.get(dimensionId).contains(chunkPos)) {
+        List<ChunkPos> list = this.freshChunks.get(dimensionId);
+        if (list.contains(chunkPos)) {
             return;
         }
-        this.freshChunks.get(dimensionId).add(chunkPos);
+        list.add(chunkPos);
     }
+
+   /* @SubscribeEvent
+    public void onChunkLoad(net.minecraftforge.event.level.ChunkEvent.Load event) {
+        if (!(event.getChunk() instanceof net.minecraft.world.level.chunk.LevelChunk levelChunk)) return;
+
+        Level level = levelChunk.getLevel();
+        if (level.isClientSide) return;
+
+        ChunkPos chunkPos = levelChunk.getPos();
+        ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(level);
+        if (extendedWorld == null) return;
+
+        RandomSource random = RandomSource.create(chunkPos.toLong() ^ extendedWorld.getWorldSeed());
+
+        List<DungeonInstance> nearby = extendedWorld.getNearbyDungeonInstances(chunkPos, 0);
+        for (DungeonInstance instance : nearby) {
+            if (!instance.complete && instance.isChunkPosWithin(chunkPos, 0)) {
+                instance.buildChunk(level, level, chunkPos, random);
+            }
+        }
+    }*/
 
     /**
      * Called on World Tick, checks for any fresh chunks to spawn in.
@@ -329,25 +356,25 @@ public class SpawnerEventListener {
 
         List<ChunkPos> freshChunks = new ArrayList<>(this.freshChunks.get(dimensionId));
         for (ChunkPos chunkPos : freshChunks) {
-            // Check If Loaded:
+            if (chunkPos == null) {
+                this.freshChunks.get(dimensionId).remove(null);
+                continue;
+            }
+
             if (!world.getChunkSource().hasChunk(chunkPos.x, chunkPos.z)) {
                 continue;
             }
             this.freshChunks.get(dimensionId).remove(chunkPos);
 
-            // Call Triggers:
-            //if (this.chunkSpawnTriggersActive) {}
             for (ChunkSpawnTrigger spawnTrigger : this.chunkSpawnTriggers) {
                 if (spawnTrigger.onChunkPopulate(world, chunkPos)) {
-                    //this.chunkSpawnTriggersActive = true;
                 }
             }
-            //this.chunkSpawnTriggersActive = false;
         }
 
-        // Clear If Too Many:
-        if (this.freshChunks.get(dimensionId).size() > 1000) {
-            this.freshChunks.get(dimensionId).clear();
+        List<ChunkPos> list = this.freshChunks.get(dimensionId);
+        if (list.size() > 1000) {
+            list.clear();
         }
     }
 

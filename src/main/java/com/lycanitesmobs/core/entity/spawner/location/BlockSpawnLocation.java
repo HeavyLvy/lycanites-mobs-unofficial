@@ -176,6 +176,7 @@ public class BlockSpawnLocation extends SpawnLocation {
             return true;
         }
         Block block = world.getBlockState(blockPos).getBlock();
+        LMHelperClass.logInfoMessageOnceDev("IsvalidBlock check: " + LMHelperClass.convertToResourceLocation(block).toString());
         if ("blacklist".equalsIgnoreCase(this.listType)) {
             return !this.blockIds.contains(LMHelperClass.convertToResourceLocation(block).toString());
         } else {

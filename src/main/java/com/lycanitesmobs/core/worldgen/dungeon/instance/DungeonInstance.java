@@ -61,7 +61,7 @@ public class DungeonInstance {
     /**
      * The seed for generating this dungeon. All random decisions are based on this seed so that the Dungeon Layout can generate the same on world reload, etc.
      **/
-    long seed = 0;
+    public long seed = 0;
 
     /**
      * The random instance to use when randomly generating, this can be seeded for consistent results.
@@ -73,6 +73,7 @@ public class DungeonInstance {
      **/
     public DungeonLayout layout;
 
+    public DungeonBuildPlan buildPlan;
 
     /**
      * Sets the origin position. This must be set before init. Reading from NBT sets this from the NBT data.
@@ -106,7 +107,6 @@ public class DungeonInstance {
             return false;
         }
 
-        // Get Schematic:
         if (this.schematic == null) {
             List<DungeonSchematic> schematics = new ArrayList<>();
             for (DungeonSchematic schematic : DungeonManager.getInstance().schematics.values()) {
@@ -125,21 +125,26 @@ public class DungeonInstance {
             }
         }
 
-        // Get Seed:
         if (this.seed == 0) {
             this.seed = world.random.nextLong();
         }
-        this.random = world.random;
+        this.random = RandomSource.create(this.seed);
 
-        // Generate Layout:
         LMHelperClass.logDebug("Dungeon", "Starting Dungeon Instance Generation For " + this);
         if (this.layout == null) {
             this.layout = new DungeonLayout(this);
             this.layout.generate(this.random);
         }
+        this.buildPlan = new DungeonBuildPlan();
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            for (SectorInstance sector : this.layout.sectors) {
+                sector.generateBuildPlan(this.buildPlan);
+            }
+            this.buildPlan.markReady();
+        });
+
         LMHelperClass.logInfo("Dungeon", "Generated New Dungeon Instance " + this);
 
-        // Mark For Save:
         ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(world);
         if (extendedWorld != null) {
             extendedWorld.setDirty();
@@ -177,21 +182,125 @@ public class DungeonInstance {
      * @param chunkPos    The chunk position to build within.
      */
     public void buildChunk(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
-        if (this.complete || this.layout == null || !this.layout.sectorChunkMap.containsKey(chunkPos)) {
+        if (this.complete || this.layout == null) {
             return;
         }
+
+        if (this.buildPlan != null && this.buildPlan.isReady()) {
+            java.util.List<DungeonBuildPlan.PlannedBlock> blocks = this.buildPlan.getForChunk(chunkPos);
+
+            if (blocks.isEmpty()) {
+                LMHelperClass.logDebug("Dungeon", "buildChunk: no planned blocks for chunk " + chunkPos + " in dungeon " + this.uuid);
+            } else {
+                int placed = 0;
+                for (DungeonBuildPlan.PlannedBlock block : blocks) {
+                    if (placed < 10) {
+                        LMHelperClass.logDebug(
+                                "Dungeon",
+                                "buildChunk: placing planned block " +
+                                        block.state.getBlock() + " at " + block.pos +
+                                        " in chunk " + chunkPos + " for dungeon " + this.uuid
+                        );
+                    }
+                    SectorInstance anySector = this.layout.sectors.isEmpty() ? null : this.layout.sectors.get(0);
+                    if (anySector != null) {
+                        block.apply(worldWriter, world, chunkPos, random, anySector);
+                        placed++;
+                    }
+                }
+                LMHelperClass.logDebug(
+                        "Dungeon",
+                        "buildChunk: placed " + placed + " planned blocks in chunk " + chunkPos + " for dungeon " + this.uuid
+                );
+            }
+
+            int plannedChunkCount = this.buildPlan.getPlannedChunks().size();
+            if (++this.chunksBuilt >= plannedChunkCount) {
+                this.complete = true;
+                LMHelperClass.logDebug(
+                        "Dungeon",
+                        "buildChunk: dungeon " + this.uuid + " marked complete using buildPlan. chunksBuilt=" +
+                                this.chunksBuilt + " plannedChunks=" + plannedChunkCount
+                );
+            }
+            return;
+        }
+
+        if (this.buildPlan == null) {
+            LMHelperClass.logDebug("Dungeon", "buildChunk: buildPlan is null for dungeon " + this.uuid + " chunk " + chunkPos);
+        } else {
+            LMHelperClass.logDebug("Dungeon", "buildChunk: buildPlan not ready yet for dungeon " + this.uuid + " chunk " + chunkPos);
+        }
+
+        if (!this.layout.sectorChunkMap.containsKey(chunkPos)) {
+            LMHelperClass.logDebug("Dungeon", "buildChunk: sectorChunkMap has no entry for chunk " + chunkPos + " for dungeon " + this.uuid);
+            return;
+        }
+
+        LMHelperClass.logDebug(
+                "Dungeon",
+                "buildChunk: using sector build for chunk " + chunkPos +
+                        " with " + this.layout.sectorChunkMap.get(chunkPos).size() +
+                        " sectors for dungeon " + this.uuid
+        );
+
         for (SectorInstance sectorInstance : this.layout.sectorChunkMap.get(chunkPos)) {
-            // The world random is used when building as it can be volatile unlike layouts which must be done by seed in order.
-            //LycanitesMobs.logInfo("", "Building In Chunk: " + chunkPos);
             sectorInstance.build(worldWriter, world, chunkPos, random);
         }
 
-        // Update Chunks Built:
         if (++this.chunksBuilt >= this.layout.sectorChunkMap.size()) {
             this.complete = true;
+            LMHelperClass.logDebug(
+                    "Dungeon",
+                    "buildChunk: dungeon " + this.uuid + " marked complete using sectorChunkMap. chunksBuilt=" +
+                            this.chunksBuilt + " sectorChunks=" + this.layout.sectorChunkMap.size()
+            );
         }
     }
 
+
+    public void debugBuildChunk(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
+        LMHelperClass.logDebug(
+                "DungeonDebug",
+                "debugBuildChunk: instance=" + this.uuid +
+                        " complete=" + this.complete +
+                        " layout=" + (this.layout != null ? "present" : "null") +
+                        " chunk=" + chunkPos
+        );
+
+        if (this.complete) {
+            LMHelperClass.logDebug("DungeonDebug", "debugBuildChunk: instance complete, skipping " + chunkPos);
+            return;
+        }
+
+        if (this.layout == null) {
+            LMHelperClass.logDebug("DungeonDebug", "debugBuildChunk: layout null for instance " + this.uuid);
+            return;
+        }
+
+        if (this.buildPlan != null && this.buildPlan.isReady()) {
+            java.util.List<DungeonBuildPlan.PlannedBlock> blocks = this.buildPlan.getForChunk(chunkPos);
+            int blockCount = blocks != null ? blocks.size() : 0;
+            LMHelperClass.logDebug(
+                    "DungeonDebug",
+                    "debugBuildChunk: buildPlan ready for " + chunkPos +
+                            " plannedBlockCount=" + blockCount
+            );
+            return;
+        }
+
+        if (!this.layout.sectorChunkMap.containsKey(chunkPos)) {
+            LMHelperClass.logDebug("DungeonDebug", "debugBuildChunk: chunk " + chunkPos + " not in sectorChunkMap");
+            return;
+        }
+
+        int sectors = this.layout.sectorChunkMap.get(chunkPos).size();
+        LMHelperClass.logDebug(
+                "DungeonDebug",
+                "debugBuildChunk: chunk " + chunkPos +
+                        " in sectorChunkMap with sectorCount=" + sectors
+        );
+    }
 
     /**
      * Loads this Dungeon Instance from the provided NBT data, this is mostly just if the dungeon is built and what its origin position is.
@@ -254,4 +363,11 @@ public class DungeonInstance {
         String tpCommand = "/tp " + this.originPos.getX() + " " + (this.originPos.getY() + 2) + " " + this.originPos.getZ() + " ";
         return "Dungeon Instance" + schematic + " - TP Command: " + tpCommand + " - Origin: " + this.originPos + " - Complete: " + complete + " - Seed: " + this.seed + " - ID: " + this.uuid;
     }
+
+    public BlockPos getOrigin() {
+        return originPos;
+    }
+
+    public static boolean DEBUG_PLACEMENT = true;
+    public static boolean DISABLE_ACTUAL_PLACEMENT = false;
 }

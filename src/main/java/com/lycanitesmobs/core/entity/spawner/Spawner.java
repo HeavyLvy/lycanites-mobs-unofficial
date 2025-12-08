@@ -549,7 +549,7 @@ public class Spawner {
         // Get Mobs:
         Map<Biome, List<MobSpawn>> mobSpawns = this.getMobSpawns(world, player, spawnPositions.size(), biomes);
         LMHelperClass.logDebug("JSONSpawner", "Spawnable Mobs Found: " + mobSpawns.size());
-        if (mobSpawns.size() == 0) {
+        if (mobSpawns.isEmpty()) {
             return false;
         }
 

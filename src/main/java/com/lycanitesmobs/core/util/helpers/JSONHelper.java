@@ -7,8 +7,11 @@ import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.Material;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.BiomeManager;
@@ -168,59 +171,135 @@ public class JSONHelper {
         return blocks;
     }
 
-    public static List<String> getBiomesFromTags(List<String> biomeTags) {
+    public static List<String> getBiomesFromTags(Level world, List<String> biomeTags) {
         List<String> biomeList = new ArrayList<>();
-        for (String biomeEntry : biomeTags) {
 
-            // Determine Function:
-            boolean additive = true;
-            if (biomeEntry.charAt(0) == '-' || biomeEntry.charAt(0) == '+') {
-                if (biomeEntry.charAt(0) == '-')
-                    additive = false;
-                biomeEntry = biomeEntry.substring(1);
-            }
+        var registryAccess = world.registryAccess();
+        var biomeRegistry = registryAccess.registryOrThrow(net.minecraft.core.registries.Registries.BIOME);
 
+        LMHelperClass.logInfo("Dungeon", "[BiomeDebug] getBiomesFromTags input: " + biomeTags);
 
-            List<Biome> selectedBiomes = new ArrayList<>();
-            if ("ALL".equalsIgnoreCase(biomeEntry)) {
-                for (BiomeManager.BiomeType biomeType : BiomeManager.BiomeType.values()) {
-                    ImmutableList<BiomeManager.BiomeEntry> selectedBiomesSet = BiomeManager.getBiomes(biomeType);
-                    for (BiomeManager.BiomeEntry selectedBiomesKey : selectedBiomesSet) {
-                        Biome biome = ForgeRegistries.BIOMES.getValue(selectedBiomesKey.getKey().registry());
-                        if (biome != null) {
-                            selectedBiomes.add(biome);
-                        }
-                    }
-                }
-            } else if (!"NONE".equalsIgnoreCase(biomeEntry)) {
-                BiomeManager.BiomeType biomeType = null;
-                try {
-                    biomeType = BiomeManager.BiomeType.valueOf(biomeEntry.toUpperCase(Locale.ENGLISH));
-                } catch (Exception e) {
-                    LMHelperClass.logWarning("", "[Spawning] Unknown biome type " + biomeEntry + " this will be ignored and treated as NONE.");
-                }
-                if (biomeType != null) {
-                    ImmutableList<BiomeManager.BiomeEntry> selectedBiomesSet = BiomeManager.getBiomes(biomeType);
-                    for (BiomeManager.BiomeEntry selectedBiomesKey : selectedBiomesSet) {
-                        Biome biome = ForgeRegistries.BIOMES.getValue(selectedBiomesKey.getKey().registry());
-                        if (biome != null) {
-                            selectedBiomes.add(biome);
-                        }
-                    }
-                }
-            }
+        for (String rawEntry : biomeTags) {
+            boolean additive;
+            String entry = rawEntry;
 
-            for (Biome biome : selectedBiomes) {
-                if (additive) {
-                    if (!biomeList.contains(biome.toString())) {
-                        biomeList.add(String.valueOf(ForgeRegistries.BIOMES.getKey(biome)));
-                    }
+            if (!entry.isEmpty()) {
+                char c = entry.charAt(0);
+                if (c == '+' || c == '-') {
+                    additive = c != '-';
+                    entry = entry.substring(1);
                 } else {
-                    biomeList.remove(String.valueOf(ForgeRegistries.BIOMES.getKey(biome)));
+                    additive = true;
+                }
+            } else {
+                additive = true;
+            }
+
+            LMHelperClass.logInfo(
+                    "Dungeon",
+                    "[BiomeDebug] Processing entry: raw=" + rawEntry +
+                            ", stripped=" + entry +
+                            ", additive=" + additive
+            );
+
+            if ("ALL".equalsIgnoreCase(entry)) {
+                biomeRegistry.registryKeySet().forEach(key -> {
+                    String id = key.location().toString();
+                    if (additive) {
+                        if (!biomeList.contains(id)) {
+                            biomeList.add(id);
+                        }
+                    } else {
+                        biomeList.remove(id);
+                    }
+                });
+                continue;
+            }
+
+            if ("NONE".equalsIgnoreCase(entry)) {
+                continue;
+            }
+
+            if (!entry.contains(":")) {
+                LMHelperClass.logWarning(
+                        "Dungeon",
+                        "[BiomeDebug] Non-namespaced biome tag entry '" + entry + "' is not supported, skipping"
+                );
+                continue;
+            }
+
+            ResourceLocation tagLoc = new ResourceLocation(entry);
+            List<String> selectedBiomeIds = new ArrayList<>();
+
+            net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome> vanillaKey =
+                    net.minecraft.tags.TagKey.create(
+                            net.minecraft.core.registries.Registries.BIOME,
+                            tagLoc
+                    );
+
+            var vanillaSetOpt = biomeRegistry.getTag(vanillaKey);
+            if (vanillaSetOpt.isPresent()) {
+                vanillaSetOpt.get().forEach(holder ->
+                        holder.unwrapKey().ifPresent(key -> {
+                            var id = key.location();
+                            if (id != null) {
+                                selectedBiomeIds.add(id.toString());
+                            }
+                        })
+                );
+                LMHelperClass.logInfo(
+                        "Dungeon",
+                        "[BiomeDebug] Vanilla tag " + entry + " resolved to biomes: " + selectedBiomeIds
+                );
+            } else {
+                net.minecraftforge.registries.tags.ITagManager<net.minecraft.world.level.biome.Biome> forgeTagManager =
+                        net.minecraftforge.registries.ForgeRegistries.BIOMES.tags();
+
+                net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome> forgeKey =
+                        net.minecraft.tags.TagKey.create(
+                                net.minecraftforge.registries.ForgeRegistries.Keys.BIOMES,
+                                tagLoc
+                        );
+
+                var forgeTag = forgeTagManager.getTag(forgeKey);
+                if (!forgeTag.isEmpty()) {
+                    forgeTag.forEach(biome -> {
+                        ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.BIOMES.getKey(biome);
+                        if (id != null) {
+                            selectedBiomeIds.add(id.toString());
+                        }
+                    });
+                    LMHelperClass.logInfo(
+                            "Dungeon",
+                            "[BiomeDebug] Forge tag " + entry + " resolved to biomes: " + selectedBiomeIds
+                    );
                 }
             }
+
+            if (selectedBiomeIds.isEmpty()) {
+                LMHelperClass.logWarning(
+                        "Dungeon",
+                        "[BiomeDebug] Biome tag " + entry + " is empty or missing in both vanilla and Forge tag collections"
+                );
+            } else {
+                for (String id : selectedBiomeIds) {
+                    if (additive) {
+                        if (!biomeList.contains(id)) {
+                            biomeList.add(id);
+                        }
+                    } else {
+                        biomeList.remove(id);
+                    }
+                }
+            }
+
+            LMHelperClass.logInfo(
+                    "Dungeon",
+                    "[BiomeDebug] Entry " + entry + " selected biomes: " + selectedBiomeIds
+            );
         }
 
+        LMHelperClass.logInfo("Dungeon", "[BiomeDebug] getBiomesFromTags final expanded list: " + biomeList);
         return biomeList;
     }
 

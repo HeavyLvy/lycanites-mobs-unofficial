@@ -42,10 +42,6 @@ import java.util.function.Supplier;
  * Contains various information about a creature from default spawn information to stats, etc.
  **/
 public class CreatureInfo {
-
-    // Core Info:
-    public static final Map<String, EntityType.Builder<?>> entityTypeBuilders = new HashMap<>();
-    public static final Map<String, Supplier<EntityType<?>>> entityTypeMap = new HashMap<>();
     /**
      * The creature type this creature belongs to.
      **/

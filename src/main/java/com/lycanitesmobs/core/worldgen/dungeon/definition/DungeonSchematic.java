@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.worldgen.dungeon.definition;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lycanitesmobs.core.entity.spawner.condition.WorldSpawnCondition;
 import com.lycanitesmobs.core.manager.DungeonManager;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
 import com.lycanitesmobs.core.data.info.item.ItemDrop;
@@ -117,6 +118,8 @@ public class DungeonSchematic {
      **/
     public List<ItemDrop> loot = new ArrayList<>();
 
+    public List<String> biomeTags = new ArrayList<>();
+
 
     /**
      * Loads this Dungeon Theme from the provided JSON data.
@@ -167,8 +170,10 @@ public class DungeonSchematic {
         }
 
         // Biomes:
-        if (json.has("biomes"))
-            this.biomeIds = JSONHelper.getBiomesFromTags(JSONHelper.getJsonStrings(json.get("biomes").getAsJsonArray()));
+        if (json.has("biomes")) {
+            this.biomeIds.clear();
+            this.biomeTags = JSONHelper.getJsonStrings(json.get("biomes").getAsJsonArray());
+        }
 
         // Themes:
         if (json.has("themes")) {
@@ -271,6 +276,23 @@ public class DungeonSchematic {
         }
     }
 
+    public void resolveBiomeIds(Level world) {
+        if (!this.biomeIds.isEmpty()) {
+            return;
+        }
+        if (this.biomeTags == null || this.biomeTags.isEmpty()) {
+            return;
+        }
+
+        this.biomeIds = JSONHelper.getBiomesFromTags(world, this.biomeTags);
+
+        LMHelperClass.logInfo(
+                "Dungeon",
+                "[BiomeDebug] Schematic " + this.name +
+                        " resolved biomeTags=" + this.biomeTags +
+                        " to biomeIds=" + this.biomeIds
+        );
+    }
 
     /**
      * Returns if this Dungeon Schematic is allowed to be used for the given world and position.
@@ -286,11 +308,16 @@ public class DungeonSchematic {
 
         for (SpawnCondition condition : this.conditions) {
             if (!condition.isMet(world, null, pos)) {
+                LMHelperClass.logDebug("Dungeon", "Schematic " + this.name + " spawn condition failed at " + pos + " condition=" + condition);
                 return false;
             }
         }
 
-        if (!this.isValidBiome(world.getBiomeManager().getBiome(pos).get())) {
+        this.resolveBiomeIds(world);
+
+        Biome biome = world.getBiome(pos).value();
+        if (!this.isValidBiome(biome)) {
+            LMHelperClass.logDebug("Dungeon", "Schematic " + this.name + " wrong biome at " + pos + " biome=" + biome.toString());
             return false;
         }
 
@@ -311,11 +338,18 @@ public class DungeonSchematic {
 
         ResourceLocation biomeId = ForgeRegistries.BIOMES.getKey(biome);
         if (biomeId == null) {
+            LMHelperClass.logDebug("Dungeon", "Schematic " + this.name + " has biome restriction but biome id is null");
             return false;
         }
 
-        return this.biomeIds.contains(biomeId.toString());
+        boolean result = this.biomeIds.contains(biomeId.toString());
+        if (!result) {
+            LMHelperClass.logDebug("Dungeon", "Schematic " + this.name + " biome mismatch: " + biomeId);
+        }
+
+        return result;
     }
+
 
     /**
      * Returns a random number of sectors to generate.
@@ -540,10 +574,12 @@ public class DungeonSchematic {
             if (itemDrop.chance <= 0) {
                 continue;
             }
+
             boolean addLoot = itemDrop.chance >= 1;
             if (!addLoot) {
-                addLoot = itemDrop.chance <= random.nextDouble();
+                addLoot = random.nextDouble() <= itemDrop.chance;
             }
+
             if (addLoot) {
                 int quantity = itemDrop.getQuantity(random, 0, 1);
                 if (quantity > 0) {
@@ -551,7 +587,19 @@ public class DungeonSchematic {
                 }
             }
         }
-
         return loot;
     }
+
+    public WorldSpawnCondition getWorldSpawnCondition() {
+        if (this.conditions == null || this.conditions.isEmpty()) {
+            return null;
+        }
+        for (SpawnCondition condition : this.conditions) {
+            if (condition instanceof WorldSpawnCondition) {
+                return (WorldSpawnCondition) condition;
+            }
+        }
+        return null;
+    }
+
 }

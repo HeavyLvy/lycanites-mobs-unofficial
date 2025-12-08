@@ -91,12 +91,15 @@ public class SpawnLocation {
      **/
     public List<BlockPos> getSpawnPositions(Level world, Player player, BlockPos triggerPos) {
         List<BlockPos> spawnPositions = new ArrayList<>();
-        int yPos = this.getOffset(world.random, this.rangeMin.getY(), this.rangeMax.getY());
-        if ((this.yMax < 0 || yPos <= this.yMax) && (this.yMin < 0 || yPos >= this.yMin)) {
+
+        int yOffset = this.getOffset(world.random, this.rangeMin.getY(), this.rangeMax.getY());
+        int finalY = triggerPos.getY() + yOffset;
+
+        if ((this.yMax < 0 || finalY <= this.yMax) && (this.yMin < 0 || finalY >= this.yMin)) {
             Vec3i offset = new Vec3i(
                     this.getOffset(world.random, this.rangeMin.getX(), this.rangeMax.getX()),
-                    yPos,
-                    this.getOffset(world.random, this.rangeMin.getY(), this.rangeMax.getY())
+                    yOffset,
+                    this.getOffset(world.random, this.rangeMin.getZ(), this.rangeMax.getZ())
             );
             spawnPositions.add(triggerPos.offset(offset));
         }

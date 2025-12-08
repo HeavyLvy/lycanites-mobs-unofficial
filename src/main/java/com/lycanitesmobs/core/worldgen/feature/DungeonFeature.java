@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.worldgen.feature;
 
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.data.config.ConfigDungeons;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
@@ -46,7 +47,7 @@ public class DungeonFeature extends Feature<NoneFeatureConfiguration> {
             ChunkPos chunkPos = new ChunkPos(origin);
             List<DungeonInstance> nearbyDungeons = extendedWorld.getNearbyDungeonInstances(chunkPos, dungeonSizeMax * 2);
 
-            /*if (nearbyDungeons.isEmpty()) {
+            if (nearbyDungeons.isEmpty()) {
                 for (int x = -1; x <= 1; x++) {
                     for (int z = -1; z <= 1; z++) {
                         if (x == 0 && z == 0) {
@@ -77,32 +78,10 @@ public class DungeonFeature extends Feature<NoneFeatureConfiguration> {
                         }
                     }
                 }
-            }*/
-            if (nearbyDungeons.isEmpty()) {
-                DungeonInstance dungeonInstance = new DungeonInstance();
-                int yPos = region.getSeaLevel();
-                if (yPos < 64) {
-                    yPos = 64;
-                }
-
-                ChunkPos center = chunkPos;
-                BlockPos dungeonPos = center.getWorldPosition().offset(7, yPos, 7);
-
-                dungeonInstance.setOrigin(dungeonPos);
-                if (dungeonInstance.init(serverLevel)) {
-                    extendedWorld.addDungeonInstance(
-                            dungeonInstance,
-                            new UUID(random.nextLong(), random.nextLong())
-                    );
-                }
             }
 
-
-            nearbyDungeons = extendedWorld.getNearbyDungeonInstances(chunkPos, 0);
-            for (DungeonInstance dungeonInstance : nearbyDungeons) {
-                dungeonInstance.buildChunk(region, serverLevel, chunkPos, random);
-            }
         } catch (Exception e) {
+            LMHelperClass.logErrorMessageOnceCatchable("Dungeon Error: ", e);
         }
 
         return true;

@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.capabilities.level;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonBuildPlan;
 import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
 import com.lycanitesmobs.core.capabilities.util.BossEntry;
 import com.lycanitesmobs.core.event.mobevent.MobEvent;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -595,4 +597,102 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
     public CompoundTag serializeNBT() {
         return this.save(new CompoundTag());
     }
+
+    public long getWorldSeed() {
+        return this.world.getServer().getWorldData().worldGenOptions().seed();
+    }
+
+    public void buildDungeonInLoadedChunks(DungeonInstance instance) {
+        if (!(this.world instanceof ServerLevel serverLevel)) return;
+        if (instance.chunkMin == null || instance.chunkMax == null) return;
+
+        LMHelperClass.logDebug(
+                "DungeonDebug",
+                "buildDungeonInLoadedChunks: instance=" + instance.uuid
+                        + " chunkMin=" + instance.chunkMin
+                        + " chunkMax=" + instance.chunkMax
+        );
+
+        int total = 0;
+        for (int cx = instance.chunkMin.x; cx <= instance.chunkMax.x; cx++) {
+            for (int cz = instance.chunkMin.z; cz <= instance.chunkMax.z; cz++) {
+                total++;
+            }
+        }
+        LMHelperClass.logDebug("DungeonDebug", "buildDungeonInLoadedChunks: totalChunksInRect=" + total);
+
+        int processed = 0;
+        for (int cx = instance.chunkMin.x; cx <= instance.chunkMax.x; cx++) {
+            for (int cz = instance.chunkMin.z; cz <= instance.chunkMax.z; cz++) {
+                if (!serverLevel.getChunkSource().hasChunk(cx, cz)) continue;
+
+                ChunkPos chunkPos = new ChunkPos(cx, cz);
+                RandomSource random = RandomSource.create(chunkPos.toLong() ^ this.getWorldSeed());
+
+                LMHelperClass.logDebug("DungeonDebug", "buildDungeonInLoadedChunks: building " + chunkPos + " (" + processed + "/" + total + ")");
+                instance.buildChunk(serverLevel, serverLevel, chunkPos, random);
+                processed++;
+            }
+        }
+
+        LMHelperClass.logDebug("DungeonDebug", "buildDungeonInLoadedChunks: done, processed=" + processed + " of " + total);
+    }
+
+
+    public void debugDryRunDungeonPlacement(DungeonInstance instance) {
+        if (!(this.world instanceof ServerLevel serverLevel)) return;
+        if (instance.chunkMin == null || instance.chunkMax == null) {
+            LMHelperClass.logDebug("DungeonDebug", "debugDryRunDungeonPlacement: no chunk bounds for instance " + instance.uuid + " " + instance);
+            return;
+        }
+
+        LMHelperClass.logDebug(
+                "DungeonDebug",
+                "debugDryRunDungeonPlacement: instance=" + instance.uuid +
+                        " chunkMin=[" + instance.chunkMin.x + "," + instance.chunkMin.z + "]" +
+                        " chunkMax=[" + instance.chunkMax.x + "," + instance.chunkMax.z + "]"
+        );
+
+        for (int cx = instance.chunkMin.x; cx <= instance.chunkMax.x; cx++) {
+            for (int cz = instance.chunkMin.z; cz <= instance.chunkMax.z; cz++) {
+                boolean loaded = serverLevel.getChunkSource().hasChunk(cx, cz);
+                LMHelperClass.logDebug(
+                        "DungeonDebug",
+                        "debugDryRunDungeonPlacement: instance=" + instance.uuid +
+                                " chunk=[" + cx + "," + cz + "] loaded=" + loaded
+                );
+                if (!loaded) continue;
+
+                ChunkPos chunkPos = new ChunkPos(cx, cz);
+                RandomSource random = RandomSource.create(chunkPos.toLong() ^ this.getWorldSeed());
+                instance.debugBuildChunk(serverLevel, serverLevel, chunkPos, random);
+            }
+        }
+    }
+
+    public void debugDungeonInLoadedChunks(DungeonInstance instance) {
+        if (!(this.world instanceof ServerLevel serverLevel)) return;
+        if (instance.chunkMin == null || instance.chunkMax == null) {
+            LMHelperClass.logDebug("DungeonDebug", "debugDungeonInLoadedChunks: no chunk bounds for instance " + instance.uuid + " " + instance);
+            return;
+        }
+
+        for (int cx = instance.chunkMin.x; cx <= instance.chunkMax.x; cx++) {
+            for (int cz = instance.chunkMin.z; cz <= instance.chunkMax.z; cz++) {
+                boolean hasChunk = serverLevel.getChunkSource().hasChunk(cx, cz);
+                LMHelperClass.logDebug(
+                        "DungeonDebug",
+                        "debugDungeonInLoadedChunks: instance=" + instance.uuid +
+                                " chunk=[" + cx + "," + cz + "] loaded=" + hasChunk
+                );
+                if (!hasChunk) continue;
+
+                ChunkPos chunkPos = new ChunkPos(cx, cz);
+                RandomSource random = RandomSource.create(chunkPos.toLong() ^ this.getWorldSeed());
+                instance.debugBuildChunk(serverLevel, serverLevel, chunkPos, random);
+            }
+        }
+    }
+
+
 }

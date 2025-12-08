@@ -158,26 +158,29 @@ public class MobSpawn {
         MobSpawn mobSpawn = null;
         if (json.has("mobId")) {
             String mobId = json.get("mobId").getAsString();
+            LMHelperClass.logDebug("JSONSpawner", "MobSpawn.createFromJSON mobId=" + mobId);
+
             CreatureInfo creatureInfo = CreatureManager.getInstance().getCreatureFromId(mobId);
+            LMHelperClass.logDebug("JSONSpawner", "MobSpawn.createFromJSON creatureInfo=" + (creatureInfo != null ? creatureInfo.getName() : "null"));
+
             if (creatureInfo != null) {
                 mobSpawn = new MobSpawn(creatureInfo);
                 mobSpawn.loadFromJSON(json);
             } else {
                 Object entityTypeObj = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(mobId));
+                LMHelperClass.logDebug("JSONSpawner", "MobSpawn.createFromJSON Forge EntityType=" + entityTypeObj);
+
                 if (entityTypeObj instanceof EntityType) {
                     EntityType entityType = (EntityType) entityTypeObj;
                     mobSpawn = new MobSpawn(entityType);
+                    mobSpawn.loadFromJSON(json);
+                } else {
+                    LMHelperClass.logWarning("", "[JSONSpawner] Unable to find entity type from the mob id: " + mobId + " Mob Spawn entry ignored.");
                 }
-            }
-            if (mobSpawn != null) {
-                mobSpawn.loadFromJSON(json);
-            } else {
-                LMHelperClass.logWarning("", "[JSONSpawner] Unable to find a Lycanites Mob from the mob id: " + mobId + " Mob Spawn entry ignored.");
             }
         }
         return mobSpawn;
     }
-
 
     /**
      * Constructors
@@ -331,7 +334,7 @@ public class MobSpawn {
 
             // Biome:
             if (biome != null && this.shouldCheckBiome()) {
-                if (!this.creatureInfo.creatureSpawn.isValidBiome(biome)) {
+                if (!this.creatureInfo.creatureSpawn.isValidBiome(world, biome)) {
                     return false;
                 }
             }

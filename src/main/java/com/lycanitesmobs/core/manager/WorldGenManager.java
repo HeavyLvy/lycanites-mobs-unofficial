@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.block.liquid.BaseLiquidBlock;
 import com.lycanitesmobs.core.manager.FluidManager;
 import com.lycanitesmobs.core.worldgen.feature.ChunkSpawnFeature;
 import com.lycanitesmobs.core.worldgen.feature.DungeonFeature;
+import com.lycanitesmobs.core.worldgen.feature.DungeonFeatureConfig;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
@@ -44,11 +45,13 @@ public class WorldGenManager {
     public static final DeferredRegister<Feature<?>> FEATURES =
             DeferredRegister.create(ForgeRegistries.FEATURES, LycanitesMobs.MODID);
 
+/*
     public static final RegistryObject<ChunkSpawnFeature> CHUNK_SPAWN_FEATURE =
             FEATURES.register("chunkspawn", () -> new ChunkSpawnFeature(NoneFeatureConfiguration.CODEC));
 
     public static final RegistryObject<DungeonFeature> DUNGEON_FEATURE =
             FEATURES.register("dungeon", () -> new DungeonFeature(NoneFeatureConfiguration.CODEC));
+*/
 
     public final Map<String, Holder<PlacedFeature>> fluidPlacedFeatures = new HashMap<>();
 

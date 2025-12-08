@@ -1,13 +1,12 @@
 package com.lycanitesmobs.core.worldgen.data;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.liquid.BaseLiquidBlock;
+import com.lycanitesmobs.core.manager.DungeonManager;
 import com.lycanitesmobs.core.manager.FluidManager;
 import com.lycanitesmobs.core.manager.WorldGenManager;
+import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSchematic;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -44,12 +43,41 @@ public class WorldgenJsonDumper {
         dumpPlacedFeatureDungeon(root);
         dumpFluidFeatures(root);
         dumpBiomeModifiers(root);
-        dumpBiomeTags(root);
+        dumpTags(root);
     }
+
 
     private static void dumpTags(Path root) throws IOException {
         dumpPlacedFeatureTags(root);
         dumpBiomeTags(root);
+        dumpDungeonBiomeTags(root);
+    }
+
+    private static void dumpDungeonBiomeTags(Path root) throws IOException {
+        DungeonManager dungeonManager = DungeonManager.getInstance();
+        Map<String, JsonObject> schematicJsons = dungeonManager.loadDungeonsFromJSON("schematics", LycanitesMobs.modInfo);
+
+        for (Map.Entry<String, JsonObject> entry : schematicJsons.entrySet()) {
+            String name = entry.getKey();
+            JsonObject schematicJson = entry.getValue();
+
+            List<String> selectors = collectDungeonBiomeSelectors(schematicJson);
+            if (selectors.isEmpty()) {
+                continue;
+            }
+
+            JsonObject tagObj = new JsonObject();
+            tagObj.addProperty("replace", false);
+
+            JsonArray values = new JsonArray();
+            for (String s : selectors) {
+                values.add(s);
+            }
+            tagObj.add("values", values);
+
+            String tagPath = "tags/worldgen/biome/has_" + name + "_dungeon.json";
+            write(root, tagPath, tagObj);
+        }
     }
 
     private static void dumpPlacedFeatureTags(Path root) throws IOException {
@@ -168,6 +196,52 @@ public class WorldgenJsonDumper {
         return root;
     }
 
+    private static List<String> collectDungeonBiomeSelectors(JsonObject schematicJson) {
+        List<String> selectors = new ArrayList<>();
+
+        if (schematicJson.has("conditions")) {
+            JsonArray conditions = schematicJson.getAsJsonArray("conditions");
+            for (JsonElement condElement : conditions) {
+                if (!condElement.isJsonObject()) {
+                    continue;
+                }
+                JsonObject condition = condElement.getAsJsonObject();
+                if (!condition.has("type")) {
+                    continue;
+                }
+                String type = condition.get("type").getAsString();
+                if (!"world".equalsIgnoreCase(type)) {
+                    continue;
+                }
+
+                String biomeTagListType = condition.has("biomeTagListType")
+                        ? condition.get("biomeTagListType").getAsString()
+                        : "whitelist";
+                String biomeIdListType = condition.has("biomeIdListType")
+                        ? condition.get("biomeIdListType").getAsString()
+                        : "whitelist";
+
+                if (condition.has("biomeTags") && !"blacklist".equalsIgnoreCase(biomeTagListType)) {
+                    JsonArray biomeTags = condition.getAsJsonArray("biomeTags");
+                    for (JsonElement tagElement : biomeTags) {
+                        String tag = tagElement.getAsString();
+                        selectors.add("#" + tag);
+                    }
+                }
+
+                if (condition.has("biomeIds") && !"blacklist".equalsIgnoreCase(biomeIdListType)) {
+                    JsonArray biomeIds = condition.getAsJsonArray("biomeIds");
+                    for (JsonElement idElement : biomeIds) {
+                        String id = idElement.getAsString();
+                        selectors.add(id);
+                    }
+                }
+            }
+        }
+
+        return selectors;
+    }
+
     private static void dumpChunkspawnAndDungeon(Path root) throws IOException {
         write(root, "forge/biome_modifier/add_chunkspawn.json",
                 biomeAddFeature(
@@ -176,12 +250,33 @@ public class WorldgenJsonDumper {
                         "top_layer_modification"
                 ));
 
-        write(root, "forge/biome_modifier/add_dungeon.json",
-                biomeAddFeature(
-                        "lycanitesmobs:dungeon",
+        DungeonManager dungeonManager = DungeonManager.getInstance();
+        Map<String, JsonObject> schematicJsons = dungeonManager.loadDungeonsFromJSON("schematics", LycanitesMobs.modInfo);
+
+        for (Map.Entry<String, JsonObject> entry : schematicJsons.entrySet()) {
+            String name = entry.getKey();
+            JsonObject schematicJson = entry.getValue();
+            String featureId = LycanitesMobs.MODID + ":dungeon_" + name;
+            String fileName = "forge/biome_modifier/add_dungeon_" + name + ".json";
+
+            List<String> selectors = collectDungeonBiomeSelectors(schematicJson);
+            if (selectors.isEmpty()) {
+                JsonObject modifier = biomeAddFeature(
+                        featureId,
                         "#minecraft:is_overworld",
                         "top_layer_modification"
-                ));
+                );
+                write(root, fileName, modifier);
+            } else {
+                String biomeTagId = LycanitesMobs.MODID + ":has_" + name + "_dungeon";
+                JsonObject modifier = biomeAddFeatureUsingBiomeTag(
+                        List.of(featureId),
+                        biomeTagId,
+                        "top_layer_modification"
+                );
+                write(root, fileName, modifier);
+            }
+        }
     }
 
     private static class BiomeSpec {
@@ -284,10 +379,19 @@ public class WorldgenJsonDumper {
     }
 
     private static void dumpConfiguredFeatureDungeon(Path root) throws IOException {
-        JsonObject rootJson = new JsonObject();
-        rootJson.addProperty("type", LycanitesMobs.MODID + ":dungeon");
-        rootJson.add("config", new JsonObject());
-        write(root, "worldgen/configured_feature/dungeon.json", rootJson);
+        DungeonManager dungeonManager = DungeonManager.getInstance();
+
+        for (DungeonSchematic schematic : dungeonManager.schematics.values()) {
+            JsonObject rootJson = new JsonObject();
+            rootJson.addProperty("type", LycanitesMobs.MODID + ":dungeon");
+
+            JsonObject config = new JsonObject();
+            config.addProperty("schematic", schematic.name);
+            rootJson.add("config", config);
+
+            String fileName = "worldgen/configured_feature/dungeon_" + schematic.name + ".json";
+            write(root, fileName, rootJson);
+        }
     }
 
     private static JsonObject uniformHeight(int min, int max) {
@@ -338,25 +442,31 @@ public class WorldgenJsonDumper {
     }
 
     private static void dumpPlacedFeatureDungeon(Path root) throws IOException {
-        JsonObject rootJson = new JsonObject();
-        rootJson.addProperty("feature", LycanitesMobs.MODID + ":dungeon");
-        JsonArray placement = new JsonArray();
+        DungeonManager dungeonManager = DungeonManager.getInstance();
 
-        JsonObject inSquare = new JsonObject();
-        inSquare.addProperty("type", "minecraft:in_square");
-        placement.add(inSquare);
+        for (DungeonSchematic schematic : dungeonManager.schematics.values()) {
+            JsonObject rootJson = new JsonObject();
+            rootJson.addProperty("feature", LycanitesMobs.MODID + ":dungeon_" + schematic.name);
+            JsonArray placement = new JsonArray();
 
-        JsonObject heightRange = new JsonObject();
-        heightRange.addProperty("type", "minecraft:height_range");
-        heightRange.add("height", uniformHeight(0, 256));
-        placement.add(heightRange);
+            JsonObject inSquare = new JsonObject();
+            inSquare.addProperty("type", "minecraft:in_square");
+            placement.add(inSquare);
 
-        JsonObject biome = new JsonObject();
-        biome.addProperty("type", "minecraft:biome");
-        placement.add(biome);
+            JsonObject heightmap = new JsonObject();
+            heightmap.addProperty("type", "minecraft:heightmap");
+            heightmap.addProperty("heightmap", "WORLD_SURFACE_WG");
+            placement.add(heightmap);
 
-        rootJson.add("placement", placement);
-        write(root, "worldgen/placed_feature/dungeon.json", rootJson);
+            JsonObject biome = new JsonObject();
+            biome.addProperty("type", "minecraft:biome");
+            placement.add(biome);
+
+            rootJson.add("placement", placement);
+
+            String fileName = "worldgen/placed_feature/dungeon_" + schematic.name + ".json";
+            write(root, fileName, rootJson);
+        }
     }
 
     private static void dumpFluidFeatures(Path root) throws IOException {

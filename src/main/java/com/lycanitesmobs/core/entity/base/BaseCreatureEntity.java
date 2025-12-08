@@ -581,9 +581,6 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     protected BaseCreatureEntity(EntityType<? extends BaseCreatureEntity> entityType, Level world) {
         super(entityType, world);
 
-        // Init Dynamic Attributes:
-        this.applyDynamicAttributes();
-
         // Movement:
         this.moveControl = this.createMoveController();
 
@@ -611,6 +608,14 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if (this.canWade() && this.getNavigation() instanceof CreaturePathNavigator) {
             CreaturePathNavigator pathNavigator = (CreaturePathNavigator) this.getNavigation();
             pathNavigator.setCanFloat(true);
+        }
+    }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        if (!this.level().isClientSide) {
+            this.applyDynamicAttributes();
         }
     }
 

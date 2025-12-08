@@ -6,23 +6,29 @@ import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.data.config.ConfigExtra;
 import com.lycanitesmobs.core.entity.effect.EffectBase;
-import com.lycanitesmobs.core.manager.EffectManager;
+import com.lycanitesmobs.core.entity.spawner.condition.SpawnCondition;
+import com.lycanitesmobs.core.entity.spawner.condition.WorldSpawnCondition;
+import com.lycanitesmobs.core.manager.*;
 import com.lycanitesmobs.core.entity.special.FearEntity;
-import com.lycanitesmobs.core.manager.CreatureManager;
-import com.lycanitesmobs.core.manager.MobEventManager;
-import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.event.mobevent.MobEventSchedule;
 import com.lycanitesmobs.core.event.mobevent.trigger.AltarMobEventTrigger;
 import com.lycanitesmobs.core.event.mobevent.trigger.MobEventTrigger;
 import com.lycanitesmobs.core.event.mobevent.trigger.RandomMobEventTrigger;
 import com.lycanitesmobs.core.event.mobevent.trigger.TickMobEventTrigger;
 import com.lycanitesmobs.core.network.message.MessageEntityVelocity;
+import com.lycanitesmobs.core.util.helpers.JSONHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSchematic;
+import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -31,11 +37,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -680,4 +690,20 @@ public class MobEventListener {
             }
         }
     }
+
+
+    public static void logBiomeAt(Level world, BlockPos pos) {
+        ResourceLocation biomeId = world
+                .getBiome(pos)
+                .unwrapKey()
+                .map(key -> key.location())
+                .orElse(null);
+
+        LMHelperClass.logInfo(
+                "Dungeon",
+                "[BiomeDebug] World biome at " + pos + " is " + biomeId
+        );
+    }
+
+
 }

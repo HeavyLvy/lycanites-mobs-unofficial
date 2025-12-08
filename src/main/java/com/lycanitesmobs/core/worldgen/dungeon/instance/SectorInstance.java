@@ -134,7 +134,8 @@ public class SectorInstance {
      */
     public void init(RandomSource random) {
         if (this.parentConnector == null) {
-            throw new RuntimeException("[Dungeon] Tried to initialise a Sector Instance with a null Parent Connector: " + this);
+            LMHelperClass.logWarning("Dungeon", "Skipping SectorInstance.init due to null parentConnector: " + this);
+            return;
         }
 
         // Close Parent Connector:
@@ -578,7 +579,6 @@ public class SectorInstance {
      * @param random      The instance of random, used for random mob spawns or loot on applicable blocks, etc.
      */
     public void placeBlock(LevelAccessor worldWriter, ChunkPos chunkPos, BlockPos blockPos, BlockState blockState, Direction facing, RandomSource random) {
-        // Restrict To Chunk Position:
         int chunkOffset = 0;
         if (blockPos.getX() < chunkPos.getMinBlockX() + chunkOffset || blockPos.getX() > chunkPos.getMaxBlockX() + chunkOffset) {
             return;
@@ -590,41 +590,61 @@ public class SectorInstance {
             return;
         }
 
-        // Don't Clear Chests:
+        if (DungeonInstance.DISABLE_ACTUAL_PLACEMENT) {
+            if (worldWriter instanceof Level level && !level.isClientSide) {
+                LMHelperClass.logDebug(
+                        "DungeonDebug",
+                        "placeBlock: disabled, would place " + blockState + " at " + blockPos + " in " + chunkPos
+                );
+            }
+            return;
+        }
+
+        if (worldWriter instanceof Level level && !level.isClientSide) {
+            ChunkPos actual = new ChunkPos(blockPos);
+            if (!level.getChunkSource().hasChunk(actual.x, actual.z)) {
+                LMHelperClass.logDebug(
+                        "DungeonDebug",
+                        "placeBlock: skip; target chunk not loaded, target=" + actual + " buildChunk=" + chunkPos + " pos=" + blockPos + " state=" + blockState
+                );
+                return;
+            }
+            if (!actual.equals(chunkPos)) {
+                LMHelperClass.logDebug(
+                        "DungeonDebug",
+                        "placeBlock: skip; chunk mismatch, target=" + actual + " buildChunk=" + chunkPos + " pos=" + blockPos + " state=" + blockState
+                );
+                return;
+            }
+        }
+
         if (blockState.getBlock() == Blocks.AIR && worldWriter.getBlockState(blockPos).getBlock() == Blocks.CHEST) {
             return;
         }
 
-
-        // Block State and Flags:
         int flags = 2;
 
-        // Torch:
-        if (blockState.getBlock() == Blocks.TORCH) {
+        if (blockState.getBlock() instanceof WallTorchBlock) {
             blockState = blockState.setValue(WallTorchBlock.FACING, facing);
             flags = 0;
         }
 
-        // Chest:
         if (blockState.getBlock() == Blocks.CHEST) {
             blockState = blockState.setValue(ChestBlock.FACING, facing);
         }
 
-        // Don't Update:
-        if (blockState.getBlock() == Blocks.AIR || blockState.getBlock() == Blocks.CAVE_AIR || (blockState.liquid() && !blockState.getBlock().getFluidState(blockState).isSource()) ||
-                blockState.getBlock() instanceof FireBlock || blockState.getBlock() instanceof BlockFireBase ||
-                blockState.getBlock() instanceof BlockPoisonCloud || blockState.getBlock() instanceof BlockFrostCloud) {
+        if (blockState.getBlock() == Blocks.AIR
+                || blockState.getBlock() == Blocks.CAVE_AIR
+                || (blockState.liquid() && !blockState.getBlock().getFluidState(blockState).isSource())
+                || blockState.getBlock() instanceof FireBlock
+                || blockState.getBlock() instanceof BlockFireBase
+                || blockState.getBlock() instanceof BlockPoisonCloud
+                || blockState.getBlock() instanceof BlockFrostCloud) {
             flags = 0;
         }
 
-
-        // Set The Block:
         worldWriter.setBlock(blockPos, blockState, flags);
 
-
-        // Tile Entities:
-
-        // Spawner:
         if (blockState.getBlock() == Blocks.SPAWNER) {
             BlockEntity tileEntity = worldWriter.getBlockEntity(blockPos);
             if (tileEntity instanceof SpawnerBlockEntity) {
@@ -638,20 +658,14 @@ public class SectorInstance {
             return;
         }
 
-        // Chest:
         if (blockState.getBlock() == Blocks.CHEST) {
             BlockEntity tileEntity = worldWriter.getBlockEntity(blockPos);
             if (tileEntity instanceof ChestBlockEntity) {
-
-                // Apply Loot Table:
                 ChestBlockEntity chest = (ChestBlockEntity) tileEntity;
                 ResourceLocation lootTable = this.layout.dungeonInstance.schematic.getRandomLootTable(this.parentConnector.level, random);
                 if (lootTable != null) {
                     chest.setLootTable(lootTable, Objects.hash(blockPos.hashCode(), random));
                 }
-
-                // Add Specific Items:
-                // TODO Add a random amount of additional specific items.
             }
         }
     }
@@ -696,22 +710,31 @@ public class SectorInstance {
      * @param random      The instance of random, used for characters that are random.
      */
     public void clearArea(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
-        // Get Start and Stop Positions:
         BlockPos startPos = this.getRoomBoundsMin();
         BlockPos stopPos = this.getRoomBoundsMax();
-        int startX = Math.min(startPos.getX(), stopPos.getX());
-        int stopX = Math.max(startPos.getX(), stopPos.getX());
-        int startY = Math.min(startPos.getY(), stopPos.getY());
-        int stopY = Math.max(startPos.getY(), stopPos.getY());
-        int startZ = Math.min(startPos.getZ(), stopPos.getZ());
-        int stopZ = Math.max(startPos.getZ(), stopPos.getZ());
+        int worldStartX = Math.min(startPos.getX(), stopPos.getX());
+        int worldStopX = Math.max(startPos.getX(), stopPos.getX());
+        int worldStartY = Math.min(startPos.getY(), stopPos.getY());
+        int worldStopY = Math.max(startPos.getY(), stopPos.getY());
+        int worldStartZ = Math.min(startPos.getZ(), stopPos.getZ());
+        int worldStopZ = Math.max(startPos.getZ(), stopPos.getZ());
 
         if ("stairs".equalsIgnoreCase(this.dungeonSector.type)) {
-            startY = Math.max(1, startPos.getY() - (this.getRoomSize().y() * 2));
+            worldStartY = Math.max(1, startPos.getY() - (this.getRoomSize().y() * 2));
+        }
+
+        int startX = Math.max(worldStartX, chunkPos.getMinBlockX());
+        int stopX = Math.min(worldStopX, chunkPos.getMaxBlockX());
+        int startZ = Math.max(worldStartZ, chunkPos.getMinBlockZ());
+        int stopZ = Math.min(worldStopZ, chunkPos.getMaxBlockZ());
+
+        if (startX > stopX || startZ > stopZ) {
+            return;
         }
 
         for (int x = startX; x <= stopX; x++) {
-            for (int y = startY; y <= stopY; y++) {
+            for (int y = worldStartY; y <= worldStopY; y++) {
+                if (y <= 0 || y >= world.getMaxBuildHeight()) continue;
                 for (int z = startZ; z <= stopZ; z++) {
                     this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, z), Blocks.CAVE_AIR.defaultBlockState(), Direction.SOUTH, random);
                 }
@@ -730,30 +753,39 @@ public class SectorInstance {
      * @param offsetY     The Y offset to build the floor at, useful for multiple floor sectors.
      */
     public void buildFloor(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random, int offsetY) {
-        // Get Start and Stop Positions:
         BlockPos startPos = this.getRoomBoundsMin().offset(0, offsetY, 0);
         BlockPos stopPos = this.getRoomBoundsMax().offset(0, offsetY, 0);
-        int startX = Math.min(startPos.getX(), stopPos.getX());
-        int stopX = Math.max(startPos.getX(), stopPos.getX());
-        int startY = Math.min(startPos.getY(), stopPos.getY());
-        int stopY = Math.max(startPos.getY(), stopPos.getY());
-        int startZ = Math.min(startPos.getZ(), stopPos.getZ());
-        int stopZ = Math.max(startPos.getZ(), stopPos.getZ());
+        int worldStartX = Math.min(startPos.getX(), stopPos.getX());
+        int worldStopX = Math.max(startPos.getX(), stopPos.getX());
+        int worldStartY = Math.min(startPos.getY(), stopPos.getY());
+        int worldStopY = Math.max(startPos.getY(), stopPos.getY());
+        int worldStartZ = Math.min(startPos.getZ(), stopPos.getZ());
+        int worldStopZ = Math.max(startPos.getZ(), stopPos.getZ());
+
+        int startX = Math.max(worldStartX, chunkPos.getMinBlockX());
+        int stopX = Math.min(worldStopX, chunkPos.getMaxBlockX());
+        int startZ = Math.max(worldStartZ, chunkPos.getMinBlockZ());
+        int stopZ = Math.min(worldStopZ, chunkPos.getMaxBlockZ());
+
+        if (startX > stopX || startZ > stopZ) {
+            return;
+        }
 
         for (int layerIndex : this.dungeonSector.floor.layers.keySet()) {
-            int y = startY + layerIndex;
+            int y = worldStartY + layerIndex;
             if (y <= 0 || y >= world.getMaxBuildHeight()) {
                 continue;
             }
             SectorLayer layer = this.dungeonSector.floor.layers.get(layerIndex);
             for (int x = startX; x <= stopX; x++) {
-                List<Character> row = layer.getRow(x - startX, stopX - startX);
+                List<Character> row = layer.getRow(x - worldStartX, worldStopX - worldStartX);
                 for (int z = startZ; z <= stopZ; z++) {
-                    char buildChar = layer.getColumn(x - startX, stopX - startX, z - startZ, stopZ - startZ, row);
+                    char buildChar = layer.getColumn(x - worldStartX, worldStopX - worldStartX, z - worldStartZ, worldStopZ - worldStartZ, row);
                     BlockPos buildPos = new BlockPos(x, y, z);
                     BlockState blockState = this.theme.getFloor(this, buildChar, random);
-                    if (blockState.getBlock() != Blocks.CAVE_AIR)
+                    if (blockState.getBlock() != Blocks.CAVE_AIR) {
                         this.placeBlock(worldWriter, chunkPos, buildPos, blockState, Direction.UP, random);
+                    }
                 }
             }
         }
@@ -769,52 +801,87 @@ public class SectorInstance {
      * @param random      The instance of random, used for characters that are random.
      */
     public void buildWalls(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
-        // Get Start and Stop Positions:
         BlockPos startPos = this.getRoomBoundsMin();
         BlockPos stopPos = this.getRoomBoundsMax();
 
         Vector3i size = this.getRoomSize();
-        int startX = Math.min(startPos.getX(), stopPos.getX());
-        int stopX = Math.max(startPos.getX(), stopPos.getX());
-        int startY = Math.min(startPos.getY() + 1, stopPos.getY());
-        int stopY = Math.max(startPos.getY() - 1, stopPos.getY());
-        int startZ = Math.min(startPos.getZ(), stopPos.getZ());
-        int stopZ = Math.max(startPos.getZ(), stopPos.getZ());
+        int worldStartX = Math.min(startPos.getX(), stopPos.getX());
+        int worldStopX = Math.max(startPos.getX(), stopPos.getX());
+        int worldStartY = Math.min(startPos.getY() + 1, stopPos.getY());
+        int worldStopY = Math.max(startPos.getY() - 1, stopPos.getY());
+        int worldStartZ = Math.min(startPos.getZ(), stopPos.getZ());
+        int worldStopZ = Math.max(startPos.getZ(), stopPos.getZ());
 
         if ("stairs".equalsIgnoreCase(this.dungeonSector.type)) {
-            startY = Math.max(1, startPos.getY() - (size.y() * 2));
+            worldStartY = Math.max(1, startPos.getY() - (size.y() * 2));
+        }
+
+        int chunkMinX = chunkPos.getMinBlockX();
+        int chunkMaxX = chunkPos.getMaxBlockX();
+        int chunkMinZ = chunkPos.getMinBlockZ();
+        int chunkMaxZ = chunkPos.getMaxBlockZ();
+
+        int xStart = Math.max(worldStartX, chunkMinX);
+        int xStop = Math.min(worldStopX, chunkMaxX);
+        int zStart = Math.max(worldStartZ, chunkMinZ);
+        int zStop = Math.min(worldStopZ, chunkMaxZ);
+
+        if (xStart > xStop || zStart > zStop) {
+            return;
         }
 
         for (int layerIndex : this.dungeonSector.wall.layers.keySet()) {
             SectorLayer layer = this.dungeonSector.wall.layers.get(layerIndex);
-            for (int y = startY; y <= stopY; y++) {
-                // Y Limit:
-                if (y <= 0 || y >= world.getMaxBuildHeight()) {
-                    continue;
-                }
+            for (int y = worldStartY; y <= worldStopY; y++) {
+                if (y <= 0 || y >= world.getMaxBuildHeight()) continue;
 
-                // Get Row:
-                int progressY = y - startY;
-                int fullY = stopY - startY;
+                int progressY = y - worldStartY;
+                int fullY = worldStopY - worldStartY;
                 List<Character> row = layer.getRow(progressY, fullY);
 
-                // Build Front/Back:
-                for (int x = startX; x <= stopX; x++) {
-                    char buildChar = layer.getColumn(progressY, fullY, x - startX, stopX - startX, row);
-                    BlockState blockState = this.theme.getWall(this, buildChar, random);
-                    if (blockState.getBlock() != Blocks.CAVE_AIR) {
-                        this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, startZ + layerIndex), blockState, Direction.SOUTH, random);
-                        this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, stopZ - layerIndex), blockState, Direction.NORTH, random);
+                int frontZ = worldStartZ + layerIndex;
+                int backZ = worldStopZ - layerIndex;
+
+                if (frontZ >= chunkMinZ && frontZ <= chunkMaxZ) {
+                    for (int x = xStart; x <= xStop; x++) {
+                        char buildChar = layer.getColumn(progressY, fullY, x - worldStartX, worldStopX - worldStartX, row);
+                        BlockState blockState = this.theme.getWall(this, buildChar, random);
+                        if (blockState.getBlock() != Blocks.CAVE_AIR) {
+                            this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, frontZ), blockState, Direction.SOUTH, random);
+                        }
                     }
                 }
 
-                // Build Left/Right:
-                for (int z = startZ; z <= stopZ; z++) {
-                    char buildChar = layer.getColumn(progressY, fullY, z - startZ, stopZ - startZ, row);
-                    BlockState blockState = this.theme.getWall(this, buildChar, random);
-                    if (blockState.getBlock() != Blocks.CAVE_AIR) {
-                        this.placeBlock(worldWriter, chunkPos, new BlockPos(startX + layerIndex, y, z), blockState, Direction.EAST, random);
-                        this.placeBlock(worldWriter, chunkPos, new BlockPos(stopX - layerIndex, y, z), blockState, Direction.WEST, random);
+                if (backZ >= chunkMinZ && backZ <= chunkMaxZ) {
+                    for (int x = xStart; x <= xStop; x++) {
+                        char buildChar = layer.getColumn(progressY, fullY, x - worldStartX, worldStopX - worldStartX, row);
+                        BlockState blockState = this.theme.getWall(this, buildChar, random);
+                        if (blockState.getBlock() != Blocks.CAVE_AIR) {
+                            this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, backZ), blockState, Direction.NORTH, random);
+                        }
+                    }
+                }
+
+                int leftX = worldStartX + layerIndex;
+                int rightX = worldStopX - layerIndex;
+
+                if (leftX >= chunkMinX && leftX <= chunkMaxX) {
+                    for (int z = zStart; z <= zStop; z++) {
+                        char buildChar = layer.getColumn(progressY, fullY, z - worldStartZ, worldStopZ - worldStartZ, row);
+                        BlockState blockState = this.theme.getWall(this, buildChar, random);
+                        if (blockState.getBlock() != Blocks.CAVE_AIR) {
+                            this.placeBlock(worldWriter, chunkPos, new BlockPos(leftX, y, z), blockState, Direction.EAST, random);
+                        }
+                    }
+                }
+
+                if (rightX >= chunkMinX && rightX <= chunkMaxX) {
+                    for (int z = zStart; z <= zStop; z++) {
+                        char buildChar = layer.getColumn(progressY, fullY, z - worldStartZ, worldStopZ - worldStartZ, row);
+                        BlockState blockState = this.theme.getWall(this, buildChar, random);
+                        if (blockState.getBlock() != Blocks.CAVE_AIR) {
+                            this.placeBlock(worldWriter, chunkPos, new BlockPos(rightX, y, z), blockState, Direction.WEST, random);
+                        }
                     }
                 }
             }
@@ -831,35 +898,43 @@ public class SectorInstance {
      * @param random      The instance of random, used for characters that are random.
      */
     public void buildCeiling(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
-        // Get Start and Stop Positions:
         BlockPos startPos = this.getRoomBoundsMin();
         BlockPos stopPos = this.getRoomBoundsMax();
-        int startX = Math.min(startPos.getX(), stopPos.getX());
-        int stopX = Math.max(startPos.getX(), stopPos.getX());
-        int startY = Math.min(startPos.getY(), stopPos.getY());
-        int stopY = Math.max(startPos.getY(), stopPos.getY());
-        int startZ = Math.min(startPos.getZ(), stopPos.getZ());
-        int stopZ = Math.max(startPos.getZ(), stopPos.getZ());
+        int worldStartX = Math.min(startPos.getX(), stopPos.getX());
+        int worldStopX = Math.max(startPos.getX(), stopPos.getX());
+        int worldStartY = Math.min(startPos.getY(), stopPos.getY());
+        int worldStopY = Math.max(startPos.getY(), stopPos.getY());
+        int worldStartZ = Math.min(startPos.getZ(), stopPos.getZ());
+        int worldStopZ = Math.max(startPos.getZ(), stopPos.getZ());
+
+        int startX = Math.max(worldStartX, chunkPos.getMinBlockX());
+        int stopX = Math.min(worldStopX, chunkPos.getMaxBlockX());
+        int startZ = Math.max(worldStartZ, chunkPos.getMinBlockZ());
+        int stopZ = Math.min(worldStopZ, chunkPos.getMaxBlockZ());
+
+        if (startX > stopX || startZ > stopZ) {
+            return;
+        }
 
         for (int layerIndex : this.dungeonSector.ceiling.layers.keySet()) {
-            int y = stopY + layerIndex;
+            int y = worldStopY + layerIndex;
             if (y <= 0 || y >= world.getMaxBuildHeight()) {
                 continue;
             }
             SectorLayer layer = this.dungeonSector.ceiling.layers.get(layerIndex);
             for (int x = startX; x <= stopX; x++) {
-                List<Character> row = layer.getRow(x - startX, stopX - startX);
+                List<Character> row = layer.getRow(x - worldStartX, worldStopX - worldStartX);
                 for (int z = startZ; z <= stopZ; z++) {
-                    char buildChar = layer.getColumn(x - startX, stopX - startX, z - startZ, stopZ - startZ, row);
+                    char buildChar = layer.getColumn(x - worldStartX, worldStopX - worldStartX, z - worldStartZ, worldStopZ - worldStartZ, row);
                     BlockPos buildPos = new BlockPos(x, y, z);
                     BlockState blockState = this.theme.getCeiling(this, buildChar, random);
-                    if (blockState.getBlock() != Blocks.CAVE_AIR)
+                    if (blockState.getBlock() != Blocks.CAVE_AIR) {
                         this.placeBlock(worldWriter, chunkPos, buildPos, blockState, Direction.DOWN, random);
+                    }
                 }
             }
         }
     }
-
 
     /**
      * Builds the entrances of this sector from within the chunk position.
@@ -883,7 +958,6 @@ public class SectorInstance {
      * @param random      The instance of random, used for characters that are random.
      */
     public void buildStairs(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
-        // Get Start and Stop Positions:
         BlockPos startPos = this.getRoomBoundsMin();
         BlockPos stopPos = this.getRoomBoundsMax();
 
@@ -895,31 +969,41 @@ public class SectorInstance {
         if (this.dungeonSector.type.equalsIgnoreCase("stairs")) {
             stairsHeight = size.y() * 2;
         }
-        int startX = centerX - 1;
-        int stopX = centerX + 1;
+
+        int worldStartX = centerX - 1;
+        int worldStopX = centerX + 1;
+        int worldStartZ = centerZ - 1;
+        int worldStopZ = centerZ + 1;
+
         int startY = Math.min(startPos.getY(), stopPos.getY());
         int stopY = Math.max(1, startPos.getY() - stairsHeight);
 
-        int startZ = centerZ - 1;
-        int stopZ = centerZ + 1;
+        int startX = Math.max(worldStartX, chunkPos.getMinBlockX());
+        int stopX = Math.min(worldStopX, chunkPos.getMaxBlockX());
+        int startZ = Math.max(worldStartZ, chunkPos.getMinBlockZ());
+        int stopZ = Math.min(worldStopZ, chunkPos.getMaxBlockZ());
+
+        if (startX > stopX || startZ > stopZ) {
+            return;
+        }
 
         BlockState floorBlockState = this.theme.getFloor(this, 'B', random);
         BlockState stairsBlockState = this.stairBlock;
 
         for (int y = startY; y >= stopY; y--) {
+            if (y <= 0 || y >= world.getMaxBuildHeight()) continue;
             for (int x = startX; x <= stopX; x++) {
                 for (int z = startZ; z <= stopZ; z++) {
                     BlockState blockState = Blocks.CAVE_AIR.defaultBlockState();
 
-                    // Center:
                     if (x == centerX && z == centerZ) {
                         blockState = this.theme.getWall(this, 'B', random);
                     }
 
-                    // Spiral Stairs:
                     int step = y % 8;
-                    int offsetX = x - startX;
-                    int offsetZ = z - startZ;
+                    int offsetX = x - worldStartX;
+                    int offsetZ = z - worldStartZ;
+
                     if (step % 4 == 3) {
                         if (offsetX == 0 && offsetZ == 0) {
                             blockState = floorBlockState;
@@ -968,7 +1052,6 @@ public class SectorInstance {
      * @param random      The instance of random, used for mob vacations where applicable.
      */
     public void spawnMob(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, BlockPos blockPos, MobSpawn mobSpawn, RandomSource random) {
-        // Restrict To Chunk Position:
         int chunkOffset = 8;
         if (blockPos.getX() < chunkPos.getMinBlockX() + chunkOffset || blockPos.getX() > chunkPos.getMaxBlockX() + chunkOffset) {
             return;
@@ -980,14 +1063,15 @@ public class SectorInstance {
             return;
         }
 
-        // Spawn Mob:
         LMHelperClass.logDebug("Dungeon", "Spawning mob " + mobSpawn + " at: " + blockPos + " level: " + this.parentConnector.level);
         LivingEntity entityLiving = mobSpawn.createEntity(world);
         entityLiving.setPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 
         if (entityLiving instanceof BaseCreatureEntity) {
             BaseCreatureEntity entityCreature = (BaseCreatureEntity) entityLiving;
-            entityCreature.setHome(blockPos.getX(), blockPos.getY(), blockPos.getZ(), Math.max(3, Math.max(this.roomSize.x(), this.roomSize.z())));
+            Vector3i size = this.getRoomSize();
+            int radius = Math.max(3, Math.max(size.x(), size.z()));
+            entityCreature.setHome(blockPos.getX(), blockPos.getY(), blockPos.getZ(), radius);
         }
 
         mobSpawn.onSpawned(entityLiving, null);
@@ -1010,4 +1094,249 @@ public class SectorInstance {
         }
         return "Sector Instance Type: " + (this.dungeonSector == null ? "Unset" : this.dungeonSector.type) + " Parent Connector Pos: " + (this.parentConnector == null ? "Unset" : this.parentConnector.position) + size + bounds;
     }
+
+    public void generateBuildPlan(DungeonBuildPlan plan) {
+        RandomSource random = RandomSource.create(this.layout.dungeonInstance.seed ^ this.hashCode());
+        this.planClearArea(plan, random);
+        this.planFloor(plan, random, 0);
+        this.planWalls(plan, random);
+        this.planCeiling(plan, random);
+        if ("stairs".equalsIgnoreCase(this.dungeonSector.type)) {
+            this.planStairs(plan, random);
+            this.planFloor(plan, random, -(this.getRoomSize().y() * 2));
+        }
+        if ("tower".equalsIgnoreCase(this.dungeonSector.type)) {
+            this.planStairs(plan, random);
+        }
+    }
+
+    private void planClearArea(DungeonBuildPlan plan, RandomSource random) {
+        BlockPos startPos = this.getRoomBoundsMin();
+        BlockPos stopPos = this.getRoomBoundsMax();
+        int startX = Math.min(startPos.getX(), stopPos.getX());
+        int stopX = Math.max(startPos.getX(), stopPos.getX());
+        int startY = Math.min(startPos.getY(), stopPos.getY());
+        int stopY = Math.max(startPos.getY(), stopPos.getY());
+        int startZ = Math.min(startPos.getZ(), stopPos.getZ());
+        int stopZ = Math.max(startPos.getZ(), stopPos.getZ());
+
+        if ("stairs".equalsIgnoreCase(this.dungeonSector.type)) {
+            startY = Math.max(1, startPos.getY() - (this.getRoomSize().y() * 2));
+        }
+
+        for (int x = startX; x <= stopX; x++) {
+            for (int y = startY; y <= stopY; y++) {
+                if (y <= 0 || y >= this.layout.dungeonInstance.world.getMaxBuildHeight()) continue;
+                for (int z = startZ; z <= stopZ; z++) {
+                    BlockPos pos = new BlockPos(x, y, z);
+                    ChunkPos chunkPos = new ChunkPos(pos);
+                    BlockState state = net.minecraft.world.level.block.Blocks.CAVE_AIR.defaultBlockState();
+                    DungeonBuildPlan.PlannedBlock pb = new DungeonBuildPlan.PlannedBlock(pos, state, Direction.SOUTH);
+                    plan.add(chunkPos, pb);
+                }
+            }
+        }
+    }
+
+    private void planFloor(DungeonBuildPlan plan, RandomSource random, int offsetY) {
+        BlockPos startPos = this.getRoomBoundsMin().offset(0, offsetY, 0);
+        BlockPos stopPos = this.getRoomBoundsMax().offset(0, offsetY, 0);
+        int startX = Math.min(startPos.getX(), stopPos.getX());
+        int stopX = Math.max(startPos.getX(), stopPos.getX());
+        int startY = Math.min(startPos.getY(), stopPos.getY());
+        int stopY = Math.max(startPos.getY(), stopPos.getY());
+        int startZ = Math.min(startPos.getZ(), stopPos.getZ());
+        int stopZ = Math.max(startPos.getZ(), stopPos.getZ());
+
+        for (int layerIndex : this.dungeonSector.floor.layers.keySet()) {
+            int y = startY + layerIndex;
+            if (y <= 0 || y >= this.layout.dungeonInstance.world.getMaxBuildHeight()) continue;
+            SectorLayer layer = this.dungeonSector.floor.layers.get(layerIndex);
+            for (int x = startX; x <= stopX; x++) {
+                java.util.List<Character> row = layer.getRow(x - startX, stopX - startX);
+                for (int z = startZ; z <= stopZ; z++) {
+                    char c = layer.getColumn(x - startX, stopX - startX, z - startZ, stopZ - startZ, row);
+                    BlockState state = this.theme.getFloor(this, c, random);
+                    if (state.getBlock() == net.minecraft.world.level.block.Blocks.CAVE_AIR) continue;
+                    BlockPos pos = new BlockPos(x, y, z);
+                    ChunkPos chunkPos = new ChunkPos(pos);
+                    DungeonBuildPlan.PlannedBlock pb = new DungeonBuildPlan.PlannedBlock(pos, state, Direction.UP);
+                    plan.add(chunkPos, pb);
+                }
+            }
+        }
+    }
+
+    private void planWalls(DungeonBuildPlan plan, RandomSource random) {
+        BlockPos startPos = this.getRoomBoundsMin();
+        BlockPos stopPos = this.getRoomBoundsMax();
+
+        Vector3i size = this.getRoomSize();
+        int startX = Math.min(startPos.getX(), stopPos.getX());
+        int stopX = Math.max(startPos.getX(), stopPos.getX());
+        int startY = Math.min(startPos.getY() + 1, stopPos.getY());
+        int stopY = Math.max(startPos.getY() - 1, stopPos.getY());
+        int startZ = Math.min(startPos.getZ(), stopPos.getZ());
+        int stopZ = Math.max(startPos.getZ(), stopPos.getZ());
+
+        if ("stairs".equalsIgnoreCase(this.dungeonSector.type)) {
+            startY = Math.max(1, startPos.getY() - (size.y() * 2));
+        }
+
+        int maxHeight = this.layout.dungeonInstance.world.getMaxBuildHeight();
+
+        for (int layerIndex : this.dungeonSector.wall.layers.keySet()) {
+            SectorLayer layer = this.dungeonSector.wall.layers.get(layerIndex);
+            for (int y = startY; y <= stopY; y++) {
+                if (y <= 0 || y >= maxHeight) {
+                    continue;
+                }
+
+                int progressY = y - startY;
+                int fullY = stopY - startY;
+                List<Character> row = layer.getRow(progressY, fullY);
+
+                for (int x = startX; x <= stopX; x++) {
+                    char buildChar = layer.getColumn(progressY, fullY, x - startX, stopX - startX, row);
+                    BlockState blockState = this.theme.getWall(this, buildChar, random);
+                    if (blockState.getBlock() != Blocks.CAVE_AIR) {
+                        BlockPos posFront = new BlockPos(x, y, startZ + layerIndex);
+                        ChunkPos chunkFront = new ChunkPos(posFront);
+                        plan.add(chunkFront, new DungeonBuildPlan.PlannedBlock(posFront, blockState, Direction.SOUTH));
+
+                        BlockPos posBack = new BlockPos(x, y, stopZ - layerIndex);
+                        ChunkPos chunkBack = new ChunkPos(posBack);
+                        plan.add(chunkBack, new DungeonBuildPlan.PlannedBlock(posBack, blockState, Direction.NORTH));
+                    }
+                }
+
+                for (int z = startZ; z <= stopZ; z++) {
+                    char buildChar = layer.getColumn(progressY, fullY, z - startZ, stopZ - startZ, row);
+                    BlockState blockState = this.theme.getWall(this, buildChar, random);
+                    if (blockState.getBlock() != Blocks.CAVE_AIR) {
+                        BlockPos posLeft = new BlockPos(startX + layerIndex, y, z);
+                        ChunkPos chunkLeft = new ChunkPos(posLeft);
+                        plan.add(chunkLeft, new DungeonBuildPlan.PlannedBlock(posLeft, blockState, Direction.EAST));
+
+                        BlockPos posRight = new BlockPos(stopX - layerIndex, y, z);
+                        ChunkPos chunkRight = new ChunkPos(posRight);
+                        plan.add(chunkRight, new DungeonBuildPlan.PlannedBlock(posRight, blockState, Direction.WEST));
+                    }
+                }
+            }
+        }
+    }
+
+    private void planCeiling(DungeonBuildPlan plan, RandomSource random) {
+        BlockPos startPos = this.getRoomBoundsMin();
+        BlockPos stopPos = this.getRoomBoundsMax();
+        int startX = Math.min(startPos.getX(), stopPos.getX());
+        int stopX = Math.max(startPos.getX(), stopPos.getX());
+        int startY = Math.min(startPos.getY(), stopPos.getY());
+        int stopY = Math.max(startPos.getY(), stopPos.getY());
+        int startZ = Math.min(startPos.getZ(), stopPos.getZ());
+        int stopZ = Math.max(startPos.getZ(), stopPos.getZ());
+
+        int maxHeight = this.layout.dungeonInstance.world.getMaxBuildHeight();
+
+        for (int layerIndex : this.dungeonSector.ceiling.layers.keySet()) {
+            int y = stopY + layerIndex;
+            if (y <= 0 || y >= maxHeight) {
+                continue;
+            }
+            SectorLayer layer = this.dungeonSector.ceiling.layers.get(layerIndex);
+            for (int x = startX; x <= stopX; x++) {
+                List<Character> row = layer.getRow(x - startX, stopX - startX);
+                for (int z = startZ; z <= stopZ; z++) {
+                    char buildChar = layer.getColumn(x - startX, stopX - startX, z - startZ, stopZ - startZ, row);
+                    BlockState blockState = this.theme.getCeiling(this, buildChar, random);
+                    if (blockState.getBlock() == Blocks.CAVE_AIR) continue;
+
+                    BlockPos buildPos = new BlockPos(x, y, z);
+                    ChunkPos chunkPos = new ChunkPos(buildPos);
+                    plan.add(chunkPos, new DungeonBuildPlan.PlannedBlock(buildPos, blockState, Direction.DOWN));
+                }
+            }
+        }
+    }
+
+    private void planStairs(DungeonBuildPlan plan, RandomSource random) {
+        BlockPos startPos = this.getRoomBoundsMin();
+        BlockPos stopPos = this.getRoomBoundsMax();
+
+        Vector3i size = this.getRoomSize();
+        int centerX = startPos.getX() + Math.round((float) size.x() / 2);
+        int centerZ = startPos.getZ() + Math.round((float) size.z() / 2);
+
+        int stairsHeight = this.parentConnector.parentSector.getOccupiedSize().y() - 1;
+        if (this.dungeonSector.type.equalsIgnoreCase("stairs")) {
+            stairsHeight = size.y() * 2;
+        }
+        int startX = centerX - 1;
+        int stopX = centerX + 1;
+        int startY = Math.min(startPos.getY(), stopPos.getY());
+        int stopY = Math.max(1, startPos.getY() - stairsHeight);
+
+        int startZ = centerZ - 1;
+        int stopZ = centerZ + 1;
+
+        int maxHeight = this.layout.dungeonInstance.world.getMaxBuildHeight();
+
+        BlockState floorBlockState = this.theme.getFloor(this, 'B', random);
+        BlockState stairsBlockState = this.stairBlock;
+
+        for (int y = startY; y >= stopY; y--) {
+            if (y <= 0 || y >= maxHeight) continue;
+
+            for (int x = startX; x <= stopX; x++) {
+                for (int z = startZ; z <= stopZ; z++) {
+                    BlockState blockState = Blocks.CAVE_AIR.defaultBlockState();
+
+                    if (x == centerX && z == centerZ) {
+                        blockState = this.theme.getWall(this, 'B', random);
+                    }
+
+                    int step = y % 8;
+                    int offsetX = x - startX;
+                    int offsetZ = z - startZ;
+
+                    if (step % 4 == 3) {
+                        if (offsetX == 0 && offsetZ == 0) {
+                            blockState = floorBlockState;
+                        } else if (offsetX == 0 && offsetZ == 1) {
+                            blockState = stairsBlockState;
+                        }
+                    }
+                    if (step % 4 == 2) {
+                        if (offsetX == 0 && offsetZ == 2) {
+                            blockState = floorBlockState;
+                        } else if (offsetX == 1 && offsetZ == 2) {
+                            blockState = stairsBlockState.setValue(StairBlock.FACING, Direction.WEST);
+                        }
+                    }
+                    if (step % 4 == 1) {
+                        if (offsetX == 2 && offsetZ == 2) {
+                            blockState = floorBlockState;
+                        } else if (offsetX == 2 && offsetZ == 1) {
+                            blockState = stairsBlockState.setValue(StairBlock.FACING, Direction.SOUTH);
+                        }
+                    }
+                    if (step % 4 == 0) {
+                        if (offsetX == 2 && offsetZ == 0) {
+                            blockState = floorBlockState;
+                        } else if (offsetX == 1 && offsetZ == 0) {
+                            blockState = stairsBlockState.setValue(StairBlock.FACING, Direction.EAST);
+                        }
+                    }
+
+                    if (blockState.getBlock() == Blocks.CAVE_AIR) continue;
+
+                    BlockPos buildPos = new BlockPos(x, y, z);
+                    ChunkPos chunkPos = new ChunkPos(buildPos);
+                    plan.add(chunkPos, new DungeonBuildPlan.PlannedBlock(buildPos, blockState, Direction.UP));
+                }
+            }
+        }
+    }
+
 }
