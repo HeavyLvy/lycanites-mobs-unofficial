@@ -694,12 +694,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         this.nextSpecialTargetIndex = 30;
         this.nextFindTargetIndex = 50;
     }
-
-    @Override
-    public AttributeMap getAttributes() {
-        AttributeMap attrs = new AttributeMap(registerCustomAttributes().build());
-        return attrs;
-    }
+    
 
     /**
      * Loads this entity's dynamic attributes.
