@@ -13,6 +13,7 @@ uniform vec2 UvOffset;
 out vec2 vTexCoord;
 out vec3 vNormalVS;
 out vec4 vColor;
+out vec3 vViewDir;
 
 void main() {
     vec4 viewPos = ModelViewMat * vec4(Position, 1.0);
@@ -21,4 +22,5 @@ void main() {
     vTexCoord = UV0 + UvOffset;
     vNormalVS = normalize(NormalMat * Normal);
     vColor = ColorModulator;
+    vViewDir = normalize(-viewPos.xyz);
 }

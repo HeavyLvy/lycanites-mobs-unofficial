@@ -82,10 +82,29 @@ public class CustomRenderStates extends RenderStateShard {
                     .setLightmapState(LIGHTMAP)
                     .setOverlayState(OVERLAY)
                     .setDepthTestState(LEQUAL_DEPTH_TEST)
-                    .setWriteMaskState(COLOR_DEPTH_WRITE)
+                    .setWriteMaskState(COLOR_WRITE)
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                     .createCompositeState(true)
     );
+
+    public static final RenderType OBJ_TRANSLUCENT_NO_DEPTH_WRITE = RenderType.create(
+            "lm_obj_pos_tex_normal_translucent_no_depth_write",
+            POS_TEX_NORMAL,
+            VertexFormat.Mode.TRIANGLES,
+            65536,
+            true,
+            false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(new ShaderStateShard(() -> POS_TEX_NORMAL_SHADER))
+                    .setCullState(NO_CULL)
+                    .setLightmapState(LIGHTMAP)
+                    .setOverlayState(OVERLAY)
+                    .setDepthTestState(LEQUAL_DEPTH_TEST)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .createCompositeState(true)
+    );
+
     public static final RenderType OBJ_CUTOUT = RenderType.create(
             "lm_obj_cutout",
             POS_TEX_NORMAL,
@@ -214,6 +233,7 @@ public class CustomRenderStates extends RenderStateShard {
         }
         return OBJ_RENDER_TYPES[(blending << 1) | (glow ? 1 : 0)];
     }
+
 
     public static RenderType getObjRenderType(ResourceLocation texture, int blending, boolean glow) {
         if (POS_COL_TEX_LIGHT_FADE_NORMAL == null) {

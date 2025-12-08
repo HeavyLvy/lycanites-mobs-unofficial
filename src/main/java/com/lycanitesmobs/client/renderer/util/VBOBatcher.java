@@ -214,9 +214,28 @@ public class VBOBatcher {
             var modelView = new org.joml.Matrix4f(RenderSystem.getModelViewMatrix()).mul(this.modelMatrix);
             var projection = RenderSystem.getProjectionMatrix();
 
+            var sunDir = shader.getUniform("SunDirectionVS");
+            if (sunDir != null) {
+                float sx = 0.0F;
+                float sy = 1.0F;
+                float sz = 0.0F;
+                sunDir.set(sx, sy, sz);
+            }
+
+            var specColor = shader.getUniform("SpecularColor");
+            if (specColor != null) specColor.set(1.0F, 1.0F, 1.0F);
+
+            var specIntensity = shader.getUniform("SpecularIntensity");
+            if (specIntensity != null) specIntensity.set(0.6F);
+
+            var specPower = shader.getUniform("SpecularPower");
+            if (specPower != null) specPower.set(32.0F);
+
             vbo.bind();
             vbo.drawWithShader(modelView, projection, shader);
             VertexBuffer.unbind();
+
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
 
 
@@ -251,5 +270,8 @@ public class VBOBatcher {
         });
 
         batchedDrawCommands.clear();
+
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
+
 }

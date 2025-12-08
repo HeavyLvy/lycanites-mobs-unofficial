@@ -14,6 +14,42 @@
   ],
   "uniforms": [
     {
+      "name": "SunDirectionVS",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SpecularColor",
+      "type": "float",
+      "count": 3,
+      "values": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "SpecularIntensity",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.5
+      ]
+    },
+    {
+      "name": "SpecularPower",
+      "type": "float",
+      "count": 1,
+      "values": [
+        32.0
+      ]
+    },
+    {
       "name": "BaseColor",
       "type": "float",
       "count": 3,
