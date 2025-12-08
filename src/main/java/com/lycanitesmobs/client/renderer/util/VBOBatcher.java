@@ -226,7 +226,7 @@ public class VBOBatcher {
             if (specColor != null) specColor.set(1.0F, 1.0F, 1.0F);
 
             var specIntensity = shader.getUniform("SpecularIntensity");
-            if (specIntensity != null) specIntensity.set(0.6F);
+            if (specIntensity != null) specIntensity.set(0.15F);
 
             var specPower = shader.getUniform("SpecularPower");
             if (specPower != null) specPower.set(32.0F);
