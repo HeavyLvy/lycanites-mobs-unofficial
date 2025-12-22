@@ -9,12 +9,18 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
@@ -194,20 +200,70 @@ public class VBOBatcher {
 
             var uv = shader.getUniform("UvOffset");
             if (uv != null) uv.set(textureOffsetX, textureOffsetY);
+
             var overlay = shader.getUniform("OverlayUv");
             if (overlay != null) overlay.set(overlayOffsetX, overlayOffsetY);
+
             var light = shader.getUniform("LightUv");
-            if (light != null) light.set(lightOffsetX, lightOffsetY);
+            if (light != null) {
+                float u = lightOffsetX;
+                float v = lightOffsetY;
+
+                Minecraft mc = Minecraft.getInstance();
+                Entity cam = mc.getCameraEntity();
+
+                float nv = 0.0F;
+                if (cam instanceof LivingEntity le) {
+                    MobEffectInstance inst = le.getEffect(MobEffects.NIGHT_VISION);
+
+                    if (inst == null) {
+                        MobEffectInstance conduit = le.getEffect(MobEffects.CONDUIT_POWER);
+                        boolean underwater = false;
+
+                        Entity viewer = mc.player;
+                        if (viewer == null) viewer = cam;
+
+                        if (viewer != null) {
+                            underwater = viewer.isUnderWater();
+                        }
+
+                        if (underwater) inst = conduit;
+                    }
+
+                    if (inst != null) {
+                        int d = inst.getDuration();
+                        if (d > 0) {
+                            if (d > 200) {
+                                nv = 1.0F;
+                            } else {
+                                nv = 0.7F + Mth.sin(((float) d - mc.getFrameTime()) * (float) Math.PI * 0.2F) * 0.3F;
+                            }
+                        }
+                    }
+                }
+
+
+                if (nv > 0.0F) {
+                    u = Mth.lerp(nv, u, 240.0F);
+                    v = Mth.lerp(nv, v, 240.0F);
+                }
+
+                light.set(u, v);
+            }
+
+
             var cutoff = shader.getUniform("AlphaCutoff");
             if (cutoff != null) cutoff.set(alphaCutoff);
 
             var baseColor = shader.getUniform("BaseColor");
             if (baseColor != null) baseColor.set(baseR, baseG, baseB);
+
             var baseRangeUni = shader.getUniform("BaseRange");
             if (baseRangeUni != null) baseRangeUni.set(baseRange);
 
             var tintColor = shader.getUniform("VariantColor");
             if (tintColor != null) tintColor.set(tintR, tintG, tintB);
+
             var tintAmt = shader.getUniform("VariantAmount");
             if (tintAmt != null) tintAmt.set(tintAmount);
 
@@ -215,12 +271,7 @@ public class VBOBatcher {
             var projection = RenderSystem.getProjectionMatrix();
 
             var sunDir = shader.getUniform("SunDirectionVS");
-            if (sunDir != null) {
-                float sx = 0.0F;
-                float sy = 1.0F;
-                float sz = 0.0F;
-                sunDir.set(sx, sy, sz);
-            }
+            if (sunDir != null) sunDir.set(0.0F, 1.0F, 0.0F);
 
             var specColor = shader.getUniform("SpecularColor");
             if (specColor != null) specColor.set(1.0F, 1.0F, 1.0F);
