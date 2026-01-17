@@ -293,16 +293,16 @@ public class GameEventListener {
     public void onLivingHurt(LivingHurtEvent event) {
         if (event.isCanceled())
             return;
-
-        if (event.getSource() == null || event.getEntity() == null)
+        DamageSource damageSource = event.getSource();
+        if (damageSource == null || event.getEntity() == null)
             return;
 
         LivingEntity damagedEntity = event.getEntity();
         ExtendedEntity damagedEntityExt = ExtendedEntity.getForEntity(damagedEntity);
 
         // True Source Extended Entity:
-        if (event.getSource().getEntity() != null &&
-                event.getSource().getEntity() instanceof LivingEntity entity) {
+        if (damageSource.getEntity() != null &&
+                damageSource.getEntity() instanceof LivingEntity entity) {
             ExtendedEntity attackerExtendedEntity = ExtendedEntity.getForEntity(entity);
             if (attackerExtendedEntity != null) {
                 attackerExtendedEntity.setLastAttackedEntity(damagedEntity);
@@ -316,21 +316,18 @@ public class GameEventListener {
 
                 // Shielding:
                 if (creatureRideable.isBlocking()) {
-                    event.setAmount(0);
                     event.setCanceled(true);
                     return;
                 }
 
                 // Prevent Mounted Entities from Suffocating:
-                if ("inWall".equals(event.getSource().getMsgId())) {
-                    event.setAmount(0);
+                if (damageSource.is(DamageTypes.IN_WALL)) {
                     event.setCanceled(true);
                     return;
                 }
 
                 // Copy Mount Immunities to Rider:
-                if (!creatureRideable.isVulnerableTo(event.getSource().getMsgId(), event.getSource(), event.getAmount())) {
-                    event.setAmount(0);
+                if (!creatureRideable.isVulnerableTo(damageSource.getMsgId(), damageSource, event.getAmount())) {
                     event.setCanceled(true);
                     return;
                 }
@@ -340,8 +337,7 @@ public class GameEventListener {
         // ========== Picked Up/Feared Protection ==========
         if (damagedEntityExt != null && damagedEntityExt.isPickedUp()) {
             // Prevent Picked Up and Feared Entities from Suffocating:
-            if ("inWall".equals(event.getSource().getMsgId())) {
-                event.setAmount(0);
+            if (damageSource.is(DamageTypes.IN_WALL)) {
                 event.setCanceled(true);
                 return;
             }
