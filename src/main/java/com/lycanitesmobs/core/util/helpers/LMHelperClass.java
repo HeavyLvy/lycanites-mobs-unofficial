@@ -8,6 +8,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -243,8 +244,8 @@ public class LMHelperClass {
             return ForgeRegistries.BLOCKS.getKey(block);
         } else if (input instanceof EntityType<?> entityType) {
             return ForgeRegistries.ENTITY_TYPES.getKey(entityType);
-        } else if (input instanceof Biome biome) {
-            return ForgeRegistries.BIOMES.getKey(biome);
+        } else if (input instanceof Biome) {
+            throw new IllegalArgumentException("Biome cannot be gotten from ForgeRegistries anymore - please use LMHelperClass.convertBiomeToResourceLocation(level, biome) to get from Level");
         } else if (input instanceof Fluid fluid) {
             return ForgeRegistries.FLUIDS.getKey(fluid);
         } else if (input instanceof MobEffect mobEffect) {
@@ -300,6 +301,13 @@ public class LMHelperClass {
         }
 
         return null;
+    }
+
+    public static ResourceLocation convertBiomeToResourceLocation(Level level, Biome biome) {
+        if (level == null || biome == null) {
+            return null;
+        }
+        return level.registryAccess().registryOrThrow(Registries.BIOME).getKey(biome);
     }
 
     public static Boolean convertToBoolean(Object input) {
