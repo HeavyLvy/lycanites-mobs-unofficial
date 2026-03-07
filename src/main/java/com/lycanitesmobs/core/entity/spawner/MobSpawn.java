@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.entity.spawner;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
@@ -24,136 +25,184 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MobSpawn {
+
     /**
-     * The Creature Info to base this Mob Spawn off of (using the Creature Spawn for default values).
-     **/
+     * The Creature Info to base this Mob Spawn off of (using the Creature Spawn
+     * for default values).
+     *
+     */
     public CreatureInfo creatureInfo;
 
     /**
-     * The entity class that this Mob Spawn should spawn if not using a MobInfo (for non-Lycanites Mobs entities).
-     **/
+     * The entity class that this Mob Spawn should spawn if not using a MobInfo
+     * (for non-Lycanites Mobs entities).
+     *
+     */
     public EntityType<? extends LivingEntity> entityType;
 
     /**
-     * If set to true, the Forge Can Spawn Event is fired but its result is ignored, use this to prevent other mods from stopping the spawn via the event.
-     **/
+     * If set to true, the Forge Can Spawn Event is fired but its result is
+     * ignored, use this to prevent other mods from stopping the spawn via the
+     * event.
+     *
+     */
     protected boolean ignoreForgeCanSpawnEvent = false;
 
     /**
-     * If set to true, all mob instance spawn checks are ignored. This includes all checks for none Lycanites Mobs, Group Limits and Light Levels.
-     **/
+     * If set to true, all mob instance spawn checks are ignored. This includes
+     * all checks for none Lycanites Mobs, Group Limits and Light Levels.
+     *
+     */
     protected boolean ignoreMobInstanceConditions = false;
 
     /**
-     * If set to true, this mob will ignore Dimension checks. This will not prevent a World Spawn Condition Dimension check however.
-     **/
+     * If set to true, this mob will ignore Dimension checks. This will not
+     * prevent a World Spawn Condition Dimension check however.
+     *
+     */
     protected boolean ignoreDimension = false;
 
     /**
-     * Whether this MobSpawn will ignore Biome checks. Can be ignore, check or default (use SpawnInfo).
-     **/
+     * Whether this MobSpawn will ignore Biome checks. Can be ignore, check or
+     * default (use SpawnInfo).
+     *
+     */
     protected String biomeCheck = "default";
 
     /**
      * If set to true, this mob will ignore Light Level checks.
-     **/
+     *
+     */
     protected boolean ignoreLightLevel = false;
 
     /**
      * If set to true, this mob will ignore Group Limit checks.
-     **/
+     *
+     */
     protected boolean ignoreGroupLimit = false;
 
     /**
      * The Spawn Weight to use, if not set the MobInfo's weight is used instead.
-     **/
+     *
+     */
     protected int weight = -1;
 
     /**
      * The Spawn Chance to use, if not set the MobInfo's chance is used instead.
-     **/
+     *
+     */
     protected double chance = -1;
 
     /**
-     * Used for the block-based spawn triggers. How many blocks that must be within the Spawn Block Search Range.
-     **/
+     * Used for the block-based spawn triggers. How many blocks that must be
+     * within the Spawn Block Search Range.
+     *
+     */
     protected int blockCost = -1;
 
     /**
      * Sets a custom name tag to a mob spawned with this Mob Spawn.
-     **/
+     *
+     */
     protected String mobNameTag = "";
 
     /**
-     * Whether the spawned mob will be persistent and wont naturally despawn. Can be: default (SpawnInfo), true or false.
-     **/
+     * Whether the spawned mob will be persistent and wont naturally despawn.
+     * Can be: default (SpawnInfo), true or false.
+     *
+     */
     protected String naturalDespawn = "default";
 
     /**
-     * If set, the spawned mob will be set as temporary where it will forcefully despawn after the specified time (in ticks). Useful for Mob Events.
-     **/
+     * If set, the spawned mob will be set as temporary where it will forcefully
+     * despawn after the specified time (in ticks). Useful for Mob Events.
+     *
+     */
     protected int temporary = -1;
 
     /**
-     * A custom scale for the physical size of the spawned mob. Only works with Lycanites Mobs.
-     **/
+     * A custom scale for the physical size of the spawned mob. Only works with
+     * Lycanites Mobs.
+     *
+     */
     protected double mobSizeScale = -1;
 
     /**
-     * If set, the spawned mob will have its subspecies changed to this value. Only works with Lycanites Mobs.
-     **/
+     * If set, the spawned mob will have its subspecies changed to this value.
+     * Only works with Lycanites Mobs.
+     *
+     */
     protected int subspecies = -1;
 
     /**
-     * If set, the spawned mob will have its variant changed to this value. Only works with Lycanites Mobs.
-     **/
+     * If set, the spawned mob will have its variant changed to this value. Only
+     * works with Lycanites Mobs.
+     *
+     */
     protected int variant = -1;
 
     /**
-     * If true, the spawned mob will fixate on the player that triggered the spawn, always attacking that player.
-     **/
+     * If true, the spawned mob will fixate on the player that triggered the
+     * spawn, always attacking that player.
+     *
+     */
     protected boolean fixate = false;
 
     /**
-     * If set, the spawned mob will set the location it spawned at as a home position and will stay within this distance (in blocks) of that position.
-     **/
+     * If set, the spawned mob will set the location it spawned at as a home
+     * position and will stay within this distance (in blocks) of that position.
+     *
+     */
     protected double home = -1;
 
     /**
-     * The level boost of the mob spawned, higher levels increase the stats by a small amount. This is added to the starting mob level (normally just 1).
-     **/
+     * The level boost of the mob spawned, higher levels increase the stats by a
+     * small amount. This is added to the starting mob level (normally just 1).
+     *
+     */
     protected int mobLevel = 0;
 
     /**
-     * If true, this mob is to be treated like a boss taking less damage from other mobs, having a damage taken cap, etc. This does not show the boss health bar. Default: false.
-     **/
+     * If true, this mob is to be treated like a boss taking less damage from
+     * other mobs, having a damage taken cap, etc. This does not show the boss
+     * health bar. Default: false.
+     *
+     */
     public boolean spawnAsBoss = false;
 
     /**
      * A list of item drops to add to a mob spawned by this MobSpawn.
-     **/
+     *
+     */
     protected List<ItemDrop> mobDrops = new ArrayList<>();
 
     /**
-     * For dungeon spawning, if 0 or above this is the minimum level of the dungeon (how far down/up) for this mob to show up in. Default -1.
-     **/
+     * For dungeon spawning, if 0 or above this is the minimum level of the
+     * dungeon (how far down/up) for this mob to show up in. Default -1.
+     *
+     */
     public int dungeonLevelMin = -1;
 
     /**
-     * For dungeon spawning, if above the min, this is the maximum level of the dungeon (how far down/up) for this mob to show up in. Default -1.
-     **/
+     * For dungeon spawning, if above the min, this is the maximum level of the
+     * dungeon (how far down/up) for this mob to show up in. Default -1.
+     *
+     */
     public int dungeonLevelMax = -1;
 
     /**
-     * For dungeon spawning, if true, this mob spawn entry is only to be used for boss sectors, if false it is only to be used for spawners.
-     **/
+     * For dungeon spawning, if true, this mob spawn entry is only to be used
+     * for boss sectors, if false it is only to be used for spawners.
+     *
+     */
     public boolean dungeonBoss = false;
-
 
     /**
      * Loads this Spawn Condition from the provided JSON data.
-     **/
+     *
+     */
     public static MobSpawn createFromJSON(JsonObject json) {
         MobSpawn mobSpawn = null;
         if (json.has("mobId")) {
@@ -172,8 +221,13 @@ public class MobSpawn {
 
                 if (entityTypeObj instanceof EntityType) {
                     EntityType entityType = (EntityType) entityTypeObj;
-                    mobSpawn = new MobSpawn(entityType);
-                    mobSpawn.loadFromJSON(json);
+                    ResourceLocation entityKey = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
+                    if (entityKey != null && LycanitesMobs.MODID.equals(entityKey.getNamespace())) {
+                        mobSpawn = new MobSpawn(entityType);
+                        mobSpawn.loadFromJSON(json);
+                    } else {
+                        LMHelperClass.logWarning("", "[JSONSpawner] Entity type '" + mobId + "' is not from the lycanitesmobs mod namespace. Mob Spawn entry ignored.");
+                    }
                 } else {
                     LMHelperClass.logWarning("", "[JSONSpawner] Unable to find entity type from the mob id: " + mobId + " Mob Spawn entry ignored.");
                 }
@@ -184,7 +238,8 @@ public class MobSpawn {
 
     /**
      * Constructors
-     **/
+     *
+     */
     public MobSpawn(CreatureInfo creatureInfo) {
         this.creatureInfo = creatureInfo;
         this.entityType = creatureInfo.getEntityType();
@@ -196,64 +251,84 @@ public class MobSpawn {
 
     /**
      * Loads this Mob Spawn from the provided JSON data.
-     **/
+     *
+     */
     public void loadFromJSON(JsonObject json) {
-        if (json.has("ignoreForgeCanSpawnEvent"))
+        if (json.has("ignoreForgeCanSpawnEvent")) {
             this.ignoreForgeCanSpawnEvent = json.get("ignoreForgeCanSpawnEvent").getAsBoolean();
+        }
 
-        if (json.has("ignoreDimension"))
+        if (json.has("ignoreDimension")) {
             this.ignoreDimension = json.get("ignoreDimension").getAsBoolean();
+        }
 
-        if (json.has("biomeCheck"))
+        if (json.has("biomeCheck")) {
             this.biomeCheck = json.get("biomeCheck").getAsString();
+        }
 
-        if (json.has("ignoreLightLevel"))
+        if (json.has("ignoreLightLevel")) {
             this.ignoreLightLevel = json.get("ignoreLightLevel").getAsBoolean();
+        }
 
-        if (json.has("ignoreGroupLimit"))
+        if (json.has("ignoreGroupLimit")) {
             this.ignoreGroupLimit = json.get("ignoreGroupLimit").getAsBoolean();
+        }
 
-        if (json.has("ignoreMobInstanceConditions"))
+        if (json.has("ignoreMobInstanceConditions")) {
             this.ignoreMobInstanceConditions = json.get("ignoreMobInstanceConditions").getAsBoolean();
+        }
 
-        if (json.has("weight"))
+        if (json.has("weight")) {
             this.weight = json.get("weight").getAsInt();
+        }
 
-        if (json.has("chance"))
+        if (json.has("chance")) {
             this.chance = json.get("chance").getAsDouble();
+        }
 
-        if (json.has("blockCost"))
+        if (json.has("blockCost")) {
             this.blockCost = json.get("blockCost").getAsInt();
+        }
 
-        if (json.has("mobNameTag"))
+        if (json.has("mobNameTag")) {
             this.mobNameTag = json.get("mobNameTag").getAsString();
+        }
 
-        if (json.has("naturalDespawn"))
+        if (json.has("naturalDespawn")) {
             this.naturalDespawn = json.get("naturalDespawn").getAsString();
+        }
 
-        if (json.has("temporary"))
+        if (json.has("temporary")) {
             this.temporary = json.get("temporary").getAsInt();
+        }
 
-        if (json.has("mobSizeScale"))
+        if (json.has("mobSizeScale")) {
             this.mobSizeScale = json.get("mobSizeScale").getAsDouble();
+        }
 
-        if (json.has("subspecies"))
+        if (json.has("subspecies")) {
             this.subspecies = json.get("subspecies").getAsInt();
+        }
 
-        if (json.has("variant"))
+        if (json.has("variant")) {
             this.variant = json.get("variant").getAsInt();
+        }
 
-        if (json.has("fixate"))
+        if (json.has("fixate")) {
             this.fixate = json.get("fixate").getAsBoolean();
+        }
 
-        if (json.has("home"))
+        if (json.has("home")) {
             this.home = json.get("home").getAsDouble();
+        }
 
-        if (json.has("mobLevel"))
+        if (json.has("mobLevel")) {
             this.mobLevel = json.get("mobLevel").getAsInt();
+        }
 
-        if (json.has("spawnAsBoss"))
+        if (json.has("spawnAsBoss")) {
             this.spawnAsBoss = json.get("spawnAsBoss").getAsBoolean();
+        }
 
         if (json.has("mobDrops")) {
             this.mobDrops.clear();
@@ -266,24 +341,29 @@ public class MobSpawn {
             }
         }
 
-        if (json.has("dungeonLevelMin"))
+        if (json.has("dungeonLevelMin")) {
             this.dungeonLevelMin = json.get("dungeonLevelMin").getAsInt();
+        }
 
-        if (json.has("dungeonLevelMax"))
+        if (json.has("dungeonLevelMax")) {
             this.dungeonLevelMax = json.get("dungeonLevelMax").getAsInt();
+        }
 
-        if (json.has("dungeonBoss"))
+        if (json.has("dungeonBoss")) {
             this.dungeonBoss = json.get("dungeonBoss").getAsBoolean();
+        }
     }
 
     /**
-     * Returns if this mob can spawn at the provided coordinate. This is a light check and does not perform an environmental check.
+     * Returns if this mob can spawn at the provided coordinate. This is a light
+     * check and does not perform an environmental check.
      *
-     * @param world                The world to spawn in.
-     * @param blockCount           The number of spawn blocks found.
-     * @param biome                The biome to check, if null, the biome check is ignored.
+     * @param world The world to spawn in.
+     * @param blockCount The number of spawn blocks found.
+     * @param biome The biome to check, if null, the biome check is ignored.
      * @param forceIgnoreDimension If true, the dimension check is ignored.
-     **/
+     *
+     */
     public boolean canSpawn(Level world, int blockCount, Biome biome, boolean forceIgnoreDimension) {
         // Global Check:
         if (!CreatureManager.getInstance().spawnConfig.isAllowedGlobal(world)) {
@@ -326,7 +406,6 @@ public class MobSpawn {
                 }
             }
 
-
             // Dimension:
             if (!forceIgnoreDimension && !this.ignoreDimension && !this.creatureInfo.creatureSpawn.isAllowedDimension(world)) {
                 return false;
@@ -348,10 +427,11 @@ public class MobSpawn {
         return true;
     }
 
-
     /**
-     * Gets the Spawn Block Cost to use, either the overridden MobSpawn Spawn Block Cost or the default SpawnInfo Spawn Block Cost.
-     **/
+     * Gets the Spawn Block Cost to use, either the overridden MobSpawn Spawn
+     * Block Cost or the default SpawnInfo Spawn Block Cost.
+     *
+     */
     public int getBlockCost() {
         if (this.blockCost > -1) {
             return this.blockCost;
@@ -359,10 +439,11 @@ public class MobSpawn {
         return 0;
     }
 
-
     /**
-     * Gets the Spawn Chance to use, either the overridden MobSpawn Spawn Chance or the default SpawnInfo Spawn Chance.
-     **/
+     * Gets the Spawn Chance to use, either the overridden MobSpawn Spawn Chance
+     * or the default SpawnInfo Spawn Chance.
+     *
+     */
     public double getChance() {
         if (this.chance > -1) {
             return this.chance;
@@ -370,10 +451,11 @@ public class MobSpawn {
         return 1;
     }
 
-
     /**
-     * Gets the Spawn Weight to use, either the overridden MobSpawn Spawn Weight or the default SpawnInfo Spawn Weight.
-     **/
+     * Gets the Spawn Weight to use, either the overridden MobSpawn Spawn Weight
+     * or the default SpawnInfo Spawn Weight.
+     *
+     */
     public int getWeight() {
         if (this.weight > -1) {
             return this.weight;
@@ -384,10 +466,11 @@ public class MobSpawn {
         return 8;
     }
 
-
     /**
-     * Gets if the spawned mob should be forced to not despawn, either the overridden value or the default SpawnInfo value.
-     **/
+     * Gets if the spawned mob should be forced to not despawn, either the
+     * overridden value or the default SpawnInfo value.
+     *
+     */
     public boolean getNaturalDespawn() {
         if ("true".equalsIgnoreCase(this.naturalDespawn)) {
             return true;
@@ -401,10 +484,11 @@ public class MobSpawn {
         return true;
     }
 
-
     /**
-     * Returns true if this Mob Spawn should check biomes and false if it should ignore them.
-     **/
+     * Returns true if this Mob Spawn should check biomes and false if it should
+     * ignore them.
+     *
+     */
     public boolean shouldCheckBiome() {
         if ("ignore".equalsIgnoreCase(this.biomeCheck)) {
             return false;
@@ -418,10 +502,10 @@ public class MobSpawn {
         return false;
     }
 
-
     /**
      * Creates a new Entity instance for spawning. Returns null on failure.
-     **/
+     *
+     */
     public LivingEntity createEntity(Level world) {
         try {
             if (this.creatureInfo != null) {
@@ -431,20 +515,21 @@ public class MobSpawn {
                 return null;
             }
             Entity entity = this.entityType.create(world);
-            if (entity instanceof LivingEntity)
-                return (LivingEntity) entity;
-            else if (entity != null)
+            if (entity instanceof LivingEntity) {
+                return (LivingEntity) entity; 
+            }else if (entity != null) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-
     /**
      * Called when a mob is spawned from this Mob Spawn.
-     **/
+     *
+     */
     public void onSpawned(LivingEntity entityLiving, Player player) {
         if (!"".equals(this.mobNameTag)) {
             entityLiving.setCustomName(Component.literal(this.mobNameTag));
@@ -488,7 +573,6 @@ public class MobSpawn {
             entityCreature.firstSpawn = firstSpawn;
         }
     }
-
 
     @Override
     public String toString() {
