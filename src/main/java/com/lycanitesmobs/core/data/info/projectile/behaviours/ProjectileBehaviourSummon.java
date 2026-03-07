@@ -10,6 +10,7 @@ import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.network.packet.MessageScreenRequest;
 import com.lycanitesmobs.core.entity.pets.SummonSet;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -119,7 +120,13 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
             } else {
                 Object entityTypeObj = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(this.summonMobId));
                 if (entityTypeObj instanceof EntityType) {
-                    entityType = (EntityType) entityTypeObj;
+                    EntityType<?> fetchedType = (EntityType) entityTypeObj;
+                    ResourceLocation entityKey = ForgeRegistries.ENTITY_TYPES.getKey(fetchedType);
+                    if (entityKey != null && LycanitesMobs.MODID.equals(entityKey.getNamespace())) {
+                        entityType = fetchedType;
+                    } else {
+                        LMHelperClass.logWarning("", "[ProjectileSummon] Entity type '" + this.summonMobId + "' is not from the lycanitesmobs mod namespace. Summon ignored.");
+                    }
                 }
             }
         }
