@@ -61,6 +61,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -694,7 +695,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         this.nextSpecialTargetIndex = 30;
         this.nextFindTargetIndex = 50;
     }
-    
+
 
     /**
      * Loads this entity's dynamic attributes.
@@ -3663,7 +3664,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             return false;
         if (this.isInvulnerableTo(damageSrc))
             return false;
-        if (!this.isVulnerableTo(damageSrc, damageAmount))
+        if (!this.isVulnerableTo("", damageSrc, damageAmount))
             return false;
         if (!this.isVulnerableTo(damageSrc.getEntity()))
             return false;
@@ -5330,7 +5331,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         // Damage Source:
-        if (!this.isVulnerableTo(source, 1)) {
+        if (!this.isVulnerableTo("", source, 1)) {
             return true;
         }
 
@@ -5343,7 +5344,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * Returns whether or not the given damage type is applicable, if not no damage will be taken.
      **/
     @Deprecated
-    public boolean isVulnerableTo(DamageSource source, float damage) {
+    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
         if ((source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.CACTUS)) && (this.isRareVariant() || this.isBoss()))
             return false;
         if (source.is(DamageTypes.IN_WALL))

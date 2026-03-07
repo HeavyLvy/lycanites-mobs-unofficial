@@ -581,7 +581,7 @@ public class Spawner {
             // Create Entity:
             LivingEntity entityLiving = mobSpawn.createEntity(world);
             if (entityLiving == null) {
-                LMHelperClass.logWarning("JSONSpawner", "Unable to instantiate an entity. Class: " + mobSpawn.entityType);
+                LMHelperClass.logWarning("JSONSpawner", "Unable to instantiate an entity. MobSpawn: " + mobSpawn + " entityType: " + mobSpawn.entityType + " creatureInfo: " + (mobSpawn.creatureInfo != null ? mobSpawn.creatureInfo.getName() : "null"));
                 continue;
             }
             BaseCreatureEntity entityCreature = null;

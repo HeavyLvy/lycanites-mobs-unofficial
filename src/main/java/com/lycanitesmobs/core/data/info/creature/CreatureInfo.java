@@ -522,13 +522,24 @@ public class CreatureInfo {
     }
 
     /**
-     * Returns the entity type of this creature.
+     * Returns the entity type of this creature. Prefers the cached entityType field (set during loadValues)
+     * over a fresh registry lookup to avoid returning EntityType.PIG (the registry default) when the
+     * entity type hasn't been registered yet or the registry lookup fails.
      *
      * @return Creature's entity type.
      */
     @Nonnull
     public EntityType<? extends LivingEntity> getEntityType() {
-        return (EntityType<? extends LivingEntity>) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(LycanitesMobs.MODID, this.getName()));
+        if (this.entityType != null) {
+            return this.entityType;
+        }
+        ResourceLocation id = new ResourceLocation(LycanitesMobs.MODID, this.getName());
+        EntityType<?> t = ForgeRegistries.ENTITY_TYPES.getValue(id);
+        if (t != null && id.equals(ForgeRegistries.ENTITY_TYPES.getKey(t))) {
+            return (EntityType<? extends LivingEntity>) t;
+        }
+        LMHelperClass.logWarning("", "[Creature] getEntityType() registry lookup failed for: " + id + " (returned " + t + "). Entity type may not be registered yet.");
+        return (EntityType<? extends LivingEntity>) t;
     }
 
 
@@ -907,8 +918,15 @@ public class CreatureInfo {
         try {
             if (this.entityClass == null)
                 return null;
-            return this.entityConstructor.newInstance(this.getEntityType(), world);
+            EntityType<? extends LivingEntity> type = this.getEntityType();
+            if (this.entityType == null) {
+                LMHelperClass.logWarning("", "[Creature] createEntity() called for " + this.getName()
+                        + " but entityType field is null (loadValues may not have run or entity registration failed). "
+                        + "Registry lookup returned: " + type);
+            }
+            return this.entityConstructor.newInstance(type, world);
         } catch (Exception e) {
+            LMHelperClass.logWarning("", "[Creature] Failed to create entity for " + this.getName() + ": " + e.getMessage());
             e.printStackTrace();
         }
         return null;
