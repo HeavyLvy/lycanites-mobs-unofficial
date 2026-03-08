@@ -81,7 +81,11 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
 
 
     /**
-     * Gets a random spawn position.
+     * Gets a random spawn position. Handles three cases:
+     * 1. Surface-only (surface=true, underground=false): Uses heightmap to find ground level.
+     * 2. Underground-only (surface=false, underground=true): Uses Y scan centered on trigger Y.
+     * 3. Both (surface=true, underground=true): Uses heightmap for surface, Y scan centered on
+     * heightmap Y (actual terrain level) for underground, with surface as fallback.
      *
      * @param world      The world to search for coordinates in.
      * @param player     Player that triggered the spawn.
@@ -93,76 +97,119 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         int x = xz[0];
         int z = xz[1];
 
-        // Surface-only spawners: use heightmap and place mob in air above ground.
-        if (this.surface && !this.underground) {
-            BlockPos groundPos = world.getHeightmapPos(
-                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                    new BlockPos(x, 0, z)
-            );
-            int feetY = groundPos.getY() + 1;
-
-            LMHelperClass.logDebug("JSONSpawner", "Random candidate (surface) XZ: " + x + ", " + z + " groundY=" + groundPos.getY() + " feetY=" + feetY);
-
-            if (feetY < world.getMinBuildHeight() || feetY >= world.getMaxBuildHeight()) {
-                LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (surface): Y out of bounds");
-                return null;
-            }
-
-            if (this.yMin >= 0 && feetY < this.yMin) {
-                LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (surface): below yMin (" + feetY + " < " + this.yMin + ")");
-                return null;
-            }
-            if (this.yMax >= 0 && feetY > this.yMax) {
-                LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (surface): above yMax (" + feetY + " > " + this.yMax + ")");
-                return null;
-            }
-
-            BlockPos feetPos = new BlockPos(x, feetY, z);
-            BlockPos headPos = feetPos.above();
-
-            BlockState feetState = world.getBlockState(feetPos);
-            BlockState headState = world.getBlockState(headPos);
-            LMHelperClass.logDebug("JSONSpawner", "Feet block: " + feetState.getBlock() + " Head block: " + headState.getBlock());
-
-            if (!this.isValidBlock(world, feetPos)) {
-                LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (surface): feetPos invalid " + feetPos);
-                return null;
-            }
-
-            if (!super.isValidBlock(world, headPos)) {
-                LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (surface): headPos invalid " + headPos);
-                return null;
-            }
-
-            LMHelperClass.logDebug("JSONSpawner", "Accepted surface spawn at " + feetPos);
-            return feetPos;
+        // Try to find a surface spawn position using the heightmap when surface spawning is allowed.
+        BlockPos surfacePos = null;
+        if (this.surface) {
+            surfacePos = this.findSurfaceSpawnPos(world, x, z);
         }
 
-        // Non-surface / underground / mixed: use the original Y scan logic.
-        int y = this.getRandomYCoord(world, new BlockPos(x, triggerPos.getY(), z));
+        // Surface-only: return the surface result directly (or null if none found).
+        if (this.surface && !this.underground) {
+            return surfacePos;
+        }
+
+        // Underground-only or both surface+underground: use Y scan for underground positions.
+        // Key fix: when surface is allowed, center the Y scan on the heightmap Y (actual terrain level)
+        // rather than the trigger Y (player position), so the scan window covers real terrain.
+        // MOTION_BLOCKING_NO_LEAVES is preferred over WORLD_SURFACE here: it ignores leaf canopies,
+        // so in forests the scan origin is the actual ground, not the treetop.
+        int scanOriginY;
+        if (this.surface) {
+            scanOriginY = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z)).getY();
+        } else {
+            scanOriginY = triggerPos.getY();
+        }
+
+        int y = this.getRandomYCoord(world, new BlockPos(x, scanOriginY, z));
         if (y <= -1) {
-            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (non-surface): no valid Y at XZ " + x + ", " + z);
+            // Y scan found nothing; fall back to surface position if we have one.
+            if (surfacePos != null) {
+                LMHelperClass.logDebug("JSONSpawner", "Y scan found nothing, using surface fallback at " + surfacePos);
+                return surfacePos;
+            }
+            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate: no valid Y at XZ " + x + ", " + z + " (scanOriginY=" + scanOriginY + ")");
             return null;
         }
 
-        BlockPos feetPos = new BlockPos(x, y, z);
+        BlockPos feetPos = new BlockPos(x, y, z).below();
         BlockPos headPos = feetPos.above();
 
-        BlockState feetState = world.getBlockState(feetPos);
-        BlockState headState = world.getBlockState(headPos);
-        LMHelperClass.logDebug("JSONSpawner", "Feet block (non-surface): " + feetState.getBlock() + " Head block: " + headState.getBlock());
-
         if (!this.isValidBlock(world, feetPos)) {
-            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (non-surface): feetPos invalid " + feetPos);
+            if (surfacePos != null) {
+                LMHelperClass.logDebug("JSONSpawner", "Underground feetPos invalid, using surface fallback at " + surfacePos);
+                return surfacePos;
+            }
+            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate: feetPos invalid " + feetPos);
             return null;
         }
 
         if (!super.isValidBlock(world, headPos)) {
-            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate (non-surface): headPos invalid " + headPos);
+            if (surfacePos != null) {
+                LMHelperClass.logDebug("JSONSpawner", "Underground headPos invalid, using surface fallback at " + surfacePos);
+                return surfacePos;
+            }
+            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate: headPos invalid " + headPos);
             return null;
         }
 
-        LMHelperClass.logDebug("JSONSpawner", "Accepted non-surface spawn at " + feetPos);
+        LMHelperClass.logDebug("JSONSpawner", "Accepted underground spawn at " + feetPos);
+        return feetPos;
+    }
+
+
+    /**
+     * Finds a valid surface spawn position at the given XZ using the heightmap.
+     *
+     * @param world The world to search in.
+     * @param x     The X coordinate.
+     * @param z     The Z coordinate.
+     * @return A valid surface BlockPos, or null if no valid position found.
+     */
+    private BlockPos findSurfaceSpawnPos(Level world, int x, int z) {
+        BlockPos groundPos = world.getHeightmapPos(
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                new BlockPos(x, 0, z)
+        );
+
+        // MOTION_BLOCKING_NO_LEAVES includes fluids (water, lava). When solidGround is required,
+        // the block at groundPos must itself be solid (canOcclude), otherwise this XZ lands over
+        // a lake or river and mobs can't stand here.
+        if (this.solidGround && !world.getBlockState(groundPos.below()).canOcclude()) {
+            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate at XZ " + x + ", " + z
+                    + ": ground block is non-solid (" + world.getBlockState(groundPos).getBlock() + " at Y=" + groundPos.getY() + ")");
+            return null;
+        }
+
+        int feetY = groundPos.getY();
+
+        if (feetY < world.getMinBuildHeight() || feetY >= world.getMaxBuildHeight()) {
+            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate at XZ " + x + ", " + z + ": Y " + feetY + " out of world bounds");
+            return null;
+        }
+
+        if (this.yMin >= 0 && feetY < this.yMin) {
+            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate at XZ " + x + ", " + z + ": below yMin (" + feetY + " < " + this.yMin + ")");
+            return null;
+        }
+        if (this.yMax >= 0 && feetY > this.yMax) {
+            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate at XZ " + x + ", " + z + ": above yMax (" + feetY + " > " + this.yMax + ")");
+            return null;
+        }
+
+        BlockPos feetPos = new BlockPos(x, feetY, z).below();
+        BlockPos headPos = feetPos.above();
+
+        if (!this.isValidBlock(world, feetPos)) {
+            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate: feetPos invalid at " + feetPos + " block=" + world.getBlockState(feetPos).getBlock());
+            return null;
+        }
+
+        if (!super.isValidBlock(world, headPos)) {
+            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate: headPos invalid at " + headPos + " block=" + world.getBlockState(headPos).getBlock());
+            return null;
+        }
+
+        LMHelperClass.logDebug("JSONSpawner", "Found surface spawn position at " + feetPos + " (groundY=" + groundPos.getY() + ")");
         return feetPos;
     }
 

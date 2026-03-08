@@ -175,7 +175,7 @@ public class JSONHelper {
         List<String> biomeList = new ArrayList<>();
 
         var registryAccess = world.registryAccess();
-        var biomeRegistry = registryAccess.registryOrThrow(net.minecraft.core.registries.Registries.BIOME);
+        var biomeRegistry = registryAccess.registryOrThrow(Registries.BIOME);
 
         LMHelperClass.logInfo("Dungeon", "[BiomeDebug] getBiomesFromTags input: " + biomeTags);
 

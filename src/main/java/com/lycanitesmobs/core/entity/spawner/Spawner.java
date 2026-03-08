@@ -27,6 +27,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.eventbus.api.Event;
@@ -542,6 +543,12 @@ public class Spawner {
                     biomes.add(biome);
             }
             LMHelperClass.logDebug("JSONSpawner", "Biomes Found: " + biomes.size());
+            if (biomes != null) {
+                for (Biome b : biomes) {
+                    Object bRL = LMHelperClass.convertBiomeToResourceLocation(world, b);
+                    LMHelperClass.logDebug("JSONSpawner", "  Biome: " + bRL + " (identity=" + System.identityHashCode(b) + ")");
+                }
+            }
         } else {
             LMHelperClass.logDebug("JSONSpawner", "All biome checks are ignored by this Spawner.");
         }
@@ -550,6 +557,7 @@ public class Spawner {
         Map<Biome, List<MobSpawn>> mobSpawns = this.getMobSpawns(world, player, spawnPositions.size(), biomes);
         LMHelperClass.logDebug("JSONSpawner", "Spawnable Mobs Found: " + mobSpawns.size());
         if (mobSpawns.isEmpty()) {
+            LMHelperClass.logDebug("JSONSpawner", "No spawnable mobs for spawner '" + this.name + "' | biomes checked: " + biomes + " | positions: " + spawnPositions.size() + " | dimension: " + world.dimension().location());
             return false;
         }
 
@@ -566,11 +574,33 @@ public class Spawner {
 
             // Choose Mob To Spawn:
             MobSpawn mobSpawn = null;
+
+            BlockState feetBlock = world.getBlockState(spawnPos);
+            BlockState belowBlock = world.getBlockState(spawnPos.below());
+            BlockState aboveBlock = world.getBlockState(spawnPos.above());
+            LMHelperClass.logDebug("JSONSpawner", "Block context at " + spawnPos
+                    + " | feet=" + LMHelperClass.convertToResourceLocation(feetBlock.getBlock())
+                    + " | below=" + LMHelperClass.convertToResourceLocation(belowBlock.getBlock())
+                    + " | above=" + LMHelperClass.convertToResourceLocation(aboveBlock.getBlock()));
+
             if (mobSpawns.containsKey(null)) {
                 LMHelperClass.logDebug("JSONSpawner", "Biome Ignored");
                 mobSpawn = this.chooseMobToSpawn(world, mobSpawns.get(null));
             } else if (mobSpawns.containsKey(spawnBiome)) {
-                mobSpawn = this.chooseMobToSpawn(world, mobSpawns.get(spawnBiome));
+                List<MobSpawn> biomeMobs = mobSpawns.get(spawnBiome);
+                LMHelperClass.logDebug("JSONSpawner", "Biome key found in map, mob list size=" + biomeMobs.size());
+                mobSpawn = this.chooseMobToSpawn(world, biomeMobs);
+            } else {
+                Object spawnBiomeRL = LMHelperClass.convertBiomeToResourceLocation(world, spawnBiome);
+                LMHelperClass.logDebug("JSONSpawner", "BIOME KEY MISMATCH! spawnBiome=" + spawnBiomeRL
+                        + " (identity=" + System.identityHashCode(spawnBiome) + ") not found in mobSpawns map.");
+                LMHelperClass.logDebug("JSONSpawner", "Map keys:");
+                for (Biome key : mobSpawns.keySet()) {
+                    Object keyRL = LMHelperClass.convertBiomeToResourceLocation(world, key);
+                    LMHelperClass.logDebug("JSONSpawner", "  key=" + keyRL
+                            + " (identity=" + System.identityHashCode(key)
+                            + ") mobs=" + mobSpawns.get(key).size());
+                }
             }
             if (mobSpawn == null) {
                 LMHelperClass.logDebug("JSONSpawner", "No Mob Spawn Chosen");
@@ -736,14 +766,21 @@ public class Spawner {
         // Local Spawns:
         possibleSpawns.addAll(this.mobSpawns);
 
+        Object biomeRL = biome != null ? LMHelperClass.convertBiomeToResourceLocation(world, biome) : null;
+        LMHelperClass.logDebug("JSONSpawner", "getBiomeSpawns() spawner=" + this.name + " | biome=" + biomeRL + " | possibleMobs=" + possibleSpawns.size() + " (global=" + (globalSpawns != null ? globalSpawns.size() : 0) + ", local=" + this.mobSpawns.size() + ")");
+
         // Get Viable Spawns:
         List<MobSpawn> viableMobSpawns = new ArrayList<>();
         for (MobSpawn possibleMobSpawn : possibleSpawns) {
-            if (possibleMobSpawn.canSpawn(world, blockCount, biome, this.ignoreDimensions)) {
+            boolean canSpawn = possibleMobSpawn.canSpawn(world, blockCount, biome, this.ignoreDimensions);
+            String mobName = possibleMobSpawn.creatureInfo != null ? possibleMobSpawn.creatureInfo.getName() : String.valueOf(possibleMobSpawn.entityType);
+            LMHelperClass.logDebug("JSONSpawner", "getBiomeSpawns() mob=" + mobName + " canSpawn=" + canSpawn);
+            if (canSpawn) {
                 viableMobSpawns.add(possibleMobSpawn);
             }
         }
 
+        LMHelperClass.logDebug("JSONSpawner", "getBiomeSpawns() spawner=" + this.name + " | biome=" + biomeRL + " | viableMobs=" + viableMobSpawns.size() + "/" + possibleSpawns.size());
         return viableMobSpawns;
     }
 

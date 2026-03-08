@@ -299,23 +299,30 @@ public class CreatureSpawn {
      * @return True if a valid biome.
      */
     public boolean isValidBiome(Level level, Biome biome) {
+        // creatureName comes from the caller (MobSpawn) which logs it; here we use tags as identifier
         if (this.ignoreBiome) {
+            LMHelperClass.logDebug("JSONSpawner", "isValidBiome(): ignoreBiome=true, auto-pass");
             return true;
         }
 
-        Object biomeRL = LMHelperClass.convertToResourceLocation(biome);
+        Object biomeRL = LMHelperClass.convertBiomeToResourceLocation(level, biome);
         String biomeId = null;
         if (biomeRL != null) {
             biomeId = biomeRL.toString();
         } else {
+            LMHelperClass.logDebug("JSONSpawner", "isValidBiome():biome ResourceLocation is NULL, rejecting");
             return false;
         }
+
+        LMHelperClass.logDebug("JSONSpawner", "isValidBiome():checking biome=" + biomeId + " | tags=" + this.biomeTags + " | blacklist=" + this.biomeTagBlacklist + " | biomeIds=" + this.biomeIds);
 
         if (!this.biomeTagBlacklist.isEmpty()) {
             if (this.biomesFromTagBlacklist == null) {
                 this.biomesFromTagBlacklist = JSONHelper.getBiomesFromTags(level, this.biomeTagBlacklist);
+                LMHelperClass.logDebug("JSONSpawner", "isValidBiome():blacklist tags expanded to: " + this.biomesFromTagBlacklist);
             }
             if (this.biomesFromTagBlacklist.contains(biomeId)) {
+                LMHelperClass.logDebug("JSONSpawner", "isValidBiome():REJECTED by blacklist, biome " + biomeId + " is in blacklist");
                 return false;
             }
         }
@@ -323,18 +330,24 @@ public class CreatureSpawn {
         if (!this.biomeTags.isEmpty()) {
             if (this.biomesFromTags == null) {
                 this.biomesFromTags = JSONHelper.getBiomesFromTags(level, this.biomeTags);
+                LMHelperClass.logDebug("JSONSpawner", "isValidBiome():whitelist tags expanded to: " + this.biomesFromTags);
             }
             if (this.biomesFromTags.contains(biomeId)) {
+                LMHelperClass.logDebug("JSONSpawner", "isValidBiome():PASSED, biome " + biomeId + " found in whitelist tags");
                 return true;
+            } else {
+                LMHelperClass.logDebug("JSONSpawner", "isValidBiome():biome " + biomeId + " NOT found in expanded whitelist: " + this.biomesFromTags);
             }
         }
 
         if (!this.biomeIds.isEmpty()) {
             if (this.biomeIds.contains(biomeId)) {
+                LMHelperClass.logDebug("JSONSpawner", "isValidBiome():PASSED, biome " + biomeId + " found in explicit biomeIds");
                 return true;
             }
         }
 
+        LMHelperClass.logDebug("JSONSpawner", "isValidBiome():REJECTED, biome " + biomeId + " matched no whitelist tags or biomeIds");
         return false;
     }
 
