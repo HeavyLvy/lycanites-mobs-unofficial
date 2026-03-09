@@ -560,21 +560,4 @@ public class GameEventListener {
             event.setImpactResult(ProjectileImpactEvent.ImpactResult.STOP_AT_CURRENT_NO_DAMAGE);
         }
     }
-
-
-    // ==================================================
-    //              Entity Attribute Registration
-    // ==================================================
-    // EntityAttributeCreationEvent fires on the MOD bus (after RegisterEvent), so it lives here.
-    @SubscribeEvent
-    public void registerEntityAttributes(EntityAttributeCreationEvent event) {
-        CreatureManager cm = CreatureManager.getInstance();
-        for (var entry : ForgeRegistries.ENTITY_TYPES.getEntries()) {
-            ResourceLocation loc = entry.getKey().location();
-            if (!loc.getNamespace().equals(LycanitesMobs.MODID)) continue;
-            CreatureInfo creatureInfo = cm.getCreature(loc.getPath());
-            if (creatureInfo == null) continue;
-            event.put(cast(entry.getValue()), BaseCreatureEntity.registerCustomAttributes().build());
-        }
-    }
 }

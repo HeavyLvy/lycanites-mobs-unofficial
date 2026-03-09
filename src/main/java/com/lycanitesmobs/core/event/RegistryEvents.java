@@ -32,6 +32,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidType;
@@ -44,6 +45,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static com.lycanitesmobs.core.manager.ObjectManager.*;
+import static com.lycanitesmobs.core.util.helpers.LMHelperClass.cast;
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class RegistryEvents {
@@ -286,20 +288,34 @@ public class RegistryEvents {
     }
 
 
- /*   @SubscribeEvent
-    public void registerFeatures(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.FEATURES,
-                helper -> {
-                    helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "chunkspawn"), WorldGenManager.getInstance().chunkSpawnFeature);
-                    helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "dungeon"), WorldGenManager.getInstance().dungeonFeature);
-                }
-        );
-    }*/
-
+    /*   @SubscribeEvent
+       public void registerFeatures(RegisterEvent event) {
+           event.register(ForgeRegistries.Keys.FEATURES,
+                   helper -> {
+                       helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "chunkspawn"), WorldGenManager.getInstance().chunkSpawnFeature);
+                       helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "dungeon"), WorldGenManager.getInstance().dungeonFeature);
+                   }
+           );
+       }*/
+    // ==================================================
+    //              Entity Attribute Registration
+    // ==================================================
+    @SubscribeEvent
+    public void registerEntityAttributes(EntityAttributeCreationEvent event) {
+        CreatureManager cm = CreatureManager.getInstance();
+        for (var entry : ForgeRegistries.ENTITY_TYPES.getEntries()) {
+            ResourceLocation loc = entry.getKey().location();
+            if (!loc.getNamespace().equals(LycanitesMobs.MODID)) continue;
+            CreatureInfo creatureInfo = cm.getCreature(loc.getPath());
+            if (creatureInfo == null) continue;
+            event.put(cast(entry.getValue()), BaseCreatureEntity.registerCustomAttributes().build());
+        }
+    }
 
     // ==================================================
     //           Debug: Scute Summon All Entities
     // ==================================================
+
     /**
      * Right-clicking with a Turtle Scute spawns one of every registered lycanitesmobs entity
      * in a grid pattern centred two blocks in front of the player. Server-side only.
@@ -312,7 +328,7 @@ public class RegistryEvents {
         if (event.getItemStack().getItem() != Items.SCUTE) return;
 
         // entities per row
-        final int COLUMNS   = 10;
+        final int COLUMNS = 10;
 
         // blocks between each spawn
         final double SPACING = 8.0;
