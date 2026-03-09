@@ -29,6 +29,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -528,7 +529,7 @@ public class CreatureInfo {
      *
      * @return Creature's entity type.
      */
-    @Nonnull
+    @Nullable
     public EntityType<? extends LivingEntity> getEntityType() {
         if (this.entityType != null) {
             return this.entityType;
@@ -539,7 +540,7 @@ public class CreatureInfo {
             return (EntityType<? extends LivingEntity>) t;
         }
         LMHelperClass.logWarning("", "[Creature] getEntityType() registry lookup failed for: " + id + " (returned " + t + "). Entity type may not be registered yet.");
-        return (EntityType<? extends LivingEntity>) t;
+        return null;
     }
 
 

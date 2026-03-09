@@ -242,7 +242,6 @@ public class MobSpawn {
      */
     public MobSpawn(CreatureInfo creatureInfo) {
         this.creatureInfo = creatureInfo;
-        this.entityType = creatureInfo.getEntityType();
     }
 
     public MobSpawn(EntityType entityType) {

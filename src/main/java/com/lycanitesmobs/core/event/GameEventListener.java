@@ -40,7 +40,12 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.manager.CreatureManager;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
@@ -55,6 +60,9 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+
+import static com.lycanitesmobs.core.util.helpers.LMHelperClass.cast;
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class GameEventListener {
@@ -550,6 +558,23 @@ public class GameEventListener {
 
         if (shooter != null && !targetCreature.isVulnerableTo(shooter)) {
             event.setImpactResult(ProjectileImpactEvent.ImpactResult.STOP_AT_CURRENT_NO_DAMAGE);
+        }
+    }
+
+
+    // ==================================================
+    //              Entity Attribute Registration
+    // ==================================================
+    // EntityAttributeCreationEvent fires on the MOD bus (after RegisterEvent), so it lives here.
+    @SubscribeEvent
+    public void registerEntityAttributes(EntityAttributeCreationEvent event) {
+        CreatureManager cm = CreatureManager.getInstance();
+        for (var entry : ForgeRegistries.ENTITY_TYPES.getEntries()) {
+            ResourceLocation loc = entry.getKey().location();
+            if (!loc.getNamespace().equals(LycanitesMobs.MODID)) continue;
+            CreatureInfo creatureInfo = cm.getCreature(loc.getPath());
+            if (creatureInfo == null) continue;
+            event.put(cast(entry.getValue()), BaseCreatureEntity.registerCustomAttributes().build());
         }
     }
 }

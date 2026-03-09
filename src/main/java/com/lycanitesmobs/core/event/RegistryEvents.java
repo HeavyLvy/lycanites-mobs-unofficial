@@ -17,19 +17,26 @@ import com.lycanitesmobs.core.manager.*;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 
@@ -236,13 +243,6 @@ public class RegistryEvents {
                 });
     }
 
-    // ========== Attributes ==========
-    @SubscribeEvent
-    public void registerEntityAttributes(EntityAttributeCreationEvent event) {
-        for (CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
-            event.put(creatureInfo.getEntityType(), BaseCreatureEntity.registerCustomAttributes().build());
-        }
-    }
 
     @SubscribeEvent
     public void registerAttributes(RegisterEvent event) {
@@ -295,4 +295,47 @@ public class RegistryEvents {
                 }
         );
     }*/
+
+
+    // ==================================================
+    //           Debug: Scute Summon All Entities
+    // ==================================================
+    /**
+     * Right-clicking with a Turtle Scute spawns one of every registered lycanitesmobs entity
+     * in a grid pattern centred two blocks in front of the player. Server-side only.
+     */
+    @SubscribeEvent
+    public static void onRightClickTurtleScute(PlayerInteractEvent.RightClickItem event) {
+        if (FMLEnvironment.production) return;
+        if (event.getHand() != InteractionHand.MAIN_HAND) return;
+        if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
+        if (event.getItemStack().getItem() != Items.SCUTE) return;
+
+        // entities per row
+        final int COLUMNS   = 10;
+
+        // blocks between each spawn
+        final double SPACING = 8.0;
+
+        var player = event.getEntity();
+        Vec3 origin = player.position().add(player.getLookAngle().multiply(3, 0, 3));
+
+        int index = 0;
+        for (var entry : ForgeRegistries.ENTITY_TYPES.getEntries()) {
+            if (!entry.getKey().location().getNamespace().equals(LycanitesMobs.MODID)) continue;
+
+            EntityType<?> type = entry.getValue();
+            Entity entity = type.create(serverLevel);
+            if (entity == null) continue;
+
+            double col = (index % COLUMNS) * SPACING;
+            double row = (index / COLUMNS) * SPACING;
+            entity.setPos(origin.x + col, origin.y, origin.z + row);
+            serverLevel.addFreshEntity(entity);
+            index++;
+        }
+
+        LMHelperClass.logInfoMessageDev("[Debug] Spawned " + index + " lycanitesmobs entities.");
+        event.setCanceled(true);
+    }
 }
