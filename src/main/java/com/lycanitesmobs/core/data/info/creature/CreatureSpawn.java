@@ -236,7 +236,7 @@ public class CreatureSpawn {
         if (json.has("spawnsInDark"))
             this.spawnsInDark = json.get("spawnsInDark").getAsBoolean();
         if (json.has("worldDayMin"))
-            this.worldDayMin = json.get("worldDayMin").getAsInt();
+            this.worldDayMin = json.get("worldDayMin").getAsDouble();
 
         if (json.has("despawnNatural"))
             this.despawnNatural = json.get("despawnNatural").getAsBoolean();

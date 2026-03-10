@@ -114,7 +114,7 @@ public class MobEventManager extends JSONLoader {
             while (jsonIterator.hasNext()) {
                 JsonObject spawnConditionJson = jsonIterator.next().getAsJsonObject();
                 SpawnCondition spawnCondition = SpawnCondition.createFromJSON(spawnConditionJson);
-                this.globalEventConditions.add(spawnCondition);
+                if (spawnCondition != null) this.globalEventConditions.add(spawnCondition);
             }
         }
         if (this.globalEventConditions.size() > 0) {

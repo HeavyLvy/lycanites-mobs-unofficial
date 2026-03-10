@@ -283,7 +283,7 @@ public class Spawner {
             while (jsonIterator.hasNext()) {
                 JsonObject conditionJson = jsonIterator.next().getAsJsonObject();
                 SpawnCondition spawnCondition = SpawnCondition.createFromJSON(conditionJson);
-                this.conditions.add(spawnCondition);
+                if (spawnCondition != null) this.conditions.add(spawnCondition);
             }
         }
 
@@ -490,10 +490,10 @@ public class Spawner {
             for (Player targetPlayer : allPlayers) {
                 if (targetPlayer.isCreative() || targetPlayer.isSpectator()) {
                     if (!SpawnerEventListener.testOnCreative)
-                        break;
+                        continue;
                 }
                 if (targetPlayer.distanceTo(player) > this.mobCountPlayerRange) {
-                    break;
+                    continue;
                 }
                 nearbyPlayers++;
             }
@@ -654,7 +654,7 @@ public class Spawner {
             // Call Entity's Initial Spawn:
             if (entityLiving instanceof Mob) {
                 BlockPos blockPos = new BlockPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
-                if (!ForgeEventFactory.checkSpawnPlacements(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, blockPos, world.getRandom(), false)) {
+                if (ForgeEventFactory.checkSpawnPlacements(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, blockPos, world.getRandom(), false)) {
                     ((Mob) entityLiving).finalizeSpawn((ServerLevelAccessor) world, world.getCurrentDifficultyAt(spawnPos), MobSpawnType.NATURAL, null, null);
                 }
             }

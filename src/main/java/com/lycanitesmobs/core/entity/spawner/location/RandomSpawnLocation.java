@@ -331,16 +331,10 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
 
         // Pick Random Y Pos:
         int y = -1;
-        if (yCoordsHigh.size() > 0 && (yCoordsLow.size() <= 0 || world.random.nextFloat() > 0.25F)) {
-            if (yCoordsHigh.size() == 1)
-                y = yCoordsHigh.get(0);
-            else
-                y = yCoordsHigh.get(world.random.nextInt(yCoordsHigh.size() - 1));
-        } else if (yCoordsLow.size() > 0) {
-            if (yCoordsLow.size() == 1)
-                y = yCoordsLow.get(0);
-            else
-                y = yCoordsLow.get(world.random.nextInt(yCoordsLow.size() - 1));
+        if (!yCoordsHigh.isEmpty() && (yCoordsLow.size() <= 0 || world.random.nextFloat() > 0.25F)) {
+            y = yCoordsHigh.get(world.random.nextInt(yCoordsHigh.size()));
+        } else if (!yCoordsLow.isEmpty()) {
+            y = yCoordsLow.get(world.random.nextInt(yCoordsLow.size()));
         }
 
         return y;

@@ -78,7 +78,7 @@ public class SpawnerManager extends JSONLoader {
             while (jsonIterator.hasNext()) {
                 JsonObject spawnConditionJson = jsonIterator.next().getAsJsonObject();
                 SpawnCondition spawnCondition = SpawnCondition.createFromJSON(spawnConditionJson);
-                this.globalSpawnConditions.add(spawnCondition);
+                if (spawnCondition != null) this.globalSpawnConditions.add(spawnCondition);
             }
         }
         if (this.globalSpawnConditions.size() > 0) {

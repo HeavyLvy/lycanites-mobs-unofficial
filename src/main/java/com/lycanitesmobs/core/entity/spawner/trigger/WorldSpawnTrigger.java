@@ -47,13 +47,14 @@ public class WorldSpawnTrigger extends SpawnTrigger {
 
 	/** Called every world tick from where players are active. **/
 	public void onTick(Level world, BlockPos position, long ticks) {
+		long tickRateLong = (long) this.tickRate;
 		// World Time:
-		if(this.useWorldTime && world.getDayTime() % 24000 != this.tickRate) {
+		if(this.useWorldTime && world.getDayTime() % 24000 != tickRateLong) {
 			return;
 		}
 
 		// Tick Rate:
-		else if(ticks == 0 || ticks % this.tickRate != 0) {
+		else if(ticks == 0 || ticks % tickRateLong != 0) {
 			return;
 		}
 

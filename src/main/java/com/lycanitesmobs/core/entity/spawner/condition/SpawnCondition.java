@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.entity.spawner.condition;
 
 import com.google.gson.JsonObject;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -30,6 +31,10 @@ public abstract class SpawnCondition {
 			spawnCondition = new GroupSpawnCondition();
 		}
 
+		if (spawnCondition == null) {
+			LMHelperClass.logWarning("JSONSpawner", "Unknown spawn condition type: '" + type + "' - condition will be ignored.");
+			return null;
+		}
 		spawnCondition.loadFromJSON(json);
 		return spawnCondition;
     }

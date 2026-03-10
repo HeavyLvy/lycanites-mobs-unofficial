@@ -121,7 +121,7 @@ public abstract class SpawnTrigger {
             while (jsonIterator.hasNext()) {
                 JsonObject conditionJson = jsonIterator.next().getAsJsonObject();
                 SpawnCondition spawnCondition = SpawnCondition.createFromJSON(conditionJson);
-                this.conditions.add(spawnCondition);
+                if (spawnCondition != null) this.conditions.add(spawnCondition);
             }
         }
 

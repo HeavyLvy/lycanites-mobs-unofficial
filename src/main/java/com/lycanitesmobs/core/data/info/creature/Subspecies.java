@@ -115,7 +115,7 @@ public class Subspecies {
             while (jsonIterator.hasNext()) {
                 JsonObject conditionJson = jsonIterator.next().getAsJsonObject();
                 SpawnCondition spawnCondition = SpawnCondition.createFromJSON(conditionJson);
-                subspecies.spawnConditions.add(spawnCondition);
+                if (spawnCondition != null) subspecies.spawnConditions.add(spawnCondition);
             }
         }
 

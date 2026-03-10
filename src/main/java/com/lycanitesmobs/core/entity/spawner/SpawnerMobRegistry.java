@@ -48,9 +48,11 @@ public class SpawnerMobRegistry {
     public static void createSpawn(CreatureInfo creatureInfo, String spawnerName) {
         if (creatureInfo == null) {
             LMHelperClass.logWarning("", "Tried to create a global Mob Spawn to " + spawnerName + " from a null Creature Info!");
+            return;
         }
         if (spawnerName == null) {
             LMHelperClass.logWarning("", "Tried to create a global Mob Spawn for " + creatureInfo.getName() + " with a null Spawner Name!");
+            return;
         }
 
         MobSpawn mobSpawn = new MobSpawn(creatureInfo);
