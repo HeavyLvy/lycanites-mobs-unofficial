@@ -196,7 +196,7 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
             return null;
         }
 
-        BlockPos feetPos = new BlockPos(x, feetY, z).below();
+        BlockPos feetPos = new BlockPos(x, feetY, z);
         BlockPos headPos = feetPos.above();
 
         if (!this.isValidBlock(world, feetPos)) {

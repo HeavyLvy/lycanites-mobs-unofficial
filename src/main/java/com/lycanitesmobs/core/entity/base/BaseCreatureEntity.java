@@ -5602,10 +5602,10 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         else
             pos = new BlockPos(pos.getX(), this.getGroundY(pos), pos.getZ());
 
-        float brightness = this.getCommandSenderWorld().getBrightness(LightLayer.BLOCK, pos);
-        if (brightness == 0) return 0;
-        if (brightness < 0.25F) return 1;
-        if (brightness < 1) return 2;
+        int rawLight = this.getCommandSenderWorld().getMaxLocalRawBrightness(pos);
+        if (rawLight == 0) return 0;
+        if (rawLight <= 3) return 1;
+        if (rawLight < 15) return 2;
         return 3;
     }
 

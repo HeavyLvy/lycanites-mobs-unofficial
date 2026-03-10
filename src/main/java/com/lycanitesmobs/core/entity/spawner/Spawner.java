@@ -510,6 +510,11 @@ public class Spawner {
         LMHelperClass.logDebug("JSONSpawner", "Trigger Player: " + player);
         LMHelperClass.logDebug("JSONSpawner", "Trigger Position: " + triggerPos);
 
+        List<MobSpawn> allRegistered = new ArrayList<>(this.mobSpawns);
+        Collection<MobSpawn> globalRegistered = SpawnerMobRegistry.getMobSpawns(this.sharedName);
+        if (globalRegistered != null) allRegistered.addAll(0, globalRegistered);
+        LMHelperClass.logDebug("JSONSpawner", "Registered mob spawns (" + allRegistered.size() + "): " + allRegistered);
+
         // Get Positions:
         List<BlockPos> spawnPositions = this.getSpawnPos(world, player, triggerPos);
         // Restrict To Chunk On Chunk Spawn Trigger:

@@ -45,10 +45,10 @@ public class WorldGenManager {
     public static final DeferredRegister<Feature<?>> FEATURES =
             DeferredRegister.create(ForgeRegistries.FEATURES, LycanitesMobs.MODID);
 
-/*
     public static final RegistryObject<ChunkSpawnFeature> CHUNK_SPAWN_FEATURE =
             FEATURES.register("chunkspawn", () -> new ChunkSpawnFeature(NoneFeatureConfiguration.CODEC));
 
+/*
     public static final RegistryObject<DungeonFeature> DUNGEON_FEATURE =
             FEATURES.register("dungeon", () -> new DungeonFeature(NoneFeatureConfiguration.CODEC));
 */
