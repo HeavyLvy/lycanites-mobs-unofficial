@@ -19,8 +19,11 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Vector3d;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class JSONHelper {
+    private static final Map<List<String>, List<String>> biomeTagCache = new ConcurrentHashMap<>();
+    private static final int MAX_CACHE_SIZE = 1000;
 
     public static Vec3i getVector3i(JsonObject json, String memberName) {
         if (json.has(memberName)) {
@@ -172,12 +175,15 @@ public class JSONHelper {
     }
 
     public static List<String> getBiomesFromTags(Level world, List<String> biomeTags) {
-        List<String> biomeList = new ArrayList<>();
+        List<String> cachedResult = biomeTagCache.get(biomeTags);
+        if (cachedResult != null) {
+            return new ArrayList<>(cachedResult);
+        }
+
+        LinkedHashSet<String> biomeSet = new LinkedHashSet<>();
 
         var registryAccess = world.registryAccess();
         var biomeRegistry = registryAccess.registryOrThrow(Registries.BIOME);
-
-        LMHelperClass.logInfo("Dungeon", "[BiomeDebug] getBiomesFromTags input: " + biomeTags);
 
         for (String rawEntry : biomeTags) {
             boolean additive;
@@ -195,22 +201,13 @@ public class JSONHelper {
                 additive = true;
             }
 
-            LMHelperClass.logInfo(
-                    "Dungeon",
-                    "[BiomeDebug] Processing entry: raw=" + rawEntry +
-                            ", stripped=" + entry +
-                            ", additive=" + additive
-            );
-
             if ("ALL".equalsIgnoreCase(entry)) {
                 biomeRegistry.registryKeySet().forEach(key -> {
                     String id = key.location().toString();
                     if (additive) {
-                        if (!biomeList.contains(id)) {
-                            biomeList.add(id);
-                        }
+                        biomeSet.add(id);
                     } else {
-                        biomeList.remove(id);
+                        biomeSet.remove(id);
                     }
                 });
                 continue;
@@ -223,7 +220,7 @@ public class JSONHelper {
             if (!entry.contains(":")) {
                 LMHelperClass.logWarning(
                         "Dungeon",
-                        "[BiomeDebug] Non-namespaced biome tag entry '" + entry + "' is not supported, skipping"
+                        "Non-namespaced biome tag entry '" + entry + "' is not supported, skipping"
                 );
                 continue;
             }
@@ -247,10 +244,6 @@ public class JSONHelper {
                             }
                         })
                 );
-                LMHelperClass.logInfo(
-                        "Dungeon",
-                        "[BiomeDebug] Vanilla tag " + entry + " resolved to biomes: " + selectedBiomeIds
-                );
             } else {
                 net.minecraftforge.registries.tags.ITagManager<net.minecraft.world.level.biome.Biome> forgeTagManager =
                         net.minecraftforge.registries.ForgeRegistries.BIOMES.tags();
@@ -269,38 +262,62 @@ public class JSONHelper {
                             selectedBiomeIds.add(id.toString());
                         }
                     });
-                    LMHelperClass.logInfo(
-                            "Dungeon",
-                            "[BiomeDebug] Forge tag " + entry + " resolved to biomes: " + selectedBiomeIds
-                    );
                 }
             }
 
             if (selectedBiomeIds.isEmpty()) {
                 LMHelperClass.logWarning(
                         "Dungeon",
-                        "[BiomeDebug] Biome tag " + entry + " is empty or missing in both vanilla and Forge tag collections"
+                        "Biome tag '" + entry + "' is empty or missing (vanilla and Forge)"
                 );
             } else {
-                for (String id : selectedBiomeIds) {
-                    if (additive) {
-                        if (!biomeList.contains(id)) {
-                            biomeList.add(id);
-                        }
-                    } else {
-                        biomeList.remove(id);
-                    }
+                if (additive) {
+                    biomeSet.addAll(selectedBiomeIds);
+                } else {
+                    biomeSet.removeAll(selectedBiomeIds);
                 }
             }
-
-            LMHelperClass.logInfo(
-                    "Dungeon",
-                    "[BiomeDebug] Entry " + entry + " selected biomes: " + selectedBiomeIds
-            );
         }
 
-        LMHelperClass.logInfo("Dungeon", "[BiomeDebug] getBiomesFromTags final expanded list: " + biomeList);
+        List<String> biomeList = new ArrayList<>(biomeSet);
+        LMHelperClass.logDebug("Dungeon", "Resolved biome tags " + biomeTags + " → " + biomeList.size() + " biomes");
+
+        cacheBiomeTags(biomeTags, biomeList);
+
         return biomeList;
+    }
+
+    /**
+     * Cache the result of biome tag resolution to avoid redundant computation
+     * @param originalTags The original tag list used as cache key
+     * @param resolvedBiomes The resolved biome list to cache
+     */
+    private static void cacheBiomeTags(List<String> originalTags, List<String> resolvedBiomes) {
+        if (biomeTagCache.size() >= MAX_CACHE_SIZE) {
+            Iterator<Map.Entry<List<String>, List<String>>> iterator = biomeTagCache.entrySet().iterator();
+            int entriesToRemove = MAX_CACHE_SIZE / 4;
+            for (int i = 0; i < entriesToRemove && iterator.hasNext(); i++) {
+                iterator.next();
+                iterator.remove();
+            }
+        }
+
+        biomeTagCache.put(new ArrayList<>(originalTags), new ArrayList<>(resolvedBiomes));
+    }
+
+    /**
+     * Clear the biome tag cache, useful for config reloading
+     */
+    public static void clearBiomeTagCache() {
+        biomeTagCache.clear();
+    }
+
+    /**
+     * Get the current size of the biome tag cache
+     * @return The number of cached entries
+     */
+    public static int getBiomeTagCacheSize() {
+        return biomeTagCache.size();
     }
 
     public static List<Biome> getBiomes(List<String> biomeIds) {

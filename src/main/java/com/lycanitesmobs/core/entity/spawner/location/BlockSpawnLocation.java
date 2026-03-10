@@ -13,14 +13,17 @@ import net.minecraftforge.fluids.IFluidBlock;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BlockSpawnLocation extends SpawnLocation {
     /**
-     * A list of blocks to either spawn in or not spawn in depending on if it is a blacklist or whitelist.
+     * A set of blocks to either spawn in or not spawn in depending on if it is a blacklist or whitelist.
+     * HashSet for O(1) lookup in isValidBlock, which is called for every Y position in every spawn candidate.
      **/
-    public List<String> blockIds = new ArrayList<>();
+    public Set<String> blockIds = new HashSet<>();
 
     /**
      * Determines if the block list is a blacklist or whitelist.
@@ -56,7 +59,7 @@ public class BlockSpawnLocation extends SpawnLocation {
     @Override
     public void loadFromJSON(JsonObject json) {
         if (json.has("blocks"))
-            this.blockIds = JSONHelper.getJsonStrings(json.get("blocks").getAsJsonArray());
+            this.blockIds = new HashSet<>(JSONHelper.getJsonStrings(json.get("blocks").getAsJsonArray()));
 
         if (json.has("listType"))
             this.listType = json.get("listType").getAsString();

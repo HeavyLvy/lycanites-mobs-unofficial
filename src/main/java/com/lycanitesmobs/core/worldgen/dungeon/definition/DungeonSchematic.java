@@ -61,7 +61,7 @@ public class DungeonSchematic {
     /**
      * The list of biome ids that this dungeon spawns in.
      **/
-    public List<String> biomeIds = new ArrayList<>();
+    public Set<String> biomeIds = new HashSet<>();
 
     /**
      * A list of themes to use. Required.
@@ -284,7 +284,7 @@ public class DungeonSchematic {
             return;
         }
 
-        this.biomeIds = JSONHelper.getBiomesFromTags(world, this.biomeTags);
+        this.biomeIds = new HashSet<>(JSONHelper.getBiomesFromTags(world, this.biomeTags));
 
         LMHelperClass.logInfo(
                 "Dungeon",

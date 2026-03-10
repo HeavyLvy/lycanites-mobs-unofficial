@@ -22,7 +22,7 @@
         "ignoreBiome": false,
         "biomeTags": [
             "all",
-            "-ocean",
+            "-#minecraft:is_ocean",
             "-beach"
         ],
         "spawnWeight": 8,

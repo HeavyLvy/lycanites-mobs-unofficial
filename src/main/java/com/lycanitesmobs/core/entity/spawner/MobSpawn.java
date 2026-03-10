@@ -207,17 +207,14 @@ public class MobSpawn {
         MobSpawn mobSpawn = null;
         if (json.has("mobId")) {
             String mobId = json.get("mobId").getAsString();
-            LMHelperClass.logDebug("JSONSpawner", "MobSpawn.createFromJSON mobId=" + mobId);
 
             CreatureInfo creatureInfo = CreatureManager.getInstance().getCreatureFromId(mobId);
-            LMHelperClass.logDebug("JSONSpawner", "MobSpawn.createFromJSON creatureInfo=" + (creatureInfo != null ? creatureInfo.getName() : "null"));
 
             if (creatureInfo != null) {
                 mobSpawn = new MobSpawn(creatureInfo);
                 mobSpawn.loadFromJSON(json);
             } else {
                 Object entityTypeObj = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(mobId));
-                LMHelperClass.logDebug("JSONSpawner", "MobSpawn.createFromJSON Forge EntityType=" + entityTypeObj);
 
                 if (entityTypeObj instanceof EntityType) {
                     EntityType entityType = (EntityType) entityTypeObj;
@@ -365,11 +362,10 @@ public class MobSpawn {
      */
     public boolean canSpawn(Level world, int blockCount, Biome biome, boolean forceIgnoreDimension) {
         String mobName = this.creatureInfo != null ? this.creatureInfo.getName() : (this.entityType != null ? this.entityType.toString() : "unknown");
-        LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() checking: " + mobName + " | biome=" + biome + " | blockCount=" + blockCount);
 
         // Global Check:
         if (!CreatureManager.getInstance().spawnConfig.isAllowedGlobal(world)) {
-            LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() REJECTED " + mobName + ": global spawn config disallows this world");
+            LMHelperClass.logDebug("JSONSpawner", "  REJECTED " + mobName + ": global spawn config disallows this world");
             return false;
         }
 
@@ -377,26 +373,23 @@ public class MobSpawn {
         if (this.creatureInfo != null) {
             // Enabled:
             if (!this.creatureInfo.enabled || !this.creatureInfo.creatureSpawn.enabled) {
-                LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() REJECTED " + mobName + ": creature disabled (enabled=" + this.creatureInfo.enabled + ", spawnEnabled=" + this.creatureInfo.creatureSpawn.enabled + ")");
+                LMHelperClass.logDebug("JSONSpawner", "  REJECTED " + mobName + ": creature disabled");
                 return false;
             }
 
             // Peaceful Difficulty:
             if (world.getDifficulty() == Difficulty.PEACEFUL && !this.creatureInfo.peaceful) {
-                LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() REJECTED " + mobName + ": peaceful difficulty but creature is not peaceful");
                 return false;
             }
         }
 
         // Weight:
         if (this.getWeight() <= 0) {
-            LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() REJECTED " + mobName + ": weight is " + this.getWeight());
             return false;
         }
 
         // Block Count:
         if (blockCount < this.getBlockCost()) {
-            LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() REJECTED " + mobName + ": blockCount " + blockCount + " < blockCost " + this.getBlockCost());
             return false;
         }
 
@@ -408,7 +401,7 @@ public class MobSpawn {
                 if (worldExt != null) {
                     int day = (int) Math.floor((worldExt.useTotalWorldTime ? world.getGameTime() : world.getDayTime()) / 24000D);
                     if (day < this.creatureInfo.creatureSpawn.worldDayMin) {
-                        LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() REJECTED " + mobName + ": world day " + day + " < required " + this.creatureInfo.creatureSpawn.worldDayMin);
+                        LMHelperClass.logDebug("JSONSpawner", "  REJECTED " + mobName + ": world day " + day + " < required " + this.creatureInfo.creatureSpawn.worldDayMin);
                         return false;
                     }
                 }
@@ -416,15 +409,13 @@ public class MobSpawn {
 
             // Dimension:
             if (!forceIgnoreDimension && !this.ignoreDimension && !this.creatureInfo.creatureSpawn.isAllowedDimension(world)) {
-                LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() REJECTED " + mobName + ": dimension not allowed (" + world.dimension().location() + ")");
+                LMHelperClass.logDebug("JSONSpawner", "  REJECTED " + mobName + ": dimension not allowed (" + world.dimension().location() + ")");
                 return false;
             }
 
             // Biome:
             if (biome != null && this.shouldCheckBiome()) {
                 if (!this.creatureInfo.creatureSpawn.isValidBiome(world, biome)) {
-                    Object biomeRL = LMHelperClass.convertBiomeToResourceLocation(world, biome);
-                    LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() REJECTED " + mobName + ": biome not valid (biome=" + biomeRL + ", tags=" + this.creatureInfo.creatureSpawn.biomeTags + ", blacklist=" + this.creatureInfo.creatureSpawn.biomeTagBlacklist + ")");
                     return false;
                 }
             }
@@ -432,11 +423,9 @@ public class MobSpawn {
 
         // Chance:
         if (this.getChance() < 1 && world.random.nextDouble() > this.getChance()) {
-            LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() REJECTED " + mobName + ": failed chance roll (chance=" + this.getChance() + ")");
             return false;
         }
 
-        LMHelperClass.logDebug("JSONSpawner", "MobSpawn.canSpawn() PASSED " + mobName);
         return true;
     }
 

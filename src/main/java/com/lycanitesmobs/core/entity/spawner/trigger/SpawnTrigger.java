@@ -154,9 +154,6 @@ public abstract class SpawnTrigger {
             return false;
         }
 
-        if ("".equals(this.spawner.eventName)) {
-            LMHelperClass.logDebug("JSONSpawner", "Trigger Fired: " + this + " for: " + this.spawner.name);
-        }
         return this.spawner.trigger(world, player, this, triggerPos, level, this.count, chain);
     }
 

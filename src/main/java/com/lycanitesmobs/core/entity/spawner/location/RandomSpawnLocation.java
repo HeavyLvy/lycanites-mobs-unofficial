@@ -67,7 +67,6 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
     @Override
     public List<BlockPos> getSpawnPositions(Level world, Player player, BlockPos triggerPos) {
         List<BlockPos> spawnPositions = new ArrayList<>();
-        LMHelperClass.logDebug("JSONSpawner", "Getting " + this.limit + " Random Spawn Positions");
 
         for (int i = 0; i < this.limit; i++) {
             BlockPos randomPos = this.getRandomPosition(world, player, triggerPos);
@@ -123,36 +122,20 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         int y = this.getRandomYCoord(world, new BlockPos(x, scanOriginY, z));
         if (y <= -1) {
             // Y scan found nothing; fall back to surface position if we have one.
-            if (surfacePos != null) {
-                LMHelperClass.logDebug("JSONSpawner", "Y scan found nothing, using surface fallback at " + surfacePos);
-                return surfacePos;
-            }
-            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate: no valid Y at XZ " + x + ", " + z + " (scanOriginY=" + scanOriginY + ")");
-            return null;
+            return surfacePos; // null if no surface either
         }
 
         BlockPos feetPos = new BlockPos(x, y, z).below();
         BlockPos headPos = feetPos.above();
 
         if (!this.isValidBlock(world, feetPos)) {
-            if (surfacePos != null) {
-                LMHelperClass.logDebug("JSONSpawner", "Underground feetPos invalid, using surface fallback at " + surfacePos);
-                return surfacePos;
-            }
-            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate: feetPos invalid " + feetPos);
-            return null;
+            return surfacePos;
         }
 
         if (!super.isValidBlock(world, headPos)) {
-            if (surfacePos != null) {
-                LMHelperClass.logDebug("JSONSpawner", "Underground headPos invalid, using surface fallback at " + surfacePos);
-                return surfacePos;
-            }
-            LMHelperClass.logDebug("JSONSpawner", "Rejected candidate: headPos invalid " + headPos);
-            return null;
+            return surfacePos;
         }
 
-        LMHelperClass.logDebug("JSONSpawner", "Accepted underground spawn at " + feetPos);
         return feetPos;
     }
 
@@ -175,24 +158,19 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         // the block at groundPos must itself be solid (canOcclude), otherwise this XZ lands over
         // a lake or river and mobs can't stand here.
         if (this.solidGround && !world.getBlockState(groundPos.below()).canOcclude()) {
-            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate at XZ " + x + ", " + z
-                    + ": ground block is non-solid (" + world.getBlockState(groundPos).getBlock() + " at Y=" + groundPos.getY() + ")");
             return null;
         }
 
         int feetY = groundPos.getY();
 
         if (feetY < world.getMinBuildHeight() || feetY >= world.getMaxBuildHeight()) {
-            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate at XZ " + x + ", " + z + ": Y " + feetY + " out of world bounds");
             return null;
         }
 
         if (this.yMin >= 0 && feetY < this.yMin) {
-            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate at XZ " + x + ", " + z + ": below yMin (" + feetY + " < " + this.yMin + ")");
             return null;
         }
         if (this.yMax >= 0 && feetY > this.yMax) {
-            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate at XZ " + x + ", " + z + ": above yMax (" + feetY + " > " + this.yMax + ")");
             return null;
         }
 
@@ -200,16 +178,13 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         BlockPos headPos = feetPos.above();
 
         if (!this.isValidBlock(world, feetPos)) {
-            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate: feetPos invalid at " + feetPos + " block=" + world.getBlockState(feetPos).getBlock());
             return null;
         }
 
         if (!super.isValidBlock(world, headPos)) {
-            LMHelperClass.logDebug("JSONSpawner", "Rejected surface candidate: headPos invalid at " + headPos + " block=" + world.getBlockState(headPos).getBlock());
             return null;
         }
 
-        LMHelperClass.logDebug("JSONSpawner", "Found surface spawn position at " + feetPos + " (groundY=" + groundPos.getY() + ")");
         return feetPos;
     }
 
@@ -285,8 +260,13 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
             maxY = Math.min(maxY, this.yMax);
         }
 
-        List<Integer> yCoordsLow = new ArrayList<>();
-        List<Integer> yCoordsHigh = new ArrayList<>();
+        int reservoirLow = -1;
+        int countLow = 0;
+        int reservoirHigh = -1;
+        int countHigh = 0;
+
+        BlockPos.MutableBlockPos spawnPos = new BlockPos.MutableBlockPos(originX, minY, originZ);
+        BlockPos.MutableBlockPos headPos = new BlockPos.MutableBlockPos(originX, minY + 1, originZ);
 
         // Get Every Valid Y Pos:
         for (int nextY = minY; nextY <= maxY; nextY++) {
@@ -294,7 +274,8 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
             if (nextY > originY - rangeMinY && nextY < originY + rangeMinY)
                 nextY = originY + rangeMinY;
 
-            BlockPos spawnPos = new BlockPos(originX, nextY, originZ);
+            spawnPos.setY(nextY);
+            headPos.setY(nextY + 1);
 
             // If the pos is valid to spawn at:
             if (this.isValidBlock(world, spawnPos)) {
@@ -310,16 +291,20 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
                                 floatRange = this.getValidBlockHeight(world, spawnPos, maxY);
                             }
                             nextY += world.random.nextInt(floatRange + 1) - 1;
+                            spawnPos.setY(nextY);
+                            headPos.setY(nextY + 1);
                         }
                     }
                     lastYPos = true;
                 }
 
-                if (super.isValidBlock(world, spawnPos.above())) {
+                if (super.isValidBlock(world, headPos)) {
                     if (nextY <= 64) {
-                        yCoordsLow.add(nextY);
+                        countLow++;
+                        if (world.random.nextInt(countLow) == 0) reservoirLow = nextY;
                     } else {
-                        yCoordsHigh.add(nextY);
+                        countHigh++;
+                        if (world.random.nextInt(countHigh) == 0) reservoirHigh = nextY;
                     }
                 }
 
@@ -330,14 +315,12 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         }
 
         // Pick Random Y Pos:
-        int y = -1;
-        if (!yCoordsHigh.isEmpty() && (yCoordsLow.size() <= 0 || world.random.nextFloat() > 0.25F)) {
-            y = yCoordsHigh.get(world.random.nextInt(yCoordsHigh.size()));
-        } else if (!yCoordsLow.isEmpty()) {
-            y = yCoordsLow.get(world.random.nextInt(yCoordsLow.size()));
+        if (reservoirHigh != -1 && (countLow == 0 || world.random.nextFloat() > 0.25F)) {
+            return reservoirHigh;
+        } else if (reservoirLow != -1) {
+            return reservoirLow;
         }
-
-        return y;
+        return -1;
     }
 
     /**

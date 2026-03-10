@@ -12,7 +12,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class WorldSpawnCondition extends SpawnCondition {
 
@@ -43,10 +45,10 @@ public class WorldSpawnCondition extends SpawnCondition {
     /**
      * The list of biomes generated from the list of biome tags.
      **/
-    public List<String> biomesFromTags = null;
+    public Set<String> biomesFromTags = null;
     public List<String> biomeTagBlacklist = new ArrayList<>();
 
-    public List<String> biomesFromTagBlacklist = null;
+    public Set<String> biomesFromTagBlacklist = null;
 
     /**
      * How the biomes from the biome ids list works. Can be whitelist or blacklist.
@@ -126,6 +128,8 @@ public class WorldSpawnCondition extends SpawnCondition {
             this.biomeTags.clear();
             this.biomeTagBlacklist.clear();
             this.biomesFromTags = null;
+            this.biomesFromTagBlacklist = null;
+            JSONHelper.clearBiomeTagCache();
 
             List<String> rawTags = JSONHelper.getJsonStrings(json.get("biomeTags").getAsJsonArray());
             for (String raw : rawTags) {
@@ -141,6 +145,8 @@ public class WorldSpawnCondition extends SpawnCondition {
             this.biomeTags.clear();
             this.biomeTagBlacklist.clear();
             this.biomesFromTags = null;
+            this.biomesFromTagBlacklist = null;
+            JSONHelper.clearBiomeTagCache();
 
             List<String> rawTags = JSONHelper.getJsonStrings(json.get("biomes").getAsJsonArray());
             for (String raw : rawTags) {
@@ -360,7 +366,7 @@ public class WorldSpawnCondition extends SpawnCondition {
 
             if (!this.biomeTagBlacklist.isEmpty()) {
                 if (this.biomesFromTagBlacklist == null) {
-                    this.biomesFromTagBlacklist = JSONHelper.getBiomesFromTags(world, this.biomeTagBlacklist);
+                    this.biomesFromTagBlacklist = new HashSet<>(JSONHelper.getBiomesFromTags(world, this.biomeTagBlacklist));
                 }
                 if (this.biomesFromTagBlacklist.contains(biomeIdString)) {
                     return false;
@@ -375,7 +381,7 @@ public class WorldSpawnCondition extends SpawnCondition {
 
             if (!this.biomeTags.isEmpty()) {
                 if (this.biomesFromTags == null) {
-                    this.biomesFromTags = JSONHelper.getBiomesFromTags(world, this.biomeTags);
+                    this.biomesFromTags = new HashSet<>(JSONHelper.getBiomesFromTags(world, this.biomeTags));
                 }
                 if (this.biomesFromTags.contains(biomeIdString)) {
                     return !"blacklist".equalsIgnoreCase(this.biomeTagListType);

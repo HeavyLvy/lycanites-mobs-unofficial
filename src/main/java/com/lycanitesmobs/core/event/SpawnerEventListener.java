@@ -23,6 +23,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.ItemFishedEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
@@ -246,6 +247,11 @@ public class SpawnerEventListener {
         playerUpdateTicks.put(player, entityUpdateTick + 1);
     }
 
+    @SubscribeEvent
+    public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        playerUpdateTicks.remove(event.getEntity());
+    }
+
 
     // ==================================================
     //                 Entity Death Event
@@ -349,32 +355,33 @@ public class SpawnerEventListener {
      **/
     public void checkFreshChunks(Level world) {
         String dimensionId = world.dimension().location().toString();
-        if (!this.freshChunks.containsKey(dimensionId)) {
-            this.freshChunks.put(dimensionId, new ArrayList<>());
+        List<ChunkPos> chunks = this.freshChunks.computeIfAbsent(dimensionId, k -> new ArrayList<>());
+
+        if (chunks.isEmpty()) return;
+
+        if (chunks.size() > 1000) {
+            chunks.clear();
             return;
         }
 
-        List<ChunkPos> freshChunks = new ArrayList<>(this.freshChunks.get(dimensionId));
-        for (ChunkPos chunkPos : freshChunks) {
-            if (chunkPos == null) {
-                this.freshChunks.get(dimensionId).remove(null);
-                continue;
-            }
+        // Snapshot + drain pattern: copy the pending list, clear it immediately, then iterate
+        // the snapshot. onChunkPopulate() can call onChunkGenerate() which adds to 'chunks' —
+        // iterating 'chunks' directly (with either a for-each or an Iterator) would cause a
+        // ConcurrentModificationException. By iterating the snapshot we avoid that, while
+        // still allowing new chunks to accumulate in 'chunks' for the next tick. Unready
+        // chunks (hasChunk == false) are put back so they are retried next tick.
+        List<ChunkPos> snapshot = new ArrayList<>(chunks);
+        chunks.clear();
 
+        for (ChunkPos chunkPos : snapshot) {
+            if (chunkPos == null) continue;
             if (!world.getChunkSource().hasChunk(chunkPos.x, chunkPos.z)) {
+                chunks.add(chunkPos); // not ready yet — keep for next tick
                 continue;
             }
-            this.freshChunks.get(dimensionId).remove(chunkPos);
-
             for (ChunkSpawnTrigger spawnTrigger : this.chunkSpawnTriggers) {
-                if (spawnTrigger.onChunkPopulate(world, chunkPos)) {
-                }
+                spawnTrigger.onChunkPopulate(world, chunkPos);
             }
-        }
-
-        List<ChunkPos> list = this.freshChunks.get(dimensionId);
-        if (list.size() > 1000) {
-            list.clear();
         }
     }
 

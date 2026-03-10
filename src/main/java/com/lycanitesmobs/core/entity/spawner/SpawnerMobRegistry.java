@@ -28,13 +28,9 @@ public class SpawnerMobRegistry {
      * @return A collection of MobSpawns, returns null if no global MobSpawns exists for the Spawner.
      **/
     public static Collection<MobSpawn> getMobSpawns(String spawnerName) {
-        LMHelperClass.logDebug("JSONSpawner", "Getting Global Mobs For Spawner: " + spawnerName);
         if (SPAWNER_MOB_REGISTRIES.containsKey(spawnerName.toLowerCase())) {
-            Collection<MobSpawn> mobs = SPAWNER_MOB_REGISTRIES.get(spawnerName.toLowerCase()).mobSpawns.values();
-            LMHelperClass.logDebug("JSONSpawner", "Found " + mobs.size() + " Global Mobs For Spawner: " + spawnerName);
-            return mobs;
+            return SPAWNER_MOB_REGISTRIES.get(spawnerName.toLowerCase()).mobSpawns.values();
         }
-        LMHelperClass.logDebug("JSONSpawner", "No Global Mobs Found For Spawner: " + spawnerName);
         return null;
     }
 
@@ -64,7 +60,6 @@ public class SpawnerMobRegistry {
             LMHelperClass.logWarning("", "Tried to create a duplicate global MobSpawn for " + creatureInfo.getName() + " in Spawner: " + spawnerName + "!");
         }
 
-        LMHelperClass.logDebug("JSONSpawner", "Added " + creatureInfo.getName() + " to " + spawnerName + " global spawn list.");
     }
 
 
