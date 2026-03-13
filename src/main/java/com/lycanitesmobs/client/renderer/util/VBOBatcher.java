@@ -27,7 +27,6 @@ import org.joml.Vector4f;
 
 import static com.lycanitesmobs.client.renderer.util.CustomRenderStates.POS_TEX_NORMAL_SHADER;
 
-
 public class VBOBatcher {
 
     public static class VBODrawCommand {
@@ -36,6 +35,13 @@ public class VBOBatcher {
         private final VertexFormat format;
         private final Matrix4f modelMatrix;
         private final ResourceLocation texLocation;
+
+        /**
+         * Minimum brightness enforced on all rendered parts.
+         * Format: Packed light value (block << 20) | (sky << 4)
+         * Default: 0x00800080 (medium brightness - 8 block, 8 sky)
+         */
+        public static int minimumBrightness = 0x00800080;
 
         private float red = 1.0F, green = 1.0F, blue = 1.0F, alpha = 1.0F;
         private float textureOffsetX, textureOffsetY;
@@ -76,8 +82,7 @@ public class VBOBatcher {
 
         public VBODrawCommand setVariantPalette(
                 float baseR, float baseG, float baseB, float baseRange,
-                float variantR, float variantG, float variantB, float variantAmount
-        ) {
+                float variantR, float variantG, float variantB, float variantAmount) {
             this.baseR = baseR;
             this.baseG = baseG;
             this.baseB = baseB;
@@ -106,7 +111,10 @@ public class VBOBatcher {
         }
 
         public VBODrawCommand setColor(float r, float g, float b, float a) {
-            this.red = r; this.green = g; this.blue = b; this.alpha = a;
+            this.red = r;
+            this.green = g;
+            this.blue = b;
+            this.alpha = a;
             return this;
         }
 
@@ -173,7 +181,8 @@ public class VBOBatcher {
         }
 
         public void draw() {
-            if (vbo == null) return;
+            if (vbo == null)
+                return;
 
             RenderSystem.setShaderTexture(0, texLocation);
             RenderSystem.setShaderColor(corrected(red), corrected(green), corrected(blue), corrected(alpha));
@@ -199,10 +208,12 @@ public class VBOBatcher {
             }
 
             var uv = shader.getUniform("UvOffset");
-            if (uv != null) uv.set(textureOffsetX, textureOffsetY);
+            if (uv != null)
+                uv.set(textureOffsetX, textureOffsetY);
 
             var overlay = shader.getUniform("OverlayUv");
-            if (overlay != null) overlay.set(overlayOffsetX, overlayOffsetY);
+            if (overlay != null)
+                overlay.set(overlayOffsetX, overlayOffsetY);
 
             var light = shader.getUniform("LightUv");
             if (light != null) {
@@ -213,74 +224,63 @@ public class VBOBatcher {
                 Entity cam = mc.getCameraEntity();
 
                 float nv = 0.0F;
-                if (cam instanceof LivingEntity le) {
-                    MobEffectInstance inst = le.getEffect(MobEffects.NIGHT_VISION);
 
-                    if (inst == null) {
-                        MobEffectInstance conduit = le.getEffect(MobEffects.CONDUIT_POWER);
-                        boolean underwater = false;
-
-                        Entity viewer = mc.player;
-                        if (viewer == null) viewer = cam;
-
-                        if (viewer != null) {
-                            underwater = viewer.isUnderWater();
-                        }
-
-                        if (underwater) inst = conduit;
-                    }
-
-                    if (inst != null) {
-                        int d = inst.getDuration();
-                        if (d > 0) {
-                            if (d > 200) {
-                                nv = 1.0F;
-                            } else {
-                                nv = 0.7F + Mth.sin(((float) d - mc.getFrameTime()) * (float) Math.PI * 0.2F) * 0.3F;
-                            }
-                        }
-                    }
-                }
-
+               /* if (cam instanceof LivingEntity le && mc.level != null
+                        && (le.hasEffect(MobEffects.NIGHT_VISION) || le.hasEffect(MobEffects.CONDUIT_POWER))) {
+                    nv = GameRenderer.getNightVisionScale(le, mc.getFrameTime());
+                }*/
 
                 if (nv > 0.0F) {
                     u = Mth.lerp(nv, u, 240.0F);
                     v = Mth.lerp(nv, v, 240.0F);
                 }
 
+                float minU = LightTexture.block(minimumBrightness) << 4;
+                float minV = LightTexture.sky(minimumBrightness) << 4;
+                u = Math.max(u, minU);
+                v = Math.max(v, minV);
+
                 light.set(u, v);
             }
 
-
             var cutoff = shader.getUniform("AlphaCutoff");
-            if (cutoff != null) cutoff.set(alphaCutoff);
+            if (cutoff != null)
+                cutoff.set(alphaCutoff);
 
             var baseColor = shader.getUniform("BaseColor");
-            if (baseColor != null) baseColor.set(baseR, baseG, baseB);
+            if (baseColor != null)
+                baseColor.set(baseR, baseG, baseB);
 
             var baseRangeUni = shader.getUniform("BaseRange");
-            if (baseRangeUni != null) baseRangeUni.set(baseRange);
+            if (baseRangeUni != null)
+                baseRangeUni.set(baseRange);
 
             var tintColor = shader.getUniform("VariantColor");
-            if (tintColor != null) tintColor.set(tintR, tintG, tintB);
+            if (tintColor != null)
+                tintColor.set(tintR, tintG, tintB);
 
             var tintAmt = shader.getUniform("VariantAmount");
-            if (tintAmt != null) tintAmt.set(tintAmount);
+            if (tintAmt != null)
+                tintAmt.set(tintAmount);
 
             var modelView = new org.joml.Matrix4f(RenderSystem.getModelViewMatrix()).mul(this.modelMatrix);
             var projection = RenderSystem.getProjectionMatrix();
 
             var sunDir = shader.getUniform("SunDirectionVS");
-            if (sunDir != null) sunDir.set(0.0F, 1.0F, 0.0F);
+            if (sunDir != null)
+                sunDir.set(0.0F, 1.0F, 0.0F);
 
             var specColor = shader.getUniform("SpecularColor");
-            if (specColor != null) specColor.set(1.0F, 1.0F, 1.0F);
+            if (specColor != null)
+                specColor.set(1.0F, 1.0F, 1.0F);
 
             var specIntensity = shader.getUniform("SpecularIntensity");
-            if (specIntensity != null) specIntensity.set(0.15F);
+            if (specIntensity != null)
+                specIntensity.set(0.15F);
 
             var specPower = shader.getUniform("SpecularPower");
-            if (specPower != null) specPower.set(32.0F);
+            if (specPower != null)
+                specPower.set(32.0F);
 
             vbo.bind();
             vbo.drawWithShader(modelView, projection, shader);
@@ -288,7 +288,6 @@ public class VBOBatcher {
 
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
-
 
         private static float corrected(float f) {
             return ((int) (f * 255.0F) & 0xFF) / 255.0F;
@@ -308,7 +307,8 @@ public class VBOBatcher {
 
     public void endBatches() {
         batchedDrawCommands.forEach((renderType, drawCommands) -> {
-            if (drawCommands.isEmpty()) return;
+            if (drawCommands.isEmpty())
+                return;
 
             renderType.setupRenderState();
 
