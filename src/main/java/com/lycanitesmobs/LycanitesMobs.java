@@ -8,14 +8,11 @@ import com.lycanitesmobs.client.gui.screen.creature.CreatureInventoryScreen;
 import com.lycanitesmobs.client.manager.ClientManager;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.data.info.ObjectLists;
-import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.manager.EffectManager;
 import com.lycanitesmobs.core.event.GameEventListener;
 import com.lycanitesmobs.core.data.info.altar.AltarInfo;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.event.RegistryEvents;
-import com.lycanitesmobs.core.item.consumable.entity.ItemColorCustomSpawnEgg;
-import com.lycanitesmobs.core.item.consumable.entity.ItemCustomSpawnEgg;
 import com.lycanitesmobs.core.manager.*;
 import com.lycanitesmobs.core.network.proxy.ClientProxy;
 import com.lycanitesmobs.client.manager.ModelManager;
@@ -41,18 +38,21 @@ import com.lycanitesmobs.core.network.proxy.IProxy;
 import com.lycanitesmobs.core.network.proxy.ServerProxy;
 import com.lycanitesmobs.core.event.SpawnerEventListener;
 import com.lycanitesmobs.core.worldgen.data.WorldgenJsonDumper;
-import com.lycanitesmobs.core.worldgen.feature.DungeonFeature;
+import com.lycanitesmobs.core.worldgen.structure.DungeonVirtualPack;
 import com.lycanitesmobs.core.worldgen.structure.ModStructureTypes;
 import com.lycanitesmobs.core.worldgen.structure.ModStructurePieceTypes;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -66,11 +66,9 @@ import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.lycanitesmobs.core.manager.WorldGenManager.FEATURES;
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.fixMaxHealth;
 
 @Mod(LycanitesMobs.MODID)
@@ -94,6 +92,7 @@ public class LycanitesMobs {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.Keys.BLOCKS, MODID);
+    // TODO: move projectile registries to RegistryEvents
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister
             .create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
 
@@ -128,6 +127,7 @@ public class LycanitesMobs {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::clientSetup);
+        modEventBus.addListener(this::addPackFinders);
         modEventBus.addListener(this::enqueueIMC);
         modEventBus.addListener(this::processIMC);
         modEventBus.register(RegistryEvents.getInstance());
@@ -227,6 +227,34 @@ public class LycanitesMobs {
             WorldGenManager.getInstance().setupFluidFeatures();
             WorldgenJsonDumper.dumpIfDev();
         });
+    }
+
+    /**
+     * Registers a virtual datapack that dynamically generates worldgen structure,
+     * structure_set, and biome tag JSONs from dungeon schematic configs.
+     * This replaces the hard-coded JSON files and allows full customization
+     * of dungeon biome placement through the schematic condition configs.
+     */
+    private void addPackFinders(final AddPackFindersEvent event) {
+        if (event.getPackType() == PackType.SERVER_DATA) {
+            event.addRepositorySource(consumer -> {
+                Pack.ResourcesSupplier supplier = id -> new DungeonVirtualPack(id);
+
+                Pack pack = Pack.readMetaAndCreate(
+                        "lycanitesmobs_dynamic_dungeons",
+                        Component.literal("Lycanites Mobs Dynamic Dungeons"),
+                        true,
+                        supplier,
+                        PackType.SERVER_DATA,
+                        Pack.Position.TOP,
+                        PackSource.BUILT_IN
+                );
+
+                if (pack != null) {
+                    consumer.accept(pack);
+                }
+            });
+        }
     }
 
     @SubscribeEvent

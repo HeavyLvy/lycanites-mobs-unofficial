@@ -25,7 +25,6 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.nbt.CompoundTag;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
