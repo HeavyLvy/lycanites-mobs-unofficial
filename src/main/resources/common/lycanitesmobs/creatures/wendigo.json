@@ -23,10 +23,10 @@
         "dimensionListType": "blacklist",
         "ignoreBiome": false,
         "biomeTags": [
-            "cold",
-            "snowy",
-            "coniferous",
-            "-end"
+            "forge:is_cold",
+            "forge:is_snowy",
+            "forge:is_coniferous",
+            "-minecraft:is_end"
         ],
         "spawnWeight": 4,
         "dungeonWeight": 0,

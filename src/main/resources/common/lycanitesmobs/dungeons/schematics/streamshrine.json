@@ -8,8 +8,12 @@
   "conditions": [
     {
       "type": "world",
+      "salt": 100007,
+      "spacing": 32,
+      "minY": 66,
+      "maxY": 66,
       "dimensionIds": [
-        0
+        "minecraft:overworld"
       ],
       "dimensionListType": "whitelist",
       "biomeTags": [

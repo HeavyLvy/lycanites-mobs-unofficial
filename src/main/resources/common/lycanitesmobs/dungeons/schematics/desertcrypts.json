@@ -8,15 +8,19 @@
   "conditions": [
     {
       "type": "world",
+      "salt": 100004,
+      "spacing": 32,
+      "minY": 66,
+      "maxY": 66,
       "dimensionIds": [
         "minecraft:overworld"
       ],
       "dimensionListType": "whitelist",
       "biomeTags": [
-        "minecraft:is_sandy",
+        "forge:is_sandy",
         "minecraft:is_badlands",
-        "minecraft:is_wasteland",
-        "minecraft:is_cold_overworld"
+        "forge:is_wasteland",
+        "forge:is_cold/overworld"
       ],
       "biomeTagListType": "whitelist"
     }

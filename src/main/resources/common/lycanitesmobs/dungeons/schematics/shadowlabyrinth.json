@@ -8,15 +8,19 @@
   "conditions": [
     {
       "type": "world",
+      "salt": 100006,
+      "spacing": 32,
+      "minY": 66,
+      "maxY": 66,
       "dimensionIds": [
         "minecraft:overworld",
         "midnight:midnight"
       ],
       "dimensionListType": "whitelist",
       "biomeTags": [
-        "minecraft:is_spooky",
-        "minecraft:is_mountain",
-        "minecraft:is_swamp",
+        "forge:is_spooky",
+        "forge:is_mountain",
+        "forge:is_swamp",
         "minecraft:is_nether",
         "minecraft:is_end"
       ],

@@ -43,7 +43,7 @@ public class DungeonVirtualPack implements PackResources {
             Map<String, JsonObject> customSchematics = new LinkedHashMap<>();
 
             IModFile modFile = ModList.get().getModFileById(LycanitesMobs.MODID).getFile();
-            Path jarSchematicsDir = modFile.findResource("data", "lycanitesmobs", "dungeons", "schematics");
+            Path jarSchematicsDir = modFile.findResource("common", "lycanitesmobs", "dungeons", "schematics");
             if (Files.isDirectory(jarSchematicsDir)) {
                 loadSchematicsFromDir(jarSchematicsDir, defaultSchematics);
             }

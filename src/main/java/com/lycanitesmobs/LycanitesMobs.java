@@ -27,6 +27,7 @@ import com.lycanitesmobs.core.container.block.SummoningPedestalContainer;
 import com.lycanitesmobs.core.container.creature.CreatureContainer;
 import com.lycanitesmobs.core.manager.DungeonManager;
 import com.lycanitesmobs.core.entity.util.EntityFactory;
+import com.lycanitesmobs.core.block.Material;
 import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.StreamLoader;
 import com.lycanitesmobs.core.manager.ProjectileManager;
@@ -214,6 +215,8 @@ public class LycanitesMobs {
         configReady = true;
         ObjectManager.setCurrentModInfo(modInfo);
         this.loadConfigs();
+        // Initialize Material block lists
+        Material.init();
         // Fix Health Limit:
         fixMaxHealth();
         // Mod Support:

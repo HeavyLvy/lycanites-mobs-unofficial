@@ -22,9 +22,9 @@
         "ignoreBiome": false,
         "biomeTags": [
             "all",
-            "-swamp",
-            "-jungle",
-            "-dense"
+            "-forge:is_swamp",
+            "-minecraft:is_jungle",
+            "-forge:is_dense"
         ],
         "spawnWeight": 1,
         "dungeonWeight": 0,

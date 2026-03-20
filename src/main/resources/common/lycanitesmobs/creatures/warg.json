@@ -21,8 +21,8 @@
         "dimensionListType": "blacklist",
         "ignoreBiome": false,
         "biomeTags": [
-            "forest",
-            "-mountain"
+            "minecraft:is_forest",
+            "-minecraft:is_mountain"
         ],
         "spawnWeight": 4,
         "dungeonWeight": 200,

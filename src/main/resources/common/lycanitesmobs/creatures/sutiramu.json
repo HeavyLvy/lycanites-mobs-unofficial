@@ -21,11 +21,11 @@
         "dimensionListType": "blacklist",
         "ignoreBiome": false,
         "biomeTags": [
-            "sandy",
-            "wasteland",
-            "mesa",
-            "-cold",
-            "-snowy"
+            "forge:is_sandy",
+            "forge:is_wasteland",
+            "minecraft:is_badlands",
+            "-forge:is_cold",
+            "-forge:is_snowy"
         ],
         "spawnWeight": 8,
         "dungeonWeight": 200,

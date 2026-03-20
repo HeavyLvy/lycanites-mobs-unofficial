@@ -41,7 +41,7 @@ public class SpawnerManager extends JSONLoader {
      **/
     public void loadAllFromJson(ModInfo modInfo) {
         // Spawners:
-        this.loadAllJson(modInfo, "Spawner", "spawners", "name", true, "spawner", FileLoader.SERVER, StreamLoader.SERVER);
+        this.loadAllJson(modInfo, "Spawner", "spawners", "name", true, "spawner", FileLoader.COMMON, StreamLoader.COMMON);
         LMHelperClass.logDebug("Spawner", "Complete! " + this.spawners.size() + " JSON Spawners Loaded In Total.");
 
         // Mob Event Spawners:
@@ -54,12 +54,12 @@ public class SpawnerManager extends JSONLoader {
         this.globalSpawnConditions.clear();
 
         JsonObject defaultGlobalJson;
-        if (FileLoader.SERVER.ready) {
-            Path defaultGlobalPath = FileLoader.SERVER.getPath("globalspawner.json");
+        if (FileLoader.COMMON.ready) {
+            Path defaultGlobalPath = FileLoader.COMMON.getPath("globalspawner.json");
             LMHelperClass.logDebug("", "Global Spawner JSON Path:" + defaultGlobalPath);
             defaultGlobalJson = this.loadJsonObject(gson, defaultGlobalPath);
         } else {
-            defaultGlobalJson = this.loadJsonObject(gson, StreamLoader.SERVER.getStream("globalspawner.json"));
+            defaultGlobalJson = this.loadJsonObject(gson, StreamLoader.COMMON.getStream("globalspawner.json"));
         }
         if (defaultGlobalJson == null) {
             LMHelperClass.logWarning("", "Could not find Global Spawning JSON.");

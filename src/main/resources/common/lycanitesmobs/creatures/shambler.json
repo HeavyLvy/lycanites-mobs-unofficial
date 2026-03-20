@@ -21,9 +21,9 @@
         "dimensionListType": "blacklist",
         "ignoreBiome": false,
         "biomeTags": [
-            "forest",
-            "jungle",
-            "-mountain"
+            "minecraft:is_forest",
+            "minecraft:is_jungle",
+            "-minecraft:is_mountain"
         ],
         "spawnWeight": 4,
         "dungeonWeight": 200,

@@ -21,9 +21,9 @@
         "dimensionListType": "blacklist",
         "ignoreBiome": false,
         "biomeTags": [
-            "plains",
-            "savanna",
-            "-snowy"
+            "forge:is_plains",
+            "minecraft:is_savanna",
+            "-forge:is_snowy"
         ],
         "spawnWeight": 6,
         "dungeonWeight": 200,

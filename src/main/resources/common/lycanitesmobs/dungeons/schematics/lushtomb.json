@@ -8,6 +8,10 @@
   "conditions": [
     {
       "type": "world",
+      "salt": 100005,
+      "spacing": 32,
+      "minY": 66,
+      "maxY": 66,
       "dimensionIds": [
         "minecraft:overworld"
       ],
@@ -15,7 +19,7 @@
       "biomeTags": [
         "minecraft:is_forest",
         "minecraft:is_jungle",
-        "minecraft:is_swamp"
+        "forge:is_swamp"
       ],
       "biomeTagListType": "whitelist"
     }
