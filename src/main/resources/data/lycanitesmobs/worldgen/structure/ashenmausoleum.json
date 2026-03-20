@@ -1,0 +1,8 @@
+{
+    "type": "lycanitesmobs:lm_dungeon",
+    "schematic_name": "ashenmausoleum",
+    "biomes": "#lycanitesmobs:has_structure/ashenmausoleum",
+    "step": "underground_structures",
+    "terrain_adaptation": "none",
+    "spawn_overrides": {}
+}

@@ -1,0 +1,8 @@
+{
+    "type": "lycanitesmobs:lm_dungeon",
+    "schematic_name": "aberrantstation",
+    "biomes": "#lycanitesmobs:has_structure/aberrantstation",
+    "step": "underground_structures",
+    "terrain_adaptation": "none",
+    "spawn_overrides": {}
+}

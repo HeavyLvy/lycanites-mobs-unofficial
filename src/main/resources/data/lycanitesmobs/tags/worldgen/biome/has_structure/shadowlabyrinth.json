@@ -1,0 +1,13 @@
+{
+    "replace": false,
+    "values": [
+        "#minecraft:is_mountain",
+        "minecraft:swamp",
+        "minecraft:mangrove_swamp",
+        "minecraft:dark_forest",
+        "minecraft:the_end",
+        "minecraft:end_highlands",
+        "minecraft:nether_wastes",
+        "minecraft:soul_sand_valley"
+    ]
+}

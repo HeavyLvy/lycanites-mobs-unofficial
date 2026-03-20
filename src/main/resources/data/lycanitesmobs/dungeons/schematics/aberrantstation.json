@@ -8,6 +8,10 @@
   "conditions": [
     {
       "type": "world",
+      "salt": 100001,
+      "spacing": 32,
+      "minY": 66,
+      "maxY": 66,
       "dimensionIds": [],
       "dimensionListType": "blacklist",
       "biomeTags": [

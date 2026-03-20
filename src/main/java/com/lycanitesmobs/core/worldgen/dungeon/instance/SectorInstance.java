@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.worldgen.dungeon.instance;
 import com.lycanitesmobs.core.block.base.BlockFireBase;
 import com.lycanitesmobs.core.block.cloud.BlockFrostCloud;
 import com.lycanitesmobs.core.block.cloud.BlockPoisonCloud;
+import com.lycanitesmobs.core.worldgen.dungeon.DeferredBossSpawner;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSector;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonTheme;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.SectorLayer;
@@ -23,6 +24,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.nbt.CompoundTag;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
@@ -48,17 +51,20 @@ public class SectorInstance {
     public SectorConnector parentConnector;
 
     /**
-     * A list of connectors that this sector provides to connect to other sectors with.
+     * A list of connectors that this sector provides to connect to other sectors
+     * with.
      **/
     public List<SectorConnector> connectors = new ArrayList<>();
 
     /**
-     * The room size of this Sector Instance, this includes the inside and inner floor, walls and ceiling. Used for building and sector to sector collision.
+     * The room size of this Sector Instance, this includes the inside and inner
+     * floor, walls and ceiling. Used for building and sector to sector collision.
      **/
     protected Vector3i roomSize;
 
     /**
-     * The occupied size of this Sector Instance, includes the room size plus additional space taken up by sector layers, structures, padding, etc.
+     * The occupied size of this Sector Instance, includes the room size plus
+     * additional space taken up by sector layers, structures, padding, etc.
      **/
     protected Vector3i occupiedSize;
 
@@ -88,10 +94,10 @@ public class SectorInstance {
     public BlockState pitBlock;
 
     /**
-     * How many chunks this sector has been built into. When this equals the total chunks this sector occupies it is considered fully built.
+     * How many chunks this sector has been built into. When this equals the total
+     * chunks this sector occupies it is considered fully built.
      **/
     public int chunksBuilt = 0;
-
 
     /**
      * Constructor
@@ -109,13 +115,11 @@ public class SectorInstance {
         this.occupiedSize = new Vector3i(
                 this.roomSize.x() + Math.max(1, this.dungeonSector.padding.getX()),
                 this.roomSize.y() + this.dungeonSector.padding.getY(),
-                this.roomSize.z() + Math.max(1, this.dungeonSector.padding.getZ())
-        );
+                this.roomSize.z() + Math.max(1, this.dungeonSector.padding.getZ()));
 
         // Structures:
         // TODO Structures
     }
-
 
     /**
      * Connects this sector to the provided connector. Should be called before init.
@@ -125,7 +129,6 @@ public class SectorInstance {
     public void connect(SectorConnector parentConnector) {
         this.parentConnector = parentConnector;
     }
-
 
     /**
      * Initialises this Sector Instance. Must be connected to a parent connector.
@@ -168,7 +171,10 @@ public class SectorInstance {
             this.addConnector(blockPos, this.parentConnector.level + 1, Direction.UP);
         }
 
-        if ("corridor".equalsIgnoreCase(this.dungeonSector.type) || "room".equalsIgnoreCase(this.dungeonSector.type) || "tower".equalsIgnoreCase(this.dungeonSector.type) || "entrance".equalsIgnoreCase(this.dungeonSector.type) || "bossRoom".equalsIgnoreCase(this.dungeonSector.type)) {
+        if ("corridor".equalsIgnoreCase(this.dungeonSector.type) || "room".equalsIgnoreCase(this.dungeonSector.type)
+                || "tower".equalsIgnoreCase(this.dungeonSector.type)
+                || "entrance".equalsIgnoreCase(this.dungeonSector.type)
+                || "bossRoom".equalsIgnoreCase(this.dungeonSector.type)) {
 
             // Front/Back Exit:
             BlockPos frontPos = this.parentConnector.position;
@@ -176,24 +182,32 @@ public class SectorInstance {
             BlockPos backPos = this.parentConnector.position;
             Direction backFacing = Direction.NORTH;
             if (this.parentConnector.facing == Direction.SOUTH || this.parentConnector.facing == Direction.UP) {
-                frontPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMax.getZ() + 1);
+                frontPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()),
+                        this.parentConnector.position.getY(), boundsMax.getZ() + 1);
                 frontFacing = Direction.SOUTH;
-                backPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMin.getZ() - 1);
+                backPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()),
+                        this.parentConnector.position.getY(), boundsMin.getZ() - 1);
                 backFacing = Direction.NORTH;
             } else if (this.parentConnector.facing == Direction.EAST) {
-                frontPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
+                frontPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(),
+                        this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
                 frontFacing = Direction.EAST;
-                backPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
+                backPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(),
+                        this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
                 backFacing = Direction.WEST;
             } else if (this.parentConnector.facing == Direction.NORTH) {
-                frontPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMin.getZ() - 1);
+                frontPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()),
+                        this.parentConnector.position.getY(), boundsMin.getZ() - 1);
                 frontFacing = Direction.NORTH;
-                backPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMax.getZ() + 1);
+                backPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()),
+                        this.parentConnector.position.getY(), boundsMax.getZ() + 1);
                 backFacing = Direction.SOUTH;
             } else if (this.parentConnector.facing == Direction.WEST) {
-                frontPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
+                frontPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(),
+                        this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
                 frontFacing = Direction.WEST;
-                backPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
+                backPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(),
+                        this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
                 backFacing = Direction.EAST;
             }
             this.addConnector(frontPos, this.parentConnector.level, frontFacing);
@@ -207,15 +221,21 @@ public class SectorInstance {
                 Direction leftFacing = Direction.WEST;
                 BlockPos rightPos = this.parentConnector.position;
                 Direction rightFacing = Direction.EAST;
-                if (this.parentConnector.facing == Direction.SOUTH || this.parentConnector.facing == Direction.NORTH || this.parentConnector.facing == Direction.UP) {
-                    leftPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
+                if (this.parentConnector.facing == Direction.SOUTH || this.parentConnector.facing == Direction.NORTH
+                        || this.parentConnector.facing == Direction.UP) {
+                    leftPos = new BlockPos(boundsMin.getX() - 1, this.parentConnector.position.getY(),
+                            this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
                     leftFacing = Direction.WEST;
-                    rightPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(), this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
+                    rightPos = new BlockPos(boundsMax.getX() + 1, this.parentConnector.position.getY(),
+                            this.getConnectorOffset(random, size.z(), boundsMin.getZ()));
                     rightFacing = Direction.EAST;
-                } else if (this.parentConnector.facing == Direction.EAST || this.parentConnector.facing == Direction.WEST) {
-                    leftPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMax.getZ() + 1);
+                } else if (this.parentConnector.facing == Direction.EAST
+                        || this.parentConnector.facing == Direction.WEST) {
+                    leftPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()),
+                            this.parentConnector.position.getY(), boundsMax.getZ() + 1);
                     leftFacing = Direction.SOUTH;
-                    rightPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()), this.parentConnector.position.getY(), boundsMin.getZ() - 1);
+                    rightPos = new BlockPos(this.getConnectorOffset(random, size.x(), boundsMin.getX()),
+                            this.parentConnector.position.getY(), boundsMin.getZ() - 1);
                     rightFacing = Direction.NORTH;
                 }
                 this.addConnector(leftPos, this.parentConnector.level, leftFacing);
@@ -239,15 +259,16 @@ public class SectorInstance {
             }
         }
 
-        //LycanitesMobs.logDebug("Dungeon", "Initialised Sector Instance - Bounds: " + this.getOccupiedBoundsMin() + " to " + this.getOccupiedBoundsMax());
+        // LycanitesMobs.logDebug("Dungeon", "Initialised Sector Instance - Bounds: " +
+        // this.getOccupiedBoundsMin() + " to " + this.getOccupiedBoundsMax());
     }
-
 
     /**
      * Gets a random offset for positioning a sector connector.
      *
      * @param random The instance of random to use.
-     * @param length The length to get a random offset from such as the x/z size of the sector instance.
+     * @param length The length to get a random offset from such as the x/z size of
+     *               the sector instance.
      * @param start  The world position to add the offset to.
      * @return
      */
@@ -258,7 +279,6 @@ public class SectorInstance {
         }
         return start + entrancePadding + random.nextInt(length - (entrancePadding * 2)) + 1;
     }
-
 
     /**
      * Adds a new child Sector Connector to this Sector Instance.
@@ -273,7 +293,6 @@ public class SectorInstance {
         this.connectors.add(connector);
         return connector;
     }
-
 
     /**
      * Returns a random child connector for a Sector Instance to connect to.
@@ -292,11 +311,12 @@ public class SectorInstance {
         return openConnectors.get(random.nextInt(openConnectors.size()));
     }
 
-
     /**
-     * Returns a list of open connectors where they are not set to closed and have no child Sector Instance connected.
+     * Returns a list of open connectors where they are not set to closed and have
+     * no child Sector Instance connected.
      *
-     * @param sectorInstance The sector to get the open connectors for. If null, collision checks are skipped.
+     * @param sectorInstance The sector to get the open connectors for. If null,
+     *                       collision checks are skipped.
      * @return A list of open connectors.
      */
     public List<SectorConnector> getOpenConnectors(SectorInstance sectorInstance) {
@@ -308,7 +328,6 @@ public class SectorInstance {
         }
         return openConnectors;
     }
-
 
     /**
      * Returns a list of every ChunkPos that this Sector Instance occupies.
@@ -327,7 +346,6 @@ public class SectorInstance {
         }
         return chunkPosList;
     }
-
 
     /**
      * Returns a list of other sectors near this sector instance.
@@ -348,9 +366,9 @@ public class SectorInstance {
         return nearbySectors;
     }
 
-
     /**
-     * Returns true if this sector instance collides with the provided sector instance.
+     * Returns true if this sector instance collides with the provided sector
+     * instance.
      *
      * @param sectorInstance The sector instance to check for collision with.
      * @return True on collision.
@@ -375,11 +393,13 @@ public class SectorInstance {
         if (!withinX)
             return false;
 
-//		boolean withinY = boundsMin.getY() >= targetMin.getY() && boundsMin.getY() <= targetMax.getY();
-//		if(!withinY)
-//			withinY = boundsMax.getY() >= targetMin.getY() && boundsMax.getY() <= targetMax.getY();
-//		if(!withinY)
-//			return false;
+        // boolean withinY = boundsMin.getY() >= targetMin.getY() && boundsMin.getY() <=
+        // targetMax.getY();
+        // if(!withinY)
+        // withinY = boundsMax.getY() >= targetMin.getY() && boundsMax.getY() <=
+        // targetMax.getY();
+        // if(!withinY)
+        // return false;
 
         boolean withinZ = boundsMin.getZ() >= targetMin.getZ() && boundsMin.getZ() <= targetMax.getZ();
         if (!withinZ)
@@ -390,10 +410,11 @@ public class SectorInstance {
         return true;
     }
 
-
     /**
-     * Returns the room size of this sector. X and Z are swapped when facing EAST or WEST.
-     * This is how large the room to be built is excluding extra blocks added for layers or structures, etc.
+     * Returns the room size of this sector. X and Z are swapped when facing EAST or
+     * WEST.
+     * This is how large the room to be built is excluding extra blocks added for
+     * layers or structures, etc.
      * Used for building this sector.
      *
      * @return A vector of the room size.
@@ -405,11 +426,13 @@ public class SectorInstance {
         return this.roomSize;
     }
 
-
     /**
-     * Returns the collision size of this sector. X and Z are swapped when facing EAST or WEST.
-     * This is how large this sector is including extra blocks added for layers or structures, etc.
-     * Used for detecting what chunks this sector needs to generate in and sector collision detection.
+     * Returns the collision size of this sector. X and Z are swapped when facing
+     * EAST or WEST.
+     * This is how large this sector is including extra blocks added for layers or
+     * structures, etc.
+     * Used for detecting what chunks this sector needs to generate in and sector
+     * collision detection.
      *
      * @return A vector of the collision size.
      */
@@ -420,9 +443,9 @@ public class SectorInstance {
         return this.occupiedSize;
     }
 
-
     /**
-     * Returns the minimum xyz position that this Sector Instance from the provided bounds size.
+     * Returns the minimum xyz position that this Sector Instance from the provided
+     * bounds size.
      *
      * @param boundsSize The xyz size to use when calculating bounds.
      * @return The minimum bounds position (corner).
@@ -433,40 +456,35 @@ public class SectorInstance {
             bounds = bounds.offset(
                     -(int) Math.ceil((double) boundsSize.x() / 2),
                     0,
-                    -(int) Math.ceil((double) boundsSize.z() / 2)
-            );
+                    -(int) Math.ceil((double) boundsSize.z() / 2));
         } else if (this.parentConnector.facing == Direction.SOUTH) {
             bounds = bounds.offset(
                     -(int) Math.ceil((double) boundsSize.x() / 2),
                     0,
-                    0
-            );
+                    0);
         } else if (this.parentConnector.facing == Direction.EAST) {
             bounds = bounds.offset(
                     0,
                     0,
-                    -(int) Math.ceil((double) boundsSize.z() / 2)
-            );
+                    -(int) Math.ceil((double) boundsSize.z() / 2));
         } else if (this.parentConnector.facing == Direction.NORTH) {
             bounds = bounds.offset(
                     -(int) Math.ceil((double) boundsSize.x() / 2),
                     0,
-                    -boundsSize.z()
-            );
+                    -boundsSize.z());
         } else if (this.parentConnector.facing == Direction.WEST) {
             bounds = bounds.offset(
                     -boundsSize.x(),
                     0,
-                    -(int) Math.ceil((double) boundsSize.z() / 2)
-            );
+                    -(int) Math.ceil((double) boundsSize.z() / 2));
         }
 
         return bounds;
     }
 
-
     /**
-     * Returns the maximum xyz position that this Sector Instance from the provided bounds size.
+     * Returns the maximum xyz position that this Sector Instance from the provided
+     * bounds size.
      *
      * @param boundsSize The xyz size to use when calculating bounds.
      * @return The maximum bounds position (corner).
@@ -477,36 +495,30 @@ public class SectorInstance {
             bounds = bounds.offset(
                     (int) Math.ceil((double) boundsSize.x() / 2),
                     boundsSize.y(),
-                    (int) Math.ceil((double) boundsSize.z() / 2)
-            );
+                    (int) Math.ceil((double) boundsSize.z() / 2));
         } else if (this.parentConnector.facing == Direction.SOUTH) {
             bounds = bounds.offset(
                     (int) Math.floor((double) boundsSize.x() / 2),
                     boundsSize.y(),
-                    boundsSize.z()
-            );
+                    boundsSize.z());
         } else if (this.parentConnector.facing == Direction.EAST) {
             bounds = bounds.offset(
                     boundsSize.x(),
                     boundsSize.y(),
-                    (int) Math.floor((double) boundsSize.z() / 2)
-            );
+                    (int) Math.floor((double) boundsSize.z() / 2));
         } else if (this.parentConnector.facing == Direction.NORTH) {
             bounds = bounds.offset(
                     (int) Math.floor((double) boundsSize.x() / 2),
                     boundsSize.y(),
-                    0
-            );
+                    0);
         } else if (this.parentConnector.facing == Direction.WEST) {
             bounds = bounds.offset(
                     0,
                     boundsSize.y(),
-                    (int) Math.floor((double) boundsSize.z() / 2)
-            );
+                    (int) Math.floor((double) boundsSize.z() / 2));
         }
         return bounds;
     }
-
 
     /**
      * Returns the minimum xyz position that this Sector Instance occupies.
@@ -521,7 +533,6 @@ public class SectorInstance {
         return occupiedBoundsMin;
     }
 
-
     /**
      * Returns the maximum xyz position that this Sector Instance occupies.
      *
@@ -530,7 +541,6 @@ public class SectorInstance {
     public BlockPos getOccupiedBoundsMax() {
         return this.getBoundsMax(this.getOccupiedSize());
     }
-
 
     /**
      * Returns the minimum xyz position that this Sector Instance builds from.
@@ -541,7 +551,6 @@ public class SectorInstance {
         return this.getBoundsMin(this.getRoomSize());
     }
 
-
     /**
      * Returns the maximum xyz position that this Sector Instance builds to.
      *
@@ -550,7 +559,6 @@ public class SectorInstance {
     public BlockPos getRoomBoundsMax() {
         return this.getBoundsMax(this.getRoomSize());
     }
-
 
     /**
      * Returns the rounded center block position of this sector.
@@ -568,54 +576,34 @@ public class SectorInstance {
         return new BlockPos(centerX, startPos.getY(), centerZ);
     }
 
-
     /**
      * Places a block state in the world from this sector.
      *
-     * @param worldWriter The world to place a block in. Cannot be the actual World during WorldGen.
+     * @param worldWriter The world to place a block in. Cannot be the actual World
+     *                    during WorldGen.
      * @param chunkPos    The chunk position to build within.
      * @param blockPos    The position to place the block at.
      * @param blockState  The block state to place.
-     * @param random      The instance of random, used for random mob spawns or loot on applicable blocks, etc.
+     * @param random      The instance of random, used for random mob spawns or loot
+     *                    on applicable blocks, etc.
      */
-    public void placeBlock(LevelAccessor worldWriter, ChunkPos chunkPos, BlockPos blockPos, BlockState blockState, Direction facing, RandomSource random) {
+    public void placeBlock(LevelAccessor worldWriter, ChunkPos chunkPos, BlockPos blockPos, BlockState blockState,
+            Direction facing, RandomSource random) {
         int chunkOffset = 0;
-        if (blockPos.getX() < chunkPos.getMinBlockX() + chunkOffset || blockPos.getX() > chunkPos.getMaxBlockX() + chunkOffset) {
+        if (blockPos.getX() < chunkPos.getMinBlockX() + chunkOffset
+                || blockPos.getX() > chunkPos.getMaxBlockX() + chunkOffset) {
             return;
         }
-        if (blockPos.getY() <= 0 || blockPos.getY() >= worldWriter.getMaxBuildHeight()) {
+        if (blockPos.getY() < worldWriter.getMinBuildHeight() || blockPos.getY() >= worldWriter.getMaxBuildHeight()) {
             return;
         }
-        if (blockPos.getZ() < chunkPos.getMinBlockZ() + chunkOffset || blockPos.getZ() > chunkPos.getMaxBlockZ() + chunkOffset) {
+        if (blockPos.getZ() < chunkPos.getMinBlockZ() + chunkOffset
+                || blockPos.getZ() > chunkPos.getMaxBlockZ() + chunkOffset) {
             return;
         }
 
         if (DungeonInstance.DISABLE_ACTUAL_PLACEMENT) {
-            if (worldWriter instanceof Level level && !level.isClientSide) {
-                LMHelperClass.logDebug(
-                        "DungeonDebug",
-                        "placeBlock: disabled, would place " + blockState + " at " + blockPos + " in " + chunkPos
-                );
-            }
             return;
-        }
-
-        if (worldWriter instanceof Level level && !level.isClientSide) {
-            ChunkPos actual = new ChunkPos(blockPos);
-            if (!level.getChunkSource().hasChunk(actual.x, actual.z)) {
-                LMHelperClass.logDebug(
-                        "DungeonDebug",
-                        "placeBlock: skip; target chunk not loaded, target=" + actual + " buildChunk=" + chunkPos + " pos=" + blockPos + " state=" + blockState
-                );
-                return;
-            }
-            if (!actual.equals(chunkPos)) {
-                LMHelperClass.logDebug(
-                        "DungeonDebug",
-                        "placeBlock: skip; chunk mismatch, target=" + actual + " buildChunk=" + chunkPos + " pos=" + blockPos + " state=" + blockState
-                );
-                return;
-            }
         }
 
         if (blockState.getBlock() == Blocks.AIR && worldWriter.getBlockState(blockPos).getBlock() == Blocks.CHEST) {
@@ -647,12 +635,11 @@ public class SectorInstance {
 
         if (blockState.getBlock() == Blocks.SPAWNER) {
             BlockEntity tileEntity = worldWriter.getBlockEntity(blockPos);
-            if (tileEntity instanceof SpawnerBlockEntity) {
-                SpawnerBlockEntity spawner = (SpawnerBlockEntity) tileEntity;
-                MobSpawn mobSpawn = this.layout.dungeonInstance.schematic.getRandomMobSpawn(this.parentConnector.level, false, random);
+            if (tileEntity instanceof SpawnerBlockEntity spawner) {
+                MobSpawn mobSpawn = this.layout.dungeonInstance.schematic.getRandomMobSpawn(this.parentConnector.level,
+                        false, random);
                 if (mobSpawn != null && mobSpawn.entityType != null) {
-                    Level level = this.layout.dungeonInstance.world;
-                    spawner.getSpawner().setEntityId(mobSpawn.entityType, level, random, blockPos);
+                    spawner.setEntityId(mobSpawn.entityType, random);
                 }
             }
             return;
@@ -662,7 +649,8 @@ public class SectorInstance {
             BlockEntity tileEntity = worldWriter.getBlockEntity(blockPos);
             if (tileEntity instanceof ChestBlockEntity) {
                 ChestBlockEntity chest = (ChestBlockEntity) tileEntity;
-                ResourceLocation lootTable = this.layout.dungeonInstance.schematic.getRandomLootTable(this.parentConnector.level, random);
+                ResourceLocation lootTable = this.layout.dungeonInstance.schematic
+                        .getRandomLootTable(this.parentConnector.level, random);
                 if (lootTable != null) {
                     chest.setLootTable(lootTable, Objects.hash(blockPos.hashCode(), random));
                 }
@@ -670,9 +658,9 @@ public class SectorInstance {
         }
     }
 
-
     /**
-     * Builds this sector. Wont build at y level 0 or below, beyond world height or outside of the chunk.
+     * Builds this sector. Wont build at y level 0 or below, beyond world height or
+     * outside of the chunk.
      *
      * @param world    The world to build in.
      * @param chunkPos The chunk position to build within.
@@ -693,21 +681,40 @@ public class SectorInstance {
         this.buildEntrances(worldWriter, world, chunkPos, random);
         this.chunksBuilt++;
         if ("bossRoom".equalsIgnoreCase(this.dungeonSector.type)) {
-            MobSpawn mobSpawn = this.layout.dungeonInstance.schematic.getRandomMobSpawn(this.parentConnector.level, true, random);
-            if (mobSpawn != null) {
-                this.spawnMob(worldWriter, world, chunkPos, this.getCenter().offset(0, 1, 0), mobSpawn, random);
+            MobSpawn mobSpawn = this.layout.dungeonInstance.schematic.getRandomMobSpawn(this.parentConnector.level,
+                    true, random);
+            if (mobSpawn != null && (mobSpawn.entityType != null || mobSpawn.mobId != null)) {
+                BlockPos bossPos = this.getCenter().offset(0, 1, 0);
+
+                Vector3i size = this.getRoomSize();
+                int radius = Math.max(3, Math.max(size.x(), size.z()));
+
+
+                net.minecraft.resources.ResourceKey<Level> dimKey = null;
+                if (this.layout.dungeonInstance.world != null) {
+                    dimKey = this.layout.dungeonInstance.world.dimension();
+                } else if (worldWriter instanceof ServerLevelAccessor sla) {
+                    dimKey = sla.getLevel().dimension();
+                }
+
+                if (dimKey != null) {
+
+                    DeferredBossSpawner.enqueue(dimKey, bossPos, mobSpawn, radius);
+                }
             }
         }
     }
 
-
     /**
-     * Sets the area of this sector to air for building in from within the chunk position.
+     * Sets the area of this sector to air for building in from within the chunk
+     * position.
      *
      * @param worldWriter The world to create blocks in.
-     * @param world       The world being built in. This cannot be used for placement during WorldGen.
+     * @param world       The world being built in. This cannot be used for
+     *                    placement during WorldGen.
      * @param chunkPos    The chunk position to build within.
-     * @param random      The instance of random, used for characters that are random.
+     * @param random      The instance of random, used for characters that are
+     *                    random.
      */
     public void clearArea(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
         BlockPos startPos = this.getRoomBoundsMin();
@@ -734,25 +741,30 @@ public class SectorInstance {
 
         for (int x = startX; x <= stopX; x++) {
             for (int y = worldStartY; y <= worldStopY; y++) {
-                if (y <= 0 || y >= world.getMaxBuildHeight()) continue;
+                if (y <= 0 || y >= world.getMaxBuildHeight())
+                    continue;
                 for (int z = startZ; z <= stopZ; z++) {
-                    this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, z), Blocks.CAVE_AIR.defaultBlockState(), Direction.SOUTH, random);
+                    this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, z), Blocks.CAVE_AIR.defaultBlockState(),
+                            Direction.SOUTH, random);
                 }
             }
         }
     }
 
-
     /**
      * Builds the floor of this sector from within the chunk position.
      *
      * @param worldWriter The world to create blocks in.
-     * @param world       The world being built in. This cannot be used for placement during WorldGen.
+     * @param world       The world being built in. This cannot be used for
+     *                    placement during WorldGen.
      * @param chunkPos    The chunk position to build within.
-     * @param random      The instance of random, used for characters that are random.
-     * @param offsetY     The Y offset to build the floor at, useful for multiple floor sectors.
+     * @param random      The instance of random, used for characters that are
+     *                    random.
+     * @param offsetY     The Y offset to build the floor at, useful for multiple
+     *                    floor sectors.
      */
-    public void buildFloor(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random, int offsetY) {
+    public void buildFloor(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random,
+            int offsetY) {
         BlockPos startPos = this.getRoomBoundsMin().offset(0, offsetY, 0);
         BlockPos stopPos = this.getRoomBoundsMax().offset(0, offsetY, 0);
         int worldStartX = Math.min(startPos.getX(), stopPos.getX());
@@ -780,7 +792,8 @@ public class SectorInstance {
             for (int x = startX; x <= stopX; x++) {
                 List<Character> row = layer.getRow(x - worldStartX, worldStopX - worldStartX);
                 for (int z = startZ; z <= stopZ; z++) {
-                    char buildChar = layer.getColumn(x - worldStartX, worldStopX - worldStartX, z - worldStartZ, worldStopZ - worldStartZ, row);
+                    char buildChar = layer.getColumn(x - worldStartX, worldStopX - worldStartX, z - worldStartZ,
+                            worldStopZ - worldStartZ, row);
                     BlockPos buildPos = new BlockPos(x, y, z);
                     BlockState blockState = this.theme.getFloor(this, buildChar, random);
                     if (blockState.getBlock() != Blocks.CAVE_AIR) {
@@ -791,14 +804,15 @@ public class SectorInstance {
         }
     }
 
-
     /**
      * Builds the walls of this sector from within the chunk position.
      *
      * @param worldWriter The world to create blocks in.
-     * @param world       The world being built in. This cannot be used for placement during WorldGen.
+     * @param world       The world being built in. This cannot be used for
+     *                    placement during WorldGen.
      * @param chunkPos    The chunk position to build within.
-     * @param random      The instance of random, used for characters that are random.
+     * @param random      The instance of random, used for characters that are
+     *                    random.
      */
     public void buildWalls(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
         BlockPos startPos = this.getRoomBoundsMin();
@@ -833,7 +847,8 @@ public class SectorInstance {
         for (int layerIndex : this.dungeonSector.wall.layers.keySet()) {
             SectorLayer layer = this.dungeonSector.wall.layers.get(layerIndex);
             for (int y = worldStartY; y <= worldStopY; y++) {
-                if (y <= 0 || y >= world.getMaxBuildHeight()) continue;
+                if (y <= 0 || y >= world.getMaxBuildHeight())
+                    continue;
 
                 int progressY = y - worldStartY;
                 int fullY = worldStopY - worldStartY;
@@ -844,20 +859,24 @@ public class SectorInstance {
 
                 if (frontZ >= chunkMinZ && frontZ <= chunkMaxZ) {
                     for (int x = xStart; x <= xStop; x++) {
-                        char buildChar = layer.getColumn(progressY, fullY, x - worldStartX, worldStopX - worldStartX, row);
+                        char buildChar = layer.getColumn(progressY, fullY, x - worldStartX, worldStopX - worldStartX,
+                                row);
                         BlockState blockState = this.theme.getWall(this, buildChar, random);
                         if (blockState.getBlock() != Blocks.CAVE_AIR) {
-                            this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, frontZ), blockState, Direction.SOUTH, random);
+                            this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, frontZ), blockState,
+                                    Direction.SOUTH, random);
                         }
                     }
                 }
 
                 if (backZ >= chunkMinZ && backZ <= chunkMaxZ) {
                     for (int x = xStart; x <= xStop; x++) {
-                        char buildChar = layer.getColumn(progressY, fullY, x - worldStartX, worldStopX - worldStartX, row);
+                        char buildChar = layer.getColumn(progressY, fullY, x - worldStartX, worldStopX - worldStartX,
+                                row);
                         BlockState blockState = this.theme.getWall(this, buildChar, random);
                         if (blockState.getBlock() != Blocks.CAVE_AIR) {
-                            this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, backZ), blockState, Direction.NORTH, random);
+                            this.placeBlock(worldWriter, chunkPos, new BlockPos(x, y, backZ), blockState,
+                                    Direction.NORTH, random);
                         }
                     }
                 }
@@ -867,20 +886,24 @@ public class SectorInstance {
 
                 if (leftX >= chunkMinX && leftX <= chunkMaxX) {
                     for (int z = zStart; z <= zStop; z++) {
-                        char buildChar = layer.getColumn(progressY, fullY, z - worldStartZ, worldStopZ - worldStartZ, row);
+                        char buildChar = layer.getColumn(progressY, fullY, z - worldStartZ, worldStopZ - worldStartZ,
+                                row);
                         BlockState blockState = this.theme.getWall(this, buildChar, random);
                         if (blockState.getBlock() != Blocks.CAVE_AIR) {
-                            this.placeBlock(worldWriter, chunkPos, new BlockPos(leftX, y, z), blockState, Direction.EAST, random);
+                            this.placeBlock(worldWriter, chunkPos, new BlockPos(leftX, y, z), blockState,
+                                    Direction.EAST, random);
                         }
                     }
                 }
 
                 if (rightX >= chunkMinX && rightX <= chunkMaxX) {
                     for (int z = zStart; z <= zStop; z++) {
-                        char buildChar = layer.getColumn(progressY, fullY, z - worldStartZ, worldStopZ - worldStartZ, row);
+                        char buildChar = layer.getColumn(progressY, fullY, z - worldStartZ, worldStopZ - worldStartZ,
+                                row);
                         BlockState blockState = this.theme.getWall(this, buildChar, random);
                         if (blockState.getBlock() != Blocks.CAVE_AIR) {
-                            this.placeBlock(worldWriter, chunkPos, new BlockPos(rightX, y, z), blockState, Direction.WEST, random);
+                            this.placeBlock(worldWriter, chunkPos, new BlockPos(rightX, y, z), blockState,
+                                    Direction.WEST, random);
                         }
                     }
                 }
@@ -888,14 +911,15 @@ public class SectorInstance {
         }
     }
 
-
     /**
      * Builds the ceiling of this sector from within the chunk position.
      *
      * @param worldWriter The world to create blocks in.
-     * @param world       The world being built in. This cannot be used for placement during WorldGen.
+     * @param world       The world being built in. This cannot be used for
+     *                    placement during WorldGen.
      * @param chunkPos    The chunk position to build within.
-     * @param random      The instance of random, used for characters that are random.
+     * @param random      The instance of random, used for characters that are
+     *                    random.
      */
     public void buildCeiling(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
         BlockPos startPos = this.getRoomBoundsMin();
@@ -925,7 +949,8 @@ public class SectorInstance {
             for (int x = startX; x <= stopX; x++) {
                 List<Character> row = layer.getRow(x - worldStartX, worldStopX - worldStartX);
                 for (int z = startZ; z <= stopZ; z++) {
-                    char buildChar = layer.getColumn(x - worldStartX, worldStopX - worldStartX, z - worldStartZ, worldStopZ - worldStartZ, row);
+                    char buildChar = layer.getColumn(x - worldStartX, worldStopX - worldStartX, z - worldStartZ,
+                            worldStopZ - worldStartZ, row);
                     BlockPos buildPos = new BlockPos(x, y, z);
                     BlockState blockState = this.theme.getCeiling(this, buildChar, random);
                     if (blockState.getBlock() != Blocks.CAVE_AIR) {
@@ -940,22 +965,25 @@ public class SectorInstance {
      * Builds the entrances of this sector from within the chunk position.
      *
      * @param worldWriter The world to create blocks in.
-     * @param world       The world being built in. This cannot be used for placement during WorldGen.
+     * @param world       The world being built in. This cannot be used for
+     *                    placement during WorldGen.
      * @param chunkPos    The chunk position to build within.
-     * @param random      The instance of random, used for characters that are random.
+     * @param random      The instance of random, used for characters that are
+     *                    random.
      */
     public void buildEntrances(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
         this.parentConnector.buildEntrance(worldWriter, world, chunkPos, random);
     }
 
-
     /**
      * Builds a set of stairs leading down to a lower room to start the next level.
      *
      * @param worldWriter The world to create blocks in.
-     * @param world       The world being built in. This cannot be used for placement during WorldGen.
+     * @param world       The world being built in. This cannot be used for
+     *                    placement during WorldGen.
      * @param chunkPos    The chunk position to build within.
-     * @param random      The instance of random, used for characters that are random.
+     * @param random      The instance of random, used for characters that are
+     *                    random.
      */
     public void buildStairs(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random) {
         BlockPos startPos = this.getRoomBoundsMin();
@@ -991,7 +1019,8 @@ public class SectorInstance {
         BlockState stairsBlockState = this.stairBlock;
 
         for (int y = startY; y >= stopY; y--) {
-            if (y <= 0 || y >= world.getMaxBuildHeight()) continue;
+            if (y <= 0 || y >= world.getMaxBuildHeight())
+                continue;
             for (int x = startX; x <= stopX; x++) {
                 for (int z = startZ; z <= stopZ; z++) {
                     BlockState blockState = Blocks.CAVE_AIR.defaultBlockState();
@@ -1040,35 +1069,47 @@ public class SectorInstance {
         }
     }
 
-
     /**
      * Spawns a mob in this sector.
      *
      * @param worldWriter The world to create blocks in.
-     * @param world       The world being built in. This cannot be used for placement during WorldGen.
+     * @param world       The world being built in. This cannot be used for
+     *                    placement during WorldGen.
      * @param chunkPos    The chunk position to spawn within.
      * @param blockPos    The position to spawn the mob at.
      * @param mobSpawn    The Mob Spawn entry to use.
-     * @param random      The instance of random, used for mob vacations where applicable.
+     * @param random      The instance of random, used for mob vacations where
+     *                    applicable.
      */
-    public void spawnMob(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, BlockPos blockPos, MobSpawn mobSpawn, RandomSource random) {
+    public void spawnMob(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, BlockPos blockPos,
+            MobSpawn mobSpawn, RandomSource random) {
         int chunkOffset = 8;
-        if (blockPos.getX() < chunkPos.getMinBlockX() + chunkOffset || blockPos.getX() > chunkPos.getMaxBlockX() + chunkOffset) {
+        if (blockPos.getX() < chunkPos.getMinBlockX() + chunkOffset
+                || blockPos.getX() > chunkPos.getMaxBlockX() + chunkOffset) {
             return;
         }
-        if (blockPos.getY() <= 0 || blockPos.getY() >= world.getMaxBuildHeight()) {
+        if (blockPos.getY() < worldWriter.getMinBuildHeight() || blockPos.getY() >= worldWriter.getMaxBuildHeight()) {
             return;
         }
-        if (blockPos.getZ() < chunkPos.getMinBlockZ() + chunkOffset || blockPos.getZ() > chunkPos.getMaxBlockZ() + chunkOffset) {
+        if (blockPos.getZ() < chunkPos.getMinBlockZ() + chunkOffset
+                || blockPos.getZ() > chunkPos.getMaxBlockZ() + chunkOffset) {
             return;
         }
 
-        LMHelperClass.logDebug("Dungeon", "Spawning mob " + mobSpawn + " at: " + blockPos + " level: " + this.parentConnector.level);
-        LivingEntity entityLiving = mobSpawn.createEntity(world);
+
+        Level entityWorld = (world != null) ? world
+                : (worldWriter instanceof ServerLevelAccessor ? ((ServerLevelAccessor) worldWriter).getLevel() : null);
+        if (entityWorld == null) {
+            return;
+        }
+
+        LivingEntity entityLiving = mobSpawn.createEntity(entityWorld);
+        if (entityLiving == null) {
+            return;
+        }
         entityLiving.setPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 
-        if (entityLiving instanceof BaseCreatureEntity) {
-            BaseCreatureEntity entityCreature = (BaseCreatureEntity) entityLiving;
+        if (entityLiving instanceof BaseCreatureEntity entityCreature) {
             Vector3i size = this.getRoomSize();
             int radius = Math.max(3, Math.max(size.x(), size.z()));
             entityCreature.setHome(blockPos.getX(), blockPos.getY(), blockPos.getZ(), radius);
@@ -1077,7 +1118,6 @@ public class SectorInstance {
         mobSpawn.onSpawned(entityLiving, null);
         worldWriter.addFreshEntity(entityLiving);
     }
-
 
     /**
      * Formats this object into a String.
@@ -1092,7 +1132,9 @@ public class SectorInstance {
             bounds = " Bounds: " + this.getOccupiedBoundsMin() + " to " + this.getOccupiedBoundsMax();
             size = " Occupies: " + this.getOccupiedSize();
         }
-        return "Sector Instance Type: " + (this.dungeonSector == null ? "Unset" : this.dungeonSector.type) + " Parent Connector Pos: " + (this.parentConnector == null ? "Unset" : this.parentConnector.position) + size + bounds;
+        return "Sector Instance Type: " + (this.dungeonSector == null ? "Unset" : this.dungeonSector.type)
+                + " Parent Connector Pos: " + (this.parentConnector == null ? "Unset" : this.parentConnector.position)
+                + size + bounds;
     }
 
     public void generateBuildPlan(DungeonBuildPlan plan) {
@@ -1126,7 +1168,8 @@ public class SectorInstance {
 
         for (int x = startX; x <= stopX; x++) {
             for (int y = startY; y <= stopY; y++) {
-                if (y <= 0 || y >= this.layout.dungeonInstance.world.getMaxBuildHeight()) continue;
+                if (y <= 0 || y >= this.layout.dungeonInstance.world.getMaxBuildHeight())
+                    continue;
                 for (int z = startZ; z <= stopZ; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     ChunkPos chunkPos = new ChunkPos(pos);
@@ -1150,14 +1193,16 @@ public class SectorInstance {
 
         for (int layerIndex : this.dungeonSector.floor.layers.keySet()) {
             int y = startY + layerIndex;
-            if (y <= 0 || y >= this.layout.dungeonInstance.world.getMaxBuildHeight()) continue;
+            if (y <= 0 || y >= this.layout.dungeonInstance.world.getMaxBuildHeight())
+                continue;
             SectorLayer layer = this.dungeonSector.floor.layers.get(layerIndex);
             for (int x = startX; x <= stopX; x++) {
                 java.util.List<Character> row = layer.getRow(x - startX, stopX - startX);
                 for (int z = startZ; z <= stopZ; z++) {
                     char c = layer.getColumn(x - startX, stopX - startX, z - startZ, stopZ - startZ, row);
                     BlockState state = this.theme.getFloor(this, c, random);
-                    if (state.getBlock() == net.minecraft.world.level.block.Blocks.CAVE_AIR) continue;
+                    if (state.getBlock() == net.minecraft.world.level.block.Blocks.CAVE_AIR)
+                        continue;
                     BlockPos pos = new BlockPos(x, y, z);
                     ChunkPos chunkPos = new ChunkPos(pos);
                     DungeonBuildPlan.PlannedBlock pb = new DungeonBuildPlan.PlannedBlock(pos, state, Direction.UP);
@@ -1250,7 +1295,8 @@ public class SectorInstance {
                 for (int z = startZ; z <= stopZ; z++) {
                     char buildChar = layer.getColumn(x - startX, stopX - startX, z - startZ, stopZ - startZ, row);
                     BlockState blockState = this.theme.getCeiling(this, buildChar, random);
-                    if (blockState.getBlock() == Blocks.CAVE_AIR) continue;
+                    if (blockState.getBlock() == Blocks.CAVE_AIR)
+                        continue;
 
                     BlockPos buildPos = new BlockPos(x, y, z);
                     ChunkPos chunkPos = new ChunkPos(buildPos);
@@ -1286,7 +1332,8 @@ public class SectorInstance {
         BlockState stairsBlockState = this.stairBlock;
 
         for (int y = startY; y >= stopY; y--) {
-            if (y <= 0 || y >= maxHeight) continue;
+            if (y <= 0 || y >= maxHeight)
+                continue;
 
             for (int x = startX; x <= stopX; x++) {
                 for (int z = startZ; z <= stopZ; z++) {
@@ -1329,7 +1376,8 @@ public class SectorInstance {
                         }
                     }
 
-                    if (blockState.getBlock() == Blocks.CAVE_AIR) continue;
+                    if (blockState.getBlock() == Blocks.CAVE_AIR)
+                        continue;
 
                     BlockPos buildPos = new BlockPos(x, y, z);
                     ChunkPos chunkPos = new ChunkPos(buildPos);
