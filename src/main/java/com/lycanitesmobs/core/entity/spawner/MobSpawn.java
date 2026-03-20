@@ -25,7 +25,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class MobSpawn {
 
     /**
@@ -199,6 +198,8 @@ public class MobSpawn {
      */
     public boolean dungeonBoss = false;
 
+    public String mobId;
+
     /**
      * Loads this Spawn Condition from the provided JSON data.
      *
@@ -209,28 +210,47 @@ public class MobSpawn {
             String mobId = json.get("mobId").getAsString();
 
             CreatureInfo creatureInfo = CreatureManager.getInstance().getCreatureFromId(mobId);
-
             if (creatureInfo != null) {
                 mobSpawn = new MobSpawn(creatureInfo);
-                mobSpawn.loadFromJSON(json);
             } else {
-                Object entityTypeObj = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(mobId));
 
-                if (entityTypeObj instanceof EntityType) {
-                    EntityType entityType = (EntityType) entityTypeObj;
-                    ResourceLocation entityKey = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
-                    if (entityKey != null && LycanitesMobs.MODID.equals(entityKey.getNamespace())) {
-                        mobSpawn = new MobSpawn(entityType);
-                        mobSpawn.loadFromJSON(json);
-                    } else {
-                        LMHelperClass.logWarning("", "[JSONSpawner] Entity type '" + mobId + "' is not from the lycanitesmobs mod namespace. Mob Spawn entry ignored.");
-                    }
-                } else {
-                    LMHelperClass.logWarning("", "[JSONSpawner] Unable to find entity type from the mob id: " + mobId + " Mob Spawn entry ignored.");
-                }
+                mobSpawn = new MobSpawn(mobId);
             }
+            mobSpawn.loadFromJSON(json);
         }
         return mobSpawn;
+    }
+
+    public MobSpawn(String mobId) {
+        this.mobId = mobId;
+    }
+
+    public void resolveEntityType() {
+        if (this.entityType != null || this.creatureInfo != null) {
+            return;
+        }
+        if (this.mobId == null) {
+            return;
+        }
+
+        CreatureInfo info = CreatureManager.getInstance().getCreatureFromId(this.mobId);
+        if (info != null) {
+            this.creatureInfo = info;
+            this.entityType = info.getEntityType();
+            return;
+        }
+
+        ResourceLocation requestedId = new ResourceLocation(this.mobId);
+        EntityType<?> resolved = ForgeRegistries.ENTITY_TYPES.getValue(requestedId);
+        if (resolved != null) {
+            ResourceLocation resolvedKey = ForgeRegistries.ENTITY_TYPES.getKey(resolved);
+
+            if (resolvedKey != null && resolvedKey.equals(requestedId)) {
+                this.entityType = (EntityType<? extends LivingEntity>) (EntityType<?>) resolved;
+                return;
+            }
+        }
+        LMHelperClass.logWarning("", "[JSONSpawner] Could not resolve entity: " + this.mobId);
     }
 
     /**
@@ -356,16 +376,19 @@ public class MobSpawn {
      *
      * @param world                The world to spawn in.
      * @param blockCount           The number of spawn blocks found.
-     * @param biome                The biome to check, if null, the biome check is ignored.
+     * @param biome                The biome to check, if null, the biome check is
+     *                             ignored.
      * @param forceIgnoreDimension If true, the dimension check is ignored.
      *
      */
     public boolean canSpawn(Level world, int blockCount, Biome biome, boolean forceIgnoreDimension) {
-        String mobName = this.creatureInfo != null ? this.creatureInfo.getName() : (this.entityType != null ? this.entityType.toString() : "unknown");
+        String mobName = this.creatureInfo != null ? this.creatureInfo.getName()
+                : (this.entityType != null ? this.entityType.toString() : "unknown");
 
         // Global Check:
         if (!CreatureManager.getInstance().spawnConfig.isAllowedGlobal(world)) {
-            LMHelperClass.logDebug("JSONSpawner", "  REJECTED " + mobName + ": global spawn config disallows this world");
+            LMHelperClass.logDebug("JSONSpawner",
+                    "  REJECTED " + mobName + ": global spawn config disallows this world");
             return false;
         }
 
@@ -399,17 +422,21 @@ public class MobSpawn {
             if (this.creatureInfo.creatureSpawn.worldDayMin > 0) {
                 ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
                 if (worldExt != null) {
-                    int day = (int) Math.floor((worldExt.useTotalWorldTime ? world.getGameTime() : world.getDayTime()) / 24000D);
+                    int day = (int) Math
+                            .floor((worldExt.useTotalWorldTime ? world.getGameTime() : world.getDayTime()) / 24000D);
                     if (day < this.creatureInfo.creatureSpawn.worldDayMin) {
-                        LMHelperClass.logDebug("JSONSpawner", "  REJECTED " + mobName + ": world day " + day + " < required " + this.creatureInfo.creatureSpawn.worldDayMin);
+                        LMHelperClass.logDebug("JSONSpawner", "  REJECTED " + mobName + ": world day " + day
+                                + " < required " + this.creatureInfo.creatureSpawn.worldDayMin);
                         return false;
                     }
                 }
             }
 
             // Dimension:
-            if (!forceIgnoreDimension && !this.ignoreDimension && !this.creatureInfo.creatureSpawn.isAllowedDimension(world)) {
-                LMHelperClass.logDebug("JSONSpawner", "  REJECTED " + mobName + ": dimension not allowed (" + world.dimension().location() + ")");
+            if (!forceIgnoreDimension && !this.ignoreDimension
+                    && !this.creatureInfo.creatureSpawn.isAllowedDimension(world)) {
+                LMHelperClass.logDebug("JSONSpawner",
+                        "  REJECTED " + mobName + ": dimension not allowed (" + world.dimension().location() + ")");
                 return false;
             }
 
@@ -559,7 +586,8 @@ public class MobSpawn {
                 entityCreature.setFixateTarget(player);
             }
             if (this.home >= 0) {
-                entityCreature.setHome((int) entityCreature.position().x(), (int) entityCreature.position().y(), (int) entityCreature.position().z(), (float) this.home);
+                entityCreature.setHome((int) entityCreature.position().x(), (int) entityCreature.position().y(),
+                        (int) entityCreature.position().z(), (float) this.home);
             }
             if (this.mobLevel > 0) {
                 entityCreature.addLevel(this.mobLevel);

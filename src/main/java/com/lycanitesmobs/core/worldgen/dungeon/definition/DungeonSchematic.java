@@ -21,7 +21,10 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.*;
 
 public class DungeonSchematic {
-    /** Dungeon Schematics define actual dungeons to spawn using a collection of Sectors, Themes, etc. **/
+    /**
+     * Dungeon Schematics define actual dungeons to spawn using a collection of
+     * Sectors, Themes, etc.
+     **/
 
     /**
      * The unique name of this dungeon. Required.
@@ -109,7 +112,9 @@ public class DungeonSchematic {
     public List<MobSpawn> mobSpawns = new ArrayList<>();
 
     /**
-     * The loot tables to random use for each level in addition to the specific loot added to this dungeon. If blank, only the specific loot is used. Ex: "minecraft:chests/simple_dungeon". Default: Empty.
+     * The loot tables to random use for each level in addition to the specific loot
+     * added to this dungeon. If blank, only the specific loot is used. Ex:
+     * "minecraft:chests/simple_dungeon". Default: Empty.
      **/
     public Map<Integer, List<String>> lootTables = new HashMap<>();
 
@@ -119,7 +124,6 @@ public class DungeonSchematic {
     public List<ItemDrop> loot = new ArrayList<>();
 
     public List<String> biomeTags = new ArrayList<>();
-
 
     /**
      * Loads this Dungeon Theme from the provided JSON data.
@@ -165,7 +169,8 @@ public class DungeonSchematic {
             while (jsonIterator.hasNext()) {
                 JsonObject conditionJson = jsonIterator.next().getAsJsonObject();
                 SpawnCondition spawnCondition = SpawnCondition.createFromJSON(conditionJson);
-                if (spawnCondition != null) this.conditions.add(spawnCondition);
+                if (spawnCondition != null)
+                    this.conditions.add(spawnCondition);
             }
         }
 
@@ -290,12 +295,12 @@ public class DungeonSchematic {
                 "Dungeon",
                 "[BiomeDebug] Schematic " + this.name +
                         " resolved biomeTags=" + this.biomeTags +
-                        " to biomeIds=" + this.biomeIds
-        );
+                        " to biomeIds=" + this.biomeIds);
     }
 
     /**
-     * Returns if this Dungeon Schematic is allowed to be used for the given world and position.
+     * Returns if this Dungeon Schematic is allowed to be used for the given world
+     * and position.
      *
      * @param world The world to use the Schematic in.
      * @param pos   The position to build a Dungeon from with this Schematic.
@@ -308,7 +313,8 @@ public class DungeonSchematic {
 
         for (SpawnCondition condition : this.conditions) {
             if (!condition.isMet(world, null, pos)) {
-                LMHelperClass.logDebug("Dungeon", "Schematic " + this.name + " spawn condition failed at " + pos + " condition=" + condition);
+                LMHelperClass.logDebug("Dungeon",
+                        "Schematic " + this.name + " spawn condition failed at " + pos + " condition=" + condition);
                 return false;
             }
         }
@@ -317,13 +323,13 @@ public class DungeonSchematic {
 
         Biome biome = world.getBiome(pos).value();
         if (!this.isValidBiome(biome)) {
-            LMHelperClass.logDebug("Dungeon", "Schematic " + this.name + " wrong biome at " + pos + " biome=" + biome.toString());
+            LMHelperClass.logDebug("Dungeon",
+                    "Schematic " + this.name + " wrong biome at " + pos + " biome=" + biome.toString());
             return false;
         }
 
         return true;
     }
-
 
     /**
      * Returns if any of the provided biomes are valid for this dungeon to spawn in.
@@ -350,7 +356,6 @@ public class DungeonSchematic {
         return result;
     }
 
-
     /**
      * Returns a random number of sectors to generate.
      *
@@ -363,7 +368,6 @@ public class DungeonSchematic {
         }
         return this.sectorCountMin + random.nextInt(this.sectorCountMax - this.sectorCountMin + 1);
     }
-
 
     /**
      * Returns a random sector of the provided type.
@@ -404,7 +408,8 @@ public class DungeonSchematic {
             }
         }
         if (sectors.isEmpty()) {
-            LMHelperClass.logWarning("Dungeon", "Unable to find any " + type + " sectors for the dungeon: " + this.name);
+            LMHelperClass.logWarning("Dungeon",
+                    "Unable to find any " + type + " sectors for the dungeon: " + this.name);
             return null;
         }
         if (sectors.size() == 1) {
@@ -423,9 +428,9 @@ public class DungeonSchematic {
         return sectors.get(sectors.size() - 1);
     }
 
-
     /**
-     * Returns the next type of sector that should connect to the parent sector type.
+     * Returns the next type of sector that should connect to the parent sector
+     * type.
      *
      * @param random The instance of Random to use.
      * @return The type of sector to use next.
@@ -442,7 +447,6 @@ public class DungeonSchematic {
         }
         return "room";
     }
-
 
     /**
      * Returns a random Dungeon Theme to generate.
@@ -470,7 +474,6 @@ public class DungeonSchematic {
 
         return themes.get(random.nextInt(themes.size()));
     }
-
 
     /**
      * Gets a weighted random mob to spawn.
@@ -524,9 +527,11 @@ public class DungeonSchematic {
             }
             searchWeight += mobSpawn.getWeight();
         }
+        if (chosenMobSpawn != null) {
+            chosenMobSpawn.resolveEntityType();
+        }
         return chosenMobSpawn;
     }
-
 
     /**
      * Returns a random loot table to apply to a chest.
@@ -560,7 +565,6 @@ public class DungeonSchematic {
 
         return new ResourceLocation(possibleLootTables.get(random.nextInt(possibleLootTables.size())));
     }
-
 
     /**
      * Returns a list of random item stacks to put into a loot chest.

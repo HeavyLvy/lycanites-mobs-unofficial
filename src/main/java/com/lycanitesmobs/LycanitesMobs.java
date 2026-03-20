@@ -42,6 +42,8 @@ import com.lycanitesmobs.core.network.proxy.ServerProxy;
 import com.lycanitesmobs.core.event.SpawnerEventListener;
 import com.lycanitesmobs.core.worldgen.data.WorldgenJsonDumper;
 import com.lycanitesmobs.core.worldgen.feature.DungeonFeature;
+import com.lycanitesmobs.core.worldgen.structure.ModStructureTypes;
+import com.lycanitesmobs.core.worldgen.structure.ModStructurePieceTypes;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -71,7 +73,6 @@ import org.apache.logging.log4j.Logger;
 import static com.lycanitesmobs.core.manager.WorldGenManager.FEATURES;
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.fixMaxHealth;
 
-
 @Mod(LycanitesMobs.MODID)
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class LycanitesMobs {
@@ -93,7 +94,8 @@ public class LycanitesMobs {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.Keys.BLOCKS, MODID);
-    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister
+            .create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
 
     public static EffectManager effectManager;
 
@@ -117,7 +119,6 @@ public class LycanitesMobs {
         StreamLoader.initAll(modInfo.modid);
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-
 
         ITEMS.register(modEventBus);
         BLOCKS.register(modEventBus);
@@ -146,7 +147,6 @@ public class LycanitesMobs {
         this.loadContent();
     }
 
-
     public static void registryObjects() {
         // Blocks and Items:
         ItemManager.getInstance().startup(modInfo);
@@ -159,21 +159,23 @@ public class LycanitesMobs {
     }
 
     /**
-     * Some initialization must be done after registries have been initialized so we do them on common setup
+     * Some initialization must be done after registries have been initialized so we
+     * do them on common setup
      */
     public static void loadValues() {
         var creatureManager = CreatureManager.getInstance();
         for (CreatureInfo creatureInfo : creatureManager.creatures.values()) {
             ResourceLocation id = new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName());
             EntityType<?> t = ForgeRegistries.ENTITY_TYPES.getValue(id);
-            if (t == null || !id.equals(ForgeRegistries.ENTITY_TYPES.getKey(t))) continue;
+            if (t == null || !id.equals(ForgeRegistries.ENTITY_TYPES.getKey(t)))
+                continue;
             creatureInfo.entityType = (EntityType<? extends LivingEntity>) t;
-            EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor, creatureInfo.getName());
+            EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor,
+                    creatureInfo.getName());
             creatureInfo.init();
         }
         ProjectileManager.getInstance().bindRegisteredTypes();
     }
-
 
     // Content Loading:
     public void loadContent() {
@@ -202,7 +204,7 @@ public class LycanitesMobs {
         ItemHalloweenTreat.createObjectLists();
         ItemWinterGift.createObjectLists();
 
-        //Registry Objects
+        // Registry Objects
         LycanitesMobs.registryObjects();
         // World Gen:
         WorldGenManager.getInstance().setupFluidFeatures();
@@ -219,6 +221,9 @@ public class LycanitesMobs {
         loadValues();
 
         event.enqueueWork(() -> {
+            ModStructureTypes.init();
+            ModStructurePieceTypes.init();
+
             WorldGenManager.getInstance().setupFluidFeatures();
             WorldgenJsonDumper.dumpIfDev();
         });
@@ -231,7 +236,7 @@ public class LycanitesMobs {
         TextureManager.getInstance().createTextures(modInfo);
         ModelManager.getInstance().createModels();
         ClientManager.getInstance().initBlockRenderTypes();
-        //New menu screen registration
+        // New menu screen registration
         event.enqueueWork(
                 () -> {
                     MenuScreens.register(CreatureContainer.TYPE, CreatureInventoryScreen::new);
@@ -239,12 +244,9 @@ public class LycanitesMobs {
                     MenuScreens.register(EquipmentForgeContainer.TYPE, EquipmentForgeScreen::new);
                     MenuScreens.register(EquipmentInfuserContainer.TYPE, EquipmentInfuserScreen::new);
                     MenuScreens.register(EquipmentStationContainer.TYPE, EquipmentStationScreen::new);
-                }
-        );
-
+                });
 
     }
-
 
     public void loadConfigs() {
         ItemManager.getInstance().loadConfig();
@@ -255,11 +257,13 @@ public class LycanitesMobs {
 
     private void enqueueIMC(final InterModEnqueueEvent event) {
         // Example code to dispatch IMC to another mod
-        //InterModComms.sendTo("modif", "methodname", () -> { LOGGER.info("Hello world from the MDK"); return "Hello world";});
+        // InterModComms.sendTo("modif", "methodname", () -> { LOGGER.info("Hello world
+        // from the MDK"); return "Hello world";});
     }
 
     private void processIMC(final InterModProcessEvent event) {
         // Example code to receive and process InterModComms from other mods
-        //LOGGER.info("Got IMC {}", event.getIMCStream().map(m->m.getMessageSupplier().get()).collect(Collectors.toList()));
+        // LOGGER.info("Got IMC {}",
+        // event.getIMCStream().map(m->m.getMessageSupplier().get()).collect(Collectors.toList()));
     }
 }

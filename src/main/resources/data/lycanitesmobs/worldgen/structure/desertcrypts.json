@@ -1,0 +1,8 @@
+{
+    "type": "lycanitesmobs:lm_dungeon",
+    "schematic_name": "desertcrypts",
+    "biomes": "#lycanitesmobs:has_structure/desertcrypts",
+    "step": "underground_structures",
+    "terrain_adaptation": "none",
+    "spawn_overrides": {}
+}

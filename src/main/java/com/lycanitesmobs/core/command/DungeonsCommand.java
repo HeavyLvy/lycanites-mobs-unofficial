@@ -33,7 +33,8 @@ public class DungeonsCommand {
         String remaining = builder.getRemaining().toLowerCase();
         DungeonManager manager = DungeonManager.getInstance();
         for (DungeonSchematic schematic : manager.getSchematics()) {
-            if (schematic == null || schematic.name == null) continue;
+            if (schematic == null || schematic.name == null)
+                continue;
             String name = schematic.name;
             if (remaining.isEmpty() || name.toLowerCase().startsWith(remaining)) {
                 builder.suggest(name);
@@ -50,9 +51,7 @@ public class DungeonsCommand {
                 .then(Commands.literal("locate")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .suggests(DUNGEON_SUGGESTIONS)
-                                .executes(DungeonsCommand::locateSpecific)
-                        )
-                );
+                                .executes(DungeonsCommand::locateSpecific)));
     }
 
     public static int reload(final CommandContext<CommandSourceStack> context) {
@@ -106,10 +105,13 @@ public class DungeonsCommand {
 
             if (nearby != null && !nearby.isEmpty()) {
                 for (DungeonInstance instance : nearby) {
-                    if (instance == null || instance.schematic == null || instance.schematic.name == null) continue;
-                    if (!instance.schematic.name.equalsIgnoreCase(targetName)) continue;
+                    if (instance == null || instance.schematic == null || instance.schematic.name == null)
+                        continue;
+                    if (!instance.schematic.name.equalsIgnoreCase(targetName))
+                        continue;
                     BlockPos dungeonOrigin = instance.getOrigin();
-                    if (dungeonOrigin == null) continue;
+                    if (dungeonOrigin == null)
+                        continue;
                     double distSq = dungeonOrigin.distSqr(origin);
                     if (distSq < closestDistSq) {
                         closestDistSq = distSq;
@@ -127,10 +129,8 @@ public class DungeonsCommand {
                     () -> Component.literal(
                             "Nearest generated \"" + finalClosest.schematic.name + "\" at " +
                                     pos.getX() + ", " + pos.getY() + ", " + pos.getZ() +
-                                    " (" + String.format("%.1f", distance) + " blocks away)"
-                    ),
-                    false
-            );
+                                    " (" + String.format("%.1f", distance) + " blocks away)"),
+                    false);
             return 1;
         }
 
@@ -148,7 +148,8 @@ public class DungeonsCommand {
 
         BlockPos theoretical = StructureSpawnEvents.findNearestTheoreticalDungeon(level, schematic, origin, 128);
         if (theoretical == null) {
-            source.sendFailure(Component.literal("No valid theoretical location found for \"" + targetName + "\" within search radius."));
+            source.sendFailure(Component
+                    .literal("No valid theoretical location found for \"" + targetName + "\" within search radius."));
             return 0;
         }
 
@@ -158,21 +159,29 @@ public class DungeonsCommand {
         String tp = String.format("/tp %d %d %d", theoretical.getX(), theoretical.getY(), theoretical.getZ());
 
         Component coords = Component.literal(
-                "[" + theoretical.getX() + ", " + theoretical.getY() + ", " + theoretical.getZ() + "]"
-        ).withStyle(style -> style
-                .withColor(ChatFormatting.GREEN)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, tp))
-                .withHoverEvent(new HoverEvent(
-                        HoverEvent.Action.SHOW_TEXT,
-                        Component.literal("Click to teleport")
-                ))
-        );
+                "[" + theoretical.getX() + ", " + theoretical.getY() + ", " + theoretical.getZ() + "]")
+                .withStyle(style -> style
+                        .withColor(ChatFormatting.GREEN)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, tp))
+                        .withHoverEvent(new HoverEvent(
+                                HoverEvent.Action.SHOW_TEXT,
+                                Component.literal("Click to teleport"))));
 
         Component message = Component.literal("Nearest " + schematic.name + " is at ")
                 .append(coords)
                 .append(Component.literal(" (" + String.format("%.0f", distanceTheo) + " blocks away)"));
 
         source.sendSuccess(() -> message, false);
+
+        String nativeCmd = "/locate structure lycanitesmobs:" + schematic.name;
+        source.sendSuccess(() -> Component.literal("Tip: ").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(nativeCmd).withStyle(style -> style
+                        .withColor(ChatFormatting.AQUA)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, nativeCmd))
+                        .withHoverEvent(new HoverEvent(
+                                HoverEvent.Action.SHOW_TEXT,
+                                Component.literal("Click to use native locate"))))),
+                false);
 
         return 1;
     }
