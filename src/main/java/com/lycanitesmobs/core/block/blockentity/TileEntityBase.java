@@ -12,6 +12,7 @@ import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import com.lycanitesmobs.core.manager.ObjectManager;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -36,14 +37,10 @@ public abstract class TileEntityBase extends BlockEntity implements WorldlyConta
         return registryName = new ResourceLocation(modID, blockName);
     }
 
-    /**
-     * Gets the Tile Entity Type used by this Tile Entity. Should be overridden.
-     *
-     * @return The Tile Entity Type.
-     */
     @Override
     public BlockEntityType<?> getType() {
-        return super.getType();
+        BlockEntityType<?> type = ObjectManager.tileEntityTypes.get(this.getClass());
+        return type != null ? type : super.getType();
     }
 
 

@@ -1,6 +1,5 @@
 package com.lycanitesmobs.core.block.blockentity;
 
-import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -13,7 +12,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class EquipmentInfuserTileEntity extends TileEntityBase {
@@ -34,11 +32,6 @@ public class EquipmentInfuserTileEntity extends TileEntityBase {
 
     public Component getName() {
         return Component.translatable("block.lycanitesmobs.equipment_infuser");
-    }
-
-    @Override
-    public BlockEntityType<?> getType() {
-        return ObjectManager.tileEntityTypes.get(this.getClass());
     }
 
     @Override

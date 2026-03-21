@@ -1,6 +1,5 @@
 package com.lycanitesmobs.core.block.blockentity;
 
-import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
@@ -39,11 +38,6 @@ public class TileEntityEquipmentForge extends TileEntityBase {
      */
     public TileEntityEquipmentForge(BlockPos pos, BlockState state) {
         super(pos, state);
-    }
-
-    @Override
-    public BlockEntityType<?> getType() {
-        return ObjectManager.tileEntityTypes.get(this.getClass());
     }
 
     @Override

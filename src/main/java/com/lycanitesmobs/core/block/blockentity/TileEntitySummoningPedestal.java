@@ -1,7 +1,6 @@
 package com.lycanitesmobs.core.block.blockentity;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.block.special.BlockSummoningPedestal;
 import com.lycanitesmobs.core.data.config.ConfigExtra;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
@@ -32,7 +31,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -83,11 +81,6 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
     public TileEntitySummoningPedestal(BlockPos pos, BlockState state) {
         super(pos, state);
         this.summoningFuelMax = ConfigExtra.INSTANCE.summoningPedestalRedstoneTime.get();
-    }
-
-    @Override
-    public BlockEntityType<?> getType() {
-        return ObjectManager.tileEntityTypes.get(this.getClass());
     }
 
     /**
