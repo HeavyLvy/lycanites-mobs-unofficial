@@ -37,6 +37,12 @@ public class DungeonSchematic {
     public boolean enabled = true;
 
     /**
+     * If true, air spaces and waterloggable blocks below sea level will be filled/waterlogged during placement.
+     * Used for underwater dungeons such as the streamshrine.
+     **/
+    public boolean waterlogged = false;
+
+    /**
      * The minimum amount of sectors this dungeon should have in total.
      **/
     public int sectorCountMin = 5;
@@ -133,6 +139,9 @@ public class DungeonSchematic {
 
         if (json.has("enabled"))
             this.enabled = json.get("enabled").getAsBoolean();
+
+        if (json.has("waterlogged"))
+            this.waterlogged = json.get("waterlogged").getAsBoolean();
 
         if (json.has("sectorCountMin"))
             this.sectorCountMin = json.get("sectorCountMin").getAsInt();

@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.joml.Vector3i;
 
@@ -629,6 +630,15 @@ public class SectorInstance {
                 || blockState.getBlock() instanceof BlockPoisonCloud
                 || blockState.getBlock() instanceof BlockFrostCloud) {
             flags = 0;
+        }
+
+        if (this.layout.dungeonInstance.schematic.waterlogged && blockPos.getY() < worldWriter.getSeaLevel()) {
+            if (blockState.getBlock() == Blocks.AIR || blockState.getBlock() == Blocks.CAVE_AIR) {
+                blockState = Blocks.WATER.defaultBlockState();
+                flags = 2;
+            } else if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)) {
+                blockState = blockState.setValue(BlockStateProperties.WATERLOGGED, true);
+            }
         }
 
         worldWriter.setBlock(blockPos, blockState, flags);
