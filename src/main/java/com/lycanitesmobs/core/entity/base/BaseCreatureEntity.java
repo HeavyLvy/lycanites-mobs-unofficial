@@ -87,6 +87,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.network.NetworkHooks;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -2730,7 +2731,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
                 yAmount,
                 zAmount * distance + this.getDeltaMovement().z() * 0.2D
         );
-        net.minecraftforge.common.ForgeHooks.onLivingJump(this);
+        ForgeHooks.onLivingJump(this);
     }
 
     // ========== Set AI Speed ==========
@@ -2782,7 +2783,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
                     leapHeight,
                     zDist / xzDist * 0.5D * 0.8D + this.getDeltaMovement().z() * 0.2D
             );
-            net.minecraftforge.common.ForgeHooks.onLivingJump(this);
+            ForgeHooks.onLivingJump(this);
         }
     }
 
@@ -3623,7 +3624,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if (this.isInvulnerableTo(damageSrc)) {
             return;
         }
-        damageAmount = net.minecraftforge.common.ForgeHooks.onLivingHurt(this, damageSrc, damageAmount);
+        damageAmount = ForgeHooks.onLivingHurt(this, damageSrc, damageAmount);
         if (damageAmount <= 0)
             return;
 
@@ -3646,7 +3647,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             ((ServerPlayer) damageSrc.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(absorbedDamage * 10.0F));
         }
 
-        damageAmount = net.minecraftforge.common.ForgeHooks.onLivingDamage(this, damageSrc, damageAmount);
+        damageAmount = ForgeHooks.onLivingDamage(this, damageSrc, damageAmount);
         if (damageAmount != 0.0F) {
             float healthBeforeDamage = this.getHealth();
             this.getCombatTracker().recordDamage(damageSrc, damageAmount);
@@ -4774,7 +4775,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
         int lootingLevel = 0;
         if (damageSource.getEntity() != null) {
-            lootingLevel = net.minecraftforge.common.ForgeHooks.getLootingLevel(this, damageSource.getEntity(), damageSource);
+            lootingLevel = ForgeHooks.getLootingLevel(this, damageSource.getEntity(), damageSource);
         }
 
         for (ItemDrop itemDrop : this.drops) {

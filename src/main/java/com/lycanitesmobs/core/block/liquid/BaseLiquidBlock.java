@@ -16,7 +16,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -29,6 +31,8 @@ public class BaseLiquidBlock extends LiquidBlock implements BlockTypeGetter {
     protected ElementInfo element;
     protected boolean destroyItems = true;
     public ResourceLocation registryName;
+
+    private static final String LAVA_ELEMENT = "lava";
 
     public BaseLiquidBlock(Supplier<? extends FlowingFluid> p_54694_, Properties p_54695_) {
         super(p_54694_, p_54695_);
@@ -89,6 +93,28 @@ public class BaseLiquidBlock extends LiquidBlock implements BlockTypeGetter {
             return false;
         }
         return true;
+    }
+
+    protected boolean isWaterLikeFluid(Level world, BlockPos pos) {
+        FluidState fluidState = world.getFluidState(pos);
+        if (fluidState.is(FluidTags.WATER)) return true;
+        BlockState blockState = world.getBlockState(pos);
+        if (blockState.getBlock() instanceof BaseLiquidBlock liquidBlock) {
+            ElementInfo neighborElement = liquidBlock.getElement();
+            return neighborElement != null && !LAVA_ELEMENT.equals(neighborElement.name);
+        }
+        return false;
+    }
+
+    protected boolean isLavaLikeFluid(Level world, BlockPos pos) {
+        FluidState fluidState = world.getFluidState(pos);
+        if (fluidState.is(FluidTags.LAVA)) return true;
+        BlockState blockState = world.getBlockState(pos);
+        if (blockState.getBlock() instanceof BaseLiquidBlock liquidBlock) {
+            ElementInfo neighborElement = liquidBlock.getElement();
+            return neighborElement != null && LAVA_ELEMENT.equals(neighborElement.name);
+        }
+        return false;
     }
 
 

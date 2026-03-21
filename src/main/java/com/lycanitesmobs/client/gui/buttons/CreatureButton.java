@@ -3,9 +3,13 @@ package com.lycanitesmobs.client.gui.buttons;
 import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 
 public class CreatureButton extends ButtonBase {
     public CreatureInfo creatureInfo;
@@ -22,24 +26,24 @@ public class CreatureButton extends ButtonBase {
         if (!this.visible) return;
         super.renderWidget(g, mouseX, mouseY, partialTicks);
 
-        com.mojang.blaze3d.systems.RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionTexShader);
-        com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
         this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
 
         int buttonX = this.getX();
         int buttonY = this.getY();
 
-        net.minecraft.resources.ResourceLocation bg = TextureManager.getTexture("GUIInventoryCreature");
+        ResourceLocation bg = TextureManager.getTexture("GUIInventoryCreature");
         int stateVOffset = 0;
         if (this.isHovered()) stateVOffset = 64;
-        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(net.minecraft.client.Minecraft.getInstance().player);
+        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(Minecraft.getInstance().player);
         if (playerExt != null && playerExt.selectedSummonSet == this.summonSetId) stateVOffset = 32;
 
         g.blit(bg, buttonX, buttonY, 193, 187 - stateVOffset, this.width, this.height);
 
         if (this.creatureInfo != null) {
-            net.minecraft.resources.ResourceLocation icon = this.creatureInfo.getIcon();
+            ResourceLocation icon = this.creatureInfo.getIcon();
             g.blit(icon, buttonX + 8, buttonY + 8, 0, 0, 16, 16, 16, 16);
         }
 

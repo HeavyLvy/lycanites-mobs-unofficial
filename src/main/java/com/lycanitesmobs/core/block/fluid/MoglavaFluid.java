@@ -22,7 +22,7 @@ public abstract class MoglavaFluid extends ForgeFlowingFluid {
         if (dir == Direction.DOWN) {
             FluidState fluidBelow = level.getFluidState(pos);
 
-            if (this.is(FluidTags.LAVA) && fluidBelow.is(FluidTags.WATER)) {
+            if (fluidBelow.is(FluidTags.WATER)) {
                 if (blockState.getBlock() instanceof LiquidBlock) {
                     level.setBlock(pos, Blocks.OBSIDIAN.defaultBlockState(), 3);
                 }

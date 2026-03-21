@@ -219,12 +219,20 @@ public class ObjectManager {
     // ========== Damage Source ==========
     public static DamageSource getDamageSource(Level level, String name) {
         ResourceKey<DamageType> key = damageTypeKeys.get(name.toLowerCase());
+        if (key == null) {
+            LMHelperClass.logWarning("ObjectManager", "Unknown damage type: " + name);
+            return level.damageSources().generic();
+        }
         Holder<DamageType> holder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key);
         return new DamageSource(holder);
     }
 
     public static DamageSource getDamageSource(Level level, String name, @Nullable Entity direct, @Nullable Entity causing) {
         ResourceKey<DamageType> key = damageTypeKeys.get(name.toLowerCase());
+        if (key == null) {
+            LMHelperClass.logWarning("ObjectManager", "Unknown damage type: " + name);
+            return level.damageSources().generic();
+        }
         Holder<DamageType> holder = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key);
         return new DamageSource(holder, direct, causing);
     }

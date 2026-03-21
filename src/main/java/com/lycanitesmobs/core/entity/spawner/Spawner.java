@@ -456,7 +456,7 @@ public class Spawner {
         return false;
     }
 
-
+    // TODO: Replace this with something better
     /**
      * Starts a new spawn, usually called from trigger() when the count is sufficient.
      *
@@ -533,6 +533,7 @@ public class Spawner {
         }
 
         int mobsSpawned = 0;
+        Map<String, Integer> spawnGroupCounts = new HashMap<>();
         for (BlockPos spawnPos : spawnPositions) {
             if (mobsSpawned >= mobCount) {
                 break;
@@ -554,6 +555,18 @@ public class Spawner {
             }
             if (mobSpawn == null) {
                 continue;
+            }
+
+            if (mobSpawn.creatureInfo != null) {
+                String creatureName = mobSpawn.creatureInfo.getName();
+                int groupMax = mobSpawn.creatureInfo.creatureSpawn.spawnGroupMax;
+                if (groupMax > 0) {
+                    int alreadySpawned = spawnGroupCounts.getOrDefault(creatureName, 0);
+                    if (alreadySpawned >= groupMax) {
+                        LMHelperClass.logDebug("JSONSpawner", "  SKIP " + creatureName + " @ " + spawnPos + ": spawnGroupMax reached (" + groupMax + ")");
+                        continue;
+                    }
+                }
             }
 
             // Create Entity:
@@ -597,6 +610,10 @@ public class Spawner {
             String spawnedName = mobSpawn.creatureInfo != null ? mobSpawn.creatureInfo.getName() : String.valueOf(mobSpawn.entityType);
             LMHelperClass.logDebug("JSONSpawner", "  SPAWNED " + spawnedName + " @ " + spawnPos);
             mobsSpawned++;
+
+            if (mobSpawn.creatureInfo != null) {
+                spawnGroupCounts.merge(mobSpawn.creatureInfo.getName(), 1, Integer::sum);
+            }
         }
 
         LMHelperClass.logDebug("JSONSpawner", "=== " + this.name + " done: " + mobsSpawned + "/" + mobCount + " spawned ===");

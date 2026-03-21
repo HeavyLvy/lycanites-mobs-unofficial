@@ -3,7 +3,6 @@ package com.lycanitesmobs.core.block.liquid;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -12,7 +11,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -25,10 +23,7 @@ public class MoglavaLiquidBlock extends BaseLiquidBlock {
 
     @Override
     public boolean shouldSpreadLiquid(Level world, BlockPos neighborBlockPos, BlockState blockState) {
-        BlockState neighborBlockState = world.getBlockState(neighborBlockPos);
-        FluidState neighborFluidState = neighborBlockState.getFluidState();
-
-        if (neighborFluidState.is(FluidTags.WATER)) {
+        if (isWaterLikeFluid(world, neighborBlockPos)) {
             world.setBlock(neighborBlockPos, Blocks.STONE.defaultBlockState(), 2);
             return false;
         }

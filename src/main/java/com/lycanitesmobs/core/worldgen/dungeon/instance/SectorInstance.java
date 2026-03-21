@@ -13,6 +13,7 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -689,7 +690,7 @@ public class SectorInstance {
                 int radius = Math.max(3, Math.max(size.x(), size.z()));
 
 
-                net.minecraft.resources.ResourceKey<Level> dimKey = null;
+                ResourceKey<Level> dimKey = null;
                 if (this.layout.dungeonInstance.world != null) {
                     dimKey = this.layout.dungeonInstance.world.dimension();
                 } else if (worldWriter instanceof ServerLevelAccessor sla) {
@@ -1172,7 +1173,7 @@ public class SectorInstance {
                 for (int z = startZ; z <= stopZ; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     ChunkPos chunkPos = new ChunkPos(pos);
-                    BlockState state = net.minecraft.world.level.block.Blocks.CAVE_AIR.defaultBlockState();
+                    BlockState state = Blocks.CAVE_AIR.defaultBlockState();
                     DungeonBuildPlan.PlannedBlock pb = new DungeonBuildPlan.PlannedBlock(pos, state, Direction.SOUTH);
                     plan.add(chunkPos, pb);
                 }
@@ -1196,11 +1197,11 @@ public class SectorInstance {
                 continue;
             SectorLayer layer = this.dungeonSector.floor.layers.get(layerIndex);
             for (int x = startX; x <= stopX; x++) {
-                java.util.List<Character> row = layer.getRow(x - startX, stopX - startX);
+                List<Character> row = layer.getRow(x - startX, stopX - startX);
                 for (int z = startZ; z <= stopZ; z++) {
                     char c = layer.getColumn(x - startX, stopX - startX, z - startZ, stopZ - startZ, row);
                     BlockState state = this.theme.getFloor(this, c, random);
-                    if (state.getBlock() == net.minecraft.world.level.block.Blocks.CAVE_AIR)
+                    if (state.getBlock() == Blocks.CAVE_AIR)
                         continue;
                     BlockPos pos = new BlockPos(x, y, z);
                     ChunkPos chunkPos = new ChunkPos(pos);

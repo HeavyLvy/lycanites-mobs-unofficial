@@ -24,6 +24,8 @@ import net.minecraft.world.entity.Pose;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderNameTagEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Event;
 
 @OnlyIn(Dist.CLIENT)
 public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<T, CreatureModel<T>> {
@@ -150,8 +152,8 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         // Render Name Tag
         if (!invisible) {
             RenderNameTagEvent renderNameplateEvent = new RenderNameTagEvent(entity, entity.getDisplayName(), this, matrixStack, renderTypeBuffer, fade, time);
-            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(renderNameplateEvent);
-            if (renderNameplateEvent.getResult() != net.minecraftforge.eventbus.api.Event.Result.DENY && (renderNameplateEvent.getResult() == net.minecraftforge.eventbus.api.Event.Result.ALLOW || this.shouldShowName(entity))) {
+            MinecraftForge.EVENT_BUS.post(renderNameplateEvent);
+            if (renderNameplateEvent.getResult() != Event.Result.DENY && (renderNameplateEvent.getResult() == Event.Result.ALLOW || this.shouldShowName(entity))) {
                 MutableComponent entityName = entity.getName().copy();
                 if (entityName != null) {
                     this.renderNameTag(entity, entityName, matrixStack, renderTypeBuffer, brightness);

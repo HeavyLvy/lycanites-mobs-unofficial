@@ -1,10 +1,8 @@
 package com.lycanitesmobs.core.util.helpers;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.Material;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
@@ -14,8 +12,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.BiomeManager;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.tags.ITagManager;
 import org.joml.Vector3d;
 
 import java.util.*;
@@ -228,9 +226,9 @@ public class JSONHelper {
             ResourceLocation tagLoc = new ResourceLocation(entry);
             List<String> selectedBiomeIds = new ArrayList<>();
 
-            net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome> vanillaKey =
-                    net.minecraft.tags.TagKey.create(
-                            net.minecraft.core.registries.Registries.BIOME,
+            TagKey<Biome> vanillaKey =
+                    TagKey.create(
+                            Registries.BIOME,
                             tagLoc
                     );
 
@@ -245,19 +243,19 @@ public class JSONHelper {
                         })
                 );
             } else {
-                net.minecraftforge.registries.tags.ITagManager<net.minecraft.world.level.biome.Biome> forgeTagManager =
-                        net.minecraftforge.registries.ForgeRegistries.BIOMES.tags();
+                ITagManager<Biome> forgeTagManager =
+                        ForgeRegistries.BIOMES.tags();
 
-                net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome> forgeKey =
-                        net.minecraft.tags.TagKey.create(
-                                net.minecraftforge.registries.ForgeRegistries.Keys.BIOMES,
+                TagKey<Biome> forgeKey =
+                        TagKey.create(
+                                ForgeRegistries.Keys.BIOMES,
                                 tagLoc
                         );
 
                 var forgeTag = forgeTagManager.getTag(forgeKey);
                 if (!forgeTag.isEmpty()) {
                     forgeTag.forEach(biome -> {
-                        ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.BIOMES.getKey(biome);
+                        ResourceLocation id = ForgeRegistries.BIOMES.getKey(biome);
                         if (id != null) {
                             selectedBiomeIds.add(id.toString());
                         }

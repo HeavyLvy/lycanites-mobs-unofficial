@@ -5,7 +5,6 @@ import com.lycanitesmobs.core.entity.creature.insect.EntityVespidQueen;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,7 +13,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -28,14 +26,12 @@ public class VeshoneyLiquidBlock extends BaseLiquidBlock {
 
     @Override
     public boolean shouldSpreadLiquid(Level world, BlockPos neighborBlockPos, BlockState blockState) {
-        FluidState neighborFluid = world.getFluidState(neighborBlockPos);
-
-        if (neighborFluid.is(FluidTags.WATER)) {
+        if (isWaterLikeFluid(world, neighborBlockPos)) {
             world.setBlock(neighborBlockPos, Blocks.DIRT.defaultBlockState(), 4);
             return false;
         }
 
-        if (neighborFluid.is(FluidTags.LAVA)) {
+        if (isLavaLikeFluid(world, neighborBlockPos)) {
             world.setBlock(neighborBlockPos, Blocks.COBBLESTONE.defaultBlockState(), 4);
             return false;
         }

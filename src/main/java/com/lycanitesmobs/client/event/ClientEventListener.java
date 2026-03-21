@@ -6,7 +6,9 @@ import com.lycanitesmobs.client.gui.screen.beastiary.CreaturesBeastiaryScreen;
 import com.lycanitesmobs.client.gui.screen.beastiary.IndexBeastiaryScreen;
 import com.lycanitesmobs.client.gui.screen.beastiary.PetsBeastiaryScreen;
 import com.lycanitesmobs.client.gui.screen.beastiary.SummoningBeastiaryScreen;
+import com.lycanitesmobs.client.gui.screen.creature.CreatureRecolorScreen;
 import com.lycanitesmobs.client.loader.LanguageLoader;
+import com.lycanitesmobs.client.loader.ModelReloadListener;
 import com.lycanitesmobs.client.manager.KeyManager;
 import com.lycanitesmobs.client.manager.TabManager;
 import com.lycanitesmobs.client.model.blocky.*;
@@ -15,6 +17,7 @@ import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.entity.projectile.ProjectileRenderFactory;
 import com.lycanitesmobs.client.renderer.misc.NoneRenderer;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
+import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.data.info.creature.CreatureType;
@@ -43,6 +46,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -56,6 +60,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.IOException;
 import java.util.Objects;
 
 @Mod.EventBusSubscriber(
@@ -90,13 +95,13 @@ public class ClientEventListener {
     @SubscribeEvent
     public static void onRegisterClientReloadListeners(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(LanguageLoader.getInstance());
-        event.registerReloadListener(com.lycanitesmobs.client.loader.ModelReloadListener.INSTANCE);
+        event.registerReloadListener(ModelReloadListener.INSTANCE);
     }
 
     @SubscribeEvent
-    public static void onRegisterShaders(RegisterShadersEvent event) throws java.io.IOException {
+    public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
         var rp = event.getResourceProvider();
-        var shader = new ShaderInstance(rp, new net.minecraft.resources.ResourceLocation(LycanitesMobs.MODID, "pos_tex_normal"), CustomRenderStates.POS_TEX_NORMAL);
+        var shader = new ShaderInstance(rp, new ResourceLocation(LycanitesMobs.MODID, "pos_tex_normal"), CustomRenderStates.POS_TEX_NORMAL);
         event.registerShader(shader, s -> CustomRenderStates.POS_TEX_NORMAL_SHADER = s);
     }
 
@@ -359,10 +364,10 @@ public class ClientEventListener {
         if (event.getButton() == 1 && event.getAction() == GLFW.GLFW_PRESS) {
             if (mc.hitResult.getType() == HitResult.Type.ENTITY) {
                 Entity entityHit = ((EntityHitResult) mc.hitResult).getEntity();
-                if (entityHit instanceof com.lycanitesmobs.core.entity.base.BaseCreatureEntity creature) {
+                if (entityHit instanceof BaseCreatureEntity creature) {
                     var held = mc.player.getMainHandItem();
-                    if (held.getItem() == net.minecraft.world.item.Items.STICK) {
-                        mc.setScreen(new com.lycanitesmobs.client.gui.screen.creature.CreatureRecolorScreen(creature));
+                    if (held.getItem() == Items.STICK) {
+                        mc.setScreen(new CreatureRecolorScreen(creature));
                     }
                 }
             }

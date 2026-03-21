@@ -92,7 +92,7 @@ public class ProjectileManager extends JSONLoader {
             LycanitesMobs.ENTITY_TYPES.register(projectileInfo, () -> this.createEntityType(projectileInfo, this.oldSpriteProjectiles.get(projectileInfo)));
         }
         for (String projectileInfo : this.oldModelProjectiles.keySet()) {
-            LycanitesMobs.ENTITY_TYPES.register(projectileInfo, () -> this.createEntityType(projectileInfo, this.oldSpriteProjectiles.get(projectileInfo)));
+            LycanitesMobs.ENTITY_TYPES.register(projectileInfo, () -> this.createEntityType(projectileInfo, this.oldModelProjectiles.get(projectileInfo)));
         }
     }
 

@@ -6,11 +6,14 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
+
+import org.joml.Quaternionf;
 
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -478,7 +481,7 @@ public class CreatureRecolorScreen extends BaseScreen {
         if (insidePreview(mouseX, mouseY)) {
             float zoomStep = 0.1F;
             previewZoom += (float) delta * zoomStep;
-            previewZoom = net.minecraft.util.Mth.clamp(previewZoom, 0.3F, 2.5F);
+            previewZoom = Mth.clamp(previewZoom, 0.3F, 2.5F);
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, delta);
@@ -526,8 +529,8 @@ public class CreatureRecolorScreen extends BaseScreen {
         pose.scale(scale, scale, scale);
 
         float radPitch = pitchDegrees * ((float) Math.PI / 180F);
-        org.joml.Quaternionf qz = new org.joml.Quaternionf().rotateZ((float) Math.PI);
-        org.joml.Quaternionf qx = new org.joml.Quaternionf().rotateX(radPitch);
+        Quaternionf qz = new Quaternionf().rotateZ((float) Math.PI);
+        Quaternionf qx = new Quaternionf().rotateX(radPitch);
         pose.mulPose(qz);
         pose.mulPose(qx);
 

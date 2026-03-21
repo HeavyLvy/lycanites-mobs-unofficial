@@ -4,7 +4,6 @@ import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -16,7 +15,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -29,14 +27,12 @@ public class AcidLiquidBlock extends BaseLiquidBlock {
 
     @Override
     public boolean shouldSpreadLiquid(Level world, BlockPos neighborBlockPos, BlockState blockState) {
-        FluidState neighborFluid = world.getFluidState(neighborBlockPos);
-
-        if (neighborFluid.is(FluidTags.WATER)) {
+        if (isWaterLikeFluid(world, neighborBlockPos)) {
             world.setBlock(neighborBlockPos, Blocks.DIORITE.defaultBlockState(), 4);
             return false;
         }
 
-        if (neighborFluid.is(FluidTags.LAVA)) {
+        if (isLavaLikeFluid(world, neighborBlockPos)) {
             world.setBlock(neighborBlockPos, Blocks.GRANITE.defaultBlockState(), 4);
             return false;
         }

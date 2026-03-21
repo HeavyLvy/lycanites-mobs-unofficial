@@ -6,12 +6,14 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraftforge.api.distmarker.Dist;
@@ -129,12 +131,12 @@ public class EntityKhalk extends TameableCreatureEntity implements Enemy, IGroup
 
                         boolean center = x == (int) this.position().x() && y == (int) this.position().y() && z == (int) this.position().z();
                         BlockState s = Blocks.LAVA.defaultBlockState();
-                        if (s.hasProperty(net.minecraft.world.level.block.LiquidBlock.LEVEL)) {
-                            var p = net.minecraft.world.level.block.LiquidBlock.LEVEL;
+                        if (s.hasProperty(LiquidBlock.LEVEL)) {
+                            var p = LiquidBlock.LEVEL;
                             int min = p.getPossibleValues().stream().mapToInt(Integer::intValue).min().orElse(0);
                             int max = p.getPossibleValues().stream().mapToInt(Integer::intValue).max().orElse(15);
                             int v = center ? 0 : 8;
-                            s = s.setValue(p, net.minecraft.util.Mth.clamp(v, min, max));
+                            s = s.setValue(p, Mth.clamp(v, min, max));
                         }
 
                         this.getCommandSenderWorld().setBlock(mpos, s, 3);
