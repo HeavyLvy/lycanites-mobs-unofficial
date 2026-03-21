@@ -680,7 +680,8 @@ public class SectorInstance {
         }
         this.buildEntrances(worldWriter, world, chunkPos, random);
         this.chunksBuilt++;
-        if ("bossRoom".equalsIgnoreCase(this.dungeonSector.type)) {
+        if ("bossRoom".equalsIgnoreCase(this.dungeonSector.type)
+                && this.chunksBuilt >= this.getChunkPositions().size()) {
             MobSpawn mobSpawn = this.layout.dungeonInstance.schematic.getRandomMobSpawn(this.parentConnector.level,
                     true, random);
             if (mobSpawn != null && (mobSpawn.entityType != null || mobSpawn.mobId != null)) {
@@ -688,7 +689,6 @@ public class SectorInstance {
 
                 Vector3i size = this.getRoomSize();
                 int radius = Math.max(3, Math.max(size.x(), size.z()));
-
 
                 ResourceKey<Level> dimKey = null;
                 if (this.layout.dungeonInstance.world != null) {
@@ -698,7 +698,6 @@ public class SectorInstance {
                 }
 
                 if (dimKey != null) {
-
                     DeferredBossSpawner.enqueue(dimKey, bossPos, mobSpawn, radius);
                 }
             }

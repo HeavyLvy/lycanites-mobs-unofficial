@@ -8,20 +8,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DeferredBossSpawner {
-
-    private static final int STARTUP_DELAY_TICKS = 200;
 
     private static class BossSpawnRequest {
         final ResourceKey<Level> dimension;
@@ -37,52 +34,37 @@ public class DeferredBossSpawner {
         }
     }
 
-    private static final ConcurrentLinkedQueue<BossSpawnRequest> PENDING = new ConcurrentLinkedQueue<>();
-    private static final Set<Long> ENQUEUED_POSITIONS = ConcurrentHashMap.newKeySet();
-    private static final AtomicInteger tickCounter = new AtomicInteger(0);
+    private static final Map<Long, BossSpawnRequest> PENDING = new ConcurrentHashMap<>();
 
     public static void enqueue(ResourceKey<Level> dimension, BlockPos pos, MobSpawn mobSpawn, int roomRadius) {
-        long posKey = pos.asLong();
-        if (ENQUEUED_POSITIONS.add(posKey)) {
-            PENDING.add(new BossSpawnRequest(dimension, pos, mobSpawn, roomRadius));
-        }
+        long chunkKey = new ChunkPos(pos).toLong();
+        PENDING.putIfAbsent(chunkKey, new BossSpawnRequest(dimension, pos, mobSpawn, roomRadius));
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
-
-        int ticks = tickCounter.incrementAndGet();
-        if (ticks < STARTUP_DELAY_TICKS) {
-            return;
-        }
-
+    public static void onChunkLoad(ChunkEvent.Load event) {
         if (PENDING.isEmpty()) {
             return;
         }
+        if (!(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
 
-        int processed = 0;
-        BossSpawnRequest request;
-        while (processed < 3 && (request = PENDING.poll()) != null) {
-            try {
-                ENQUEUED_POSITIONS.remove(request.pos.asLong());
+        long chunkKey = event.getChunk().getPos().toLong();
+        BossSpawnRequest request = PENDING.remove(chunkKey);
+        if (request == null) {
+            return;
+        }
 
-                ServerLevel level = event.getServer().getLevel(request.dimension);
-                if (level == null) {
-                    continue;
-                }
+        if (!request.dimension.equals(level.dimension())) {
+            PENDING.putIfAbsent(chunkKey, request);
+            return;
+        }
 
-                if (!level.isLoaded(request.pos)) {
-                    continue;
-                }
-
-                spawnBoss(level, request);
-                processed++;
-            } catch (Exception e) {
-                LMHelperClass.logWarning("", "[DeferredBoss] Error: " + e.getMessage());
-            }
+        try {
+            spawnBoss(level, request);
+        } catch (Exception e) {
+            LMHelperClass.logWarning("", "[DeferredBoss] Error spawning boss: " + e.getMessage());
         }
     }
 
