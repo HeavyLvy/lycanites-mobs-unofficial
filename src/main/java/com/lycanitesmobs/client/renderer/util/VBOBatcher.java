@@ -36,12 +36,7 @@ public class VBOBatcher {
         private final Matrix4f modelMatrix;
         private final ResourceLocation texLocation;
 
-        /**
-         * Minimum brightness enforced on all rendered parts.
-         * Format: Packed light value (block << 20) | (sky << 4)
-         * Default: 0x00800080 (medium brightness - 8 block, 8 sky)
-         */
-        public static int minimumBrightness = 0x00800080;
+        public static int minimumBrightness = 0;
 
         private float red = 1.0F, green = 1.0F, blue = 1.0F, alpha = 1.0F;
         private float textureOffsetX, textureOffsetY;
@@ -225,10 +220,10 @@ public class VBOBatcher {
 
                 float nv = 0.0F;
 
-               /* if (cam instanceof LivingEntity le && mc.level != null
+                if (cam instanceof LivingEntity le && mc.level != null
                         && (le.hasEffect(MobEffects.NIGHT_VISION) || le.hasEffect(MobEffects.CONDUIT_POWER))) {
                     nv = GameRenderer.getNightVisionScale(le, mc.getFrameTime());
-                }*/
+                }
 
                 if (nv > 0.0F) {
                     u = Mth.lerp(nv, u, 240.0F);
