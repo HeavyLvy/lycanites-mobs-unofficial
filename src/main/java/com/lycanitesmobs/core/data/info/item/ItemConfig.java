@@ -10,6 +10,8 @@ public class ItemConfig {
 
     public static boolean chargesToXPBottles = true;
 
+    public static boolean equipmentSpecialNames = true;
+
     public static int lowEquipmentRepairAmount = 50;
     public static int mediumEquipmentRepairAmount = 100;
     public static int highEquipmentRepairAmount = 500;
@@ -29,6 +31,8 @@ public class ItemConfig {
         removeOnNoFireTick = ConfigItem.INSTANCE.removeOnNoFireTick.get();
 
         chargesToXPBottles = ConfigItem.INSTANCE.chargesToXPBottles.get();
+
+        equipmentSpecialNames = ConfigItem.INSTANCE.equipmentSpecialNames.get();
 
         lowEquipmentRepairAmount = ConfigItem.INSTANCE.lowEquipmentRepairAmount.get();
         mediumEquipmentRepairAmount = ConfigItem.INSTANCE.mediumEquipmentRepairAmount.get();

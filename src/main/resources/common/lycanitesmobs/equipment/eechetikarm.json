@@ -39,5 +39,15 @@
       "effectDuration": 100,
       "effectStrength": 3
     }
+  ],
+  "equipmentNames": [
+    "Plaguescythe",
+    "Blightreaper",
+    "Pestilence",
+    "Miasma Edge",
+    "Witherfang",
+    "Contagion",
+    "Rotcleaver",
+    "Blight Sickle"
   ]
 }

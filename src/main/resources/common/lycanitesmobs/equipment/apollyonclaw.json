@@ -39,5 +39,15 @@
       "effectDuration": 80,
       "effectStrength": 2
     }
+  ],
+  "equipmentNames": [
+    "Apollyon",
+    "Abyssal",
+    "Doom-Touched",
+    "Apollyonic",
+    "Ruinborn",
+    "Apocalyptic",
+    "Cataclysmic",
+    "End-Sworn"
   ]
 }

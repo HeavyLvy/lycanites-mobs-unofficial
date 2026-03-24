@@ -43,5 +43,15 @@
       "effectDuration": 80,
       "effectStrength": 2
     }
+  ],
+  "equipmentNames": [
+    "Hellscythe",
+    "Brimstone Edge",
+    "Infernal Spine",
+    "Demonback",
+    "Scorchbone",
+    "Pyrospike",
+    "Blazethorn",
+    "Cinder Fang"
   ]
 }

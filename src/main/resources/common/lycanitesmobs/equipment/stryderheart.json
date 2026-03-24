@@ -73,5 +73,15 @@
       "count": 1,
       "bonusDamage": 10
     }
+  ],
+  "equipmentNames": [
+    "Abyssal",
+    "Deepsworn",
+    "Pelagic",
+    "Fathomless",
+    "Maelstrom",
+    "Leviathan's",
+    "Tidecaller's",
+    "Oceanheart"
   ]
 }

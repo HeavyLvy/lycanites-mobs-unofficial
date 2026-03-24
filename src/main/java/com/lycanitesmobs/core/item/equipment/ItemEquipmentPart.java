@@ -56,6 +56,12 @@ public class ItemEquipmentPart extends BaseItem {
     public List<ElementInfo> elements = new ArrayList<>();
 
     /**
+     * Name fragments used by {@link EquipmentNameGenerator} when building dynamic equipment names.
+     * Loaded from the "equipmentNames" array in the part's JSON config.
+     **/
+    public List<String> equipmentNames = new ArrayList<>();
+
+    /**
      * The slot type that this part must fit into. Can be: base, head, blade, axe, pike or jewel.
      **/
     public String slotType;
@@ -119,6 +125,10 @@ public class ItemEquipmentPart extends BaseItem {
 
         if (json.has("levelMax"))
             this.levelMax = json.get("levelMax").getAsInt();
+
+        if (json.has("equipmentNames")) {
+            this.equipmentNames = JSONHelper.getJsonStrings(json.get("equipmentNames").getAsJsonArray());
+        }
 
         // Elements:
         List<String> elementNames = new ArrayList<>();

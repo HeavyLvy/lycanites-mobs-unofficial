@@ -42,5 +42,15 @@
       "count": 1,
       "bonusDamage": 3
     }
+  ],
+  "equipmentNames": [
+    "Icebound",
+    "Cryogenic",
+    "Frostbitten",
+    "Gelid",
+    "Hyperborean",
+    "Glaciated",
+    "Subzero",
+    "Winterheart"
   ]
 }

@@ -16,7 +16,11 @@
       "harvestType": "pickaxe",
       "harvestSpeed": 6,
       "harvestShape": "block",
-      "harvestRange": [1, 1, 4],
+      "harvestRange": [
+        1,
+        1,
+        4
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -26,7 +30,11 @@
       "harvestType": "pickaxe",
       "harvestSpeed": 7,
       "harvestShape": "block",
-      "harvestRange": [1, 1, 8],
+      "harvestRange": [
+        1,
+        1,
+        8
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -35,7 +43,11 @@
       "levelMin": 3,
       "harvestSpeed": 8,
       "harvestShape": "block",
-      "harvestRange": [1, 1, 16],
+      "harvestRange": [
+        1,
+        1,
+        16
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -63,5 +75,15 @@
       "effectDuration": 80,
       "effectStrength": 1
     }
+  ],
+  "equipmentNames": [
+    "Geonach",
+    "Earthen",
+    "Stone-Tipped",
+    "Bedrock",
+    "Fault-Sworn",
+    "Seismic",
+    "Tectonic",
+    "Quake-Touched"
   ]
 }

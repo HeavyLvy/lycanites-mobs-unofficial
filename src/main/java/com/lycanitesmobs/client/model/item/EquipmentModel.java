@@ -99,9 +99,11 @@ public class EquipmentModel implements IItemModelRenderer {
             }
         }
 
-        // Clear Animation Frames:
         for (ItemObjModel itemObjModel : this.renderedModels) {
             itemObjModel.clearAnimationFrames();
+            for (AnimationPart animationPart : itemObjModel.animationParts.values()) {
+                animationPart.setOffset(null);
+            }
         }
         this.renderedModels.clear();
     }

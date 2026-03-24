@@ -15,14 +15,22 @@
       "levelMax": 1,
       "harvestType": "sword",
       "harvestShape": "block",
-      "harvestRange": [1, 1, 1]
+      "harvestRange": [
+        1,
+        1,
+        1
+      ]
     },
     {
       "featureType": "harvest",
       "levelMin": 2,
       "harvestType": "sword",
       "harvestShape": "block",
-      "harvestRange": [3, 3, 3]
+      "harvestRange": [
+        3,
+        3,
+        3
+      ]
     },
     {
       "featureType": "damage",
@@ -63,5 +71,15 @@
       "spreadX": 25,
       "spreadY": 25
     }
+  ],
+  "equipmentNames": [
+    "Brucha",
+    "Quill-Crowned",
+    "Bristling",
+    "Spine-Born",
+    "Porcupine's",
+    "Needle-Sworn",
+    "Barbed",
+    "Thorn-Studded"
   ]
 }

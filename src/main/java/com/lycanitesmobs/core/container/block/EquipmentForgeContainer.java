@@ -83,7 +83,6 @@ public class EquipmentForgeContainer extends BaseContainer {
             equipmentSlotBase.addChildSlot(equipmentSlotPommel);
         }
         this.inventoryFinish = this.inventoryStart + slots;
-        //this.inventoryFinish = this.inventorySlots.size() - 1;
     }
 
 
@@ -229,11 +228,47 @@ public class EquipmentForgeContainer extends BaseContainer {
     }
 
 
-    /**
-     * Disabled until fixed later.
-     */
     @Override
     public ItemStack quickMoveStack(Player player, int slotID) {
-        return ItemStack.EMPTY;
+        Slot slot = this.slots.get(slotID);
+        if (slot == null || !slot.hasItem()) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack slotStack = slot.getItem();
+        ItemStack original = slotStack.copy();
+
+        if (this.isPlayerSlot(slotID)) {
+            boolean moved = false;
+            for (int i = this.inventoryStart; i < this.inventoryFinish; i++) {
+                Slot targetSlot = this.slots.get(i);
+                if (targetSlot.mayPlace(slotStack) && !targetSlot.hasItem()) {
+                    targetSlot.set(slotStack.copy());
+                    slot.set(ItemStack.EMPTY);
+                    moved = true;
+                    break;
+                }
+            }
+            if (!moved) {
+                return ItemStack.EMPTY;
+            }
+        } else {
+            if (!slot.mayPickup(player)) {
+                return ItemStack.EMPTY;
+            }
+            if (this.playerInventoryFinish >= 0) {
+                if (!this.moveItemStackTo(slotStack, this.playerInventoryStart, this.playerInventoryFinish + 1, true)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+            if (slotStack.isEmpty()) {
+                slot.set(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+            slot.onTake(player, original);
+        }
+
+        return original;
     }
 }

@@ -64,11 +64,15 @@ public class ItemManager extends JSONLoader {
     public static final CreativeModeTab.Builder chargesGroup =
             LMChargesGroup.getBuilder();
 
+    public static final CreativeModeTab.Builder bestEquipmentGroup =
+            LMBestEquipmentGroup.getBuilder();
+
     public static final RegistryObject<CreativeModeTab> itemTab = TABS.register(LycanitesMobs.MODID + ".items", itemsGroup::build);
     public static final RegistryObject<CreativeModeTab> blockTab = TABS.register(LycanitesMobs.MODID + ".blocks", blocksGroup::build);
     public static final RegistryObject<CreativeModeTab> creaturesTab = TABS.register(LycanitesMobs.MODID + ".creatures", creaturesGroups::build);
     public static final RegistryObject<CreativeModeTab> chargesTab = TABS.register(LycanitesMobs.MODID + ".charges", chargesGroup::build);
     public static final RegistryObject<CreativeModeTab> equipmentPartsTab = TABS.register(LycanitesMobs.MODID + ".equipmentparts", equipmentPartsGroup::build);
+    public static final RegistryObject<CreativeModeTab> bestEquipmentTab = TABS.register(LycanitesMobs.MODID + ".bestequipment", bestEquipmentGroup::build);
     public static final Map<String, Item.Properties> registryItems = new HashMap<>();
     public static ItemManager INSTANCE;
     public static Map<String, ItemInfo> items = new HashMap<>();

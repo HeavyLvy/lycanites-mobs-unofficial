@@ -41,5 +41,15 @@
       "count": 1,
       "bonusDamage": 12
     }
+  ],
+  "equipmentNames": [
+    "Magma-Forged",
+    "Molten",
+    "Erupting",
+    "Igneous",
+    "Caldera-Born",
+    "Obsidian",
+    "Vulcanic",
+    "Tectonic-Fired"
   ]
 }

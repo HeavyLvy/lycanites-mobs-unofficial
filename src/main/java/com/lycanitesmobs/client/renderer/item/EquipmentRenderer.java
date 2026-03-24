@@ -4,7 +4,6 @@ import com.lycanitesmobs.client.manager.ModelManager;
 import com.lycanitesmobs.client.model.item.EquipmentModel;
 import com.lycanitesmobs.client.renderer.layer.item.LayerItem;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -12,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -39,7 +37,7 @@ public class EquipmentRenderer extends BlockEntityWithoutLevelRenderer implement
                              MultiBufferSource buffer,
                              int packedLight,
                              int packedOverlay) {
-        if (!(itemStack.getItem() instanceof ItemEquipment itemEquipment)) {
+        if (!(itemStack.getItem() instanceof ItemEquipment)) {
             return;
         }
 
@@ -47,8 +45,8 @@ public class EquipmentRenderer extends BlockEntityWithoutLevelRenderer implement
 
         poseStack.pushPose();
         if (displayContext == ItemDisplayContext.GUI) {
-            poseStack.scale(0.65f, 0.65f, 0.65f);
-            poseStack.translate(-.1F, 1.55F, 0F);
+            poseStack.scale(0.55f, 0.5f, 0.55f);
+            poseStack.translate(-.45F, 1.45F, 0F);
             poseStack.mulPose(Axis.XP.rotationDegrees(120F));
             poseStack.mulPose(Axis.ZP.rotationDegrees(-110F));
         } else {
@@ -71,45 +69,6 @@ public class EquipmentRenderer extends BlockEntityWithoutLevelRenderer implement
         equipmentModel.render(itemStack, hand, poseStack, buffer, this, loop, packedLight);
 
         poseStack.popPose();
-
-        double manaNormal = (double) itemEquipment.getMana(itemStack) / ItemEquipment.MANA_MAX;
-        if (manaNormal < 1D) {
-            RenderSystem.disableDepthTest();
-            RenderSystem.disableBlend();
-
-            VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.lines());
-
-            double barX = -0.375D;
-            double barWidth = 0.825D;
-            double barFill = barWidth * manaNormal;
-
-            for (int i = 0; i <= 2; i++) {
-                double y = -0.25D + (i * 0.05D);
-
-                vertexBuilder.vertex(barX, y, 1D)
-                        .color(0, 0, 0, 255)
-                        .normal(0F, 0F, 1F)
-                        .endVertex();
-
-                vertexBuilder.vertex(barX + barWidth, y, 1D)
-                        .color(0, 0, 0, 255)
-                        .normal(0F, 0F, 1F)
-                        .endVertex();
-            }
-
-            vertexBuilder.vertex(barX, -0.2D, 1D)
-                    .color(64, 0, 128, 255)
-                    .normal(0F, 0F, 1F)
-                    .endVertex();
-
-            vertexBuilder.vertex(barX + barFill, -0.2D, 1D)
-                    .color(0, 128, 255, 255)
-                    .normal(0F, 0F, 1F)
-                    .endVertex();
-
-            RenderSystem.enableBlend();
-            RenderSystem.enableDepthTest();
-        }
 
     }
 

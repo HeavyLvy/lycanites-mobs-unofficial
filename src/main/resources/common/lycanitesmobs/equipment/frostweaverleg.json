@@ -42,5 +42,15 @@
       "spreadX": 10,
       "spreadY": 1
     }
+  ],
+  "equipmentNames": [
+    "Frostweaver",
+    "Glacial-Spun",
+    "Rime-Touched",
+    "Permafrost",
+    "Winter-Woven",
+    "Blizzardborn",
+    "Hoarfrost",
+    "Frozen-Veined"
   ]
 }

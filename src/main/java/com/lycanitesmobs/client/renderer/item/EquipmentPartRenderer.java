@@ -59,6 +59,10 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
             return;
         }
 
+        for (AnimationPart animPart : itemObjModel.animationParts.values()) {
+            animPart.setOffset(null);
+        }
+
         this.renderLayers.clear();
         itemObjModel.addCustomLayers(this);
 
@@ -203,7 +207,7 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 matrixStack.mulPose(Axis.XN.rotationDegrees(20F));
                 matrixStack.translate(-.35F, 0F, 0.15F);
             }
-            case "sprigganheart" -> matrixStack.translate(0F, 0.2F, 0.1F);
+            case "sprigganheart" -> matrixStack.translate(0.3F, 0.2F, 0.1F);
             case "afritlung" -> matrixStack.translate(0F, .3F, 0F);
             case "conbabutt", "eyewigeye", "naxiriseye", "malwratheye", "bansheeeye",
                  "woodenguard", "gammasphere", "ironrod", "arixbrain", "geonachfist" -> {

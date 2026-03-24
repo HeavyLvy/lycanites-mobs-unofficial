@@ -16,7 +16,11 @@
       "harvestType": "pickaxe",
       "harvestSpeed": 6,
       "harvestShape": "block",
-      "harvestRange": [1, 2, 2],
+      "harvestRange": [
+        1,
+        2,
+        2
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -26,7 +30,11 @@
       "harvestType": "pickaxe",
       "harvestSpeed": 7,
       "harvestShape": "block",
-      "harvestRange": [1, 4, 4],
+      "harvestRange": [
+        1,
+        4,
+        4
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -35,7 +43,11 @@
       "levelMin": 3,
       "harvestSpeed": 8,
       "harvestShape": "block",
-      "harvestRange": [1, 8, 8],
+      "harvestRange": [
+        1,
+        8,
+        8
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -44,7 +56,11 @@
       "harvestType": "shovel",
       "harvestSpeed": 6,
       "harvestShape": "block",
-      "harvestRange": [1, 2, 2],
+      "harvestRange": [
+        1,
+        2,
+        2
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -54,7 +70,11 @@
       "harvestType": "shovel",
       "harvestSpeed": 7,
       "harvestShape": "block",
-      "harvestRange": [1, 2, 4],
+      "harvestRange": [
+        1,
+        2,
+        4
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -63,7 +83,11 @@
       "levelMin": 3,
       "harvestSpeed": 8,
       "harvestShape": "shovel",
-      "harvestRange": [1, 2, 8],
+      "harvestRange": [
+        1,
+        2,
+        8
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -97,5 +121,15 @@
       "count": 1,
       "bonusDamage": 6
     }
+  ],
+  "equipmentNames": [
+    "Erepede",
+    "Burrowing",
+    "Drill-Fanged",
+    "Tunneler's",
+    "Earthborer's",
+    "Deep-Delving",
+    "Subterranean",
+    "Undersworn"
   ]
 }

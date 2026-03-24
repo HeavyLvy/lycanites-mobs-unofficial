@@ -45,5 +45,15 @@
       "count": 1,
       "bonusDamage": 6
     }
+  ],
+  "equipmentNames": [
+    "Behemoth's",
+    "Colossal",
+    "Titan-Gripped",
+    "Behemophian",
+    "Mountainous",
+    "Goliath's",
+    "Monolithic",
+    "Primordial"
   ]
 }

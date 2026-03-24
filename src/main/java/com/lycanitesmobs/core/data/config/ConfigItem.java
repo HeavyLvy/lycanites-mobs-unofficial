@@ -22,6 +22,8 @@ public class ConfigItem {
 	public final ForgeConfigSpec.ConfigValue<List<? extends String>> highEquipmentSharpnessItems;
 	public final ForgeConfigSpec.ConfigValue<List<? extends String>> maxEquipmentSharpnessItems;
 
+	public final ForgeConfigSpec.ConfigValue<Boolean> equipmentSpecialNames;
+
 	public final ForgeConfigSpec.ConfigValue<List<? extends String>> lowEquipmentManaItems;
 	public final ForgeConfigSpec.ConfigValue<List<? extends String>> mediumEquipmentManaItems;
 	public final ForgeConfigSpec.ConfigValue<List<? extends String>> highEquipmentManaItems;
@@ -61,6 +63,11 @@ public class ConfigItem {
 				.comment("The amount of Sharpness or Mana High tier Equipment repair items give.")
 				.translation(CoreConfig.CONFIG_PREFIX + "item.equipment.highEquipmentRepairAmount")
 				.define("highEquipmentRepairAmount", 500);
+
+		this.equipmentSpecialNames = builder
+				.comment("If true, assembled Equipment pieces will receive dynamic names based on their parts (e.g. 'Venomous Serpixian Hellscythe'). If false, they use the default translation key.")
+				.translation(CoreConfig.CONFIG_PREFIX + "item.equipment.equipmentSpecialNames")
+				.define("equipmentSpecialNames", true);
 
 		// Sharpness
 		this.lowEquipmentSharpnessItems = builder

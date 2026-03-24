@@ -73,5 +73,15 @@
       "count": 1,
       "bonusDamage": 2
     }
+  ],
+  "equipmentNames": [
+    "Malefic",
+    "Doom-Gazed",
+    "Hex-Eyed",
+    "Accursed",
+    "Balefire",
+    "Ruinous",
+    "Anathema",
+    "Maledictive"
   ]
 }

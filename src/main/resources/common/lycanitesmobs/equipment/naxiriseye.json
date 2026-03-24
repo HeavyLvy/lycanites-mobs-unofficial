@@ -40,5 +40,15 @@
       "count": 1,
       "bonusDamage": 2
     }
+  ],
+  "equipmentNames": [
+    "Arcane",
+    "Eldritch",
+    "Mystical",
+    "Thaumaturgic",
+    "Ensorcelled",
+    "Spellforged",
+    "Runic",
+    "Arcanist's"
   ]
 }

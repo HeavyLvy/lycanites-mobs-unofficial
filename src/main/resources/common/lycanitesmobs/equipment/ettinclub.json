@@ -38,5 +38,15 @@
       "damageRange": 2,
       "damageSweep": 0
     }
+  ],
+  "equipmentNames": [
+    "Ettin",
+    "Twin-Minded",
+    "Giant-Born",
+    "Colossal",
+    "Ogre-Strength",
+    "Titanic",
+    "Mountainous",
+    "Thundering"
   ]
 }

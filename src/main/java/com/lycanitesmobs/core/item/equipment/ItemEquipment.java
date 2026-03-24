@@ -9,7 +9,9 @@ import com.lycanitesmobs.client.renderer.item.EquipmentRenderer;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.item.base.BaseItem;
+import com.lycanitesmobs.core.data.info.item.ItemConfig;
 import com.lycanitesmobs.core.item.equipment.features.*;
+import com.lycanitesmobs.core.item.tool.CustomTiers;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.item.tool.ToolType;
 import net.minecraft.ChatFormatting;
@@ -42,7 +44,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.minecraftforge.common.TierSortingRegistry;
 import net.minecraftforge.common.ToolAction;
+import net.minecraftforge.common.ToolActions;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,8 +66,7 @@ public class ItemEquipment extends BaseItem {
     /**
      * Constructor
      */
-    public ItemEquipment(/*float attackDamage, float attackSpeed, Tier tier, TagKey<Block> blockTagKey, */Properties properties) {
-        //super(attackDamage, attackSpeed, tier, blockTagKey, properties);
+    public ItemEquipment(Properties properties) {
         super(properties);
         this.itemName = "equipment";
         setup();
@@ -80,6 +83,20 @@ public class ItemEquipment extends BaseItem {
 
     public void setup() {
         this.setRegistryName(LycanitesMobs.MODID, this.itemName);
+    }
+
+    @Override
+    public Component getName(ItemStack itemStack) {
+        if (itemStack.hasCustomHoverName()) {
+            return itemStack.getHoverName();
+        }
+        if (ItemConfig.equipmentSpecialNames) {
+            Component generatedName = EquipmentNameGenerator.generateName(itemStack);
+            if (generatedName != null) {
+                return generatedName;
+            }
+        }
+        return super.getName(itemStack);
     }
 
     // ==================================================
@@ -107,7 +124,7 @@ public class ItemEquipment extends BaseItem {
     }
 
     @Override
-    public Component getDescription(ItemStack stack, @org.jetbrains.annotations.Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+    public Component getDescription(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
         return Component.literal("");
     }
 
@@ -209,12 +226,7 @@ public class ItemEquipment extends BaseItem {
 
     @Override
     public boolean isBarVisible(ItemStack itemStack) {
-        return (double) this.getSharpness(itemStack) < SHARPNESS_MAX;
-    }
-
-    @Override
-    public int getBarWidth(ItemStack itemStack) {
-        return 1 - this.getSharpness(itemStack) / SHARPNESS_MAX;
+        return false;
     }
 
 
@@ -666,7 +678,32 @@ public class ItemEquipment extends BaseItem {
 
     @Override
     public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
-        return super.canPerformAction(stack, toolAction);
+        if (this.getSharpness(stack) <= 0) {
+            return false;
+        }
+        for (EquipmentFeature equipmentFeature : this.getFeaturesByType(stack, "harvest")) {
+            HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature) equipmentFeature;
+            String type = harvestFeature.harvestType;
+            if ("pickaxe".equalsIgnoreCase(type) && ToolActions.DEFAULT_PICKAXE_ACTIONS.contains(toolAction)) {
+                return true;
+            }
+            if ("axe".equalsIgnoreCase(type) && ToolActions.DEFAULT_AXE_ACTIONS.contains(toolAction)) {
+                return true;
+            }
+            if ("shovel".equalsIgnoreCase(type) && ToolActions.DEFAULT_SHOVEL_ACTIONS.contains(toolAction)) {
+                return true;
+            }
+            if ("hoe".equalsIgnoreCase(type) && ToolActions.DEFAULT_HOE_ACTIONS.contains(toolAction)) {
+                return true;
+            }
+            if ("sword".equalsIgnoreCase(type) && ToolActions.DEFAULT_SWORD_ACTIONS.contains(toolAction)) {
+                return true;
+            }
+            if ("shears".equalsIgnoreCase(type) && ToolActions.DEFAULT_SHEARS_ACTIONS.contains(toolAction)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int getHarvestLevel(ItemStack itemStack, ToolType tool, @Nullable Player player, @Nullable BlockState blockState) {
@@ -683,52 +720,63 @@ public class ItemEquipment extends BaseItem {
         }
         return harvestLevel;
     }
-    //TODO: impliment harvest levels
-	/*@Override
-	public Tier getTier() {
-		if (this.getSharpness(this.getDefaultInstance()) <= 0) {
-			return null;
-		}
+    /**
+     * Returns the highest CustomTier across all harvest features on this equipment.
+     */
+    @Nullable
+    public Tier getTier(ItemStack itemStack) {
+        if (this.getSharpness(itemStack) <= 0) {
+            return null;
+        }
 
-		int harvestLevel = -1;
-		for (EquipmentFeature equipmentFeature : this.getFeaturesByType(this.getDefaultInstance(), "harvest")) {
-			HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature) equipmentFeature;
-			if (harvestLevel < harvestFeature.harvestLevel) {
-				harvestLevel = harvestFeature.harvestLevel;
-			}
-		}
+        int harvestLevel = -1;
+        for (EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "harvest")) {
+            HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature) equipmentFeature;
+            if (harvestLevel < harvestFeature.harvestLevel) {
+                harvestLevel = harvestFeature.harvestLevel;
+            }
+        }
 
-		switch (harvestLevel) {
-			case 0:
-				return CustomTiers.HARVEST_0;
-			case 1:
-				return CustomTiers.HARVEST_1;
-			case 2:
-				return CustomTiers.HARVEST_2;
-			case 3:
-				return CustomTiers.HARVEST_3;
-			case 4:
-				return CustomTiers.HARVEST_4;
-			default:
-				return null;
-		}
-	}*/
+        return switch (harvestLevel) {
+            case 0 -> CustomTiers.HARVEST_0;
+            case 1 -> CustomTiers.HARVEST_1;
+            case 2 -> CustomTiers.HARVEST_2;
+            case 3 -> CustomTiers.HARVEST_3;
+            case 4 -> CustomTiers.HARVEST_4;
+            default -> null;
+        };
+    }
 
     @Override
-    public boolean isCorrectToolForDrops(BlockState blockState) {
-        ItemStack itemStack = this.getDefaultInstance();
-
+    public boolean isCorrectToolForDrops(ItemStack itemStack, BlockState blockState) {
         if (this.getSharpness(itemStack) <= 0) {
             return false;
         }
 
+        boolean canHarvest = false;
         for (EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "harvest")) {
             HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature) equipmentFeature;
             if (harvestFeature.canHarvestBlock(blockState)) {
-                return true;
+                canHarvest = true;
+                break;
             }
         }
-        return false;
+
+        if (!canHarvest) {
+            return false;
+        }
+
+        Tier tier = this.getTier(itemStack);
+        if (tier == null) {
+            return false;
+        }
+
+        return TierSortingRegistry.isCorrectTierForDrops(tier, blockState);
+    }
+
+    @Override
+    public boolean isCorrectToolForDrops(BlockState blockState) {
+        return this.isCorrectToolForDrops(this.getDefaultInstance(), blockState);
     }
 
     @Override

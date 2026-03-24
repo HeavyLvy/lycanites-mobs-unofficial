@@ -16,7 +16,11 @@
       "harvestType": "pickaxe",
       "harvestSpeed": 6,
       "harvestShape": "block",
-      "harvestRange": [1, 1, 2],
+      "harvestRange": [
+        1,
+        1,
+        2
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -26,7 +30,11 @@
       "harvestType": "pickaxe",
       "harvestSpeed": 7,
       "harvestShape": "block",
-      "harvestRange": [2, 1, 2],
+      "harvestRange": [
+        2,
+        1,
+        2
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -35,7 +43,11 @@
       "levelMin": 3,
       "harvestSpeed": 8,
       "harvestShape": "block",
-      "harvestRange": [3, 2, 4],
+      "harvestRange": [
+        3,
+        2,
+        4
+      ],
       "harvestRangeLevelMultiplier": 1
     },
     {
@@ -67,5 +79,15 @@
       "spreadX": 45,
       "spreadY": 10
     }
+  ],
+  "equipmentNames": [
+    "Serpix",
+    "Mandible-Crowned",
+    "Chitinsworn",
+    "Frost-Jawed",
+    "Glacial-Fanged",
+    "Iceborn",
+    "Crystalline",
+    "Permafrost-Fanged"
   ]
 }

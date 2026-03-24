@@ -63,5 +63,15 @@
       "damageRange": 1,
       "damageSweep": 90
     }
+  ],
+  "equipmentNames": [
+    "Prong",
+    "Goremaul",
+    "Antler Crown",
+    "Boneshatter",
+    "Dread Prong",
+    "Hunger's End",
+    "Ravenous Mace",
+    "Skullbreaker"
   ]
 }

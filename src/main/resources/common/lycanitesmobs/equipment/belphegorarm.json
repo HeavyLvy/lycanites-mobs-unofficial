@@ -48,5 +48,15 @@
       "count": 16,
       "bonusDamage": 2
     }
+  ],
+  "equipmentNames": [
+    "Warmaul",
+    "Demolisher",
+    "Juggernaut",
+    "Colossus Arm",
+    "Siegehammer",
+    "Titanfist",
+    "Worldcrusher",
+    "Dreadnought"
   ]
 }

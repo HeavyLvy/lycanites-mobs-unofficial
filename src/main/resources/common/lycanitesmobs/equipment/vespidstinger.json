@@ -35,5 +35,15 @@
       "effectDuration": 40,
       "effectStrength": 1
     }
+  ],
+  "equipmentNames": [
+    "Venomous",
+    "Virulent",
+    "Toxic",
+    "Poisonous",
+    "Noxious",
+    "Envenomed",
+    "Corrosive",
+    "Bane-Tipped"
   ]
 }

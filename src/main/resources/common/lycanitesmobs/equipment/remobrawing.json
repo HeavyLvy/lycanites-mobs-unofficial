@@ -15,7 +15,11 @@
       "levelMax": 1,
       "harvestType": "axe",
       "harvestShape": "block",
-      "harvestRange": [1, 1, 1]
+      "harvestRange": [
+        1,
+        1,
+        1
+      ]
     },
     {
       "featureType": "harvest",
@@ -23,14 +27,22 @@
       "levelMax": 2,
       "harvestType": "axe",
       "harvestShape": "block",
-      "harvestRange": [2, 3, 2]
+      "harvestRange": [
+        2,
+        3,
+        2
+      ]
     },
     {
       "featureType": "harvest",
       "levelMin": 3,
       "harvestType": "axe",
       "harvestShape": "block",
-      "harvestRange": [3, 10, 3]
+      "harvestRange": [
+        3,
+        10,
+        3
+      ]
     },
     {
       "featureType": "damage",
@@ -95,5 +107,15 @@
       "summonCountMax": 1,
       "sizeScale": 0.4
     }
+  ],
+  "equipmentNames": [
+    "Remobra",
+    "Wyvern-Winged",
+    "Venomwing",
+    "Toxic-Veined",
+    "Serpent-Winged",
+    "Poison-Plumed",
+    "Noxious",
+    "Bane-Winged"
   ]
 }
