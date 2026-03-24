@@ -58,10 +58,6 @@ public class EquipmentPartManager extends JSONLoader {
             LMHelperClass.logWarning("", "[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
             throw new RuntimeException("[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
         }
-        if (this.equipmentParts.values().contains(equipmentPart)) {
-            LMHelperClass.logWarning("", "[Equipment] Tried to add a Equipment Part that is already added: " + name);
-            throw new RuntimeException("[Equipment] Tried to add a Equipment Part that is already added: " + name);
-        }
         this.equipmentParts.put(name, equipmentPart);
         equipmentNames.add(name);
         ObjectManager.addItem(name, equipmentPart);

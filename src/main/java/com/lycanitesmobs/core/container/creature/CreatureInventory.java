@@ -447,7 +447,7 @@ public class CreatureInventory implements Container {
 		}
 		
 		// Saddle:
-		if(this.creature instanceof RideableCreatureEntity && itemStack.getItem() == this.creature.creatureInfo.creatureType.saddle) {
+		if(this.creature instanceof RideableCreatureEntity && itemStack.getItem() == this.creature.creatureInfo.creatureType.getSaddleItem()) {
 			return "saddle";
 		}
 		

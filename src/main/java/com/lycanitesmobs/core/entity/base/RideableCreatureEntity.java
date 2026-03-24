@@ -509,7 +509,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
   	// ==================================================
     public boolean hasSaddle() {
     	ItemStack saddleStack = this.inventory.getEquipmentStack("saddle");
-    	return !saddleStack.isEmpty() && saddleStack.getItem() == this.creatureInfo.creatureType.saddle;
+    	return !saddleStack.isEmpty() && saddleStack.getItem() == this.creatureInfo.creatureType.getSaddleItem();
     }
 
 	
