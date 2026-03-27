@@ -1257,6 +1257,66 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     /**
+     * Combined spawn limit check — performs boss proximity AND group limit checks with a single entity scan
+     * instead of two separate getNearbyEntities calls. This is a significant performance optimization as
+     * world.getEntitiesOfClass() with large AABBs is expensive.
+     *
+     * @param world The world to check in.
+     * @param pos The position to check around.
+     * @param groupLimitRange The range for group limit checks.
+     * @return True if the mob is allowed to spawn (no boss nearby, within group limits).
+     */
+    public boolean checkSpawnLimits(Level world, BlockPos pos, double groupLimitRange) {
+        CreatureGroup bossGroup = CreatureManager.getInstance().getCreatureGroup("boss");
+        int typesLimit = CreatureManager.getInstance().spawnConfig.typeSpawnLimit;
+        int speciesLimit = this.creatureInfo.creatureSpawn.spawnAreaLimit;
+        double bossRange = CreatureManager.getInstance().spawnConfig.spawnLimitRange;
+
+        double range = Math.max(groupLimitRange, bossRange);
+        if (range <= 0 && bossGroup == null) {
+            return true;
+        }
+
+        List<BaseCreatureEntity> nearby = this.getNearbyEntities(
+                BaseCreatureEntity.class,
+                entity -> BaseCreatureEntity.class.isAssignableFrom(entity.getClass()),
+                range
+        );
+
+        if (bossGroup != null && bossRange > 0) {
+            for (BaseCreatureEntity target : nearby) {
+                if (target.distanceTo(this) <= bossRange && bossGroup.hasEntity(target)) {
+                    return false;
+                }
+            }
+        }
+
+        if (groupLimitRange <= 0 || (typesLimit <= 0 && speciesLimit <= 0)) {
+            return true;
+        }
+        int typesFound = 0;
+        int speciesFound = 0;
+        for (BaseCreatureEntity target : nearby) {
+            if (target.distanceTo(this) > groupLimitRange) {
+                continue;
+            }
+            if (target.creatureInfo.peaceful == this.creatureInfo.peaceful) {
+                typesFound++;
+            }
+            if (this.creatureInfo.entityClass.isAssignableFrom(target.getClass())) {
+                speciesFound++;
+            }
+        }
+        if (typesLimit > 0 && typesFound >= typesLimit) {
+            return false;
+        }
+        if (speciesLimit > 0 && speciesFound >= speciesLimit) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Called once this mob is initially spawned.
      **/
     @Override

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.model.creature.base;
 
+import com.google.gson.*;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.obj.model.ObjModel;
 import com.lycanitesmobs.client.obj.geometry.ObjPart;
@@ -15,11 +16,17 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.apache.commons.io.IOUtils;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +65,10 @@ public class CreatureObjModelOld extends CreatureModel {
      * A map to be used on the fly, this allows one part to apply a position offset to another part. This is no longer used though and will be made redundant when the new model code is created.
      **/
     public Map<String, float[]> offsets = new HashMap<>();
+    /**
+     * Part centers loaded from _parts.json. These take priority over hardcoded partCenters, allowing resource packs to override part positions.
+     **/
+    public Map<String, float[]> jsonPartCenters = new HashMap<>();
 
     // Head:
     /**
@@ -133,7 +144,44 @@ public class CreatureObjModelOld extends CreatureModel {
         if (this.wavefrontParts.isEmpty())
             LMHelperClass.logWarning("", "Unable to load (old format) model obj for: " + name + "");
 
+        this.loadPartsJson(resourceManager);
+
         return this;
+    }
+
+    /**
+     * Loads part center overrides from a _parts.json file. These override hardcoded setPartCenter() values,
+     * allowing resource packs to reposition model parts without code changes.
+     *
+     * @param resourceManager The resource manager to load from.
+     */
+    protected void loadPartsJson(ResourceManager resourceManager) {
+        if (this.modelModInfo == null || this.modelPath == null) return;
+
+        this.jsonPartCenters.clear();
+        ResourceLocation partsLocation = new ResourceLocation(this.modelModInfo.modid, "modelparts/" + this.modelPath + "_parts.json");
+        try {
+            Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
+            InputStream in = resourceManager.getResource(partsLocation).get().open();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            try {
+                JsonArray jsonArray = GsonHelper.fromJson(gson, reader, JsonArray.class, false);
+                Iterator<JsonElement> jsonIterator = jsonArray.iterator();
+                while (jsonIterator.hasNext()) {
+                    JsonObject partJson = jsonIterator.next().getAsJsonObject();
+                    String name = partJson.get("name").getAsString().toLowerCase();
+                    float centerX = Float.parseFloat(partJson.get("centerX").getAsString());
+                    float centerY = Float.parseFloat(partJson.get("centerY").getAsString());
+                    float centerZ = Float.parseFloat(partJson.get("centerZ").getAsString());
+                    this.jsonPartCenters.put(name, new float[]{centerX, centerY, centerZ});
+                }
+            } finally {
+                IOUtils.closeQuietly(reader);
+            }
+            LMHelperClass.logDebug("Models", "Loaded _parts.json overrides for old model: " + this.modelName + " (" + this.jsonPartCenters.size() + " parts)");
+        } catch (Exception e) {
+            LMHelperClass.logDebug("Models", "No _parts.json found for old model: " + this.modelName + ", using hardcoded centers.");
+        }
     }
 
     public void reloadModel(ResourceManager resourceManager) {
@@ -155,6 +203,7 @@ public class CreatureObjModelOld extends CreatureModel {
                     "CreatureObjModelOld.reloadModel: initModel name=" + this.modelName + " path=" + this.modelPath
             );
             this.initModel(this.modelName, this.modelModInfo, this.modelPath, resourceManager);
+            this.loadPartsJson(resourceManager);
         } else {
             LMHelperClass.logDebug(
                     "Resources",
@@ -310,33 +359,30 @@ public class CreatureObjModelOld extends CreatureModel {
     }
 
     public float[] getPartCenter(String partName) {
-        if (!this.partCenters.containsKey(partName)) return new float[]{0.0F, 0.0F, 0.0F};
-        return this.partCenters.get(partName);
+        if (this.jsonPartCenters.containsKey(partName)) return this.jsonPartCenters.get(partName);
+        if (this.partCenters.containsKey(partName)) return this.partCenters.get(partName);
+        return new float[]{0.0F, 0.0F, 0.0F};
     }
 
     public void centerPart(String partName) {
-        if (!this.partCenters.containsKey(partName)) return;
-        float[] partCenter = this.partCenters.get(partName);
+        float[] partCenter = this.getPartCenter(partName);
         this.doTranslate(partCenter[0], partCenter[1], partCenter[2]);
     }
 
     public void uncenterPart(String partName) {
-        if (!this.partCenters.containsKey(partName)) return;
-        float[] partCenter = this.partCenters.get(partName);
+        float[] partCenter = this.getPartCenter(partName);
         this.doTranslate(-partCenter[0], -partCenter[1], -partCenter[2]);
     }
 
     public void centerPartToPart(String part, String targetPart) {
         this.uncenterPart(part);
-        float[] partCenter = this.partCenters.get(targetPart);
-        if (partCenter != null)
-            this.doTranslate(partCenter[0], partCenter[1], partCenter[2]);
+        float[] partCenter = this.getPartCenter(targetPart);
+        this.doTranslate(partCenter[0], partCenter[1], partCenter[2]);
     }
 
     public void uncenterPartToPart(String part, String targetPart) {
-        float[] partCenter = this.partCenters.get(targetPart);
-        if (partCenter != null)
-            this.doTranslate(-partCenter[0], -partCenter[1], -partCenter[2]);
+        float[] partCenter = this.getPartCenter(targetPart);
+        this.doTranslate(-partCenter[0], -partCenter[1], -partCenter[2]);
         this.centerPart(part);
     }
 
@@ -373,9 +419,9 @@ public class CreatureObjModelOld extends CreatureModel {
     }
 
     public float[] getSubCenterOffset(String partName) {
-        if (!partCenters.containsKey(partName)) return null;
+        if (!partCenters.containsKey(partName) && !jsonPartCenters.containsKey(partName)) return null;
         if (!partSubCenters.containsKey(partName)) return null;
-        float[] partCenter = partCenters.get(partName);
+        float[] partCenter = this.getPartCenter(partName);
         float[] partSubCenter = partSubCenters.get(partName);
         float[] offset = new float[3];
         for (int coord = 0; coord < 3; coord++)

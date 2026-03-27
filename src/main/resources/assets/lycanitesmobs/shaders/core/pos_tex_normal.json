@@ -5,6 +5,9 @@
   "samplers": [
     {
       "name": "Sampler0"
+    },
+    {
+      "name": "Sampler2"
     }
   ],
   "attributes": [

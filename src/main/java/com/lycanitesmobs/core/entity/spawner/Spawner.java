@@ -516,10 +516,13 @@ public class Spawner {
 
         // Get Biomes:
         List<Biome> biomes = null;
+        Map<BlockPos, Biome> positionBiomeCache = new HashMap<>();
         if (!this.ignoreBiomes) {
             Set<Biome> biomeSet = new LinkedHashSet<>();
             for (BlockPos spawnPos : spawnPositions) {
-                biomeSet.add(world.getBiomeManager().getBiome(spawnPos).get());
+                Biome biome = world.getBiomeManager().getBiome(spawnPos).get();
+                positionBiomeCache.put(spawnPos, biome);
+                biomeSet.add(biome);
             }
             biomes = new ArrayList<>(biomeSet);
         }
@@ -538,7 +541,7 @@ public class Spawner {
             if (mobsSpawned >= mobCount) {
                 break;
             }
-            Biome spawnBiome = world.getBiomeManager().getBiome(spawnPos).get();
+            Biome spawnBiome = positionBiomeCache.getOrDefault(spawnPos, world.getBiomeManager().getBiome(spawnPos).get());
 
             // Choose Mob To Spawn:
             MobSpawn mobSpawn = null;
@@ -791,11 +794,6 @@ public class Spawner {
                 return false;
             }
 
-            if (!entityCreature.checkSpawnBoss(world, spawnPos)) {
-                LMHelperClass.logDebug("JSONSpawner", "  FAIL " + mobName + " @ " + spawnPos + ": nearby boss");
-                return false;
-            }
-
             if (mobSpawn.ignoreMobInstanceConditions) {
                 return true;
             }
@@ -807,11 +805,11 @@ public class Spawner {
                 }
             }
 
-            if (!this.ignoreGroupLimit && !mobSpawn.ignoreGroupLimit) {
-                if (!entityCreature.checkSpawnGroupLimit(world, spawnPos, this.groupLimitRange)) {
-                    LMHelperClass.logDebug("JSONSpawner", "  FAIL " + mobName + " @ " + spawnPos + ": group limit");
-                    return false;
-                }
+            boolean checkGroupLimit = !this.ignoreGroupLimit && !mobSpawn.ignoreGroupLimit;
+            double effectiveGroupRange = checkGroupLimit ? this.groupLimitRange : 0;
+            if (!entityCreature.checkSpawnLimits(world, spawnPos, effectiveGroupRange)) {
+                LMHelperClass.logDebug("JSONSpawner", "  FAIL " + mobName + " @ " + spawnPos + ": boss proximity or group limit");
+                return false;
             }
 
             return true;

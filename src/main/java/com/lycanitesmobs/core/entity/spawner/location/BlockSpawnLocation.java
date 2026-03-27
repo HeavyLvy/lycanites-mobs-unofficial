@@ -55,6 +55,12 @@ public class BlockSpawnLocation extends SpawnLocation {
      **/
     public Vec3i offset = new Vec3i(0, 0, 0);
 
+    /**
+     * Cache for Block → registry ID string lookups. Avoids ForgeRegistries.BLOCKS.getKey() per block
+     * in the hot triple-nested scanning loop. Safe to cache since the block registry is immutable at runtime.
+     **/
+    private final Map<Block, String> blockIdCache = new HashMap<>();
+
 
     @Override
     public void loadFromJSON(JsonObject json) {
@@ -88,49 +94,42 @@ public class BlockSpawnLocation extends SpawnLocation {
     public List<BlockPos> getSpawnPositions(Level world, Player player, BlockPos triggerPos) {
         List<BlockPos> spawnPositions = new ArrayList<>();
         Map<Block, Integer> validBlocksFound = new HashMap<>();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
-        for (int y = triggerPos.getY() - this.rangeMax.getY(); y <= triggerPos.getY() + this.rangeMax.getY(); y++) {
-            // Y Limits:
-            int yMin = 0;
-            if (this.yMin >= 0) {
-                yMin = this.yMin;
-            }
-            if (y < yMin) {
-                y = yMin;
-            }
-            int yMax = world.getMaxBuildHeight();
-            if (this.yMax >= 0) {
-                yMax = Math.min(this.yMax, yMax);
-            }
-            if (y >= yMax) {
-                break;
-            }
+        int yMin = 0;
+        if (this.yMin >= 0) {
+            yMin = this.yMin;
+        }
+        int yMax = world.getMaxBuildHeight();
+        if (this.yMax >= 0) {
+            yMax = Math.min(this.yMax, yMax);
+        }
 
+        int startY = Math.max(triggerPos.getY() - this.rangeMax.getY(), yMin);
+        int endY = Math.min(triggerPos.getY() + this.rangeMax.getY(), yMax - 1);
+
+        for (int y = startY; y <= endY; y++) {
             for (int x = triggerPos.getX() - this.rangeMax.getX(); x <= triggerPos.getX() + this.rangeMax.getX(); x++) {
                 for (int z = triggerPos.getZ() - this.rangeMax.getZ(); z <= triggerPos.getZ() + this.rangeMax.getZ(); z++) {
-                    BlockPos spawnPos = new BlockPos(x, y, z);
-                    BlockState blockState = world.getBlockState(spawnPos);
+                    mutablePos.set(x, y, z);
+                    BlockState blockState = world.getBlockState(mutablePos);
 
                     // Ignore Flowing Liquids:
                     if (blockState.getBlock() instanceof IFluidBlock) {
-                        float filled = ((IFluidBlock) blockState.getBlock()).getFilledPercentage(world, spawnPos);
+                        float filled = ((IFluidBlock) blockState.getBlock()).getFilledPercentage(world, mutablePos);
                         if (filled != 1 && filled != -1) {
                             continue;
                         }
                     }
 
                     // Check Block:
-                    if (this.isValidBlock(world, spawnPos)) {
-                        spawnPositions.add(spawnPos.offset(this.offset));
+                    if (this.isValidBlock(world, mutablePos, blockState)) {
+                        BlockPos immutablePos = mutablePos.immutable();
+                        spawnPositions.add(immutablePos.offset(this.offset));
 
                         // Require All:
                         if (this.requiredBlockTypes > 0) {
-                            Block block = world.getBlockState(spawnPos).getBlock();
-                            if (!validBlocksFound.containsKey(block)) {
-                                validBlocksFound.put(block, 1);
-                            } else {
-                                validBlocksFound.put(block, validBlocksFound.get(block) + 1);
-                            }
+                            validBlocksFound.merge(blockState.getBlock(), 1, Integer::sum);
                         }
                     }
                 }
@@ -163,6 +162,14 @@ public class BlockSpawnLocation extends SpawnLocation {
      * Returns if the provided block position is valid.
      **/
     public boolean isValidBlock(Level world, BlockPos blockPos) {
+        return this.isValidBlock(world, blockPos, world.getBlockState(blockPos));
+    }
+
+    /**
+     * Returns if the provided block position is valid using a pre-fetched BlockState.
+     * This avoids a redundant world.getBlockState() call when the caller already has the state.
+     **/
+    public boolean isValidBlock(Level world, BlockPos blockPos, BlockState blockState) {
         if (!this.surface || !this.underground) {
             if (world.canSeeSkyFromBelowWater(blockPos)) {
                 if (!this.surface) {
@@ -178,12 +185,13 @@ public class BlockSpawnLocation extends SpawnLocation {
         if (this.blockIds.isEmpty()) {
             return true;
         }
-        Block block = world.getBlockState(blockPos).getBlock();
-        // LMHelperClass.logInfoMessageOnceDev("IsvalidBlock check: " + LMHelperClass.convertToResourceLocation(block).toString());
+        Block block = blockState.getBlock();
+        String blockId = this.blockIdCache.computeIfAbsent(block,
+                b -> LMHelperClass.convertToResourceLocation(b).toString());
         if ("blacklist".equalsIgnoreCase(this.listType)) {
-            return !this.blockIds.contains(LMHelperClass.convertToResourceLocation(block).toString());
+            return !this.blockIds.contains(blockId);
         } else {
-            return this.blockIds.contains(LMHelperClass.convertToResourceLocation(block).toString());
+            return this.blockIds.contains(blockId);
         }
     }
 }
