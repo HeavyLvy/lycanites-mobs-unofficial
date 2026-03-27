@@ -1,5 +1,6 @@
 #version 150
 uniform sampler2D Sampler0;
+uniform sampler2D Sampler2;
 
 uniform vec2 OverlayUv;
 uniform vec2 LightUv;
@@ -42,9 +43,10 @@ void main() {
     float amount = VariantAmount * influence;
     vec3 recolored = mix(base, VariantColor, amount);
 
-    float block = LightUv.x / 240.0;
-    float sky = LightUv.y / 240.0;
-    float lightFactor = clamp(max(block, sky), 0.0, 1.0);
+    // Sample the lightmap texture. This encodes time of day, weather, etc
+    vec2 lightUv = clamp(LightUv / 256.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0));
+    vec4 lightColor = texture(Sampler2, lightUv);
+    float lightFactor = max(lightColor.r, max(lightColor.g, lightColor.b));
     float minBrightness = 0.15;
     lightFactor = max(lightFactor, minBrightness);
 
