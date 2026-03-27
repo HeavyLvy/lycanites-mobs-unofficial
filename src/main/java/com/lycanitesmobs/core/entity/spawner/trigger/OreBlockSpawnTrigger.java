@@ -54,10 +54,10 @@ public class OreBlockSpawnTrigger extends BlockSpawnTrigger {
 			return this.ores;
 		}
 
-		if(LMHelperClass.convertToResourceLocation(block) == null) {
+		if(LMHelperClass.convertToResourceLocation(block, world.registryAccess()) == null) {
 			return false;
 		}
-		String blockName = LMHelperClass.convertToResourceLocation(block).getPath();
+		String blockName = LMHelperClass.convertToResourceLocation(block, world.registryAccess()).getPath();
 		String[] blockNameParts = blockName.split("\\.");
 		for(String blockNamePart : blockNameParts) {
 			int blockNamePartLength = blockNamePart.length();

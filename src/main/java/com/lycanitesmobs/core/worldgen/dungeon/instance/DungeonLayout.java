@@ -144,7 +144,11 @@ public class DungeonLayout {
 
         DungeonSector dungeonSector = this.dungeonInstance.schematic.getRandomSector("stairs", random);
         SectorInstance sectorInstance = new SectorInstance(this, dungeonSector, random);
-        sectorInstance.connect(entranceSector.getRandomConnector(random, sectorInstance));
+        SectorConnector stairsConnector = entranceSector.getRandomConnector(random, sectorInstance);
+        if (stairsConnector == null) {
+            return entranceSector;
+        }
+        sectorInstance.connect(stairsConnector);
         sectorInstance.init(random);
         this.addSectorInstance(sectorInstance);
 
@@ -180,7 +184,7 @@ public class DungeonLayout {
 
             SectorConnector sectorConnector = lastSector.getRandomConnector(random, sectorInstance);
             if (sectorConnector == null) {
-                com.lycanitesmobs.core.util.helpers.LMHelperClass.logDebug(
+                LMHelperClass.logDebug(
                         "Dungeon",
                         "snake: no connector available from " + lastSector + " at step " + i + " (type " + nextType + "), aborting chain"
                 );
@@ -257,6 +261,9 @@ public class DungeonLayout {
         DungeonSector dungeonSector = this.dungeonInstance.schematic.getRandomSector("tower", random);
         SectorInstance sectorInstance = new SectorInstance(this, dungeonSector, random);
         SectorConnector sectorConnector = startSector.getRandomConnector(random, sectorInstance);
+        if (sectorConnector == null) {
+            return null;
+        }
         sectorInstance.connect(sectorConnector);
 
         if (sectorInstance.getOccupiedBoundsMax().getY() > 255) {
@@ -301,6 +308,9 @@ public class DungeonLayout {
             DungeonSector roomSector = this.dungeonInstance.schematic.getRandomSector(roomType, random);
             SectorInstance roomInstance = new SectorInstance(this, roomSector, random);
             SectorConnector roomConnector = corridorInstance.getRandomConnector(random, roomInstance);
+            if (roomConnector == null) {
+                continue;
+            }
             roomInstance.connect(roomConnector);
             roomInstance.init(random);
             this.addSectorInstance(roomInstance);

@@ -187,7 +187,7 @@ public class DungeonInstance {
         }
 
         if (this.buildPlan != null && this.buildPlan.isReady()) {
-            java.util.List<DungeonBuildPlan.PlannedBlock> blocks = this.buildPlan.getForChunk(chunkPos);
+            List<DungeonBuildPlan.PlannedBlock> blocks = this.buildPlan.getForChunk(chunkPos);
 
             if (blocks.isEmpty()) {
                 LMHelperClass.logDebug("Dungeon", "buildChunk: no planned blocks for chunk " + chunkPos + " in dungeon " + this.uuid);
@@ -279,7 +279,7 @@ public class DungeonInstance {
         }
 
         if (this.buildPlan != null && this.buildPlan.isReady()) {
-            java.util.List<DungeonBuildPlan.PlannedBlock> blocks = this.buildPlan.getForChunk(chunkPos);
+            List<DungeonBuildPlan.PlannedBlock> blocks = this.buildPlan.getForChunk(chunkPos);
             int blockCount = blocks != null ? blocks.size() : 0;
             LMHelperClass.logDebug(
                     "DungeonDebug",

@@ -258,7 +258,7 @@ public class VBOBatcher {
             if (tintAmt != null)
                 tintAmt.set(tintAmount);
 
-            var modelView = new org.joml.Matrix4f(RenderSystem.getModelViewMatrix()).mul(this.modelMatrix);
+            var modelView = new Matrix4f(RenderSystem.getModelViewMatrix()).mul(this.modelMatrix);
             var projection = RenderSystem.getProjectionMatrix();
 
             var sunDir = shader.getUniform("SunDirectionVS");

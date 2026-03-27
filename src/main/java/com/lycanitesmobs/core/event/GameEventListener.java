@@ -138,7 +138,7 @@ public class GameEventListener {
             if (ExtendedEntity.FORCE_REMOVE_ENTITY_IDS != null && !ExtendedEntity.FORCE_REMOVE_ENTITY_IDS.isEmpty()) {
                 LMHelperClass.logDebug("ForceRemoveEntity", "Forced entity removal, checking: " + event.getEntity().getName());
                 for (String forceRemoveID : ExtendedEntity.FORCE_REMOVE_ENTITY_IDS) {
-                    if (forceRemoveID.equalsIgnoreCase(LMHelperClass.convertToResourceLocation(event.getEntity()).toString())) {
+                    if (forceRemoveID.equalsIgnoreCase(LMHelperClass.convertToResourceLocation(event.getEntity().getType(), event.getEntity().level().registryAccess()).toString())) {
                         event.getEntity().remove(Entity.RemovalReason.DISCARDED);
                         break;
                     }

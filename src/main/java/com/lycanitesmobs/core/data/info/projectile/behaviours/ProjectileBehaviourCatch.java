@@ -36,7 +36,7 @@ public class ProjectileBehaviourCatch extends ProjectileBehaviour {
         if (projectile.getCommandSenderWorld().isClientSide || target == projectile.getOwner()) {
             return canDamage;
         }
-        ResourceLocation entityResourceLocation = LMHelperClass.convertToResourceLocation(target.getType());
+        ResourceLocation entityResourceLocation = LMHelperClass.convertToResourceLocation(target.getType(), world.registryAccess());
         if (entityResourceLocation == null) {
             return canDamage;
         }

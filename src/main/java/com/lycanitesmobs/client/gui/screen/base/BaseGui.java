@@ -45,7 +45,7 @@ public abstract class BaseGui extends Screen {
 
         float yawRad = (float) (yawDegrees * Math.PI / 180.0);
         float pitchRad = (float) (pitchDegrees * Math.PI / 180.0);
-        org.joml.Quaternionf qView = new org.joml.Quaternionf().rotateYXZ(yawRad, pitchRad, 0.0F);
+        Quaternionf qView = new Quaternionf().rotateYXZ(yawRad, pitchRad, 0.0F);
 
         pose.mulPose(qBase);
         pose.mulPose(qView);

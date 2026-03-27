@@ -187,7 +187,7 @@ public class BlockSpawnLocation extends SpawnLocation {
         }
         Block block = blockState.getBlock();
         String blockId = this.blockIdCache.computeIfAbsent(block,
-                b -> LMHelperClass.convertToResourceLocation(b).toString());
+                b -> LMHelperClass.convertToResourceLocation(b, world.registryAccess()).toString());
         if ("blacklist".equalsIgnoreCase(this.listType)) {
             return !this.blockIds.contains(blockId);
         } else {

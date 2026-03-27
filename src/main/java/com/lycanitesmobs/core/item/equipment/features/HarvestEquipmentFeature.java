@@ -26,10 +26,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraftforge.common.IForgeShearable;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 public class HarvestEquipmentFeature extends EquipmentFeature {
@@ -436,13 +439,13 @@ public class HarvestEquipmentFeature extends EquipmentFeature {
             return false;
         }
 
-        if (entity instanceof net.minecraftforge.common.IForgeShearable) {
-            net.minecraftforge.common.IForgeShearable target = (net.minecraftforge.common.IForgeShearable) entity;
+        if (entity instanceof IForgeShearable) {
+            IForgeShearable target = (IForgeShearable) entity;
             BlockPos pos = new BlockPos((int) Math.floor(entity.getX()), (int) Math.floor(entity.getY()), (int) Math.floor(entity.getZ()));
             if (target.isShearable(itemStack, entity.level(), pos)) {
-                java.util.List<ItemStack> drops = target.onSheared(player, itemStack, entity.level(), pos,
+                List<ItemStack> drops = target.onSheared(player, itemStack, entity.level(), pos,
                         EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, itemStack));
-                java.util.Random rand = new java.util.Random();
+                Random rand = new Random();
                 drops.forEach(d -> {
                     ItemEntity ent = entity.spawnAtLocation(d, 1.0F);
                     ent.setDeltaMovement(ent.getDeltaMovement().add((rand.nextFloat() - rand.nextFloat()) * 0.1F, rand.nextFloat() * 0.05F, (rand.nextFloat() - rand.nextFloat()) * 0.1F));

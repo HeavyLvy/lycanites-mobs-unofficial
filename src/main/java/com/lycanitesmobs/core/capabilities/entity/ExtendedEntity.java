@@ -146,7 +146,7 @@ public class ExtendedEntity {
         if (!this.entity.getCommandSenderWorld().isClientSide && FORCE_REMOVE_ENTITY_IDS != null && FORCE_REMOVE_ENTITY_IDS.size() > 0 && !this.forceRemoveChecked) {
             LMHelperClass.logDebug("ForceRemoveEntity", "Forced entity removal, checking: " + this.entity.getName());
             for (String forceRemoveID : FORCE_REMOVE_ENTITY_IDS) {
-                if (forceRemoveID.equalsIgnoreCase(LMHelperClass.convertToResourceLocation(this.entity.getType()).toString())) {
+                if (forceRemoveID.equalsIgnoreCase(LMHelperClass.convertToResourceLocation(this.entity.getType(), this.entity.level().registryAccess()).toString())) {
                     this.forceRemove = true;
                     break;
                 }

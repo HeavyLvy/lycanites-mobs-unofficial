@@ -52,6 +52,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -2053,6 +2054,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
         this.onSyncUpdate();
 
+        Level world = this.getCommandSenderWorld();
+        boolean isClient = world.isClientSide;
+
         if (this.despawnCheck()) {
             if (!this.isBoundPet() || this.isTemporary)
                 this.inventory.dropInventory();
@@ -2070,12 +2074,12 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         // Climbing/Flying:
-        if (!this.getCommandSenderWorld().isClientSide || this.isControlledByLocalInstance()) {
+        if (!isClient || this.isControlledByLocalInstance()) {
             this.setBesideClimbableBlock(this.horizontalCollision);
             if (!this.onGround() && this.flySoundSpeed > 0 && this.tickCount % 20 == 0)
                 this.playFlySound();
         }
-        if (!this.getCommandSenderWorld().isClientSide && this.isFlying() && this.hasAttackTarget() && this.updateTick % 40 == 0) {
+        if (!isClient && this.isFlying() && this.hasAttackTarget() && this.updateTick % 40 == 0) {
             this.leap(0, 0.4D);
         }
 
@@ -2098,7 +2102,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         // Boss Health Update:
-        if (!this.getCommandSenderWorld().isClientSide() && this.isBoss() && this.updateTick % 20 == 0 && this.playerTargets.isEmpty()) {
+        if (!isClient && this.isBoss() && this.updateTick % 20 == 0 && this.playerTargets.isEmpty()) {
             this.heal(1);
         }
         if (this.bossInfo != null) {
@@ -2106,9 +2110,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         // Beastiary Proximity Discovery:
-        if (!this.getCommandSenderWorld().isClientSide && this.updateTick % 20 == 0) {
-            for (Player player : this.getCommandSenderWorld().players()) {
-                if (this.distanceTo(player) <= 10) {
+        if (!isClient && this.updateTick % 20 == 0) {
+            for (Player player : world.players()) {
+                if (this.distanceToSqr(player) <= 10.0 * 10.0) {
                     ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(player);
                     if (extendedPlayer != null) {
                         CreatureKnowledge creatureKnowledge = extendedPlayer.getBeastiary().getCreatureKnowledge(this.creatureInfo.getName());
@@ -2121,10 +2125,10 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         // GUI Refresh Tick:
-        if (!this.getCommandSenderWorld().isClientSide && this.guiViewers.size() <= 0) {
+        if (!isClient && this.guiViewers.size() <= 0) {
             this.guiRefreshTick = 0;
         }
-        if (!this.getCommandSenderWorld().isClientSide && this.guiRefreshTick > 0) {
+        if (!isClient && this.guiRefreshTick > 0) {
             if (--this.guiRefreshTick <= 0) {
                 this.refreshGUIViewers();
                 this.guiRefreshTick = 0;
@@ -2148,6 +2152,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      **/
     @Override
     public void aiStep() {
+        Level world = this.getCommandSenderWorld();
+        boolean isClient = world.isClientSide;
+
         // Enforce Damage Limit:
         if (this.damageLimit > 0) {
             if (this.healthLastTick < 0)
@@ -2155,7 +2162,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             if (this.healthLastTick - this.getHealth() > this.damageLimit)
                 this.setHealth(this.healthLastTick - this.damageLimit);
             this.healthLastTick = this.getHealth();
-            if (!this.getCommandSenderWorld().isClientSide && this.updateTick % 20 == 0) {
+            if (!isClient && this.updateTick % 20 == 0) {
                 this.damageTakenThisSec = 0;
             }
         }
@@ -2185,20 +2192,16 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         // First Spawn:
-        if (!this.getCommandSenderWorld().isClientSide && this.firstSpawn) {
+        if (!isClient && this.firstSpawn) {
             this.onFirstSpawn();
         }
 
         // Fixate Target:
-        if (!this.getCommandSenderWorld().isClientSide && !this.hasFixateTarget() && this.fixateUUID != null) {
-            double range = 64D;
-            List connections = this.getCommandSenderWorld().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(range, range, range));
-            Iterator possibleFixateTargets = connections.iterator();
-            while (possibleFixateTargets.hasNext()) {
-                LivingEntity possibleFixateTarget = (LivingEntity) possibleFixateTargets.next();
-                if (possibleFixateTarget != this && possibleFixateTarget.getUUID().equals(this.fixateUUID)) {
-                    this.setFixateTarget(possibleFixateTarget);
-                    break;
+        if (!isClient && !this.hasFixateTarget() && this.fixateUUID != null) {
+            if (world instanceof ServerLevel serverLevel) {
+                Entity foundEntity = serverLevel.getEntity(this.fixateUUID);
+                if (foundEntity instanceof LivingEntity livingTarget && foundEntity != this) {
+                    this.setFixateTarget(livingTarget);
                 }
             }
             this.fixateUUID = null;
@@ -2227,10 +2230,14 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             this.setDeltaMovement(this.getDeltaMovement().multiply(1, this.getFallingMod(), 1));
         }
 
+        float brightness = -1;
+        if (!isClient) {
+            brightness = this.getBrightness();
+        }
+
         // Sunlight Damage:
-        if (!this.getCommandSenderWorld().isClientSide && this.daylightBurns() && this.getCommandSenderWorld().isDay()) {
-            float brightness = this.getBrightness();
-            if (brightness > 0.5F && this.random.nextFloat() * 30.0F < (brightness - 0.4F) * 2.0F && this.getCommandSenderWorld().canSeeSkyFromBelowWater(this.blockPosition())) {
+        if (!isClient && this.daylightBurns() && world.isDay()) {
+            if (brightness > 0.5F && this.random.nextFloat() * 30.0F < (brightness - 0.4F) * 2.0F && world.canSeeSkyFromBelowWater(this.blockPosition())) {
                 boolean shouldBurn = true;
                 ItemStack helmet = this.inventory.getEquipmentStack("head");
                 if (!helmet.isEmpty()) {
@@ -2249,12 +2256,12 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         // Water Damage:
-        if (!this.getCommandSenderWorld().isClientSide && this.waterDamage() && this.isInWaterOrRain() && !this.isInLava()) {
+        if (!isClient && this.waterDamage() && this.isInWaterOrRain() && !this.isInLava()) {
             this.hurt(this.level().damageSources().drown(), 1.0F);
         }
 
         // Suffocation:
-        if (!this.getCommandSenderWorld().isClientSide && this.isAlive() && !this.canBreatheAir()) {
+        if (!isClient && this.isAlive() && !this.canBreatheAir()) {
             this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
             if (this.getAirSupply() <= -200) {
                 this.setAirSupply(-160);
@@ -2263,17 +2270,16 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         // Natural Despawn Light Scaling:
-        if (!this.getCommandSenderWorld().isClientSide) {
-            float light = this.getBrightness();
-            if (!this.creatureInfo.creatureSpawn.spawnsInLight && light > 0.5F) {
+        if (!isClient) {
+            if (!this.creatureInfo.creatureSpawn.spawnsInLight && brightness > 0.5F) {
                 this.noActionTime += 2;
-            } else if (!this.creatureInfo.creatureSpawn.spawnsInDark && light <= 0.5F) {
+            } else if (!this.creatureInfo.creatureSpawn.spawnsInDark && brightness <= 0.5F) {
                 this.noActionTime += 2;
             }
         }
 
         // Stealth Invisibility:
-        if (!this.getCommandSenderWorld().isClientSide) {
+        if (!isClient) {
             if (this.isStealthed() && !this.isInvisible())
                 this.setInvisible(true);
             else if (!this.isStealthed() && this.isInvisible() && !this.hasEffect(MobEffects.INVISIBILITY))
@@ -2283,20 +2289,20 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             if (this.stealthPrev != this.isStealthed())
                 this.startStealth();
             this.onStealth();
-        } else if (this.isInvisible() && !this.hasEffect(MobEffects.INVISIBILITY) && !this.getCommandSenderWorld().isClientSide) {
+        } else if (this.isInvisible() && !this.hasEffect(MobEffects.INVISIBILITY) && !isClient) {
             this.setInvisible(false);
         }
         this.stealthPrev = this.isStealthed();
 
         // Pickup Items:
-        if (this.tickCount % 20 == 0 && !this.getCommandSenderWorld().isClientSide && this.isAlive() && this.canPickupItems())
+        if (this.tickCount % 20 == 0 && !isClient && this.isAlive() && this.canPickupItems())
             this.pickupItems();
 
         // Entity Pickups:
-        if (!this.getCommandSenderWorld().isClientSide && this.pickupEntity != null) {
+        if (!isClient && this.pickupEntity != null) {
             if (!this.pickupEntity.isAlive())
                 this.dropPickupEntity();
-            else if (Math.sqrt(this.distanceTo(this.pickupEntity)) > 32D) {
+            else if (this.distanceToSqr(this.pickupEntity) > 32D * 32D) {
                 this.dropPickupEntity();
             }
         }
@@ -2304,17 +2310,13 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         // Boss:
         this.getBossInfo();
         if (this.isBossAlways()) {
-            ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(this.getCommandSenderWorld());
+            ExtendedWorld extendedWorld = ExtendedWorld.getForWorld(world);
             extendedWorld.bossUpdate(this);
         }
 
         // Check Minions:
         if (!this.minions.isEmpty()) {
-            for (LivingEntity minion : this.minions.toArray(new LivingEntity[0])) {
-                if (!minion.isAlive()) {
-                    this.minions.remove(minion);
-                }
-            }
+            this.minions.removeIf(minion -> !minion.isAlive());
         }
 
         // Minion To Master Update:

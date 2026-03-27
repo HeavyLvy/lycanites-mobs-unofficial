@@ -102,7 +102,7 @@ public abstract class EntitySpawnTrigger extends SpawnTrigger {
 
 		// Check Entity Id:
 		if(!this.entityIds.isEmpty()) {
-			ResourceLocation entityResourceLocation = LMHelperClass.convertToResourceLocation(killedEntity.getType());
+			ResourceLocation entityResourceLocation = LMHelperClass.convertToResourceLocation(killedEntity.getType(), killedEntity.level().registryAccess());
 			if(entityResourceLocation == null) {
 				return false;
 			}

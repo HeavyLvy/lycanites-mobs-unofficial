@@ -49,7 +49,7 @@ public class LMItemsGroup {
 
                     String FOOD_KEY = "food";
 
-                    java.util.Map<String, List<String>> groups = new java.util.HashMap<>();
+                    Map<String, List<String>> groups = new HashMap<>();
                     List<String> leftover = new ArrayList<>();
 
                     for (String name : filtered) {

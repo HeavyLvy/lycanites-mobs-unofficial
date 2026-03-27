@@ -96,10 +96,16 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         int x = xz[0];
         int z = xz[1];
 
-        // Try to find a surface spawn position using the heightmap when surface spawning is allowed.
+        int heightmapY = Integer.MIN_VALUE;
+        if (this.surface || this.underground) {
+            if (this.surface) {
+                heightmapY = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z)).getY();
+            }
+        }
+
         BlockPos surfacePos = null;
-        if (this.surface) {
-            surfacePos = this.findSurfaceSpawnPos(world, x, z);
+        if (this.surface && heightmapY != Integer.MIN_VALUE) {
+            surfacePos = this.findSurfaceSpawnPos(world, x, z, heightmapY);
         }
 
         // Surface-only: return the surface result directly (or null if none found).
@@ -110,11 +116,9 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         // Underground-only or both surface+underground: use Y scan for underground positions.
         // Key fix: when surface is allowed, center the Y scan on the heightmap Y (actual terrain level)
         // rather than the trigger Y (player position), so the scan window covers real terrain.
-        // MOTION_BLOCKING_NO_LEAVES is preferred over WORLD_SURFACE here: it ignores leaf canopies,
-        // so in forests the scan origin is the actual ground, not the treetop.
         int scanOriginY;
-        if (this.surface) {
-            scanOriginY = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z)).getY();
+        if (this.surface && heightmapY != Integer.MIN_VALUE) {
+            scanOriginY = heightmapY;
         } else {
             scanOriginY = triggerPos.getY();
         }
@@ -141,40 +145,35 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
 
 
     /**
-     * Finds a valid surface spawn position at the given XZ using the heightmap.
+     * Finds a valid surface spawn position at the given XZ using a pre-computed heightmap Y.
      *
-     * @param world The world to search in.
-     * @param x     The X coordinate.
-     * @param z     The Z coordinate.
+     * @param world      The world to search in.
+     * @param x          The X coordinate.
+     * @param z          The Z coordinate.
+     * @param heightmapY The pre-computed heightmap Y for this x,z.
      * @return A valid surface BlockPos, or null if no valid position found.
      */
-    private BlockPos findSurfaceSpawnPos(Level world, int x, int z) {
-        BlockPos groundPos = world.getHeightmapPos(
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                new BlockPos(x, 0, z)
-        );
-
+    private BlockPos findSurfaceSpawnPos(Level world, int x, int z, int heightmapY) {
         // MOTION_BLOCKING_NO_LEAVES includes fluids (water, lava). When solidGround is required,
         // the block at groundPos must itself be solid (canOcclude), otherwise this XZ lands over
         // a lake or river and mobs can't stand here.
+        BlockPos groundPos = new BlockPos(x, heightmapY, z);
         if (this.solidGround && !world.getBlockState(groundPos.below()).canOcclude()) {
             return null;
         }
 
-        int feetY = groundPos.getY();
-
-        if (feetY < world.getMinBuildHeight() || feetY >= world.getMaxBuildHeight()) {
+        if (heightmapY < world.getMinBuildHeight() || heightmapY >= world.getMaxBuildHeight()) {
             return null;
         }
 
-        if (this.yMin >= 0 && feetY < this.yMin) {
+        if (this.yMin >= 0 && heightmapY < this.yMin) {
             return null;
         }
-        if (this.yMax >= 0 && feetY > this.yMax) {
+        if (this.yMax >= 0 && heightmapY > this.yMax) {
             return null;
         }
 
-        BlockPos feetPos = new BlockPos(x, feetY, z);
+        BlockPos feetPos = new BlockPos(x, heightmapY, z);
         BlockPos headPos = feetPos.above();
 
         if (!this.isValidBlock(world, feetPos)) {

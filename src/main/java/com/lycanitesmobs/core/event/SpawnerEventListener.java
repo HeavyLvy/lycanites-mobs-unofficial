@@ -353,6 +353,8 @@ public class SpawnerEventListener {
     /**
      * Called on World Tick, checks for any fresh chunks to spawn in.
      **/
+    private static final int MAX_CHUNKS_PER_TICK = 4;
+
     public void checkFreshChunks(Level world) {
         String dimensionId = world.dimension().location().toString();
         List<ChunkPos> chunks = this.freshChunks.computeIfAbsent(dimensionId, k -> new ArrayList<>());
@@ -373,15 +375,21 @@ public class SpawnerEventListener {
         List<ChunkPos> snapshot = new ArrayList<>(chunks);
         chunks.clear();
 
+        int processed = 0;
         for (ChunkPos chunkPos : snapshot) {
             if (chunkPos == null) continue;
             if (!world.getChunkSource().hasChunk(chunkPos.x, chunkPos.z)) {
                 chunks.add(chunkPos); // not ready yet — keep for next tick
                 continue;
             }
+            if (processed >= MAX_CHUNKS_PER_TICK) {
+                chunks.add(chunkPos);
+                continue;
+            }
             for (ChunkSpawnTrigger spawnTrigger : this.chunkSpawnTriggers) {
                 spawnTrigger.onChunkPopulate(world, chunkPos);
             }
+            processed++;
         }
     }
 

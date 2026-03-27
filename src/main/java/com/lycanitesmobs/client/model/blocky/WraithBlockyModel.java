@@ -163,13 +163,13 @@ public class WraithBlockyModel<T extends Entity> extends HierarchicalModel<T> {
         this.root().getAllParts().forEach(ModelPart::resetPose);
         float loop = ageInTicks;
         float vibration = loop * 2.0F;
-        this.Skull.x += net.minecraft.util.Mth.cos(vibration) * 0.01F;
-        this.Skull.y += net.minecraft.util.Mth.cos(vibration) * 0.01F;
-        this.Skull.z += net.minecraft.util.Mth.cos(vibration) * 0.01F;
-        this.Mouth.xRot += -(net.minecraft.util.Mth.cos(vibration) * 0.025F);
+        this.Skull.x += Mth.cos(vibration) * 0.01F;
+        this.Skull.y += Mth.cos(vibration) * 0.01F;
+        this.Skull.z += Mth.cos(vibration) * 0.01F;
+        this.Mouth.xRot += -(Mth.cos(vibration) * 0.025F);
         if (entity instanceof BaseCreatureEntity creature && creature.hasAttackTarget()) {
             float base = (float) (Mth.PI / 9.0);
-            this.Mouth.xRot += base + -(net.minecraft.util.Mth.cos(loop) * 0.1F);
+            this.Mouth.xRot += base + -(Mth.cos(loop) * 0.1F);
         }
     }
 

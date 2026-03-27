@@ -34,6 +34,7 @@ import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Spawner {
     /** Spawners are loaded from JSON and operate around their Triggers, Conditions and Locations. **/
@@ -551,10 +552,10 @@ public class Spawner {
             } else if (mobSpawns.containsKey(spawnBiome)) {
                 mobSpawn = this.chooseMobToSpawn(world, mobSpawns.get(spawnBiome));
             } else {
-                Object spawnBiomeRL = LMHelperClass.convertBiomeToResourceLocation(world, spawnBiome);
+                Object spawnBiomeRL = LMHelperClass.convertToResourceLocation(spawnBiome,world.registryAccess());
                 LMHelperClass.logWarning("JSONSpawner", "BIOME KEY MISMATCH! spawnBiome=" + spawnBiomeRL
                         + " (identity=" + System.identityHashCode(spawnBiome) + ") not in mobSpawns map (keys: "
-                        + mobSpawns.keySet().stream().map(k -> String.valueOf(LMHelperClass.convertBiomeToResourceLocation(world, k))).collect(java.util.stream.Collectors.joining(", ")) + ")");
+                        + mobSpawns.keySet().stream().map(k -> String.valueOf(LMHelperClass.convertToResourceLocation(k,world.registryAccess()))).collect(Collectors.joining(", ")) + ")");
             }
             if (mobSpawn == null) {
                 continue;
@@ -731,7 +732,7 @@ public class Spawner {
             }
         }
         if (biome != null && viableMobSpawns.size() < possibleSpawns.size()) {
-            Object biomeRL = LMHelperClass.convertBiomeToResourceLocation(world, biome);
+            Object biomeRL = LMHelperClass.convertToResourceLocation(biome,world.registryAccess());
             LMHelperClass.logDebug("JSONSpawner", "  biome=" + biomeRL + ": " + viableMobSpawns.size() + "/" + possibleSpawns.size() + " eligible");
         }
         return viableMobSpawns;

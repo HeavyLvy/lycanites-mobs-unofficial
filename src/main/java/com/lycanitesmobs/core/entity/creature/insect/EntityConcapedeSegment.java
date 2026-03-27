@@ -9,6 +9,8 @@ import com.lycanitesmobs.core.block.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
@@ -19,8 +21,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3d;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.UUID;
 
 public class EntityConcapedeSegment extends AgeableCreatureEntity {
@@ -95,25 +95,24 @@ public class EntityConcapedeSegment extends AgeableCreatureEntity {
 	// ========== Living Update ==========
 	@Override
     public void aiStep() {
+        Level world = this.getCommandSenderWorld();
+        boolean isClient = world.isClientSide;
+
         // Try to Load Parent from UUID:
-        if(!this.getCommandSenderWorld().isClientSide && !this.hasParent() && this.parentUUID != null && this.updateTick > 0 && this.updateTick % 40 == 0) {
-	        double range = 64D;
-	        List connections = this.getCommandSenderWorld().getEntitiesOfClass(AgeableCreatureEntity.class, this.getBoundingBox().inflate(range, range, range));
-	        Iterator possibleConnections = connections.iterator();
-	        while(possibleConnections.hasNext()) {
-	        	AgeableCreatureEntity possibleConnection = (AgeableCreatureEntity)possibleConnections.next();
-	            if(possibleConnection != this && possibleConnection.getUUID().equals(this.parentUUID)) {
-	            	this.setParentTarget(possibleConnection);
-	            	break;
-	            }
+        if(!isClient && !this.hasParent() && this.parentUUID != null && this.updateTick > 0 && this.updateTick % 40 == 0) {
+	        if (world instanceof ServerLevel serverLevel) {
+	        	Entity foundEntity = serverLevel.getEntity(this.parentUUID);
+	        	if (foundEntity instanceof AgeableCreatureEntity parent && parent != this) {
+	        		this.setParentTarget(parent);
+	        	}
 	        }
 	        this.parentUUID = null;
         }
-        
+
         super.aiStep();
-        
+
         // Concapede Connections:
-        if(!this.getCommandSenderWorld().isClientSide) {
+        if(!isClient) {
         	// Check if back segment is alive:
 			if(this.backSegment != null) {
 				if(!this.backSegment.isAlive())
@@ -133,8 +132,8 @@ public class EntityConcapedeSegment extends AgeableCreatureEntity {
 
 				Vector3d parentPos = this.getFacingPositionDouble(this.getParentTarget().getX(), this.getParentTarget().getY(), this.getParentTarget().getZ(), -0.65D, this.getParentTarget().yRot);
 				double segmentPullThreshold = 0.15D;
-				double segmentDistance = Math.sqrt(this.distanceToSqr(LMHelperClass.convertToVec3(parentPos)));
-				if (segmentDistance > segmentPullThreshold) {
+				double segmentDistanceSq = this.distanceToSqr(LMHelperClass.convertToVec3(parentPos));
+				if (segmentDistanceSq > segmentPullThreshold * segmentPullThreshold) {
 					double dragAmount = segmentPullThreshold / 2;
 					Vector3d posVector = new Vector3d(this.getX(), this.getY(), this.getZ());
 					Vector3d dragPos = this.getFacingPositionDouble(parentPos.x, parentPos.y, parentPos.z, dragAmount, posVector.dot(parentPos));
@@ -145,7 +144,7 @@ public class EntityConcapedeSegment extends AgeableCreatureEntity {
         	}
 
 			// Growth Into Head:
-			if(!this.getCommandSenderWorld().isClientSide && this.getGrowingAge() <= 0)
+			if(this.getGrowingAge() <= 0)
 				this.setGrowingAge(-this.growthTime);
         }
     }

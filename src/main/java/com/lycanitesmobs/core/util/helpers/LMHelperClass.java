@@ -3,10 +3,7 @@ package com.lycanitesmobs.core.util.helpers;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.config.ConfigDebug;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.Vec3i;
+import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -302,12 +299,77 @@ public class LMHelperClass {
 
         return null;
     }
-
-    public static ResourceLocation convertBiomeToResourceLocation(Level level, Biome biome) {
-        if (level == null || biome == null) {
+    public static ResourceLocation convertToResourceLocation(Object input, RegistryAccess access) {
+        if (input == null) {
             return null;
         }
-        return level.registryAccess().registryOrThrow(Registries.BIOME).getKey(biome);
+        if (input instanceof ResourceLocation) {
+            return (ResourceLocation) input;
+        } else if (input instanceof String) {
+            return new ResourceLocation((String) input);
+        } else if (input instanceof Item item) {
+            return access.registryOrThrow(Registries.ITEM).getKey(item);
+        } else if (input instanceof Block block) {
+            return access.registryOrThrow(Registries.BLOCK).getKey(block);
+        } else if (input instanceof EntityType<?> entityType) {
+            return access.registryOrThrow(Registries.ENTITY_TYPE).getKey(entityType);
+        } else if (input instanceof Biome biome) {
+            return access.registryOrThrow(Registries.BIOME).getKey(biome);
+        } else if (input instanceof Fluid fluid) {
+            return access.registryOrThrow(Registries.FLUID).getKey(fluid);
+        } else if (input instanceof MobEffect mobEffect) {
+            return access.registryOrThrow(Registries.MOB_EFFECT).getKey(mobEffect);
+        } else if (input instanceof SoundEvent soundEvent) {
+            return access.registryOrThrow(Registries.SOUND_EVENT).getKey(soundEvent);
+        } else if (input instanceof Potion potion) {
+            return access.registryOrThrow(Registries.POTION).getKey(potion);
+        } else if (input instanceof Enchantment enchantment) {
+            return access.registryOrThrow(Registries.ENCHANTMENT).getKey(enchantment);
+        } else if (input instanceof BlockEntityType<?> blockEntityType) {
+            return access.registryOrThrow(Registries.BLOCK_ENTITY_TYPE).getKey(blockEntityType);
+        } else if (input instanceof ParticleType<?> particleType) {
+            return access.registryOrThrow(Registries.PARTICLE_TYPE).getKey(particleType);
+        } else if (input instanceof MenuType<?> menuType) {
+            return access.registryOrThrow(Registries.MENU).getKey(menuType);
+        } else if (input instanceof PaintingVariant paintingVariant) {
+            return access.registryOrThrow(Registries.PAINTING_VARIANT).getKey(paintingVariant);
+        } else if (input instanceof RecipeType<?> recipeType) {
+            return access.registryOrThrow(Registries.RECIPE_TYPE).getKey(recipeType);
+        } else if (input instanceof RecipeSerializer<?> recipeSerializer) {
+            return access.registryOrThrow(Registries.RECIPE_SERIALIZER).getKey(recipeSerializer);
+        } else if (input instanceof Attribute attribute) {
+            return access.registryOrThrow(Registries.ATTRIBUTE).getKey(attribute);
+        } else if (input instanceof StatType<?> statType) {
+            return access.registryOrThrow(Registries.STAT_TYPE).getKey(statType);
+        } else if (input instanceof ArgumentTypeInfo<?, ?> argumentTypeInfo) {
+            return access.registryOrThrow(Registries.COMMAND_ARGUMENT_TYPE).getKey(argumentTypeInfo);
+        } else if (input instanceof VillagerProfession villagerProfession) {
+            return access.registryOrThrow(Registries.VILLAGER_PROFESSION).getKey(villagerProfession);
+        } else if (input instanceof PoiType poiType) {
+            return access.registryOrThrow(Registries.POINT_OF_INTEREST_TYPE).getKey(poiType);
+        } else if (input instanceof MemoryModuleType<?> memoryModuleType) {
+            return access.registryOrThrow(Registries.MEMORY_MODULE_TYPE).getKey(memoryModuleType);
+        } else if (input instanceof SensorType<?> sensorType) {
+            return access.registryOrThrow(Registries.SENSOR_TYPE).getKey(sensorType);
+        } else if (input instanceof Schedule schedule) {
+            return access.registryOrThrow(Registries.SCHEDULE).getKey(schedule);
+        } else if (input instanceof Activity activity) {
+            return access.registryOrThrow(Registries.ACTIVITY).getKey(activity);
+        } else if (input instanceof WorldCarver<?> worldCarver) {
+            return access.registryOrThrow(Registries.CARVER).getKey(worldCarver);
+        } else if (input instanceof Feature<?> feature) {
+            return access.registryOrThrow(Registries.FEATURE).getKey(feature);
+        } else if (input instanceof ChunkStatus chunkStatus) {
+            return access.registryOrThrow(Registries.CHUNK_STATUS).getKey(chunkStatus);
+        } else if (input instanceof BlockStateProviderType<?> blockStateProviderType) {
+            return access.registryOrThrow(Registries.BLOCK_STATE_PROVIDER_TYPE).getKey(blockStateProviderType);
+        } else if (input instanceof FoliagePlacerType<?> foliagePlacerType) {
+            return access.registryOrThrow(Registries.FOLIAGE_PLACER_TYPE).getKey(foliagePlacerType);
+        } else if (input instanceof TreeDecoratorType<?> treeDecoratorType) {
+            return access.registryOrThrow(Registries.TREE_DECORATOR_TYPE).getKey(treeDecoratorType);
+        }
+
+        return null;
     }
 
     public static Boolean convertToBoolean(Object input) {

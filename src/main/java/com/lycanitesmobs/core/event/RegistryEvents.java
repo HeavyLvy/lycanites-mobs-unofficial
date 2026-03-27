@@ -41,7 +41,9 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.lycanitesmobs.core.manager.ObjectManager.*;
@@ -195,7 +197,7 @@ public class RegistryEvents {
             }
         });
         event.register(ForgeRegistries.Keys.FLUID_TYPES, helper -> {
-            java.util.Set<ResourceLocation> seen = new java.util.HashSet<>();
+            Set<ResourceLocation> seen = new HashSet<>();
             for (Fluid fluid : fluids.values()) {
                 FluidType ft = fluid.getFluidType();
                 if (ft instanceof BaseFluidType bft) {

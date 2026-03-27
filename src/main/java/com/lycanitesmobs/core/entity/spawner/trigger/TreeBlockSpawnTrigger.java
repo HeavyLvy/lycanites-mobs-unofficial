@@ -47,7 +47,7 @@ public class TreeBlockSpawnTrigger extends BlockSpawnTrigger {
 				}
 			}
 		}
-		String blockName = LMHelperClass.convertToResourceLocation(block).toString();
+		String blockName = LMHelperClass.convertToResourceLocation(block, world.registryAccess()).toString();
 		if((blockName.contains("tree") || blockName.contains("traverse")) && blockName.contains("branch")) {
 			return true;
 		}
@@ -70,7 +70,7 @@ public class TreeBlockSpawnTrigger extends BlockSpawnTrigger {
 				}
 			}
 		}
-		String blockName = LMHelperClass.convertToResourceLocation(block).toString();
+		String blockName = LMHelperClass.convertToResourceLocation(block, world.registryAccess()).toString();
 		if((blockName.contains("tree") || blockName.contains("traverse")) && blockName.contains("leaves")) {
 			return true;
 		}

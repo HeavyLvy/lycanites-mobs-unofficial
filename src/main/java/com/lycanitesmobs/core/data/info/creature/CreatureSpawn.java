@@ -309,7 +309,7 @@ public class CreatureSpawn {
             return true;
         }
 
-        Object biomeRL = LMHelperClass.convertBiomeToResourceLocation(level, biome);
+        Object biomeRL = LMHelperClass.convertToResourceLocation(biome,level.registryAccess());
         String biomeId = null;
         if (biomeRL != null) {
             biomeId = biomeRL.toString();

@@ -6,7 +6,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ProjectileBehaviourPlaceBlocks extends ProjectileBehaviour {
@@ -82,12 +84,12 @@ public class ProjectileBehaviourPlaceBlocks extends ProjectileBehaviour {
 
     private static BlockState applyLevelIfPresent(BlockState state, int desired) {
         for (var prop : state.getProperties()) {
-            if (prop instanceof net.minecraft.world.level.block.state.properties.IntegerProperty ip) {
+            if (prop instanceof IntegerProperty ip) {
                 String n = ip.getName();
                 if ("level".equals(n) || "layers".equals(n)) {
                     int min = ip.getPossibleValues().stream().mapToInt(Integer::intValue).min().orElse(desired);
                     int max = ip.getPossibleValues().stream().mapToInt(Integer::intValue).max().orElse(desired);
-                    int v = net.minecraft.util.Mth.clamp(desired, min, max);
+                    int v = Mth.clamp(desired, min, max);
                     return state.setValue(ip, v);
                 }
             }
