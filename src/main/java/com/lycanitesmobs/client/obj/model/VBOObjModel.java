@@ -3,9 +3,11 @@ package com.lycanitesmobs.client.obj.model;
 import com.lycanitesmobs.client.model.creature.base.ModelObjState;
 import com.lycanitesmobs.client.obj.geometry.ObjPart;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
+import com.lycanitesmobs.client.renderer.util.RecolorTextureCache;
 import com.lycanitesmobs.client.renderer.util.VBOBatcher;
 import com.lycanitesmobs.client.renderer.util.VBOBatcher.VBODrawCommand;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -21,6 +23,11 @@ public class VBOObjModel extends ObjModel {
     public static ResourceLocation tex;
     public static boolean renderNormal;
     public static boolean renderOutline;
+
+    /** When true, use the entity-format VBO (for Iris/Oculus compatibility). */
+    public static boolean useEntityFormat;
+    /** The Iris-compatible entity render type (set by CreatureRenderer). */
+    public static RenderType irisRenderType;
 
     public float baseR = 1.0F, baseG = 1.0F, baseB = 1.0F, baseRange = 0.1F;
     public float variantR = 1.0F, variantG = 1.0F, variantB = 1.0F, variantAmount = 0.0F;
@@ -51,6 +58,30 @@ public class VBOObjModel extends ObjModel {
                            int brightness, int fade, ObjPart objPart, Vector4f color, Vector2f textureOffset) {
         if (vertexBuilder != null) {
             super.renderPart(vertexBuilder, matrix3f, matrix4f, brightness, fade, objPart, color, textureOffset);
+            return;
+        }
+
+        if (useEntityFormat && irisRenderType != null) {
+            ResourceLocation recoloredTex = tex;
+            if (variantAmount > 0.01F) {
+                recoloredTex = RecolorTextureCache.getRecoloredTexture(
+                        tex, baseR, baseG, baseB, baseRange,
+                        variantR, variantG, variantB, variantAmount);
+            }
+
+            VBODrawCommand cmd = new VBODrawCommand(
+                    objPart.mesh.getEntityVbo(),
+                    objPart.mesh.indices.length,
+                    DefaultVertexFormat.NEW_ENTITY,
+                    matrix4f,
+                    recoloredTex
+            )
+                    .setColor(color)
+                    .setTextureOffset(textureOffset)
+                    .setOverlayOffset(0.0F, 10.0F - fade)
+                    .setLightOffset(brightness);
+
+            VBOBatcher.getInstance().queue(irisRenderType, cmd);
             return;
         }
 
@@ -92,7 +123,7 @@ public class VBOObjModel extends ObjModel {
                     new VBODrawCommand(
                             objPart.mesh.getVbo(),
                             objPart.mesh.indices.length,
-                            renderType.format(),
+                            renderType != null ? renderType.format() : CustomRenderStates.POS_TEX_NORMAL,
                             matrix4f,
                             tex
                     )
@@ -106,6 +137,4 @@ public class VBOObjModel extends ObjModel {
         float b = (hex & 0xFF) / 255.0F;
         return new float[]{r, g, b};
     }
-
-
 }

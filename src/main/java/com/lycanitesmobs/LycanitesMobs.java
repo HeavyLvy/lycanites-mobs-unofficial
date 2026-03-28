@@ -19,6 +19,7 @@ import com.lycanitesmobs.client.manager.ModelManager;
 import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.manager.CommandManager;
 import com.lycanitesmobs.core.compatibility.DLDungeons;
+import com.lycanitesmobs.core.compatibility.OculusCompat;
 import com.lycanitesmobs.core.data.config.CoreConfig;
 import com.lycanitesmobs.core.container.block.EquipmentForgeContainer;
 import com.lycanitesmobs.core.container.block.EquipmentInfuserContainer;
@@ -221,6 +222,7 @@ public class LycanitesMobs {
         fixMaxHealth();
         // Mod Support:
         DLDungeons.init();
+        OculusCompat.init();
         loadValues();
 
         event.enqueueWork(() -> {

@@ -21,3 +21,10 @@ This mod adds many new mobs to specific biomes, dimensions and more. These mobs 
     versionRange="[47.2.20,)"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.lycanitesmobs]]
+    modId="oculus"
+    mandatory=false
+    versionRange="[1.6.0,)"
+    ordering="AFTER"
+    side="CLIENT"

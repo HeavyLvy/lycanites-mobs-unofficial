@@ -1,6 +1,7 @@
 package com.lycanitesmobs.client.loader;
 
 import com.lycanitesmobs.client.manager.ModelManager;
+import com.lycanitesmobs.client.renderer.util.RecolorTextureCache;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -33,6 +34,7 @@ public class ModelReloadListener implements PreparableReloadListener {
                 .thenCompose(barrier::wait)
                 .thenAcceptAsync(manager -> {
                     LMHelperClass.logDebug("Resources", "ModelReloadListener.reload: apply");
+                    RecolorTextureCache.clear();
                     manager.reloadModels(resourceManager);
                     LMHelperClass.logDebug("Resources", "ModelReloadListener.reload: done");
                 }, gameExecutor);

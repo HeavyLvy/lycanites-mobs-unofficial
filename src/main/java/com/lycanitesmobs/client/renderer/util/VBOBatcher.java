@@ -4,6 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+
+import org.apache.logging.log4j.LogManager;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -17,7 +20,6 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -148,14 +150,14 @@ public class VBOBatcher {
         private static void logShaderMissingOnce(VertexFormat fmt) {
             if (!loggedOnce) {
                 loggedOnce = true;
-                org.apache.logging.log4j.LogManager.getLogger().warn(
+                LogManager.getLogger().warn(
                         "[Lycanites Mobs] No shader bound for format '{}'. " +
                                 "Bind a shader in RenderType or switch to a vanilla format (e.g. POSITION_TEX_COLOR_NORMAL). Skipping draw to avoid crash.",
                         fmt);
             }
         }
 
-        private static java.util.function.Supplier<ShaderInstance> pickShaderForFormat(VertexFormat fmt) {
+        private static Supplier<ShaderInstance> pickShaderForFormat(VertexFormat fmt) {
             if (fmt == DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL)
                 return GameRenderer::getPositionTexColorNormalShader;
             if (fmt == DefaultVertexFormat.POSITION_COLOR)
@@ -175,25 +177,53 @@ public class VBOBatcher {
             return null;
         }
 
+        /**
+         * Returns true if this draw command uses a vanilla entity vertex format,
+         * meaning it should defer to the RenderType's shader (which Iris replaces).
+         */
+        private boolean isEntityFormat() {
+            return format == DefaultVertexFormat.NEW_ENTITY;
+        }
+
         public void draw() {
             if (vbo == null)
                 return;
 
             RenderSystem.setShaderTexture(0, texLocation);
-            RenderSystem.setShaderColor(corrected(red), corrected(green), corrected(blue), corrected(alpha));
 
-            ShaderInstance shader = RenderSystem.getShader();
+            ShaderInstance shader;
 
-            if (format == CustomRenderStates.POS_TEX_NORMAL && POS_TEX_NORMAL_SHADER != null) {
-                if (shader != POS_TEX_NORMAL_SHADER) {
-                    RenderSystem.setShader(() -> POS_TEX_NORMAL_SHADER);
-                    shader = POS_TEX_NORMAL_SHADER;
+            if (isEntityFormat()) {
+                float finalR = red;
+                float finalG = green;
+                float finalB = blue;
+                if (tintAmount > 0.001F) {
+                    finalR = red * (1.0F - tintAmount) + red * tintR * tintAmount;
+                    finalG = green * (1.0F - tintAmount) + green * tintG * tintAmount;
+                    finalB = blue * (1.0F - tintAmount) + blue * tintB * tintAmount;
                 }
-            } else if (shader == null) {
-                var pick = pickShaderForFormat(format);
-                if (pick != null) {
-                    RenderSystem.setShader(pick);
-                    shader = pick.get();
+                RenderSystem.setShaderColor(corrected(finalR), corrected(finalG), corrected(finalB), corrected(alpha));
+
+                shader = RenderSystem.getShader();
+                if (shader == null) {
+                    RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
+                    shader = RenderSystem.getShader();
+                }
+            } else {
+                RenderSystem.setShaderColor(corrected(red), corrected(green), corrected(blue), corrected(alpha));
+                shader = RenderSystem.getShader();
+
+                if (format == CustomRenderStates.POS_TEX_NORMAL && POS_TEX_NORMAL_SHADER != null) {
+                    if (shader != POS_TEX_NORMAL_SHADER) {
+                        RenderSystem.setShader(() -> POS_TEX_NORMAL_SHADER);
+                        shader = POS_TEX_NORMAL_SHADER;
+                    }
+                } else if (shader == null) {
+                    var pick = pickShaderForFormat(format);
+                    if (pick != null) {
+                        RenderSystem.setShader(pick);
+                        shader = pick.get();
+                    }
                 }
             }
 

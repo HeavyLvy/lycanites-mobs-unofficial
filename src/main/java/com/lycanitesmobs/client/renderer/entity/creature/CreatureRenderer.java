@@ -6,6 +6,7 @@ import com.lycanitesmobs.client.obj.model.VBOObjModel;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
 import com.lycanitesmobs.client.renderer.util.VBOBatcher;
 import com.lycanitesmobs.client.renderer.layer.creature.LayerCreatureBase;
+import com.lycanitesmobs.core.compatibility.OculusCompat;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -193,7 +194,27 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
     protected void renderModel(BaseCreatureEntity entity, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, LayerCreatureBase layer, float time, float distance, float loop, float lookY, float lookX, float scale, int brightness, int fade, boolean invisible, boolean allyInvisible) {
 
         texture = this.getEntityTexture(entity, layer);
-        // Render Model
+
+        if (OculusCompat.isShaderPackActive()) {
+            if (!invisible || allyInvisible) {
+                int blending = this.getMainModel().getBlending(entity, layer);
+                boolean glow = this.getMainModel().getGlow(entity, layer);
+
+                VBOObjModel.useEntityFormat = true;
+                VBOObjModel.irisRenderType = OculusCompat.getIrisEntityRenderType(texture, blending, glow);
+                VBOObjModel.renderNormal = false;
+                VBOObjModel.renderOutline = false;
+                VBOObjModel.tex = texture;
+
+                this.getMainModel().render(entity, matrixStack, null, layer, time, distance, loop, lookY, lookX, 1, brightness, fade);
+
+                VBOObjModel.tex = null;
+                VBOObjModel.useEntityFormat = false;
+                VBOObjModel.irisRenderType = null;
+            }
+            return;
+        }
+
         // TODO allyInvisible lower color alpha
         if (!invisible || allyInvisible) {
             VBOObjModel.renderType = CustomRenderStates.getObjVBORenderType(this.getMainModel().getBlending(entity, layer), this.getMainModel().getGlow(entity, layer));
