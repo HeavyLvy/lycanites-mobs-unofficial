@@ -32,7 +32,6 @@ public abstract class SpawnCondition {
 		}
 
 		if (spawnCondition == null) {
-			LMHelperClass.logWarning("JSONSpawner", "Unknown spawn condition type: '" + type + "' - condition will be ignored.");
 			return null;
 		}
 		spawnCondition.loadFromJSON(json);

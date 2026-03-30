@@ -81,15 +81,11 @@ public class SpawnerManager extends JSONLoader {
                 if (spawnCondition != null) this.globalSpawnConditions.add(spawnCondition);
             }
         }
-        if (this.globalSpawnConditions.size() > 0) {
-            LMHelperClass.logDebug("JSONSpawner", "Loaded " + this.globalSpawnConditions.size() + " Global Spawn Conditions.");
-        }
     }
 
 
     @Override
     public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
-        LMHelperClass.logDebug("JSONSpawner", "Loading Spawner JSON: " + json);
         Spawner spawner = new Spawner();
         spawner.loadFromJSON(json);
         this.addSpawner(spawner);
@@ -100,7 +96,6 @@ public class SpawnerManager extends JSONLoader {
      * Reloads all JSON Spawners.
      **/
     public void reload() {
-        LMHelperClass.logDebug("JSONSpawner", "Destroying JSON Spawners!");
         for (Spawner spawner : this.spawners.values().toArray(new Spawner[this.spawners.size()])) {
             spawner.destroy();
         }

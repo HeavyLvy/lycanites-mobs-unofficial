@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.fluids.IFluidBlock;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class BlockSpawnLocation extends SpawnLocation {
     public Vec3i offset = new Vec3i(0, 0, 0);
 
     /**
-     * Cache for Block → registry ID string lookups. Avoids ForgeRegistries.BLOCKS.getKey() per block
+     * Cache for Block → registry ID string lookups. Avoids repeated registry lookups per block
      * in the hot triple-nested scanning loop. Safe to cache since the block registry is immutable at runtime.
      **/
     private final Map<Block, String> blockIdCache = new HashMap<>();
@@ -171,7 +172,9 @@ public class BlockSpawnLocation extends SpawnLocation {
      **/
     public boolean isValidBlock(Level world, BlockPos blockPos, BlockState blockState) {
         if (!this.surface || !this.underground) {
-            if (world.canSeeSkyFromBelowWater(blockPos)) {
+            int surfaceY = world.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX(), blockPos.getZ());
+            boolean isSurface = blockPos.getY() >= surfaceY;
+            if (isSurface) {
                 if (!this.surface) {
                     return false;
                 }
@@ -187,7 +190,8 @@ public class BlockSpawnLocation extends SpawnLocation {
         }
         Block block = blockState.getBlock();
         String blockId = this.blockIdCache.computeIfAbsent(block,
-                b -> LMHelperClass.convertToResourceLocation(b, world.registryAccess()).toString());
+                b -> LMHelperClass.convertToResourceLocation(b).toString());
+
         if ("blacklist".equalsIgnoreCase(this.listType)) {
             return !this.blockIds.contains(blockId);
         } else {

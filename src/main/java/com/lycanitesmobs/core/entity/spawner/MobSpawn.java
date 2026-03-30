@@ -250,7 +250,6 @@ public class MobSpawn {
                 return;
             }
         }
-        LMHelperClass.logWarning("", "[JSONSpawner] Could not resolve entity: " + this.mobId);
     }
 
     /**
@@ -387,8 +386,6 @@ public class MobSpawn {
 
         // Global Check:
         if (!CreatureManager.getInstance().spawnConfig.isAllowedGlobal(world)) {
-            LMHelperClass.logDebug("JSONSpawner",
-                    "  REJECTED " + mobName + ": global spawn config disallows this world");
             return false;
         }
 
@@ -396,7 +393,6 @@ public class MobSpawn {
         if (this.creatureInfo != null) {
             // Enabled:
             if (!this.creatureInfo.enabled || !this.creatureInfo.creatureSpawn.enabled) {
-                LMHelperClass.logDebug("JSONSpawner", "  REJECTED " + mobName + ": creature disabled");
                 return false;
             }
 
@@ -425,8 +421,6 @@ public class MobSpawn {
                     int day = (int) Math
                             .floor((worldExt.useTotalWorldTime ? world.getGameTime() : world.getDayTime()) / 24000D);
                     if (day < this.creatureInfo.creatureSpawn.worldDayMin) {
-                        LMHelperClass.logDebug("JSONSpawner", "  REJECTED " + mobName + ": world day " + day
-                                + " < required " + this.creatureInfo.creatureSpawn.worldDayMin);
                         return false;
                     }
                 }
@@ -435,8 +429,6 @@ public class MobSpawn {
             // Dimension:
             if (!forceIgnoreDimension && !this.ignoreDimension
                     && !this.creatureInfo.creatureSpawn.isAllowedDimension(world)) {
-                LMHelperClass.logDebug("JSONSpawner",
-                        "  REJECTED " + mobName + ": dimension not allowed (" + world.dimension().location() + ")");
                 return false;
             }
 

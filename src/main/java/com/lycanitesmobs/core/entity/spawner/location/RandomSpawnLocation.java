@@ -96,6 +96,10 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         int x = xz[0];
         int z = xz[1];
 
+        if (!world.getChunkSource().hasChunk(x >> 4, z >> 4)) {
+            return null;
+        }
+
         int heightmapY = Integer.MIN_VALUE;
         if (this.surface || this.underground) {
             if (this.surface) {
@@ -108,28 +112,25 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
             surfacePos = this.findSurfaceSpawnPos(world, x, z, heightmapY);
         }
 
-        // Surface-only: return the surface result directly (or null if none found).
         if (this.surface && !this.underground) {
             return surfacePos;
         }
 
-        // Underground-only or both surface+underground: use Y scan for underground positions.
-        // Key fix: when surface is allowed, center the Y scan on the heightmap Y (actual terrain level)
-        // rather than the trigger Y (player position), so the scan window covers real terrain.
         int scanOriginY;
         if (this.surface && heightmapY != Integer.MIN_VALUE) {
             scanOriginY = heightmapY;
+        } else if (!this.surface && this.underground && this.yMax >= 0) {
+            scanOriginY = this.yMax;
         } else {
             scanOriginY = triggerPos.getY();
         }
 
         int y = this.getRandomYCoord(world, new BlockPos(x, scanOriginY, z));
-        if (y <= -1) {
-            // Y scan found nothing; fall back to surface position if we have one.
-            return surfacePos; // null if no surface either
+        if (y == Integer.MIN_VALUE) {
+            return surfacePos;
         }
 
-        BlockPos feetPos = new BlockPos(x, y, z).below();
+        BlockPos feetPos = new BlockPos(x, y, z);
         BlockPos headPos = feetPos.above();
 
         if (!this.isValidBlock(world, feetPos)) {
@@ -154,9 +155,6 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
      * @return A valid surface BlockPos, or null if no valid position found.
      */
     private BlockPos findSurfaceSpawnPos(Level world, int x, int z, int heightmapY) {
-        // MOTION_BLOCKING_NO_LEAVES includes fluids (water, lava). When solidGround is required,
-        // the block at groundPos must itself be solid (canOcclude), otherwise this XZ lands over
-        // a lake or river and mobs can't stand here.
         BlockPos groundPos = new BlockPos(x, heightmapY, z);
         if (this.solidGround && !world.getBlockState(groundPos.below()).canOcclude()) {
             return null;
@@ -234,7 +232,7 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
      *
      * @param world      The world that the coordinates are being selected in, mainly for getting Random.
      * @param triggerPos The position to search from using XZ coords and up and down within range of the Y coord.
-     * @return The y position, -1 if a valid position could not be found.
+     * @return The y position, Integer.MIN_VALUE if a valid position could not be found.
      */
     public int getRandomYCoord(Level world, BlockPos triggerPos) {
         double difficultyScale = this.normalDifficultyRangeScale;
@@ -250,39 +248,35 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         int originY = triggerPos.getY();
         int originZ = triggerPos.getZ();
 
-        int minY = Math.max(originY - rangeMaxY, 0); // Start from this y pos
+        int minY = Math.max(originY - rangeMaxY, world.getMinBuildHeight());
         if (this.yMin >= 0) {
             minY = Math.max(minY, this.yMin);
         }
-        int maxY = Math.min(originY + rangeMaxY, world.getMaxBuildHeight() - 1); // Search up to this y pos
+        int maxY = Math.min(originY + rangeMaxY, world.getMaxBuildHeight() - 1);
         if (this.yMax >= 0) {
             maxY = Math.min(maxY, this.yMax);
         }
 
-        int reservoirLow = -1;
+        int reservoirLow = Integer.MIN_VALUE;
         int countLow = 0;
-        int reservoirHigh = -1;
+        int reservoirHigh = Integer.MIN_VALUE;
         int countHigh = 0;
 
         BlockPos.MutableBlockPos spawnPos = new BlockPos.MutableBlockPos(originX, minY, originZ);
         BlockPos.MutableBlockPos headPos = new BlockPos.MutableBlockPos(originX, minY + 1, originZ);
 
-        // Get Every Valid Y Pos:
         for (int nextY = minY; nextY <= maxY; nextY++) {
-            // If the next y pos to check is within the min range area, move it up out of it:
             if (nextY > originY - rangeMinY && nextY < originY + rangeMinY)
                 nextY = originY + rangeMinY;
 
             spawnPos.setY(nextY);
             headPos.setY(nextY + 1);
 
-            // If the pos is valid to spawn at:
             if (this.isValidBlock(world, spawnPos)) {
                 boolean lastYPos = false;
 
-                // If can see sky:
-                if (world.canSeeSkyFromBelowWater(spawnPos)) {
-                    // Get random floating position if not searching for solid ground:
+                int heightmapSurfaceY = world.getHeight(Heightmap.Types.OCEAN_FLOOR, spawnPos.getX(), spawnPos.getZ());
+                if (nextY >= heightmapSurfaceY) {
                     if (!this.solidGround) {
                         int floatRange = maxY - nextY;
                         if (floatRange > 1) {
@@ -313,13 +307,12 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
             }
         }
 
-        // Pick Random Y Pos:
-        if (reservoirHigh != -1 && (countLow == 0 || world.random.nextFloat() > 0.25F)) {
+        if (reservoirHigh != Integer.MIN_VALUE && (countLow == 0 || world.random.nextFloat() > 0.25F)) {
             return reservoirHigh;
-        } else if (reservoirLow != -1) {
+        } else if (reservoirLow != Integer.MIN_VALUE) {
             return reservoirLow;
         }
-        return -1;
+        return Integer.MIN_VALUE;
     }
 
     /**
@@ -328,14 +321,10 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
     @Override
     public boolean isValidBlock(Level world, BlockPos blockPos) {
         if (!super.isValidBlock(world, blockPos)) {
-            //LMHelperClass.logDebug("JSONSpawner", "isValidBlock: super rejected " + blockPos);
             return false;
         }
         if (this.solidGround) {
             boolean groundOk = this.posHasGround(world, blockPos);
-           /* if (!groundOk) {
-                LMHelperClass.logDebug("JSONSpawner", "isValidBlock: no solid ground under " + blockPos);
-            }*/
             return groundOk;
         }
         return true;
@@ -346,19 +335,12 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
      * Returns true if the specified position has a block underneath it that a mob can safely stand on.
      **/
     public boolean posHasGround(Level world, BlockPos pos) {
-        if (pos == null || pos.getY() == 0)
+        if (pos == null || pos.getY() <= world.getMinBuildHeight())
             return false;
         BlockState possibleGroundBlock = world.getBlockState(pos.below());
         try {
             if (possibleGroundBlock.canOcclude())
                 return true;
-        } catch (Exception e) {
-        }
-        try {
-			/*if (possibleGroundBlock.isSideSolid(world, pos.down(), EnumFacing.UP))
-				return true;
-			if (possibleGroundBlock.isSideSolid(world, pos.down(), EnumFacing.DOWN))
-				return true;*/
         } catch (Exception e) {
         }
         return false;

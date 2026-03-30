@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,9 @@ public class MaterialSpawnLocation extends BlockSpawnLocation {
         BlockState blockState = world.getBlockState(blockPos);
 
         if (!this.surface || !this.underground) {
-            if (world.canSeeSkyFromBelowWater(blockPos)) {
+            int surfaceY = world.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX(), blockPos.getZ());
+            boolean isSurface = blockPos.getY() >= surfaceY;
+            if (isSurface) {
                 if (!this.surface) {
                     return false;
                 }

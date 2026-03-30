@@ -413,9 +413,7 @@ public class Spawner {
             return false;
         }
 
-        LMHelperClass.logDebug("JSONSpawner", "=== " + this.name + " triggered @ " + triggerPos + " ===");
         if (!this.canSpawn(world, player, triggerPos)) {
-            LMHelperClass.logDebug("JSONSpawner", "=== " + this.name + " skipped: conditions not met");
             return false;
         }
 
@@ -494,7 +492,6 @@ public class Spawner {
         }
 
         ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
-        LMHelperClass.logDebug("JSONSpawner", "  wave=" + mobCount + " dim=" + world.dimension().location() + " player=" + (player != null ? player.getName().getString() : "none"));
 
         List<MobSpawn> allRegistered = new ArrayList<>(this.mobSpawns);
         Collection<MobSpawn> globalRegistered = SpawnerMobRegistry.getMobSpawns(this.sharedName);
@@ -510,7 +507,6 @@ public class Spawner {
             );
         }
         if (spawnPositions.isEmpty()) {
-            LMHelperClass.logDebug("JSONSpawner", "=== " + this.name + " skipped: no spawn positions found");
             return false;
         }
         Collections.shuffle(spawnPositions);
@@ -527,12 +523,9 @@ public class Spawner {
             }
             biomes = new ArrayList<>(biomeSet);
         }
-        LMHelperClass.logDebug("JSONSpawner", "  positions=" + spawnPositions.size() + " biomes=" + (biomes != null ? biomes.size() : "ignored"));
-
         // Get Mobs:
         Map<Biome, List<MobSpawn>> mobSpawns = this.getMobSpawns(world, player, spawnPositions.size(), biomes);
         if (mobSpawns.isEmpty()) {
-            LMHelperClass.logDebug("JSONSpawner", "=== " + this.name + " skipped: no spawnable mobs (biomes=" + biomes + " dim=" + world.dimension().location() + ")");
             return false;
         }
 
@@ -551,11 +544,6 @@ public class Spawner {
                 mobSpawn = this.chooseMobToSpawn(world, mobSpawns.get(null));
             } else if (mobSpawns.containsKey(spawnBiome)) {
                 mobSpawn = this.chooseMobToSpawn(world, mobSpawns.get(spawnBiome));
-            } else {
-                Object spawnBiomeRL = LMHelperClass.convertToResourceLocation(spawnBiome,world.registryAccess());
-                LMHelperClass.logWarning("JSONSpawner", "BIOME KEY MISMATCH! spawnBiome=" + spawnBiomeRL
-                        + " (identity=" + System.identityHashCode(spawnBiome) + ") not in mobSpawns map (keys: "
-                        + mobSpawns.keySet().stream().map(k -> String.valueOf(LMHelperClass.convertToResourceLocation(k,world.registryAccess()))).collect(Collectors.joining(", ")) + ")");
             }
             if (mobSpawn == null) {
                 continue;
@@ -567,7 +555,6 @@ public class Spawner {
                 if (groupMax > 0) {
                     int alreadySpawned = spawnGroupCounts.getOrDefault(creatureName, 0);
                     if (alreadySpawned >= groupMax) {
-                        LMHelperClass.logDebug("JSONSpawner", "  SKIP " + creatureName + " @ " + spawnPos + ": spawnGroupMax reached (" + groupMax + ")");
                         continue;
                     }
                 }
@@ -576,7 +563,6 @@ public class Spawner {
             // Create Entity:
             LivingEntity entityLiving = mobSpawn.createEntity(world);
             if (entityLiving == null) {
-                LMHelperClass.logWarning("JSONSpawner", "Unable to instantiate entity for MobSpawn: " + mobSpawn + " entityType: " + mobSpawn.entityType + " creatureInfo: " + (mobSpawn.creatureInfo != null ? mobSpawn.creatureInfo.getName() : "null"));
                 continue;
             }
 
@@ -589,8 +575,6 @@ public class Spawner {
                 BlockPos blockPos = new BlockPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
                 canSpawn = new MobSpawnEvent.SpawnPlacementCheck(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, blockPos, world.getRandom(), false).getResult();
                 if (canSpawn == Event.Result.DENY && !this.ignoreForgeCanSpawnEvent && !mobSpawn.ignoreForgeCanSpawnEvent) {
-                    String mobName = mobSpawn.creatureInfo != null ? mobSpawn.creatureInfo.getName() : String.valueOf(mobSpawn.entityType);
-                    LMHelperClass.logWarning("JSONSpawner", "FAIL " + mobName + " @ " + spawnPos + ": blocked by Forge CanSpawn event (another mod)");
                     continue;
                 }
             }
@@ -611,8 +595,6 @@ public class Spawner {
                 }
             }
 
-            String spawnedName = mobSpawn.creatureInfo != null ? mobSpawn.creatureInfo.getName() : String.valueOf(mobSpawn.entityType);
-            LMHelperClass.logDebug("JSONSpawner", "  SPAWNED " + spawnedName + " @ " + spawnPos);
             mobsSpawned++;
 
             if (mobSpawn.creatureInfo != null) {
@@ -620,7 +602,6 @@ public class Spawner {
             }
         }
 
-        LMHelperClass.logDebug("JSONSpawner", "=== " + this.name + " done: " + mobsSpawned + "/" + mobCount + " spawned ===");
         return mobsSpawned > 0;
     }
 
@@ -731,10 +712,6 @@ public class Spawner {
                 viableMobSpawns.add(possibleMobSpawn);
             }
         }
-        if (biome != null && viableMobSpawns.size() < possibleSpawns.size()) {
-            Object biomeRL = LMHelperClass.convertToResourceLocation(biome,world.registryAccess());
-            LMHelperClass.logDebug("JSONSpawner", "  biome=" + biomeRL + ": " + viableMobSpawns.size() + "/" + possibleSpawns.size() + " eligible");
-        }
         return viableMobSpawns;
     }
 
@@ -791,7 +768,6 @@ public class Spawner {
             String mobName = entityCreature.creatureInfo.getName();
 
             if (!this.ignoreCollision && !entityCreature.checkSpawnCollision(world, spawnPos)) {
-                LMHelperClass.logDebug("JSONSpawner", "  FAIL " + mobName + " @ " + spawnPos + ": collision");
                 return false;
             }
 
@@ -801,7 +777,6 @@ public class Spawner {
 
             if (!this.ignoreLightLevel && !mobSpawn.ignoreLightLevel) {
                 if (!entityCreature.checkSpawnLightLevel(world, spawnPos)) {
-                    LMHelperClass.logDebug("JSONSpawner", "  FAIL " + mobName + " @ " + spawnPos + ": light level");
                     return false;
                 }
             }
@@ -809,7 +784,6 @@ public class Spawner {
             boolean checkGroupLimit = !this.ignoreGroupLimit && !mobSpawn.ignoreGroupLimit;
             double effectiveGroupRange = checkGroupLimit ? this.groupLimitRange : 0;
             if (!entityCreature.checkSpawnLimits(world, spawnPos, effectiveGroupRange)) {
-                LMHelperClass.logDebug("JSONSpawner", "  FAIL " + mobName + " @ " + spawnPos + ": boss proximity or group limit");
                 return false;
             }
 

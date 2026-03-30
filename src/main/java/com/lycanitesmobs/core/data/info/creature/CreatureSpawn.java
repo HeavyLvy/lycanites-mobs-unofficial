@@ -314,7 +314,6 @@ public class CreatureSpawn {
         if (biomeRL != null) {
             biomeId = biomeRL.toString();
         } else {
-            LMHelperClass.logWarning("JSONSpawner", "isValidBiome(): biome ResourceLocation is null, rejecting");
             return false;
         }
 

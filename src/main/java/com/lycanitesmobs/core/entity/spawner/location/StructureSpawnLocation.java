@@ -50,7 +50,6 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
     @Override
     public List<BlockPos> getSpawnPositions(Level world, Player player, BlockPos triggerPos) {
         if (!(world instanceof ServerLevel)) {
-            LMHelperClass.logWarning("", "[JSONSpawner] Structure spawn location was called with a non ServerWorld World instance.");
             return new ArrayList<>();
         }
 
@@ -66,8 +65,6 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
             if (spawnStructure == null) {
                 continue;
             }
-            LMHelperClass.logDebug("JSONSpawner", "Getting Nearest " + structureId + " Structures Within Range");
-
             BlockPos structurePos = null;
             try {
                 structurePos = ((ServerLevel) world).findNearestMapStructure(lycaniteStructures, triggerPos, this.structureRange, false);
@@ -76,19 +73,16 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
 
             // No Structure:
             if (structurePos == null) {
-                LMHelperClass.logDebug("JSONSpawner", "No " + structureId + " Structures found.");
                 continue;
             }
 
             // Too Far:
             double structureDistance = Math.sqrt(structurePos.distSqr(triggerPos));
             if (structureDistance > this.structureRange) {
-                LMHelperClass.logDebug("JSONSpawner", "No " + structureId + " Structures within range, nearest was: " + structureDistance + "/" + this.structureRange + " at: " + structurePos);
                 continue;
             }
 
             // Structure Found:
-            LMHelperClass.logDebug("JSONSpawner", "Found a " + structureId + " Structure within range, at: " + structurePos + " distance: " + structureDistance + "/" + this.structureRange);
             spawnPositions.addAll(super.getSpawnPositions(world, player, structurePos));
         }
 

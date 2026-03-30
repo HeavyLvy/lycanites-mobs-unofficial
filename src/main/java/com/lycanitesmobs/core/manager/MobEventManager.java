@@ -117,9 +117,6 @@ public class MobEventManager extends JSONLoader {
                 if (spawnCondition != null) this.globalEventConditions.add(spawnCondition);
             }
         }
-        if (this.globalEventConditions.size() > 0) {
-            LMHelperClass.logDebug("JSONSpawner", "Loaded " + this.globalEventConditions.size() + " Global Mob Event Conditions.");
-        }
     }
 
     public void loadScheduledEvents() {
