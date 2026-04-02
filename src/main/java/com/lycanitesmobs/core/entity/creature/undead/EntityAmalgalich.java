@@ -39,7 +39,7 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
 
     public EntityAmalgalich(EntityType<? extends EntityAmalgalich> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEAD;
         this.hasAttackSound = true;
@@ -76,7 +76,7 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
                 .setConditions(new GoalConditions().setBattlePhase(0)));
         this.consumptionGoalP0 = new ForceGoal(this).setRange(64F).setCooldown(consumptionGoalCooldown).setDuration(this.consumptionDuration).setWindUp(this.consumptionWindUp).setForce(-1F).setPhase(0).setDismount(true);
         this.goalSelector.addGoal(this.nextIdleGoalIndex, new EffectAuraGoal(this).setRange(1F).setCooldown(consumptionGoalCooldown + this.consumptionWindUp).setDuration(this.consumptionDuration - this.consumptionWindUp).setTickRate(5).setDamageAmount(1000).setCheckSight(false)
-                .setTargetTypes((byte)(TARGET_TYPES.ALLY.id|TARGET_TYPES.ENEMY.id))
+                .setTargetTypes((byte) (TARGET_TYPES.ALLY.id | TARGET_TYPES.ENEMY.id))
                 .setConditions(new GoalConditions().setBattlePhase(0)));
         this.goalSelector.addGoal(this.nextIdleGoalIndex, this.consumptionGoalP0);
 
@@ -90,14 +90,16 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         this.consumptionGoalP2 = new ForceGoal(this).setRange(64F).setCooldown(consumptionGoalCooldown).setDuration(this.consumptionDuration).setWindUp(this.consumptionWindUp).setForce(-1F).setPhase(2).setDismount(true);
         this.goalSelector.addGoal(this.nextIdleGoalIndex, this.consumptionGoalP2);
         this.goalSelector.addGoal(this.nextIdleGoalIndex, new EffectAuraGoal(this).setRange(1F).setCooldown(consumptionGoalCooldown + this.consumptionWindUp).setDuration(this.consumptionDuration - this.consumptionWindUp).setTickRate(5).setDamageAmount(1000).setCheckSight(false)
-                .setTargetTypes((byte)(TARGET_TYPES.ALLY.id|TARGET_TYPES.ENEMY.id))
+                .setTargetTypes((byte) (TARGET_TYPES.ALLY.id | TARGET_TYPES.ENEMY.id))
                 .setConditions(new GoalConditions().setBattlePhase(2)));
         this.goalSelector.addGoal(this.nextIdleGoalIndex, new FireProjectilesGoal(this).setProjectile("lobdarklings").setFireRate(10 * 20).setVelocity(0.8F).setScale(2F).setRandomCount(3).setAngle(360).setPhase(2));
 
         super.registerGoals();
     }
 
-    /** Returns a larger bounding box for rendering this large entity. **/
+    /**
+     * Returns a larger bounding box for rendering this large entity.
+     **/
     @OnlyIn(Dist.CLIENT)
     public AABB getBoundingBoxForCulling() {
         return this.getBoundingBox().inflate(200, 50, 200).move(0, -25, 0);
@@ -106,7 +108,7 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
     @Override
     public void onFirstSpawn() {
         super.onFirstSpawn();
-        if(this.getArenaCenter() == null) {
+        if (this.getArenaCenter() == null) {
             this.setArenaCenter(this.blockPosition());
         }
     }
@@ -116,7 +118,7 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         super.aiStep();
 
         // Arena Snapping:
-        if(this.hasArenaCenter()) {
+        if (this.hasArenaCenter()) {
             BlockPos arenaPos = this.getArenaCenter();
             double arenaY = this.position().y();
             if (this.getCommandSenderWorld().isEmptyBlock(arenaPos))
@@ -129,11 +131,10 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         }
 
         // Consumption Animation:
-        if(this.getCommandSenderWorld().isClientSide) {
-            if(!this.extraAnimation01()) {
+        if (this.getCommandSenderWorld().isClientSide) {
+            if (!this.extraAnimation01()) {
                 this.consumptionAnimationTime = this.consumptionDuration;
-            }
-            else {
+            } else {
                 this.consumptionAnimationTime--;
             }
         }
@@ -142,11 +143,11 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
     @Override
     public void updateBattlePhase() {
         double healthNormal = this.getHealth() / this.getMaxHealth();
-        if(healthNormal <= 0.2D) {
+        if (healthNormal <= 0.2D) {
             this.setBattlePhase(2);
             return;
         }
-        if(healthNormal <= 0.6D) {
+        if (healthNormal <= 0.6D) {
             this.setBattlePhase(1);
             return;
         }
@@ -165,8 +166,8 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
 
     @Override
     public boolean canAttack(LivingEntity target) {
-    	if(target instanceof EntityBanshee || target instanceof EntityReaper || target instanceof EntityGeist)
-    		return false;
+        if (target instanceof EntityBanshee || target instanceof EntityReaper || target instanceof EntityGeist)
+            return false;
         return super.canAttack(target);
     }
 
@@ -178,29 +179,29 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
 
     // ========== Consumption Attack ==========
     public float getConsumptionAnimation() {
-        if(this.consumptionAnimationTime >= this.consumptionDuration) {
+        if (this.consumptionAnimationTime >= this.consumptionDuration) {
             return 0F;
         }
         int windUpThreshhold = this.consumptionDuration - this.consumptionWindUp;
-        if(this.consumptionAnimationTime > windUpThreshhold) {
-            return 1F - (float)(this.consumptionAnimationTime - windUpThreshhold) / this.consumptionWindUp;
+        if (this.consumptionAnimationTime > windUpThreshhold) {
+            return 1F - (float) (this.consumptionAnimationTime - windUpThreshhold) / this.consumptionWindUp;
         }
-        float finishingTime = (float)this.consumptionWindUp / 2;
-        if(this.consumptionAnimationTime < finishingTime) {
-            return (float)this.consumptionAnimationTime / finishingTime;
+        float finishingTime = (float) this.consumptionWindUp / 2;
+        if (this.consumptionAnimationTime < finishingTime) {
+            return (float) this.consumptionAnimationTime / finishingTime;
         }
         return 1F;
     }
 
     public boolean extraAnimation01() {
-        if(this.getCommandSenderWorld().isClientSide) {
+        if (this.getCommandSenderWorld().isClientSide) {
             return super.extraAnimation01();
         }
 
-        if(this.getBattlePhase() == 0) {
+        if (this.getBattlePhase() == 0) {
             return this.consumptionGoalP0.cooldownTime <= 0;
         }
-        if(this.getBattlePhase() == 2) {
+        if (this.getBattlePhase() == 2) {
             return this.consumptionGoalP2.cooldownTime <= 0;
         }
 
@@ -210,7 +211,7 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
     @Override
     public boolean addMinion(LivingEntity minion) {
         boolean minionAdded = super.addMinion(minion);
-        if(minionAdded && minion instanceof BaseCreatureEntity) {
+        if (minionAdded && minion instanceof BaseCreatureEntity) {
             BaseCreatureEntity minionCreature = (BaseCreatureEntity) minion;
             minionCreature.targetSelector.addGoal(minionCreature.nextFindTargetIndex++, new CopyMasterAttackTargetGoal(minionCreature));
             if (minion instanceof EntityGeist) {
@@ -226,15 +227,15 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         super.onMinionDeath(minion, damageSource);
 
         // Shadowfire Clearing:
-        if(minion instanceof EntityEpion) {
+        if (minion instanceof EntityEpion) {
             int extinguishWidth = 10;
             int extinguishHeight = 30;
-            if(!this.getCommandSenderWorld().isClientSide) {
-                for(int x = (int)minion.position().x() - extinguishWidth; x <= (int)minion.position().x() + extinguishWidth; x++) {
-                    for(int y = (int)minion.position().y() - extinguishHeight; y <= (int)minion.position().y() + 2; y++) {
-                        for(int z = (int)minion.position().z() - extinguishWidth; z <= (int)minion.position().z() + extinguishWidth; z++) {
+            if (!this.getCommandSenderWorld().isClientSide) {
+                for (int x = (int) minion.position().x() - extinguishWidth; x <= (int) minion.position().x() + extinguishWidth; x++) {
+                    for (int y = (int) minion.position().y() - extinguishHeight; y <= (int) minion.position().y() + 2; y++) {
+                        for (int z = (int) minion.position().z() - extinguishWidth; z <= (int) minion.position().z() + extinguishWidth; z++) {
                             Block block = this.getCommandSenderWorld().getBlockState(new BlockPos(x, y, z)).getBlock();
-                            if(block == ObjectManager.getBlock("shadowfire")) {
+                            if (block == ObjectManager.getBlock("shadowfire")) {
                                 BlockPos placePos = new BlockPos(x, y, z);
                                 this.getCommandSenderWorld().removeBlock(placePos, true);
                             }
@@ -248,7 +249,7 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
     @Override
     public void onTryToDamageMinion(LivingEntity minion, float damageAmount) {
         super.onTryToDamageMinion(minion, damageAmount);
-        if(damageAmount >= 1000) {
+        if (damageAmount >= 1000) {
             minion.remove(RemovalReason.DISCARDED);
             this.heal(25);
         }
@@ -256,13 +257,30 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
 
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
-        if(this.isBlocking())
+        var entity = source.getEntity();
+        if (this.isBlocking())
             return true;
+        if (entity instanceof ZombifiedPiglin) {
+            entity.remove(RemovalReason.DISCARDED);
+            return true;
+        }
+        if (entity instanceof IronGolem) {
+            entity.remove(RemovalReason.DISCARDED);
+            return true;
+        }
+        if (entity instanceof Player) {
+            Player player = (Player) entity;
+            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
+                return true;
+            }
+        }
         return super.isInvulnerableTo(source);
     }
-    
+
     @Override
-    public boolean canBurn() { return false; }
+    public boolean canBurn() {
+        return false;
+    }
 
     @Override
     public boolean isBlocking() {
@@ -273,24 +291,6 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         return true;
     }
 
-    @Override
-    public boolean isVulnerableTo(Entity entity) {
-        if(entity instanceof ZombifiedPiglin) {
-            entity.remove(RemovalReason.DISCARDED);
-            return false;
-        }
-        if(entity instanceof IronGolem) {
-            entity.remove(RemovalReason.DISCARDED);
-            return false;
-        }
-        if(entity instanceof Player) {
-            Player player = (Player)entity;
-            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
-                return false;
-            }
-        }
-        return super.isVulnerableTo(entity);
-    }
 
     @Override
     public void readAdditionalSaveData(CompoundTag nbt) {

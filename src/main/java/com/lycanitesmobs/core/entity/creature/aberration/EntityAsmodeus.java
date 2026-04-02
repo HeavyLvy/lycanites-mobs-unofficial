@@ -516,8 +516,23 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
     // ========== Damage ==========
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
+        var entity = source.getEntity();
         if (this.isBlocking())
             return true;
+        if (entity instanceof ZombifiedPiglin) {
+            entity.remove(RemovalReason.DISCARDED);
+            return true;
+        }
+        if (entity instanceof IronGolem) {
+            entity.remove(RemovalReason.DISCARDED);
+            return true;
+        }
+        if (entity instanceof Player) {
+            Player player = (Player) entity;
+            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
+                return true;
+            }
+        }
         return super.isInvulnerableTo(source);
     }
 
@@ -538,24 +553,6 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
         return true;
     }
 
-    @Override
-    public boolean isVulnerableTo(Entity entity) {
-        if (entity instanceof ZombifiedPiglin) {
-            entity.remove(RemovalReason.DISCARDED);
-            return false;
-        }
-        if (entity instanceof IronGolem) {
-            entity.remove(RemovalReason.DISCARDED);
-            return false;
-        }
-        if (entity instanceof Player) {
-            Player player = (Player) entity;
-            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
-                return false;
-            }
-        }
-        return super.isVulnerableTo(entity);
-    }
 
     @Override
     public void readAdditionalSaveData(CompoundTag nbt) {

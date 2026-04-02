@@ -77,7 +77,9 @@ public class Subspecies {
             for (JsonElement jsonElement : json.get("variants").getAsJsonArray()) {
                 JsonObject jsonObject = jsonElement.getAsJsonObject();
                 Variant variant = Variant.createFromJSON(creatureInfo, jsonObject);
-                subspecies.variants.put(variant.index, variant);
+                if (variant != null) {
+                    subspecies.variants.put(variant.index, variant);
+                }
             }
         }
 
@@ -103,7 +105,8 @@ public class Subspecies {
         for (String elementName : elementNames) {
             ElementInfo element = ElementManager.getInstance().getElement(elementName);
             if (element == null) {
-                throw new RuntimeException("[Creature] The element " + elementName + " cannot be found for subspecies: " + subspecies.name);
+                LMHelperClass.logWarningMessage("[Creature] Skipping unknown element '" + elementName + "' for subspecies '" + subspecies.name + "'. If you have updated the mod, clear your creature configs.");
+                continue;
             }
             subspecies.elements.add(element);
         }

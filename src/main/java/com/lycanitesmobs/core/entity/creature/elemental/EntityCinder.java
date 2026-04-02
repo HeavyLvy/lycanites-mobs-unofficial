@@ -174,14 +174,6 @@ public class EntityCinder extends TameableCreatureEntity implements Enemy, IFusa
     // ==================================================
     //                     Immunities
     // ==================================================
-    @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-		/*if(type.equals("inWall")) {
-			this.inWallDamageAbsorbed += damage;
-			return false;
-		}*/
-        return super.isVulnerableTo(type, source, damage);
-    }
 
     @Override
     public boolean canBurn() {

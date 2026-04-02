@@ -7,6 +7,7 @@ import com.lycanitesmobs.core.block.blockentity.TileEntityEquipmentForge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -66,6 +67,17 @@ public class BlockEquipmentForge extends BlockBase implements EntityBlock {
 
     @Override
     public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock())) {
+            BlockEntity blockEntity = worldIn.getBlockEntity(pos);
+            if (blockEntity instanceof TileEntityEquipmentForge forge) {
+                for (int i = 1; i < forge.getContainerSize(); i++) {
+                    ItemStack stack = forge.getItem(i);
+                    if (!stack.isEmpty()) {
+                        Containers.dropItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), stack);
+                    }
+                }
+            }
+        }
         super.onRemove(state, worldIn, pos, newState, isMoving);
     }
 

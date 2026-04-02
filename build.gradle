@@ -20,7 +20,9 @@ minecraft {
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
-
+        configureEach {
+            property('terminal.ansi', 'true')
+        }
         client {
             workingDirectory project.file('run')
             args '--mixin.config=lycanitesmobs.mixins.json', '--debug', '--username', "Dev"

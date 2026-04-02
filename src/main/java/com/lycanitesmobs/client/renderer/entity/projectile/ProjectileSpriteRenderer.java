@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.misc.LaserEndProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.LaserProjectileEntity;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -36,7 +37,7 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
             return;
         if (entity.getClass() == LaserEndProjectileEntity.class) return;
 
-        float loop = (float) entity.tickCount + Math.min(1, partialTicks);
+        float loop = (float) entity.tickCount + (Minecraft.getInstance().isPaused() ? 0 : Math.min(1, partialTicks));
         float scale = entity.getProjectileScale();
 
         if (entity instanceof CustomProjectileEntity && ((CustomProjectileEntity) entity).getLaserEnd() != null) {
@@ -50,7 +51,6 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
         matrixStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         matrixStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F));
         matrixStack.translate(0, entity.getTextureOffsetY(), 0);
-        if (entity.rollSpeed != 0) matrixStack.mulPose(com.mojang.math.Axis.ZP.rotation(loop * entity.rollSpeed * 4));
         matrixStack.scale(scale, scale, scale);
         ResourceLocation texture = this.getTextureLocation(entity);
         RenderType rendertype = CustomRenderStates.getSpriteRenderType(texture);
@@ -118,7 +118,6 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
             matrixStack.translate(0, entity.getTextureOffsetY(), 0);
             matrixStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
             matrixStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F));
-            if (entity.rollSpeed != 0) matrixStack.mulPose(com.mojang.math.Axis.ZP.rotation(loop * entity.rollSpeed));
             matrixStack.scale(scale, scale, scale);
             this.renderSprite(entity, matrixStack, renderTypeBuffer, rendertype, scale);
             matrixStack.popPose();

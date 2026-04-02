@@ -1,7 +1,6 @@
 package com.lycanitesmobs.core.entity.goals.actions;
 
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
-import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
@@ -11,7 +10,6 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3d;
 
 import java.util.EnumSet;
 
@@ -68,10 +66,7 @@ public class MoveVillageGoal extends Goal {
                     return (-serverWorld.getBlockFloorHeight(p_220755_1_));
                 });
                 if (lvt_3_1_ == null) return false;
-                var x = LMHelperClass.convertObjectToDesired(lvt_3_1_.x, "integer");
-                var y = LMHelperClass.convertObjectToDesired(lvt_3_1_.y, "double");
-                var z = LMHelperClass.convertObjectToDesired(lvt_3_1_.z, "double");
-                this.blockPos = new BlockPos((Integer) x, (Integer)y, (Integer)z);
+                this.blockPos = BlockPos.containing(lvt_3_1_.x, lvt_3_1_.y, lvt_3_1_.z);
                 return true;
             }
         }
@@ -93,22 +88,18 @@ public class MoveVillageGoal extends Goal {
     @Override
     public void tick() {
         if (this.blockPos != null) {
-            PathNavigation lvt_1_1_ = this.host.getNavigation();
-            Vec3i v3 = (Vec3i) LMHelperClass.convertObjectToDesired(this.host.position(), "vec3i");
-            if (lvt_1_1_.isDone() && !this.blockPos.closerThan(v3, 10.0D)) {
-                Vector3d lvt_2_1_ = new Vector3d(this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ());
-                Vector3d lvt_3_1_ = new Vector3d(this.host.position().x(), this.host.position().y(), this.host.position().z());
-                Vector3d lvt_4_1_ = lvt_3_1_.sub(lvt_2_1_);
-                lvt_2_1_ = lvt_4_1_.set(0.4D).add(lvt_2_1_);
-                Vector3d lvt_5_1_ = lvt_2_1_.sub(lvt_3_1_).normalize().set(10.0D).add(lvt_3_1_);
-                Vec3i vec3i = (Vec3i) LMHelperClass.convertObjectToDesired(lvt_5_1_, "vec3i");
-                BlockPos lvt_6_1_ = new BlockPos(vec3i);
-                lvt_6_1_ = this.host.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, lvt_6_1_);
-                if (!lvt_1_1_.moveTo(lvt_6_1_.getX(), lvt_6_1_.getY(), lvt_6_1_.getZ(), 1.0D)) {
+            PathNavigation navigation = this.host.getNavigation();
+            Vec3i hostVec = new Vec3i((int) this.host.position().x(), (int) this.host.position().y(), (int) this.host.position().z());
+            if (navigation.isDone() && !this.blockPos.closerThan(hostVec, 10.0D)) {
+                Vec3 targetVec = new Vec3(this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ());
+                Vec3 hostPos = this.host.position();
+                Vec3 direction = targetVec.subtract(hostPos).normalize();
+                Vec3 moveTarget = hostPos.add(direction.scale(10.0D));
+                BlockPos moveBlockPos = this.host.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(moveTarget.x, moveTarget.y, moveTarget.z));
+                if (!navigation.moveTo(moveBlockPos.getX(), moveBlockPos.getY(), moveBlockPos.getZ(), 1.0D)) {
                     this.moveRandomly();
                 }
             }
-
         }
     }
 

@@ -246,8 +246,9 @@ public class CreatureInfo {
 
     /**
      * Loads this creature from a JSON object.
+     * @return true if loaded successfully, false if this entry should be skipped.
      **/
-    public void loadFromJson(JsonObject json) {
+    public boolean loadFromJson(JsonObject json) {
         this.name = json.get("name").getAsString();
 
         // Entity Class:
@@ -255,8 +256,8 @@ public class CreatureInfo {
             this.entityClass = (Class<? extends BaseCreatureEntity>) Class.forName(json.get("entityClass").getAsString());
             this.entityConstructor = this.entityClass.getConstructor(EntityType.class, Level.class);
         } catch (Exception e) {
-            LMHelperClass.logError("[Creature] Unable to find the Java Entity Class: " + json.get("entityClass").getAsString() + " for " + this.getName());
-            throw new RuntimeException("Creature config loading error, clear your config if updating from an older version of the mod. Missing Class: " + json.get("entityClass").getAsString() + " Creature: " + this.getName());
+            LMHelperClass.logWarningMessage("[Creature] Skipping creature '" + this.getName() + "': unable to find entity class '" + json.get("entityClass").getAsString() + "'. If you have updated the mod, clear your creature configs at: config/lycanitesmobs/creatures/" + this.getName() + ".json");
+            return false;
         }
 
         // Enabled:
@@ -265,7 +266,7 @@ public class CreatureInfo {
         if (json.has("dummy"))
             this.dummy = json.get("dummy").getAsBoolean();
         if (this.dummy)
-            return;
+            return true;
 
         // Model Class:
         this.modelClassName = json.get("modelClass").getAsString();
@@ -356,7 +357,8 @@ public class CreatureInfo {
             this.subspecies.put(subspecies.index, subspecies);
         }
         if (this.subspecies.isEmpty()) {
-            throw new RuntimeException("No subspecies were found for " + this.getName() + " there should always be at least 1 default subspecies for the base normal subspecies.");
+            LMHelperClass.logWarningMessage("[Creature] Skipping creature '" + this.getName() + "': no subspecies found (there should always be at least 1 default subspecies). Clear your creature configs at: config/lycanitesmobs/creatures/" + this.getName() + ".json");
+            return false;
         }
 
         // Elements:
@@ -371,7 +373,8 @@ public class CreatureInfo {
         for (String elementName : elementNames) {
             ElementInfo element = ElementManager.getInstance().getElement(elementName);
             if (element == null) {
-                throw new RuntimeException("[Creature] The element " + elementName + " cannot be found for: " + this.getName());
+                LMHelperClass.logWarningMessage("[Creature] Skipping unknown element '" + elementName + "' for creature '" + this.getName() + "'. Clear your creature configs at: config/lycanitesmobs/creatures/" + this.getName() + ".json");
+                continue;
             }
             this.elements.add(element);
         }
@@ -443,6 +446,7 @@ public class CreatureInfo {
         if (this.creatureType != null) {
             this.creatureType.addCreature(this);
         }
+        return true;
     }
 
     /**

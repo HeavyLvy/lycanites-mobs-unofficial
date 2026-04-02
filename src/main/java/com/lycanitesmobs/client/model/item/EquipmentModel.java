@@ -2,6 +2,7 @@ package com.lycanitesmobs.client.model.item;
 
 import com.lycanitesmobs.client.manager.ModelManager;
 import com.lycanitesmobs.client.model.animation.AnimationPart;
+import com.lycanitesmobs.client.obj.model.VBOObjModel;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
 import com.lycanitesmobs.client.renderer.item.IItemModelRenderer;
 import com.lycanitesmobs.client.renderer.layer.item.LayerItem;
@@ -139,13 +140,33 @@ public class EquipmentModel implements IItemModelRenderer {
         this.renderLayers.clear();
         itemObjModel.addCustomLayers(this);
         itemObjModel.generateAnimationFrames(partStack, null, loop, offsetPart);
+
         ResourceLocation texture = itemObjModel.getTexture(partStack, null);
-        RenderType renderType = CustomRenderStates.getObjRenderType(texture, itemObjModel.getBlending(partStack, null), itemObjModel.getGlow(partStack, null));
-        itemObjModel.render(partStack, hand, matrixStack, renderTypeBuffer.getBuffer(renderType), renderer, offsetPart, null, loop, brightness);
+        RenderType renderType = CustomRenderStates.getObjVBORenderType(
+                itemObjModel.getBlending(partStack, null),
+                itemObjModel.getGlow(partStack, null)
+        );
+        VBOObjModel.renderType = renderType;
+        VBOObjModel.renderNormal = true;
+        VBOObjModel.tex = texture;
+        itemObjModel.render(partStack, hand, matrixStack, null, renderer, offsetPart, null, loop, brightness);
+        VBOObjModel.tex = null;
+        VBOObjModel.renderNormal = false;
+        VBOObjModel.renderType = null;
+
         for (LayerItem layer : this.renderLayers) {
             texture = itemObjModel.getTexture(partStack, layer);
-            renderType = CustomRenderStates.getObjRenderType(texture, itemObjModel.getBlending(partStack, layer), itemObjModel.getGlow(partStack, layer));
-            itemObjModel.render(partStack, hand, matrixStack, renderTypeBuffer.getBuffer(renderType), renderer, offsetPart, layer, loop, brightness);
+            renderType = CustomRenderStates.getObjVBORenderType(
+                    itemObjModel.getBlending(partStack, layer),
+                    itemObjModel.getGlow(partStack, layer)
+            );
+            VBOObjModel.renderType = renderType;
+            VBOObjModel.renderNormal = true;
+            VBOObjModel.tex = texture;
+            itemObjModel.render(partStack, hand, matrixStack, null, renderer, offsetPart, layer, loop, brightness);
+            VBOObjModel.tex = null;
+            VBOObjModel.renderNormal = false;
+            VBOObjModel.renderType = null;
         }
         this.renderedModels.add(itemObjModel);
 

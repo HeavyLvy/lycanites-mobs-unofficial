@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.model.animation;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
@@ -10,6 +11,9 @@ import com.lycanitesmobs.client.renderer.layer.item.LayerItem;
 import com.lycanitesmobs.client.renderer.layer.projectile.LayerProjectileEffect;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TextureLayerAnimation {
 
@@ -47,6 +51,11 @@ public class TextureLayerAnimation {
      * The color fading speeds to use, if 0 the color isn't faded.
      **/
     public Vector4f colorFadeSpeed;
+
+    /**
+     * The target parts that this layer should render on. If empty, all parts are rendered.
+     **/
+    public List<String> targetParts = new ArrayList<>();
 
 
     /**
@@ -91,6 +100,13 @@ public class TextureLayerAnimation {
             colorFadeAlpha = json.get("colorFadeAlpha").getAsFloat();
         if (colorFadeRed != 0 || colorFadeGreen != 0 || colorFadeBlue != 0 || colorFadeAlpha != 0)
             this.colorFadeSpeed = new Vector4f(colorFadeRed, colorFadeGreen, colorFadeBlue, colorFadeAlpha);
+
+        if (json.has("targetParts")) {
+            JsonArray targetPartsArray = json.get("targetParts").getAsJsonArray();
+            for (int i = 0; i < targetPartsArray.size(); i++) {
+                this.targetParts.add(targetPartsArray.get(i).getAsString().toLowerCase());
+            }
+        }
     }
 
 
@@ -156,6 +172,7 @@ public class TextureLayerAnimation {
         renderLayer.blending = blendingId;
         renderLayer.scrollSpeed = this.scrollSpeed;
         renderLayer.colorFadeSpeed = this.colorFadeSpeed;
+        renderLayer.targetParts = this.targetParts;
 
         return renderLayer;
     }

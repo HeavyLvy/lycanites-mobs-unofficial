@@ -639,22 +639,23 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
     }
 
     @Override
-    public boolean isVulnerableTo(Entity entity) {
+    public boolean isInvulnerableTo(DamageSource source) {
+        var entity = source.getEntity();
         if (entity instanceof ZombifiedPiglin) {
             entity.remove(RemovalReason.DISCARDED);
-            return false;
+            return true;
         }
         if (entity instanceof IronGolem) {
             entity.remove(RemovalReason.DISCARDED);
-            return false;
+            return true;
         }
         if (entity instanceof Player) {
             Player player = (Player) entity;
             if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
-                return false;
+                return true;
             }
         }
-        return super.isVulnerableTo(entity);
+        return super.isInvulnerableTo(source);
     }
 
     @Override

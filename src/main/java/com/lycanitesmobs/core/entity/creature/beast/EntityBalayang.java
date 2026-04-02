@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.entity.creature.beast;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.monster.Enemy;
@@ -13,7 +14,7 @@ public class EntityBalayang extends TameableCreatureEntity implements Enemy {
 
     public EntityBalayang(EntityType<? extends EntityBalayang> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
@@ -46,10 +47,8 @@ public class EntityBalayang extends TameableCreatureEntity implements Enemy {
     }
 
     @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-    	if(type.equals("cactus")) {
-    	    return false;
-        }
-    	return super.isVulnerableTo(type, source, damage);
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.CACTUS)) return true;
+        return super.isInvulnerableTo(source);
     }
 }

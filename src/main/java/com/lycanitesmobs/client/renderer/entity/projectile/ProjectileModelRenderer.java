@@ -14,6 +14,7 @@ import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -62,7 +63,7 @@ public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity
         // Model States:
         float time = 0;
         float distance = 0;
-        float loop = (float) entity.tickCount + (partialTicks % 1.0F);
+        float loop = (float) entity.tickCount + (Minecraft.getInstance().isPaused() ? 0 : (partialTicks % 1.0F));
         float lookYaw = 0;
         float lookPitch = 0;
         float scale = 1;

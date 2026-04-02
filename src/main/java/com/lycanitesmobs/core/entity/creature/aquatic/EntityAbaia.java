@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
@@ -136,10 +137,10 @@ public class EntityAbaia extends TameableCreatureEntity implements Enemy {
     /**
      * Returns whether or not the given damage type is applicable, if not no damage will be taken.
      **/
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if ("lightning".equalsIgnoreCase(type))
-            return false;
-        return super.isVulnerableTo(type, source, damage);
+    @Override
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.LIGHTNING_BOLT)) return true;
+        return super.isInvulnerableTo(source);
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
@@ -154,17 +155,12 @@ public class EntityMalwrath extends RideableCreatureEntity {
     //                     Immunities
     // ==================================================
     @Override
-    public boolean isVulnerableTo(Entity entity) {
+    public boolean isInvulnerableTo(DamageSource source) {
+        var entity = source.getEntity();
         if (entity instanceof EntityMalwrath)
-            return false;
-        return super.isVulnerableTo(entity);
-    }
-
-    @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if ("explosion".equals(type))
-            return false;
-        return super.isVulnerableTo(type, source, damage);
+            return true;
+        if (source.is(DamageTypes.EXPLOSION)) return true;
+        return super.isInvulnerableTo(source);
     }
 
     @Override

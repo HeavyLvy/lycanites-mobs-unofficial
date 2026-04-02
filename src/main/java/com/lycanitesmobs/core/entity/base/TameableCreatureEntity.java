@@ -684,33 +684,33 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     //                     Immunities
     // ==================================================
     // ========== Damage ==========
-    @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if (this.isTamed()) {
-            Entity entity = source.getEntity();
-            if (entity instanceof Player && this.getCommandSenderWorld().getServer() != null && !this.getCommandSenderWorld().getServer().isPvpAllowed()) {
-                return false;
-            }
-            if (entity == this.getPlayerOwner()) {
-                return false;
-            }
-        }
-        if ("inWall".equals(type) && this.isTamed())
-            return false;
-        return super.isVulnerableTo(type, source, damage);
-    }
 
     @Override
-    public boolean isVulnerableTo(Entity entity) {
+    public boolean isInvulnerableTo(DamageSource source) {
+        var entity = source.getEntity();
+
         if (this.isTamed()) {
             if (entity instanceof Player && this.getCommandSenderWorld().getServer() != null && !this.getCommandSenderWorld().getServer().isPvpAllowed()) {
-                return false;
+                return true;
             }
             if (entity == this.getPlayerOwner()) {
-                return false;
+                return true;
             }
         }
-        return super.isVulnerableTo(entity);
+
+        if (this.isTamed()) {
+            if (entity instanceof Player && this.getCommandSenderWorld().getServer() != null && !this.getCommandSenderWorld().getServer().isPvpAllowed()) {
+                return true;
+            }
+            if (entity == this.getPlayerOwner()) {
+                return true;
+            }
+        }
+
+        if (source.is(DamageTypes.IN_WALL) && this.isTamed())
+            return true;
+
+        return super.isInvulnerableTo(source);
     }
 
 

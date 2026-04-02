@@ -20,6 +20,9 @@ public class WorldSpawnTrigger extends SpawnTrigger {
 	/** If true, the world time is used instead of a generic world tick count. **/
 	public boolean useWorldTime = false;
 
+	/** Tracks the first tick to prevent instant firing on world load. **/
+	private long firstTick = -1;
+
 
 	/** Constructor **/
 	public WorldSpawnTrigger(Spawner spawner) {
@@ -48,6 +51,12 @@ public class WorldSpawnTrigger extends SpawnTrigger {
 	/** Called every world tick from where players are active. **/
 	public void onTick(Level world, BlockPos position, long ticks) {
 		long tickRateLong = (long) this.tickRate;
+
+		if (this.firstTick < 0) {
+			this.firstTick = ticks;
+			return;
+		}
+
 		// World Time:
 		if(this.useWorldTime && world.getDayTime() % 24000 != tickRateLong) {
 			return;

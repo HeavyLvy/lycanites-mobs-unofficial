@@ -199,12 +199,16 @@ public class CreatureManager extends JSONLoader {
         // Parse Creature JSON:
         if ("Creature".equals(loadGroup)) {
             CreatureInfo creatureInfo = new CreatureInfo(modInfo);
-            creatureInfo.loadFromJson(json);
+            if (!creatureInfo.loadFromJson(json)) {
+                return;
+            }
 
             // Already Exists:
             if (this.creatures.containsKey(creatureInfo.getName())) {
                 creatureInfo = this.creatures.get(creatureInfo.getName());
-                creatureInfo.loadFromJson(json);
+                if (!creatureInfo.loadFromJson(json)) {
+                    return;
+                }
             }
 
             this.creatures.put(creatureInfo.getName(), creatureInfo);

@@ -211,13 +211,15 @@ public class ElementInfo {
      * @return True if the effect can be applied.
      */
     public boolean isEffectApplicable(MobEffectInstance effect) {
-        if (effect == null || effect.getEffect() == null || effect.getEffect().getDescriptionId() == null) {
+        if (effect == null || effect.getEffect() == null) {
             return false;
         }
-        if (this.debuffs.contains(effect.getEffect().getDescriptionId())) {
+        ResourceLocation effectKey = ForgeRegistries.MOB_EFFECTS.getKey(effect.getEffect());
+        String effectName = effectKey != null ? effectKey.toString() : "";
+        if (this.debuffs.contains(effectName)) {
             return false;
         }
-        if (this.immunities.contains(effect.getEffect().getDescriptionId())) {
+        if (this.immunities.contains(effectName)) {
             return false;
         }
 		/*for(ElementInfo element : this.components) {

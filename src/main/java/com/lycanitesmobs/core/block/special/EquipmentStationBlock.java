@@ -7,6 +7,7 @@ import com.lycanitesmobs.core.block.blockentity.EquipmentStationTileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -52,6 +53,12 @@ public class EquipmentStationBlock extends BlockBase implements EntityBlock {
 
     @Override
     public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock())) {
+            BlockEntity blockEntity = worldIn.getBlockEntity(pos);
+            if (blockEntity instanceof EquipmentStationTileEntity station) {
+                Containers.dropContents(worldIn, pos, station);
+            }
+        }
         super.onRemove(state, worldIn, pos, newState, isMoving);
     }
 

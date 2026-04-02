@@ -132,6 +132,7 @@ public class LycanitesMobs {
         modEventBus.addListener(this::addPackFinders);
         modEventBus.addListener(this::enqueueIMC);
         modEventBus.addListener(this::processIMC);
+        modEventBus.addListener(GameEventListener::onRegisterCapabilities);
         modEventBus.register(RegistryEvents.getInstance());
 
         PROXY.registerEvents();

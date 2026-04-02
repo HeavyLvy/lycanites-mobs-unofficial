@@ -10,7 +10,7 @@ public class ItemConfig {
 
     public static boolean chargesToXPBottles = true;
 
-    public static boolean equipmentSpecialNames = true;
+    public static boolean equipmentSpecialNames = false;
 
     public static int lowEquipmentRepairAmount = 50;
     public static int mediumEquipmentRepairAmount = 100;

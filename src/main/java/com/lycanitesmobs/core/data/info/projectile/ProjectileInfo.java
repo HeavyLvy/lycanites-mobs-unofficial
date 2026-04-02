@@ -228,8 +228,9 @@ public class ProjectileInfo {
 
     /**
      * Loads this projectile from a JSON object.
+     * @return true if loaded successfully, false if this entry should be skipped.
      **/
-    public void loadFromJSON(JsonObject json) {
+    public boolean loadFromJSON(JsonObject json) {
         this.name = json.get("name").getAsString();
 
         if (json.has("chargeItemName")) {
@@ -248,8 +249,8 @@ public class ProjectileInfo {
             }
             this.entityConstructor = this.entityClass.getConstructor(EntityType.class, Level.class);
         } catch (Exception e) {
-            LMHelperClass.logError("[Projectile] Unable to find the Java Entity Class: " + json.get("entityClass").getAsString() + " for " + this.getName());
-            throw new RuntimeException(e);
+            LMHelperClass.logWarningMessage("[Projectile] Skipping projectile '" + this.getName() + "': unable to find entity class '" + json.get("entityClass").getAsString() + "'. If you have updated the mod, clear your projectile configs at: config/lycanitesmobs/projectiles/" + this.getName() + ".json");
+            return false;
         }
 
         if (json.has("modelClass")) {
@@ -295,7 +296,8 @@ public class ProjectileInfo {
         for (String elementName : elementNames) {
             ElementInfo element = ElementManager.getInstance().getElement(elementName);
             if (element == null) {
-                throw new RuntimeException("[Projectile] Unable to initialise Projectile Info for " + this.getName() + " as the element " + elementName + " cannot be found.");
+                LMHelperClass.logWarningMessage("[Projectile] Skipping unknown element '" + elementName + "' for projectile '" + this.getName() + "'. If you have updated the mod, clear your projectile configs at: config/lycanitesmobs/projectiles/" + this.getName() + ".json");
+                continue;
             }
             this.elements.add(element);
         }
@@ -343,6 +345,7 @@ public class ProjectileInfo {
         if (json.has("waterParticleId")) {
             this.waterParticleId = json.get("waterParticleId").getAsString();
         }
+        return true;
     }
 
     /**

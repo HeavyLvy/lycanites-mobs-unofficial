@@ -3,7 +3,6 @@ package com.lycanitesmobs.core.data.info.gui;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
-import com.lycanitesmobs.core.entity.special.FearEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
 import com.lycanitesmobs.core.data.info.creature.CreatureType;
@@ -84,7 +83,7 @@ public class Beastiary {
      */
     public CreatureKnowledge addCreatureKnowledge(Entity entity, int experience) {
         // Invalid Entity:
-        if (!(entity instanceof BaseCreatureEntity) || entity instanceof FearEntity) {
+        if (!(entity instanceof BaseCreatureEntity)) {
             return null;
         }
 

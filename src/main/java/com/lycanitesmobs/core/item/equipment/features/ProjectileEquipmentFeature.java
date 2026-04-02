@@ -195,7 +195,7 @@ public class ProjectileEquipmentFeature extends EquipmentFeature {
     }
 
     /**
-     * Called when an entity using their equipment.
+     * Called when an entity is holding right-click to use their equipment's secondary ability.
      *
      * @param shooter The entity using the equipment.
      * @param count   How long (in ticks) the equipment has been used for.

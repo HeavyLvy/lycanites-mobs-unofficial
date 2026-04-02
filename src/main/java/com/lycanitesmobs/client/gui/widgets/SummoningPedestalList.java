@@ -47,6 +47,9 @@ public class SummoningPedestalList extends BaseList<SummoningPedestalScreen> {
 		@Override
 		public void render(GuiGraphics matrixStack, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
 			CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(this.minionName);
+			if (creatureInfo == null) {
+				return;
+			}
 
 			// Summon Level:
 			int levelBarWidth = 9;

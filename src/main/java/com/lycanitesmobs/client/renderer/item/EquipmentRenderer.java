@@ -3,6 +3,7 @@ package com.lycanitesmobs.client.renderer.item;
 import com.lycanitesmobs.client.manager.ModelManager;
 import com.lycanitesmobs.client.model.item.EquipmentModel;
 import com.lycanitesmobs.client.renderer.layer.item.LayerItem;
+import com.lycanitesmobs.client.renderer.util.VBOBatcher;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -62,14 +63,14 @@ public class EquipmentRenderer extends BlockEntityWithoutLevelRenderer implement
         EquipmentModel equipmentModel = ModelManager.getInstance().getEquipmentModel();
 
         float loop = 0F;
-        if (Minecraft.getInstance().player != null) {
+        if (Minecraft.getInstance().player != null && !Minecraft.getInstance().isPaused()) {
             loop = Minecraft.getInstance().player.tickCount;
         }
 
         equipmentModel.render(itemStack, hand, poseStack, buffer, this, loop, packedLight);
 
         poseStack.popPose();
-
+        VBOBatcher.getInstance().endBatches();
     }
 
     protected void drawBar(VertexConsumer vertexBuilder, int x, int y, int width, int height, int r, int g, int b, int a) {

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.data.config.ConfigCreatureSubspecies;
 import com.lycanitesmobs.core.entity.util.CreatureStats;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.LivingEntity;
@@ -123,7 +124,8 @@ public class Variant {
 			color = json.get("name").getAsString().toLowerCase();
 		}
 		if(color == null) {
-			throw new RuntimeException("Invalid subspecies variant added with no color defined!");
+			LMHelperClass.logWarningMessage("[Creature] Skipping subspecies variant with no color defined. If you have updated the mod, clear your creature configs.");
+			return null;
 		}
 
 		// Create Variant:

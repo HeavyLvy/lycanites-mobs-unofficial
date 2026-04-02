@@ -144,10 +144,11 @@ public class EntityNaxiris extends RideableCreatureEntity {
     //                     Immunities
     // ==================================================
     @Override
-    public boolean isVulnerableTo(Entity entity) {
+    public boolean isInvulnerableTo(DamageSource source) {
+        var entity = source.getEntity();
         if (entity instanceof EntityNaxiris)
-            return false;
-        return super.isVulnerableTo(entity);
+            return true;
+        return super.isInvulnerableTo(source);
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.lycanitesmobs.core.entity.navigation;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
-import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import net.minecraft.util.Mth;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
@@ -41,12 +41,9 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
 
     @Override
     public void updateEntitySize(Entity updateEntity) {
-        var w =  LMHelperClass.convertObjectToDesired(Math.min(Math.floor(this.getWidth(true, updateEntity) + 1.0F), 3), "integer");
-        var h =  LMHelperClass.convertObjectToDesired(Math.min(Math.floor(updateEntity.getDimensions(Pose.STANDING).height + 1.0F), 3), "integer");
-        var d = LMHelperClass.convertObjectToDesired(Math.min(Math.floor(this.getWidth(true, updateEntity) + 1.0F), 3), "integer");
-        this.entityWidth = (int) w;
-        this.entityHeight = (int) h;
-        this.entityDepth = (int) d;
+        this.entityWidth = Math.min(Mth.floor(this.getWidth(true, updateEntity) + 1.0F), 3);
+        this.entityHeight = Math.min(Mth.floor(updateEntity.getDimensions(Pose.STANDING).height + 1.0F), 3);
+        this.entityDepth = Math.min(Mth.floor(this.getWidth(true, updateEntity) + 1.0F), 3);
     }
 
     /** Returns the starting position to create a new path from. **/
@@ -55,7 +52,7 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
 
         // Flying/Strong Swimming:
         if(this.flying() || (this.entityCreature.isStrongSwimmer() && this.entityCreature.isUnderWater())) {
-            return this.getNode(LMHelperClass.convertToInteger(Math.floor(this.mob.getBoundingBox().minX)), LMHelperClass.convertToInteger(Math.floor(this.mob.getBoundingBox().minY + 0.5D)), LMHelperClass.convertToInteger(Math.floor(this.mob.getBoundingBox().minZ)));
+            return this.getNode(Mth.floor(this.mob.getBoundingBox().minX), Mth.floor(this.mob.getBoundingBox().minY + 0.5D), Mth.floor(this.mob.getBoundingBox().minZ));
         }
 
         return super.getStart();
@@ -74,7 +71,7 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
     public Target getGoal(double x, double y, double z) {
         // Flying/Strong Swimming:
         if(this.flying() || this.swimming()) {
-            return new Target(this.getNode(LMHelperClass.convertToInteger(Math.floor(x - this.getWidth(false))), LMHelperClass.convertToInteger(Math.floor(y + 0.5D)), LMHelperClass.convertToInteger(Math.floor(z - this.getWidth(false)))));
+            return new Target(this.getNode(Mth.floor(x - this.getWidth(false)), Mth.floor(y + 0.5D), Mth.floor(z - this.getWidth(false))));
         }
         return super.getGoal(x, y, z);
     }

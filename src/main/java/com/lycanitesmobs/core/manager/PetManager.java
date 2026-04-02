@@ -100,9 +100,11 @@ public class PetManager {
      * Called by the host's entity update, runs any logic to manage pet entries.
      **/
     public void onUpdate(Level world) {
-        // Load NBT Entries:
+        if (this.host == null)
+            return;
+
         if (!this.entryNBTs.isEmpty()) {
-            // Have Currently Loaded Entries Read From The NBT Map:
+
             for (PetEntry petEntry : this.entries.values()) {
                 if (this.entryNBTs.containsKey(petEntry.petEntryID)) {
                     petEntry.readFromNBT(this.entryNBTs.get(petEntry.petEntryID));
@@ -110,9 +112,8 @@ public class PetManager {
                 }
             }
 
-            // Create New Entries For Non-Loaded Entries From The NBT Map:
             for (CompoundTag nbtEntry : this.entryNBTs.values()) {
-                if (this.host instanceof Player && nbtEntry.getString("Type").equalsIgnoreCase("familiar")) { // Only load active familiars.
+                if (this.host instanceof Player && nbtEntry.getString("Type").equalsIgnoreCase("familiar")) {
                     if (!PlayerFamiliars.INSTANCE.playerFamiliars.containsKey(this.host.getUUID()) ||
                             !PlayerFamiliars.INSTANCE.playerFamiliars.get(this.host.getUUID()).containsKey(nbtEntry.getUUID("UUID"))) {
                         continue;
@@ -197,7 +198,6 @@ public class PetManager {
         if (!nbtTagCompound.contains("PetManager"))
             return;
 
-        // Load All NBT Data Into The NBT Map:
         ListTag entryList = nbtTagCompound.getList("PetManager", 10);
         for (int i = 0; i < entryList.size(); ++i) {
             CompoundTag nbtEntry = (CompoundTag) entryList.get(i);

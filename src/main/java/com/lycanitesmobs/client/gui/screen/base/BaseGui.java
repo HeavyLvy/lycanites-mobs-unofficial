@@ -92,14 +92,20 @@ public abstract class BaseGui extends Screen {
         matrixStack.mulPose(Axis.YN.rotationDegrees(180.0F));
 
         float renderYawOffset = entity.yBodyRot;
+        float prevRenderYawOffset = entity.yBodyRotO;
         float rotationYaw = entity.getYRot();
+        float prevRotationYaw = entity.yRotO;
         float rotationPitch = entity.getXRot();
+        float prevRotationPitch = entity.xRotO;
         float prevRotationYawHead = entity.yHeadRotO;
         float rotationYawHead = entity.yHeadRot;
 
         entity.yBodyRot = lookXRot * 20.0F;
+        entity.yBodyRotO = entity.yBodyRot;
         entity.setYRot(lookXRot * 40.0F);
+        entity.yRotO = entity.getYRot();
         entity.setXRot(-lookYRot * 20.0F);
+        entity.xRotO = entity.getXRot();
         entity.yHeadRot = entity.getYRot();
         entity.yHeadRotO = entity.getYRot();
         entity.setOnGround(true);
@@ -114,8 +120,11 @@ public abstract class BaseGui extends Screen {
         renderManager.setRenderShadow(true);
 
         entity.yBodyRot = renderYawOffset;
+        entity.yBodyRotO = prevRenderYawOffset;
         entity.setYRot(rotationYaw);
+        entity.yRotO = prevRotationYaw;
         entity.setXRot(rotationPitch);
+        entity.xRotO = prevRotationPitch;
         entity.yHeadRotO = prevRotationYawHead;
         entity.yHeadRot = rotationYawHead;
 

@@ -131,7 +131,12 @@ public class LMBlocksGroup {
                         }
                     }
 
-                    Collections.sort(blockEntities);
+                    blockEntities.sort((a, b) -> {
+                        int tierA = a.contains("lesser") ? 1 : a.contains("greater") ? 2 : a.contains("master") ? 3 : 0;
+                        int tierB = b.contains("lesser") ? 1 : b.contains("greater") ? 2 : b.contains("master") ? 3 : 0;
+                        if (tierA != tierB) return Integer.compare(tierA, tierB);
+                        return a.compareTo(b);
+                    });
                     ordered.addAll(blockEntities);
 
                     Collections.sort(remaining);

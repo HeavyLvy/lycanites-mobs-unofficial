@@ -36,11 +36,6 @@ public class EquipmentInfuserTileEntity extends TileEntityBase {
 
     @Override
     public void setRemoved() {
-        for (ItemStack itemStack : this.itemStacks) {
-            CustomItemEntity entityItem = new CustomItemEntity(this.getLevel(), this.getBlockPos().getX(), this.getBlockPos().getY() + 0.5D, this.getBlockPos().getZ(), itemStack);
-            this.getLevel().addFreshEntity(entityItem);
-        }
-        this.clearContent();
         super.setRemoved();
     }
 

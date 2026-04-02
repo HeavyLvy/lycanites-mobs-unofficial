@@ -66,10 +66,10 @@ public class ModelJousteAlpha extends ModelTemplateQuadruped {
 		// Walking:
 		float walkSwing = 0.3F;
 		if (partName.equals("legrightfront") || partName.equals("legleftback")) {
-			rotation += Math.toDegrees(Mth.cos(time * 0.6662F + (float) Math.PI) * walkSwing * distance);
+			rotation += Mth.cos(time * 0.6662F + (float) Math.PI) * walkSwing * distance;
 		}
 		else if (partName.equals("legleftfront") || partName.equals("legrightback")) {
-			rotation += Math.toDegrees(Mth.cos(time * 0.6662F) * walkSwing * distance);
+			rotation += Mth.cos(time * 0.6662F) * walkSwing * distance;
 		}
 		else if (partName.equals("body")) {
 			float bob = Mth.cos(time * 0.6662F + (float) Math.PI) * walkSwing * distance;

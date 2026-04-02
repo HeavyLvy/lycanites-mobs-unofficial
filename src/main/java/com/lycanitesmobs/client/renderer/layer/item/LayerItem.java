@@ -8,6 +8,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @OnlyIn(Dist.CLIENT)
 public class LayerItem {
     public IItemModelRenderer renderer;
@@ -35,6 +38,8 @@ public class LayerItem {
     public Vector2f scrollSpeed;
 
     public Vector4f colorFadeSpeed;
+
+    public List<String> targetParts = new ArrayList<>();
 
 
     /**

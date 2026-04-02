@@ -108,7 +108,9 @@ public class ProjectileManager extends JSONLoader {
     @Override
     public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
         ProjectileInfo projectileInfo = new ProjectileInfo(modInfo);
-        projectileInfo.loadFromJSON(json);
+        if (!projectileInfo.loadFromJSON(json)) {
+            return;
+        }
         if (projectileInfo.getName() == null) {
             LMHelperClass.logWarning("", "[Projectile] Unable to load " + loadGroup + " json due to missing name.");
             return;
@@ -117,7 +119,9 @@ public class ProjectileManager extends JSONLoader {
         // Already Exists:
         if (this.projectiles.containsKey(projectileInfo.getName())) {
             projectileInfo = this.projectiles.get(projectileInfo.getName());
-            projectileInfo.loadFromJSON(json);
+            if (!projectileInfo.loadFromJSON(json)) {
+                return;
+            }
         }
 
         this.projectiles.put(projectileInfo.getName(), projectileInfo);

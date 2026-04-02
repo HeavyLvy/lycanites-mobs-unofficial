@@ -3,7 +3,7 @@ package com.lycanitesmobs.core.capabilities.entity;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.data.config.ConfigAdmin;
-import com.lycanitesmobs.core.entity.special.FearEntity;
+import com.lycanitesmobs.core.effect.FearHandler;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.network.message.MessageEntityPerched;
@@ -52,7 +52,7 @@ public class ExtendedEntity {
     public boolean perchedEntityNoclip = false;
 
     // Fear:
-    public FearEntity fearEntity;
+    public FearHandler fearHandler;
 
     // Force Remove:
     boolean forceRemoveChecked = false;
@@ -164,9 +164,10 @@ public class ExtendedEntity {
             this.lastSafePos = new Vector3d(Math.floor(this.entity.position().x()) + 0.5D, this.entity.blockPosition().getY(), Math.floor(this.entity.position().z()) + 0.5D);
         }
 
-        // Fear Entity:
-        if (this.fearEntity != null && !this.fearEntity.isAlive())
-            this.fearEntity = null;
+        // Fear Handler:
+        if (this.fearHandler != null && !this.fearHandler.tick(this.entity)) {
+            this.fearHandler = null;
+        }
 
         // Picked Up By Entity:
         try {
@@ -294,7 +295,7 @@ public class ExtendedEntity {
     }
 
     public boolean isFeared() {
-        return this.pickedUpByEntity instanceof FearEntity;
+        return this.fearHandler != null;
     }
 
 
@@ -414,8 +415,9 @@ public class ExtendedEntity {
     public void setProjectileCooldown(int type, String projectileName, int cooldown) {
         if (type == 1) {
             this.projectileCooldownsPrimary.put(projectileName, cooldown);
+        } else if (type == 2) {
+            this.projectileCooldownsSecondary.put(projectileName, cooldown);
         }
-        this.projectileCooldownsSecondary.put(projectileName, cooldown);
     }
 
 

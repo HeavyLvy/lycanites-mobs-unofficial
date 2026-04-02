@@ -26,7 +26,7 @@ public class FireProjectilesGoal extends BaseGoal {
     protected int phase = -1;
     protected boolean overhead = false;
 
-    private int abilityTime = 60;
+    private int cooldownTime = 0;
     private Entity attackTarget;
 
 
@@ -191,7 +191,7 @@ public class FireProjectilesGoal extends BaseGoal {
 
     @Override
     public void start() {
-        this.abilityTime = 1;
+        this.cooldownTime = 1;
     }
 
     @Override
@@ -201,9 +201,10 @@ public class FireProjectilesGoal extends BaseGoal {
 
     @Override
     public void tick() {
-        if (this.abilityTime++ % Math.round((float) ((1.0D / this.host.getAttribute(BaseCreatureEntity.RANGED_SPEED).getValue()) * this.fireRate)) != 0) {
+        if (--this.cooldownTime > 0) {
             return;
         }
+        this.cooldownTime = Math.round((float) ((1.0D / this.host.getAttribute(BaseCreatureEntity.RANGED_SPEED).getValue()) * this.fireRate));
 
         // All Players Mode:
         if (this.allPlayers) {

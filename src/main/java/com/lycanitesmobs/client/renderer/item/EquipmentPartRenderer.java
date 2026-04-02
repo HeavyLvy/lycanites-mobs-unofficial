@@ -67,7 +67,7 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
         itemObjModel.addCustomLayers(this);
 
         float loop = 0;
-        if (Minecraft.getInstance().player != null) {
+        if (Minecraft.getInstance().player != null && !Minecraft.getInstance().isPaused()) {
             loop = Minecraft.getInstance().player.tickCount;
         }
 
@@ -198,7 +198,7 @@ public class EquipmentPartRenderer extends BlockEntityWithoutLevelRenderer imple
                 matrixStack.translate(0.5F, 0F, -.1F);
             }
             case "astarothclaw" -> matrixStack.translate(0F, 0.45F, 0F);
-            case "vespidstinger" -> matrixStack.translate(1.8F, 0F, 0.5F);
+            case "vespidstinger" -> matrixStack.translate(1.2F, 0F, 0.5F);
             case "wraithskull" -> {
                 matrixStack.mulPose(Axis.ZP.rotationDegrees(-100F));
                 matrixStack.mulPose(Axis.YN.rotationDegrees(-9F));

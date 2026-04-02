@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -223,8 +224,8 @@ public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
     }
 
     @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if (type.equals("inWall")) return false;
-        return super.isVulnerableTo(type, source, damage);
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.IN_WALL)) return true;
+        return super.isInvulnerableTo(source);
     }
 }

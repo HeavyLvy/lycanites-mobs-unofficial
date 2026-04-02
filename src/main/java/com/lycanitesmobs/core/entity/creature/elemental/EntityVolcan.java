@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Silverfish;
@@ -195,9 +196,9 @@ public class EntityVolcan extends TameableCreatureEntity implements Enemy {
     //                     Immunities
     // ==================================================
     @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if (type.equals("cactus") || type.equals("inWall")) return false;
-        return super.isVulnerableTo(type, source, damage);
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.CACTUS)) return true;
+        return super.isInvulnerableTo(source);
     }
 
     @Override

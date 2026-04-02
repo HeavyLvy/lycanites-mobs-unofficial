@@ -25,7 +25,6 @@ import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.entity.navigation.CreatureMoveController;
 import com.lycanitesmobs.core.entity.navigation.CreaturePathNavigator;
 import com.lycanitesmobs.core.entity.navigation.DirectNavigator;
-import com.lycanitesmobs.core.entity.special.FearEntity;
 import com.lycanitesmobs.core.entity.util.CreatureRelationshipEntry;
 import com.lycanitesmobs.core.entity.util.CreatureRelationships;
 import com.lycanitesmobs.core.entity.util.CreatureStats;
@@ -234,6 +233,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * The Pet Entry for this mob, this binds this mob to a entity for special interaction, it will also cause this mob to be removed if the entity it is bound to is removed or dead.
      **/
     public PetEntry petEntry;
+    protected boolean boundPetOrphan = false;
     /**
      * If true, this mob will be treated as if it was spawned from an Altar, this is typically called directly by AltarInfo or by events triggered by AltarInfo.
      **/
@@ -1262,8 +1262,8 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * instead of two separate getNearbyEntities calls. This is a significant performance optimization as
      * world.getEntitiesOfClass() with large AABBs is expensive.
      *
-     * @param world The world to check in.
-     * @param pos The position to check around.
+     * @param world           The world to check in.
+     * @param pos             The position to check around.
      * @param groupLimitRange The range for group limit checks.
      * @return True if the mob is allowed to spawn (no boss nearby, within group limits).
      */
@@ -2061,6 +2061,11 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             if (!this.isBoundPet() || this.isTemporary)
                 this.inventory.dropInventory();
             this.remove(RemovalReason.DISCARDED);
+        }
+
+        if (this.boundPetOrphan && !this.hasPetEntry()) {
+            this.discard();
+            return;
         }
 
         // Fire Immunity Override:
@@ -3727,11 +3732,6 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             return false;
         if (this.isInvulnerableTo(damageSrc))
             return false;
-        if (!this.isVulnerableTo("", damageSrc, damageAmount))
-            return false;
-        if (!this.isVulnerableTo(damageSrc.getEntity()))
-            return false;
-
         if (this.dropsRequirePlayerDamage && damageSrc.getEntity() instanceof Player) {
             this.dropsRequirePlayerDamage = false;
         }
@@ -4698,7 +4698,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if (ObjectManager.getEffect("repulsion") != null)
             if ((entity).hasEffect(ObjectManager.getEffect("repulsion")))
                 return false;
-        return extendedEntity.pickedUpByEntity == null || extendedEntity.pickedUpByEntity instanceof FearEntity;
+        return extendedEntity.pickedUpByEntity == null;
     }
 
     // ========== Blocking ==========
@@ -5389,50 +5389,27 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         // Entity:
-        if (!this.isVulnerableTo(source.getEntity())) {
-            return true;
-        }
-
-        // Damage Source:
-        if (!this.isVulnerableTo("", source, 1)) {
-            return true;
-        }
-
-        return super.isInvulnerableTo(source);
-    }
-
-    // ========== Pickup Items ==========
-
-    /**
-     * Returns whether or not the given damage type is applicable, if not no damage will be taken.
-     **/
-    @Deprecated
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if ((source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.CACTUS)) && (this.isRareVariant() || this.isBoss()))
-            return false;
-        if (source.is(DamageTypes.IN_WALL))
-            return !CreatureManager.getInstance().config.suffocationImmunity && !this.hasPerchTarget();
-        if (source.is(DamageTypes.DROWN))
-            return !CreatureManager.getInstance().config.drownImmunity;
-        return true;
-    }
-
-    /**
-     * Returns whether or not this entity can be harmed by the specified entity.
-     **/
-    @Deprecated
-    public boolean isVulnerableTo(Entity entity) {
+        var entity = source.getEntity();
         if (this.isBoss() || this.isRareVariant()) {
             if (entity == null)
-                return false;
+                return true;
             if (this.distanceTo(entity) > this.bossRange) {
                 if (entity instanceof Player) {
                     ((Player) entity).displayClientMessage(Component.translatable("boss.damage.protection.range"), true);
                 }
-                return false;
+                return true;
             }
         }
-        return true;
+
+        // Damage Source:
+        if ((source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.CACTUS)) && (this.isRareVariant() || this.isBoss()))
+            return true;
+        if (source.is(DamageTypes.IN_WALL))
+            return CreatureManager.getInstance().config.suffocationImmunity && this.hasPerchTarget();
+        if (source.is(DamageTypes.DROWN))
+            return CreatureManager.getInstance().config.drownImmunity;
+
+        return super.isInvulnerableTo(source);
     }
 
     @Override
@@ -5827,8 +5804,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
         if (nbt.contains("IsBoundPet")) {
             if (nbt.getBoolean("IsBoundPet")) {
-                if (!this.hasPetEntry())
-                    this.remove(RemovalReason.DISCARDED);
+                if (!this.hasPetEntry()) {
+                    this.boundPetOrphan = true;
+                }
             }
         }
 
@@ -5876,6 +5854,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
         if (nbt.contains("SpawnedAsBoss")) {
             this.spawnedAsBoss = nbt.getBoolean("SpawnedAsBoss");
+        }
+        if (nbt.contains("SpawnedRare")) {
+            this.spawnedRare = nbt.getBoolean("SpawnedRare");
         }
 
         super.readAdditionalSaveData(nbt);
@@ -5952,6 +5933,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         nbt.putInt("MobLevel", this.getMobLevel());
         nbt.putInt("Experience", this.getExperience());
         nbt.putBoolean("SpawnedAsBoss", this.spawnedAsBoss);
+        nbt.putBoolean("SpawnedRare", this.spawnedRare);
 
         if (this.hasHome()) {
             BlockPos homePos = this.getRestrictCenter();

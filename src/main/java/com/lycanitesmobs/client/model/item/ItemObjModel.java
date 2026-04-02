@@ -338,6 +338,11 @@ public abstract class ItemObjModel implements IAnimationModel {
         if (!this.animationParts.containsKey(partName))
             return false;
 
+        if (layer != null && !layer.targetParts.isEmpty()) {
+            if (!layer.targetParts.contains(partName))
+                return false;
+        }
+
         return true;
     }
 

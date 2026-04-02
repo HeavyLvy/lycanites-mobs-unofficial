@@ -10,6 +10,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
@@ -20,18 +21,18 @@ import net.minecraft.world.level.Level;
 import org.joml.Vector3d;
 
 public class EntityReaper extends TameableCreatureEntity implements Enemy {
-    
+
     // ==================================================
- 	//                    Constructor
- 	// ==================================================
+    //                    Constructor
+    // ==================================================
     public EntityReaper(EntityType<? extends EntityReaper> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEAD;
         this.hasAttackSound = false;
         this.setupMob();
-        
+
         // No Block Collision:
         this.noPhysics = true;
     }
@@ -46,15 +47,15 @@ public class EntityReaper extends TameableCreatureEntity implements Enemy {
         this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(EntityType.PHANTOM));
     }
 
-	@Override
+    @Override
     public void aiStep() {
         super.aiStep();
-        
+
         // Particles:
-        if(this.getCommandSenderWorld().isClientSide)
-	        for(int i = 0; i < 2; ++i) {
-	            this.getCommandSenderWorld().addParticle(ParticleTypes.WITCH, this.position().x() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double)this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
-	        }
+        if (this.getCommandSenderWorld().isClientSide)
+            for (int i = 0; i < 2; ++i) {
+                this.getCommandSenderWorld().addParticle(ParticleTypes.WITCH, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
+            }
     }
 
     @Override
@@ -64,7 +65,9 @@ public class EntityReaper extends TameableCreatureEntity implements Enemy {
     }
 
     @Override
-    public boolean isFlying() { return true; }
+    public boolean isFlying() {
+        return true;
+    }
 
     @Override
     public boolean useDirectNavigator() {
@@ -78,13 +81,17 @@ public class EntityReaper extends TameableCreatureEntity implements Enemy {
 
 
     @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-    	if(type.equals("inWall")) return false;
-    	return super.isVulnerableTo(type, source, damage);
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.IN_WALL)) return true;
+        return super.isInvulnerableTo(source);
     }
 
-    /** Returns true if this mob should be damaged by the sun. **/
-    public boolean daylightBurns() { return super.daylightBurns(); }
+    /**
+     * Returns true if this mob should be damaged by the sun.
+     **/
+    public boolean daylightBurns() {
+        return super.daylightBurns();
+    }
 
     @Override
     public boolean canBurn() {
@@ -93,28 +100,28 @@ public class EntityReaper extends TameableCreatureEntity implements Enemy {
 
     @Override
     protected SoundEvent getAmbientSound() {
-    	if(this.hasAttackTarget()) {
-    		if(this.getTarget() instanceof Player)
-    			if("jbams".equalsIgnoreCase((this.getTarget()).getName().toString())) // JonBams special sound!
-    				return ObjectManager.getSound(this.creatureInfo.getName() + "_say_jon");
-    	}
-        if(this.isTamed() && this.getOwner() != null) {
-            if("jbams".equalsIgnoreCase(this.getOwnerName().getString()))
+        if (this.hasAttackTarget()) {
+            if (this.getTarget() instanceof Player)
+                if ("jbams".equalsIgnoreCase((this.getTarget()).getName().toString())) // JonBams special sound!
+                    return ObjectManager.getSound(this.creatureInfo.getName() + "_say_jon");
+        }
+        if (this.isTamed() && this.getOwner() != null) {
+            if ("jbams".equalsIgnoreCase(this.getOwnerName().getString()))
                 return ObjectManager.getSound(this.creatureInfo.getName() + "_say_jon");
         }
-    	return super.getAmbientSound();
+        return super.getAmbientSound();
     }
 
     @Override
     public ResourceLocation getTexture(String suffix) {
-        if(!this.hasCustomName() || !"Satan Claws".equals(this.getCustomName().getString()))
+        if (!this.hasCustomName() || !"Satan Claws".equals(this.getCustomName().getString()))
             return super.getTexture(suffix);
 
         String textureName = this.getTextureName() + "_satanclaws";
-        if(!"".equals(suffix)) {
+        if (!"".equals(suffix)) {
             textureName += "_" + suffix;
         }
-        if(TextureManager.getTexture(textureName) == null)
+        if (TextureManager.getTexture(textureName) == null)
             TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
         return TextureManager.getTexture(textureName);
     }

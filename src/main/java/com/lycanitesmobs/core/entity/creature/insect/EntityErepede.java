@@ -7,6 +7,7 @@ import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.block.Material;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
@@ -138,9 +139,9 @@ public class EntityErepede extends RideableCreatureEntity {
     //                     Immunities
     // ==================================================
     @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if (type.equals("cactus")) return false;
-        return super.isVulnerableTo(type, source, damage);
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.CACTUS)) return true;
+        return super.isInvulnerableTo(source);
     }
 
     @Override

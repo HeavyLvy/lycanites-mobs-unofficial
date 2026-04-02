@@ -97,10 +97,12 @@ public class GameEventListener {
     // ==================================================
     @SubscribeEvent
     public void onPlayerClone(PlayerEvent.Clone event) {
+        event.getOriginal().reviveCaps();
         ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(event.getOriginal());
         if (extendedPlayer != null) {
             extendedPlayer.backupPlayer();
         }
+        event.getOriginal().invalidateCaps();
     }
 
     // ==================================================
@@ -110,10 +112,9 @@ public class GameEventListener {
     public void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof Player) {
             event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "player"), new CapabilityProviderPlayer());
-        } else {
-            if (!event.getObject().getCapability(CapabilityProviderEntity.EXTENDED_ENTITY).isPresent()) {
-                event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "entity"), new CapabilityProviderEntity());
-            }
+        }
+        if (!event.getObject().getCapability(CapabilityProviderEntity.EXTENDED_ENTITY).isPresent()) {
+            event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "entity"), new CapabilityProviderEntity());
         }
     }
 
@@ -337,7 +338,7 @@ public class GameEventListener {
                 }
 
                 // Copy Mount Immunities to Rider:
-                if (!creatureRideable.isVulnerableTo(damageSource.getMsgId(), damageSource, event.getAmount())) {
+                if (creatureRideable.isInvulnerableTo(damageSource)) {
                     event.setCanceled(true);
                     return;
                 }
@@ -556,7 +557,7 @@ public class GameEventListener {
             shooter = projectileItemEntity.getOwner();
         }
 
-        if (shooter != null && !targetCreature.isVulnerableTo(shooter)) {
+        if (shooter instanceof LivingEntity living && targetCreature.isInvulnerableTo(targetCreature.level().damageSources().mobAttack(living))) {
             event.setImpactResult(ProjectileImpactEvent.ImpactResult.STOP_AT_CURRENT_NO_DAMAGE);
         }
     }

@@ -6,12 +6,14 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.StealthGoal;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.block.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
@@ -49,7 +51,7 @@ public class EntitySerpix extends TameableCreatureEntity implements IGroupHeavy 
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextPriorityGoalIndex++, new StealthGoal(this).setStealthTime(60));
+        this.goalSelector.addGoal(this.nextPriorityGoalIndex++, new StealthGoal(this).setStealthTime(60).setStealthMove(true).setStealthAttack(true));
         this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.5D).setStaminaTime(100).setRange(12.0F).setMinChaseDistance(8.0F));
     }
 
@@ -210,10 +212,9 @@ public class EntitySerpix extends TameableCreatureEntity implements IGroupHeavy 
     //                     Immunities
     // ==================================================
     @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if (type.equals("ooze")) return false;
-        if (type.equals("cactus")) return false;
-        if (type.equals("inWall")) return false;
-        return super.isVulnerableTo(type, source, damage);
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.CACTUS)) return true;
+        if (source.type().equals(ObjectManager.getDamageSource(this.level(), "ooze").type())) return true;
+        return super.isInvulnerableTo(source);
     }
 }

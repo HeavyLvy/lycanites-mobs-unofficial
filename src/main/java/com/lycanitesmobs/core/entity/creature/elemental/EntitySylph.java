@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
@@ -14,14 +15,14 @@ import org.joml.Vector3d;
 
 public class EntitySylph extends TameableCreatureEntity implements Enemy {
 
-	public float fireDamageAbsorbed = 0;
+    public float fireDamageAbsorbed = 0;
 
     // ==================================================
- 	//                    Constructor
- 	// ==================================================
+    //                    Constructor
+    // ==================================================
     public EntitySylph(EntityType<? extends EntitySylph> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = false;
@@ -38,75 +39,91 @@ public class EntitySylph extends TameableCreatureEntity implements Enemy {
 
         this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(EntityType.PLAYER));
     }
-	
-	
+
+
     // ==================================================
     //                      Updates
     // ==================================================
-	// ========== Living Update ==========
-	@Override
+    // ========== Living Update ==========
+    @Override
     public void aiStep() {
         super.aiStep();
     }
-    
-    
+
+
     // ==================================================
     //                      Attacks
     // ==================================================
     // ========== Ranged Attack ==========
     @Override
     public void attackRanged(Entity target, float range) {
-    	int projectileCount = 10;
-    	for(int i = 0; i < projectileCount; i++) {
-    		this.fireProjectile("aetherwave", target, range, (360 / projectileCount) * i, new Vector3d(0, 0, 0), 0.6f, 2f, 1F);
-		}
+        int projectileCount = 10;
+        for (int i = 0; i < projectileCount; i++) {
+            this.fireProjectile("aetherwave", target, range, (360 / projectileCount) * i, new Vector3d(0, 0, 0), 0.6f, 2f, 1F);
+        }
         super.attackRanged(target, range);
     }
-    
-    
+
+
     // ==================================================
-  	//                     Abilities
-  	// ==================================================
+    //                     Abilities
+    // ==================================================
     @Override
-    public boolean isFlying() { return true; }
+    public boolean isFlying() {
+        return true;
+    }
 
     @Override
-    public boolean isStrongSwimmer() { return false; }
+    public boolean isStrongSwimmer() {
+        return false;
+    }
 
 
-
-    
     // ==================================================
     //                     Pet Control
     // ==================================================
-    public boolean petControlsEnabled() { return true; }
+    public boolean petControlsEnabled() {
+        return true;
+    }
 
     // ==================================================
     //                     Equipment
     // ==================================================
     @Override
-    public int getNoBagSize() { return 0; }
+    public int getNoBagSize() {
+        return 0;
+    }
+
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() {
+        return this.creatureInfo.bagSize;
+    }
+
     // ==================================================
-   	//                     Immunities
-   	// ==================================================
+    //                     Immunities
+    // ==================================================
     @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if(type.equals("cactus") || type.equals("inWall"))
-            return false;
-        if(source.is(DamageTypeTags.IS_FIRE)) {
-            this.fireDamageAbsorbed += damage;
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.CACTUS)) return true;
+        return super.isInvulnerableTo(source);
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        if (source.is(DamageTypeTags.IS_FIRE)) {
+            this.fireDamageAbsorbed += amount;
             return false;
         }
-        return super.isVulnerableTo(type, source, damage);
+        return super.hurt(source, amount);
     }
-    
+
     @Override
     public boolean canBreatheUnderwater() {
         return true;
     }
-    
+
     @Override
-    public boolean canBurn() { return false; }
+    public boolean canBurn() {
+        return false;
+    }
 }

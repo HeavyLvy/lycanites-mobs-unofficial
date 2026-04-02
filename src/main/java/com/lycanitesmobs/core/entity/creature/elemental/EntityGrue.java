@@ -14,6 +14,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
@@ -212,9 +213,9 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
     //                     Immunities
     // ==================================================
     @Override
-    public boolean isVulnerableTo(String type, DamageSource source, float damage) {
-        if (type.equals("inWall")) return false;
-        return super.isVulnerableTo(type, source, damage);
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.IN_WALL)) return true;
+        return super.isInvulnerableTo(source);
     }
 
     /**

@@ -217,6 +217,8 @@ public class ExtendedPlayer {
      * Called by the EventListener, runs any logic on the main player entity's main update loop.
      **/
     public void onUpdate() {
+        if (this.player == null)
+            return;
         this.timePlayed++;
         this.hasAttacked = false;
         boolean creative = this.player.getAbilities().instabuild;

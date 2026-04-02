@@ -312,7 +312,9 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      */
     @Override
     protected float getBob(BaseCreatureEntity creatureEntity, float particalTicks) {
-        creatureEntity.renderTick += Minecraft.getInstance().getDeltaFrameTime();
+        if (!Minecraft.getInstance().isPaused()) {
+            creatureEntity.renderTick += Minecraft.getInstance().getDeltaFrameTime();
+        }
         return creatureEntity.renderTick;
     }
 }

@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.entity.navigation;
 
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
-import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import net.minecraft.util.Mth;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
@@ -83,7 +83,7 @@ public class CreatureMoveController extends MoveControl {
             float scaledSpeed = (float) this.speedModifier * moveSpeed;
             float moveForward = this.strafeForwards;
             float moveStrafe = this.strafeRight;
-            float velocity = LMHelperClass.convertToFloat(Math.sqrt(moveForward * moveForward + moveStrafe * moveStrafe));
+            float velocity = (float) Math.sqrt(moveForward * moveForward + moveStrafe * moveStrafe);
             if (velocity < 1.0F) {
                 velocity = 1.0F;
             }
@@ -91,17 +91,17 @@ public class CreatureMoveController extends MoveControl {
             velocity = scaledSpeed / velocity;
             moveForward *= velocity;
             moveStrafe *= velocity;
-            float yawSin = LMHelperClass.convertToFloat(Math.sin(this.mob.getYRot() * 0.017453292F));
-            float yawCos = LMHelperClass.convertToFloat(Math.cos(this.mob.getYRot() * 0.017453292F));
+            float yawSin = Mth.sin(this.mob.getYRot() * 0.017453292F);
+            float yawCos = Mth.cos(this.mob.getYRot() * 0.017453292F);
             float moveX = moveForward * yawCos - moveStrafe * yawSin;
             moveZ = moveStrafe * yawCos + moveForward * yawSin;
             PathNavigation pathNavigator = this.mob.getNavigation();
             NodeEvaluator nodeProcessor = pathNavigator.getNodeEvaluator();
             if (nodeProcessor.getBlockPathType(
                     this.mob.level(),
-                    LMHelperClass.convertToInteger(Math.floor(this.mob.position().x() + (double) moveX)),
-                    LMHelperClass.convertToInteger(Math.floor(this.mob.position().y())),
-                    LMHelperClass.convertToInteger(Math.floor(this.mob.position().z() + (double) moveZ))
+                    Mth.floor(this.mob.position().x() + (double) moveX),
+                    Mth.floor(this.mob.position().y()),
+                    Mth.floor(this.mob.position().z() + (double) moveZ)
             ) != BlockPathTypes.WALKABLE) {
                 this.strafeForwards = 1.0F;
                 this.strafeRight = 0.0F;
