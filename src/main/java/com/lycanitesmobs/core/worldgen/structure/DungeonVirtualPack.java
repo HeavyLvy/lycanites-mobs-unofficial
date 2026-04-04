@@ -21,13 +21,26 @@ import java.util.stream.Stream;
 /**
  * A virtual PackResources that dynamically generates worldgen structure, structure_set,
  * and biome tag JSON files from dungeon schematic configs at startup.
- *
+ * <p>
  * This eliminates the need for hard-coded JSON files in the resources folder and allows
  * full customization of dungeon biome placement through the schematic config JSONs.
  */
 public class DungeonVirtualPack implements PackResources {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    /**
+     * Identifier of the combined structure_set that holds every enabled Lycanites dungeon.
+     */
+    private static final String COMBINED_SET_NAME = "dungeons";
+    /**
+     * Fallback spacing/separation when no schematic specifies one.
+     */
+    private static final int DEFAULT_SPACING = 32;
+    private static final int DEFAULT_SEPARATION = 8;
+    /**
+     * Stable salt for the single combined set so the grid is deterministic across loads.
+     */
+    private static final int COMBINED_SET_SALT = Math.abs("lycanitesmobs:dungeons".hashCode()) % 1000000;
 
     private final String packId;
     private final Map<ResourceLocation, byte[]> resources = new HashMap<>();
@@ -35,6 +48,25 @@ public class DungeonVirtualPack implements PackResources {
     public DungeonVirtualPack(String packId) {
         this.packId = packId;
         generateResources();
+    }
+
+    private static class SchematicEntry {
+        final String name;
+        final int spacing;
+        final int separation;
+        final int weight;
+        final List<String> whitelistTags;
+        final List<String> biomeIds;
+
+        SchematicEntry(String name, int spacing, int separation, int weight,
+                       List<String> whitelistTags, List<String> biomeIds) {
+            this.name = name;
+            this.spacing = spacing;
+            this.separation = separation;
+            this.weight = weight;
+            this.whitelistTags = whitelistTags;
+            this.biomeIds = biomeIds;
+        }
     }
 
     private void generateResources() {
@@ -67,8 +99,38 @@ public class DungeonVirtualPack implements PackResources {
                 }
             }
 
+            List<SchematicEntry> enabledSchematics = new ArrayList<>();
             for (JsonObject json : mergedSchematics.values()) {
-                processSchematic(json);
+                SchematicEntry entry = parseSchematic(json);
+                if (entry != null) {
+                    enabledSchematics.add(entry);
+                }
+            }
+
+            // Emit per-dungeon biome tag + structure JSONs, but group them into ONE combined
+            // structure_set. Minecraft picks one structure per grid point by weight, which
+            // guarantees no two Lycanites dungeons ever share a grid cell.
+            for (SchematicEntry entry : enabledSchematics) {
+                generateBiomeTag(entry.name, entry.whitelistTags, entry.biomeIds);
+                generateStructure(entry.name);
+            }
+
+            if (!enabledSchematics.isEmpty()) {
+                int setSpacing = DEFAULT_SPACING;
+                int setSeparation = DEFAULT_SEPARATION;
+                for (SchematicEntry entry : enabledSchematics) {
+                    setSpacing = Math.max(setSpacing, entry.spacing);
+                }
+                // Minimum separation across entries, clamped to < spacing (vanilla requires sep < spacing).
+                setSeparation = Math.max(1, Math.min(setSpacing - 1, setSeparation));
+                for (SchematicEntry entry : enabledSchematics) {
+                    setSeparation = Math.min(setSeparation, Math.max(1, Math.min(setSpacing - 1, entry.separation)));
+                }
+                generateCombinedStructureSet(enabledSchematics, setSpacing, setSeparation, COMBINED_SET_SALT);
+                LMHelperClass.logDebug("DungeonVirtualPack",
+                        "[DungeonSpread] Combined set '" + COMBINED_SET_NAME + "' with " + enabledSchematics.size()
+                                + " dungeons: spacing=" + setSpacing + " separation=" + setSeparation
+                                + " salt=" + COMBINED_SET_SALT);
             }
 
             LMHelperClass.logDebug("DungeonVirtualPack",
@@ -99,18 +161,23 @@ public class DungeonVirtualPack implements PackResources {
         }
     }
 
-    private void processSchematic(JsonObject json) {
+    /**
+     * Parses a schematic JSON and returns its metadata, or null if disabled/invalid.
+     * Strips `-` prefixed biome tags into the blacklist (handled at runtime by LMDungeonStructure).
+     */
+    @Nullable
+    private SchematicEntry parseSchematic(JsonObject json) {
         try {
             String name = json.get("name").getAsString().toLowerCase();
 
             if (json.has("enabled") && !json.get("enabled").getAsBoolean()) {
-                return;
+                return null;
             }
 
-            int spacing = 32;
-            int separation = 8;
-            int salt = 0;
-            List<String> biomeTags = new ArrayList<>();
+            int spacing = DEFAULT_SPACING;
+            int separation = DEFAULT_SEPARATION;
+            int weight = 1;
+            List<String> whitelistTags = new ArrayList<>();
             List<String> biomeIds = new ArrayList<>();
 
             if (json.has("conditions")) {
@@ -125,12 +192,16 @@ public class DungeonVirtualPack implements PackResources {
                     } else {
                         separation = Math.max(1, spacing / 4);
                     }
-                    if (cond.has("salt")) salt = cond.get("salt").getAsInt();
-
+                    if (cond.has("weight")) weight = Math.max(1, cond.get("weight").getAsInt());
                     if (cond.has("biomeTags")) {
                         for (JsonElement e : cond.getAsJsonArray("biomeTags")) {
                             String tag = e.getAsString();
-                            if (!tag.isEmpty()) biomeTags.add(tag);
+                            if (!tag.isEmpty() && tag.charAt(0) != '-') {
+                                whitelistTags.add(tag);
+                            }
+                            // Negative tags (starting with '-') are stripped here.
+                            // They are handled at runtime by LMDungeonStructure via
+                            // WorldSpawnCondition.biomeTagBlacklist.
                         }
                     }
                     if (cond.has("biomeIds")) {
@@ -143,27 +214,27 @@ public class DungeonVirtualPack implements PackResources {
                 }
             }
 
-            if (biomeTags.isEmpty() && biomeIds.isEmpty()) {
+            if (whitelistTags.isEmpty() && biomeIds.isEmpty()) {
                 LMHelperClass.logWarning("DungeonVirtualPack",
                         "Schematic '" + name + "' has no biome tags or IDs, skipping worldgen resource generation.");
-                return;
+                return null;
             }
 
-            generateBiomeTag(name, biomeTags, biomeIds);
-            generateStructure(name);
-            generateStructureSet(name, spacing, separation, salt);
-
             LMHelperClass.logDebug("DungeonVirtualPack",
-                    "Generated virtual worldgen resources for dungeon: " + name);
+                    "[DungeonSpread] Schematic '" + name + "': spacing=" + spacing + " separation=" + separation
+                            + " weight=" + weight);
+
+            return new SchematicEntry(name, spacing, separation, weight, whitelistTags, biomeIds);
 
         } catch (Exception e) {
             LMHelperClass.logWarning("DungeonVirtualPack",
-                    "Failed to process schematic: " + e.getMessage());
+                    "Failed to parse schematic: " + e.getMessage());
+            return null;
         }
     }
 
     /**
-     * Generates a biome tag JSON from the schematic's condition biomeTags and biomeIds.
+     * Generates a biome tag JSON from the schematic's whitelisted biomeTags and biomeIds.
      * biomeTags entries are written as tag references (prefixed with #).
      * biomeIds entries are written as direct biome resource locations.
      */
@@ -211,17 +282,20 @@ public class DungeonVirtualPack implements PackResources {
     }
 
     /**
-     * Generates a structure_set JSON with random_spread placement using
-     * the spacing, separation, and salt from the schematic's condition.
+     * Generates a single combined structure_set containing every enabled Lycanites dungeon as
+     * weighted entries. Since vanilla picks at most one structure per grid point, this guarantees
+     * no two Lycanites dungeons ever collide — no per-dungeon exclusion math needed.
      */
-    private void generateStructureSet(String name, int spacing, int separation, int salt) {
+    private void generateCombinedStructureSet(List<SchematicEntry> entries, int spacing, int separation, int salt) {
         JsonObject set = new JsonObject();
 
         JsonArray structures = new JsonArray();
-        JsonObject entry = new JsonObject();
-        entry.addProperty("structure", "lycanitesmobs:" + name);
-        entry.addProperty("weight", 1);
-        structures.add(entry);
+        for (SchematicEntry e : entries) {
+            JsonObject struct = new JsonObject();
+            struct.addProperty("structure", "lycanitesmobs:" + e.name);
+            struct.addProperty("weight", e.weight);
+            structures.add(struct);
+        }
         set.add("structures", structures);
 
         JsonObject placement = new JsonObject();
@@ -232,7 +306,7 @@ public class DungeonVirtualPack implements PackResources {
         set.add("placement", placement);
 
         resources.put(
-                new ResourceLocation("lycanitesmobs", "worldgen/structure_set/" + name + ".json"),
+                new ResourceLocation("lycanitesmobs", "worldgen/structure_set/" + COMBINED_SET_NAME + ".json"),
                 toBytes(set)
         );
     }

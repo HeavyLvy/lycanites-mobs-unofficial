@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.joml.Vector3i;
 
@@ -589,7 +590,7 @@ public class SectorInstance {
      *                    on applicable blocks, etc.
      */
     public void placeBlock(LevelAccessor worldWriter, ChunkPos chunkPos, BlockPos blockPos, BlockState blockState,
-            Direction facing, RandomSource random) {
+                           Direction facing, RandomSource random) {
         int chunkOffset = 0;
         if (blockPos.getX() < chunkPos.getMinBlockX() + chunkOffset
                 || blockPos.getX() > chunkPos.getMaxBlockX() + chunkOffset) {
@@ -690,8 +691,7 @@ public class SectorInstance {
         }
         this.buildEntrances(worldWriter, world, chunkPos, random);
         this.chunksBuilt++;
-        if ("bossRoom".equalsIgnoreCase(this.dungeonSector.type)
-                && this.chunksBuilt >= this.getChunkPositions().size()) {
+        if ("bossRoom".equalsIgnoreCase(this.dungeonSector.type)) {
             MobSpawn mobSpawn = this.layout.dungeonInstance.schematic.getRandomMobSpawn(this.parentConnector.level,
                     true, random);
             if (mobSpawn != null && (mobSpawn.entityType != null || mobSpawn.mobId != null)) {
@@ -701,14 +701,17 @@ public class SectorInstance {
                 int radius = Math.max(3, Math.max(size.x(), size.z()));
 
                 ResourceKey<Level> dimKey = null;
+                ServerLevel serverLevel = null;
                 if (this.layout.dungeonInstance.world != null) {
                     dimKey = this.layout.dungeonInstance.world.dimension();
+                    serverLevel = (ServerLevel) this.layout.dungeonInstance.world;
                 } else if (worldWriter instanceof ServerLevelAccessor sla) {
                     dimKey = sla.getLevel().dimension();
+                    serverLevel = sla.getLevel();
                 }
 
                 if (dimKey != null) {
-                    DeferredBossSpawner.enqueue(dimKey, bossPos, mobSpawn, radius);
+                    DeferredBossSpawner.enqueue(dimKey, bossPos, mobSpawn, radius, serverLevel);
                 }
             }
         }
@@ -773,7 +776,7 @@ public class SectorInstance {
      *                    floor sectors.
      */
     public void buildFloor(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random,
-            int offsetY) {
+                           int offsetY) {
         BlockPos startPos = this.getRoomBoundsMin().offset(0, offsetY, 0);
         BlockPos stopPos = this.getRoomBoundsMax().offset(0, offsetY, 0);
         int worldStartX = Math.min(startPos.getX(), stopPos.getX());
@@ -1091,7 +1094,7 @@ public class SectorInstance {
      *                    applicable.
      */
     public void spawnMob(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, BlockPos blockPos,
-            MobSpawn mobSpawn, RandomSource random) {
+                         MobSpawn mobSpawn, RandomSource random) {
         int chunkOffset = 8;
         if (blockPos.getX() < chunkPos.getMinBlockX() + chunkOffset
                 || blockPos.getX() > chunkPos.getMaxBlockX() + chunkOffset) {

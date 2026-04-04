@@ -14,7 +14,12 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -34,11 +39,31 @@ public class DeferredBossSpawner {
         }
     }
 
-    private static final Map<Long, BossSpawnRequest> PENDING = new ConcurrentHashMap<>();
+    private static final Map<Long, List<BossSpawnRequest>> PENDING = new ConcurrentHashMap<>();
+    private static final Set<Long> SPAWNED = ConcurrentHashMap.newKeySet();
 
-    public static void enqueue(ResourceKey<Level> dimension, BlockPos pos, MobSpawn mobSpawn, int roomRadius) {
+    public static void enqueue(ResourceKey<Level> dimension, BlockPos pos, MobSpawn mobSpawn, int roomRadius,
+            @Nullable ServerLevel level) {
+        long posKey = pos.asLong();
+        if (SPAWNED.contains(posKey)) {
+            return;
+        }
+
         long chunkKey = new ChunkPos(pos).toLong();
-        PENDING.putIfAbsent(chunkKey, new BossSpawnRequest(dimension, pos, mobSpawn, roomRadius));
+        BossSpawnRequest request = new BossSpawnRequest(dimension, pos, mobSpawn, roomRadius);
+        PENDING.computeIfAbsent(chunkKey, k -> Collections.synchronizedList(new ArrayList<>())).add(request);
+
+        if (level != null && level.dimension().equals(dimension)) {
+            ChunkPos cp = new ChunkPos(pos);
+            if (level.getChunkSource().getChunkNow(cp.x, cp.z) != null) {
+                List<BossSpawnRequest> requests = PENDING.remove(chunkKey);
+                if (requests != null) {
+                    for (BossSpawnRequest req : requests) {
+                        spawnBoss(level, req);
+                    }
+                }
+            }
+        }
     }
 
     @SubscribeEvent
@@ -51,28 +76,36 @@ public class DeferredBossSpawner {
         }
 
         long chunkKey = event.getChunk().getPos().toLong();
-        BossSpawnRequest request = PENDING.remove(chunkKey);
-        if (request == null) {
+        List<BossSpawnRequest> requests = PENDING.remove(chunkKey);
+        if (requests == null) {
             return;
         }
 
-        if (!request.dimension.equals(level.dimension())) {
-            PENDING.putIfAbsent(chunkKey, request);
-            return;
-        }
+        for (BossSpawnRequest request : requests) {
+            if (!request.dimension.equals(level.dimension())) {
+                PENDING.computeIfAbsent(chunkKey, k -> Collections.synchronizedList(new ArrayList<>())).add(request);
+                continue;
+            }
 
-        try {
-            spawnBoss(level, request);
-        } catch (Exception e) {
-            LMHelperClass.logWarning("", "[DeferredBoss] Error spawning boss: " + e.getMessage());
+            try {
+                spawnBoss(level, request);
+            } catch (Exception e) {
+                LMHelperClass.logWarning("", "[DeferredBoss] Error spawning boss: " + e.getMessage());
+            }
         }
     }
 
     private static void spawnBoss(ServerLevel level, BossSpawnRequest request) {
+        long posKey = request.pos.asLong();
+        if (!SPAWNED.add(posKey)) {
+            return;
+        }
+
         request.mobSpawn.resolveEntityType();
 
         LivingEntity entity = request.mobSpawn.createEntity(level);
         if (entity == null) {
+            SPAWNED.remove(posKey);
             return;
         }
 
@@ -85,5 +118,6 @@ public class DeferredBossSpawner {
 
         request.mobSpawn.onSpawned(entity, null);
         level.addFreshEntity(entity);
+        LMHelperClass.logDebug("Dungeon", "[DeferredBoss] Spawned boss at " + request.pos);
     }
 }

@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.worldgen.dungeon.instance;
 import com.lycanitesmobs.core.data.config.ConfigDungeons;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSector;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
@@ -11,6 +12,13 @@ import java.util.*;
 
 public class DungeonLayout {
     /** A Dungeon Layout is a procedurally generated collection of connecting Sectors with Structures and a Theme as well as other properties. **/
+
+    /**
+     * Max distance (in blocks) any sector can extend from the dungeon origin in X or Z.
+     * Minecraft's structure reference propagation range is 8 chunks. Using 7 chunks (112 blocks)
+     * as a safe margin to prevent rooms from being cut off by normal terrain generation.
+     **/
+    private static final int MAX_RADIUS = 112;
 
     /**
      * The Dungeon Instance that this Layout belongs to.
@@ -45,6 +53,25 @@ public class DungeonLayout {
      */
     public DungeonLayout(DungeonInstance dungeonInstance) {
         this.dungeonInstance = dungeonInstance;
+    }
+
+
+    /**
+     * Checks if a connected sector's occupied bounds are within MAX_RADIUS of the dungeon origin.
+     * Must be called after connect() so the sector has a position.
+     *
+     * @param sector The sector instance to check.
+     * @return True if the sector is within bounds.
+     */
+    public boolean isWithinBounds(SectorInstance sector) {
+        BlockPos origin = this.dungeonInstance.originPos;
+        BlockPos min = sector.getOccupiedBoundsMin();
+        BlockPos max = sector.getOccupiedBoundsMax();
+
+        return Math.abs(min.getX() - origin.getX()) <= MAX_RADIUS
+                && Math.abs(max.getX() - origin.getX()) <= MAX_RADIUS
+                && Math.abs(min.getZ() - origin.getZ()) <= MAX_RADIUS
+                && Math.abs(max.getZ() - origin.getZ()) <= MAX_RADIUS;
     }
 
 
@@ -193,11 +220,23 @@ public class DungeonLayout {
 
             sectorInstance.connect(sectorConnector);
 
+            if (!this.isWithinBounds(sectorInstance)) {
+                LMHelperClass.logDebug("Dungeon",
+                        "snake: sector " + nextType + " at step " + i + " exceeds max radius, ending chain");
+                return lastSector;
+            }
+
             if ("stairs".equals(nextType) && sectorInstance.getOccupiedBoundsMin().getY() <= 1) {
                 nextType = "finish";
                 dungeonSector = this.dungeonInstance.schematic.getRandomSector(nextType, random);
                 sectorInstance = new SectorInstance(this, dungeonSector, random);
                 sectorInstance.connect(sectorConnector);
+
+                if (!this.isWithinBounds(sectorInstance)) {
+                    LMHelperClass.logDebug("Dungeon",
+                            "snake: finish sector exceeds max radius, ending chain");
+                    return lastSector;
+                }
             }
 
             sectorInstance.init(random);
@@ -234,6 +273,13 @@ public class DungeonLayout {
                 continue;
             }
             sectorInstance.connect(connector);
+
+            if (!this.isWithinBounds(sectorInstance)) {
+                LMHelperClass.logDebug("Dungeon",
+                        "stem: sector " + nextType + " exceeds max radius, skipping");
+                continue;
+            }
+
             sectorInstance.init(random);
             this.addSectorInstance(sectorInstance);
             generatedSectors.add(sectorInstance);
@@ -270,6 +316,11 @@ public class DungeonLayout {
             return null;
         }
 
+        if (!this.isWithinBounds(sectorInstance)) {
+            LMHelperClass.logDebug("Dungeon", "tower: sector exceeds max radius, stopping tower");
+            return null;
+        }
+
         sectorInstance.init(random);
         this.addSectorInstance(sectorInstance);
         return sectorInstance;
@@ -298,6 +349,12 @@ public class DungeonLayout {
                 break;
             }
             corridorInstance.connect(corridorConnector);
+
+            if (!this.isWithinBounds(corridorInstance)) {
+                LMHelperClass.logDebug("Dungeon", "ledge: corridor exceeds max radius, stopping ledges");
+                break;
+            }
+
             corridorInstance.init(random);
             this.addSectorInstance(corridorInstance);
 
@@ -312,6 +369,12 @@ public class DungeonLayout {
                 continue;
             }
             roomInstance.connect(roomConnector);
+
+            if (!this.isWithinBounds(roomInstance)) {
+                LMHelperClass.logDebug("Dungeon", "ledge: " + roomType + " exceeds max radius, skipping");
+                continue;
+            }
+
             roomInstance.init(random);
             this.addSectorInstance(roomInstance);
 

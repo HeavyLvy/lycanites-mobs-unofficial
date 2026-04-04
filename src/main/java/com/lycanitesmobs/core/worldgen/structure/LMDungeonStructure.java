@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.worldgen.structure;
 
+import com.lycanitesmobs.core.entity.spawner.condition.WorldSpawnCondition;
 import com.lycanitesmobs.core.manager.DungeonManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSchematic;
@@ -9,8 +10,13 @@ import com.lycanitesmobs.core.worldgen.dungeon.instance.SectorInstance;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -22,8 +28,8 @@ public class LMDungeonStructure extends Structure {
 
     public static final Codec<LMDungeonStructure> CODEC = RecordCodecBuilder
             .<LMDungeonStructure>mapCodec(instance -> instance.group(
-                    settingsCodec(instance),
-                    Codec.STRING.fieldOf("schematic_name").forGetter(s -> s.schematicName))
+                            settingsCodec(instance),
+                            Codec.STRING.fieldOf("schematic_name").forGetter(s -> s.schematicName))
                     .apply(instance, LMDungeonStructure::new))
             .codec();
 
@@ -52,6 +58,20 @@ public class LMDungeonStructure extends Structure {
                 context.randomState());
 
         int y = computeYPosition(schematic, context.random(), groundHeight);
+
+        // -- Check biome blacklist from schematic conditions --
+        WorldSpawnCondition condition = schematic.getWorldSpawnCondition();
+        if (condition != null && !condition.biomeTagBlacklist.isEmpty()) {
+            Holder<Biome> biomeHolder = context.chunkGenerator().getBiomeSource()
+                    .getNoiseBiome(centerX >> 2, y >> 2, centerZ >> 2, context.randomState().sampler());
+            for (String blacklistTag : condition.biomeTagBlacklist) {
+                TagKey<Biome> tagKey = TagKey.create(Registries.BIOME, new ResourceLocation(blacklistTag));
+                if (biomeHolder.is(tagKey)) {
+                    return Optional.empty();
+                }
+            }
+        }
+
         BlockPos center = new BlockPos(centerX, y, centerZ);
 
         return Optional.of(new GenerationStub(center, builder -> {
