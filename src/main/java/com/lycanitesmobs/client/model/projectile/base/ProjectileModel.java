@@ -217,7 +217,7 @@ public class ProjectileModel extends EntityModel<BaseProjectileEntity> implement
     @Override
     public void doAngle(float rotation, float angleX, float angleY, float angleZ) {
         if (rotation != 0.0F && (angleX != 0.0F || angleY != 0.0F || angleZ != 0.0F)) {
-            this.matrixStack.mulPose(new Quaternionf(new AxisAngle4f(rotation, angleX, angleY, angleZ)));
+            this.matrixStack.mulPose(new Quaternionf(new AxisAngle4f((float) Math.toRadians(rotation), angleX, angleY, angleZ)));
         }
     }
 

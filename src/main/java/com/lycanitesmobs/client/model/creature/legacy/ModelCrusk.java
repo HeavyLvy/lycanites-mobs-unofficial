@@ -99,7 +99,7 @@ public class ModelCrusk extends CreatureObjModelOld {
     		angleY = -0.5F;
     	}
     	if(partName.equals("topleftmouth") || partName.equals("toprightmouth") || partName.equals("bottomleftmouth") || partName.equals("bottomrightmouth")) {
-    		rotation += -(Mth.cos(loop * 0.09F) * 0.05F - 0.05F);
+    		rotation += -Math.toDegrees(Mth.cos(loop * 0.09F) * 0.05F - 0.05F);
     		if(entity instanceof BaseCreatureEntity && ((BaseCreatureEntity)entity).isAttackOnCooldown())
     			rotation = -20;
     		if(entity instanceof TameableCreatureEntity && ((TameableCreatureEntity)entity).isSitting())

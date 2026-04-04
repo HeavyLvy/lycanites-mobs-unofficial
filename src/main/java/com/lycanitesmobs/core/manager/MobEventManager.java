@@ -60,7 +60,6 @@ public class MobEventManager extends JSONLoader {
      * Called during early start up, loads all global event configs into the manager.
      **/
     public void loadConfig() {
-        LMHelperClass.logDebug("", "Config Test: " + ConfigMobEvent.INSTANCE.mobEventsEnabled.get());
         this.mobEventsEnabled = ConfigMobEvent.INSTANCE.mobEventsEnabled.get();
         this.mobEventsRandom = ConfigMobEvent.INSTANCE.mobEventsRandom.get();
         this.defaultMobDuration = ConfigMobEvent.INSTANCE.defaultMobDuration.get();
@@ -92,7 +91,6 @@ public class MobEventManager extends JSONLoader {
         JsonObject defaultGlobalJson;
         if (FileLoader.SERVER.ready) {
             Path defaultGlobalPath = FileLoader.SERVER.getPath("globalmobevent.json");
-            LMHelperClass.logDebug("", "Global Mob Event JSON Path:" + defaultGlobalPath);
             defaultGlobalJson = this.loadJsonObject(gson, defaultGlobalPath);
         } else {
             defaultGlobalJson = this.loadJsonObject(gson, StreamLoader.SERVER.getStream("globalmobevent.json"));

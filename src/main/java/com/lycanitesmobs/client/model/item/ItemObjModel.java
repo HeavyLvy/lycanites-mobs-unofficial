@@ -39,8 +39,12 @@ public abstract class ItemObjModel implements IAnimationModel {
     // Global:
     /**
      * An initial x rotation applied to make Blender models match Minecraft.
+     * Value is ~233.24° because all equipment part display transforms (GUI, first-person, third-person)
+     * were fine-tuned when doAngle was broken (passing 180 raw radians to AxisAngle4f instead of
+     * converting degrees to radians). The old effective rotation was 180 rad mod 2π ≈ 4.071 rad ≈ 233.24°.
+     * Keeping this value preserves all fine-tuned EquipmentPartRenderer/EquipmentRenderer offsets.
      **/
-    public static float ROT_OFFSET_X = 180F;
+    public static float ROT_OFFSET_X = 233.24F;
     /**
      * An initial y offset applied to make Blender models match Minecraft.
      **/
@@ -405,7 +409,7 @@ public abstract class ItemObjModel implements IAnimationModel {
     @Override
     public void doAngle(float rotation, float angleX, float angleY, float angleZ) {
         if (rotation != 0.0F && (angleX != 0.0F || angleY != 0.0F || angleZ != 0.0F)) {
-            this.matrixStack.mulPose(new Quaternionf(new AxisAngle4f(rotation, angleX, angleY, angleZ)));
+            this.matrixStack.mulPose(new Quaternionf(new AxisAngle4f((float) Math.toRadians(rotation), angleX, angleY, angleZ)));
         }
     }
 

@@ -25,7 +25,6 @@ public class MessageOverlayMessage {
      */
     public static void handle(MessageOverlayMessage message, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().setPacketHandled(true);
-        LMHelperClass.logDebug("", "Overlay Packet: " + ctx.get().getDirection());
         if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
             return;
 

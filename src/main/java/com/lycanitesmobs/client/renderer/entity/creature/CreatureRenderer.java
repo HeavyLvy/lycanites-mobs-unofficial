@@ -110,10 +110,10 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         //matrixStack.translate(0.0D, 0.0D, -1.8f);
         // Animation Ticks:
         float loop = this.getBob(entity, partialTicks % 1.0F);
-        float facingFix = 180.0F;
-        this.setupRotations(entity, matrixStack, loop, Mth.wrapDegrees(renderYaw + facingFix), yaw);
-        matrixStack.mulPose(Axis.XP.rotationDegrees(133.0F));
+        this.setupRotations(entity, matrixStack, loop, renderYaw, yaw);
+        matrixStack.scale(-1.0F, -1.0F, 1.0F);
         this.scale(entity, matrixStack, yaw);
+        matrixStack.translate(0.0D, (double)-1.501F, 0.0D);
         float distance = 0.0F;
         float time = 0.0F;
         if (!shouldSit && entity.isAlive()) {

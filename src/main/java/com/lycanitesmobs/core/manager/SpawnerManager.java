@@ -56,7 +56,6 @@ public class SpawnerManager extends JSONLoader {
         JsonObject defaultGlobalJson;
         if (FileLoader.COMMON.ready) {
             Path defaultGlobalPath = FileLoader.COMMON.getPath("globalspawner.json");
-            LMHelperClass.logDebug("", "Global Spawner JSON Path:" + defaultGlobalPath);
             defaultGlobalJson = this.loadJsonObject(gson, defaultGlobalPath);
         } else {
             defaultGlobalJson = this.loadJsonObject(gson, StreamLoader.COMMON.getStream("globalspawner.json"));

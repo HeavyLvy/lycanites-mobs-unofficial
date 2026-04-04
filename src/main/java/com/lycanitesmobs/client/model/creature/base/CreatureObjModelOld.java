@@ -242,10 +242,8 @@ public class CreatureObjModelOld extends CreatureModel {
             if (!this.canRenderPart(partName, entity, layer, trophyModel) || (trophyModel && !isTrophyPart)) continue;
 
             matrixStack.pushPose();
-            float uprightFixDeg = -0.1f;
-            float leanFromPitch = 0f;
-            this.doAngle(modelXRotOffset + (entity != null ? (-entity.getXRot()) * leanFromPitch : 0f) + uprightFixDeg, 1F, 0F, 0F);
-            this.doTranslate(0F, 0F, 0F);
+            this.doAngle(modelXRotOffset, 1F, 0F, 0F);
+            this.doTranslate(0F, modelYPosOffset, 0F);
 
 
             if (isChild && !trophyModel) this.childScale(partName);

@@ -61,7 +61,7 @@ public class EquipmentRenderer extends BlockEntityWithoutLevelRenderer implement
             poseStack.translate(0.3F, 0.3F, -.1F);
         }
         EquipmentModel equipmentModel = ModelManager.getInstance().getEquipmentModel();
-
+        
         float loop = 0F;
         if (Minecraft.getInstance().player != null && !Minecraft.getInstance().isPaused()) {
             loop = Minecraft.getInstance().player.tickCount;

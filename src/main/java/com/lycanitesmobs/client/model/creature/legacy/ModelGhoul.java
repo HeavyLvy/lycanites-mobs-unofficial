@@ -20,10 +20,7 @@ public class ModelGhoul extends CreatureObjModelOld {
     public ModelGhoul(float shadowSize) {
     	// Load Model:
     	this.initModel("GhoulZombie", LycanitesMobs.modInfo, "entity/ghoul");
-    	
 
-
-    	
     	// Set Rotation Centers:
     	setPartCenter("head", 0F, 1.2F, 0.4F);
     	setPartCenter("body", 0F, 1.2F, 0.1F);

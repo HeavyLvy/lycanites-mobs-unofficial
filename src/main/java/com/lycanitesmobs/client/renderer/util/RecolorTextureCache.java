@@ -39,15 +39,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class RecolorTextureCache {
 
-    private RecolorTextureCache() {}
+    private RecolorTextureCache() {
+    }
 
-    /** Quantized cache key — avoids float equality issues. */
+    /**
+     * Quantized cache key — avoids float equality issues.
+     */
     private record RecolorKey(
             ResourceLocation texture,
             int baseColorPacked,
             int variantColorPacked,
             int paramsPacked
-    ) {}
+    ) {
+    }
 
     private static final Map<RecolorKey, ResourceLocation> cache = new ConcurrentHashMap<>();
 
@@ -87,20 +91,21 @@ public final class RecolorTextureCache {
             texManager.release(loc);
         }
         cache.clear();
-        LMHelperClass.logDebug("", "[Lycanites Mobs] Recolor texture cache cleared.");
     }
 
     private static RecolorKey makeKey(
             ResourceLocation tex,
             float bR, float bG, float bB, float bRange,
             float vR, float vG, float vB, float vAmt) {
-        int basePacked  = packRGB(bR, bG, bB);
-        int varPacked   = packRGB(vR, vG, vB);
+        int basePacked = packRGB(bR, bG, bB);
+        int varPacked = packRGB(vR, vG, vB);
         int paramPacked = (quantize(bRange) << 8) | quantize(vAmt);
         return new RecolorKey(tex, basePacked, varPacked, paramPacked);
     }
 
-    /** 6-bit quantize (0–63) to reduce cache fragmentation. */
+    /**
+     * 6-bit quantize (0–63) to reduce cache fragmentation.
+     */
     private static int quantize(float f) {
         return Math.min(63, Math.max(0, Math.round(f * 63.0F)));
     }

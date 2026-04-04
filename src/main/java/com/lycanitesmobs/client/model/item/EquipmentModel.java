@@ -8,6 +8,7 @@ import com.lycanitesmobs.client.renderer.item.IItemModelRenderer;
 import com.lycanitesmobs.client.renderer.layer.item.LayerItem;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -54,49 +55,34 @@ public class EquipmentModel implements IItemModelRenderer {
         for (ItemStack partStack : equipmentPartStacks) {
             slotId++;
 
-            // Base:
+            AnimationPart targetPart = null;
+
             if (slotId == 0) {
                 modelPartBase = this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, null, loop, brightness);
-            }
-
-            // Head:
-            else if (slotId == 1) {
-                if (modelPartBase == null || !modelPartBase.animationParts.containsKey("head")) {
-                    continue;
+            } else if (slotId == 1) {
+                if (modelPartBase == null || !modelPartBase.animationParts.containsKey("head")) continue;
+                targetPart = modelPartBase.animationParts.get("head");
+                modelPartHead = this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, targetPart, loop, brightness);
+            } else if (slotId == 2) {
+                if (modelPartHead == null || !modelPartHead.animationParts.containsKey("tipa")) continue;
+                targetPart = modelPartHead.animationParts.get("tipa");
+                this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, targetPart, loop, brightness);
+            } else if (slotId == 3) {
+                if (modelPartHead == null || !modelPartHead.animationParts.containsKey("tipb")) continue;
+                targetPart = modelPartHead.animationParts.get("tipb");
+                this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, targetPart, loop, brightness);
+            } else if (slotId == 4) {
+                if (modelPartHead == null || !modelPartHead.animationParts.containsKey("tipc")) continue;
+                targetPart = modelPartHead.animationParts.get("tipc");
+                if ((LMHelperClass.convertToResourceLocation(partStack.getItem()).getPath()).equals("equipmentpart_sutiramustinger") ||
+                        (LMHelperClass.convertToResourceLocation(partStack.getItem()).getPath()).equals("equipmentpart_lacedonhead")) {
+                    matrixStack.translate(0, 0.3, -0.1);
                 }
-                modelPartHead = this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, modelPartBase.animationParts.get("head"), loop, brightness);
-            }
-
-            // Tip A:
-            else if (slotId == 2) {
-                if (modelPartHead == null || !modelPartHead.animationParts.containsKey("tipa")) {
-                    continue;
-                }
-                this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, modelPartHead.animationParts.get("tipa"), loop, brightness);
-            }
-
-            // Tip B:
-            else if (slotId == 3) {
-                if (modelPartHead == null || !modelPartHead.animationParts.containsKey("tipb")) {
-                    continue;
-                }
-                this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, modelPartHead.animationParts.get("tipb"), loop, brightness);
-            }
-
-            // Tip C:
-            else if (slotId == 4) {
-                if (modelPartHead == null || !modelPartHead.animationParts.containsKey("tipc")) {
-                    continue;
-                }
-                this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, modelPartHead.animationParts.get("tipc"), loop, brightness);
-            }
-
-            // Pommel:
-            if (slotId == 5) {
-                if (modelPartBase == null || !modelPartBase.animationParts.containsKey("pommel")) {
-                    continue;
-                }
-                this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, modelPartBase.animationParts.get("pommel"), loop, brightness);
+                this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, targetPart, loop, brightness);
+            } else if (slotId == 5) {
+                if (modelPartBase == null || !modelPartBase.animationParts.containsKey("pommel")) continue;
+                targetPart = modelPartBase.animationParts.get("pommel");
+                this.renderPart(partStack, hand, matrixStack, renderTypeBuffer, renderer, targetPart, loop, brightness);
             }
         }
 

@@ -74,7 +74,7 @@ public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity
         try {
             matrixStack.translate(0, -0.25F, 0); // translate
             matrixStack.scale(0.25F, 0.25F, 0.25F); // scale
-            matrixStack.mulPose(new Quaternionf(new AxisAngle4f(entity.yRotO, 0.0F, 1.0F, 0.0F))); // rotate
+            matrixStack.mulPose(new Quaternionf(new AxisAngle4f((float) Math.toRadians(entity.yRotO), 0.0F, 1.0F, 0.0F))); // rotate
 
             if (this.getModel() == null) {
                 LMHelperClass.logWarning("", "Missing Projectile Model: " + entity);

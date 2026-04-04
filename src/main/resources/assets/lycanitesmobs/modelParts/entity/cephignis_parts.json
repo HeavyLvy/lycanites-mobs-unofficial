@@ -1,42 +1,42 @@
 [
   {
-    "name": "Head",
+    "name": "head",
     "parent": "",
     "centerX": "0.0",
-    "centerY": "0.0",
-    "centerZ": "-0.0",
-    "rotationX": "89.964",
+    "centerY": "0.5",
+    "centerZ": "0.4",
+    "rotationX": "0.0",
     "rotationY": "0.0",
-    "rotationZ": "-0.0"
+    "rotationZ": "0.0"
   },
   {
-    "name": "ArmRight",
+    "name": "body",
     "parent": "",
     "centerX": "0.0",
-    "centerY": "0.0",
-    "centerZ": "-0.0",
-    "rotationX": "89.964",
+    "centerY": "0.5",
+    "centerZ": "0.4",
+    "rotationX": "0.0",
     "rotationY": "0.0",
-    "rotationZ": "-0.0"
+    "rotationZ": "0.0"
   },
   {
-    "name": "ArmLeft",
+    "name": "armleft",
     "parent": "",
-    "centerX": "0.0",
-    "centerY": "0.0",
-    "centerZ": "-0.0",
-    "rotationX": "89.964",
+    "centerX": "0.15",
+    "centerY": "0.4",
+    "centerZ": "0.3",
+    "rotationX": "0.0",
     "rotationY": "0.0",
-    "rotationZ": "-0.0"
+    "rotationZ": "0.0"
   },
   {
-    "name": "Body",
+    "name": "armright",
     "parent": "",
-    "centerX": "0.0",
-    "centerY": "0.0",
-    "centerZ": "-0.0",
-    "rotationX": "89.964",
+    "centerX": "-0.15",
+    "centerY": "0.4",
+    "centerZ": "0.3",
+    "rotationX": "0.0",
     "rotationY": "0.0",
-    "rotationZ": "-0.0"
+    "rotationZ": "0.0"
   }
 ]

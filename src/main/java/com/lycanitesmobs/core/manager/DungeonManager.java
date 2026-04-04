@@ -47,24 +47,17 @@ public class DungeonManager extends JSONLoader {
      **/
     public void loadAllFromJson(ModInfo modInfo) {
         // Themes:
-        LMHelperClass.logDebug("", "Loading Dungeon Themes...");
         this.loadAllJson(modInfo, "Dungeon Theme", "dungeons/themes", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
         LMHelperClass.logDebug("", "Complete! " + this.themes.size() + " Dungeon Themes Loaded In Total.");
 
         // Structures:
-        LMHelperClass.logDebug("", "Loading Dungeon Structures...");
         this.loadAllJson(modInfo, "Dungeon Structure", "dungeons/structures", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
-        LMHelperClass.logDebug("", "Complete! " + this.structures.size() + " Dungeon Structures Loaded In Total.");
 
         // Sectors:
-        LMHelperClass.logDebug("", "Loading Dungeon Sectors...");
         this.loadAllJson(modInfo, "Dungeon Sector", "dungeons/sectors", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
-        LMHelperClass.logDebug("", "Complete! " + this.sectors.size() + " Dungeon Sectors Loaded In Total.");
 
         // Schematics:
-        LMHelperClass.logDebug("", "Loading Dungeon Schematics...");
         this.loadAllJson(modInfo, "Dungeon Schematic", "dungeons/schematics", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
-        LMHelperClass.logDebug("", "Complete! " + this.schematics.size() + " Dungeon Schematics Loaded In Total.");
     }
 
     @Override

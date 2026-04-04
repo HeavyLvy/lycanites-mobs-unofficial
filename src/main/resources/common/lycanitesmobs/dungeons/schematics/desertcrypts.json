@@ -20,7 +20,7 @@
         "forge:is_sandy",
         "minecraft:is_badlands",
         "forge:is_wasteland",
-        "forge:is_cold/overworld"
+        "-forge:is_cold/overworld"
       ],
       "biomeTagListType": "whitelist"
     }
