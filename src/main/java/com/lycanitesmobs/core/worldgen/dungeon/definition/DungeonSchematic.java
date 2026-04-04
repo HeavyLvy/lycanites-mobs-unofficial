@@ -45,12 +45,12 @@ public class DungeonSchematic {
     /**
      * The minimum amount of sectors this dungeon should have in total.
      **/
-    public int sectorCountMin = 30;
+    public int sectorCountMin = 10;
 
     /**
      * The maximum amount of sectors this dungeon should have in total.
      **/
-    public int sectorCountMax = 50;
+    public int sectorCountMax = 20;
 
     /**
      * The chance of a corridor connecting to another corridor.
