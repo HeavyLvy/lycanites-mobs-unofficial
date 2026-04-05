@@ -24,9 +24,13 @@ public class VBOObjModel extends ObjModel {
     public static boolean renderNormal;
     public static boolean renderOutline;
 
-    /** When true, use the entity-format VBO (for Iris/Oculus compatibility). */
+    /**
+     * When true, use the entity-format VBO (for Iris/Oculus compatibility).
+     */
     public static boolean useEntityFormat;
-    /** The Iris-compatible entity render type (set by CreatureRenderer). */
+    /**
+     * The Iris-compatible entity render type (set by CreatureRenderer).
+     */
     public static RenderType irisRenderType;
 
     public float baseR = 1.0F, baseG = 1.0F, baseB = 1.0F, baseRange = 0.1F;
@@ -97,6 +101,8 @@ public class VBOObjModel extends ObjModel {
                     .setTextureOffset(textureOffset)
                     .setOverlayOffset(0.0F, 10.0F - fade)
                     .setLightOffset(brightness)
+                    .setLightRangeScale(0.85F)
+                    .setHighlightCompression(0.2F)
                     .setRecolorBand(
                             baseR,
                             baseG,

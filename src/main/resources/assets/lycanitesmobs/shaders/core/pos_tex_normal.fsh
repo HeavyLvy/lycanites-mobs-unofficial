@@ -25,41 +25,83 @@ uniform vec3 SpecularColor;
 uniform float SpecularIntensity;
 uniform float SpecularPower;
 
+uniform float LightRangeScale;
+uniform float HighlightCompression;
+
 void main() {
     vec4 tex = texture(Sampler0, vTexCoord);
     if (AlphaCutoff > 0.0 && tex.a <= AlphaCutoff) {
         discard;
     }
 
-    vec3 N = normalize(vNormalVS);
-    vec3 L = normalize(vec3(0.0, 0.0, 1.0));
-    float ndotl = max(dot(N, L), 0.0);
-
+    // Variant recolor band
     vec3 base = tex.rgb;
-
     float dist = distance(base, BaseColor);
     float influence = BaseRange > 0.0 ? clamp(1.0 - dist / BaseRange, 0.0, 1.0) : 0.0;
-
     float amount = VariantAmount * influence;
     vec3 recolored = mix(base, VariantColor, amount);
 
-    // Sample the lightmap texture. This encodes time of day, weather, etc
-    vec2 lightUv = clamp(LightUv / 256.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0));
-    vec4 lightColor = texture(Sampler2, lightUv);
-    float lightFactor = max(lightColor.r, max(lightColor.g, lightColor.b));
+    // Split vanilla lightmap into block-only vs sky-only contributions.
+    // LightUv.x encodes block light (0..240), LightUv.y encodes sky light.
+    // Sampler2 is a 16x16 lightmap combining block (U) and sky (V) channels.
+    const float TEX = 1.0 / 16.0;
+    vec2 clampedBlock = clamp(vec2(LightUv.x / 256.0, 0.5 * TEX), vec2(0.5 * TEX), vec2(15.5 * TEX));
+    vec2 clampedSky   = clamp(vec2(0.5 * TEX, LightUv.y / 256.0), vec2(0.5 * TEX), vec2(15.5 * TEX));
+    vec3 blockLight = texture(Sampler2, clampedBlock).rgb;
+    vec3 skyLight   = texture(Sampler2, clampedSky).rgb;
+    float skyFactor   = max(skyLight.r,   max(skyLight.g,   skyLight.b));
+    float blockFactor = max(blockLight.r, max(blockLight.g, blockLight.b));
+
+    // Per-entity light range compression: pulls both ends toward 0.5.
+    // scale = 1.0 leaves range untouched; scale < 1.0 dims highs and lifts lows.
+    float rangeScale = clamp(LightRangeScale, 0.0, 1.0);
+    skyFactor   = 0.5 + (skyFactor   - 0.5) * rangeScale;
+    blockFactor = 0.5 + (blockFactor - 0.5) * rangeScale;
+    skyLight    = vec3(0.5) + (skyLight   - vec3(0.5)) * rangeScale;
+    blockLight  = vec3(0.5) + (blockLight - vec3(0.5)) * rangeScale;
+
+    // Directional sun shading (view-space sun direction uploaded from Java).
+    vec3 N = normalize(vNormalVS);
+    vec3 L = normalize(SunDirectionVS);
+    float ndotl = max(dot(N, L), 0.0);
+
+    // Half-Lambert softens the terminator so back faces aren't pitch black.
+    float halfLambert = ndotl * 0.5 + 0.5;
+
+    const float ambient = 0.55;
+    const float diffuseStrength = 0.45;
+    float diffuse = mix(ambient, ambient + diffuseStrength, halfLambert) * skyFactor;
+
+    // Combine sun-driven diffuse with block-light contribution.
+    // Instead of summing (which blows out at noon+torch), block light fills the
+    // gap left by sun coverage. At noon: block adds ~0. At night: block adds fully.
+    vec3 sunContrib   = skyLight * diffuse;
+    vec3 blockContrib = blockLight * blockFactor;
+    float sunCoverage = clamp(max(sunContrib.r, max(sunContrib.g, sunContrib.b)), 0.0, 1.0);
+    vec3 lightCol = sunContrib + blockContrib * (1.0 - sunCoverage);
+
+    vec3 sunColor = skyLight; // retained for specular tint below
+
+    // Keep a global minimum so things aren't fully black in deep dark.
     float minBrightness = 0.15;
-    lightFactor = max(lightFactor, minBrightness);
+    lightCol = max(lightCol, vec3(minBrightness));
 
-    vec3 lit = mix(recolored * 0.5, recolored, ndotl) * lightFactor;
+    vec3 lit = recolored * lightCol;
 
-    vec3 sunL = normalize(SunDirectionVS);
+    // Specular highlight from the sun, gated by sky exposure.
     vec3 V = normalize(vViewDir);
-    vec3 H = normalize(sunL + V);
+    vec3 H = normalize(L + V);
     float ndoth = max(dot(N, H), 0.0);
-    float spec = pow(ndoth, SpecularPower) * SpecularIntensity;
-    vec3 specular = SpecularColor * spec * lightFactor;
+    float spec = pow(ndoth, SpecularPower) * SpecularIntensity * skyFactor * ndotl;
+    vec3 specular = SpecularColor * spec * sunColor;
 
     vec3 finalRgb = lit + specular;
+
+    // Per-entity highlight rolloff. 0.0 = no compression.
+    // Reinhard-style soft clip: preserves midtones, softly pulls highs toward 1.
+    if (HighlightCompression > 0.0) {
+        finalRgb = finalRgb / (1.0 + finalRgb * HighlightCompression);
+    }
 
     fragColor = vec4(finalRgb, tex.a) * vColor;
 }

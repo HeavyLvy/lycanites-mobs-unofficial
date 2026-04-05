@@ -23,8 +23,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import static com.lycanitesmobs.client.renderer.util.CustomRenderStates.POS_TEX_NORMAL_SHADER;
@@ -50,6 +52,8 @@ public class VBOBatcher {
         private float tintG = 1.0F;
         private float tintB = 1.0F;
         private float tintAmount = 0.0F;
+        private float lightRangeScale = 1.0F;
+        private float highlightCompression = 0.0F;
 
         /**
          * Keeps the old ctor shape: (vbo, vertexCount, format, matrix, tex)
@@ -142,6 +146,27 @@ public class VBOBatcher {
         public VBODrawCommand setLightOffset(float u, float v) {
             this.lightOffsetX = u;
             this.lightOffsetY = v;
+            return this;
+        }
+
+        /**
+         * Compresses this draw's lightmap response toward the midpoint (0.5).
+         * 1.0 = unchanged. 0.6 ≈ tighter day/night margins. 0.0 = flat.
+         * Useful for entities that look too bright at noon or too dark at night.
+         */
+        public VBODrawCommand setLightRangeScale(float scale) {
+            this.lightRangeScale = scale;
+            return this;
+        }
+
+        /**
+         * Soft-clips the brightest output colors toward 1.0. 0.0 = off (hard clip).
+         * Higher values pull highlights down more aggressively while preserving midtones.
+         * Useful when torches + daylight combined still wash out too much.
+         * Typical range: 0.0 .. 0.5.
+         */
+        public VBODrawCommand setHighlightCompression(float strength) {
+            this.highlightCompression = strength;
             return this;
         }
 
@@ -288,12 +313,26 @@ public class VBOBatcher {
             if (tintAmt != null)
                 tintAmt.set(tintAmount);
 
-            var modelView = new Matrix4f(RenderSystem.getModelViewMatrix()).mul(this.modelMatrix);
+            // viewMat = RenderSystem.getModelViewMatrix() holds the camera/view matrix.
+            // modelView = view * per-draw model.
+            var viewMat = RenderSystem.getModelViewMatrix();
+            var modelView = new Matrix4f(viewMat).mul(this.modelMatrix);
             var projection = RenderSystem.getProjectionMatrix();
 
+            // Upload NormalMat = inverse-transpose of the upper-3x3 of modelView so
+            // vNormalVS actually lands in view-space.
+            var normalMatUni = shader.getUniform("NormalMat");
+            if (normalMatUni != null) {
+                Matrix3f normalMat = new Matrix3f(modelView).invert().transpose();
+                normalMatUni.set(normalMat);
+            }
+
+            // Compute a real view-space sun direction from the world sun angle.
             var sunDir = shader.getUniform("SunDirectionVS");
-            if (sunDir != null)
-                sunDir.set(0.0F, 1.0F, 0.0F);
+            if (sunDir != null) {
+                Vector3f sunVS = computeSunDirectionVS(viewMat);
+                sunDir.set(sunVS.x, sunVS.y, sunVS.z);
+            }
 
             var specColor = shader.getUniform("SpecularColor");
             if (specColor != null)
@@ -307,6 +346,14 @@ public class VBOBatcher {
             if (specPower != null)
                 specPower.set(32.0F);
 
+            var rangeScale = shader.getUniform("LightRangeScale");
+            if (rangeScale != null)
+                rangeScale.set(lightRangeScale);
+
+            var hiComp = shader.getUniform("HighlightCompression");
+            if (hiComp != null)
+                hiComp.set(highlightCompression);
+
             vbo.bind();
             vbo.drawWithShader(modelView, projection, shader);
             VertexBuffer.unbind();
@@ -316,6 +363,33 @@ public class VBOBatcher {
 
         private static float corrected(float f) {
             return ((int) (f * 255.0F) & 0xFF) / 255.0F;
+        }
+
+        /**
+         * Returns the sun direction in view-space. Derived from the world sun angle
+         * and transformed by the current view matrix's upper-3x3. Falls back to
+         * straight-up if there's no level (e.g. menu renders).
+         */
+        private static Vector3f computeSunDirectionVS(Matrix4f viewMat) {
+            Minecraft mc = Minecraft.getInstance();
+            Vector3f sunWS;
+            if (mc.level != null) {
+                float a = mc.level.getSunAngle(mc.getFrameTime());
+                // Sun orbits around world-X axis in Minecraft. At noon (sunAngle ~ 0)
+                // the sun is overhead; at dusk it's on the horizon.
+                sunWS = new Vector3f(0.0F, Mth.cos(a), -Mth.sin(a));
+            } else {
+                sunWS = new Vector3f(0.0F, 1.0F, 0.0F);
+            }
+            // Direction FROM surface TOWARD sun; vanilla sun angle already encodes this.
+            Matrix3f viewRot = new Matrix3f(viewMat);
+            viewRot.transform(sunWS);
+            if (sunWS.lengthSquared() < 1.0e-6F) {
+                sunWS.set(0.0F, 1.0F, 0.0F);
+            } else {
+                sunWS.normalize();
+            }
+            return sunWS;
         }
     }
 
