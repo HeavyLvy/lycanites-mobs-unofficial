@@ -102,7 +102,7 @@ public class VBOObjModel extends ObjModel {
                     .setOverlayOffset(0.0F, 10.0F - fade)
                     .setLightOffset(brightness)
                     .setLightRangeScale(0.85F)
-                    .setHighlightCompression(0.2F)
+                    .setHighlightCompression(0.5F)
                     .setRecolorBand(
                             baseR,
                             baseG,

@@ -113,7 +113,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         this.setupRotations(entity, matrixStack, loop, renderYaw, yaw);
         matrixStack.scale(-1.0F, -1.0F, 1.0F);
         this.scale(entity, matrixStack, yaw);
-        matrixStack.translate(0.0D, (double)-1.501F, 0.0D);
+        matrixStack.translate(0.0D, (double) -1.501F, 0.0D);
         float distance = 0.0F;
         float time = 0.0F;
         if (!shouldSit && entity.isAlive()) {
@@ -129,10 +129,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         }
 
         // Damage Fade:
-        int fade = 0;
-        if (entity.hurtTime > 0) {
-            fade = 10;
-        }
+        int fade = Math.max(entity.hurtTime, 0);
 
         // Entity Visibility:
         boolean invisible = !this.isBodyVisible(entity);

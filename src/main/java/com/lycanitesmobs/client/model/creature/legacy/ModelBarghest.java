@@ -66,11 +66,12 @@ public class ModelBarghest extends CreatureObjModelOld {
 
         // Looking (Mouth):
         if(partName.equals("mouth")) {
+            float mouthLookScale = (entity != null && entity.isBaby()) ? 0.75F : 1.0F;
             this.centerPartToPart("mouth", "head");
             if(!lockHeadX)
-                this.doRotate((float)Math.toDegrees(lookX / (180F / (float)Math.PI)), 0, 0);
+                this.doRotate((float)Math.toDegrees(lookX * mouthLookScale / (180F / (float)Math.PI)), 0, 0);
             if(!lockHeadY)
-                this.doRotate(0, (float)Math.toDegrees(lookY / (180F / (float)Math.PI)), 0);
+                this.doRotate(0, (float)Math.toDegrees(lookY * mouthLookScale / (180F / (float)Math.PI)), 0);
             this.uncenterPartToPart("mouth", "head");
         }
     	

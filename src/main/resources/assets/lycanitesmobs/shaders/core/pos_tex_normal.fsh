@@ -97,8 +97,13 @@ void main() {
 
     vec3 finalRgb = lit + specular;
 
-    // Per-entity highlight rolloff. 0.0 = no compression.
-    // Reinhard-style soft clip: preserves midtones, softly pulls highs toward 1.
+    // Damage red flash: OverlayUv.y == 0 means full red, 10 means no red
+    float hurtIntensity = clamp(1.0 - OverlayUv.y / 10.0, 0.0, 1.0);
+    if (hurtIntensity > 0.0) {
+        finalRgb = mix(finalRgb, vec3(1.0, 0.0, 0.0), hurtIntensity * 0.3);
+    }
+
+    // Per-entity highlight rolloff. 0.0 = no compression
     if (HighlightCompression > 0.0) {
         finalRgb = finalRgb / (1.0 + finalRgb * HighlightCompression);
     }
