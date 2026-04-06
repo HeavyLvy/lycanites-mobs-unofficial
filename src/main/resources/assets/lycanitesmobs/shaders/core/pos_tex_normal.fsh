@@ -9,10 +9,15 @@ in vec2 vTexCoord;
 in vec3 vNormalVS;
 in vec4 vColor;
 in vec3 vViewDir;
+in float vertexDistance;
 
 out vec4 fragColor;
 
 uniform float AlphaCutoff;
+
+uniform float FogStart;
+uniform float FogEnd;
+uniform vec4 FogColor;
 
 uniform vec3 BaseColor;
 uniform float BaseRange;
@@ -108,5 +113,18 @@ void main() {
         finalRgb = finalRgb / (1.0 + finalRgb * HighlightCompression);
     }
 
-    fragColor = vec4(finalRgb, tex.a) * vColor;
+    vec4 preFogColor = vec4(finalRgb, tex.a) * vColor;
+
+    // Fog: blend toward FogColor based on vertex distance.
+    // Matches vanilla linear_fog(): smoothstep between FogStart and FogEnd,
+    // scaled by FogColor.a (0 = no fog active, 1 = full fog).
+    // Covers all fog types: distance, underwater, lava, blindness, void, powder snow, etc.
+    if (FogColor.a > 0.0) {
+        float fogFactor = vertexDistance <= FogStart ? 0.0
+                        : vertexDistance >= FogEnd   ? 1.0
+                        : smoothstep(FogStart, FogEnd, vertexDistance);
+        fragColor = vec4(mix(preFogColor.rgb, FogColor.rgb, fogFactor * FogColor.a), preFogColor.a);
+    } else {
+        fragColor = preFogColor;
+    }
 }
