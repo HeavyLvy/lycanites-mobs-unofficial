@@ -22,11 +22,17 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeMod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +80,11 @@ public class ExtendedPlayer {
         }
     }
 
-    public boolean hasAttacked = false; // If true, this entity has attacked this tick.
+    // Big-entity reach modifier (applied transiently when the crosshair lands on an oversized creature).
+    private static final UUID BIG_ENTITY_REACH_UUID = UUID.fromString("7c83f3c0-5e2f-4a2a-9d4e-1a6e3f5b2c10");
+    private static final String BIG_ENTITY_REACH_NAME = "LycanitesBigEntityReach";
+    private static final double BIG_ENTITY_SIZE_THRESHOLD = 4.0;
+    private static final double BIG_ENTITY_REACH_MAX_SCAN = 4.0;
 
     // Spirit:
     public int spiritCharge = 100;
@@ -174,38 +184,64 @@ public class ExtendedPlayer {
     }
 
     /**
-     * Returns true if the provided entity is within melee attack range and is considered large. This is used for when the vanilla attack range fails on big entities.
+     * Scans the player's crosshair for a large creature and applies a transient reach modifier so that
+     * vanilla's attack-range check (and any mod that reads {@link ForgeMod#ENTITY_REACH}) succeeds on
+     * oversized mobs whose center is farther than vanilla's base reach even when the model is touching
+     * the player. The modifier is cleared every tick and only re-applied while the crosshair is actually
+     * on a large entity, so smaller targets in the area are unaffected. Server-side only; Forge syncs
+     * the attribute to the client automatically.
      **/
-    public boolean canMeleeBigEntity(Entity targetEntity) {
-        if (!(targetEntity instanceof LivingEntity))
-            return false;
-        float targetWidth = targetEntity.getBbWidth();
-        float targetHeight = targetEntity.getBbHeight();
-        if (targetEntity instanceof BaseCreatureEntity) {
-            BaseCreatureEntity targetCreature = (BaseCreatureEntity) targetEntity;
-            targetWidth *= targetCreature.hitAreaWidthScale;
-            targetHeight *= targetCreature.hitAreaHeightScale;
-        }
-        if (targetWidth <= 4 && targetHeight <= 4)
-            return false;
-        double heightOffset = this.player.position().y() - targetEntity.position().y();
-        double heightCompensation = 0;
-        if (heightOffset > 0)
-            heightCompensation = Math.min(heightOffset, targetHeight);
-        double distance = Math.sqrt(this.player.distanceTo(targetEntity));
-        double range = 6 + heightCompensation + (targetWidth / 2);
-        return distance <= range;
+    public void updateBigEntityReach() {
+        if (this.player == null || this.player.level().isClientSide)
+            return;
+        AttributeInstance reachAttr = this.player.getAttribute(ForgeMod.ENTITY_REACH.get());
+        if (reachAttr == null)
+            return;
+        reachAttr.removeModifier(BIG_ENTITY_REACH_UUID);
+        if (this.player.isSpectator())
+            return;
+
+        Vec3 eyePos = this.player.getEyePosition();
+        Vec3 lookVec = this.player.getLookAngle();
+        Vec3 endPos = eyePos.add(lookVec.scale(BIG_ENTITY_REACH_MAX_SCAN));
+        AABB scanBox = new AABB(eyePos, endPos).inflate(1.0);
+
+        EntityHitResult hit = ProjectileUtil.getEntityHitResult(
+                this.player.level(),
+                this.player,
+                eyePos,
+                endPos,
+                scanBox,
+                e -> e instanceof LivingEntity && e.isPickable() && !e.isSpectator() && isLargeEntity(e)
+        );
+        if (hit == null)
+            return;
+
+        double currentReach = reachAttr.getValue();
+        double needed = eyePos.distanceTo(hit.getLocation()) + 0.5;
+        if (needed <= currentReach)
+            return;
+
+        reachAttr.addTransientModifier(new AttributeModifier(
+                BIG_ENTITY_REACH_UUID,
+                BIG_ENTITY_REACH_NAME,
+                needed - currentReach,
+                AttributeModifier.Operation.ADDITION
+        ));
     }
 
     /**
-     * Makes this player attempt to melee attack. This is typically used for when the vanilla attack range fails on big entities.
+     * An entity is "large" for reach-override purposes when its effective hit box (applying the
+     * creature's hit-area scales, if any) exceeds {@link #BIG_ENTITY_SIZE_THRESHOLD} on either axis.
      **/
-    public void meleeAttack(Entity targetEntity) {
-        if (!this.hasAttacked && !this.player.getMainHandItem().isEmpty() && this.canMeleeBigEntity(targetEntity)) {
-            this.player.attack(targetEntity);
-            this.player.resetAttackStrengthTicker();
-            this.player.swing(InteractionHand.MAIN_HAND);
+    private static boolean isLargeEntity(Entity entity) {
+        float width = entity.getBbWidth();
+        float height = entity.getBbHeight();
+        if (entity instanceof BaseCreatureEntity creature) {
+            width *= creature.hitAreaWidthScale;
+            height *= creature.hitAreaHeightScale;
         }
+        return width > BIG_ENTITY_SIZE_THRESHOLD || height > BIG_ENTITY_SIZE_THRESHOLD;
     }
 
 
@@ -220,7 +256,7 @@ public class ExtendedPlayer {
         if (this.player == null)
             return;
         this.timePlayed++;
-        this.hasAttacked = false;
+        // this.updateBigEntityReach();
         boolean creative = this.player.getAbilities().instabuild;
 
         // Stats:

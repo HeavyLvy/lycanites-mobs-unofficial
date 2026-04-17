@@ -129,9 +129,9 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         }
 
         // Damage Fade:
+        // Entity Visibility:
         int fade = Math.max(entity.hurtTime, 0);
 
-        // Entity Visibility:
         boolean invisible = !this.isBodyVisible(entity);
         boolean allyInvisible = invisible && !entity.isInvisibleTo(Minecraft.getInstance().player);
 

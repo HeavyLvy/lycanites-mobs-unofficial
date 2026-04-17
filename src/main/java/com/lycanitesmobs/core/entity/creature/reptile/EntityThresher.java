@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.entity.creature.reptile;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.api.IGroupBoss;
-import com.lycanitesmobs.api.IGroupHeavy;
+import com.lycanitesmobs.core.entity.IGroupBoss;
+import com.lycanitesmobs.core.entity.IGroupHeavy;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -27,11 +27,11 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
     protected int mountedWhirlpool = 0;
 
     // ==================================================
- 	//                    Constructor
- 	// ==================================================
+    //                    Constructor
+    // ==================================================
     public EntityThresher(EntityType<? extends EntityThresher> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEFINED;
         this.spawnsOnLand = false;
@@ -58,30 +58,30 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
     public void loadCreatureFlags() {
         this.whirlpoolRange = this.creatureInfo.getFlag("whirlpoolRange", this.whirlpoolRange);
     }
-    
-    
+
+
     // ==================================================
     //                      Updates
     // ==================================================
-	// ========== Living Update ==========
-	@Override
+    // ========== Living Update ==========
+    @Override
     public void aiStep() {
         super.aiStep();
 
-		// Whirlpool:
-        if(!this.getCommandSenderWorld().isClientSide) {
-            if(this.whirlpoolRecharging) {
-                if(++this.whirlpoolEnergy >= this.whirlpoolEnergyMax)
+        // Whirlpool:
+        if (!this.getCommandSenderWorld().isClientSide) {
+            if (this.whirlpoolRecharging) {
+                if (++this.whirlpoolEnergy >= this.whirlpoolEnergyMax)
                     this.whirlpoolRecharging = false;
             }
             this.whirlpoolEnergy = Math.min(this.whirlpoolEnergy, this.whirlpoolEnergyMax);
-            if(this.canWhirlpool()) {
+            if (this.canWhirlpool()) {
                 for (Entity entity : this.getNearbyEntities(Entity.class, null, this.whirlpoolRange)) {
                     if (entity == this || entity == this.getControllingPassenger() || entity instanceof IGroupBoss || entity instanceof IGroupHeavy)
                         continue;
-                    if(entity instanceof LivingEntity) {
-                        LivingEntity entityLivingBase = (LivingEntity)entity;
-                        if(entityLivingBase.hasEffect(ObjectManager.getEffect("weight")) || !this.canAttack(entityLivingBase))
+                    if (entity instanceof LivingEntity) {
+                        LivingEntity entityLivingBase = (LivingEntity) entity;
+                        if (entityLivingBase.hasEffect(ObjectManager.getEffect("weight")) || !this.canAttack(entityLivingBase))
                             continue;
                     }
                     ServerPlayer player = null;
@@ -102,28 +102,31 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
                     if (player != null)
                         player.connection.send(new ClientboundSetEntityMotionPacket(entity));
                 }
-                if(--this.whirlpoolEnergy <= 0)
+                if (--this.whirlpoolEnergy <= 0)
                     this.whirlpoolRecharging = true;
             }
         }
 
-        if(this.mountedWhirlpool > 0)
+        if (this.mountedWhirlpool > 0)
             this.mountedWhirlpool--;
     }
 
     @Override
     public void riderEffects(LivingEntity rider) {
         rider.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, (5 * 20) + 5, 1));
-        if(rider.hasEffect(ObjectManager.getEffect("paralysis")))
+        if (rider.hasEffect(ObjectManager.getEffect("paralysis")))
             rider.removeEffect(ObjectManager.getEffect("paralysis"));
-        if(rider.hasEffect(ObjectManager.getEffect("penetration")))
+        if (rider.hasEffect(ObjectManager.getEffect("penetration")))
             rider.removeEffect(ObjectManager.getEffect("penetration"));
     }
 
     // ========== Extra Animations ==========
-    /** An additional animation boolean that is passed to all clients through the animation mask. **/
+
+    /**
+     * An additional animation boolean that is passed to all clients through the animation mask.
+     **/
     public boolean extraAnimation01() {
-        if(this.getCommandSenderWorld().isClientSide) {
+        if (this.getCommandSenderWorld().isClientSide) {
             return super.extraAnimation01();
         }
         return this.canWhirlpool();
@@ -131,17 +134,17 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
 
     // ========== Whirlpool ==========
     public boolean canWhirlpool() {
-        if(this.getCommandSenderWorld().isClientSide) {
+        if (this.getCommandSenderWorld().isClientSide) {
             return this.extraAnimation01();
         }
 
         // Out of Water:
-        if(!this.isInWater()) {
+        if (!this.isInWater()) {
             return false;
         }
 
         // Mounted:
-        if(this.getControllingPassenger() != null && this.mountedWhirlpool > 0) {
+        if (this.getControllingPassenger() != null && this.mountedWhirlpool > 0) {
             return true;
         }
 
@@ -149,56 +152,56 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
         return !this.whirlpoolRecharging && this.hasAttackTarget() && this.distanceTo(this.getTarget()) <= (this.whirlpoolRange * 3);
     }
 
-	
+
     // ==================================================
     //                      Movement
     // ==================================================
     // Pathing Weight:
-	@Override
-	public float getBlockPathWeight(int x, int y, int z) {
+    @Override
+    public float getBlockPathWeight(int x, int y, int z) {
         int waterWeight = 10;
 
         Block block = this.getCommandSenderWorld().getBlockState(new BlockPos(x, y, z)).getBlock();
-        if(block == Blocks.WATER)
+        if (block == Blocks.WATER)
             return (super.getBlockPathWeight(x, y, z) + 1) * (waterWeight + 1);
-        if(this.getCommandSenderWorld().isRaining() && this.getCommandSenderWorld().canSeeSkyFromBelowWater(new BlockPos(x, y, z)))
+        if (this.getCommandSenderWorld().isRaining() && this.getCommandSenderWorld().canSeeSkyFromBelowWater(new BlockPos(x, y, z)))
             return (super.getBlockPathWeight(x, y, z) + 1) * (waterWeight + 1);
 
-        if(this.getTarget() != null)
+        if (this.getTarget() != null)
             return super.getBlockPathWeight(x, y, z);
-        if(this.waterContact())
+        if (this.waterContact())
             return -999999.0F;
 
         return super.getBlockPathWeight(x, y, z);
     }
-	
-	// Swimming:
-	@Override
-	public boolean isStrongSwimmer() {
-		return true;
-	}
-	
-	// Walking:
-	@Override
-	public boolean canWalk() {
-		return false;
-	}
+
+    // Swimming:
+    @Override
+    public boolean isStrongSwimmer() {
+        return true;
+    }
+
+    // Walking:
+    @Override
+    public boolean canWalk() {
+        return false;
+    }
 
     // ========== Mounted Offset ==========
     @Override
     public double getPassengersRidingOffset() {
-        return (double)this.getDimensions(Pose.STANDING).height * 0.5D;
+        return (double) this.getDimensions(Pose.STANDING).height * 0.5D;
     }
-    
-    
+
+
     // ==================================================
-   	//                     Immunities
-   	// ==================================================
+    //                     Immunities
+    // ==================================================
     @Override
     public boolean canBreatheUnderwater() {
         return true;
     }
-    
+
     @Override
     public boolean canBreatheAir() {
         return false;
@@ -210,10 +213,10 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
     // ==================================================
     @Override
     public void mountAbility(Entity rider) {
-        if(this.getCommandSenderWorld().isClientSide)
+        if (this.getCommandSenderWorld().isClientSide)
             return;
 
-        if(this.getStamina() < this.getStaminaCost()) {
+        if (this.getStamina() < this.getStaminaCost()) {
             return;
         }
 
@@ -240,8 +243,8 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
     @Override
     public void onDismounted(Entity entity) {
         super.onDismounted(entity);
-        if(entity instanceof LivingEntity) {
-            ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 5 * 20, 1));
+        if (entity instanceof LivingEntity) {
+            ((LivingEntity) entity).addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 5 * 20, 1));
         }
     }
 
@@ -250,12 +253,20 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
     //                     Equipment
     // ==================================================
     @Override
-    public int getNoBagSize() { return 0; }
+    public int getNoBagSize() {
+        return 0;
+    }
+
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() {
+        return this.creatureInfo.bagSize;
+    }
+
     // ==================================================
     //                     Pet Control
     // ==================================================
     @Override
-    public boolean petControlsEnabled() { return true; }
+    public boolean petControlsEnabled() {
+        return true;
+    }
 }

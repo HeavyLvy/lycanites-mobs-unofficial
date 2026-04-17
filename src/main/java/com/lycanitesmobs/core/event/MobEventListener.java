@@ -1,13 +1,12 @@
 package com.lycanitesmobs.core.event;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.api.IGroupBoss;
-import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
+import com.lycanitesmobs.core.entity.IGroupBoss;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.data.config.ConfigExtra;
 import com.lycanitesmobs.core.entity.effect.EffectBase;
 import com.lycanitesmobs.core.manager.*;
-import com.lycanitesmobs.core.effect.FearHandler;
+import com.lycanitesmobs.core.entity.creature.aberration.EntityFear;
 import com.lycanitesmobs.core.event.mobevent.MobEventSchedule;
 import com.lycanitesmobs.core.event.mobevent.trigger.AltarMobEventTrigger;
 import com.lycanitesmobs.core.event.mobevent.trigger.MobEventTrigger;
@@ -29,8 +28,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -257,14 +258,11 @@ public class MobEventListener {
             }
         }
 
-        // Fear
+        // Fear — spawn an EntityFear to haunt the player if one isn't already present.
         EffectBase fear = ObjectManager.getEffect("fear");
         if (fear != null && !entity.getCommandSenderWorld().isClientSide) {
-            if (!invulnerable && entity.hasEffect(fear)) {
-                ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(entity);
-                if (extendedEntity != null && extendedEntity.fearHandler == null) {
-                    extendedEntity.fearHandler = new FearHandler(null);
-                }
+            if (!invulnerable && entity.hasEffect(fear) && entity instanceof Player player) {
+                EntityFear.spawnForPlayer(player, null);
             }
         }
 
@@ -369,7 +367,7 @@ public class MobEventListener {
         EffectBase swiftswimming = ObjectManager.getEffect("swiftswimming");
         if (swiftswimming != null && entity instanceof Player) {
             Player player = (Player) entity;
-            AttributeInstance movement = entity.getAttribute(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get());
+            AttributeInstance movement = entity.getAttribute(ForgeMod.SWIM_SPEED.get());
             int amplifier = -1;
             if (entity.hasEffect(swiftswimming)) {
                 amplifier = entity.getEffect(swiftswimming).getAmplifier();
@@ -441,6 +439,19 @@ public class MobEventListener {
                     }
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        Player player = event.getEntity();
+        if (player == null || player.getCommandSenderWorld().isClientSide) {
+            return;
+        }
+
+        Level world = player.getCommandSenderWorld();
+        for (EntityFear fearEntity : world.getEntitiesOfClass(EntityFear.class, player.getBoundingBox().inflate(128.0D), fear -> player.equals(fear.hauntTarget))) {
+            fearEntity.discard();
         }
     }
 

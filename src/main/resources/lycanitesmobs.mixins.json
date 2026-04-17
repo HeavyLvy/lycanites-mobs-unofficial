@@ -6,9 +6,12 @@
   "mixins": [
     "CreativeModeTabRegistryMixin",
     "EntityTypeMixin",
-    "ReloadCommandMixin"
+    "ModifiableStructureInfoAccessor",
+    "ReloadCommandMixin",
+    "StructureAccessor"
   ],
   "client": [
+    "LightTextureMixin"
   ],
   "refmap": "lycanitesmobs.refmap.json"
 }

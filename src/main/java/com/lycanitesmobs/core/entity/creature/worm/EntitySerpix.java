@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.worm;
 
-import com.lycanitesmobs.api.IGroupHeavy;
+import com.lycanitesmobs.core.entity.IGroupHeavy;
 import com.lycanitesmobs.core.entity.projectile.generic.RapidFireProjectileEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;

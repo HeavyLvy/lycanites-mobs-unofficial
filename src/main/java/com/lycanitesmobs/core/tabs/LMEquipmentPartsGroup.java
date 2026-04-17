@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.tabs;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -37,7 +38,7 @@ public class LMEquipmentPartsGroup {
                         var item = ObjectManager.getItem(name);
                         if (item == null) continue;
 
-                        if (item instanceof com.lycanitesmobs.core.item.equipment.ItemEquipmentPart part) {
+                        if (item instanceof ItemEquipmentPart part) {
                             for (int level = 1; level <= part.levelMax; level++) {
                                 ItemStack stack = new ItemStack(part, 1);
                                 part.setLevel(stack, level);

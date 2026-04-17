@@ -17,12 +17,16 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -288,8 +292,19 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
     public void onDamage(LivingEntity target, float damage, boolean attackSuccess) {
         super.onDamage(target, damage, attackSuccess);
         if (!this.getCommandSenderWorld().isClientSide && attackSuccess && this.projectileInfo != null) {
-            for (ElementInfo element : this.projectileInfo.elements) {
-                element.debuffEntity(target, this.projectileInfo.effectDuration * 20, this.projectileInfo.effectAmplifier);
+            if (this.projectileInfo.debuffsOverride != null) {
+                int duration = this.projectileInfo.effectDuration * 20;
+                int amplifier = this.projectileInfo.effectAmplifier;
+                for (String debuff : this.projectileInfo.debuffsOverride) {
+                    MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(debuff));
+                    if (effect != null) {
+                        target.addEffect(new MobEffectInstance(effect, duration, amplifier));
+                    }
+                }
+            } else {
+                for (ElementInfo element : this.projectileInfo.elements) {
+                    element.debuffEntity(target, this.projectileInfo.effectDuration * 20, this.projectileInfo.effectAmplifier);
+                }
             }
         }
 

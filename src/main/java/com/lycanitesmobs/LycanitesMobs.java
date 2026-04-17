@@ -18,7 +18,6 @@ import com.lycanitesmobs.core.network.proxy.ClientProxy;
 import com.lycanitesmobs.client.manager.ModelManager;
 import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.manager.CommandManager;
-import com.lycanitesmobs.core.compatibility.DLDungeons;
 import com.lycanitesmobs.core.compatibility.OculusCompat;
 import com.lycanitesmobs.core.data.config.CoreConfig;
 import com.lycanitesmobs.core.container.block.EquipmentForgeContainer;
@@ -38,6 +37,7 @@ import com.lycanitesmobs.core.manager.EquipmentPartManager;
 import com.lycanitesmobs.core.event.MobEventListener;
 import com.lycanitesmobs.core.network.proxy.IProxy;
 import com.lycanitesmobs.core.network.proxy.ServerProxy;
+import com.lycanitesmobs.core.entity.spawner.StructureSpawnInjector;
 import com.lycanitesmobs.core.event.SpawnerEventListener;
 import com.lycanitesmobs.core.worldgen.data.WorldgenJsonDumper;
 import com.lycanitesmobs.core.worldgen.structure.DungeonVirtualPack;
@@ -53,6 +53,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -144,8 +145,22 @@ public class LycanitesMobs {
         MinecraftForge.EVENT_BUS.register(new GameEventListener());
         MinecraftForge.EVENT_BUS.register(MobEventManager.getInstance());
         MinecraftForge.EVENT_BUS.register(MobEventListener.getInstance());
+        MinecraftForge.EVENT_BUS.register(StructureSpawnInjector.getInstance());
 
         PACKET_MANAGER.register();
+
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            try {
+                Class<?> lib = Class.forName("net.liopyu.dyntopolib.DyntopoLib");
+                lib.getMethod("register", IEventBus.class).invoke(null, modEventBus);
+                Class<?> shapes = Class.forName("net.liopyu.dyntopolib.LycanitesShapes");
+                shapes.getMethod("register").invoke(null);
+            } catch (ClassNotFoundException ignored) {
+                // dyntopolib not present — editor unavailable, mod runs fine
+            } catch (ReflectiveOperationException e) {
+                LOGGER.warn("DyntopoLib found but failed to initialize", e);
+            }
+        });
 
         this.loadContent();
     }
@@ -191,8 +206,14 @@ public class LycanitesMobs {
         // Mob Effects:
         effectManager = EffectManager.getInstance();
 
+        // Registry Objects (creatures must load before spawners so MobSpawn can resolve creature IDs):
+        LycanitesMobs.registryObjects();
+
         // Spawners:
         SpawnerManager.getInstance().loadAllFromJson(modInfo);
+
+        // Structure Spawn Injection (replaces tick-based StructureSpawnLocation):
+        StructureSpawnInjector.getInstance().loadAllFromJson(modInfo);
 
         // Altars:
         AltarInfo.createAltars();
@@ -207,8 +228,6 @@ public class LycanitesMobs {
         ItemHalloweenTreat.createObjectLists();
         ItemWinterGift.createObjectLists();
 
-        // Registry Objects
-        LycanitesMobs.registryObjects();
         // World Gen:
         WorldGenManager.getInstance().setupFluidFeatures();
     }
@@ -222,7 +241,6 @@ public class LycanitesMobs {
         // Fix Health Limit:
         fixMaxHealth();
         // Mod Support:
-        DLDungeons.init();
         OculusCompat.init();
         loadValues();
 

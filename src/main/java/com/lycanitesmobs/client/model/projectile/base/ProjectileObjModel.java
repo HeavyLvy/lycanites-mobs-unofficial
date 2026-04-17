@@ -21,6 +21,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -120,7 +121,7 @@ public class ProjectileObjModel extends ProjectileModel {
         return this;
     }
 
-    public void reloadModel(net.minecraft.server.packs.resources.ResourceManager resourceManager) {
+    public void reloadModel(ResourceManager resourceManager) {
         if (this.modelModInfo == null || this.modelPath == null) {
             return;
         }

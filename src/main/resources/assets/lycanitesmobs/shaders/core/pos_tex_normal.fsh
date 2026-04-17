@@ -32,6 +32,7 @@ uniform float SpecularPower;
 
 uniform float LightRangeScale;
 uniform float HighlightCompression;
+uniform float FearRedGlow;
 
 void main() {
     vec4 tex = texture(Sampler0, vTexCoord);
@@ -65,27 +66,17 @@ void main() {
     skyLight    = vec3(0.5) + (skyLight   - vec3(0.5)) * rangeScale;
     blockLight  = vec3(0.5) + (blockLight - vec3(0.5)) * rangeScale;
 
-    // Directional sun shading (view-space sun direction uploaded from Java).
-    vec3 N = normalize(vNormalVS);
-    vec3 L = normalize(SunDirectionVS);
-    float ndotl = max(dot(N, L), 0.0);
+    // Matte lightmap-based lighting (no directional sun shading).
+    // SunDirectionVS, SpecularColor, SpecularIntensity, SpecularPower, vNormalVS,
+    // and vViewDir are still available as uniforms/varyings for resource pack
+    // shader overrides that want to implement custom material lighting.
 
-    // Half-Lambert softens the terminator so back faces aren't pitch black.
-    float halfLambert = ndotl * 0.5 + 0.5;
-
-    const float ambient = 0.55;
-    const float diffuseStrength = 0.45;
-    float diffuse = mix(ambient, ambient + diffuseStrength, halfLambert) * skyFactor;
-
-    // Combine sun-driven diffuse with block-light contribution.
-    // Instead of summing (which blows out at noon+torch), block light fills the
-    // gap left by sun coverage. At noon: block adds ~0. At night: block adds fully.
-    vec3 sunContrib   = skyLight * diffuse;
+    // Combine sky and block light contributions.
+    // Block light fills the gap left by sky coverage so they don't double-bright.
+    vec3 sunContrib   = skyLight * skyFactor;
     vec3 blockContrib = blockLight * blockFactor;
     float sunCoverage = clamp(max(sunContrib.r, max(sunContrib.g, sunContrib.b)), 0.0, 1.0);
     vec3 lightCol = sunContrib + blockContrib * (1.0 - sunCoverage);
-
-    vec3 sunColor = skyLight; // retained for specular tint below
 
     // Keep a global minimum so things aren't fully black in deep dark.
     float minBrightness = 0.15;
@@ -93,14 +84,17 @@ void main() {
 
     vec3 lit = recolored * lightCol;
 
-    // Specular highlight from the sun, gated by sky exposure.
-    vec3 V = normalize(vViewDir);
-    vec3 H = normalize(L + V);
-    float ndoth = max(dot(N, H), 0.0);
-    float spec = pow(ndoth, SpecularPower) * SpecularIntensity * skyFactor * ndotl;
-    vec3 specular = SpecularColor * spec * sunColor;
+    // Fear red glow: red-dominant pixels bypass lighting and become emissive.
+    // Detects texels where red channel significantly exceeds green and blue,
+    // making creature eyes/markings glow through the fear darkness.
+    if (FearRedGlow > 0.0) {
+        float redExcess = recolored.r - max(recolored.g, recolored.b);
+        float isRed = smoothstep(0.12, 0.35, redExcess) * smoothstep(0.25, 0.45, recolored.r);
+        vec3 emissive = recolored * 1.8;
+        lit = mix(lit, emissive, isRed * FearRedGlow);
+    }
 
-    vec3 finalRgb = lit + specular;
+    vec3 finalRgb = lit;
 
     // Damage red flash: OverlayUv.y == 0 means full red, 10 means no red
     float hurtIntensity = clamp(1.0 - OverlayUv.y / 10.0, 0.0, 1.0);

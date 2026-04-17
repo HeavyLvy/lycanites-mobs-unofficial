@@ -9,6 +9,7 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -49,7 +50,7 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
 
         matrixStack.pushPose();
         matrixStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-        matrixStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(180.0F));
         matrixStack.translate(0, entity.getTextureOffsetY(), 0);
         matrixStack.scale(scale, scale, scale);
         ResourceLocation texture = this.getTextureLocation(entity);
@@ -117,7 +118,7 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
             matrixStack.translate(segment * direction.x() * spacing, segment * direction.y() * spacing, segment * direction.z() * spacing);
             matrixStack.translate(0, entity.getTextureOffsetY(), 0);
             matrixStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-            matrixStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F));
+            matrixStack.mulPose(Axis.YP.rotationDegrees(180.0F));
             matrixStack.scale(scale, scale, scale);
             this.renderSprite(entity, matrixStack, renderTypeBuffer, rendertype, scale);
             matrixStack.popPose();

@@ -1,7 +1,5 @@
 package com.lycanitesmobs.core.entity.creature.aberration;
 
-import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
-import com.lycanitesmobs.core.effect.FearHandler;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
@@ -133,9 +131,8 @@ public class EntityShade extends RideableCreatureEntity {
                 if (doDamage) {
                     if (ObjectManager.getEffect("fear") != null) {
                         possibleTarget.addEffect(new MobEffectInstance(ObjectManager.getEffect("fear"), this.getEffectDuration(5), 1));
-                        ExtendedEntity extTarget = ExtendedEntity.getForEntity(possibleTarget);
-                        if (extTarget != null) {
-                            extTarget.fearHandler = new FearHandler(this);
+                        if (possibleTarget instanceof Player player) {
+                            EntityFear.spawnForPlayer(player, this);
                         }
                     } else {
                         possibleTarget.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 10 * 20, 0));

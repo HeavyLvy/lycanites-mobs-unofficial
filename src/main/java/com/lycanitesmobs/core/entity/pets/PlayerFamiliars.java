@@ -20,6 +20,8 @@ import javax.net.ssl.X509TrustManager;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.*;
 
 public class PlayerFamiliars {
@@ -33,22 +35,22 @@ public class PlayerFamiliars {
         // Trust Self Signed SSL Certificates:
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    public X509Certificate[] getAcceptedIssuers() {
                         return null;
                     }
 
                     public void checkClientTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
+                            X509Certificate[] certs, String authType) {
                     }
 
                     public void checkServerTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
+                            X509Certificate[] certs, String authType) {
                     }
                 }
         };
         try {
             this.sslContext = SSLContext.getInstance("SSL");
-            this.sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            this.sslContext.init(null, trustAllCerts, new SecureRandom());
         } catch (Exception e) {
             e.printStackTrace();
         }

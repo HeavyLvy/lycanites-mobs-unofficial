@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.dragon;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.api.IGroupHeavy;
+import com.lycanitesmobs.core.entity.IGroupHeavy;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
@@ -18,14 +18,14 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
     protected AttackMeleeGoal attackAI;
     protected int waterTime = 0;
     protected boolean wantsToLand;
-    protected boolean  isLanded;
+    protected boolean isLanded;
 
     // ==================================================
- 	//                    Constructor
- 	// ==================================================
+    //                    Constructor
+    // ==================================================
     public EntityQuetzodracl(EntityType<? extends EntityQuetzodracl> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEFINED;
         this.hasAttackSound = true;
@@ -42,60 +42,57 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
         this.attackAI = new AttackMeleeGoal(this).setLongMemory(false);
         this.goalSelector.addGoal(this.nextCombatGoalIndex++, this.attackAI);
     }
-	
-	
+
+
     // ==================================================
     //                      Updates
     // ==================================================
-	// ========== Living Update ==========
-	@Override
+    // ========== Living Update ==========
+    @Override
     public void aiStep() {
         super.aiStep();
 
         // Land/Fly:
-        if(!this.getCommandSenderWorld().isClientSide) {
-            if(this.isLanded) {
+        if (!this.getCommandSenderWorld().isClientSide) {
+            if (this.isLanded) {
                 this.wantsToLand = false;
-                if(this.hasPickupEntity() || this.getControllingPassenger() != null || this.isLeashed() || this.isInWater() || (!this.isTamed() && this.updateTick % (5 * 20) == 0 && this.getRandom().nextBoolean())) {
+                if (this.hasPickupEntity() || this.getControllingPassenger() != null || this.isLeashed() || this.isInWater() || (!this.isTamed() && this.updateTick % (5 * 20) == 0 && this.getRandom().nextBoolean())) {
                     this.leap(1.0D, 1.0D);
                     this.isLanded = false;
                 }
-            }
-            else {
-                if(this.wantsToLand) {
-                    if(!this.isLanded && this.isSafeToLand()) {
+            } else {
+                if (this.wantsToLand) {
+                    if (!this.isLanded && this.isSafeToLand()) {
                         this.isLanded = true;
                     }
-                }
-                else {
+                } else {
                     if (!this.hasPickupEntity() && !this.hasAttackTarget() && this.updateTick % (5 * 20) == 0 && this.getRandom().nextBoolean()) {
                         this.wantsToLand = true;
                     }
                 }
             }
-            if(this.hasPickupEntity() || this.getControllingPassenger() != null || this.hasAttackTarget() || this.isInWater()) {
+            if (this.hasPickupEntity() || this.getControllingPassenger() != null || this.hasAttackTarget() || this.isInWater()) {
                 this.wantsToLand = false;
-            }
-            else if(this.isTamed() && !this.isLeashed()) {
+            } else if (this.isTamed() && !this.isLeashed()) {
                 this.wantsToLand = true;
             }
         }
-        
+
         // Entity Pickup Update:
-        if(!this.getCommandSenderWorld().isClientSide && this.getControllingPassenger() == null) {
-	    	this.attackAI.setEnabled(!this.hasPickupEntity());
-            if(!this.isInWater()) {
+        if (!this.getCommandSenderWorld().isClientSide && this.getControllingPassenger() == null) {
+            this.attackAI.setEnabled(!this.hasPickupEntity());
+            if (!this.isInWater()) {
                 this.waterTime = 0;
 
                 // Random Dropping:
-                if(this.hasPickupEntity()) {
-                    if(this.updateTick % this.getMeleeCooldown() == 0) {
+                if (this.hasPickupEntity()) {
+                    if (this.updateTick % this.getMeleeCooldown() == 0) {
                         this.attackMelee(this.getPickupEntity(), 1);
                     }
                     ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(this.getPickupEntity());
-                    if(extendedEntity != null)
+                    if (extendedEntity != null)
                         extendedEntity.setPickedUpByEntity(this);
-                    if(this.tickCount % 100 == 0 && this.getRandom().nextBoolean()) {
+                    if (this.tickCount % 100 == 0 && this.getRandom().nextBoolean()) {
                         this.dropPickupEntity();
                     }
                 }
@@ -112,22 +109,20 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
             // Burst Out of Water:
             else {
                 this.waterTime++;
-                if(this.hasPickupEntity() || this.getAirSupply() <= 40) {
-	                if(this.waterTime >= (2 * 20)) {
-	                    this.waterTime = 0;
-	                    this.leap(0.5F, 2.0D);
-	                }
-                }
-                else if(this.hasAttackTarget()) {
-                	if(this.waterTime >= (16 * 20)) {
-	                    this.waterTime = 4 * 20;
-	                    this.leap(0.5F, 2.0D);
-                	}
-                }
-                else if(this.waterTime >= (8 * 20)) {
+                if (this.hasPickupEntity() || this.getAirSupply() <= 40) {
+                    if (this.waterTime >= (2 * 20)) {
+                        this.waterTime = 0;
+                        this.leap(0.5F, 2.0D);
+                    }
+                } else if (this.hasAttackTarget()) {
+                    if (this.waterTime >= (16 * 20)) {
+                        this.waterTime = 4 * 20;
+                        this.leap(0.5F, 2.0D);
+                    }
+                } else if (this.waterTime >= (8 * 20)) {
                     this.waterTime = 4 * 20;
                     this.leap(0.5F, 2.0D);
-            	}
+                }
             }
         }
     }
@@ -138,21 +133,22 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
     // ==================================================
     // ========== Get Wander Position ==========
     public BlockPos getWanderPosition(BlockPos wanderPosition) {
-        if(this.wantsToLand || !this.isLanded) {
+        if (this.wantsToLand || !this.isLanded) {
             BlockPos groundPos;
-            for(groundPos = wanderPosition.below(); groundPos.getY() > 0 && this.getCommandSenderWorld().getBlockState(groundPos).getBlock() == Blocks.AIR; groundPos = groundPos.below()) {}
-            if(this.getCommandSenderWorld().getBlockState(groundPos).isSolid()) {
+            for (groundPos = wanderPosition.below(); groundPos.getY() > 0 && this.getCommandSenderWorld().getBlockState(groundPos).getBlock() == Blocks.AIR; groundPos = groundPos.below()) {
+            }
+            if (this.getCommandSenderWorld().getBlockState(groundPos).isSolid()) {
                 return groundPos.above();
             }
         }
-        if(this.hasPickupEntity() && this.getPickupEntity() instanceof Player)
+        if (this.hasPickupEntity() && this.getPickupEntity() instanceof Player)
             wanderPosition = new BlockPos(wanderPosition.getX(), this.restrictYHeightFromGround(wanderPosition, 6, 14), wanderPosition.getZ());
         return wanderPosition;
     }
 
     // ========== Get Flight Offset ==========
     public double getFlightOffset() {
-        if(!this.wantsToLand) {
+        if (!this.wantsToLand) {
             super.getFlightOffset();
         }
         return 0;
@@ -160,79 +156,83 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
 
     @Override
     public boolean rollWanderChance() {
-        if(this.isFlying())
+        if (this.isFlying())
             return this.getRandom().nextDouble() <= 0.25D;
         return this.getRandom().nextDouble() <= 0.008D;
     }
-    
-    
+
+
     // ==================================================
     //                      Attacks
     // ==================================================
     // ========== Melee Attack ==========
     @Override
     public boolean attackMelee(Entity target, double damageScale) {
-    	if(!super.attackMelee(target, damageScale))
-    		return false;
+        if (!super.attackMelee(target, damageScale))
+            return false;
 
         // Pickup:
-        if(target instanceof LivingEntity && this.getControllingPassenger() == null) {
-            LivingEntity entityLivingBase = (LivingEntity)target;
+        if (target instanceof LivingEntity && this.getControllingPassenger() == null) {
+            LivingEntity entityLivingBase = (LivingEntity) target;
             if (this.canPickupEntity(entityLivingBase)) {
                 this.pickupEntity(entityLivingBase);
             }
         }
-        
+
         return true;
     }
-    
-    
+
+
     // ==================================================
-  	//                     Abilities
-  	// ==================================================
+    //                     Abilities
+    // ==================================================
     @Override
     public boolean isFlying() {
         return !this.isLanded || this.hasPickupEntity();
     }
 
     @Override
-    public boolean isStrongSwimmer() { return false; }
-    
+    public boolean isStrongSwimmer() {
+        return false;
+    }
+
     @Override
     public void pickupEntity(LivingEntity entity) {
-    	super.pickupEntity(entity);
-        if(this.getCommandSenderWorld().getBlockState(this.blockPosition()) != null && this.getCommandSenderWorld().canSeeSkyFromBelowWater(this.blockPosition()))
-    	    this.leap(1.0F, 2.0D);
+        super.pickupEntity(entity);
+        if (this.getCommandSenderWorld().getBlockState(this.blockPosition()) != null && this.getCommandSenderWorld().canSeeSkyFromBelowWater(this.blockPosition()))
+            this.leap(1.0F, 2.0D);
     }
 
     @Override
     public void dropPickupEntity() {
-    	// Drop Weight Effect:
-        if(this.hasPickupEntity()) {
-            if(ObjectManager.getEffect("weight") != null)
+        // Drop Weight Effect:
+        if (this.hasPickupEntity()) {
+            if (ObjectManager.getEffect("weight") != null)
                 this.getPickupEntity().addEffect(new MobEffectInstance(ObjectManager.getEffect("weight"), this.getEffectDuration(5), 1));
         }
-    	super.dropPickupEntity();
+        super.dropPickupEntity();
     }
-    
+
     @Override
     public double[] getPickupOffset(Entity entity) {
-        if(entity != null) {
+        if (entity != null) {
             return new double[]{0, 1 - entity.getDimensions(Pose.STANDING).height, 0};
         }
         return new double[]{0, -1, 0};
     }
-    
-    
+
+
     // ==================================================
     //                     Pet Control
     // ==================================================
-    public boolean petControlsEnabled() { return true; }
-    
-    
+    public boolean petControlsEnabled() {
+        return true;
+    }
+
+
     // ==================================================
-   	//                     Immunities
-   	// ==================================================
+    //                     Immunities
+    // ==================================================
     @Override
     public float getFallResistance() {
         return 100;
@@ -243,9 +243,14 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
     //                     Equipment
     // ==================================================
     @Override
-    public int getNoBagSize() { return 0; }
+    public int getNoBagSize() {
+        return 0;
+    }
+
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() {
+        return this.creatureInfo.bagSize;
+    }
 
 
     // ==================================================
@@ -253,7 +258,7 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
     // ==================================================
     @Override
     public double getPassengersRidingOffset() {
-        return (double)this.getDimensions(Pose.STANDING).height * 0.8D;
+        return (double) this.getDimensions(Pose.STANDING).height * 0.8D;
     }
 
 
@@ -262,22 +267,22 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
     // ==================================================
     @Override
     public void mountAbility(Entity rider) {
-        if(this.getCommandSenderWorld().isClientSide)
+        if (this.getCommandSenderWorld().isClientSide)
             return;
 
-        if(this.abilityToggled)
+        if (this.abilityToggled)
             return;
 
-        if(this.hasPickupEntity()) {
+        if (this.hasPickupEntity()) {
             this.dropPickupEntity();
             return;
         }
 
-        if(this.getStamina() < this.getStaminaCost())
+        if (this.getStamina() < this.getStaminaCost())
             return;
 
         LivingEntity nearestTarget = this.getNearestEntity(LivingEntity.class, null, 4, false);
-        if(this.canPickupEntity(nearestTarget))
+        if (this.canPickupEntity(nearestTarget))
             this.pickupEntity(nearestTarget);
 
         this.applyStaminaCost();

@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
+import net.minecraftforge.common.ForgeHooks;
 import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -269,7 +270,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
                 if (!this.getCommandSenderWorld().isClientSide)
                     this.playJumpSound();
                 this.setJumpPower(0);
-                net.minecraftforge.common.ForgeHooks.onLivingJump(this);
+                ForgeHooks.onLivingJump(this);
             }
             this.setFlyingSpeed((float) (this.getSpeed() * this.getGlideScale()));
         }

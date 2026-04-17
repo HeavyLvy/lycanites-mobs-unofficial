@@ -1,12 +1,11 @@
 package com.lycanitesmobs.core.entity.creature.worm;
 
-import com.lycanitesmobs.api.IGroupHeavy;
+import com.lycanitesmobs.core.entity.IGroupHeavy;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.StealthGoal;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
-import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.block.Material;

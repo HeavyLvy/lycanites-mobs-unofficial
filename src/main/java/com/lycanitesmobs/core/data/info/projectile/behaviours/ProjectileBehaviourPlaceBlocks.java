@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.data.info.projectile.behaviours;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -69,7 +70,7 @@ public class ProjectileBehaviourPlaceBlocks extends ProjectileBehaviour {
             for (int y = this.height - 1; y < this.height; y++) {
                 for (int z = -this.radius + 1; z < this.radius; z++) {
                     BlockPos placePos = start.offset(x, y, z);
-                    if (this.solidSurface && !world.getBlockState(placePos.below()).isFaceSturdy(world, placePos.below(), net.minecraft.core.Direction.UP)) {
+                    if (this.solidSurface && !world.getBlockState(placePos.below()).isFaceSturdy(world, placePos.below(), Direction.UP)) {
                         continue;
                     }
                     if (!blockState.canSurvive(world, placePos)) continue;

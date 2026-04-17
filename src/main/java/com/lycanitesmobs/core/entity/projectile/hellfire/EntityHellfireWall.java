@@ -3,7 +3,7 @@ package com.lycanitesmobs.core.entity.projectile.hellfire;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.api.IGroupBoss;
+import com.lycanitesmobs.core.entity.IGroupBoss;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.creature.demon.EntityRahovart;

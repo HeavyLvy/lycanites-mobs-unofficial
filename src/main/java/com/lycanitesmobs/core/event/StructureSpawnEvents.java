@@ -8,6 +8,7 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSchematic;
 import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -85,7 +86,7 @@ public class StructureSpawnEvents {
             debugSpawnDungeonInstance(level, extendedWorld, schematic, origin);
 
             player.sendSystemMessage(
-                    net.minecraft.network.chat.Component.literal(
+                    Component.literal(
                             "Debug spawned \"" + schematic.name + "\" at " +
                                     origin.getX() + ", " + origin.getY() + ", " + origin.getZ()));
             spawned = true;

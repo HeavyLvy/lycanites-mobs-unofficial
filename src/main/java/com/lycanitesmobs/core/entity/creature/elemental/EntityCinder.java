@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.elemental;
 
-import com.lycanitesmobs.api.IFusable;
+import com.lycanitesmobs.core.entity.IFusable;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.RapidFireProjectileEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;

@@ -9,6 +9,7 @@ import com.lycanitesmobs.client.model.animation.ModelObjAnimationFrame;
 import com.lycanitesmobs.client.obj.model.ObjModel;
 import com.lycanitesmobs.client.obj.geometry.ObjPart;
 import com.lycanitesmobs.client.obj.model.VBOObjModel;
+import com.lycanitesmobs.client.gui.screen.creature.RecolorDebug;
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.layer.creature.LayerCreatureBase;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
@@ -312,7 +313,7 @@ public class CreatureObjModel extends CreatureModel {
 
 
         if (this.currentModelState != null) {
-            com.lycanitesmobs.client.gui.screen.creature.RecolorDebug.applyToState(this.currentModelState, entity);
+            RecolorDebug.applyToState(this.currentModelState, entity);
 
             if (!this.currentModelState.variantInit) {
         /*

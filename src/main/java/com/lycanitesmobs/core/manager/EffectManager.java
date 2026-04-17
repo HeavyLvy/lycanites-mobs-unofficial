@@ -52,6 +52,7 @@ public class EffectManager {
 
         // Effect Sounds:
         ObjectManager.addSound("effect_fear", "effect.fear");
+        ObjectManager.addSound("effect_heartbeat", "effect.heartbeat");
     }
 
     public static EffectManager INSTANCE = new EffectManager();

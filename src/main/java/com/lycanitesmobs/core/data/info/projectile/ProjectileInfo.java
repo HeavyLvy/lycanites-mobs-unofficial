@@ -149,6 +149,10 @@ public class ProjectileInfo {
      * The Elements of this projectile, affects buffs and debuffs amongst other things.
      **/
     public List<ElementInfo> elements = new ArrayList<>();
+    /**
+     * When non-null, overrides element-derived debuffs on impact. An empty list means no debuffs are applied.
+     **/
+    public List<String> debuffsOverride = null;
 
     // Behaviours:
     /**
@@ -228,6 +232,7 @@ public class ProjectileInfo {
 
     /**
      * Loads this projectile from a JSON object.
+     *
      * @return true if loaded successfully, false if this entry should be skipped.
      **/
     public boolean loadFromJSON(JsonObject json) {
@@ -300,6 +305,12 @@ public class ProjectileInfo {
                 continue;
             }
             this.elements.add(element);
+        }
+
+        if (json.has("debuffs")) {
+            this.debuffsOverride = JSONHelper.getJsonStrings(json.get("debuffs").getAsJsonArray());
+        } else {
+            this.debuffsOverride = null;
         }
 
         // Behaviours:

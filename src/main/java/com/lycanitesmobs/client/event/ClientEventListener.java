@@ -1,6 +1,10 @@
 package com.lycanitesmobs.client.event;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.client.effect.FearAudioHandler;
+import com.lycanitesmobs.client.effect.FearHeartbeatSound;
+import com.lycanitesmobs.client.effect.FearVisualHandler;
+import com.lycanitesmobs.client.effect.MuffledSoundInstance;
 import com.lycanitesmobs.client.gui.screen.creature.MinionSelectionScreen;
 import com.lycanitesmobs.client.gui.screen.beastiary.CreaturesBeastiaryScreen;
 import com.lycanitesmobs.client.gui.screen.beastiary.IndexBeastiaryScreen;
@@ -15,6 +19,7 @@ import com.lycanitesmobs.client.model.blocky.*;
 import com.lycanitesmobs.client.renderer.entity.creature.BlockyRenderer;
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.entity.projectile.ProjectileRenderFactory;
+import com.lycanitesmobs.client.renderer.entity.effect.FearRenderer;
 import com.lycanitesmobs.client.renderer.misc.NoneRenderer;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
@@ -31,7 +36,6 @@ import com.lycanitesmobs.core.manager.ItemManager;
 import com.lycanitesmobs.core.item.special.ItemSoulgazer;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
-import com.lycanitesmobs.core.network.message.MessagePlayerAttack;
 import com.lycanitesmobs.core.network.message.MessagePlayerControl;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.logging.LogUtils;
@@ -40,6 +44,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
@@ -53,6 +58,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -122,7 +128,11 @@ public class ClientEventListener {
             //LMHelperClass.logInfoMessage("CI Name: " + creatureInfo.getName());
             var registerBlocky = false;
             if (creatureInfo.dummy) {
-                event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
+                if ("fear".equals(creatureInfo.getName())) {
+                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), FearRenderer::new);
+                } else {
+                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
+                }
                 continue;
             } else if (registerBlocky) {
                 if (Objects.equals(creatureInfo.getName(), "nymph")) {
@@ -234,12 +244,40 @@ public class ClientEventListener {
         }
     }
 
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public void onRenderLevelStage(RenderLevelStageEvent event) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
+            FearVisualHandler.uploadDimmedForWorld();
+        } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
+            FearVisualHandler.restoreCleanAfterWorld();
+        }
+    }
+
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public void onPlaySound(PlaySoundEvent event) {
+        if (!FearAudioHandler.isActive()) return;
+        SoundInstance sound = event.getSound();
+        if (sound == null) return;
+
+        if (sound instanceof FearHeartbeatSound) return;
+
+        float volumeScale = FearAudioHandler.computeVolumeScale(sound);
+        float pitchScale = FearAudioHandler.computePitchScale();
+
+        if (volumeScale >= 1.0F && pitchScale >= 1.0F) return;
+
+        event.setSound(MuffledSoundInstance.wrap(sound, volumeScale, pitchScale));
+    }
 
     @SubscribeEvent
     public void onPlayerTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) {
             return;
         }
+        FearVisualHandler.tick();
+        FearAudioHandler.tick();
         ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(KeyManager.getInstance().mc.player);
         if (playerExt == null)
             return;
@@ -279,7 +317,6 @@ public class ClientEventListener {
         if (KeyManager.summoning.consumeClick()) {
             mc.setScreen(new SummoningBeastiaryScreen(mc.player));
         }
-
 
         if (mc.isWindowActive()) {
             // ========== HUD Controls ==========
@@ -345,22 +382,11 @@ public class ClientEventListener {
     @SubscribeEvent
     public void onMouseEvent(InputEvent.MouseButton event) {
         var mc = Minecraft.getInstance();
-        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(mc.player);
-        if (mc.player == null || playerExt == null || mc.hitResult == null)
+        if (mc.player == null || mc.hitResult == null)
             return;
 
-        // Left (Attack):
-        if (event.getButton() == 0) {
-            // Disable attack for large entity reach override:
-            if (!mc.player.isSpectator() && !mc.player.isHandsBusy() && mc.hitResult.getType() == HitResult.Type.ENTITY && mc.screen == null) {
-                Entity entityHit = ((EntityHitResult) mc.hitResult).getEntity();
-                if (playerExt.canMeleeBigEntity(entityHit)) {
-                    MessagePlayerAttack message = new MessagePlayerAttack(entityHit);
-                    LycanitesMobs.PACKET_MANAGER.sendToServer(message);
-                    //event.setCanceled(true);
-                }
-            }
-        }
+        // Large-entity reach is now handled server-side via a transient ForgeMod.ENTITY_REACH modifier
+        // in ExtendedPlayer.updateBigEntityReach(), so no custom left-click handling is needed here.
         if (event.getButton() == 1 && event.getAction() == GLFW.GLFW_PRESS) {
             if (mc.hitResult.getType() == HitResult.Type.ENTITY) {
                 Entity entityHit = ((EntityHitResult) mc.hitResult).getEntity();

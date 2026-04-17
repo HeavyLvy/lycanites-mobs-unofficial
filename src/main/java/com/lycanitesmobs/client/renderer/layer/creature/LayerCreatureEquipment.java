@@ -2,6 +2,7 @@ package com.lycanitesmobs.client.renderer.layer.creature;
 
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeableHorseArmorItem;
 import net.minecraft.world.item.ItemStack;
@@ -20,7 +21,7 @@ public class LayerCreatureEquipment extends LayerCreatureBase {
 
     @Override
     public boolean canRenderLayer(BaseCreatureEntity entity, float scale) {
-        if(!super.canRenderLayer(entity, scale) || this.equipmentSlot == null)
+        if (!super.canRenderLayer(entity, scale) || this.equipmentSlot == null)
             return false;
         return entity.getEquipmentName(this.equipmentSlot) != null;
     }
@@ -34,13 +35,33 @@ public class LayerCreatureEquipment extends LayerCreatureBase {
     public Vector4f getPartColor(String partName, BaseCreatureEntity entity, boolean trophy) {
         ItemStack equipmentStack = entity.inventory.getEquipmentStack("chest");
         if (equipmentStack != null && equipmentStack.getItem() instanceof DyeableHorseArmorItem) {
-            DyeableHorseArmorItem dyeableEquipment = (DyeableHorseArmorItem)equipmentStack.getItem();
+            DyeableHorseArmorItem dyeableEquipment = (DyeableHorseArmorItem) equipmentStack.getItem();
             int color = dyeableEquipment.getColor(equipmentStack);
-            float r = (float)(color >> 16 & 255) / 255.0F;
-            float g = (float)(color >> 8 & 255) / 255.0F;
-            float b = (float)(color & 255) / 255.0F;
+            float r = (float) (color >> 16 & 255) / 255.0F;
+            float g = (float) (color >> 8 & 255) / 255.0F;
+            float b = (float) (color & 255) / 255.0F;
             return new Vector4f(r, g, b, 1);
         }
         return new Vector4f(1, 1, 1, 1);
+    }
+
+    /**
+     * Equipment parts opt out of the creature body's lightmap compression — armor should
+     * use the raw lightmap response, not the flattened day/night curve tuned for mob skin.
+     * Override in a subclass if you want to re-enable compression for a specific equipment set.
+     */
+    @Override
+    public float getLightRangeScale(String partName, BaseCreatureEntity entity, float defaultScale) {
+        return 1F;
+    }
+
+    /**
+     * Equipment parts opt out of the creature body's highlight soft-clip — armor should
+     * render with vanilla highlight behaviour. Override in a subclass if you want to re-enable
+     * roll-off for a specific equipment set.
+     */
+    @Override
+    public float getHighlightCompression(String partName, BaseCreatureEntity entity, float defaultStrength) {
+        return 0F;
     }
 }

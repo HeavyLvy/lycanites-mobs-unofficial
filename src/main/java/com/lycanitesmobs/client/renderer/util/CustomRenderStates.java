@@ -30,7 +30,7 @@ public class CustomRenderStates extends RenderStateShard {
     public static VertexFormat POS_COL_TEX_LIGHT_FADE_NORMAL;
     public static VertexFormat POS_COL_TEX_NORMAL;
     public static final VertexFormat POS_TEX_NORMAL = new VertexFormat(
-            com.google.common.collect.ImmutableMap.<String, VertexFormatElement>builder()
+            ImmutableMap.<String, VertexFormatElement>builder()
                     .put("Position", DefaultVertexFormat.ELEMENT_POSITION)
                     .put("UV0", DefaultVertexFormat.ELEMENT_UV0)
                     .put("Normal", DefaultVertexFormat.ELEMENT_NORMAL)
@@ -83,6 +83,24 @@ public class CustomRenderStates extends RenderStateShard {
                     .setOverlayState(OVERLAY)
                     .setDepthTestState(LEQUAL_DEPTH_TEST)
                     .setWriteMaskState(COLOR_WRITE)
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .createCompositeState(true)
+    );
+
+    public static final RenderType FEAR_RENDER_TYPE = RenderType.create(
+            "lm_fear_translucent",
+            POS_TEX_NORMAL,
+            VertexFormat.Mode.TRIANGLES,
+            65536,
+            true,
+            false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(new ShaderStateShard(() -> POS_TEX_NORMAL_SHADER))
+                    .setCullState(NO_CULL)
+                    .setLightmapState(LIGHTMAP)
+                    .setOverlayState(OVERLAY)
+                    .setDepthTestState(LEQUAL_DEPTH_TEST)
+                    .setWriteMaskState(COLOR_DEPTH_WRITE)
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                     .createCompositeState(true)
     );

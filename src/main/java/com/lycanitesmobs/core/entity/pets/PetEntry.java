@@ -385,15 +385,22 @@ public class PetEntry {
 
         // Active Spawning:
         if (this.spawningActive) {
-            // Dead Check:
-            if (this.entity != null && !this.entity.isAlive() && this.entity instanceof Mob && ((Mob) this.entity).getHealth() <= 0) {
+            // Dead / Stale Reference Check:
+            if (this.entity != null && !this.entity.isAlive()) {
+                boolean killed = this.entity instanceof Mob && ((Mob) this.entity).getHealth() <= 0;
                 this.saveEntityNBT();
                 this.entity = null;
-                this.isRespawning = true;
-                this.respawnTime = this.respawnTimeMax;
-                if (this.summonSet.playerExt != null) {
-                    this.summonSet.playerExt.sendPetEntryToPlayer(this);
+                if (killed) {
+                    // Genuine death — start the respawn timer.
+                    this.isRespawning = true;
+                    this.respawnTime = this.respawnTimeMax;
+                    if (this.summonSet.playerExt != null) {
+                        this.summonSet.playerExt.sendPetEntryToPlayer(this);
+                    }
                 }
+                // Otherwise (removed via CHANGED_DIMENSION, chunk unload, etc.),
+                // just drop the stale ref so the respawn block below re-spawns it
+                // immediately without starting the death timer.
             }
 
             // No Entity:
@@ -416,8 +423,17 @@ public class PetEntry {
                 // Teleport Entity:
                 try {
                     if (this.teleportEntity) {
-                        if (this.entity.getCommandSenderWorld() != this.host.getCommandSenderWorld())
-                            this.entity.changeDimension(this.host.getServer().getLevel(this.host.getCommandSenderWorld().dimension()));
+                        if (this.entity.getCommandSenderWorld() != this.host.getCommandSenderWorld()) {
+                            Entity moved = this.entity.changeDimension(this.host.getServer().getLevel(this.host.getCommandSenderWorld().dimension()));
+                            if (moved != null) {
+                                this.entity = moved;
+                                if (this.entity instanceof BaseCreatureEntity) {
+                                    BaseCreatureEntity bce = (BaseCreatureEntity) this.entity;
+                                    bce.setMinion(true);
+                                    bce.setPetEntry(this);
+                                }
+                            }
+                        }
                         this.entity.setPos(this.host.position().x(), this.host.position().y(), this.host.position().z());
                     }
                 } catch (Exception e) {

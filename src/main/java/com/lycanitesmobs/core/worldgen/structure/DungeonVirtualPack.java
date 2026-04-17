@@ -35,8 +35,8 @@ public class DungeonVirtualPack implements PackResources {
     /**
      * Fallback spacing/separation when no schematic specifies one.
      */
-    private static final int DEFAULT_SPACING = 32;
-    private static final int DEFAULT_SEPARATION = 8;
+    private static final int DEFAULT_SPACING = 38;
+    private static final int DEFAULT_SEPARATION = 12;
     /**
      * Stable salt for the single combined set so the grid is deterministic across loads.
      */

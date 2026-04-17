@@ -14,6 +14,7 @@ import net.minecraftforge.common.util.Lazy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ public class LMBlocksGroup {
                         List<String> solid = new ArrayList<>();
                         List<String> shaped = new ArrayList<>();
 
-                        java.util.Iterator<String> it = remaining.iterator();
+                        Iterator<String> it = remaining.iterator();
                         while (it.hasNext()) {
                             String name = it.next();
                             boolean match = false;
@@ -96,7 +97,7 @@ public class LMBlocksGroup {
                     List<String> fires = new ArrayList<>();
                     List<String> clouds = new ArrayList<>();
 
-                    java.util.Iterator<String> itFireWebCloud = remaining.iterator();
+                    Iterator<String> itFireWebCloud = remaining.iterator();
                     while (itFireWebCloud.hasNext()) {
                         String name = itFireWebCloud.next();
                         if (name.contains("web")) {
@@ -120,7 +121,7 @@ public class LMBlocksGroup {
                     ordered.addAll(clouds);
 
                     List<String> blockEntities = new ArrayList<>();
-                    java.util.Iterator<String> it = remaining.iterator();
+                    Iterator<String> it = remaining.iterator();
                     while (it.hasNext()) {
                         String name = it.next();
                         if (name.startsWith("equipment") ||

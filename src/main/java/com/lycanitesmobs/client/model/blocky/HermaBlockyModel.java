@@ -218,7 +218,7 @@ public class HermaBlockyModel<T extends EntityHerma> extends HierarchicalModel<T
     }
 
     @Override
-    public void setupAnim(com.lycanitesmobs.core.entity.creature.aquatic.EntityHerma entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(EntityHerma entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 
     }
 

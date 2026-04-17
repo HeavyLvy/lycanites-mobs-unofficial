@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.aquatic;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.api.IGroupHeavy;
+import com.lycanitesmobs.core.entity.IGroupHeavy;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
@@ -27,7 +27,7 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
 
     public EntityStryder(EntityType<? extends EntityStryder> entityType, Level world) {
         super(entityType, world);
-        
+
         // Setup:
         this.attribute = MobType.UNDEFINED;
         this.spawnsOnLand = true;
@@ -51,34 +51,32 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
     }
 
     private int pickupTime = 0;
-	@Override
+
+    @Override
     public void aiStep() {
         super.aiStep();
-        if(!this.getCommandSenderWorld().isClientSide) {
+        if (!this.getCommandSenderWorld().isClientSide) {
             // Drop Owner When Tamed:
-            if(this.isTamed() && this.hasPickupEntity() && this.getPickupEntity() == this.getOwner())
+            if (this.isTamed() && this.hasPickupEntity() && this.getPickupEntity() == this.getOwner())
                 this.dropPickupEntity();
 
             // Entity Pickup Update:
-            if(this.hasPickupEntity()) {
+            if (this.hasPickupEntity()) {
                 ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(this.getPickupEntity());
-                if(extendedEntity != null)
+                if (extendedEntity != null)
                     extendedEntity.setPickedUpByEntity(this);
 
-                if(this.isTamed() && !this.canAttack(this.getPickupEntity())) {
+                if (this.isTamed() && !this.canAttack(this.getPickupEntity())) {
                     this.getPickupEntity().addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, this.getEffectDuration(5), 1));
-                }
-
-                else if(this.pickupTime++ % 40 == 0) {
+                } else if (this.pickupTime++ % 40 == 0) {
                     this.attackEntityAsMob(this.getPickupEntity(), 0.5F);
-                    if(this.getPickupEntity() instanceof LivingEntity) {
-                        if(ObjectManager.getEffect("penetration") != null)
+                    if (this.getPickupEntity() instanceof LivingEntity) {
+                        if (ObjectManager.getEffect("penetration") != null)
                             this.getPickupEntity().addEffect(new MobEffectInstance(ObjectManager.getEffect("penetration"), this.getEffectDuration(5), 1));
                     }
                 }
-            }
-            else {
-                if(this.pickupCooldown > 0)
+            } else {
+                if (this.pickupCooldown > 0)
                     this.pickupCooldown--;
                 this.pickupTime = 0;
             }
@@ -87,22 +85,22 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
 
     @Override
     public void mountAbility(Entity rider) {
-        if(this.getCommandSenderWorld().isClientSide)
+        if (this.getCommandSenderWorld().isClientSide)
             return;
 
-        if(this.abilityToggled)
+        if (this.abilityToggled)
             return;
 
-        if(this.hasPickupEntity()) {
+        if (this.hasPickupEntity()) {
             this.dropPickupEntity();
             return;
         }
 
-        if(this.getStamina() < this.getStaminaCost())
+        if (this.getStamina() < this.getStaminaCost())
             return;
 
         LivingEntity nearestTarget = this.getNearestEntity(LivingEntity.class, null, 4, false);
-        if(this.canPickupEntity(nearestTarget))
+        if (this.canPickupEntity(nearestTarget))
             this.pickupEntity(nearestTarget);
 
         this.applyStaminaCost();
@@ -120,12 +118,12 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
         return 1.0F;
     }
 
-	@Override
+    @Override
     public float getAISpeedModifier() {
-    	if(this.isInWater()) // Checks specifically just for water.
+        if (this.isInWater()) // Checks specifically just for water.
             return 1F;
-    	if(this.waterContact()) // Checks for water, rain, etc.
-    		return 0.9F;
+        if (this.waterContact()) // Checks for water, rain, etc.
+            return 0.9F;
         return 0.75F;
     }
 
@@ -146,19 +144,19 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
         return fluid.is(FluidTags.WATER);
     }
 
-	@Override
-	public float getBlockPathWeight(int x, int y, int z) {
+    @Override
+    public float getBlockPathWeight(int x, int y, int z) {
         int waterWeight = 10;
 
         Block block = this.getCommandSenderWorld().getBlockState(new BlockPos(x, y, z)).getBlock();
-        if(block == Blocks.WATER)
+        if (block == Blocks.WATER)
             return (super.getBlockPathWeight(x, y, z) + 1) * (waterWeight + 1);
-        if(this.getCommandSenderWorld().isRaining() && this.getCommandSenderWorld().canSeeSkyFromBelowWater(new BlockPos(x, y, z)))
+        if (this.getCommandSenderWorld().isRaining() && this.getCommandSenderWorld().canSeeSkyFromBelowWater(new BlockPos(x, y, z)))
             return (super.getBlockPathWeight(x, y, z) + 1) * (waterWeight + 1);
 
-        if(this.getTarget() != null)
+        if (this.getTarget() != null)
             return super.getBlockPathWeight(x, y, z);
-        if(this.waterContact())
+        if (this.waterContact())
             return -999999.0F;
 
         return super.getBlockPathWeight(x, y, z);
@@ -166,18 +164,19 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
 
     public BlockPos getWanderPosition(BlockPos wanderPosition) {
         BlockPos groundPos;
-        for(groundPos = wanderPosition.below(); groundPos.getY() > 0 && !this.getCommandSenderWorld().getBlockState(groundPos).isSolid(); groundPos = groundPos.below()) {}
+        for (groundPos = wanderPosition.below(); groundPos.getY() > 0 && !this.getCommandSenderWorld().getBlockState(groundPos).isSolid(); groundPos = groundPos.below()) {
+        }
         return groundPos.above();
     }
 
     @Override
     public boolean attackMelee(Entity target, double damageScale) {
-        if(!super.attackMelee(target, damageScale))
+        if (!super.attackMelee(target, damageScale))
             return false;
 
         // Pickup:
-        if(target instanceof LivingEntity) {
-            LivingEntity entityLivingBase = (LivingEntity)target;
+        if (target instanceof LivingEntity) {
+            LivingEntity entityLivingBase = (LivingEntity) target;
             if (this.canPickupEntity(entityLivingBase) && this.hasLineOfSight(target)) {
                 this.pickupEntity(entityLivingBase);
                 this.pickupCooldown = 100;
@@ -187,10 +186,12 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
         return true;
     }
 
-    /** Called when this mob has received damage. Here there is a random chance of this mob dropping any picked up entities. **/
+    /**
+     * Called when this mob has received damage. Here there is a random chance of this mob dropping any picked up entities.
+     **/
     @Override
     public void onDamage(DamageSource damageSrc, float damage) {
-        if(this.hasPickupEntity() && !this.isTamed() && this.getRandom().nextFloat() <= 0.25F)
+        if (this.hasPickupEntity() && !this.isTamed() && this.getRandom().nextFloat() <= 0.25F)
             this.dropPickupEntity();
         super.onDamage(damageSrc, damage);
     }
@@ -211,22 +212,29 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
     }
 
     public boolean canPickupEntity(LivingEntity entity) {
-        if(!this.isTamed() && this.pickupCooldown > 0)
+        if (!this.isTamed() && this.pickupCooldown > 0)
             return false;
         return super.canPickupEntity(entity);
     }
 
     public void dropPickupEntity() {
         ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(this.getPickupEntity());
-        if(extendedEntity != null)
+        if (extendedEntity != null)
             extendedEntity.setPickedUpByEntity(null);
         this.pickupEntity = null;
     }
 
     @Override
-    public int getNoBagSize() { return 0; }
-    @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getNoBagSize() {
+        return 0;
+    }
 
-    public boolean petControlsEnabled() { return true; }
+    @Override
+    public int getBagSize() {
+        return this.creatureInfo.bagSize;
+    }
+
+    public boolean petControlsEnabled() {
+        return true;
+    }
 }

@@ -22,11 +22,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import com.lycanitesmobs.client.effect.FearVisualHandler;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
+
 import org.joml.Vector4f;
 
 import static com.lycanitesmobs.client.renderer.util.CustomRenderStates.POS_TEX_NORMAL_SHADER;
@@ -327,24 +328,9 @@ public class VBOBatcher {
                 normalMatUni.set(normalMat);
             }
 
-            // Compute a real view-space sun direction from the world sun angle.
-            var sunDir = shader.getUniform("SunDirectionVS");
-            if (sunDir != null) {
-                Vector3f sunVS = computeSunDirectionVS(viewMat);
-                sunDir.set(sunVS.x, sunVS.y, sunVS.z);
-            }
-
-            var specColor = shader.getUniform("SpecularColor");
-            if (specColor != null)
-                specColor.set(1.0F, 1.0F, 1.0F);
-
-            var specIntensity = shader.getUniform("SpecularIntensity");
-            if (specIntensity != null)
-                specIntensity.set(0.15F);
-
-            var specPower = shader.getUniform("SpecularPower");
-            if (specPower != null)
-                specPower.set(32.0F);
+            // SunDirectionVS, SpecularColor, SpecularIntensity, SpecularPower uniforms
+            // are defined in the shader JSON for resource pack override support but are
+            // not uploaded here — mobs use matte (lightmap-only) shading by default.
 
             var rangeScale = shader.getUniform("LightRangeScale");
             if (rangeScale != null)
@@ -353,6 +339,10 @@ public class VBOBatcher {
             var hiComp = shader.getUniform("HighlightCompression");
             if (hiComp != null)
                 hiComp.set(highlightCompression);
+
+            var fearGlow = shader.getUniform("FearRedGlow");
+            if (fearGlow != null)
+                fearGlow.set(FearVisualHandler.getRedGlowIntensity());
 
             vbo.bind();
             vbo.drawWithShader(modelView, projection, shader);
@@ -365,32 +355,6 @@ public class VBOBatcher {
             return ((int) (f * 255.0F) & 0xFF) / 255.0F;
         }
 
-        /**
-         * Returns the sun direction in view-space. Derived from the world sun angle
-         * and transformed by the current view matrix's upper-3x3. Falls back to
-         * straight-up if there's no level (e.g. menu renders).
-         */
-        private static Vector3f computeSunDirectionVS(Matrix4f viewMat) {
-            Minecraft mc = Minecraft.getInstance();
-            Vector3f sunWS;
-            if (mc.level != null) {
-                float a = mc.level.getSunAngle(mc.getFrameTime());
-                // Sun orbits around world-X axis in Minecraft. At noon (sunAngle ~ 0)
-                // the sun is overhead; at dusk it's on the horizon.
-                sunWS = new Vector3f(0.0F, Mth.cos(a), -Mth.sin(a));
-            } else {
-                sunWS = new Vector3f(0.0F, 1.0F, 0.0F);
-            }
-            // Direction FROM surface TOWARD sun; vanilla sun angle already encodes this.
-            Matrix3f viewRot = new Matrix3f(viewMat);
-            viewRot.transform(sunWS);
-            if (sunWS.lengthSquared() < 1.0e-6F) {
-                sunWS.set(0.0F, 1.0F, 0.0F);
-            } else {
-                sunWS.normalize();
-            }
-            return sunWS;
-        }
     }
 
     private static final VBOBatcher INSTANCE = new VBOBatcher();

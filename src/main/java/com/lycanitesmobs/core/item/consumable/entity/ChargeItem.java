@@ -72,7 +72,7 @@ public class ChargeItem extends BaseItem {
     }
 
     @Override
-    public Component getDescription(ItemStack stack, @org.jetbrains.annotations.Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+    public Component getDescription(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
         return Component.translatable("item.lycanitesmobs.charge.description").withStyle(ChatFormatting.GREEN);
 
     }

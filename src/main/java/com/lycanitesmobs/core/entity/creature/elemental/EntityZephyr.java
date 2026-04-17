@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.elemental;
 
-import com.lycanitesmobs.api.IFusable;
+import com.lycanitesmobs.core.entity.IFusable;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.manager.CreatureManager;

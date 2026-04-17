@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.dragon;
 
-import com.lycanitesmobs.api.IGroupHeavy;
+import com.lycanitesmobs.core.entity.IGroupHeavy;
 import com.lycanitesmobs.core.entity.projectile.generic.RapidFireProjectileEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;

@@ -82,9 +82,11 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
     /**
      * Gets a random spawn position. Handles three cases:
      * 1. Surface-only (surface=true, underground=false): Uses heightmap to find ground level.
-     * 2. Underground-only (surface=false, underground=true): Uses Y scan centered on trigger Y.
-     * 3. Both (surface=true, underground=true): Uses heightmap for surface, Y scan centered on
-     * heightmap Y (actual terrain level) for underground, with surface as fallback.
+     * 2. Underground-only (surface=false, underground=true) with yMax set: Y scan down from yMax.
+     * 3. Both (surface=true, underground=true): Y scan centred on heightmap Y so land/surface
+     *    spawners still populate the overworld surface even when the trigger player is deep
+     *    underground. Falls back to player Y when the heightmap is outside the Y scan range
+     *    (so tight-range player-centred spawners like `darkness` still work for cave players).
      *
      * @param world      The world to search for coordinates in.
      * @param player     Player that triggered the spawn.
@@ -117,11 +119,18 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         }
 
         int scanOriginY;
-        if (this.surface && heightmapY != Integer.MIN_VALUE) {
-            scanOriginY = heightmapY;
-        } else if (!this.surface && this.underground && this.yMax >= 0) {
+        if (!this.surface && this.underground && this.yMax >= 0) {
+            // Underground-only with an explicit yMax cap: scan down from yMax.
             scanOriginY = this.yMax;
+        } else if (this.surface && heightmapY != Integer.MIN_VALUE
+                && Math.abs(heightmapY - triggerPos.getY()) <= this.rangeMax.getY()) {
+            // Surface+underground AND the heightmap is within reach of the Y scan range:
+            // anchor on heightmap so wide-range land spawners keep their surface bias.
+            scanOriginY = heightmapY;
         } else {
+            // Fallback: use the player's actual Y. Covers underground-only without yMax,
+            // and tight-range surface+underground spawners where heightmap is unreachable
+            // (e.g. `darkness` with rangeMax.Y=2 and the player deep in a cave).
             scanOriginY = triggerPos.getY();
         }
 

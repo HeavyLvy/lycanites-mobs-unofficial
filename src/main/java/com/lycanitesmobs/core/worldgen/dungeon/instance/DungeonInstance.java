@@ -14,6 +14,7 @@ import net.minecraft.world.level.LevelAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class DungeonInstance {
     /** A Dungeon Instance is a dungeon that is active in the world. **/
@@ -136,7 +137,7 @@ public class DungeonInstance {
             this.layout.generate(this.random);
         }
         this.buildPlan = new DungeonBuildPlan();
-        java.util.concurrent.CompletableFuture.runAsync(() -> {
+        CompletableFuture.runAsync(() -> {
             for (SectorInstance sector : this.layout.sectors) {
                 sector.generateBuildPlan(this.buildPlan);
             }

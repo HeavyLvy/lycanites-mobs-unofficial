@@ -16,6 +16,7 @@
 		"phase",
 		"shadow"
 	],
+	"debuffs": [],
 	"behaviours": [],
 	"waterproof": true,
 	"lavaproof": true,

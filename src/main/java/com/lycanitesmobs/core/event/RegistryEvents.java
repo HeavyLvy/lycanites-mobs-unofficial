@@ -22,6 +22,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -33,6 +35,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidType;
@@ -312,6 +315,28 @@ public class RegistryEvents {
             if (creatureInfo == null) continue;
             event.put(cast(entry.getValue()), BaseCreatureEntity.registerCustomAttributes().build());
         }
+    }
+
+    @SubscribeEvent
+    public void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
+        CreatureManager cm = CreatureManager.getInstance();
+        int count = 0;
+        for (var entry : ForgeRegistries.ENTITY_TYPES.getEntries()) {
+            ResourceLocation loc = entry.getKey().location();
+            if (!loc.getNamespace().equals(LycanitesMobs.MODID)) continue;
+            CreatureInfo creatureInfo = cm.getCreature(loc.getPath());
+            if (creatureInfo == null) continue;
+
+            event.register(
+                    cast(entry.getValue()),
+                    SpawnPlacements.Type.NO_RESTRICTIONS,
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    (type, level, spawnType, pos, random) -> true,
+                    SpawnPlacementRegisterEvent.Operation.OR
+            );
+            count++;
+        }
+        LMHelperClass.logDebug("MobSpawns", "Registered SpawnPlacements for " + count + " creatures.");
     }
 
     // ==================================================

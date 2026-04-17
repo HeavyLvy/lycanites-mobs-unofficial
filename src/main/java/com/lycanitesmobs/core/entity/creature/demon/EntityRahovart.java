@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.entity.creature.demon;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.api.IGroupBoss;
-import com.lycanitesmobs.api.IGroupHeavy;
+import com.lycanitesmobs.core.entity.IGroupBoss;
+import com.lycanitesmobs.core.entity.IGroupHeavy;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.util.GoalConditions;

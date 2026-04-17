@@ -142,7 +142,7 @@ public class PetManager {
 
         // Entry Updates:
         int newSpiritReserved = 0;
-        for (PetEntry petEntry : this.entries.values()) {
+        for (PetEntry petEntry : new ArrayList<>(this.entries.values())) {
 
             // Owner Check:
             if (petEntry.host != this.host)

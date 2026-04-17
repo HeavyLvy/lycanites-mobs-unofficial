@@ -69,7 +69,7 @@ public class BlockBase extends Block implements BlockTypeGetter {
         blockNames.add(name);
     }
 
-    @org.jetbrains.annotations.Nullable
+    @Nullable
     /*@Override*/
     public BlockEntity newBlockEntity(BlockPos p_153215_, BlockState p_153216_) {
         return null;
