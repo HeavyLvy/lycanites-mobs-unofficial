@@ -9,7 +9,6 @@ import com.lycanitesmobs.client.renderer.util.VBOBatcher.VBODrawCommand;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -33,6 +32,7 @@ public class VBOObjModel extends ObjModel {
      * The Iris-compatible entity render type (set by CreatureRenderer).
      */
     public static RenderType irisRenderType;
+    public static boolean deferFlush;
 
     public float baseR = 1.0F, baseG = 1.0F, baseB = 1.0F, baseRange = 0.1F;
     public float variantR = 1.0F, variantG = 1.0F, variantB = 1.0F, variantAmount = 0.0F;
@@ -125,20 +125,26 @@ public class VBOObjModel extends ObjModel {
                 cmd.setAlphaCutoff(0.1F);
             }
 
-            VBOBatcher.getInstance().queue(renderType, cmd);
+            if (deferFlush) {
+                VBOBatcher.getInstance().queueDeferred(renderType, cmd);
+            } else {
+                VBOBatcher.getInstance().queue(renderType, cmd);
+            }
         }
 
         if (renderOutline) {
-            VBOBatcher.getInstance().queue(
-                    CustomRenderStates.OBJ_OUTLINE_RENDER_TYPE,
-                    new VBODrawCommand(
-                            objPart.mesh.getVbo(),
-                            objPart.mesh.indices.length,
-                            renderType != null ? renderType.format() : CustomRenderStates.POS_TEX_NORMAL,
-                            matrix4f,
-                            tex
-                    )
+            VBODrawCommand outlineCmd = new VBODrawCommand(
+                    objPart.mesh.getVbo(),
+                    objPart.mesh.indices.length,
+                    renderType != null ? renderType.format() : CustomRenderStates.POS_TEX_NORMAL,
+                    matrix4f,
+                    tex
             );
+            if (deferFlush) {
+                VBOBatcher.getInstance().queueDeferred(CustomRenderStates.OBJ_OUTLINE_RENDER_TYPE, outlineCmd);
+            } else {
+                VBOBatcher.getInstance().queue(CustomRenderStates.OBJ_OUTLINE_RENDER_TYPE, outlineCmd);
+            }
         }
     }
 

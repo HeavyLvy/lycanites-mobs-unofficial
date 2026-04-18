@@ -16,12 +16,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Pose;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -97,60 +95,58 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
             lookYaw = renderYawHead - renderYaw;
         }
 
+        float time = 0.0F;
+        int fade = 0;
+        boolean invisible = false;
+
         // Looking Pitch:
         matrixStack.pushPose();
-        float lookPitch = Mth.lerp(yaw, entity.xRotO, entity.xRot);
-        if (entity.getPose() == Pose.SLEEPING) {
-            Direction direction = entity.getBedOrientation();
-            if (direction != null) {
-                float f4 = entity.getEyeHeight(Pose.STANDING) - 0.1F;
-                // matrixStack.translate((double) ((float) (-direction.getStepX()) * f4), 0.0D, (double) ((float) (-direction.getStepZ()) * f4));
+        VBOObjModel.deferFlush = true;
+        try {
+            float lookPitch = Mth.lerp(yaw, entity.xRotO, entity.xRot);
+
+            // Animation Ticks:
+            float loop = this.getBob(entity, partialTicks % 1.0F);
+            this.setupRotations(entity, matrixStack, loop, renderYaw, yaw);
+            matrixStack.scale(-1.0F, -1.0F, 1.0F);
+            this.scale(entity, matrixStack, yaw);
+            matrixStack.translate(0.0D, (double) -1.501F, 0.0D);
+            float distance = 0.0F;
+            if (!shouldSit && entity.isAlive()) {
+                distance = entity.walkAnimation.speed(yaw);
+                time = entity.walkAnimation.position() - entity.walkAnimation.speed() * (1.0F - yaw);
+                if (entity.isBaby()) {
+                    time *= 3.0F;
+                }
+
+                if (distance > 1.0F) {
+                    distance = 1.0F;
+                }
             }
+
+            fade = Math.max(entity.hurtTime, 0);
+            invisible = !this.isBodyVisible(entity);
+            boolean allyInvisible = invisible && !entity.isInvisibleTo(Minecraft.getInstance().player);
+
+            // Render Model Layers:
+            this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
+            this.renderModel(entity, matrixStack, renderTypeBuffer, null, time, distance, loop, lookYaw, lookPitch, 1, brightness, fade, invisible, allyInvisible);
+            for (RenderLayer<T, CreatureModel<T>> layer : this.layers) {
+                if (!(layer instanceof LayerCreatureBase)) {
+                    continue;
+                }
+                LayerCreatureBase layerCreatureBase = (LayerCreatureBase) layer;
+                if (!layerCreatureBase.canRenderLayer(entity, scale)) {
+                    continue;
+                }
+                this.renderModel(entity, matrixStack, renderTypeBuffer, layerCreatureBase, time, distance, loop, lookYaw, lookPitch, scale, brightness, fade, invisible, allyInvisible);
+            }
+            this.getMainModel().clearAnimationFrames();
+            matrixStack.popPose();
+            VBOBatcher.getInstance().endBatches();
+        } finally {
+            VBOObjModel.deferFlush = false;
         }
-        //matrixStack.translate(0.0D, 0.0D, -1.8f);
-        // Animation Ticks:
-        float loop = this.getBob(entity, partialTicks % 1.0F);
-        this.setupRotations(entity, matrixStack, loop, renderYaw, yaw);
-        matrixStack.scale(-1.0F, -1.0F, 1.0F);
-        this.scale(entity, matrixStack, yaw);
-        matrixStack.translate(0.0D, (double) -1.501F, 0.0D);
-        float distance = 0.0F;
-        float time = 0.0F;
-        if (!shouldSit && entity.isAlive()) {
-            distance = entity.walkAnimation.speed(yaw);
-            time = entity.walkAnimation.position() - entity.walkAnimation.speed() * (1.0F - yaw);
-            if (entity.isBaby()) {
-                time *= 3.0F;
-            }
-
-            if (distance > 1.0F) {
-                distance = 1.0F;
-            }
-        }
-
-        // Damage Fade:
-        // Entity Visibility:
-        int fade = Math.max(entity.hurtTime, 0);
-
-        boolean invisible = !this.isBodyVisible(entity);
-        boolean allyInvisible = invisible && !entity.isInvisibleTo(Minecraft.getInstance().player);
-
-        // Render Model Layers:
-        this.getMainModel().generateAnimationFrames(entity, time, distance, loop, lookYaw, lookPitch, 1, brightness);
-        this.renderModel(entity, matrixStack, renderTypeBuffer, null, time, distance, loop, lookYaw, lookPitch, 1, brightness, fade, invisible, allyInvisible);
-        for (RenderLayer<T, CreatureModel<T>> layer : this.layers) {
-            if (!(layer instanceof LayerCreatureBase)) {
-                continue;
-            }
-            LayerCreatureBase layerCreatureBase = (LayerCreatureBase) layer;
-            if (!layerCreatureBase.canRenderLayer(entity, scale)) {
-                continue;
-            }
-            this.renderModel(entity, matrixStack, renderTypeBuffer, layerCreatureBase, time, distance, loop, lookYaw, lookPitch, scale, brightness, fade, invisible, allyInvisible);
-        }
-        this.getMainModel().clearAnimationFrames();
-        matrixStack.popPose();
-        VBOBatcher.getInstance().endBatches();
 
         // Render Name Tag
         if (!invisible) {

@@ -22,6 +22,7 @@ import com.lycanitesmobs.client.renderer.entity.projectile.ProjectileRenderFacto
 import com.lycanitesmobs.client.renderer.entity.effect.FearRenderer;
 import com.lycanitesmobs.client.renderer.misc.NoneRenderer;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
+import com.lycanitesmobs.client.renderer.util.VBOBatcher;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
@@ -249,6 +250,8 @@ public class ClientEventListener {
     public void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
             FearVisualHandler.uploadDimmedForWorld();
+        } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+            VBOBatcher.getInstance().endDeferredBatches();
         } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
             FearVisualHandler.restoreCleanAfterWorld();
         }

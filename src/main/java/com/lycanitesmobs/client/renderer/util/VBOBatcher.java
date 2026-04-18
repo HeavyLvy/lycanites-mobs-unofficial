@@ -1,9 +1,11 @@
 package com.lycanitesmobs.client.renderer.util;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
@@ -42,6 +44,13 @@ public class VBOBatcher {
         private final ResourceLocation texLocation;
 
         public static int minimumBrightness = 0;
+
+        static float frameNvScale = 0.0F;
+        static float frameMinLightU = 0.0F;
+        static float frameMinLightV = 0.0F;
+
+        private static final Matrix4f MODELVIEW_SCRATCH = new Matrix4f();
+        private static final Matrix3f NORMAL_SCRATCH = new Matrix3f();
 
         private float red = 1.0F, green = 1.0F, blue = 1.0F, alpha = 1.0F;
         private float textureOffsetX, textureOffsetY;
@@ -189,10 +198,16 @@ public class VBOBatcher {
         }
 
         public void draw() {
+            draw(false);
+        }
+
+        public void draw(boolean skipTextureBind) {
             if (vbo == null)
                 return;
 
-            RenderSystem.setShaderTexture(0, texLocation);
+            if (!skipTextureBind) {
+                RenderSystem.setShaderTexture(0, texLocation);
+            }
 
             ShaderInstance shader;
 
@@ -248,25 +263,13 @@ public class VBOBatcher {
                 float u = lightOffsetX;
                 float v = lightOffsetY;
 
-                Minecraft mc = Minecraft.getInstance();
-                Entity cam = mc.getCameraEntity();
-
-                float nv = 0.0F;
-
-                if (cam instanceof LivingEntity le && mc.level != null
-                        && (le.hasEffect(MobEffects.NIGHT_VISION) || le.hasEffect(MobEffects.CONDUIT_POWER))) {
-                    nv = GameRenderer.getNightVisionScale(le, mc.getFrameTime());
+                if (frameNvScale > 0.0F) {
+                    u = Mth.lerp(frameNvScale, u, 240.0F);
+                    v = Mth.lerp(frameNvScale, v, 240.0F);
                 }
 
-                if (nv > 0.0F) {
-                    u = Mth.lerp(nv, u, 240.0F);
-                    v = Mth.lerp(nv, v, 240.0F);
-                }
-
-                float minU = LightTexture.block(minimumBrightness) << 4;
-                float minV = LightTexture.sky(minimumBrightness) << 4;
-                u = Math.max(u, minU);
-                v = Math.max(v, minV);
+                u = Math.max(u, frameMinLightU);
+                v = Math.max(v, frameMinLightV);
 
                 light.set(u, v);
             }
@@ -292,17 +295,17 @@ public class VBOBatcher {
                 tintAmt.set(tintAmount);
 
             // viewMat = RenderSystem.getModelViewMatrix() holds the camera/view matrix.
-            // modelView = view * per-draw model.
+            // modelView = view * per-draw model. Reuse scratch to avoid allocation.
             var viewMat = RenderSystem.getModelViewMatrix();
-            var modelView = new Matrix4f(viewMat).mul(this.modelMatrix);
+            var modelView = MODELVIEW_SCRATCH.set(viewMat).mul(this.modelMatrix);
             var projection = RenderSystem.getProjectionMatrix();
 
-            // Upload NormalMat = inverse-transpose of the upper-3x3 of modelView so
-            // vNormalVS actually lands in view-space.
+            // Creature parts use uniform scale + rotation only, so mat3(modelView) is
+            // orthonormal up to a scalar. normalize() in the vertex shader corrects the
+            // scale factor, so the full invert+transpose is not needed.
             var normalMatUni = shader.getUniform("NormalMat");
             if (normalMatUni != null) {
-                Matrix3f normalMat = new Matrix3f(modelView).invert().transpose();
-                normalMatUni.set(normalMat);
+                normalMatUni.set(NORMAL_SCRATCH.set(modelView));
             }
 
             // SunDirectionVS, SpecularColor, SpecularIntensity, SpecularPower uniforms
@@ -328,16 +331,41 @@ public class VBOBatcher {
 
     private static final VBOBatcher INSTANCE = new VBOBatcher();
     private final Map<RenderType, List<VBODrawCommand>> batchedDrawCommands = new LinkedHashMap<>();
+    private final Map<RenderType, List<VBODrawCommand>> deferredDrawCommands = new LinkedHashMap<>();
+
+    private static final Comparator<VBODrawCommand> TEX_COMPARATOR =
+            Comparator.comparing(c -> c.texLocation, Comparator.nullsFirst(Comparator.naturalOrder()));
 
     public static VBOBatcher getInstance() {
         return INSTANCE;
     }
 
     public void queue(RenderType renderType, VBODrawCommand drawCommand) {
-        batchedDrawCommands.computeIfAbsent(renderType, k -> new LinkedList<>()).add(drawCommand);
+        batchedDrawCommands.computeIfAbsent(renderType, k -> new ArrayList<>()).add(drawCommand);
+    }
+
+    public void queueDeferred(RenderType renderType, VBODrawCommand drawCommand) {
+        deferredDrawCommands.computeIfAbsent(renderType, k -> new ArrayList<>()).add(drawCommand);
+    }
+
+    private static void updateFrameLightingFactors() {
+        Minecraft mc = Minecraft.getInstance();
+        Entity cam = mc.getCameraEntity();
+        VBODrawCommand.frameNvScale = 0.0F;
+        if (cam instanceof LivingEntity le && mc.level != null
+                && (le.hasEffect(MobEffects.NIGHT_VISION) || le.hasEffect(MobEffects.CONDUIT_POWER))) {
+            VBODrawCommand.frameNvScale = GameRenderer.getNightVisionScale(le, mc.getFrameTime());
+        }
+        VBODrawCommand.frameMinLightU = LightTexture.block(VBODrawCommand.minimumBrightness) << 4;
+        VBODrawCommand.frameMinLightV = LightTexture.sky(VBODrawCommand.minimumBrightness) << 4;
     }
 
     public void endBatches() {
+        if (batchedDrawCommands.isEmpty())
+            return;
+
+        updateFrameLightingFactors();
+
         batchedDrawCommands.forEach((renderType, drawCommands) -> {
             if (drawCommands.isEmpty())
                 return;
@@ -353,6 +381,45 @@ public class VBOBatcher {
         });
 
         batchedDrawCommands.clear();
+
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    public void endDeferredBatches() {
+        if (deferredDrawCommands.isEmpty())
+            return;
+
+        updateFrameLightingFactors();
+
+        deferredDrawCommands.forEach((renderType, drawCommands) -> {
+            if (drawCommands.isEmpty())
+                return;
+
+            if (drawCommands.size() > 1) {
+                drawCommands.sort(TEX_COMPARATOR);
+            }
+
+            renderType.setupRenderState();
+
+            ResourceLocation lastTex = null;
+            boolean first = true;
+            for (VBODrawCommand cmd : drawCommands) {
+                ResourceLocation tex = cmd.texLocation;
+                if (first || !Objects.equals(tex, lastTex)) {
+                    if (tex != null) {
+                        RenderSystem.setShaderTexture(0, tex);
+                    }
+                    lastTex = tex;
+                    first = false;
+                }
+                cmd.draw(true);
+            }
+
+            renderType.clearRenderState();
+            drawCommands.clear();
+        });
+
+        deferredDrawCommands.clear();
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
