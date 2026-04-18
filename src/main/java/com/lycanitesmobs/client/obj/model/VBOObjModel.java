@@ -34,28 +34,8 @@ public class VBOObjModel extends ObjModel {
      */
     public static RenderType irisRenderType;
 
-    /**
-     * Default tone-mapping values applied to creature bodies. Layers that want
-     * to opt out (e.g. equipment) should set these fields to neutral (1.0F / 0.0F)
-     * before calling {@link #renderPart} via the layer hooks in LayerCreatureBase.
-     */
-    public static final float DEFAULT_LIGHT_RANGE_SCALE = 0.95F;
-    public static final float DEFAULT_HIGHLIGHT_COMPRESSION = 0.35F;
-
     public float baseR = 1.0F, baseG = 1.0F, baseB = 1.0F, baseRange = 0.1F;
     public float variantR = 1.0F, variantG = 1.0F, variantB = 1.0F, variantAmount = 0.0F;
-
-    /**
-     * Per-draw lightmap-response compression. 1.0 = unchanged, <1.0 = flatter day/night swing.
-     * Set by CreatureObjModel from the current LayerCreatureBase's hook before each renderPart call.
-     */
-    public float lightRangeScale = DEFAULT_LIGHT_RANGE_SCALE;
-    /**
-     * Per-draw highlight soft-clip. 0.0 = off, higher = more rolloff on bright outputs.
-     * Set by CreatureObjModel from the current LayerCreatureBase's hook before each renderPart call.
-     */
-    public float highlightCompression = DEFAULT_HIGHLIGHT_COMPRESSION;
-
 
     public VBOObjModel(ResourceLocation resourceLocation) {
         super(resourceLocation);
@@ -128,8 +108,6 @@ public class VBOObjModel extends ObjModel {
                     .setTextureOffset(textureOffset)
                     .setOverlayOffset(0.0F, 10.0F - fade)
                     .setLightOffset(boostedBrightness)
-                    .setLightRangeScale(lightRangeScale)
-                    .setHighlightCompression(highlightCompression)
                     .setRecolorBand(
                             baseR,
                             baseG,

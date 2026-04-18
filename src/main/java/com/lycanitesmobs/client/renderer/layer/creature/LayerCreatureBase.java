@@ -109,35 +109,6 @@ public class LayerCreatureBase<T extends BaseCreatureEntity> extends RenderLayer
     }
 
     /**
-     * Returns the lightmap-response range scale this layer should use. 1.0 = unchanged,
-     * &lt;1.0 compresses the day/night swing toward the midpoint. Default passes through the
-     * provided default (which is the entity body value). Override in a subclass to opt a
-     * layer's parts out of body tone-mapping — e.g. equipment layers return 1.0F so they
-     * aren't flattened by the creature-wide compression.
-     * @param partName The name of the model part.
-     * @param entity The entity to render.
-     * @param defaultScale The base value being applied to the creature body.
-     * @return The light range scale this layer wants for this part.
-     */
-    public float getLightRangeScale(String partName, BaseCreatureEntity entity, float defaultScale) {
-        return defaultScale;
-    }
-
-    /**
-     * Returns the highlight soft-clip strength this layer should use. 0.0 = off (hard clip),
-     * higher rolls bright outputs down more. Default passes through the provided default
-     * (which is the entity body value). Override in a subclass to opt out — e.g. equipment
-     * layers return 0.0F so they aren't desaturated by the creature-wide highlight roll-off.
-     * @param partName The name of the model part.
-     * @param entity The entity to render.
-     * @param defaultStrength The base value being applied to the creature body.
-     * @return The highlight compression this layer wants for this part.
-     */
-    public float getHighlightCompression(String partName, BaseCreatureEntity entity, float defaultStrength) {
-        return defaultStrength;
-    }
-
-    /**
      * Returns the blending type that this layer should use, see CustomRenderStates.BLEND.
      * @param entity The entity to render.
      * @return The part blending type.

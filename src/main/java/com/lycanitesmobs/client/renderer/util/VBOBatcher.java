@@ -53,8 +53,6 @@ public class VBOBatcher {
         private float tintG = 1.0F;
         private float tintB = 1.0F;
         private float tintAmount = 0.0F;
-        private float lightRangeScale = 1.0F;
-        private float highlightCompression = 0.0F;
 
         /**
          * Keeps the old ctor shape: (vbo, vertexCount, format, matrix, tex)
@@ -147,27 +145,6 @@ public class VBOBatcher {
         public VBODrawCommand setLightOffset(float u, float v) {
             this.lightOffsetX = u;
             this.lightOffsetY = v;
-            return this;
-        }
-
-        /**
-         * Compresses this draw's lightmap response toward the midpoint (0.5).
-         * 1.0 = unchanged. 0.6 ≈ tighter day/night margins. 0.0 = flat.
-         * Useful for entities that look too bright at noon or too dark at night.
-         */
-        public VBODrawCommand setLightRangeScale(float scale) {
-            this.lightRangeScale = scale;
-            return this;
-        }
-
-        /**
-         * Soft-clips the brightest output colors toward 1.0. 0.0 = off (hard clip).
-         * Higher values pull highlights down more aggressively while preserving midtones.
-         * Useful when torches + daylight combined still wash out too much.
-         * Typical range: 0.0 .. 0.5.
-         */
-        public VBODrawCommand setHighlightCompression(float strength) {
-            this.highlightCompression = strength;
             return this;
         }
 
@@ -331,14 +308,6 @@ public class VBOBatcher {
             // SunDirectionVS, SpecularColor, SpecularIntensity, SpecularPower uniforms
             // are defined in the shader JSON for resource pack override support but are
             // not uploaded here — mobs use matte (lightmap-only) shading by default.
-
-            var rangeScale = shader.getUniform("LightRangeScale");
-            if (rangeScale != null)
-                rangeScale.set(lightRangeScale);
-
-            var hiComp = shader.getUniform("HighlightCompression");
-            if (hiComp != null)
-                hiComp.set(highlightCompression);
 
             var fearGlow = shader.getUniform("FearRedGlow");
             if (fearGlow != null)

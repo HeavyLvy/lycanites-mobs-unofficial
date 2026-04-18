@@ -197,22 +197,6 @@
       ]
     },
     {
-      "name": "LightRangeScale",
-      "type": "float",
-      "count": 1,
-      "values": [
-        1.0
-      ]
-    },
-    {
-      "name": "HighlightCompression",
-      "type": "float",
-      "count": 1,
-      "values": [
-        0.0
-      ]
-    },
-    {
       "name": "FearRedGlow",
       "type": "float",
       "count": 1,

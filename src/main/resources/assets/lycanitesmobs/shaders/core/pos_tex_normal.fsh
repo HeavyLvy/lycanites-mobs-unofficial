@@ -30,8 +30,6 @@ uniform vec3 SpecularColor;
 uniform float SpecularIntensity;
 uniform float SpecularPower;
 
-uniform float LightRangeScale;
-uniform float HighlightCompression;
 uniform float FearRedGlow;
 
 void main() {
@@ -47,38 +45,20 @@ void main() {
     float amount = VariantAmount * influence;
     vec3 recolored = mix(base, VariantColor, amount);
 
-    // Split vanilla lightmap into block-only vs sky-only contributions.
-    // LightUv.x encodes block light (0..240), LightUv.y encodes sky light.
-    // Sampler2 is a 16x16 lightmap combining block (U) and sky (V) channels.
+    // Single lightmap sample at combined block+sky UV — vanilla approach.
+    // Sampler2 is the 16x16 lightmap; block light = U axis, sky light = V axis.
     const float TEX = 1.0 / 16.0;
-    vec2 clampedBlock = clamp(vec2(LightUv.x / 256.0, 0.5 * TEX), vec2(0.5 * TEX), vec2(15.5 * TEX));
-    vec2 clampedSky   = clamp(vec2(0.5 * TEX, LightUv.y / 256.0), vec2(0.5 * TEX), vec2(15.5 * TEX));
-    vec3 blockLight = texture(Sampler2, clampedBlock).rgb;
-    vec3 skyLight   = texture(Sampler2, clampedSky).rgb;
-    float skyFactor   = max(skyLight.r,   max(skyLight.g,   skyLight.b));
-    float blockFactor = max(blockLight.r, max(blockLight.g, blockLight.b));
+    vec2 uvCoord = clamp(LightUv / 256.0, vec2(0.5 * TEX), vec2(15.5 * TEX));
+    vec3 lightCol = texture(Sampler2, uvCoord).rgb;
 
-    // Per-entity light range compression: pulls both ends toward 0.5.
-    // scale = 1.0 leaves range untouched; scale < 1.0 dims highs and lifts lows.
-    float rangeScale = clamp(LightRangeScale, 0.0, 1.0);
-    skyFactor   = 0.5 + (skyFactor   - 0.5) * rangeScale;
-    blockFactor = 0.5 + (blockFactor - 0.5) * rangeScale;
-    skyLight    = vec3(0.5) + (skyLight   - vec3(0.5)) * rangeScale;
-    blockLight  = vec3(0.5) + (blockLight - vec3(0.5)) * rangeScale;
+    // Baked range compression (lightRangeScale = 0.95): 0.5 + (x - 0.5) * 0.95
+    lightCol = vec3(0.025) + lightCol * 0.95;
 
     // Matte lightmap-based lighting (no directional sun shading).
     // SunDirectionVS, SpecularColor, SpecularIntensity, SpecularPower, vNormalVS,
     // and vViewDir are still available as uniforms/varyings for resource pack
     // shader overrides that want to implement custom material lighting.
 
-    // Combine sky and block light contributions.
-    // Block light fills the gap left by sky coverage so they don't double-bright.
-    vec3 sunContrib   = skyLight * skyFactor;
-    vec3 blockContrib = blockLight * blockFactor;
-    float sunCoverage = clamp(max(sunContrib.r, max(sunContrib.g, sunContrib.b)), 0.0, 1.0);
-    vec3 lightCol = sunContrib + blockContrib * (1.0 - sunCoverage);
-
-    // Keep a global minimum so things aren't fully black in deep dark.
     float minBrightness = 0.15;
     lightCol = max(lightCol, vec3(minBrightness));
 
@@ -102,10 +82,8 @@ void main() {
         finalRgb = mix(finalRgb, vec3(1.0, 0.0, 0.0), hurtIntensity * 0.3);
     }
 
-    // Per-entity highlight rolloff. 0.0 = no compression
-    if (HighlightCompression > 0.0) {
-        finalRgb = finalRgb / (1.0 + finalRgb * HighlightCompression);
-    }
+    // Baked highlight rolloff (highlightCompression = 0.35).
+    finalRgb = finalRgb / (1.0 + finalRgb * 0.35);
 
     vec4 preFogColor = vec4(finalRgb, tex.a) * vColor;
 

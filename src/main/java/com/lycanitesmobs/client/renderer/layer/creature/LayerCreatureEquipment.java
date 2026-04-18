@@ -45,23 +45,4 @@ public class LayerCreatureEquipment extends LayerCreatureBase {
         return new Vector4f(1, 1, 1, 1);
     }
 
-    /**
-     * Equipment parts opt out of the creature body's lightmap compression — armor should
-     * use the raw lightmap response, not the flattened day/night curve tuned for mob skin.
-     * Override in a subclass if you want to re-enable compression for a specific equipment set.
-     */
-    @Override
-    public float getLightRangeScale(String partName, BaseCreatureEntity entity, float defaultScale) {
-        return 1F;
-    }
-
-    /**
-     * Equipment parts opt out of the creature body's highlight soft-clip — armor should
-     * render with vanilla highlight behaviour. Override in a subclass if you want to re-enable
-     * roll-off for a specific equipment set.
-     */
-    @Override
-    public float getHighlightCompression(String partName, BaseCreatureEntity entity, float defaultStrength) {
-        return 0F;
-    }
 }
