@@ -195,15 +195,21 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
 
                 VBOObjModel.useEntityFormat = true;
                 VBOObjModel.irisRenderType = OculusCompat.getIrisEntityRenderType(texture, blending, glow);
+                VBOObjModel.irisBlending = blending;
+                VBOObjModel.irisGlow = glow;
                 VBOObjModel.renderNormal = false;
                 VBOObjModel.renderOutline = false;
                 VBOObjModel.tex = texture;
 
-                this.getMainModel().render(entity, matrixStack, null, layer, time, distance, loop, lookY, lookX, 1, brightness, fade);
-
-                VBOObjModel.tex = null;
-                VBOObjModel.useEntityFormat = false;
-                VBOObjModel.irisRenderType = null;
+                try {
+                    this.getMainModel().render(entity, matrixStack, null, layer, time, distance, loop, lookY, lookX, 1, brightness, fade);
+                } finally {
+                    VBOObjModel.tex = null;
+                    VBOObjModel.useEntityFormat = false;
+                    VBOObjModel.irisRenderType = null;
+                    VBOObjModel.irisBlending = 0;
+                    VBOObjModel.irisGlow = false;
+                }
             }
             return;
         }

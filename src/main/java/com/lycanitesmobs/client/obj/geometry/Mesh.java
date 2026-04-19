@@ -3,7 +3,6 @@ package com.lycanitesmobs.client.obj.geometry;
 import com.lycanitesmobs.core.util.math.Vector3o;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -20,20 +19,6 @@ public class Mesh {
     public Vector3o[] normals;
 
     private VertexBuffer vbo = null;
-
-    /**
-     * VBO in vanilla NEW_ENTITY format (Position, Color, UV0, Overlay, Lightmap, Normal).
-     * Used when Iris/Oculus shaders are active so that Iris can intercept the draw
-     * and route it through the shader-pack's gbuffers_entities program.
-     *
-     * <p>Per-vertex color, overlay, and lightmap are baked to sensible defaults:
-     * <ul>
-     *   <li>Color: white (255,255,255,255) – the shader-pack tints via uniforms</li>
-     *   <li>Overlay: (0, 10) – no damage red flash (overridden per-draw)</li>
-     *   <li>Lightmap: (240, 240) – full brightness (shader packs override lighting)</li>
-     * </ul>
-     */
-    private VertexBuffer entityVbo = null;
     public static List<String> logs = new ArrayList<>();
 
     /**
@@ -89,70 +74,10 @@ public class Mesh {
         return this.vbo;
     }
 
-    /**
-     * Returns (and lazily builds) the VBO in vanilla {@code NEW_ENTITY} format.
-     * This is the format that Iris/Oculus knows how to extend and intercept.
-     *
-     * <p>The VBO contains the same geometry as {@link #getVbo()} but with the
-     * vanilla attribute layout so Iris can properly route draws through its
-     * shader pipeline.</p>
-     */
-    public VertexBuffer getEntityVbo() {
-        try {
-            if (this.entityVbo == null) {
-                LMHelperClass.logDebug("Resources", "Mesh.getEntityVbo: building entity-format VBO");
-                computeVertexNormalsIfNeeded();
-
-                Tesselator tess = Tesselator.getInstance();
-                BufferBuilder buf = tess.getBuilder();
-                buf.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
-
-                for (int i = 0; i < this.indices.length; i++) {
-                    int idx = this.indices[i];
-                    Vertex vertex = this.vertices[idx];
-                    Vector3o normal = this.normals != null && idx < this.normals.length ? this.normals[idx] : null;
-
-                    float px = vertex.getPos().x();
-                    float py = vertex.getPos().y();
-                    float pz = vertex.getPos().z();
-
-                    float u = vertex.getTexCoords().x;
-                    float v = 1.0F - vertex.getTexCoords().y;
-
-                    if (normal == null) {
-                        normal = new Vector3o(0, 1, 0);
-                    }
-
-                    buf.vertex(px, py, pz)
-                            .color(255, 255, 255, 255)
-                            .uv(u, v)
-                            .overlayCoords(0, 10)
-                            .uv2(240, 240)
-                            .normal(normal.x(), normal.y(), normal.z())
-                            .endVertex();
-                }
-
-                VertexBuffer vb = new VertexBuffer(VertexBuffer.Usage.STATIC);
-                vb.bind();
-                vb.upload(buf.end());
-                VertexBuffer.unbind();
-
-                this.entityVbo = vb;
-            }
-        } catch (Exception e) {
-            LMHelperClass.logErrorMessageOnceCatchable("Error in Mesh class (entity VBO). ", e);
-        }
-        return this.entityVbo;
-    }
-
     public void delete() {
         if (this.vbo != null) {
             this.vbo.close();
             this.vbo = null;
-        }
-        if (this.entityVbo != null) {
-            this.entityVbo.close();
-            this.entityVbo = null;
         }
     }
 
