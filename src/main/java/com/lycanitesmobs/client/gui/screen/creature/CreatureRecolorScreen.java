@@ -3,17 +3,12 @@ package com.lycanitesmobs.client.gui.screen.creature;
 import com.lycanitesmobs.client.gui.screen.base.BaseGui;
 import com.lycanitesmobs.client.gui.screen.base.BaseScreen;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.LivingEntity;
-
-import org.joml.Quaternionf;
 
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -422,12 +417,10 @@ public class CreatureRecolorScreen extends BaseScreen {
             lastRotateMouseY = mouseY;
 
             previewYaw -= (float) deltaX * 0.75F;
-            previewPitch += (float) deltaY * 0.75F;
+            previewPitch = clampPreviewPitch(previewPitch + (float) deltaY * 0.75F);
 
             if (previewYaw > 360F) previewYaw -= 360F;
             if (previewYaw < -360F) previewYaw += 360F;
-            if (previewPitch > 360F) previewPitch -= 360F;
-            if (previewPitch < -360F) previewPitch += 360F;
 
             return true;
         }
@@ -503,59 +496,6 @@ public class CreatureRecolorScreen extends BaseScreen {
         int hx = g.x + g.width - handleSize;
         int hy = g.y + g.height - handleSize - HANDLE_OFFSET_Y;
         return x >= hx && x <= g.x + g.width && y >= hy && y <= hy + handleSize;
-    }
-
-    public static void renderLivingEntityRotated(
-            GuiGraphics guiGraphics,
-            int x,
-            int y,
-            int scale,
-            float yawDegrees,
-            float pitchDegrees,
-            LivingEntity entity
-    ) {
-        var mc = Minecraft.getInstance();
-        var dispatcher = mc.getEntityRenderDispatcher();
-        var pose = guiGraphics.pose();
-
-        float oldBodyRot = entity.yBodyRot;
-        float oldYRot = entity.getYRot();
-        float oldXRot = entity.getXRot();
-        float oldHeadO = entity.yHeadRotO;
-        float oldHead = entity.yHeadRot;
-
-        pose.pushPose();
-        pose.translate(x, y, 50.0D);
-        pose.scale(scale, scale, scale);
-
-        float radPitch = pitchDegrees * ((float) Math.PI / 180F);
-        Quaternionf qz = new Quaternionf().rotateZ((float) Math.PI);
-        Quaternionf qx = new Quaternionf().rotateX(radPitch);
-        pose.mulPose(qz);
-        pose.mulPose(qx);
-
-        entity.yBodyRot = 180.0F + yawDegrees;
-        entity.setYRot(180.0F + yawDegrees);
-        entity.setXRot(-pitchDegrees);
-        entity.yHeadRot = entity.getYRot();
-        entity.yHeadRotO = entity.getYRot();
-
-        Lighting.setupForEntityInInventory();
-        dispatcher.setRenderShadow(false);
-        var buffer = guiGraphics.bufferSource();
-        RenderSystem.runAsFancy(() ->
-                dispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, pose, buffer, 15728880)
-        );
-        buffer.endBatch();
-        dispatcher.setRenderShadow(true);
-        pose.popPose();
-        Lighting.setupFor3DItems();
-
-        entity.yBodyRot = oldBodyRot;
-        entity.setYRot(oldYRot);
-        entity.setXRot(oldXRot);
-        entity.yHeadRotO = oldHeadO;
-        entity.yHeadRot = oldHead;
     }
 
     private void renderResizeHandles(GuiGraphics guiGraphics) {

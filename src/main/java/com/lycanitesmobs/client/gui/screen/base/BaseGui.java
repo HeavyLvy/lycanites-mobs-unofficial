@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.gui.screen.base;
 
+import com.lycanitesmobs.client.renderer.util.VBOBatcher;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -32,8 +33,11 @@ public abstract class BaseGui extends Screen {
         var pose = guiGraphics.pose();
 
         float oldBodyRot = entity.yBodyRot;
+        float oldBodyRotO = entity.yBodyRotO;
         float oldYRot = entity.getYRot();
+        float oldYRotO = entity.yRotO;
         float oldXRot = entity.getXRot();
+        float oldXRotO = entity.xRotO;
         float oldHeadO = entity.yHeadRotO;
         float oldHead = entity.yHeadRot;
 
@@ -51,25 +55,34 @@ public abstract class BaseGui extends Screen {
         pose.mulPose(qView);
 
         entity.yBodyRot = 0.0F;
+        entity.yBodyRotO = 0.0F;
         entity.setYRot(0.0F);
+        entity.yRotO = 0.0F;
         entity.setXRot(0.0F);
+        entity.xRotO = 0.0F;
         entity.yHeadRotO = 0.0F;
         entity.yHeadRot = 0.0F;
 
         Lighting.setupForEntityInInventory();
         dispatcher.setRenderShadow(false);
-        var buffer = guiGraphics.bufferSource();
+        MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
         RenderSystem.runAsFancy(() ->
                 dispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, pose, buffer, 15728880)
         );
+        // GUI creature renders do not get the world AFTER_ENTITIES hook, so drain any
+        // deferred cutout batches here while the preview pose is still active.
+        VBOBatcher.getInstance().endDeferredBatches();
         buffer.endBatch();
         dispatcher.setRenderShadow(true);
         pose.popPose();
         Lighting.setupFor3DItems();
 
         entity.yBodyRot = oldBodyRot;
+        entity.yBodyRotO = oldBodyRotO;
         entity.setYRot(oldYRot);
+        entity.yRotO = oldYRotO;
         entity.setXRot(oldXRot);
+        entity.xRotO = oldXRotO;
         entity.yHeadRotO = oldHeadO;
         entity.yHeadRot = oldHead;
     }
@@ -116,6 +129,9 @@ public abstract class BaseGui extends Screen {
         renderManager.setRenderShadow(false);
         MultiBufferSource.BufferSource renderTypeBuffer = Minecraft.getInstance().renderBuffers().bufferSource();
         renderManager.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixStack, renderTypeBuffer, 15728880);
+        // GUI previews bypass the world render stages, so deferred creature batches
+        // need an explicit flush here or cutout parts render late with the wrong pose.
+        VBOBatcher.getInstance().endDeferredBatches();
         renderTypeBuffer.endBatch();
         renderManager.setRenderShadow(true);
 
