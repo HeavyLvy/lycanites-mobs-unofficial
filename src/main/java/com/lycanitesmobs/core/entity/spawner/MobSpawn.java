@@ -226,7 +226,14 @@ public class MobSpawn {
     }
 
     public void resolveEntityType() {
-        if (this.entityType != null || this.creatureInfo != null) {
+        if (this.entityType != null) {
+            return;
+        }
+        if (this.creatureInfo != null) {
+            this.entityType = this.creatureInfo.getEntityType();
+            if (this.mobId == null) {
+                this.mobId = this.creatureInfo.getEntityId();
+            }
             return;
         }
         if (this.mobId == null) {
