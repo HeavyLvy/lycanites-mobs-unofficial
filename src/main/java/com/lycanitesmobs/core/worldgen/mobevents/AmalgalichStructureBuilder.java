@@ -44,12 +44,14 @@ public class AmalgalichStructureBuilder extends StructureBuilder {
         // Effects:
         if (ticks == 1) {
             for (int i = 0; i < 5; i++) {
+                int effectIndex = i;
                 BaseProjectileEntity baseProjectileEntity = new EntityShadowfireBarrier(ProjectileManager.getInstance().oldProjectileTypes.get(EntityShadowfireBarrier.class), world, originX, originY + (10 * i), originZ);
                 baseProjectileEntity.projectileLife = 20 * 20;
-                world.addFreshEntity(baseProjectileEntity);
-                if (worldExt != null) {
-                    worldExt.bossUpdate(baseProjectileEntity);
-                }
+                this.spawnDeferred(world, new BlockPos(originX, originY + (10 * i), originZ), "structure_effect:" + this.name + ":" + effectIndex + ":" + pos.asLong(), baseProjectileEntity, () -> {
+                    if (worldExt != null) {
+                        worldExt.bossUpdate(baseProjectileEntity);
+                    }
+                });
             }
         }
 
@@ -72,14 +74,16 @@ public class AmalgalichStructureBuilder extends StructureBuilder {
         if (ticks == 25 * 20) {
             BaseCreatureEntity baseCreatureEntity = (BaseCreatureEntity) CreatureManager.getInstance().getCreature("amalgalich").createEntity(world);
             baseCreatureEntity.moveTo(originX, originY + 1, originZ, 0, 0);
-            world.addFreshEntity(baseCreatureEntity);
-            baseCreatureEntity.setArenaCenter(new BlockPos(originX, originY + 1, originZ));
-            if (worldExt != null) {
-                MobEventPlayerServer mobEventPlayerServer = worldExt.getMobEventPlayerServer(this.name);
-                if (mobEventPlayerServer != null) {
-                    mobEventPlayerServer.mobEvent.onSpawn(baseCreatureEntity, world, player, pos, level, ticks, variant);
+            BlockPos arenaCenter = new BlockPos(originX, originY + 1, originZ);
+            this.spawnDeferred(world, arenaCenter, "structure_boss:" + this.name + ":" + pos.asLong(), baseCreatureEntity, () -> {
+                baseCreatureEntity.setArenaCenter(arenaCenter);
+                if (worldExt != null) {
+                    MobEventPlayerServer mobEventPlayerServer = worldExt.getMobEventPlayerServer(this.name);
+                    if (mobEventPlayerServer != null) {
+                        mobEventPlayerServer.mobEvent.onSpawn(baseCreatureEntity, world, player, pos, level, ticks, variant);
+                    }
                 }
-            }
+            });
         }
     }
 

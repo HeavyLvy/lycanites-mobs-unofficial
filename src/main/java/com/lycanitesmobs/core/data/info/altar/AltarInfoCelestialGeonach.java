@@ -184,8 +184,8 @@ public class AltarInfoCelestialGeonach extends AltarInfo {
         entityGeonach.forceBossHealthBar = true;
         entityGeonach.applyVariant(3);
         entityGeonach.moveTo(x, y - 2, z, 0, 0);
-        world.addFreshEntity(entityGeonach);
-        entityGeonach.destroyArea(x, y, z, 10000, false, 2);
+        this.spawnDeferred(world, pos, "altar_spawn:" + this.name + ":" + pos.asLong(), entityGeonach,
+                () -> entityGeonach.destroyArea(x, y, z, 10000, false, 2));
 
         return true;
     }

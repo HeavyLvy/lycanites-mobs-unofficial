@@ -156,8 +156,8 @@ public class AltarInfoLunarGrue extends AltarInfo {
         entityGrue.forceBossHealthBar = true;
         entityGrue.applyVariant(3);
         entityGrue.moveTo(x, y - 2, z, 0, 0);
-        world.addFreshEntity(entityGrue);
-        entityGrue.destroyArea(x, y, z, 10000, false, 2);
+        this.spawnDeferred(world, pos, "altar_spawn:" + this.name + ":" + pos.asLong(), entityGrue,
+                () -> entityGrue.destroyArea(x, y, z, 10000, false, 2));
 
         return true;
     }

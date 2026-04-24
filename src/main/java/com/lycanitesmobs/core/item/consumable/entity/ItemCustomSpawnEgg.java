@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.item.consumable.entity;
 
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.entity.dispenser.SpawnEggDispenseBehaviour;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -250,7 +252,11 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
                 mobEntity.playAmbientSound();
             }
 
-            world.addFreshEntity(entity);
+            if (world instanceof ServerLevel serverLevel) {
+                DeferredLevelActionManager.enqueue(serverLevel, BlockPos.containing(x, y, z), "spawn_egg:" + entity.getUUID(), level -> level.addFreshEntity(entity));
+            } else {
+                world.addFreshEntity(entity);
+            }
         }
         return entity;
     }

@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.data.info.altar;
 
 import com.lycanitesmobs.core.data.config.ConfigMobEvent;
 import com.lycanitesmobs.core.event.mobevent.effects.StructureBuilder;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.event.mobevent.trigger.AltarMobEventTrigger;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.worldgen.mobevents.AmalgalichStructureBuilder;
@@ -9,6 +10,7 @@ import com.lycanitesmobs.core.worldgen.mobevents.AsmodeusStructureBuilder;
 import com.lycanitesmobs.core.worldgen.mobevents.RahovartStructureBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
@@ -158,5 +160,22 @@ public class AltarInfo {
                 LMHelperClass.convertToInteger(Math.round((double) pos.getZ() + (distance * zAmount)))
         );
         return facingPos;
+    }
+
+    protected boolean spawnDeferred(Level world, BlockPos pos, String key, Entity entity, Runnable afterSpawn) {
+        if (world instanceof ServerLevel serverLevel) {
+            return DeferredLevelActionManager.enqueue(serverLevel, pos, key, level -> {
+                level.addFreshEntity(entity);
+                if (afterSpawn != null) {
+                    afterSpawn.run();
+                }
+            });
+        }
+
+        world.addFreshEntity(entity);
+        if (afterSpawn != null) {
+            afterSpawn.run();
+        }
+        return true;
     }
 }

@@ -170,8 +170,8 @@ public class AltarInfoRoyalApollyon extends AltarInfo {
         entityCreature.forceBossHealthBar = true;
         entityCreature.applyVariant(3);
         entityCreature.moveTo(x, y - 2, z, 0, 0);
-        world.addFreshEntity(entityCreature);
-        entityCreature.destroyArea(x, y, z, 10000, false, 2);
+        this.spawnDeferred(world, pos, "altar_spawn:" + this.name + ":" + pos.asLong(), entityCreature,
+                () -> entityCreature.destroyArea(x, y, z, 10000, false, 2));
 
         return true;
     }

@@ -8,6 +8,7 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.event.SpawnerEventListener;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.SpawnerManager;
 import com.lycanitesmobs.core.event.mobevent.MobEvent;
 import com.lycanitesmobs.core.event.mobevent.MobEventPlayerServer;
@@ -19,6 +20,7 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -585,15 +587,7 @@ public class Spawner {
             }
 
             // Spawn The Mob:
-            this.spawnEntity(world, worldExt, entityLiving, level, mobSpawn, player, chain);
-
-            // Call Entity's Initial Spawn:
-            if (entityLiving instanceof Mob) {
-                BlockPos blockPos = new BlockPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
-                if (ForgeEventFactory.checkSpawnPlacements(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, blockPos, world.getRandom(), false)) {
-                    ((Mob) entityLiving).finalizeSpawn((ServerLevelAccessor) world, world.getCurrentDifficultyAt(spawnPos), MobSpawnType.NATURAL, null, null);
-                }
-            }
+            this.spawnEntity(world, worldExt, entityLiving, spawnPos, level, mobSpawn, player, chain, canSpawn == Event.Result.ALLOW);
 
             mobsSpawned++;
 
@@ -803,7 +797,7 @@ public class Spawner {
      * @param world        The world to spawn in.
      * @param entityLiving The entity to spawn.
      */
-    public void spawnEntity(Level world, ExtendedWorld worldExt, LivingEntity entityLiving, int level, MobSpawn mobSpawn, Player player, int chain) {
+    public void spawnEntity(Level world, ExtendedWorld worldExt, LivingEntity entityLiving, BlockPos spawnPos, int level, MobSpawn mobSpawn, Player player, int chain, boolean callInitialSpawn) {
         // Before Spawn:
         entityLiving.setPortalCooldown(); // Start Portal Cooldown
 
@@ -832,17 +826,31 @@ public class Spawner {
             }
         }
 
-        // Spawn:
-        world.addFreshEntity(entityLiving);
-
-        // After Spawn:
-        mobSpawn.onSpawned(entityLiving, player);
-        if (!"".equals(this.eventName) && worldExt != null) {
-            MobEventPlayerServer mobEventPlayerServer = worldExt.getMobEventPlayerServer(this.eventName);
-            if (mobEventPlayerServer != null) {
-                MobEvent mobEvent = mobEventPlayerServer.mobEvent;
-                mobEvent.onSpawn(entityLiving, mobEventPlayerServer.world, mobEventPlayerServer.player, mobEventPlayerServer.origin, mobEventPlayerServer.level, mobEventPlayerServer.ticks, -1);
+        Runnable afterSpawn = () -> {
+            if (callInitialSpawn && entityLiving instanceof Mob mobEntity
+                    && ForgeEventFactory.checkSpawnPlacements(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, spawnPos, world.getRandom(), false)) {
+                mobEntity.finalizeSpawn((ServerLevelAccessor) world, world.getCurrentDifficultyAt(spawnPos), MobSpawnType.NATURAL, null, null);
             }
+
+            mobSpawn.onSpawned(entityLiving, player);
+            if (!"".equals(this.eventName) && worldExt != null) {
+                MobEventPlayerServer mobEventPlayerServer = worldExt.getMobEventPlayerServer(this.eventName);
+                if (mobEventPlayerServer != null) {
+                    MobEvent mobEvent = mobEventPlayerServer.mobEvent;
+                    mobEvent.onSpawn(entityLiving, mobEventPlayerServer.world, mobEventPlayerServer.player, mobEventPlayerServer.origin, mobEventPlayerServer.level, mobEventPlayerServer.ticks, -1);
+                }
+            }
+        };
+
+        if (world instanceof ServerLevel serverLevel) {
+            DeferredLevelActionManager.enqueue(serverLevel, spawnPos, "spawner_spawn:" + entityLiving.getUUID(), levelAccessor -> {
+                levelAccessor.addFreshEntity(entityLiving);
+                afterSpawn.run();
+            });
+            return;
         }
+
+        world.addFreshEntity(entityLiving);
+        afterSpawn.run();
     }
 }

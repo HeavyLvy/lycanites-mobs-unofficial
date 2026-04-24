@@ -182,8 +182,8 @@ public class AltarInfoUmberCherufe extends AltarInfo {
         entityLobber.forceBossHealthBar = true;
         entityLobber.applyVariant(3);
         entityLobber.moveTo(x, y - 2, z, 0, 0);
-        world.addFreshEntity(entityLobber);
-        entityLobber.destroyArea(x, y, z, 10000, false, 2);
+        this.spawnDeferred(world, pos, "altar_spawn:" + this.name + ":" + pos.asLong(), entityLobber,
+                () -> entityLobber.destroyArea(x, y, z, 10000, false, 2));
 
         return true;
     }

@@ -7,8 +7,8 @@ import com.google.gson.JsonParser;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
-import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.Variant;
+import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.io.IOUtils;
@@ -22,13 +22,20 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerFamiliars {
     public static PlayerFamiliars INSTANCE = new PlayerFamiliars();
-    public Map<UUID, Map<UUID, PetEntry>> playerFamiliars = new HashMap<>();
-    public Map<UUID, Long> playerFamiliarLoadedTimes = new HashMap<>();
+    public Map<UUID, Map<UUID, PetEntry>> playerFamiliars = new ConcurrentHashMap<>();
+    public Map<UUID, Long> playerFamiliarLoadedTimes = new ConcurrentHashMap<>();
     public List<String> familiarBlacklist = new ArrayList<>();
+    public java.util.Set<UUID> familiarLoadsInFlight = ConcurrentHashMap.newKeySet();
+    public java.util.Set<UUID> pendingFamiliars = ConcurrentHashMap.newKeySet();
     public SSLContext sslContext;
 
     public PlayerFamiliars() {
@@ -57,23 +64,22 @@ public class PlayerFamiliars {
     }
 
     public static class FamiliarLoader implements Runnable {
-        Player player;
+        UUID playerUUID;
 
-        public FamiliarLoader(Player player) {
-            this.player = player;
+        public FamiliarLoader(UUID playerUUID) {
+            this.playerUUID = playerUUID;
         }
 
         @Override
         public void run() {
-            this.getForPlayerUUID(player.getUUID());
-            ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(this.player);
-            if (extendedPlayer != null) {
-                extendedPlayer.loadFamiliars();
+            try {
+                this.loadForPlayerUUID(this.playerUUID);
+            } finally {
+                PlayerFamiliars.INSTANCE.familiarLoadsInFlight.remove(this.playerUUID);
             }
-            PlayerFamiliars.INSTANCE.updatePlayerFamiliarLoadedTime(this.player);
         }
 
-        private void getForPlayerUUID(UUID uuid) {
+        private void loadForPlayerUUID(UUID uuid) {
             String jsonString;
             try {
                 URL url = new URL(LycanitesMobs.serviceAPI + "/familiars?minecraft_uuid=" + uuid.toString());
@@ -98,22 +104,26 @@ public class PlayerFamiliars {
             }
 
             // Parse JSON File:
-            PlayerFamiliars.INSTANCE.parseFamiliarJSON(jsonString);
+            PlayerFamiliars.INSTANCE.parseFamiliarJSON(uuid, jsonString);
+            PlayerFamiliars.INSTANCE.pendingFamiliars.add(uuid);
         }
     }
 
     // Parses JSON to Familiars, returns false if the JSON is invalid.
-    public void parseFamiliarJSON(String jsonString) {
+    public void parseFamiliarJSON(UUID playerUUID, String jsonString) {
+        Map<UUID, PetEntry> parsedEntries = new HashMap<>();
         try {
             JsonParser jsonParser = new JsonParser();
             JsonObject json = jsonParser.parse(jsonString).getAsJsonObject();
             JsonArray jsonArray = json.getAsJsonArray("data");
-            Iterator<JsonElement> jsonIterator = jsonArray.iterator();
-            while (jsonIterator.hasNext()) {
+            for (JsonElement jsonElement : jsonArray) {
                 try {
                     // Familiar UUIDs:
-                    JsonObject familiarJson = jsonIterator.next().getAsJsonObject();
+                    JsonObject familiarJson = jsonElement.getAsJsonObject();
                     UUID minecraft_uuid = UUID.fromString(familiarJson.get("minecraft_uuid").getAsString());
+                    if (!playerUUID.equals(minecraft_uuid)) {
+                        continue;
+                    }
                     if (this.familiarBlacklist.contains(minecraft_uuid.toString())) {
                         continue;
                     }
@@ -144,17 +154,7 @@ public class PlayerFamiliars {
                         familiarEntry.setEntityName(familiar_name);
                     }
                     familiarEntry.setColor(familiar_color);
-
-                    // Add Pet Entries or Update Existing Entries:
-                    if (!this.playerFamiliars.containsKey(minecraft_uuid)) {
-                        this.playerFamiliars.put(minecraft_uuid, new HashMap<>());
-                    }
-                    if (!this.playerFamiliars.get(minecraft_uuid).containsKey(familiar_uuid)) {
-                        this.playerFamiliars.get(minecraft_uuid).put(familiar_uuid, familiarEntry);
-                    } else {
-                        PetEntry existingEntry = this.playerFamiliars.get(minecraft_uuid).get(familiar_uuid);
-                        existingEntry.copy(familiarEntry);
-                    }
+                    parsedEntries.put(familiar_uuid, familiarEntry);
                 } catch (Exception e) {
                 }
             }
@@ -162,21 +162,24 @@ public class PlayerFamiliars {
             /*LycanitesMobs.logWarning("", "A problem occurred when loading online player familiars:");
             e.printStackTrace();*/
         }
+        this.playerFamiliars.put(playerUUID, parsedEntries);
     }
 
     public Map<UUID, PetEntry> getFamiliarsForPlayer(Player player) {
+        UUID playerUUID = player.getUUID();
         long currentTime = System.currentTimeMillis() / 1000;
         long loadedTime = this.getPlayerFamiliarLoadedTime(player);
-        if (loadedTime < 0 || currentTime - loadedTime > 30 * 60) {
-            this.updatePlayerFamiliarLoadedTime(player);
-            FamiliarLoader familiarLoader = new FamiliarLoader(player);
-            Thread thread = new Thread(familiarLoader);
+        if ((loadedTime < 0 || currentTime - loadedTime > 30 * 60) && this.familiarLoadsInFlight.add(playerUUID)) {
+            this.updatePlayerFamiliarLoadedTime(playerUUID);
+            FamiliarLoader familiarLoader = new FamiliarLoader(playerUUID);
+            Thread thread = new Thread(familiarLoader, "LycanitesFamiliars-" + playerUUID);
+            thread.setDaemon(true);
             thread.start();
         }
 
         Map<UUID, PetEntry> playerFamiliarEntries = new HashMap<>();
-        if (this.playerFamiliars.containsKey(player.getUUID())) {
-            playerFamiliarEntries = this.playerFamiliars.get(player.getUUID());
+        if (this.playerFamiliars.containsKey(playerUUID)) {
+            playerFamiliarEntries.putAll(this.playerFamiliars.get(playerUUID));
             for (PetEntry familiarEntry : playerFamiliarEntries.values()) {
                 if (familiarEntry.host == null) {
                     familiarEntry.host = player;
@@ -195,6 +198,21 @@ public class PlayerFamiliars {
     }
 
     public void updatePlayerFamiliarLoadedTime(Player player) {
-        this.playerFamiliarLoadedTimes.put(player.getUUID(), System.currentTimeMillis() / 1000);
+        this.updatePlayerFamiliarLoadedTime(player.getUUID());
+    }
+
+    public void updatePlayerFamiliarLoadedTime(UUID playerUUID) {
+        this.playerFamiliarLoadedTimes.put(playerUUID, System.currentTimeMillis() / 1000);
+    }
+
+    public void applyPendingFamiliars(Player player) {
+        if (!this.pendingFamiliars.remove(player.getUUID())) {
+            return;
+        }
+
+        ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(player);
+        if (extendedPlayer != null) {
+            extendedPlayer.loadFamiliars();
+        }
     }
 }

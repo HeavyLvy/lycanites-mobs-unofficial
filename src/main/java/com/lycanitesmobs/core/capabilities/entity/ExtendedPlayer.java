@@ -332,6 +332,10 @@ public class ExtendedPlayer {
             this.sendPetEntriesToPlayer("");
         }
 
+        if (!this.player.getCommandSenderWorld().isClientSide) {
+            PlayerFamiliars.INSTANCE.applyPendingFamiliars(this.player);
+        }
+
         // Pet Manager:
         this.petManager.onUpdate(this.player.getCommandSenderWorld());
 

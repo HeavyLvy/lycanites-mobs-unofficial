@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.worldgen.dungeon.instance;
 import com.lycanitesmobs.core.block.base.BlockFireBase;
 import com.lycanitesmobs.core.block.cloud.BlockFrostCloud;
 import com.lycanitesmobs.core.block.cloud.BlockPoisonCloud;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.worldgen.dungeon.DeferredBossSpawner;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSector;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonTheme;
@@ -1128,6 +1129,12 @@ public class SectorInstance {
         }
 
         mobSpawn.onSpawned(entityLiving, null);
+        if (entityWorld instanceof ServerLevel serverLevel) {
+            DeferredLevelActionManager.enqueue(serverLevel, blockPos,
+                    "dungeon_room_spawn:" + this.hashCode() + ":" + blockPos.asLong(),
+                    level -> level.addFreshEntity(entityLiving));
+            return;
+        }
         worldWriter.addFreshEntity(entityLiving);
     }
 

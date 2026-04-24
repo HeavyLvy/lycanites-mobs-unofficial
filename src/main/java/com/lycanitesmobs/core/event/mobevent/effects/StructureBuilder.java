@@ -1,7 +1,10 @@
 package com.lycanitesmobs.core.event.mobevent.effects;
 
 
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -29,4 +32,21 @@ public abstract class StructureBuilder {
 
 
 	public abstract void build(Level world, Player player, BlockPos pos, int level, int ticks, int variant);
+
+	protected boolean spawnDeferred(Level world, BlockPos pos, String key, Entity entity, Runnable afterSpawn) {
+		if (world instanceof ServerLevel serverLevel) {
+			return DeferredLevelActionManager.enqueue(serverLevel, pos, key, level -> {
+				level.addFreshEntity(entity);
+				if (afterSpawn != null) {
+					afterSpawn.run();
+				}
+			});
+		}
+
+		world.addFreshEntity(entity);
+		if (afterSpawn != null) {
+			afterSpawn.run();
+		}
+		return true;
+	}
 }

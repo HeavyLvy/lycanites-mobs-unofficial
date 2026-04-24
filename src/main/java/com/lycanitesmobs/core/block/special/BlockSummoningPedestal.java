@@ -78,6 +78,17 @@ public class BlockSummoningPedestal extends BlockBase implements EntityBlock {
         return new TileEntitySummoningPedestal(p_153215_, p_153216_);
     }
 
+    @Override
+    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock())) {
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (blockEntity instanceof TileEntitySummoningPedestal pedestal) {
+                pedestal.onBlockRemoved();
+            }
+        }
+        super.onRemove(state, world, pos, newState, isMoving);
+    }
+
 
     public static void setState(EnumSummoningPedestal owner, Level worldIn, BlockPos pos) {
         BlockState blockState = worldIn.getBlockState(pos);

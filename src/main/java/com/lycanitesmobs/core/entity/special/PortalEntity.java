@@ -7,6 +7,7 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.item.summoningstaff.ItemStaffSummoning;
 import com.lycanitesmobs.core.entity.pets.SummonSet;
 import com.lycanitesmobs.core.block.blockentity.TileEntitySummoningPedestal;
@@ -16,6 +17,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -279,7 +281,16 @@ public class PortalEntity extends BaseProjectileEntity {
                     //this.shootingEntity.addStat(ObjectManager.getStat(entityCreature.creatureInfo.getName() + ".summon"), 1); TODO Player Stats
                 }
             }
-            this.getCommandSenderWorld().addFreshEntity(entity);
+            if (this.getCommandSenderWorld() instanceof ServerLevel serverLevel) {
+                DeferredLevelActionManager.enqueue(serverLevel, this.blockPosition(), "portal_summon:" + entity.getUUID(), level -> {
+                    if (!this.isAlive()) {
+                        return;
+                    }
+                    level.addFreshEntity(entity);
+                });
+            } else {
+                this.getCommandSenderWorld().addFreshEntity(entity);
+            }
         }
         int amount = this.summonAmount;
         this.summonAmount = 0;

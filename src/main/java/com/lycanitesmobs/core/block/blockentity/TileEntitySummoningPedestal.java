@@ -8,6 +8,7 @@ import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.entity.special.PortalEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.network.message.MessageSummoningPedestalStats;
 import com.lycanitesmobs.core.network.message.MessageSummoningPedestalSummonSet;
@@ -22,6 +23,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -84,22 +86,6 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
     }
 
     /**
-     * Can be called by a block when broken to alert this TileEntity that it is being removed.
-     **/
-    @Override
-    public void setRemoved() {
-        if (this.summoningPortal != null && this.summoningPortal.isAlive()) {
-            this.summoningPortal.remove(Entity.RemovalReason.DISCARDED);
-        }
-        for (ItemStack itemStack : this.itemStacks) {
-            CustomItemEntity entityItem = new CustomItemEntity(this.getLevel(), this.getBlockPos().getX(), this.getBlockPos().getY() + 0.5D, this.getBlockPos().getZ(), itemStack);
-            this.getLevel().addFreshEntity(entityItem);
-        }
-        this.clearContent();
-        super.setRemoved();
-    }
-
-    /**
      * The main update called every tick.
      **/
     @Override
@@ -150,9 +136,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
 
             // Summoning Portal:
             if (this.summoningPortal == null || !this.summoningPortal.isAlive()) {
-                this.summoningPortal = new PortalEntity((EntityType<? extends PortalEntity>) ProjectileManager.getInstance().oldProjectileTypes.get(PortalEntity.class), this.getLevel(), this);
-                this.summoningPortal.setProjectileScale(6);
-                this.getLevel().addFreshEntity(this.summoningPortal);
+                this.requestSummoningPortal();
             }
 
             // Update Minions:
@@ -399,7 +383,9 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
 
     @Override
     public void clearContent() {
-        this.itemStacks.clear();
+        for (int i = 0; i < this.itemStacks.size(); i++) {
+            this.itemStacks.set(i, ItemStack.EMPTY);
+        }
     }
 
     /**
@@ -474,6 +460,58 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
 
     public void sendSummonSetToServer(SummonSet summonSet) {
         LycanitesMobs.PACKET_MANAGER.sendToServer(new MessageSummoningPedestalSummonSet(summonSet, this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ()));
+    }
+
+    public void onBlockRemoved() {
+        if (!(this.getLevel() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        List<ItemStack> drops = new ArrayList<>();
+        for (ItemStack itemStack : this.itemStacks) {
+            if (!itemStack.isEmpty()) {
+                drops.add(itemStack.copy());
+            }
+        }
+
+        PortalEntity portal = this.summoningPortal;
+        BlockPos blockPos = this.getBlockPos();
+        this.summoningPortal = null;
+        this.clearContent();
+
+        DeferredLevelActionManager.enqueue(serverLevel, blockPos, "pedestal_remove:" + blockPos.asLong(), level -> {
+            if (portal != null && portal.isAlive()) {
+                portal.remove(Entity.RemovalReason.DISCARDED);
+            }
+            for (ItemStack drop : drops) {
+                CustomItemEntity entityItem = new CustomItemEntity(level, blockPos.getX(), blockPos.getY() + 0.5D, blockPos.getZ(), drop);
+                level.addFreshEntity(entityItem);
+            }
+        });
+    }
+
+    protected void requestSummoningPortal() {
+        if (!(this.getLevel() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        BlockPos blockPos = this.getBlockPos();
+        DeferredLevelActionManager.enqueue(serverLevel, blockPos, "pedestal_portal:" + blockPos.asLong(), level -> {
+            if (this.isRemoved() || level.getBlockEntity(blockPos) != this) {
+                return;
+            }
+            if (this.summonSet == null || this.summonSet.getCreatureInfo() == null) {
+                return;
+            }
+            if (this.summoningPortal != null && this.summoningPortal.isAlive()) {
+                return;
+            }
+
+            PortalEntity portal = new PortalEntity((EntityType<? extends PortalEntity>) ProjectileManager.getInstance().oldProjectileTypes.get(PortalEntity.class), level, this);
+            portal.setProjectileScale(6);
+            this.summoningPortal = portal;
+            level.addFreshEntity(portal);
+        });
     }
 
 

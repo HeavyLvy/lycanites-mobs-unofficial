@@ -11,6 +11,7 @@ import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.creature.Subspecies;
 import com.lycanitesmobs.core.data.info.Variant;
 import com.lycanitesmobs.core.manager.PetManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.UUID;
 
@@ -412,7 +414,6 @@ public class PetEntry {
                     this.respawnTime = this.respawnTimeMax;
                 if (this.respawnTime-- <= 0) {
                     this.spawnEntity();
-                    this.isRespawning = false;
                 }
             }
 
@@ -509,6 +510,20 @@ public class PetEntry {
      * Spawns and sets this entry's entity if it isn't active already.
      **/
     public void spawnEntity() {
+        if (!(this.host != null && this.host.getCommandSenderWorld() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        DeferredLevelActionManager.enqueue(serverLevel, this.host.blockPosition(), "pet_spawn:" + this.petEntryID, level -> {
+            if (this.entity != null || this.host == null || this.host.getCommandSenderWorld() != level || !this.active || !this.spawningActive) {
+                return;
+            }
+            this.spawnEntityNow();
+            this.isRespawning = false;
+        });
+    }
+
+    private void spawnEntityNow() {
         if (this.entity != null || this.host == null)
             return;
         try {
