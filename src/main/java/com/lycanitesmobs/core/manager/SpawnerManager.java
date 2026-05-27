@@ -23,6 +23,7 @@ public class SpawnerManager extends JSONLoader {
 
     protected Map<String, Spawner> spawners = new HashMap<>();
     protected List<SpawnCondition> globalSpawnConditions = new ArrayList<>();
+    private String loadingDefinitionPath = "spawners";
 
 
     /**
@@ -57,10 +58,12 @@ public class SpawnerManager extends JSONLoader {
      **/
     public void loadAllFromJson(ModInfo modInfo) {
         // Spawners:
+        this.loadingDefinitionPath = "spawners";
         this.loadAllJson(modInfo, "Spawner", "spawners", "name", true, "spawner", FileLoader.common(), StreamLoader.common());
         LMHelperClass.logDebug("Spawner", "Complete! " + this.spawners.size() + " JSON Spawners Loaded In Total.");
 
         // Mob Event Spawners:
+        this.loadingDefinitionPath = "mobevents";
         this.loadAllJson(modInfo, "Spawner", "mobevents", "name", true, "spawner", FileLoader.common(), StreamLoader.common());
         LMHelperClass.logDebug("Spawner", "Complete! " + this.spawners.size() + " JSON Spawners Loaded In Total.");
 
@@ -102,7 +105,9 @@ public class SpawnerManager extends JSONLoader {
     @Override
     public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
         Spawner spawner = new Spawner();
-        spawner.loadFromJSON(json);
+        String name = json.get("name").getAsString();
+        String definitionPath = "config/" + LycanitesMobs.MODID + "/" + this.loadingDefinitionPath + "/" + name + ".json";
+        spawner.loadFromJSON(json, definitionPath);
         this.addSpawner(spawner);
     }
 

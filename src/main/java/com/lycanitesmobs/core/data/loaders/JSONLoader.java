@@ -80,7 +80,16 @@ public abstract class JSONLoader {
                 LMHelperClass.logError("There was a problem loading JSON " + loadGroup + ": " + jsonName);
                 throw new RuntimeException(e);
             }
-            this.parseJson(modInfo, loadGroup, json);
+            try {
+                this.parseJson(modInfo, loadGroup, json);
+            } catch (Exception e) {
+                String definitionPath = "config/" + LycanitesMobs.MODID + "/"
+                        + (!"".equals(dataPath) ? dataPath + "/" : "") + jsonName + ".json";
+                LMHelperClass.logWarningMessage("[JSON] Something is wrong with " + loadGroup
+                        + " JSON '" + jsonName + "'. Check this file: " + definitionPath
+                        + ". Cause: " + e.toString());
+                throw new RuntimeException(e);
+            }
         }
     }
 

@@ -16,6 +16,7 @@ import com.lycanitesmobs.core.manager.SpawnerManager;
 import com.lycanitesmobs.core.entity.spawner.condition.SpawnCondition;
 import com.lycanitesmobs.core.entity.spawner.location.SpawnLocation;
 import com.lycanitesmobs.core.entity.spawner.trigger.SpawnTrigger;
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -326,6 +327,10 @@ public class Spawner {
      * Loads this Spawner from the provided JSON data.
      **/
     public void loadFromJSON(JsonObject json) {
+        this.loadFromJSON(json, "config/lycanitesmobs/spawners/" + json.get("name").getAsString() + ".json");
+    }
+
+    public void loadFromJSON(JsonObject json, String definitionPath) {
         // Spawner Properties:
         this.name = json.get("name").getAsString();
         this.sharedName = this.name;
@@ -419,6 +424,30 @@ public class Spawner {
             }
         }
 
+        // Locations:
+        if (json.has("locations")) {
+            JsonArray jsonArray = json.get("locations").getAsJsonArray();
+            Iterator<JsonElement> jsonIterator = jsonArray.iterator();
+            while (jsonIterator.hasNext()) {
+                JsonObject locationJson = jsonIterator.next().getAsJsonObject();
+                SpawnLocation spawnLocation = SpawnLocation.createFromJSON(locationJson);
+                if (spawnLocation == null) {
+                    String locationType = "<missing>";
+                    if (locationJson.has("type") && !locationJson.get("type").isJsonNull()) {
+                        locationType = locationJson.get("type").isJsonPrimitive()
+                                ? "'" + locationJson.get("type").getAsString() + "'"
+                                : locationJson.get("type").toString();
+                    }
+                    this.enabled = false;
+                    LMHelperClass.logWarningMessage("[Spawner] Disabled spawner '" + this.name
+                            + "' because it has an unsupported location type " + locationType
+                            + ". Fix or delete this JSON file: " + definitionPath);
+                    continue;
+                }
+                this.locations.add(spawnLocation);
+            }
+        }
+
         // Triggers:
         if (json.has("triggers")) {
             JsonArray jsonArray = json.get("triggers").getAsJsonArray();
@@ -430,17 +459,6 @@ public class Spawner {
                 if (this.enabled) {
                     SpawnerTriggerDispatcher.getInstance().addTrigger(spawnTrigger);
                 }
-            }
-        }
-
-        // Locations:
-        if (json.has("locations")) {
-            JsonArray jsonArray = json.get("locations").getAsJsonArray();
-            Iterator<JsonElement> jsonIterator = jsonArray.iterator();
-            while (jsonIterator.hasNext()) {
-                JsonObject locationJson = jsonIterator.next().getAsJsonObject();
-                SpawnLocation spawnLocation = SpawnLocation.createFromJSON(locationJson);
-                this.locations.add(spawnLocation);
             }
         }
 

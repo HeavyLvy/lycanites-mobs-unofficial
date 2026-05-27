@@ -47,6 +47,9 @@ public class SpawnLocation {
      * Loads this Spawn Condition from the provided JSON data.
      **/
     public static SpawnLocation createFromJSON(JsonObject json) {
+        if (json == null || !json.has("type") || json.get("type").isJsonNull() || !json.get("type").isJsonPrimitive()) {
+            return null;
+        }
         String type = json.get("type").getAsString();
         SpawnLocation spawnLocation = null;
 
@@ -62,6 +65,9 @@ public class SpawnLocation {
             spawnLocation = new StructureSpawnLocation();
         }
 
+        if (spawnLocation == null) {
+            return null;
+        }
         spawnLocation.loadFromJSON(json);
         return spawnLocation;
     }
