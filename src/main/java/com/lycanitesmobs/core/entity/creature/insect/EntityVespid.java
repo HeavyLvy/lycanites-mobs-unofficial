@@ -21,8 +21,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import com.lycanitesmobs.core.entity.creature.beast.EntityConba;
 
 public class EntityVespid extends AgeableCreatureEntity implements Enemy {
-    public PlaceBlockGoal aiPlaceBlock;
-    public ContextUtils.CreatureBuildTask creatureBuildTask;
+    protected PlaceBlockGoal aiPlaceBlock;
+    protected ContextUtils.CreatureBuildTask creatureBuildTask;
 
     private boolean hiveBuilding = true;
 
@@ -44,11 +44,11 @@ public class EntityVespid extends AgeableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(true));
         this.aiPlaceBlock = new PlaceBlockGoal(this).setMaxDistance(128D).setSpeed(3D).setReplaceLiquid(true).setReplaceSolid(true);
-        this.goalSelector.addGoal(this.nextIdleGoalIndex++, this.aiPlaceBlock);
+        this.goalSelector.addGoal(this.claimIdleGoalIndex(), this.aiPlaceBlock);
 
-        this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindMasterGoal(this).setTargetClass(EntityVespidQueen.class).setRange(64.0D));
+        this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindMasterGoal(this).setTargetClass(EntityVespidQueen.class).setRange(64.0D));
     }
 
     @Override
@@ -68,9 +68,9 @@ public class EntityVespid extends AgeableCreatureEntity implements Enemy {
         super.aiStep();
 
         // Building AI:
-        if (!this.getCommandSenderWorld().isClientSide && this.hiveBuilding && this.getMasterTarget() instanceof EntityVespidQueen && this.aiPlaceBlock.blockState == null) {
+        if (!this.getCommandSenderWorld().isClientSide && this.hiveBuilding && this.getMasterTarget() instanceof EntityVespidQueen && !this.aiPlaceBlock.hasBlockPlacement()) {
             EntityVespidQueen queen = (EntityVespidQueen) this.getMasterTarget();
-            this.creatureBuildTask = queen.creatureStructure.getBuildTask(this);
+            this.creatureBuildTask = queen.getBuildTaskFor(this);
             if (this.creatureBuildTask != null) {
                 this.aiPlaceBlock.setBlockPlacement(this.creatureBuildTask.blockState, this.creatureBuildTask.pos);
             }
@@ -78,7 +78,7 @@ public class EntityVespid extends AgeableCreatureEntity implements Enemy {
 
         // Don't Keep Infected Conbas Targeted:
         if (!this.getCommandSenderWorld().isClientSide && this.getTarget() instanceof EntityConba) {
-            if (((EntityConba) this.getTarget()).vespidInfection) {
+            if (((EntityConba) this.getTarget()).isVespidInfected()) {
                 this.setTarget(null);
             }
         }
@@ -89,7 +89,7 @@ public class EntityVespid extends AgeableCreatureEntity implements Enemy {
         if (this.getMasterTarget() instanceof EntityVespidQueen) {
             EntityVespidQueen queen = (EntityVespidQueen) this.getMasterTarget();
             if (this.creatureBuildTask != null) {
-                queen.creatureStructure.completeBuildTask(this.creatureBuildTask);
+                queen.completeBuildTask(this.creatureBuildTask);
                 this.creatureBuildTask = null;
             }
         }
@@ -111,7 +111,7 @@ public class EntityVespid extends AgeableCreatureEntity implements Enemy {
         }
         if (this.hasMaster() && this.getMasterTarget() instanceof EntityVespidQueen) {
             EntityVespidQueen entityVespidQueen = (EntityVespidQueen) this.getMasterTarget();
-            CreatureRelationshipEntry creatureRelationshipEntry = entityVespidQueen.relationships.getEntry(targetEntity);
+            CreatureRelationshipEntry creatureRelationshipEntry = entityVespidQueen.getRelationshipEntry(targetEntity);
             if (creatureRelationshipEntry != null && !creatureRelationshipEntry.canAttack()) {
                 return false;
             }

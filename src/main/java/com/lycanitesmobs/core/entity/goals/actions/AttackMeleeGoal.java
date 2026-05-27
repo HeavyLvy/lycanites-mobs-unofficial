@@ -28,7 +28,7 @@ public class AttackMeleeGoal extends Goal {
     private double attackRange = 0.5D;
     private float maxChaseDistance = 1024F;
     private double damageScale = 1.0D;
-    public boolean enabled = true;
+    private boolean enabled = true;
     protected int phase = -1;
 
     // Pathing:
@@ -148,7 +148,7 @@ public class AttackMeleeGoal extends Goal {
 
             // Set Direct Target:
             else {
-                return this.host.directNavigator.setTargetPosition(new BlockPos((int) Math.floor(attackTarget.position().x()), (int) Math.floor(attackTarget.position().y() + this.host.getFlightOffset()), (int) Math.floor(attackTarget.position().z())), this.speed);
+                return this.host.setDirectNavigationTarget(new BlockPos((int) Math.floor(attackTarget.position().x()), (int) Math.floor(attackTarget.position().y() + this.host.getFlightOffset()), (int) Math.floor(attackTarget.position().z())), this.speed);
             }
         }
 
@@ -178,7 +178,7 @@ public class AttackMeleeGoal extends Goal {
         if (!this.longMemory)
             if (!this.host.useDirectNavigator() && this.host.getNavigation().isDone())
                 return false;
-            else if (this.host.useDirectNavigator() && (this.host.directNavigator.atTargetPosition() || !this.host.directNavigator.isTargetPositionValid()))
+            else if (this.host.useDirectNavigator() && (this.host.isDirectNavigationAtTarget() || !this.host.isDirectNavigationTargetValid()))
                 return false;
         return this.host.positionNearHome(Mth.floor(attackTarget.position().x()), Mth.floor(attackTarget.position().y()), Mth.floor(attackTarget.position().z()));
     }
@@ -192,7 +192,7 @@ public class AttackMeleeGoal extends Goal {
         if (!this.host.useDirectNavigator()) {
             this.host.getNavigation().moveTo(this.pathToTarget, this.speed);
         } else if (attackTarget != null) {
-            this.host.directNavigator.setTargetPosition(new BlockPos((int) attackTarget.position().x(), (int) (attackTarget.getBoundingBox().minY + this.host.getFlightOffset()), (int) attackTarget.position().z()), speed);
+            this.host.setDirectNavigationTarget(new BlockPos((int) attackTarget.position().x(), (int) (attackTarget.getBoundingBox().minY + this.host.getFlightOffset()), (int) attackTarget.position().z()), speed);
         }
         this.repathTime = 0;
     }
@@ -204,7 +204,7 @@ public class AttackMeleeGoal extends Goal {
     @Override
     public void stop() {
         this.host.getNavigation().stop();
-        this.host.directNavigator.clearTargetPosition(1.0D);
+        this.host.clearDirectNavigationTarget(1.0D);
         this.attackTarget = null;
     }
 
@@ -236,7 +236,7 @@ public class AttackMeleeGoal extends Goal {
                     this.failedPathFindingPenalty += this.getFailedPathFindingPenalty();
                 }
             } else if (this.host.useDirectNavigator()) {
-                this.host.directNavigator.setTargetPosition(new BlockPos((int) this.attackTarget.position().x(), (int) (this.attackTarget.getBoundingBox().minY + this.host.getFlightOffset()), (int) this.attackTarget.position().z()), speed);
+                this.host.setDirectNavigationTarget(new BlockPos((int) this.attackTarget.position().x(), (int) (this.attackTarget.getBoundingBox().minY + this.host.getFlightOffset()), (int) this.attackTarget.position().z()), speed);
             }
         }
 

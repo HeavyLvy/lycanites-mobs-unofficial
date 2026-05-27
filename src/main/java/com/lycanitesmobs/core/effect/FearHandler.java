@@ -3,9 +3,9 @@ package com.lycanitesmobs.core.effect;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.network.message.MessageEntityVelocity;
+import com.lycanitesmobs.core.util.math.SchismMath;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -118,7 +118,7 @@ public class FearHandler {
         // Amplifier scaling: 0.0 at Fear I → 1.0 at Fear V.
         MobEffectInstance inst = entity.getEffect(fear);
         int amplifier = inst != null ? inst.getAmplifier() : 0;
-        float scale = Mth.clamp(amplifier / MAX_AMPLIFIER, 0.0F, 1.0F);
+        float scale = SchismMath.clamp(amplifier / MAX_AMPLIFIER, 0.0F, 1.0F);
 
         double pushX, pushZ;
         if (this.fearSource != null) {
@@ -135,7 +135,7 @@ public class FearHandler {
             }
             fleeAngle += (entity.getRandom().nextDouble() - 0.5) * 2.0 * FLEE_WOBBLE_MAX;
 
-            double fleeStrength = Mth.lerp(scale, FLEE_STRENGTH_AT_MIN, FLEE_STRENGTH_AT_MAX);
+            double fleeStrength = SchismMath.lerp(scale, FLEE_STRENGTH_AT_MIN, FLEE_STRENGTH_AT_MAX);
             pushX = Math.cos(fleeAngle) * fleeStrength;
             pushZ = Math.sin(fleeAngle) * fleeStrength;
         } else {
@@ -151,14 +151,14 @@ public class FearHandler {
                     tugPhase = 1;
                 }
             } else {
-                double tugStrength = Mth.lerp(scale, TUG_STRENGTH_AT_MIN, TUG_STRENGTH_AT_MAX);
+                double tugStrength = SchismMath.lerp(scale, TUG_STRENGTH_AT_MIN, TUG_STRENGTH_AT_MAX);
                 pushX = Math.cos(tugAngle) * tugStrength;
                 pushZ = Math.sin(tugAngle) * tugStrength;
 
                 if (tugPhase >= TUG_DURATION) {
                     // Pause length scales inversely with amplifier (longer at low fear, shorter at high).
-                    int pauseMin = (int) Mth.lerp(scale, TUG_PAUSE_MIN_AT_MIN, TUG_PAUSE_MIN_AT_MAX);
-                    int pauseMax = (int) Mth.lerp(scale, TUG_PAUSE_MAX_AT_MIN, TUG_PAUSE_MAX_AT_MAX);
+                    int pauseMin = (int) SchismMath.lerp(scale, TUG_PAUSE_MIN_AT_MIN, TUG_PAUSE_MIN_AT_MAX);
+                    int pauseMax = (int) SchismMath.lerp(scale, TUG_PAUSE_MAX_AT_MIN, TUG_PAUSE_MAX_AT_MAX);
                     int pause = pauseMin + entity.getRandom().nextInt(Math.max(pauseMax - pauseMin + 1, 1));
                     tugPhase = -pause;
                 }

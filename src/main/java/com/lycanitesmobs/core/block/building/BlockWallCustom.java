@@ -19,15 +19,15 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class BlockWallCustom extends WallBlock implements BlockTypeGetter {
-    public String blockName = "BlockBase";
-    public ResourceLocation registryName;
+    private String blockName = "BlockBase";
+    private ResourceLocation registryName;
 
     // ==================================================
     //                   Constructor
     // ==================================================
     public BlockWallCustom(Block.Properties properties, BlockBase block) {
         super(properties);
-        this.setRegistryName(LycanitesMobs.MODID, block.blockName + "_wall");
+        this.setRegistryName(LycanitesMobs.MODID, block.getBlockName() + "_wall");
     }
 
     public ResourceLocation getRegistryName() {

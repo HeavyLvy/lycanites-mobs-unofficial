@@ -15,7 +15,7 @@ public class PlayerControlGoal extends Goal {
     private double speed = 1.0D;
     private double sprintSpeed = 1.5D;
     private double flightSpeed = 1.0D;
-    public boolean enabled = true;
+    private boolean enabled = true;
 	
 	// ==================================================
  	//                    Constructor

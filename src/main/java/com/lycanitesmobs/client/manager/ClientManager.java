@@ -82,7 +82,7 @@ public class ClientManager {
 
 
     public void initBlockRenderTypes() {
-        for (Block block : ItemManager.getInstance().cutoutBlocks) {
+        for (Block block : ItemManager.getInstance().getCutoutBlocks()) {
             ItemBlockRenderTypes.setRenderLayer(block, RenderType.cutout());
         }
     }

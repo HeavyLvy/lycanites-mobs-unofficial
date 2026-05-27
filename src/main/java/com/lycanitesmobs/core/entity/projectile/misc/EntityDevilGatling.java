@@ -1,10 +1,10 @@
 package com.lycanitesmobs.core.entity.projectile.misc;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.data.info.ObjectLists;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -24,8 +24,8 @@ import java.util.List;
 public class EntityDevilGatling extends BaseProjectileEntity {
 
     // Properties:
-    public Entity shootingEntity;
-    public int expireTime = 15;
+    protected Entity shootingEntity;
+    protected int expireTime = 15;
 
     // ==================================================
     //                   Constructors
@@ -144,8 +144,6 @@ public class EntityDevilGatling extends BaseProjectileEntity {
     }
 
     public ResourceLocation getTexture() {
-        if (TextureManager.getTexture(this.entityName) == null)
-            TextureManager.addTexture(this.entityName, "textures/item/" + subTypeString() + "/" + this.entityName + ".png");
-        return TextureManager.getTexture(this.entityName);
+        return AssetHelper.texture("textures/item/" + subTypeString() + "/" + this.entityName + ".png");
     }
 }

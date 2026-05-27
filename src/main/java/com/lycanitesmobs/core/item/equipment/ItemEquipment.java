@@ -3,9 +3,6 @@ package com.lycanitesmobs.core.item.equipment;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.manager.ClientManager;
-import com.lycanitesmobs.client.manager.TextureManager;
-import com.lycanitesmobs.client.renderer.item.EquipmentRenderer;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.item.base.BaseItem;
@@ -14,9 +11,8 @@ import com.lycanitesmobs.core.item.equipment.features.*;
 import com.lycanitesmobs.core.item.tool.CustomTiers;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.item.tool.ToolType;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -41,8 +37,6 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.common.TierSortingRegistry;
 import net.minecraftforge.common.ToolAction;
@@ -57,11 +51,11 @@ public class ItemEquipment extends BaseItem {
     /**
      * The maximum amount of parts that can be added to an Equipment Piece.
      **/
-    public static int PART_LIMIT = 20;
+    public static final int PART_LIMIT = 20;
 
-    public static int SHARPNESS_MAX = 1500;
-    public static int MANA_MAX = 1500;
-    public ResourceLocation registryName = null;
+    public static final int SHARPNESS_MAX = 1500;
+    public static final int MANA_MAX = 1500;
+    protected ResourceLocation registryName = null;
 
     /**
      * Constructor
@@ -90,7 +84,7 @@ public class ItemEquipment extends BaseItem {
         if (itemStack.hasCustomHoverName()) {
             return itemStack.getHoverName();
         }
-        if (ItemConfig.equipmentSpecialNames) {
+        if (ItemConfig.usesEquipmentSpecialNames()) {
             Component generatedName = EquipmentNameGenerator.generateName(itemStack);
             if (generatedName != null) {
                 return generatedName;
@@ -104,12 +98,7 @@ public class ItemEquipment extends BaseItem {
     // ==================================================
     @Override
     public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(new IClientItemExtensions() {
-            @Override
-            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return new EquipmentRenderer();
-            }
-        });
+        consumer.accept(LycanitesMobs.PROXY.createEquipmentItemExtensions());
     }
 
     // ==================================================
@@ -218,12 +207,6 @@ public class ItemEquipment extends BaseItem {
         return featureSummaries;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    @Nullable
-    public Font getFontRenderer(ItemStack stack) {
-        return ClientManager.getInstance().getFontRenderer();
-    }
-
     @Override
     public boolean isBarVisible(ItemStack itemStack) {
         return false;
@@ -313,11 +296,7 @@ public class ItemEquipment extends BaseItem {
             if (equipmentPart == null) {
                 continue;
             }
-            for (EquipmentFeature feature : equipmentPart.features) {
-                if (feature.isActive(equipmentPartStack, equipmentPart.getPartLevel(equipmentPartStack)) && feature.featureType.equalsIgnoreCase(featureType)) {
-                    features.add(feature);
-                }
-            }
+            features.addAll(equipmentPart.getActiveFeaturesByType(equipmentPartStack, featureType));
         }
         return features;
     }
@@ -336,10 +315,8 @@ public class ItemEquipment extends BaseItem {
             if (equipmentPart == null) {
                 continue;
             }
-            for (EquipmentFeature feature : equipmentPart.features) {
-                if (feature.isActive(equipmentPartStack, equipmentPart.getPartLevel(equipmentPartStack)) && feature.featureType.equalsIgnoreCase(featureType)) {
-                    features.put(feature, equipmentPartStack);
-                }
+            for (EquipmentFeature feature : equipmentPart.getActiveFeaturesByType(equipmentPartStack, featureType)) {
+                features.put(feature, equipmentPartStack);
             }
         }
         return features;
@@ -683,7 +660,7 @@ public class ItemEquipment extends BaseItem {
         }
         for (EquipmentFeature equipmentFeature : this.getFeaturesByType(stack, "harvest")) {
             HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature) equipmentFeature;
-            String type = harvestFeature.harvestType;
+            String type = harvestFeature.getHarvestType();
             if ("pickaxe".equalsIgnoreCase(type) && ToolActions.DEFAULT_PICKAXE_ACTIONS.contains(toolAction)) {
                 return true;
             }
@@ -714,8 +691,8 @@ public class ItemEquipment extends BaseItem {
         int harvestLevel = -1;
         for (EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "harvest")) {
             HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature) equipmentFeature;
-            if (harvestLevel < harvestFeature.harvestLevel && tool == harvestFeature.getToolType()) {
-                harvestLevel = harvestFeature.harvestLevel;
+            if (harvestLevel < harvestFeature.getHarvestLevel() && tool == harvestFeature.getToolType()) {
+                harvestLevel = harvestFeature.getHarvestLevel();
             }
         }
         return harvestLevel;
@@ -732,8 +709,8 @@ public class ItemEquipment extends BaseItem {
         int harvestLevel = -1;
         for (EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "harvest")) {
             HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature) equipmentFeature;
-            if (harvestLevel < harvestFeature.harvestLevel) {
-                harvestLevel = harvestFeature.harvestLevel;
+            if (harvestLevel < harvestFeature.getHarvestLevel()) {
+                harvestLevel = harvestFeature.getHarvestLevel();
             }
         }
 
@@ -983,7 +960,7 @@ public class ItemEquipment extends BaseItem {
         double damage = 0;
         for (EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "damage")) {
             DamageEquipmentFeature damageFeature = (DamageEquipmentFeature) equipmentFeature;
-            damage += damageFeature.damageAmount;
+            damage += damageFeature.getDamageAmount();
         }
         return damage;
     }
@@ -999,7 +976,7 @@ public class ItemEquipment extends BaseItem {
         double i = 0;
         for (EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "damage")) {
             DamageEquipmentFeature damageFeature = (DamageEquipmentFeature) equipmentFeature;
-            cooldown += damageFeature.damageCooldown;
+            cooldown += damageFeature.getDamageCooldown();
             i++;
         }
 
@@ -1021,7 +998,7 @@ public class ItemEquipment extends BaseItem {
         double range = 0;
         for (EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "damage")) {
             DamageEquipmentFeature damageFeature = (DamageEquipmentFeature) equipmentFeature;
-            range += damageFeature.damageRange;
+            range += damageFeature.getDamageRange();
         }
         return range;
     }
@@ -1040,7 +1017,7 @@ public class ItemEquipment extends BaseItem {
         double knockback = 0;
         for (EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "damage")) {
             DamageEquipmentFeature damageFeature = (DamageEquipmentFeature) equipmentFeature;
-            knockback += damageFeature.damageKnockback;
+            knockback += damageFeature.getDamageKnockback();
         }
         return knockback;
     }
@@ -1059,7 +1036,7 @@ public class ItemEquipment extends BaseItem {
         double sweep = 0;
         for (EquipmentFeature equipmentFeature : this.getFeaturesByType(itemStack, "damage")) {
             DamageEquipmentFeature damageFeature = (DamageEquipmentFeature) equipmentFeature;
-            sweep += damageFeature.damageSweep;
+            sweep += damageFeature.getDamageSweep();
         }
         return sweep;
     }
@@ -1073,6 +1050,6 @@ public class ItemEquipment extends BaseItem {
      * Returns the texture to use for the provided ItemStack.
      **/
     public ResourceLocation getTexture(ItemStack itemStack) {
-        return TextureManager.getTexture(this.itemName);
+        return AssetHelper.texture("textures/equipment/" + this.itemName + ".png");
     }
 }

@@ -5,13 +5,13 @@ import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.entity.spawner.condition.WorldSpawnCondition;
 import com.lycanitesmobs.core.manager.DungeonManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import com.lycanitesmobs.core.util.math.SchismMath;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSchematic;
 import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -56,7 +56,7 @@ public class StructureSpawnEvents {
 
         boolean spawned = false;
         for (DungeonSchematic schematic : DungeonManager.getInstance().getSchematics()) {
-            if (schematic == null || schematic.name == null) {
+            if (schematic == null || schematic.getName() == null) {
                 continue;
             }
 
@@ -73,7 +73,7 @@ public class StructureSpawnEvents {
                 maxY = t;
             }
 
-            int clampedY = Mth.clamp(clickPos.getY(), minY, maxY);
+            int clampedY = SchismMath.clamp(clickPos.getY(), minY, maxY);
             BlockPos origin = new BlockPos(clickPos.getX(), clampedY, clickPos.getZ());
 
             if (!worldCondition.isMet(level, serverPlayer, origin)) {
@@ -87,7 +87,7 @@ public class StructureSpawnEvents {
 
             player.sendSystemMessage(
                     Component.literal(
-                            "Debug spawned \"" + schematic.name + "\" at " +
+                            "Debug spawned \"" + schematic.getName() + "\" at " +
                                     origin.getX() + ", " + origin.getY() + ", " + origin.getZ()));
             spawned = true;
             break;
@@ -177,19 +177,19 @@ public class StructureSpawnEvents {
     private static void debugSpawnDungeonInstance(ServerLevel level, ExtendedWorld extendedWorld,
             DungeonSchematic schematic, BlockPos origin) {
         DungeonInstance instance = new DungeonInstance();
-        instance.schematic = schematic;
+        instance.setSchematic(schematic);
         instance.setOrigin(origin);
         instance.init(level);
 
         long xorSeed = level.getSeed() ^ origin.asLong();
         RandomSource idRandom = RandomSource.create(xorSeed);
         UUID id = new UUID(idRandom.nextLong(), idRandom.nextLong());
-        instance.uuid = id;
+        instance.setUuid(id);
 
         extendedWorld.addDungeonInstance(instance, id);
         extendedWorld.buildDungeonInLoadedChunks(instance);
 
         LMHelperClass.logDebug("Dungeon",
-                "Debug dungeon " + schematic.name + " spawned at " + origin);
+                "Debug dungeon " + schematic.getName() + " spawned at " + origin);
     }
 }

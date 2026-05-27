@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -21,52 +22,52 @@ public class ProjectileEquipmentFeature extends EquipmentFeature {
     /**
      * The name of the projectile to spawn.
      **/
-    public String projectileName;
+    protected String projectileName;
 
     /**
      * How this feature spawns projectiles. Can be: 'hit' (when damaging an entity), 'primary' (left click) or 'secondary' (right click).
      **/
-    public String projectileTrigger = "secondary";
+    protected String projectileTrigger = "secondary";
 
     /**
      * The pattern to fire projectiles in. Can be 'simple', 'spread' or 'ring'.
      **/
-    public String projectilePattern = "simple";
+    protected String projectilePattern = "simple";
 
     /**
      * The chance of firing a projectile for the hit trigger.
      **/
-    public double hitChance = 0.05;
+    protected double hitChance = 0.05;
 
     /**
      * The cooldown (in ticks) for primary and secondary triggers.
      **/
-    public int cooldown = 2;
+    protected int cooldown = 2;
 
     /**
      * How many projectiles to fire per round.
      **/
-    public int count = 1;
+    protected int count = 1;
 
     /**
      * The x spread for the spread projectile pattern.
      **/
-    public double spreadX = 0;
+    protected double spreadX = 0;
 
     /**
      * The y spread for the spread projectile pattern.
      **/
-    public double spreadY = 0;
+    protected double spreadY = 0;
 
     /**
      * The range in degrees for the ring pattern.
      **/
-    public double ringRange = 0;
+    protected double ringRange = 0;
 
     /**
      * Additional damage added to the projectile.
      **/
-    public int bonusDamage = 0;
+    protected int bonusDamage = 0;
 
     /**
      * Stores a channeled projectile currently in use by this feature, used for lasers.
@@ -106,6 +107,18 @@ public class ProjectileEquipmentFeature extends EquipmentFeature {
 
         if (json.has("bonusDamage"))
             this.bonusDamage = json.get("bonusDamage").getAsInt();
+    }
+
+    public int getCooldown() {
+        return this.cooldown;
+    }
+
+    public int getCount() {
+        return this.count;
+    }
+
+    public int getBonusDamage() {
+        return this.bonusDamage;
     }
 
     @Override
@@ -252,7 +265,7 @@ public class ProjectileEquipmentFeature extends EquipmentFeature {
             if (!this.channeledProjectile.isAlive()) {
                 this.channeledProjectile = null;
             } else {
-                this.channeledProjectile.projectileLife = 20;
+                this.channeledProjectile.setProjectileLife(20);
                 return;
             }
         }
@@ -270,10 +283,10 @@ public class ProjectileEquipmentFeature extends EquipmentFeature {
                 ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile(this.projectileName);
                 BaseProjectileEntity projectile = projectileInfo.createProjectile(world, shooter);
                 projectile.setPos(firePos.x, firePos.y, firePos.z);
-                projectile.shootFromRotation(shooter, (float) pitch, (float) yaw - (float) offsetX, 0, (float) projectileInfo.velocity, 0);
+                projectile.shootFromRotation(shooter, (float) pitch, (float) yaw - (float) offsetX, 0, (float) projectileInfo.getVelocity(), 0);
                 projectile.setOwner(shooter);
                 projectile.setBonusDamage(this.bonusDamage);
-                world.addFreshEntity(projectile);
+                DeferredLevelActionManager.spawnEntity(world, shooter.blockPosition(), null, projectile);
                 mainProjectile = projectile;
             }
         } else if ("ring".equals(this.projectilePattern)) {
@@ -284,8 +297,8 @@ public class ProjectileEquipmentFeature extends EquipmentFeature {
                 BaseProjectileEntity projectile = projectileInfo.createProjectile(world, shooter);
                 projectile.setPos(firePos.x, firePos.y, firePos.z);
                 projectile.setBonusDamage(this.bonusDamage);
-                world.addFreshEntity(projectile);
-                projectile.shootFromRotation(shooter, shooter.xRotO, (float) yaw - (float) offsetX, 0, (float) projectileInfo.velocity, 0);
+                DeferredLevelActionManager.spawnEntity(world, shooter.blockPosition(), null, projectile);
+                projectile.shootFromRotation(shooter, shooter.xRotO, (float) yaw - (float) offsetX, 0, (float) projectileInfo.getVelocity(), 0);
                 projectile.setOwner(shooter);
                 mainProjectile = projectile;
             }
@@ -293,10 +306,10 @@ public class ProjectileEquipmentFeature extends EquipmentFeature {
             ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile(this.projectileName);
             mainProjectile = projectileInfo.createProjectile(world, shooter);
             mainProjectile.setPos(firePos.x, firePos.y, firePos.z);
-            mainProjectile.shootFromRotation(shooter, shooter.xRotO, shooter.yRotO - (float) offsetX, 0, (float) projectileInfo.velocity, 0);
+            mainProjectile.shootFromRotation(shooter, shooter.xRotO, shooter.yRotO - (float) offsetX, 0, (float) projectileInfo.getVelocity(), 0);
             mainProjectile.setOwner(shooter);
             mainProjectile.setBonusDamage(this.bonusDamage);
-            world.addFreshEntity(mainProjectile);
+            DeferredLevelActionManager.spawnEntity(world, shooter.blockPosition(), null, mainProjectile);
         }
 
         // Channeling:

@@ -51,7 +51,7 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false).setRange(2));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false).setRange(2));
     }
 
     @Override
@@ -259,7 +259,7 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

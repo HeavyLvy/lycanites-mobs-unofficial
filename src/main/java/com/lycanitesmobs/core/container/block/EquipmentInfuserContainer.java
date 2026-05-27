@@ -20,9 +20,9 @@ import net.minecraftforge.common.extensions.IForgeMenuType;
 public class EquipmentInfuserContainer extends BaseContainer {
     public static final MenuType<EquipmentInfuserContainer> TYPE = IForgeMenuType.create(EquipmentInfuserContainer::new);
 
-    public EquipmentInfuserTileEntity equipmentInfuser;
-    EquipmentInfuserPartSlot partSlot;
-    EquipmentInfuserChargeSlot chargeSlot;
+    protected final EquipmentInfuserTileEntity equipmentInfuser;
+    protected EquipmentInfuserPartSlot partSlot;
+    protected EquipmentInfuserChargeSlot chargeSlot;
 
     /**
      * Client Constructor
@@ -63,6 +63,10 @@ public class EquipmentInfuserContainer extends BaseContainer {
         this.inventoryFinish = this.inventoryStart + slots;
     }
 
+    public EquipmentInfuserTileEntity getEquipmentInfuser() {
+        return this.equipmentInfuser;
+    }
+
     @Override
     public boolean stillValid(Player player) {
         if (this.equipmentInfuser == null || !this.equipmentInfuser.stillValid(player)) {
@@ -81,7 +85,7 @@ public class EquipmentInfuserContainer extends BaseContainer {
 
             // Charge Experience:
             if (this.chargeSlot.getItem().getItem() instanceof ChargeItem) {
-                if (equipmentPart.getPartLevel(this.partSlot.getItem()) >= equipmentPart.levelMax) {
+                if (equipmentPart.isAtMaxLevel(this.partSlot.getItem())) {
                     return;
                 }
                 ChargeItem chargeItem = (ChargeItem) this.chargeSlot.getItem().getItem();

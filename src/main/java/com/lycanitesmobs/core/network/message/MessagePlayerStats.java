@@ -1,9 +1,8 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -18,9 +17,9 @@ public class MessagePlayerStats {
     }
 
     public MessagePlayerStats(ExtendedPlayer playerExt) {
-        this.spirit = playerExt.spirit;
-        this.summonFocus = playerExt.summonFocus;
-        this.creatureStudyCooldown = playerExt.creatureStudyCooldown;
+        this.spirit = playerExt.getSpirit();
+        this.summonFocus = playerExt.getSummonFocus();
+        this.creatureStudyCooldown = playerExt.getCreatureStudyCooldown();
     }
 
     /**
@@ -31,14 +30,11 @@ public class MessagePlayerStats {
         if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
             return;
 
-        Player player = ClientManager.getInstance().getClientPlayer();
-        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
-        if (playerExt == null)
-            return;
-
-        playerExt.spirit = message.spirit;
-        playerExt.summonFocus = message.summonFocus;
-        playerExt.creatureStudyCooldown = message.creatureStudyCooldown;
+        ctx.get().enqueueWork(() ->
+                LycanitesMobs.PROXY.applyPlayerStats(
+                        message.spirit,
+                        message.summonFocus,
+                        message.creatureStudyCooldown));
     }
 
     /**

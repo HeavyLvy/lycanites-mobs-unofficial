@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.entity.spawner.location;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -98,7 +99,7 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         int x = xz[0];
         int z = xz[1];
 
-        if (!world.getChunkSource().hasChunk(x >> 4, z >> 4)) {
+        if (!this.isColumnLoaded(world, x, z)) {
             return null;
         }
 
@@ -146,7 +147,7 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
             return surfacePos;
         }
 
-        if (!super.isValidBlock(world, headPos)) {
+        if (!this.isValidHeadSpace(world, feetPos, headPos)) {
             return surfacePos;
         }
 
@@ -164,8 +165,7 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
      * @return A valid surface BlockPos, or null if no valid position found.
      */
     private BlockPos findSurfaceSpawnPos(Level world, int x, int z, int heightmapY) {
-        BlockPos groundPos = new BlockPos(x, heightmapY, z);
-        if (this.solidGround && !world.getBlockState(groundPos.below()).canOcclude()) {
+        if (!this.isColumnLoaded(world, x, z)) {
             return null;
         }
 
@@ -183,11 +183,15 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         BlockPos feetPos = new BlockPos(x, heightmapY, z);
         BlockPos headPos = feetPos.above();
 
+        if (this.solidGround && !this.posHasGround(world, feetPos)) {
+            return null;
+        }
+
         if (!this.isValidBlock(world, feetPos)) {
             return null;
         }
 
-        if (!super.isValidBlock(world, headPos)) {
+        if (!this.isValidHeadSpace(world, feetPos, headPos)) {
             return null;
         }
 
@@ -244,6 +248,10 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
      * @return The y position, Integer.MIN_VALUE if a valid position could not be found.
      */
     public int getRandomYCoord(Level world, BlockPos triggerPos) {
+        if (!this.isColumnLoaded(world, triggerPos.getX(), triggerPos.getZ())) {
+            return Integer.MIN_VALUE;
+        }
+
         double difficultyScale = this.normalDifficultyRangeScale;
         if (world.getDifficulty().getId() <= 1) {
             difficultyScale = this.easyDifficultyRangeScale;
@@ -273,6 +281,7 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
 
         BlockPos.MutableBlockPos spawnPos = new BlockPos.MutableBlockPos(originX, minY, originZ);
         BlockPos.MutableBlockPos headPos = new BlockPos.MutableBlockPos(originX, minY + 1, originZ);
+        int heightmapSurfaceY = world.getHeight(Heightmap.Types.OCEAN_FLOOR, originX, originZ);
 
         for (int nextY = minY; nextY <= maxY; nextY++) {
             if (nextY > originY - rangeMinY && nextY < originY + rangeMinY)
@@ -284,7 +293,6 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
             if (this.isValidBlock(world, spawnPos)) {
                 boolean lastYPos = false;
 
-                int heightmapSurfaceY = world.getHeight(Heightmap.Types.OCEAN_FLOOR, spawnPos.getX(), spawnPos.getZ());
                 if (nextY >= heightmapSurfaceY) {
                     if (!this.solidGround) {
                         int floatRange = maxY - nextY;
@@ -300,7 +308,7 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
                     lastYPos = true;
                 }
 
-                if (super.isValidBlock(world, headPos)) {
+                if (this.isValidHeadSpace(world, spawnPos, headPos)) {
                     if (nextY <= 64) {
                         countLow++;
                         if (world.random.nextInt(countLow) == 0) reservoirLow = nextY;
@@ -346,6 +354,9 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
     public boolean posHasGround(Level world, BlockPos pos) {
         if (pos == null || pos.getY() <= world.getMinBuildHeight())
             return false;
+        if (!this.isBlockLoaded(world, pos.below())) {
+            return false;
+        }
         BlockState possibleGroundBlock = world.getBlockState(pos.below());
         try {
             if (possibleGroundBlock.canOcclude())
@@ -368,4 +379,20 @@ public class RandomSpawnLocation extends BlockSpawnLocation {
         }
         return y - startPos.getY();
     }
+
+    protected boolean isValidHeadSpace(Level world, BlockPos feetPos, BlockPos headPos) {
+        if (!this.isBlockLoaded(world, headPos)) {
+            return false;
+        }
+        if (super.isValidBlock(world, headPos)) {
+            return true;
+        }
+        BlockState feetState = world.getBlockState(feetPos);
+        BlockState headState = world.getBlockState(headPos);
+        if (!feetState.getFluidState().is(FluidTags.WATER)) {
+            return false;
+        }
+        return headState.isAir() || headState.getFluidState().is(FluidTags.WATER);
+    }
+
 }

@@ -18,7 +18,8 @@
         "forge:is_spooky",
         "forge:is_mountain",
         "forge:is_cold",
-        "minecraft:is_end"
+        "minecraft:is_end",
+        "-minecraft:is_ocean"
       ],
       "biomeTagListType": "whitelist",
       "biomeIds": [

@@ -28,7 +28,7 @@ public class EntityRemobra extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setRange(14.0F).setMinChaseDistance(5.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setRange(14.0F).setMinChaseDistance(5.0F));
     }
 	
 	
@@ -70,5 +70,5 @@ public class EntityRemobra extends TameableCreatureEntity implements Enemy {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
 }

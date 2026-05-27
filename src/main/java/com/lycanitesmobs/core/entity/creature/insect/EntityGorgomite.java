@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.entity.creature.insect;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindAvoidTargetGoal;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
@@ -30,8 +31,8 @@ public class EntityGorgomite extends BaseCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(true));
-        this.targetSelector.addGoal(this.nextSpecialTargetIndex++, new FindAvoidTargetGoal(this).setTargetClass(EntityBalayang.class));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(true));
+        this.targetSelector.addGoal(this.claimSpecialTargetGoalIndex(), new FindAvoidTargetGoal(this).setTargetClass(EntityBalayang.class));
     }
 
     @Override
@@ -71,7 +72,7 @@ public class EntityGorgomite extends BaseCreatureEntity implements Enemy {
         minion.moveTo(x, y, z, this.random.nextFloat() * 360.0F, 0.0F);
         minion.setMinion(true);
         minion.applyVariant(this.getVariantIndex());
-        this.getCommandSenderWorld().addFreshEntity(minion);
+        DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, minion);
         if (this.getTarget() != null)
             minion.setLastHurtByMob(this.getTarget());
     }
@@ -106,7 +107,7 @@ public class EntityGorgomite extends BaseCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

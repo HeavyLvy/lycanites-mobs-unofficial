@@ -124,7 +124,7 @@ public class AvoidGoal extends Goal {
 
         if (!this.host.useDirectNavigator() && this.host.getNavigation().isDone())
             return false;
-        if (this.host.useDirectNavigator() && this.host.directNavigator.atTargetPosition())
+        if (this.host.useDirectNavigator() && this.host.isDirectNavigationAtTarget())
             return false;
 
         if (this.host.distanceToSqr(this.avoidTarget) >= this.farDistance)
@@ -142,7 +142,7 @@ public class AvoidGoal extends Goal {
         if (!this.host.useDirectNavigator())
             this.host.getNavigation().moveTo(this.pathEntity, this.farSpeed);
         else if (this.avoidPos != null)
-            this.host.directNavigator.setTargetPosition(this.avoidPos, this.farSpeed);
+            this.host.setDirectNavigationTarget(this.avoidPos, this.farSpeed);
     }
 
 
@@ -166,12 +166,12 @@ public class AvoidGoal extends Goal {
             if (!this.host.useDirectNavigator())
                 this.host.getNavigation().setSpeedModifier(this.nearSpeed);
             else
-                this.host.directNavigator.speedModifier = this.nearSpeed;
+                this.host.setDirectNavigationSpeedModifier(this.nearSpeed);
         } else {
             if (!this.host.useDirectNavigator())
                 this.host.getNavigation().setSpeedModifier(this.farSpeed);
             else
-                this.host.directNavigator.speedModifier = this.farSpeed;
+                this.host.setDirectNavigationSpeedModifier(this.farSpeed);
         }
     }
 

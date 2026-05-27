@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EntityKobold extends TameableCreatureEntity implements Enemy {
-    public boolean griefing = true;
-    public boolean theivery = true;
+    protected boolean griefing = true;
+    protected boolean theivery = true;
 
     public EntityKobold(EntityType<? extends EntityKobold> entityType, Level world) {
         super(entityType, world);
@@ -39,14 +39,14 @@ public class EntityKobold extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
 		if(this.theivery)
-			this.goalSelector.addGoal(this.nextIdleGoalIndex++, new GetItemGoal(this).setDistanceMax(8).setSpeed(1.2D));
+			this.goalSelector.addGoal(this.claimIdleGoalIndex(), new GetItemGoal(this).setDistanceMax(8).setSpeed(1.2D));
 		if(this.griefing)
-			this.goalSelector.addGoal(this.nextIdleGoalIndex++, new GetBlockGoal(this).setDistanceMax(8).setSpeed(1.2D).setBlockName("torch").setTamedLooting(false));
+			this.goalSelector.addGoal(this.claimIdleGoalIndex(), new GetBlockGoal(this).setDistanceMax(8).setSpeed(1.2D).setBlockName("torch").setTamedLooting(false));
 
 		super.registerGoals();
 
-		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
-		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
+		this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
+		this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this));
     }
 
 	@Override

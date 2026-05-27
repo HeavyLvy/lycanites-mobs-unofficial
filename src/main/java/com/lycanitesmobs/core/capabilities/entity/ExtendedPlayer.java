@@ -8,6 +8,7 @@ import com.lycanitesmobs.core.data.info.gui.Beastiary;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.util.VersionChecker;
 import com.lycanitesmobs.core.data.config.ConfigExtra;
+import com.lycanitesmobs.core.data.config.ConfigPlayer;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.special.PortalEntity;
 import com.lycanitesmobs.core.item.summoningstaff.ItemStaffSummoning;
@@ -39,44 +40,48 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ExtendedPlayer {
-    public static Map<Player, ExtendedPlayer> clientExtendedPlayers = new HashMap<>();
-    public static Map<Player, ExtendedPlayer> serverExtendedPlayers = new HashMap<>();
-    public static Map<UUID, CompoundTag> backupNBTTags = new HashMap<>();
+    protected static Map<Player, ExtendedPlayer> clientExtendedPlayers = new HashMap<>();
+    protected static Map<Player, ExtendedPlayer> serverExtendedPlayers = new HashMap<>();
+    protected static Map<UUID, CompoundTag> backupNBTTags = new HashMap<>();
 
     // Player Info and Containers:
-    public Player player;
-    public Beastiary beastiary;
-    public PetManager petManager;
-    public long timePlayed = 0;
+    protected Player player;
+    protected Beastiary beastiary;
+    protected PetManager petManager;
+    protected long timePlayed = 0;
 
     // Beastiary Menu:
-    public CreatureType selectedCreatureType;
-    public CreatureInfo selectedCreature;
-    public int selectedSubspecies = 0;
-    public int selectedVariant = 0;
-    public int selectedPetType = 0;
-    public PetEntry selectedPet;
+    protected CreatureType selectedCreatureType;
+    protected CreatureInfo selectedCreature;
+    protected int selectedSubspecies = 0;
+    protected int selectedVariant = 0;
+    protected int selectedPetType = 0;
+    protected PetEntry selectedPet;
 
-    public long currentTick = 0;
-    public boolean needsFirstSync = true;
+    protected long currentTick = 0;
+    protected boolean needsFirstSync = true;
     /**
      * Set for a few seconds after a player breaks a block.
      **/
-    public BlockState justBrokenBlock;
+    protected BlockState justBrokenBlock;
     /**
      * How many ticks left until the justBrokenBlock should be cleared.
      **/
     protected int justBrokenClearTime;
 
     // Action Controls:
-    public byte controlStates = 0;
+    protected byte controlStates = 0;
 
     public static enum CONTROL_ID {
         JUMP((byte) 1), MOUNT_DISMOUNT((byte) 2), MOUNT_ABILITY((byte) 4), MOUNT_INVENTORY((byte) 8), ATTACK((byte) 16), DESCEND((byte) 32);
-        public byte id;
+        private final byte id;
 
         CONTROL_ID(byte i) {
             id = i;
+        }
+
+        public byte id() {
+            return this.id;
         }
     }
 
@@ -87,23 +92,24 @@ public class ExtendedPlayer {
     private static final double BIG_ENTITY_REACH_MAX_SCAN = 4.0;
 
     // Spirit:
-    public int spiritCharge = 100;
-    public int spiritMax = (this.spiritCharge * 10);
-    public int spirit = this.spiritMax;
-    public int spiritReserved = 0;
+    protected int spiritCharge = 100;
+    protected int spiritMax = (this.spiritCharge * 10);
+    protected int spirit = this.spiritMax;
+    protected int spiritReserved = 0;
 
     // Summoning:
-    public int selectedSummonSet = 1;
-    public int summonFocusCharge = 600;
-    public int summonFocusMax = (this.summonFocusCharge * 10);
-    public int summonFocus = this.summonFocusMax;
-    public Map<Integer, SummonSet> summonSets = new HashMap<>();
-    public int summonSetMax = 5;
-    public PortalEntity staffPortal;
+    protected int selectedSummonSet = 1;
+    protected int summonFocusCharge = 600;
+    protected int summonFocusMax = (this.summonFocusCharge * 10);
+    protected int summonFocusRecharge = 5;
+    protected int summonFocus = this.summonFocusMax;
+    protected Map<Integer, SummonSet> summonSets = new HashMap<>();
+    protected int summonSetMax = 5;
+    protected PortalEntity staffPortal;
 
     // Creature Studying:
-    public int creatureStudyCooldown = 0;
-    public int creatureStudyCooldownMax = 200;
+    protected int creatureStudyCooldown = 0;
+    protected int creatureStudyCooldownMax = 200;
 
     // Initial Setup:
     private boolean initialSetup = false;
@@ -113,7 +119,7 @@ public class ExtendedPlayer {
     // ==================================================
     public static ExtendedPlayer getForPlayer(Player player) {
         if (player == null) {
-            //LycanitesMobs.logWarning("", "Tried to access an ExtendedPlayer from a null Player.");
+            // LMHelperClass.logWarningMessage("Tried to access an ExtendedPlayer from a null Player.");
             return null;
         }
 
@@ -138,6 +144,10 @@ public class ExtendedPlayer {
         return iExtendedPlayer;
     }
 
+    public static void unloadClientPlayer(Player player) {
+        clientExtendedPlayers.remove(player);
+    }
+
 
     // ==================================================
     //                    Constructor
@@ -145,7 +155,10 @@ public class ExtendedPlayer {
     public ExtendedPlayer() {
         this.beastiary = new Beastiary(this);
         this.petManager = new PetManager(this.player);
-        this.creatureStudyCooldownMax = CreatureManager.getInstance().config.creatureStudyCooldown;
+        this.creatureStudyCooldownMax = CreatureManager.getInstance().getConfig().creatureStudyCooldown();
+        if (ConfigPlayer.INSTANCE != null) {
+            this.summonFocusRecharge = ConfigPlayer.INSTANCE.summoningFocusRecharge.get();
+        }
     }
 
 
@@ -169,7 +182,7 @@ public class ExtendedPlayer {
      **/
     public void setPlayer(Player player) {
         this.player = player;
-        this.petManager.host = player;
+        this.petManager.setHost(player);
         this.player.getCommandSenderWorld();
         if (this.player.getCommandSenderWorld().isClientSide)
             return;
@@ -181,6 +194,97 @@ public class ExtendedPlayer {
 
     public Player getPlayer() {
         return this.player;
+    }
+
+    public PetManager getPetManager() {
+        return this.petManager;
+    }
+
+    public long getTimePlayed() {
+        return this.timePlayed;
+    }
+
+    public CreatureType getSelectedCreatureType() {
+        return this.selectedCreatureType;
+    }
+
+    public CreatureInfo getSelectedCreature() {
+        return this.selectedCreature;
+    }
+
+    public int getSelectedSubspecies() {
+        return this.selectedSubspecies;
+    }
+
+    public int getSelectedVariant() {
+        return this.selectedVariant;
+    }
+
+    public int getSelectedPetType() {
+        return this.selectedPetType;
+    }
+
+    public PetEntry getSelectedPet() {
+        return this.selectedPet;
+    }
+
+    public boolean hasSelectedCreature() {
+        return this.selectedCreature != null;
+    }
+
+    public boolean hasSelectedCreatureType() {
+        return this.selectedCreatureType != null;
+    }
+
+    public boolean hasSelectedPet() {
+        return this.selectedPet != null;
+    }
+
+    public boolean isSelectedCreature(CreatureInfo creatureInfo) {
+        return this.selectedCreature != null && this.selectedCreature.equals(creatureInfo);
+    }
+
+    public boolean isSelectedCreatureType(CreatureType creatureType) {
+        return this.selectedCreatureType != null && this.selectedCreatureType.equals(creatureType);
+    }
+
+    public boolean isSelectedPet(PetEntry petEntry) {
+        return this.selectedPet != null && this.selectedPet.equals(petEntry);
+    }
+
+    public boolean isSelectedSubspeciesVariant(int subspecies, int variant) {
+        return this.selectedSubspecies == subspecies && this.selectedVariant == variant;
+    }
+
+    public void selectCreatureType(CreatureType creatureType) {
+        this.selectedCreatureType = creatureType;
+        this.selectedCreature = null;
+    }
+
+    public void selectCreature(CreatureInfo creatureInfo) {
+        this.selectedCreature = creatureInfo;
+        this.resetSelectedSubspeciesVariant();
+    }
+
+    public void selectSubspeciesVariant(int subspecies, int variant) {
+        this.selectedSubspecies = subspecies;
+        this.selectedVariant = variant;
+    }
+
+    public void resetSelectedSubspeciesVariant() {
+        this.selectSubspeciesVariant(0, 0);
+    }
+
+    public void selectPetType(int petType) {
+        this.selectedPetType = petType;
+    }
+
+    public void selectPet(PetEntry petEntry) {
+        this.selectedPet = petEntry;
+    }
+
+    public void clearSelectedPet() {
+        this.selectedPet = null;
     }
 
     /**
@@ -238,8 +342,8 @@ public class ExtendedPlayer {
         float width = entity.getBbWidth();
         float height = entity.getBbHeight();
         if (entity instanceof BaseCreatureEntity creature) {
-            width *= creature.hitAreaWidthScale;
-            height *= creature.hitAreaHeightScale;
+            width *= creature.getHitAreaWidthScale();
+            height *= creature.getHitAreaHeightScale();
         }
         return width > BIG_ENTITY_SIZE_THRESHOLD || height > BIG_ENTITY_SIZE_THRESHOLD;
     }
@@ -279,7 +383,7 @@ public class ExtendedPlayer {
         // Summoning Focus Stat Update:
         this.summonFocus = Math.min(Math.max(this.summonFocus, 0), this.summonFocusMax);
         if (this.summonFocus < this.summonFocusMax) {
-            this.summonFocus += 10;
+            this.summonFocus += this.summonFocusRecharge;
             if (!this.player.getCommandSenderWorld().isClientSide && !creative && this.currentTick % 20 == 0
                     || this.summonFocus < this.summonFocusMax
                     || this.player.getMainHandItem().getItem() instanceof ItemStaffSummoning
@@ -312,9 +416,10 @@ public class ExtendedPlayer {
 
             // Mod Version Check:
             if (this.player.getCommandSenderWorld().isClientSide) {
-                VersionChecker.VersionInfo latestVersion = VersionChecker.INSTANCE.getLatestVersion();
-                VersionChecker.INSTANCE.enabled = ConfigExtra.INSTANCE.versionCheckerEnabled.get();
-                if (latestVersion != null && latestVersion.isNewer && VersionChecker.INSTANCE.enabled) {
+                VersionChecker versionChecker = VersionChecker.getInstance();
+                VersionChecker.VersionInfo latestVersion = versionChecker.getLatestVersion();
+                versionChecker.setEnabled(ConfigExtra.INSTANCE.versionCheckerEnabled.get());
+                if (latestVersion != null && latestVersion.isNewer && versionChecker.isEnabled()) {
                     String versionText = Component.translatable("lyc.version.newer").getString().replace("{current}", LycanitesMobs.versionNumber).replace("{latest}", latestVersion.versionNumber);
                     this.player.displayClientMessage(Component.literal(versionText), false);
                 }
@@ -353,16 +458,172 @@ public class ExtendedPlayer {
         this.justBrokenClearTime = 60;
     }
 
+    public int getSpiritCharge() {
+        return this.spiritCharge;
+    }
+
+    public int getSpiritMax() {
+        return this.spiritMax;
+    }
+
+    public int getSpirit() {
+        return this.spirit;
+    }
+
+    public int getSpiritReserved() {
+        return this.spiritReserved;
+    }
+
+    public int getSpiritMaxUnits() {
+        return this.spiritCharge <= 0 ? 0 : Math.round((float) this.spiritMax / this.spiritCharge);
+    }
+
+    public int getSpiritReservedUnits() {
+        return this.spiritCharge <= 0 ? 0 : (int) Math.floor((double) this.spiritReserved / this.spiritCharge);
+    }
+
+    public int getSpiritAvailableUnits() {
+        return this.spiritCharge <= 0 ? 0 : (int) Math.floor((double) this.spirit / this.spiritCharge);
+    }
+
+    public float getSpiritFillRatio() {
+        if (this.spiritCharge <= 0) {
+            return 0;
+        }
+        return ((float) this.spirit / this.spiritCharge) - this.getSpiritAvailableUnits();
+    }
+
+    public boolean canReserveSpirit(int newSpiritReserved) {
+        return this.spirit + this.spiritReserved >= newSpiritReserved && newSpiritReserved <= this.spiritMax;
+    }
+
+    public void setSpiritReserved(int spiritReserved) {
+        this.spiritReserved = spiritReserved;
+    }
+
+    public boolean consumeSpirit(int cost) {
+        if (this.spirit < cost) {
+            return false;
+        }
+        this.spirit -= cost;
+        return true;
+    }
+
+    public void addSpiritReserved(int spiritReserved) {
+        this.spiritReserved += spiritReserved;
+    }
+
+    public int getSummonFocusCharge() {
+        return this.summonFocusCharge;
+    }
+
+    public int getSummonFocusMax() {
+        return this.summonFocusMax;
+    }
+
+    public int getSummonFocus() {
+        return this.summonFocus;
+    }
+
+    public int getSummonFocusMaxUnits() {
+        return this.summonFocusCharge <= 0 ? 0 : Math.round((float) this.summonFocusMax / this.summonFocusCharge);
+    }
+
+    public int getSummonFocusAvailableUnits() {
+        return this.summonFocusCharge <= 0 ? 0 : (int) Math.floor((double) this.summonFocus / this.summonFocusCharge);
+    }
+
+    public float getSummonFocusFillRatio() {
+        if (this.summonFocusCharge <= 0) {
+            return 0;
+        }
+        return ((float) this.summonFocus / this.summonFocusCharge) - this.getSummonFocusAvailableUnits();
+    }
+
+    public boolean hasSummonFocus(int cost) {
+        return this.summonFocus >= cost;
+    }
+
+    public boolean consumeSummonFocus(int cost) {
+        if (!this.hasSummonFocus(cost)) {
+            return false;
+        }
+        this.summonFocus -= cost;
+        return true;
+    }
+
+    public int getCreatureStudyCooldown() {
+        return this.creatureStudyCooldown;
+    }
+
+    public boolean hasCreatureStudyCooldown() {
+        return this.creatureStudyCooldown > 0;
+    }
+
+    public float getCreatureStudyCooldownSeconds() {
+        return (float) this.creatureStudyCooldown / 20;
+    }
+
+    public int getCreatureStudyCooldownBarWidth() {
+        if (this.creatureStudyCooldownMax <= 0) {
+            return 0;
+        }
+        return this.creatureStudyCooldown / this.creatureStudyCooldownMax;
+    }
+
+    public void applyNetworkStats(int spirit, int summonFocus, int creatureStudyCooldown) {
+        this.spirit = spirit;
+        this.summonFocus = summonFocus;
+        this.creatureStudyCooldown = creatureStudyCooldown;
+    }
+
+    public int getSelectedSummonSetId() {
+        return this.selectedSummonSet;
+    }
+
+    public int getSummonSetMax() {
+        return this.summonSetMax;
+    }
+
+    public boolean isSelectedSummonSet(int summonSetId) {
+        return this.selectedSummonSet == summonSetId;
+    }
+
+    public boolean hasStaffPortal() {
+        return this.staffPortal != null;
+    }
+
+    public PortalEntity getStaffPortal() {
+        return this.staffPortal;
+    }
+
+    public void setStaffPortal(PortalEntity staffPortal) {
+        this.staffPortal = staffPortal;
+    }
+
+    public void clearStaffPortal() {
+        this.staffPortal = null;
+    }
+
+    public void clearStaffPortalIf(PortalEntity staffPortal) {
+        if (this.staffPortal == staffPortal) {
+            this.staffPortal = null;
+        }
+    }
+
+    public boolean isStaffPortal(PortalEntity staffPortal) {
+        return this.staffPortal == staffPortal;
+    }
 
     // ==================================================
     //                      Summoning
     // ==================================================
     public SummonSet getSummonSet(int setID) {
         if (setID <= 0) {
-            LMHelperClass.logWarning("", "Attempted to access set " + setID + " but the minimum ID is 1. Player: " + this.player);
+            LMHelperClass.logWarningMessage("Attempted to access set " + setID + " but the minimum ID is 1. Player: " + this.player);
             return this.getSummonSet(1);
         } else if (setID > this.summonSetMax) {
-            LMHelperClass.logWarning("", "Attempted to access set " + setID + " but the maximum set ID is " + this.summonSetMax + ". Player: " + this.player);
+            LMHelperClass.logWarningMessage("Attempted to access set " + setID + " but the maximum set ID is " + this.summonSetMax + ". Player: " + this.player);
             return this.getSummonSet(this.summonSetMax);
         }
         if (!this.summonSets.containsKey(setID)) {
@@ -387,7 +648,7 @@ public class ExtendedPlayer {
      **/
     public int validateSummonSetID(int targetSetID) {
         targetSetID = Math.max(Math.min(targetSetID, this.summonSetMax), 1);
-        while (!this.getSummonSet(targetSetID).isUseable() && targetSetID > 1 && !"".equals(this.getSummonSet(targetSetID).summonType)) {
+        while (!this.getSummonSet(targetSetID).isUseable() && targetSetID > 1 && !"".equals(this.getSummonSet(targetSetID).getSummonType())) {
             targetSetID--;
         }
         return targetSetID;
@@ -408,18 +669,21 @@ public class ExtendedPlayer {
 
     public void loadFamiliars() {
         Map<UUID, PetEntry> playerFamiliars = PlayerFamiliars.INSTANCE.getFamiliarsForPlayer(this.player);
-        if (!playerFamiliars.isEmpty()) {
-            for (PetEntry petEntry : playerFamiliars.values()) {
-                if (this.petManager.hasEntry(petEntry)) {
-                    PetEntry currentFamiliarEntry = this.petManager.getEntry(petEntry.petEntryID);
-                    currentFamiliarEntry.copy(petEntry);
-                } else {
-                    this.petManager.addEntry(petEntry);
-                    petEntry.entity = null;
-                }
-            }
-            this.sendPetEntriesToPlayer("familiar");
+        if (playerFamiliars.isEmpty()) {
+            return;
         }
+
+        for (PetEntry petEntry : playerFamiliars.values()) {
+            if (this.petManager.hasEntry(petEntry)) {
+                PetEntry currentFamiliarEntry = this.petManager.getEntry(petEntry.getPetEntryID());
+                currentFamiliarEntry.copy(petEntry);
+            }
+            else {
+                this.petManager.addEntry(petEntry);
+                petEntry.clearEntityReference();
+            }
+        }
+        this.sendPetEntriesToPlayer("familiar");
     }
 
     /**
@@ -458,19 +722,19 @@ public class ExtendedPlayer {
             }
             if (!this.player.getCommandSenderWorld().isClientSide()) {
                 if (newKnowledge.getMaxExperience() == 0) {
-                    this.sendOverlayMessage(Component.translatable("message.beastiary.study.full").append(" ").append(creature.creatureInfo.getTitle()));
+                    this.sendOverlayMessage(Component.translatable("message.beastiary.study.full").append(" ").append(creature.getCreatureTitle()));
                 } else if (experience > 0) {
                     boolean showMessage = alwaysShowMessage;
                     if (!showMessage) {
                         float messageThreshold = ((float) newKnowledge.getMaxExperience() * 0.25F);
-                        int fromExperience = Math.max(0, newKnowledge.experience - experience);
+                        int fromExperience = Math.max(0, newKnowledge.getExperience() - experience);
                         int wrappedExperience = fromExperience % (int) messageThreshold;
                         showMessage = wrappedExperience + experience >= messageThreshold;
                     }
                     if (showMessage) {
                         this.sendOverlayMessage(Component.translatable("message.beastiary.study")
                                 .append(" ").append(newKnowledge.getCreatureInfo().getTitle())
-                                .append(" " + newKnowledge.experience + "/" + newKnowledge.getMaxExperience() + " (+" + experience + ")"));
+                                .append(" " + newKnowledge.getExperience() + "/" + newKnowledge.getMaxExperience() + " (+" + experience + ")"));
                     }
                 }
             }
@@ -478,7 +742,7 @@ public class ExtendedPlayer {
         }
 
         if (useCooldown && !this.player.getCommandSenderWorld().isClientSide()) {
-            this.sendOverlayMessage(Component.translatable("message.beastiary.study.full").append(" ").append(creature.creatureInfo.getTitle()));
+            this.sendOverlayMessage(Component.translatable("message.beastiary.study.full").append(" ").append(creature.getCreatureTitle()));
         }
         return false;
     }
@@ -497,7 +761,7 @@ public class ExtendedPlayer {
     // ==================================================
     public void sendPetEntriesToPlayer(String entryType) {
         if (this.player.getCommandSenderWorld().isClientSide) return;
-        for (PetEntry petEntry : this.petManager.entries.values()) {
+        for (PetEntry petEntry : this.petManager.getEntries()) {
             if (entryType.equals(petEntry.getType()) || "".equals(entryType)) {
                 MessagePetEntry message = new MessagePetEntry(this, petEntry);
                 LycanitesMobs.PACKET_MANAGER.sendToPlayer(message, (ServerPlayer) this.player);
@@ -552,8 +816,12 @@ public class ExtendedPlayer {
         this.controlStates = controlStates;
     }
 
+    public byte getControlStates() {
+        return this.controlStates;
+    }
+
     public boolean isControlActive(CONTROL_ID controlID) {
-        return (this.controlStates & controlID.id) > 0;
+        return (this.controlStates & controlID.id()) > 0;
     }
 
 

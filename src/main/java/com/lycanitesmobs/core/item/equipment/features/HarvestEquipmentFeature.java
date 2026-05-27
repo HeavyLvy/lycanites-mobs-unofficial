@@ -47,27 +47,27 @@ public class HarvestEquipmentFeature extends EquipmentFeature {
     /**
      * The type of tool to harvest as. Can be: pickaxe, axe, shovel, hoe, sword or shears.
      **/
-    public String harvestType;
+    protected String harvestType;
 
     /**
      * The shape of the harvest. Can be block, cross or random.
      **/
-    public String harvestShape = "block";
+    protected String harvestShape = "block";
 
     /**
      * How much harvest speed to add when harvesting compatible blocks.
      **/
-    public float harvestSpeed = 1;
+    protected float harvestSpeed = 1;
 
     /**
      * The level of harvesting. -1 = Unable, 0 = Wood, 1 = Stone, 2 = Iron, 3 = Diamond.
      **/
-    public int harvestLevel = 3;
+    protected int harvestLevel = 3;
 
     /**
      * The additional block range of the harvest shape, relative to the harvesting direction, the central block is not affected by this. X = number of blocks both sides laterally (sideways). Y = Number of blocks vertically. Z = Number of blocks forwards.
      **/
-    public Vec3i harvestRange = new Vec3i(0, 0, 0);
+    protected Vec3i harvestRange = new Vec3i(0, 0, 0);
 
 
     // ==================================================
@@ -121,6 +121,18 @@ public class HarvestEquipmentFeature extends EquipmentFeature {
         harvestRangeString += "x" + (this.harvestRange.getY() + 1);
         harvestRangeString += "x" + (this.harvestRange.getZ() + 1);
         return harvestRangeString;
+    }
+
+    public String getHarvestType() {
+        return this.harvestType;
+    }
+
+    public float getHarvestSpeed() {
+        return this.harvestSpeed;
+    }
+
+    public int getHarvestLevel() {
+        return this.harvestLevel;
     }
 
 

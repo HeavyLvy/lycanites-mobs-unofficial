@@ -44,7 +44,7 @@ public abstract class JSONLoader {
 
         // Load Default:
         Map<String, JsonObject> defaultJsons = new HashMap<>();
-        if (fileLoader.ready) {
+        if (fileLoader.isReady()) {
             Path path = fileLoader.getPath(dataPath);
             this.loadJsonObjects(gson, path, defaultJsons, mapKey, jsonType);
         } else {
@@ -143,7 +143,7 @@ public abstract class JSONLoader {
             inputStream.close();
             return json;
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "Unable to read file from path.\n" + e.toString());
+            LMHelperClass.logWarningMessage("Unable to read file from path.\n" + e.toString());
         }
         return null;
     }
@@ -187,10 +187,10 @@ public abstract class JSONLoader {
                             jsonObjectMap.put(json.get(mapKey).getAsString(), json);
                         }
                     } catch (JsonParseException e) {
-                        LMHelperClass.logWarning("", "Parsing error loading JSON " + relativePath + "\n" + e.toString());
+                        LMHelperClass.logWarningMessage("Parsing error loading JSON " + relativePath + "\n" + e.toString());
                         e.printStackTrace();
                     } catch (Exception e) {
-                        LMHelperClass.logWarning("", "There was a problem loading JSON " + relativePath + "\n" + e.toString());
+                        LMHelperClass.logWarningMessage("There was a problem loading JSON " + relativePath + "\n" + e.toString());
                         e.printStackTrace();
                     }
                 } finally {
@@ -198,7 +198,7 @@ public abstract class JSONLoader {
                 }
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "Unable to read files from directory.\n" + e.toString());
+            LMHelperClass.logWarningMessage("Unable to read files from directory.\n" + e.toString());
             //e.printStackTrace();
         }
     }
@@ -222,17 +222,17 @@ public abstract class JSONLoader {
                     JsonObject json = GsonHelper.fromJson(gson, reader, JsonObject.class, false);
                     return json;
                 } catch (JsonParseException e) {
-                    LMHelperClass.logWarning("", "Parsing error loading JSON from path: " + path + "\n" + e.toString());
+                    LMHelperClass.logWarningMessage("Parsing error loading JSON from path: " + path + "\n" + e.toString());
                     e.printStackTrace();
                 } catch (Exception e) {
-                    LMHelperClass.logWarning("", "There was a problem loading JSON from path: " + path + "\n" + e.toString());
+                    LMHelperClass.logWarningMessage("There was a problem loading JSON from path: " + path + "\n" + e.toString());
                     e.printStackTrace();
                 }
             } finally {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "Unable to read file from path.\n" + e.toString());
+            LMHelperClass.logWarningMessage("Unable to read file from path.\n" + e.toString());
         }
         return null;
     }
@@ -266,10 +266,10 @@ public abstract class JSONLoader {
                     mixedJSONs.put(jsonName, customJSON);
                 }
             } catch (JsonParseException e) {
-                LMHelperClass.logWarning("", "Parsing error loading JSON: " + jsonName);
+                LMHelperClass.logWarningMessage("Parsing error loading JSON: " + jsonName);
                 e.printStackTrace();
             } catch (Exception e) {
-                LMHelperClass.logWarning("", "There was a problem loading JSON: " + jsonName);
+                LMHelperClass.logWarningMessage("There was a problem loading JSON: " + jsonName);
                 e.printStackTrace();
             }
         }
@@ -309,10 +309,10 @@ public abstract class JSONLoader {
                 return customJSON;
             }
         } catch (JsonParseException e) {
-            LMHelperClass.logWarning("", "Parsing error loading JSON: " + jsonName);
+            LMHelperClass.logWarningMessage("Parsing error loading JSON: " + jsonName);
             throw new RuntimeException("Error Parsing JSON: " + jsonName + "\n" + e);
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "There was a problem loading JSON: " + jsonName);
+            LMHelperClass.logWarningMessage("There was a problem loading JSON: " + jsonName);
             throw new RuntimeException("Error Loading JSON: " + jsonName + "\n" + e);
         }
         return null;
@@ -334,7 +334,7 @@ public abstract class JSONLoader {
             outputStreamWriter.close();
             outputStream.close();
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "Unable to save JSON into the config folder.");
+            LMHelperClass.logWarningMessage("Unable to save JSON into the config folder.");
             e.printStackTrace();
         }
     }

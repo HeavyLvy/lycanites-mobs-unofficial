@@ -38,7 +38,7 @@ public class EntityShade extends RideableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setSpeed(1.5D));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setSpeed(1.5D));
     }
 
 
@@ -171,7 +171,7 @@ public class EntityShade extends RideableCreatureEntity {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
 

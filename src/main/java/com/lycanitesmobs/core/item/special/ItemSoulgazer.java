@@ -27,7 +27,7 @@ public class ItemSoulgazer extends BaseItem {
             return InteractionResult.FAIL;
         }
 
-        int amount = CreatureManager.getInstance().config.creatureStudyKnowledge;
+        int amount = CreatureManager.getInstance().getConfig().creatureStudyKnowledge();
         if (!extendedPlayer.studyCreature(entity, amount, true, true)) {
             return InteractionResult.FAIL;
         }
@@ -65,7 +65,7 @@ public class ItemSoulgazer extends BaseItem {
         if (LycanitesMobs.PROXY.getClientPlayer() != null) {
             ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(LycanitesMobs.PROXY.getClientPlayer());
             if (extendedPlayer != null) {
-                return extendedPlayer.creatureStudyCooldown > 0;
+                return extendedPlayer.hasCreatureStudyCooldown();
             }
         }
         return false;
@@ -76,7 +76,7 @@ public class ItemSoulgazer extends BaseItem {
         if (LycanitesMobs.PROXY.getClientPlayer() != null) {
             ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(LycanitesMobs.PROXY.getClientPlayer());
             if (extendedPlayer != null) {
-                return extendedPlayer.creatureStudyCooldown / extendedPlayer.creatureStudyCooldownMax;
+                return extendedPlayer.getCreatureStudyCooldownBarWidth();
             }
         }
         return 0;

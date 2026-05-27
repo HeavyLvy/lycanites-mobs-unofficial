@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.TemptGoal;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.block.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -20,9 +21,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class EntityConcapedeHead extends AgeableCreatureEntity {
 	
-	public static int CONCAPEDE_SIZE_MAX = 10;
-	public BaseCreatureEntity backSegment;
-	public boolean isHungry = true;
+	protected static int CONCAPEDE_SIZE_MAX = 10;
+	private BaseCreatureEntity backSegment;
+	protected boolean isHungry = true;
 	
     // ==================================================
  	//                    Constructor
@@ -42,8 +43,8 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-		this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new TemptGoal(this).setIncludeDiet(true));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+		this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new TemptGoal(this).setIncludeDiet(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
     }
 
 	@Override
@@ -69,9 +70,9 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
 				segmentEntity.setParentTarget(parentSegment);
 				segmentEntity.applyVariant(this.getVariantIndex());
 				segmentEntity.setSizeScale(this.sizeScale);
-				segmentEntity.spawnEventType = this.spawnEventType;
-				segmentEntity.firstSpawn = false;
-        		parentSegment.getCommandSenderWorld().addFreshEntity(segmentEntity);
+				segmentEntity.inheritSpawnEventFrom(this);
+				segmentEntity.markNotFirstSpawn();
+                DeferredLevelActionManager.spawnEntity(parentSegment.getCommandSenderWorld(), segmentEntity.blockPosition(), null, segmentEntity);
 				parentSegment = segmentEntity;
         	}
         }
@@ -104,7 +105,7 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
 	@Override
 	public void setGrowingAge(int age) {
 		// Spawn Additional Segments:
-		if(!this.getCommandSenderWorld().isClientSide && !this.firstSpawn && age == 0 && !this.isHungry && CreatureManager.getInstance().getCreature("concapedesegment") != null) {
+		if(!this.getCommandSenderWorld().isClientSide && !this.isFirstSpawn() && age == 0 && !this.isHungry && CreatureManager.getInstance().getCreature("concapedesegment") != null) {
 			age = -(this.growthTime / 4);
 			this.isHungry = true;
 
@@ -115,9 +116,9 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
 
 				BaseCreatureEntity trailingSegment = null;
 				if(lastSegment instanceof EntityConcapedeHead)
-					trailingSegment = ((EntityConcapedeHead)lastSegment).backSegment;
+					trailingSegment = ((EntityConcapedeHead)lastSegment).getBackSegment();
 				else if(lastSegment instanceof EntityConcapedeSegment)
-					trailingSegment = ((EntityConcapedeSegment)lastSegment).backSegment;
+					trailingSegment = ((EntityConcapedeSegment)lastSegment).getBackSegment();
 
 				if(trailingSegment == null || trailingSegment == lastSegment) {
 					break;
@@ -131,9 +132,9 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
 				segmentEntity.setParentTarget(lastSegment);
 				segmentEntity.applyVariant(this.getVariantIndex());
 				segmentEntity.setSizeScale(this.sizeScale);
-				segmentEntity.spawnEventType = this.spawnEventType;
-				segmentEntity.firstSpawn = false;
-				lastSegment.getCommandSenderWorld().addFreshEntity(segmentEntity);
+				segmentEntity.inheritSpawnEventFrom(this);
+				segmentEntity.markNotFirstSpawn();
+                DeferredLevelActionManager.spawnEntity(lastSegment.getCommandSenderWorld(), segmentEntity.blockPosition(), null, segmentEntity);
 			}
 		}
         super.setGrowingAge(age);
@@ -256,13 +257,21 @@ public class EntityConcapedeHead extends AgeableCreatureEntity {
 		return false;
 	}
 
+	BaseCreatureEntity getBackSegment() {
+		return this.backSegment;
+	}
+
+	void setBackSegment(BaseCreatureEntity backSegment) {
+		this.backSegment = backSegment;
+	}
+
 	// ==================================================
 	//                     Equipment
 	// ==================================================
 	@Override
 	public int getNoBagSize() { return 0; }
 	@Override
-	public int getBagSize() { return this.creatureInfo.bagSize; }
+	public int getBagSize() { return this.creatureInfo.getBagSize(); }
     // ==================================================
    	//                     Immunities
    	// ==================================================

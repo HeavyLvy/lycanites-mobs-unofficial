@@ -81,7 +81,7 @@ public class ElementDescriptionList extends BaseList {
                 .append(Component.translatable("gui.beastiary.elements.buffs"))
                 .append(": " + "\u00A7r");
 
-        for (String buff : this.elementInfo.buffs) {
+        for (String buff : this.elementInfo.getBuffs()) {
             MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(buff));
             if (effect == null) {
                 continue;
@@ -100,7 +100,7 @@ public class ElementDescriptionList extends BaseList {
                 .append(Component.translatable("gui.beastiary.elements.debuffs"))
                 .append(": " + "\u00A7r");
 
-        for (String debuff : this.elementInfo.debuffs) {
+        for (String debuff : this.elementInfo.getDebuffs()) {
             if ("burning".equals(debuff)) {
                 text.append("\n")
                         .append(Component.translatable("effect.burning"))

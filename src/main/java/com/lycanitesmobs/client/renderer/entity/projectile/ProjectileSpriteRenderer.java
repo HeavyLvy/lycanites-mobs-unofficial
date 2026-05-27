@@ -34,7 +34,7 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
 
     @Override
     public void render(BaseProjectileEntity entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
-        if (entity instanceof CustomProjectileEntity && ((CustomProjectileEntity) entity).projectileInfo == null)
+        if (entity instanceof CustomProjectileEntity && !((CustomProjectileEntity) entity).hasProjectileInfo())
             return;
         if (entity.getClass() == LaserEndProjectileEntity.class) return;
 
@@ -43,7 +43,7 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
 
         if (entity instanceof CustomProjectileEntity && ((CustomProjectileEntity) entity).getLaserEnd() != null) {
             matrixStack.pushPose();
-            this.renderLaser((CustomProjectileEntity) entity, matrixStack, renderTypeBuffer, ((CustomProjectileEntity) entity).laserWidth / 4, loop);
+            this.renderLaser((CustomProjectileEntity) entity, matrixStack, renderTypeBuffer, ((CustomProjectileEntity) entity).getLaserWidth() / 4, loop);
             matrixStack.popPose();
             return;
         }
@@ -55,7 +55,7 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
         matrixStack.scale(scale, scale, scale);
         ResourceLocation texture = this.getTextureLocation(entity);
         RenderType rendertype = CustomRenderStates.getSpriteRenderType(texture);
-        this.renderSprite(entity, matrixStack, renderTypeBuffer, rendertype, entity.textureScale);
+        this.renderSprite(entity, matrixStack, renderTypeBuffer, rendertype, entity.getTextureScale());
         matrixStack.popPose();
     }
 
@@ -67,9 +67,9 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
         float maxU = 1;
         float minV = 0;
         float maxV = 1;
-        if (entity.animationFrameMax > 0) {
-            minV = (float) entity.animationFrame / (float) entity.animationFrameMax;
-            maxV = minV + (1F / (float) entity.animationFrameMax);
+        if (entity.getAnimationFrameMax() > 0) {
+            minV = (float) entity.getAnimationFrame() / (float) entity.getAnimationFrameMax();
+            maxV = minV + (1F / (float) entity.getAnimationFrameMax());
             textureWidth *= scale;
             textureHeight *= scale;
         }
@@ -129,7 +129,6 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
     @Override
     public ResourceLocation getTextureLocation(BaseProjectileEntity entity) {
         ResourceLocation tex = entity.getTexture();
-        LMHelperClass.logErrorMessageOnce("Missing texture from entity: " + entity.getType());
         return tex != null ? tex : MissingTextureAtlasSprite.getLocation();
     }
 

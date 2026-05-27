@@ -160,7 +160,7 @@ public abstract class TargetingGoal extends Goal {
             Collections.sort(possibleTargets, this.nearestSorter);
             newTarget = possibleTargets.get(0);
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "An exception occurred when target selecting, this has been skipped to prevent a crash.");
+            LMHelperClass.logWarningMessage("An exception occurred when target selecting, this has been skipped to prevent a crash.");
             e.printStackTrace();
         }
         return newTarget;
@@ -211,7 +211,7 @@ public abstract class TargetingGoal extends Goal {
                 }
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "An exception occurred when calling for help, this has been skipped to prevent a crash.");
+            LMHelperClass.logWarningMessage("An exception occurred when calling for help, this has been skipped to prevent a crash.");
             e.printStackTrace();
         }
     }

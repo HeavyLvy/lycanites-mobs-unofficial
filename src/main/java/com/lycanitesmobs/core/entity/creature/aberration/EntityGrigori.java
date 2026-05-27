@@ -25,10 +25,10 @@ public class EntityGrigori extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setSpeed(2.0D).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setSpeed(2.0D).setLongMemory(false));
 
-		this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindMasterGoal(this).setTargetClass(EntityGrell.class).setSightCheck(false));
-		this.targetSelector.addGoal(this.nextFindTargetIndex++, new CopyMasterAttackTargetGoal(this));
+		this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindMasterGoal(this).setTargetClass(EntityGrell.class).setSightCheck(false));
+		this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new CopyMasterAttackTargetGoal(this));
     }
 
 	@Override
@@ -48,7 +48,7 @@ public class EntityGrigori extends TameableCreatureEntity implements Enemy {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
     @Override
     public boolean canBurn() { return false; }
 }

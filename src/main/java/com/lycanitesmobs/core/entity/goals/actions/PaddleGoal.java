@@ -20,7 +20,7 @@ public class PaddleGoal extends Goal {
         this.host = setEntity;
         if(setEntity.getNavigation() instanceof GroundPathNavigation || setEntity.getNavigation() instanceof CreaturePathNavigator)
             setEntity.getNavigation().setCanFloat(true);
-		this.sink = this.host.canBreatheUnderwater() || (this.host.canBreatheUnderlava() && this.host.isLavaCreature);
+		this.sink = this.host.canBreatheUnderwater() || (this.host.canBreatheUnderlava() && this.host.isLavaCreature());
     }
     
     
@@ -65,8 +65,8 @@ public class PaddleGoal extends Goal {
                 }
 	    	}
 	    	else {
-	    		if(!this.host.directNavigator.atTargetPosition()) {
-                    targetY = this.host.directNavigator.targetPosition.getY();
+	    		if(!this.host.isDirectNavigationAtTarget()) {
+                    targetY = this.host.getDirectNavigationTargetY();
                 }
 	    	}
 

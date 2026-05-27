@@ -9,13 +9,13 @@ import net.minecraft.world.level.Level;
 public class EventSpawnCondition extends SpawnCondition {
 
     /** The name of the mob event that must be active. Required. **/
-    public String eventName = "";
+    protected String eventName = "";
 
     /** The minimum time (in ticks) the event must have been running for. **/
-    public int eventTimeMin = -1;
+    protected int eventTimeMin = -1;
 
     /** The maximum event time (in ticks), after this the condition is false. **/
-    public int eventTimeMax = -1;
+    protected int eventTimeMax = -1;
 
 
 	@Override

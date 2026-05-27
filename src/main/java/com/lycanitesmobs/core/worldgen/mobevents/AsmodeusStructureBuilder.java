@@ -43,12 +43,12 @@ public class AsmodeusStructureBuilder extends StructureBuilder {
         if (ticks == 1) {
             for (int i = 0; i < 5; i++) {
                 int effectIndex = i;
-                BaseProjectileEntity baseProjectileEntity = new EntityHellfireWall(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireWall.class), world, originX, originY + (10 * i), originZ);
-                baseProjectileEntity.projectileLife = 20 * 20;
+                BaseProjectileEntity baseProjectileEntity = new EntityHellfireWall(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireWall.class), world, originX, originY + (10 * i), originZ);
+                baseProjectileEntity.setProjectileLife(20 * 20);
                 this.spawnDeferred(world, new BlockPos(originX, originY + (10 * i), originZ), "structure_effect:" + this.name + ":" + effectIndex + ":" + pos.asLong(), baseProjectileEntity, () -> {
                     if (worldExt != null) {
                         worldExt.bossUpdate(baseProjectileEntity);
-                        worldExt.overrideBossRange(baseProjectileEntity, CreatureManager.getInstance().getCreature("asmodeus").bossNearbyRange);
+                        worldExt.overrideBossRange(baseProjectileEntity, CreatureManager.getInstance().getCreature("asmodeus").getBossNearbyRange());
                     }
                 });
             }
@@ -84,7 +84,7 @@ public class AsmodeusStructureBuilder extends StructureBuilder {
                 if (worldExt != null) {
                     MobEventPlayerServer mobEventPlayerServer = worldExt.getMobEventPlayerServer(this.name);
                     if (mobEventPlayerServer != null) {
-                        mobEventPlayerServer.mobEvent.onSpawn(baseCreatureEntity, world, player, pos, level, ticks, variant);
+                        mobEventPlayerServer.getMobEvent().onSpawn(baseCreatureEntity, world, player, pos, level, ticks, variant);
                     }
                 }
             });

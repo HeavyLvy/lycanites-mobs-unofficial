@@ -7,12 +7,16 @@ import net.minecraft.world.item.ItemStack;
 
 public class SlotEquipmentFeature extends EquipmentFeature {
 	/** The type of slot that this adds to the part. Can be: head, blade, axe, pike or jewel. Shouldn't be base else you can have infinitely large weapons! **/
-	public String slotType;
+	protected String slotType;
 
 	/** Loads this slot from a JSON object. **/
 	public void loadFromJSON(JsonObject json) {
 		super.loadFromJSON(json);
 		this.slotType = json.get("slotType").getAsString();
+	}
+
+	public String getSlotType() {
+		return this.slotType;
 	}
 
 	@Override

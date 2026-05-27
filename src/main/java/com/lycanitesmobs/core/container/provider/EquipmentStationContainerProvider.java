@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class EquipmentStationContainerProvider implements Nameable, MenuProvider {
-    public EquipmentStationTileEntity equipmentStation;
+    protected final EquipmentStationTileEntity equipmentStation;
 
     public EquipmentStationContainerProvider(@Nonnull EquipmentStationTileEntity equipmentStation) {
         this.equipmentStation = equipmentStation;

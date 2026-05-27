@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class StructureBuilder {
-	public static Map<String, StructureBuilder> STRUCTURE_BUILDERS = new HashMap<>();
+	protected static Map<String, StructureBuilder> STRUCTURE_BUILDERS = new HashMap<>();
 
-	public String name;
+	protected String name;
 
 	/** Gets a Structure Builder by name. **/
 	public static StructureBuilder getStructureBuilder(String name) {
@@ -30,23 +30,14 @@ public abstract class StructureBuilder {
 		STRUCTURE_BUILDERS.put(structureBuilder.name, structureBuilder );
 	}
 
+	public String getName() {
+		return this.name;
+	}
+
 
 	public abstract void build(Level world, Player player, BlockPos pos, int level, int ticks, int variant);
 
 	protected boolean spawnDeferred(Level world, BlockPos pos, String key, Entity entity, Runnable afterSpawn) {
-		if (world instanceof ServerLevel serverLevel) {
-			return DeferredLevelActionManager.enqueue(serverLevel, pos, key, level -> {
-				level.addFreshEntity(entity);
-				if (afterSpawn != null) {
-					afterSpawn.run();
-				}
-			});
-		}
-
-		world.addFreshEntity(entity);
-		if (afterSpawn != null) {
-			afterSpawn.run();
-		}
-		return true;
+		return DeferredLevelActionManager.spawnEntity(world, pos, key, entity, afterSpawn);
 	}
 }

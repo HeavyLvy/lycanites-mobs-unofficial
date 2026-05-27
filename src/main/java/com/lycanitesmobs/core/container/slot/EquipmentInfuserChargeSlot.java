@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public class EquipmentInfuserChargeSlot extends BaseSlot {
-    public EquipmentInfuserContainer container;
+    protected final EquipmentInfuserContainer container;
 
     /**
      * Constructor
@@ -20,7 +20,7 @@ public class EquipmentInfuserChargeSlot extends BaseSlot {
      * @param y                The y display position.
      */
     public EquipmentInfuserChargeSlot(EquipmentInfuserContainer infuserContainer, int slotIndex, int x, int y) {
-        super(infuserContainer.equipmentInfuser, slotIndex, x, y);
+        super(infuserContainer.getEquipmentInfuser(), slotIndex, x, y);
         this.container = infuserContainer;
     }
 

@@ -56,7 +56,7 @@ public class ModelTemplateElemental extends CreatureObjModel {
         // Attack:
         if(entity instanceof BaseCreatureEntity && ((BaseCreatureEntity)entity).isAttackOnCooldown()) {
             BaseCreatureEntity baseCreatureEntity = (BaseCreatureEntity)entity;
-            if(baseCreatureEntity.attackPhaseMax > 0) {
+            if(baseCreatureEntity.getAttackPhaseMax() > 0) {
 				if (partName.equals("armleft") && baseCreatureEntity.getAttackPhase() == 2)
 					rotate(0.0F, -25.0F, 0.0F);
 				if (partName.equals("armright") && baseCreatureEntity.getAttackPhase() != 2)

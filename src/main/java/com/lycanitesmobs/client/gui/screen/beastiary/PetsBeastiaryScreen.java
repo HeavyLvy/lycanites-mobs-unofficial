@@ -26,8 +26,7 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
 
     public PetsBeastiaryScreen(Player player) {
         super(player);
-        this.playerExt.selectedSubspecies = 0;
-        this.playerExt.selectedVariant = 0;
+        this.playerExt.resetSelectedSubspeciesVariant();
     }
 
     @Override
@@ -117,8 +116,9 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
         super.renderBackground(matrixStack, mouseX, mouseY, partialTicks);
 
         // Model:
-        if (this.playerExt.selectedPet != null) {
-            this.renderCreature(matrixStack, this.playerExt.selectedPet.getCreatureInfo(), this.colRightX + (this.colRightWidth / 2), this.colRightY + Math.round((float) this.colRightHeight / 2), mouseX, mouseY, partialTicks);
+        PetEntry selectedPet = this.playerExt.getSelectedPet();
+        if (selectedPet != null) {
+            this.renderCreature(matrixStack, selectedPet.getCreatureInfo(), this.colRightX + (this.colRightWidth / 2), this.colRightY + Math.round((float) this.colRightHeight / 2), mouseX, mouseY, partialTicks);
         }
     }
 
@@ -126,7 +126,8 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
     protected void renderWidgets(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
         super.renderWidgets(matrixStack, mouseX, mouseY, partialTicks);
 
-        boolean empty = this.playerExt.petManager.entries.isEmpty();
+        boolean empty = !this.playerExt.getPetManager().hasEntries();
+        PetEntry selectedPet = this.playerExt.getSelectedPet();
 
         if (!empty) {
             this.petTypeList.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -140,11 +141,11 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
             ButtonBase button = (ButtonBase) buttonWidget;
 
             if (button.buttonId >= this.petCommandIdStart && button.buttonId < this.releaseConfirmId) {
-                button.visible = !empty && this.playerExt.selectedPet != null;
-                if (this.playerExt.selectedPet != null && !this.playerExt.selectedPet.releaseEntity) {
+                button.visible = !empty && selectedPet != null;
+                if (selectedPet != null && !selectedPet.isReleasePending()) {
 
                     if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.ACTIVE.id + this.petCommandIdStart) {
-                        if (!this.playerExt.selectedPet.spawningActive) {
+                        if (!selectedPet.isSpawningActive()) {
                             button.setMessage(Component.translatable("gui.pet.summon"));
                         } else {
                             button.setMessage(Component.translatable("gui.pet.dismiss"));
@@ -152,37 +153,37 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
                     } else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.PVP.id + this.petCommandIdStart) {
                         MutableComponent label = Component.translatable("gui.pet.pvp")
                                 .append(": ")
-                                .append(this.playerExt.selectedPet.summonSet.getPVP()
+                                .append(selectedPet.getSummonSet().getPVP()
                                         ? Component.translatable("common.yes")
                                         : Component.translatable("common.no"));
                         button.setMessage(label);
                     } else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.PASSIVE.id + this.petCommandIdStart) {
-                        button.active = !this.playerExt.selectedPet.summonSet.passive;
+                        button.active = !selectedPet.getSummonSet().getPassive();
                     } else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.DEFENSIVE.id + this.petCommandIdStart) {
-                        button.active = !(!this.playerExt.selectedPet.summonSet.getPassive()
-                                && !this.playerExt.selectedPet.summonSet.getAssist()
-                                && !this.playerExt.selectedPet.summonSet.getAggressive());
+                        button.active = !(!selectedPet.getSummonSet().getPassive()
+                                && !selectedPet.getSummonSet().getAssist()
+                                && !selectedPet.getSummonSet().getAggressive());
                     } else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.ASSIST.id + this.petCommandIdStart) {
-                        button.active = !(!this.playerExt.selectedPet.summonSet.getPassive()
-                                && this.playerExt.selectedPet.summonSet.getAssist()
-                                && !this.playerExt.selectedPet.summonSet.getAggressive());
+                        button.active = !(!selectedPet.getSummonSet().getPassive()
+                                && selectedPet.getSummonSet().getAssist()
+                                && !selectedPet.getSummonSet().getAggressive());
                     } else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.AGGRESSIVE.id + this.petCommandIdStart) {
-                        button.active = !(!this.playerExt.selectedPet.summonSet.getPassive()
-                                && this.playerExt.selectedPet.summonSet.getAggressive());
+                        button.active = !(!selectedPet.getSummonSet().getPassive()
+                                && selectedPet.getSummonSet().getAggressive());
                     } else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.FOLLOW.id + this.petCommandIdStart) {
-                        button.active = !(!this.playerExt.selectedPet.summonSet.getSitting()
-                                && this.playerExt.selectedPet.summonSet.getFollowing());
+                        button.active = !(!selectedPet.getSummonSet().getSitting()
+                                && selectedPet.getSummonSet().getFollowing());
                     } else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.WANDER.id + this.petCommandIdStart) {
-                        button.active = !(!this.playerExt.selectedPet.summonSet.getSitting()
-                                && !this.playerExt.selectedPet.summonSet.getFollowing());
+                        button.active = !(!selectedPet.getSummonSet().getSitting()
+                                && !selectedPet.getSummonSet().getFollowing());
                     } else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.SIT.id + this.petCommandIdStart) {
-                        button.active = !this.playerExt.selectedPet.summonSet.getSitting();
+                        button.active = !selectedPet.getSummonSet().getSitting();
                     }
                 } else {
                     button.visible = false;
                 }
             } else if (button.buttonId == this.releaseConfirmId || button.buttonId == this.releaseCancelId) {
-                button.visible = this.playerExt.selectedPet != null && this.playerExt.selectedPet.releaseEntity && !empty;
+                button.visible = selectedPet != null && selectedPet.isReleasePending() && !empty;
             }
         }
     }
@@ -198,7 +199,7 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
         int width = this.colRightWidth - marginX;
 
         // Empty:
-        if (this.playerExt.petManager.entries.isEmpty()) {
+        if (!this.playerExt.getPetManager().hasEntries()) {
             String text = Component.translatable("gui.beastiary.pets.empty.info").getString();
             this.drawHelper.drawStringWrapped(matrixStack, text, nextX, nextY, width, 0xFFFFFF, true);
             return;
@@ -208,10 +209,10 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
         String text = "\u00A7l" + Component.translatable("gui.beastiary.player.spirit").getString() + ": ";
         this.drawHelper.drawString(matrixStack, text, nextX, nextY, 0xFFFFFF);
         int barX = nextX + this.drawHelper.getStringWidth(text);
-        int spiritMax = Math.round((float) this.playerExt.spiritMax / this.playerExt.spiritCharge);
-        int spiritReserved = (int) Math.floor((double) this.playerExt.spiritReserved / this.playerExt.spiritCharge);
-        int spiritAvailable = (int) Math.floor((double) this.playerExt.spirit / this.playerExt.spiritCharge);
-        float spiritFilling = ((float) this.playerExt.spirit / this.playerExt.spiritCharge) - spiritAvailable;
+        int spiritMax = this.playerExt.getSpiritMaxUnits();
+        int spiritReserved = this.playerExt.getSpiritReservedUnits();
+        int spiritAvailable = this.playerExt.getSpiritAvailableUnits();
+        float spiritFilling = this.playerExt.getSpiritFillRatio();
         this.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetSpiritEmpty"), barX, nextY, 0, 9, 9, spiritMax, 10);
         this.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetSpirit"), barX, nextY, 0, 9, 9, spiritAvailable, 10);
         if (spiritFilling > 0) {
@@ -220,16 +221,17 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
         this.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetSpiritUsed"), barX, nextY, 0, 9, 9, spiritReserved, -10);
 
         // Creature Display:
-        if (this.playerExt.selectedPet != null) {
+        PetEntry selectedPet = this.playerExt.getSelectedPet();
+        if (selectedPet != null) {
             // Spirit:
             nextY += 4 + this.drawHelper.getWordWrappedHeight(text, colRightWidth);
             text = "\u00A7l" + Component.translatable("creature.stat.spirit").getString() + ": ";
             this.drawHelper.drawString(matrixStack, text, nextX, nextY, 0xFFFFFF);
-            this.drawLevel(matrixStack, this.playerExt.selectedPet.getCreatureInfo(), TextureManager.getTexture("GUIPetLevel"), nextX + this.drawHelper.getStringWidth(text), nextY);
+            this.drawLevel(matrixStack, selectedPet.getCreatureInfo(), TextureManager.getTexture("GUIPetLevel"), nextX + this.drawHelper.getStringWidth(text), nextY);
 
             // Health:
             nextY += 4 + this.drawHelper.getWordWrappedHeight(text, colRightWidth);
-            if (this.playerExt.selectedPet.respawnTime <= 0) {
+            if (selectedPet.getRespawnTime() <= 0) {
                 text = "\u00A7l" + Component.translatable("creature.stat.health").getString() + ": ";
             } else {
                 text = "\u00A7l" + Component.translatable("creature.stat.respawning").getString() + ": ";
@@ -242,15 +244,15 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
             barX = nextX + this.drawHelper.getStringWidth(text);
             int barCenter = barX + (barWidth / 2);
             this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIPetBarEmpty"), barX, barY, 0, 1, 1, barWidth, barHeight);
-            if (this.playerExt.selectedPet.respawnTime <= 0) {
-                float healthNormal = Math.min(this.playerExt.selectedPet.getHealth() / this.playerExt.selectedPet.getMaxHealth(), 1);
+            if (selectedPet.getRespawnTime() <= 0) {
+                float healthNormal = Math.min(selectedPet.getHealth() / selectedPet.getMaxHealth(), 1);
                 this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIPetBarHealth"), barX, barY, 0, healthNormal, 1, barWidth * healthNormal, barHeight);
-                String healthText = String.format("%.0f", this.playerExt.selectedPet.getHealth()) + "/" + String.format("%.0f", this.playerExt.selectedPet.getMaxHealth());
+                String healthText = String.format("%.0f", selectedPet.getHealth()) + "/" + String.format("%.0f", selectedPet.getMaxHealth());
                 this.drawHelper.drawString(matrixStack, healthText, barCenter - (this.drawHelper.getStringWidth(healthText) / 2), barY + 2, 0xFFFFFF);
             } else {
-                float respawnNormal = 1.0F - ((float) this.playerExt.selectedPet.respawnTime / this.playerExt.selectedPet.respawnTimeMax);
+                float respawnNormal = 1.0F - ((float) selectedPet.getRespawnTime() / selectedPet.getRespawnTimeMax());
                 this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIPetBarRespawn"), barX, barY, 0, respawnNormal, 1, barWidth * respawnNormal, barHeight);
-                this.drawHelper.drawString(matrixStack, "" + (this.playerExt.selectedPet.respawnTime / 20) + "s", barX + barWidth + 10, nextY, 0xFFFFFF);
+                this.drawHelper.drawString(matrixStack, "" + (selectedPet.getRespawnTime() / 20) + "s", barX + barWidth + 10, nextY, 0xFFFFFF);
             }
 
             // Experience:
@@ -264,9 +266,9 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
             barX = nextX + this.drawHelper.getStringWidth(text);
             barCenter = barX + (barWidth / 2);
             this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIPetBarEmpty"), barX, barY, 0, 1, 1, barWidth, barHeight);
-            float experienceNormal = (float) this.playerExt.selectedPet.getExperience() / this.playerExt.selectedPet.getMaxExperience();
+            float experienceNormal = (float) selectedPet.getExperience() / selectedPet.getMaxExperience();
             this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIBarExperience"), barX, barY, 0, experienceNormal, 1, barWidth * experienceNormal, barHeight);
-            String experienceText = this.playerExt.selectedPet.getExperience() + "/" + this.playerExt.selectedPet.getMaxExperience();
+            String experienceText = selectedPet.getExperience() + "/" + selectedPet.getMaxExperience();
             this.drawHelper.draw(matrixStack, experienceText, barCenter - (this.drawHelper.getStringWidth(experienceText) / 2), barY + 2, 0xFFFFFF);
         }
 
@@ -281,7 +283,7 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
         int buttonHeight = 20;
         int buttonSpacing = 2;
         int buttonY = this.colRightY + this.colRightHeight - ((buttonHeight + buttonSpacing) * 3);
-        if (this.playerExt.selectedPet != null && !this.playerExt.selectedPet.releaseEntity) {
+        if (selectedPet != null && !selectedPet.isReleasePending()) {
             this.drawHelper.drawString(matrixStack, "\u00A7l" + Component.translatable("gui.pet.actions").getString(), this.colRightX, buttonY + 6, 0xFFFFFF);
             buttonY += buttonHeight + buttonSpacing;
             this.drawHelper.drawString(matrixStack, "\u00A7l" + Component.translatable("gui.pet.stance").getString(), this.colRightX, buttonY + 6, 0xFFFFFF);
@@ -290,7 +292,7 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
         }
 
         // Release Confirmation:
-        if (this.playerExt.selectedPet != null && this.playerExt.selectedPet.releaseEntity) {
+        if (selectedPet != null && selectedPet.isReleasePending()) {
             text = Component.translatable("gui.pet.release.confirm").getString();
             nextX = this.colRightX;
             nextY = this.colRightY + Math.round((float) this.colRightHeight / 2) - Math.round((float) buttonHeight / 2) - this.drawHelper.getWordWrappedHeight(text, this.colRightWidth) - 2;
@@ -300,8 +302,10 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
 
     @Override
     public void actionPerformed(int buttonId) {
-        if (this.playerExt.selectedPet != null && this.playerExt.selectedPet.summonSet != null) {
-            PetEntry petEntry = this.playerExt.selectedPet;
+        PetEntry selectedPet = this.playerExt.getSelectedPet();
+        if (selectedPet != null && selectedPet.getSummonSet() != null) {
+            PetEntry petEntry = selectedPet;
+            var summonSet = petEntry.getSummonSet();
 
             // Pet Commands;
             if (buttonId >= this.petCommandIdStart && buttonId < this.releaseConfirmId) {
@@ -309,48 +313,37 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
 
                 // Actions:
                 if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.ACTIVE.id) {
-                    petEntry.spawningActive = !petEntry.spawningActive;
+                    petEntry.setSpawningActive(!petEntry.isSpawningActive());
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.TELEPORT.id) {
-                    petEntry.teleportEntity = true;
+                    petEntry.requestTeleport();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.PVP.id) {
-                    petEntry.summonSet.pvp = !petEntry.summonSet.pvp;
+                    summonSet.togglePVP();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.RELEASE.id) {
-                    petEntry.releaseEntity = true;
+                    petEntry.setReleasePending(true);
                 }
 
                 // Stance:
                 else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.PASSIVE.id) {
-                    petEntry.summonSet.passive = true;
-                    petEntry.summonSet.assist = false;
-                    petEntry.summonSet.aggressive = false;
+                    summonSet.setPassiveStance();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.DEFENSIVE.id) {
-                    petEntry.summonSet.passive = false;
-                    petEntry.summonSet.assist = false;
-                    petEntry.summonSet.aggressive = false;
+                    summonSet.setDefensiveStance();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.ASSIST.id) {
-                    petEntry.summonSet.passive = false;
-                    petEntry.summonSet.assist = true;
-                    petEntry.summonSet.aggressive = false;
+                    summonSet.setAssistStance();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.AGGRESSIVE.id) {
-                    petEntry.summonSet.passive = false;
-                    petEntry.summonSet.assist = true;
-                    petEntry.summonSet.aggressive = true;
+                    summonSet.setAggressiveStance();
                 }
 
                 // Movement:
                 else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.FOLLOW.id) {
-                    petEntry.summonSet.following = true;
-                    petEntry.summonSet.sitting = false;
+                    summonSet.setFollowMovement();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.WANDER.id) {
-                    petEntry.summonSet.following = false;
-                    petEntry.summonSet.sitting = false;
+                    summonSet.setWanderMovement();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.SIT.id) {
-                    petEntry.summonSet.following = false;
-                    petEntry.summonSet.sitting = true;
+                    summonSet.setSitMovement();
                 }
 
                 this.playerExt.sendPetEntryToServer(petEntry);
-                if (this.playerExt.selectedPet == null) {
+                if (!this.playerExt.hasSelectedPet()) {
                     this.mc.setScreen(new PetsBeastiaryScreen(this.mc.player));
                 }
                 return;
@@ -358,10 +351,10 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
 
             // Release Confirmation:
             else if (buttonId == this.releaseCancelId) {
-                petEntry.releaseEntity = false;
+                petEntry.setReleasePending(false);
                 return;
             } else if (buttonId == this.releaseConfirmId) {
-                this.playerExt.selectedPet = null;
+                this.playerExt.clearSelectedPet();
                 this.playerExt.sendPetEntryRemoveRequest(petEntry);
                 return;
             }
@@ -372,17 +365,18 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
 
     @Override
     public MutableComponent getTitle() {
-        if (this.playerExt.selectedPet != null) {
-            MutableComponent title = this.playerExt.selectedPet.getDisplayName().copy()
+        PetEntry selectedPet = this.playerExt.getSelectedPet();
+        if (selectedPet != null) {
+            MutableComponent title = selectedPet.getDisplayName().copy()
                     .append(" ")
                     .append(Component.translatable("creature.stat.level"))
-                    .append(" " + this.playerExt.selectedPet.getLevel());
-            if (this.playerExt.selectedPet.releaseEntity) {
+                    .append(" " + selectedPet.getLevel());
+            if (selectedPet.isReleasePending()) {
                 title = Component.translatable("gui.pet.release").append(" ").append(title);
             }
             return title;
         }
-        if (this.playerExt.petManager.entries.isEmpty()) {
+        if (!this.playerExt.getPetManager().hasEntries()) {
             return Component.translatable("gui.beastiary.pets.empty.title");
         }
         return Component.translatable("gui.beastiary.pets");
@@ -391,18 +385,20 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
 
     @Override
     public int getDisplaySubspecies(CreatureInfo creatureInfo) {
-        if (this.playerExt.selectedPet == null) {
+        PetEntry selectedPet = this.playerExt.getSelectedPet();
+        if (selectedPet == null) {
             return super.getDisplaySubspecies(creatureInfo);
         }
-        return this.playerExt.selectedPet.subspeciesIndex;
+        return selectedPet.getSubspeciesIndex();
     }
 
     @Override
     public int getDisplayVariant(CreatureInfo creatureInfo) {
-        if (this.playerExt.selectedPet == null) {
+        PetEntry selectedPet = this.playerExt.getSelectedPet();
+        if (selectedPet == null) {
             return super.getDisplayVariant(creatureInfo);
         }
-        return this.playerExt.selectedPet.variantIndex;
+        return selectedPet.getVariantIndex();
     }
 
 
@@ -412,9 +408,10 @@ public class PetsBeastiaryScreen extends BeastiaryScreen {
             return;
         }
         String soundSuffix = "";
-        if (this.playerExt.selectedPet != null
-                && creatureInfo.getSubspecies(this.playerExt.selectedPet.subspeciesIndex).name != null) {
-            soundSuffix += "." + creatureInfo.getSubspecies(this.playerExt.selectedPet.subspeciesIndex).name;
+        PetEntry selectedPet = this.playerExt.getSelectedPet();
+        if (selectedPet != null
+                && creatureInfo.getSubspecies(selectedPet.getSubspeciesIndex()).getName() != null) {
+            soundSuffix += "." + creatureInfo.getSubspecies(selectedPet.getSubspeciesIndex()).getName();
         }
         SoundEvent soundEvent = ObjectManager.getSound(creatureInfo.getName() + soundSuffix + "_tame");
         if (soundEvent != null) {

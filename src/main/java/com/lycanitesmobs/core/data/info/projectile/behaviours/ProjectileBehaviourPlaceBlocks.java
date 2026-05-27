@@ -16,27 +16,27 @@ public class ProjectileBehaviourPlaceBlocks extends ProjectileBehaviour {
     /**
      * The name of the block to place.
      **/
-    public String blockName;
+    protected String blockName;
 
     /**
      * The chance of placing a block at each location.
      **/
-    public double chance = 1;
+    protected double chance = 1;
 
     /**
      * The radius of blocks placed.
      **/
-    public int radius = 1;
+    protected int radius = 1;
 
     /**
      * The height of blocks placed.
      **/
-    public int height = 1;
+    protected int height = 1;
 
     /**
      * Whether the block must be placed on top of a solid block (use for fires, etc)
      **/
-    public boolean solidSurface = true;
+    protected boolean solidSurface = true;
 
     @Override
     public void loadFromJSON(JsonObject json) {

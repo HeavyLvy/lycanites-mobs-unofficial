@@ -101,7 +101,7 @@ public class FollowOwnerGoal extends FollowGoal {
     // ========== Teleport to Owner ==========
     public void teleportToOwner() {
     	if(this.getTarget() != null) {
-			if(!this.host.canBreatheAir() && ((!this.host.isLavaCreature && !this.getTarget().isInWater()) || (this.host.isLavaCreature && !this.getTarget().isInLava()))) {
+			if(!this.host.canBreatheAir() && ((!this.host.isLavaCreature() && !this.getTarget().isInWater()) || (this.host.isLavaCreature() && !this.getTarget().isInLava()))) {
 				return;
 			}
 			if(!this.host.canBreatheUnderwater() && this.getTarget().isInWater()) {

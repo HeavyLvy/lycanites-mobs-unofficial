@@ -41,8 +41,8 @@ public class CreatureRelationshipEntry {
 	 * @return Returns true if the reputation has increased, false otherwise (if it is capped, etc).
 	 */
 	public boolean increaseReputation(int amount) {
-		int max = this.creatureRelationships.getCreatureEntity().creatureInfo.getTamingReputation();
-		int min = -this.creatureRelationships.getCreatureEntity().creatureInfo.getTamingReputation();
+		int max = this.creatureRelationships.getCreatureEntity().getTamingReputation();
+		int min = -this.creatureRelationships.getCreatureEntity().getTamingReputation();
 		if (this.reputation >= max) {
 			return false;
 		}
@@ -57,8 +57,8 @@ public class CreatureRelationshipEntry {
 	 * @return Returns true if the reputation has decreased, false otherwise (if it is capped, etc).
 	 */
 	public boolean decreaseReputation(int amount) {
-		int max = this.creatureRelationships.getCreatureEntity().creatureInfo.getTamingReputation();
-		int min = -this.creatureRelationships.getCreatureEntity().creatureInfo.getTamingReputation();
+		int max = this.creatureRelationships.getCreatureEntity().getTamingReputation();
+		int min = -this.creatureRelationships.getCreatureEntity().getTamingReputation();
 		if (this.reputation <= min) {
 			return false;
 		}
@@ -72,7 +72,7 @@ public class CreatureRelationshipEntry {
 	 * @return True if the target can be attacked at all, false if not.
 	 */
 	public boolean canAttack() {
-		return this.reputation < this.creatureRelationships.getCreatureEntity().creatureInfo.getTamingReputation();
+		return this.reputation < this.creatureRelationships.getCreatureEntity().getTamingReputation();
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class CreatureRelationshipEntry {
 	 * @return True if the target can be hunted, false if not.
 	 */
 	public boolean canHunt() {
-		return this.reputation < this.creatureRelationships.getCreatureEntity().creatureInfo.getFriendlyReputation();
+		return this.reputation < this.creatureRelationships.getCreatureEntity().getFriendlyReputation();
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class CreatureRelationshipEntry {
 	 * @return True if the target should be defended, false if not.
 	 */
 	public boolean shouldDefend() {
-		return this.reputation >= this.creatureRelationships.getCreatureEntity().creatureInfo.getFriendlyReputation();
+		return this.reputation >= this.creatureRelationships.getCreatureEntity().getFriendlyReputation();
 	}
 
 	/**

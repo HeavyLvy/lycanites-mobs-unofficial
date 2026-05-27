@@ -15,7 +15,7 @@ import org.joml.Vector3d;
 
 public class EntitySylph extends TameableCreatureEntity implements Enemy {
 
-    public float fireDamageAbsorbed = 0;
+    private float fireDamageAbsorbed = 0;
 
     // ==================================================
     //                    Constructor
@@ -35,9 +35,9 @@ public class EntitySylph extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setRange(16.0F).setMinChaseDistance(8.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setRange(16.0F).setMinChaseDistance(8.0F));
 
-        this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(EntityType.PLAYER));
+        this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindAttackTargetGoal(this).addTargets(EntityType.PLAYER));
     }
 
 
@@ -96,7 +96,7 @@ public class EntitySylph extends TameableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -23,32 +24,32 @@ public class SummonEquipmentFeature extends EquipmentFeature {
     /**
      * The id of the mob to summon. *
      */
-    public String summonMobId;
+    protected String summonMobId;
 
     /**
      * The chance on summoning mobs. *
      */
-    public double summonChance = 0.05;
+    protected double summonChance = 0.05;
 
     /**
      * How long in ticks the summoned creature lasts for. *
      */
-    public int summonDuration = 60;
+    protected int summonDuration = 60;
 
     /**
      * The minimum amount of mobs to summon. *
      */
-    public int summonCountMin = 1;
+    protected int summonCountMin = 1;
 
     /**
      * The maximum amount of mobs to summon. *
      */
-    public int summonCountMax = 1;
+    protected int summonCountMax = 1;
 
     /**
      * The size scale of summoned mobs. *
      */
-    public double sizeScale = 1;
+    protected double sizeScale = 1;
 
     @Override
     public void loadFromJSON(JsonObject json) {
@@ -133,7 +134,7 @@ public class SummonEquipmentFeature extends EquipmentFeature {
                 if (entityKey != null && LycanitesMobs.MODID.equals(entityKey.getNamespace())) {
                     entityType = fetchedType;
                 } else {
-                    LMHelperClass.logWarning("", "[SummonEquipment] Entity type '" + this.summonMobId + "' is not from the lycanitesmobs mod namespace. Summon ignored.");
+                    LMHelperClass.logWarningMessage("[SummonEquipment] Entity type '" + this.summonMobId + "' is not from the lycanitesmobs mod namespace. Summon ignored.");
                 }
             }
         }
@@ -175,8 +176,13 @@ public class SummonEquipmentFeature extends EquipmentFeature {
                         BlockPos spawnPos = entityCreature.getFacingPosition(attacker, -1, randomAngle);
                         entity.moveTo(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), attacker.yRotO, 0.0F);
                         entityCreature.setTarget(target);
-                        entity.getCommandSenderWorld().addFreshEntity(entity);
-                        summonedCreatures++;
+                        if (DeferredLevelActionManager.spawnEntity(
+                                attacker.getCommandSenderWorld(),
+                                spawnPos,
+                                "equipment_summon:" + entity.getUUID(),
+                                entity)) {
+                            summonedCreatures++;
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

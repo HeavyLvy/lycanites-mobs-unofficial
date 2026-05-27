@@ -1,14 +1,9 @@
 package com.lycanitesmobs.core.network.message;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.manager.ClientManager;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.util.CreatureRelationshipEntry;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -34,16 +29,8 @@ public class MessageCreature {
         if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
             return;
 
-        Player player = ClientManager.getInstance().getClientPlayer();
-        Level world = player.getCommandSenderWorld();
-        Entity entity = world.getEntity(message.entityID);
-        if (!(entity instanceof BaseCreatureEntity)) {
-            return;
-        }
-        BaseCreatureEntity creatureEntity = (BaseCreatureEntity) entity;
-
-        CreatureRelationshipEntry relationshipEntry = creatureEntity.relationships.getOrCreateEntry(player);
-        relationshipEntry.setReputation(message.playerReputation);
+        ctx.get().enqueueWork(() ->
+                LycanitesMobs.PROXY.applyCreatureReputation(message.entityID, message.playerReputation));
     }
 
     /**
@@ -55,7 +42,7 @@ public class MessageCreature {
             message.entityID = packet.readInt();
             message.playerReputation = packet.readInt();
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "There was a problem decoding the packet: " + packet + ".");
+            LMHelperClass.logWarningMessage("There was a problem decoding the packet: " + packet + ".");
             e.printStackTrace();
         }
         return message;

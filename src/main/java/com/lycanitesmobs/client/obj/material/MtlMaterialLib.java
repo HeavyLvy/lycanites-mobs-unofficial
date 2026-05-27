@@ -77,7 +77,7 @@ public class MtlMaterialLib {
             InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(resourceLocation).get().open();
             return loadTexture(ImageIO.read(inputStream));
         } catch (IOException e) {
-            LMHelperClass.logWarning("", "Unable to load a texture from the obj material file.");
+            LMHelperClass.logWarningMessage("Unable to load a texture from the obj material file.");
             e.printStackTrace();
         }
         return 0;

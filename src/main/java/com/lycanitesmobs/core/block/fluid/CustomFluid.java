@@ -14,7 +14,7 @@ abstract public class CustomFluid extends ForgeFlowingFluid {
         this.setRegistryName(LycanitesMobs.MODID, name);
     }
 
-    public ResourceLocation registryName;
+    private ResourceLocation registryName;
 
     public ResourceLocation getRegistryName() {
         return registryName;

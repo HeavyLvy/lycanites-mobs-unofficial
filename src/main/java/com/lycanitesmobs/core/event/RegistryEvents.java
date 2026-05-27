@@ -9,18 +9,20 @@ import com.lycanitesmobs.core.block.blockentity.TileEntitySummoningPedestal;
 import com.lycanitesmobs.core.command.*;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.data.info.item.ItemInfo;
+import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.effect.EffectBase;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
-import com.lycanitesmobs.core.block.fluid.CustomFluid;
-import com.lycanitesmobs.core.block.fluid.type.BaseFluidType;
 import com.lycanitesmobs.core.manager.*;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -30,7 +32,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -38,23 +39,26 @@ import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 
-import java.util.HashSet;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.lycanitesmobs.core.manager.ObjectManager.*;
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.cast;
 
 @Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class RegistryEvents {
-    public static RegistryEvents INSTANCE;
+    private static RegistryEvents INSTANCE;
 
     public static RegistryEvents getInstance() {
         if (INSTANCE == null)
@@ -70,7 +74,7 @@ public class RegistryEvents {
     public void registerEntities(RegisterEvent event) {
         event.register(ForgeRegistries.Keys.ENTITY_TYPES,
                 helper -> {
-                    for (Map.Entry<String, Lazy<? extends EntityType<?>>> entityType : entityTypes.entrySet()) {
+                    for (Map.Entry<String, Lazy<? extends EntityType<?>>> entityType : ObjectManager.getEntityTypeEntries()) {
                         helper.register(new ResourceLocation(LycanitesMobs.MODID, entityType.getKey()), entityType.getValue().get());
                     }
                 }
@@ -94,11 +98,11 @@ public class RegistryEvents {
     @SubscribeEvent
     public void registerBlocks(RegisterEvent event) {
         event.register(ForgeRegistries.Keys.BLOCKS, helper -> {
-            for (Supplier<? extends Block> block : blocks.values()) {
+            for (Supplier<? extends Block> block : ObjectManager.getBlockSuppliers()) {
                 BlockTypeGetter getter = (BlockTypeGetter) block.get();
                 helper.register(getter.getRegistryName(), block.get());
             }
-            for (Lazy<? extends LiquidBlock> lazy : liquidBlocks.values()) {
+            for (Lazy<? extends LiquidBlock> lazy : ObjectManager.getLiquidBlockSuppliers()) {
                 LiquidBlock lb = lazy.get();
                 BlockTypeGetter getter = (BlockTypeGetter) lb;
                 helper.register(getter.getRegistryName(), lb);
@@ -106,12 +110,12 @@ public class RegistryEvents {
         });
         event.register(ForgeRegistries.Keys.ITEMS,
                 helper -> {
-                    for (Map.Entry<String, Lazy<? extends BlockItem>> entry : ObjectManager.blockItems.entrySet()) {
+                    for (Map.Entry<String, Lazy<? extends BlockItem>> entry : ObjectManager.getBlockItemEntries()) {
                         String name = entry.getKey();
                         Supplier<? extends BlockItem> blockItem = entry.getValue();
                         LMHelperClass.logDebug("Item", "Registering item block: " + name);
                         if (name == null) {
-                            LMHelperClass.logWarning("", "Block Item: " + name + " has no Registry Name!");
+                            LMHelperClass.logWarningMessage("Block Item: " + name + " has no Registry Name!");
                             continue;
                         }
                         helper.register(new ResourceLocation(LycanitesMobs.MODID, name), blockItem.get());
@@ -126,8 +130,8 @@ public class RegistryEvents {
         event.register(ForgeRegistries.Keys.ITEMS,
                 helper -> {
                     //General Items
-                    for (ItemInfo itemInfo : ItemManager.items.values()) {
-                        if (ObjectManager.items.containsKey(itemInfo.getName())) {
+                    for (ItemInfo itemInfo : ItemManager.getItemInfos()) {
+                        if (ObjectManager.hasItem(itemInfo.getName())) {
                             LycanitesMobs.LOGGER.info("Tried registering item in Object Manager's item list, skipping: " + itemInfo.getName());
                             return;
                         }
@@ -136,15 +140,14 @@ public class RegistryEvents {
                         helper.register(new ResourceLocation(LycanitesMobs.MODID, itemInfo.getItem().itemName), itemInfo.getItem());
                     }
                     //Special Items
-                    for (Supplier<? extends Item> item : items.values()) {
-                        for (String name : items.keySet()) {
-                            if (ItemManager.items.containsKey(name)) {
-                                LycanitesMobs.LOGGER.info("Tried registering item in Item Manager's item list, skipping: " + name);
-                                return;
-                            }
-                            LMHelperClass.logDebug("Item", "Registering special item: " + name);
-                            helper.register(new ResourceLocation(LycanitesMobs.MODID, name), item.get());
+                    for (Map.Entry<String, Supplier<? extends Item>> entry : ObjectManager.getItemSupplierEntries()) {
+                        String name = entry.getKey();
+                        if (ItemManager.hasItemInfo(name)) {
+                            LycanitesMobs.LOGGER.info("Tried registering item in Item Manager's item list, skipping: " + name);
+                            return;
                         }
+                        LMHelperClass.logDebug("Item", "Registering special item: " + name);
+                        helper.register(new ResourceLocation(LycanitesMobs.MODID, name), entry.getValue().get());
                     }
                 }
         );
@@ -167,7 +170,7 @@ public class RegistryEvents {
                     for (Lazy<? extends SoundEvent> soundEvent : sounds.values()) {
                         for (ResourceLocation registryName : soundNames.values()) {
                             if (registryName == null) {
-                                LycanitesMobs.logWarning("", "Sound: " + soundEvent + " has no Registry Name!");
+                                LMHelperClass.logWarningMessage("Sound: " + soundEvent + " has no Registry Name!");
                             }
                             helper.register(registryName, soundEvent.get());
                         }
@@ -181,7 +184,7 @@ public class RegistryEvents {
     public void registerEffects(RegisterEvent event) {
         event.register(ForgeRegistries.Keys.MOB_EFFECTS,
                 helper -> {
-                    for (EffectBase effect : effects.values()) {
+                    for (EffectBase effect : ObjectManager.getEffects()) {
                         helper.register(effect.getRegistryName(), effect);
                     }
                 }
@@ -193,23 +196,11 @@ public class RegistryEvents {
     public void registerFluids(RegisterEvent event) {
         event.register(ForgeRegistries.Keys.FLUIDS, helper -> {
             FluidManager.getInstance().defineFluids();
-            for (Fluid fluid : fluids.values()) {
-                if (fluid instanceof CustomFluid customFluid) {
-                    helper.register(customFluid.getRegistryName(), fluid);
-                }
-            }
+            FluidManager.getInstance().registerFluidObjects(helper::register);
         });
         event.register(ForgeRegistries.Keys.FLUID_TYPES, helper -> {
-            Set<ResourceLocation> seen = new HashSet<>();
-            for (Fluid fluid : fluids.values()) {
-                FluidType ft = fluid.getFluidType();
-                if (ft instanceof BaseFluidType bft) {
-                    ResourceLocation id = bft.getRegistryName();
-                    if (seen.add(id)) {
-                        helper.register(id, bft);
-                    }
-                }
-            }
+            FluidManager.getInstance().defineFluids();
+            FluidManager.getInstance().forEachFluidType(helper::register);
         });
     }
 
@@ -219,34 +210,34 @@ public class RegistryEvents {
         event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES,
                 helper -> {
                     BlockEntityType<TileEntitySummoningPedestal> summoningPedestalType = BlockEntityType.Builder.of(TileEntitySummoningPedestal::new,
-                            getBlock("summoningpedestal")
+                            ObjectManager.getBlock("summoningpedestal")
                     ).build(null);
                     ResourceLocation summoningpedestalLocation = new ResourceLocation(LycanitesMobs.MODID, "summoningpedestal");
                     helper.register(summoningpedestalLocation, summoningPedestalType);
-                    tileEntityTypes.put(TileEntitySummoningPedestal.class, summoningPedestalType);
+                    ObjectManager.registerTileEntityType(TileEntitySummoningPedestal.class, summoningPedestalType);
 
                     BlockEntityType<TileEntityEquipmentForge> equipmentForgeType = BlockEntityType.Builder.of(TileEntityEquipmentForge::new,
-                            getBlock("equipmentforge_lesser"),
-                            getBlock("equipmentforge_greater"),
-                            getBlock("equipmentforge_master")
+                            ObjectManager.getBlock("equipmentforge_lesser"),
+                            ObjectManager.getBlock("equipmentforge_greater"),
+                            ObjectManager.getBlock("equipmentforge_master")
                     ).build(null);
                     ResourceLocation equipmentforgeLocation = new ResourceLocation(LycanitesMobs.MODID, "equipmentforge");
                     helper.register(equipmentforgeLocation, equipmentForgeType);
-                    tileEntityTypes.put(TileEntityEquipmentForge.class, equipmentForgeType);
+                    ObjectManager.registerTileEntityType(TileEntityEquipmentForge.class, equipmentForgeType);
 
                     BlockEntityType<EquipmentInfuserTileEntity> equipmentInfuserType = BlockEntityType.Builder.of(EquipmentInfuserTileEntity::new,
-                            getBlock("equipment_infuser")
+                            ObjectManager.getBlock("equipment_infuser")
                     ).build(null);
                     ResourceLocation equipment_infuserLocation = new ResourceLocation(LycanitesMobs.MODID, "equipment_infuser");
                     helper.register(equipment_infuserLocation, equipmentInfuserType);
-                    tileEntityTypes.put(EquipmentInfuserTileEntity.class, equipmentInfuserType);
+                    ObjectManager.registerTileEntityType(EquipmentInfuserTileEntity.class, equipmentInfuserType);
 
                     BlockEntityType<EquipmentStationTileEntity> equipmentStationType = BlockEntityType.Builder.of(EquipmentStationTileEntity::new,
-                            getBlock("equipment_station")
+                            ObjectManager.getBlock("equipment_station")
                     ).build(null);
                     ResourceLocation equipment_stationLocation = new ResourceLocation(LycanitesMobs.MODID, "equipment_station");
                     helper.register(equipment_stationLocation, equipmentStationType);
-                    tileEntityTypes.put(EquipmentStationTileEntity.class, equipmentStationType);
+                    ObjectManager.registerTileEntityType(EquipmentStationTileEntity.class, equipmentStationType);
                 });
     }
 
@@ -265,13 +256,13 @@ public class RegistryEvents {
     @SubscribeEvent
     public void registerStats(RegisterEvent event) {
         StatManager.getInstance().createStatTypes();
-        for (var entry : StatManager.getInstance().statTypes.entrySet()) {
+        StatManager.getInstance().forEachStatType((name, statType) -> {
             event.register(ForgeRegistries.Keys.STAT_TYPES,
                     helper -> {
-                        helper.register(new ResourceLocation(LycanitesMobs.MODID, entry.getKey()), entry.getValue());
+                        helper.register(new ResourceLocation(LycanitesMobs.MODID, name), statType);
                     }
             );
-        }
+        });
     }
 
 
@@ -292,16 +283,6 @@ public class RegistryEvents {
         );
     }
 
-
-    /*   @SubscribeEvent
-       public void registerFeatures(RegisterEvent event) {
-           event.register(ForgeRegistries.Keys.FEATURES,
-                   helper -> {
-                       helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "chunkspawn"), WorldGenManager.getInstance().chunkSpawnFeature);
-                       helper.register(new ResourceLocation(LycanitesMobs.modInfo.modid, "dungeon"), WorldGenManager.getInstance().dungeonFeature);
-                   }
-           );
-       }*/
     // ==================================================
     //              Entity Attribute Registration
     // ==================================================
@@ -340,45 +321,227 @@ public class RegistryEvents {
     }
 
     // ==================================================
-    //           Debug: Scute Summon All Entities
+    //           Debug: Scute Entity Galleries
     // ==================================================
 
     /**
-     * Right-clicking with a Turtle Scute spawns one of every registered lycanitesmobs entity
-     * in a grid pattern centred two blocks in front of the player. Server-side only.
+     * Right-clicking with a Turtle Scute in the main hand spawns one of every projectile.
+     * Right-clicking with a Turtle Scute in the offhand spawns one of every creature.
      */
     @SubscribeEvent
     public static void onRightClickTurtleScute(PlayerInteractEvent.RightClickItem event) {
         if (FMLEnvironment.production) return;
-        if (event.getHand() != InteractionHand.MAIN_HAND) return;
         if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
         if (event.getItemStack().getItem() != Items.SCUTE) return;
 
-        // entities per row
-        final int COLUMNS = 10;
-
-        // blocks between each spawn
-        final double SPACING = 8.0;
+        if (event.getHand() == InteractionHand.OFF_HAND) {
+            spawnCreatureGallery(serverLevel, event.getEntity());
+            event.setCanceled(true);
+            return;
+        }
+        if (event.getHand() != InteractionHand.MAIN_HAND) return;
 
         var player = event.getEntity();
-        Vec3 origin = player.position().add(player.getLookAngle().multiply(3, 0, 3));
-
-        int index = 0;
-        for (var entry : ForgeRegistries.ENTITY_TYPES.getEntries()) {
-            if (!entry.getKey().location().getNamespace().equals(LycanitesMobs.MODID)) continue;
-
-            EntityType<?> type = entry.getValue();
-            Entity entity = type.create(serverLevel);
-            if (entity == null) continue;
-
-            double col = (index % COLUMNS) * SPACING;
-            double row = (index / COLUMNS) * SPACING;
-            entity.setPos(origin.x + col, origin.y, origin.z + row);
-            serverLevel.addFreshEntity(entity);
-            index++;
+        List<ProjectileSpawn> projectileSpawns = collectProjectileSpawns(serverLevel, player);
+        if (projectileSpawns.isEmpty()) {
+            LMHelperClass.logInfoMessageDev("[Debug] No projectiles were available for the scute gallery.");
+            return;
         }
 
-        LMHelperClass.logInfoMessageDev("[Debug] Spawned " + index + " lycanitesmobs entities.");
+        final int columns = Math.max(1, (int) Math.ceil(Math.sqrt(projectileSpawns.size())));
+        final double spacing = 5.0D;
+        Vec3 forward = horizontalForward(player.getYRot());
+        Vec3 right = new Vec3(forward.z(), 0, -forward.x()).normalize();
+        Vec3 origin = player.position()
+                .add(forward.scale(8.0D))
+                .add(right.scale(-((columns - 1) * spacing) / 2.0D))
+                .add(0, 1.5D, 0);
+
+        List<TextureCheck> textureChecks = new ArrayList<>();
+        int spawned = 0;
+        for (int index = 0; index < projectileSpawns.size(); index++) {
+            ProjectileSpawn spawn = projectileSpawns.get(index);
+            BaseProjectileEntity projectile = spawn.projectile();
+
+            double col = (index % columns) * spacing;
+            double row = (index / columns) * spacing;
+            Vec3 pos = origin.add(right.scale(col)).add(forward.scale(row));
+            prepareProjectileGalleryEntry(projectile, pos, spawn.name());
+            textureChecks.add(TextureCheck.from(spawn.name(), spawn.kind(), projectile.getClass().getName(), projectile.getTexture()));
+
+            DeferredLevelActionManager.spawnEntity(serverLevel, projectile.blockPosition(), null, projectile);
+            spawned++;
+        }
+
+        Path reportPath = writeProjectileTextureReport(textureChecks);
+        long missing = textureChecks.stream().filter(TextureCheck::missing).count();
+        LMHelperClass.logInfoMessageDev("[Debug] Spawned " + spawned + " projectile gallery entries. Missing textures: " + missing + ". Report: " + reportPath);
         event.setCanceled(true);
+    }
+
+    private static void spawnCreatureGallery(ServerLevel serverLevel, Entity player) {
+        List<CreatureInfo> creatureInfos = new ArrayList<>(CreatureManager.getInstance().getCreatures());
+        creatureInfos.removeIf(creatureInfo -> creatureInfo.isDummy() || creatureInfo.getEntityType() == null);
+        creatureInfos.sort(Comparator.comparing(CreatureInfo::getName));
+        if (creatureInfos.isEmpty()) {
+            LMHelperClass.logInfoMessageDev("[Debug] No creatures were available for the scute gallery.");
+            return;
+        }
+
+        final int columns = Math.max(1, (int) Math.ceil(Math.sqrt(creatureInfos.size())));
+        final double spacing = 6.0D;
+        Vec3 forward = horizontalForward(player.getYRot());
+        Vec3 right = new Vec3(forward.z(), 0, -forward.x()).normalize();
+        Vec3 origin = player.position()
+                .add(forward.scale(10.0D))
+                .add(right.scale(-((columns - 1) * spacing) / 2.0D));
+
+        int spawned = 0;
+        for (int index = 0; index < creatureInfos.size(); index++) {
+            CreatureInfo creatureInfo = creatureInfos.get(index);
+            LivingEntity creature = creatureInfo.createEntity(serverLevel);
+            if (creature == null) {
+                continue;
+            }
+
+            double col = (index % columns) * spacing;
+            double row = (index / columns) * spacing;
+            Vec3 pos = origin.add(right.scale(col)).add(forward.scale(row));
+            prepareCreatureGalleryEntry(creature, pos, creatureInfo.getName());
+
+            DeferredLevelActionManager.spawnEntity(serverLevel, creature.blockPosition(), null, creature);
+            spawned++;
+        }
+
+        LMHelperClass.logInfoMessageDev("[Debug] Spawned " + spawned + " creature gallery entries.");
+    }
+
+    private static List<ProjectileSpawn> collectProjectileSpawns(ServerLevel level, Entity owner) {
+        ProjectileManager projectileManager = ProjectileManager.getInstance();
+        List<ProjectileSpawn> projectileSpawns = new ArrayList<>();
+
+        List<ProjectileInfo> projectileInfos = new ArrayList<>(projectileManager.getProjectiles());
+        projectileInfos.sort(Comparator.comparing(ProjectileInfo::getName));
+        for (ProjectileInfo projectileInfo : projectileInfos) {
+            if (!projectileInfo.isEnabled()) {
+                continue;
+            }
+            BaseProjectileEntity projectile = owner instanceof net.minecraft.world.entity.LivingEntity livingEntity
+                    ? projectileInfo.createProjectile(level, livingEntity)
+                    : projectileInfo.createProjectile(level, 0, 0, 0);
+            if (projectile != null) {
+                projectileSpawns.add(new ProjectileSpawn(projectileInfo.getName(), "json", projectile));
+            }
+        }
+
+        addOldProjectileSpawns(projectileSpawns, projectileManager.getOldSpriteProjectileEntries(), projectileManager, level);
+        addOldProjectileSpawns(projectileSpawns, projectileManager.getOldModelProjectileEntries(), projectileManager, level);
+        projectileSpawns.sort(Comparator.comparing(ProjectileSpawn::kind).thenComparing(ProjectileSpawn::name));
+        return projectileSpawns;
+    }
+
+    private static void addOldProjectileSpawns(List<ProjectileSpawn> projectileSpawns,
+            Iterable<Map.Entry<String, Class<? extends Entity>>> oldProjectiles, ProjectileManager projectileManager, ServerLevel level) {
+        for (Map.Entry<String, Class<? extends Entity>> entry : oldProjectiles) {
+            Class<? extends Entity> entityClass = entry.getValue();
+            if (!BaseProjectileEntity.class.isAssignableFrom(entityClass)) {
+                continue;
+            }
+            @SuppressWarnings("unchecked")
+            Class<? extends BaseProjectileEntity> projectileClass = (Class<? extends BaseProjectileEntity>) entityClass;
+            BaseProjectileEntity projectile = projectileManager.createOldProjectile(projectileClass, level, 0, 0, 0);
+            if (projectile != null) {
+                projectileSpawns.add(new ProjectileSpawn(entry.getKey(), "old", projectile));
+            }
+        }
+    }
+
+    private static void prepareProjectileGalleryEntry(BaseProjectileEntity projectile, Vec3 pos, String name) {
+        projectile.setPos(pos.x(), pos.y(), pos.z());
+        projectile.setDeltaMovement(Vec3.ZERO);
+        projectile.stopMovement();
+        projectile.setNoGravity(true);
+        projectile.setProjectileLife(Integer.MAX_VALUE);
+        projectile.setCustomName(Component.literal(name));
+        projectile.setCustomNameVisible(true);
+    }
+
+    private static void prepareCreatureGalleryEntry(LivingEntity creature, Vec3 pos, String name) {
+        creature.setPos(pos.x(), pos.y(), pos.z());
+        creature.setDeltaMovement(Vec3.ZERO);
+        creature.stopRiding();
+        creature.setNoGravity(true);
+        creature.setCustomName(Component.literal(name));
+        creature.setCustomNameVisible(true);
+        if (creature instanceof BaseCreatureEntity baseCreature) {
+            baseCreature.setPersistenceRequired();
+            baseCreature.setNoAi(true);
+        }
+    }
+
+    private static Vec3 horizontalForward(float yawDegrees) {
+        double yaw = Math.toRadians(yawDegrees);
+        return new Vec3(-Math.sin(yaw), 0, Math.cos(yaw)).normalize();
+    }
+
+    private static Path writeProjectileTextureReport(List<TextureCheck> textureChecks) {
+        Path gameDir = FMLPaths.GAMEDIR.get();
+        Path reportDir = gameDir.resolve("lycanites_debug");
+        Path reportPath = reportDir.resolve("projectile_texture_report.txt");
+        List<String> lines = new ArrayList<>();
+        lines.add("Lycanites projectile texture report");
+        lines.add("Generated by right-clicking a Turtle Scute in the dev environment.");
+        lines.add("");
+        for (TextureCheck check : textureChecks) {
+            if (!check.missing()) {
+                continue;
+            }
+            lines.add("MISSING " + check.name());
+            lines.add("  kind: " + check.kind());
+            lines.add("  entity: " + check.entityClass());
+            lines.add("  texture: " + check.texture());
+            lines.add("  checked: " + check.checkedPath());
+            lines.add("");
+        }
+        if (lines.size() == 3) {
+            lines.add("No missing projectile textures were detected from the dev resource tree.");
+        }
+
+        lines.add("");
+        lines.add("All checked projectiles:");
+        for (TextureCheck check : textureChecks) {
+            lines.add((check.missing() ? "MISSING " : "OK      ") + check.name() + " -> " + check.texture());
+        }
+
+        try {
+            Files.createDirectories(reportDir);
+            Files.write(reportPath, lines);
+        } catch (IOException e) {
+            LMHelperClass.logWarningMessage("Unable to write projectile texture report: " + e.getMessage());
+        }
+        return reportPath.toAbsolutePath().normalize();
+    }
+
+    private record ProjectileSpawn(String name, String kind, BaseProjectileEntity projectile) {
+    }
+
+    private record TextureCheck(String name, String kind, String entityClass, ResourceLocation texture, Path checkedPath, boolean missing) {
+        static TextureCheck from(String name, String kind, String entityClass, ResourceLocation texture) {
+            Path checkedPath = null;
+            boolean missing = texture == null;
+            if (texture != null) {
+                checkedPath = FMLPaths.GAMEDIR.get()
+                        .resolve("..")
+                        .resolve("src")
+                        .resolve("main")
+                        .resolve("resources")
+                        .resolve("assets")
+                        .resolve(texture.getNamespace())
+                        .resolve(texture.getPath())
+                        .normalize();
+                missing = !Files.exists(checkedPath);
+            }
+            return new TextureCheck(name, kind, entityClass, texture, checkedPath, missing);
+        }
     }
 }

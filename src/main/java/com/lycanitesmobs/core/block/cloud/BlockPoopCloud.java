@@ -40,7 +40,7 @@ public class BlockPoopCloud extends BlockBase {
         //this.setRegistryName(this.group.modid, this.blockName.toLowerCase());
         this.registerDefaultState(this.getStateDefinition().any().setValue(AGE, 0));
 
-        ItemManager.getInstance().cutoutBlocks.add(this);
+        ItemManager.getInstance().registerCutoutBlock(this);
     }
 
     @Override

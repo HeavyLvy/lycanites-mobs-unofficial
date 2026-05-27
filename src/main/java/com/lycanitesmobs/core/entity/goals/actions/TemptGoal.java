@@ -151,7 +151,7 @@ public class TemptGoal extends Goal {
         }
 
         // Creature Diet:
-        if(this.includeDiet && this.host.creatureInfo.canEat(itemStack)) {
+        if(this.includeDiet && this.host.canEat(itemStack)) {
             return true;
         }
 
@@ -258,7 +258,7 @@ public class TemptGoal extends Goal {
                 this.host.getNavigation().moveTo(this.player, this.speed);
             }
         	else {
-                this.host.directNavigator.setTargetPosition(new BlockPos((int) this.player.position().x(), (int) this.player.position().y(), (int) this.player.position().z()), speed);
+                this.host.setDirectNavigationTarget(new BlockPos((int) this.player.position().x(), (int) this.player.position().y(), (int) this.player.position().z()), speed);
             }
         }
     }

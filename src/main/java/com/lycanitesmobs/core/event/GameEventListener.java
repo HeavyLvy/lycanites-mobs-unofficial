@@ -14,6 +14,7 @@ import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.data.info.item.ItemConfig;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.network.message.MessagePlayerLeftClick;
 
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -88,7 +89,7 @@ public class GameEventListener {
 
     @SubscribeEvent
     public void onWorldUnloading(LevelEvent.Unload event) {
-        ExtendedWorld.loadedExtWorlds.remove(event.getLevel());
+        ExtendedWorld.unloadWorld(event.getLevel());
     }
 
 
@@ -136,9 +137,9 @@ public class GameEventListener {
 
         // ========== Force Remove Entity ==========
         if (!(event.getEntity() instanceof LivingEntity)) {
-            if (ExtendedEntity.FORCE_REMOVE_ENTITY_IDS != null && !ExtendedEntity.FORCE_REMOVE_ENTITY_IDS.isEmpty()) {
+            if (!ExtendedEntity.getForceRemoveEntityIds().isEmpty()) {
                 LMHelperClass.logDebug("ForceRemoveEntity", "Forced entity removal, checking: " + event.getEntity().getName());
-                for (String forceRemoveID : ExtendedEntity.FORCE_REMOVE_ENTITY_IDS) {
+                for (String forceRemoveID : ExtendedEntity.getForceRemoveEntityIds()) {
                     if (forceRemoveID.equalsIgnoreCase(LMHelperClass.convertToResourceLocation(event.getEntity().getType(), event.getEntity().level().registryAccess()).toString())) {
                         event.getEntity().remove(Entity.RemovalReason.DISCARDED);
                         break;
@@ -162,7 +163,7 @@ public class GameEventListener {
             extendedEntity.onEntityRemoved();
         }
         if (event.getEntity() instanceof Player) {
-            ExtendedPlayer.clientExtendedPlayers.remove((Player) event.getEntity());
+            ExtendedPlayer.unloadClientPlayer((Player) event.getEntity());
         }
     }
 
@@ -363,31 +364,49 @@ public class GameEventListener {
     public void onLivingDrops(LivingDropsEvent event) {
         Level world = event.getEntity().getCommandSenderWorld();
 
-        // Seasonal Items:
-        if (ItemConfig.seasonalItemDropChance > 0
-                && (LMHelperClass.isHalloween() || LMHelperClass.isYuletide() || LMHelperClass.isNewYear())) {
-            boolean noSeaonalDrop = false;
-            if (event.getEntity() instanceof BaseCreatureEntity) {
-                if (((BaseCreatureEntity) event.getEntity()).isMinion())
-                    noSeaonalDrop = true;
-            }
-
-            Item seasonalItem = null;
-            if (LMHelperClass.isHalloween())
-                seasonalItem = ObjectManager.getItem("halloweentreat");
-            if (LMHelperClass.isYuletide()) {
-                seasonalItem = ObjectManager.getItem("wintergift");
-                if (LMHelperClass.isYuletidePeak() && world.random.nextBoolean())
-                    seasonalItem = ObjectManager.getItem("wintergiftlarge");
-            }
-
-            if (seasonalItem != null && !noSeaonalDrop && event.getEntity().getRandom().nextFloat() < ItemConfig.seasonalItemDropChance) {
-                ItemStack dropStack = new ItemStack(seasonalItem, 1);
-                CustomItemEntity entityItem = new CustomItemEntity(world, event.getEntity().position().x(), event.getEntity().position().y(), event.getEntity().position().z(), dropStack);
-                entityItem.setPickUpDelay(10);
-                world.addFreshEntity(entityItem);
-            }
+        if (!this.shouldDropSeasonalItem(event.getEntity())) {
+            return;
         }
+
+        Item seasonalItem = this.getSeasonalDropItem(world);
+        if (seasonalItem == null) {
+            return;
+        }
+
+        this.dropSeasonalItem(world, event.getEntity(), seasonalItem);
+    }
+
+    private boolean shouldDropSeasonalItem(LivingEntity entity) {
+        if (ItemConfig.getSeasonalItemDropChance() <= 0) {
+            return false;
+        }
+        if (!LMHelperClass.isHalloween() && !LMHelperClass.isYuletide() && !LMHelperClass.isNewYear()) {
+            return false;
+        }
+        if (entity instanceof BaseCreatureEntity baseCreatureEntity && baseCreatureEntity.isMinion()) {
+            return false;
+        }
+        return entity.getRandom().nextFloat() < ItemConfig.getSeasonalItemDropChance();
+    }
+
+    private Item getSeasonalDropItem(Level world) {
+        if (LMHelperClass.isHalloween()) {
+            return ObjectManager.getItem("halloweentreat");
+        }
+        if (LMHelperClass.isYuletide()) {
+            if (LMHelperClass.isYuletidePeak() && world.random.nextBoolean()) {
+                return ObjectManager.getItem("wintergiftlarge");
+            }
+            return ObjectManager.getItem("wintergift");
+        }
+        return null;
+    }
+
+    private void dropSeasonalItem(Level world, LivingEntity entity, Item seasonalItem) {
+        ItemStack dropStack = new ItemStack(seasonalItem, 1);
+        CustomItemEntity entityItem = new CustomItemEntity(world, entity.position().x(), entity.position().y(), entity.position().z(), dropStack);
+        entityItem.setPickUpDelay(10);
+        DeferredLevelActionManager.spawnEntity(world, entity.blockPosition(), null, entityItem);
     }
 
 
@@ -402,7 +421,7 @@ public class GameEventListener {
             return;
         BlockPos pos = ((BlockHitResult) target).getBlockPos();
         Block block = world.getBlockState(pos).getBlock();
-        Item bucket = ObjectManager.buckets.get(block);
+        Item bucket = ObjectManager.getBucket(block);
         if (bucket != null && world.getFluidState(pos).getAmount() == 0) {
             world.removeBlock(pos, true);
         }

@@ -66,7 +66,7 @@ public class CreatureList extends BaseList<BeastiaryScreen> {
 
         // Creature Knowledge List:
         if (this.listType == Type.KNOWLEDGE || this.listType == Type.SUMMONABLE) {
-            List<String> creatures = new ArrayList<>(this.screen.playerExt.getBeastiary().creatureKnowledgeList.keySet());
+            List<String> creatures = new ArrayList<>(this.screen.playerExt.getBeastiary().getCreatureKnowledgeNames());
             creatures.sort(Collator.getInstance(new Locale("US")));
             for (String creatureName : creatures) {
                 CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(creatureName.toLowerCase());
@@ -74,7 +74,7 @@ public class CreatureList extends BaseList<BeastiaryScreen> {
                     if (!creatureInfo.isSummonable()) {
                         continue;
                     }
-                    if (this.screen.playerExt.getBeastiary().getCreatureKnowledge(creatureName) == null || this.screen.playerExt.getBeastiary().getCreatureKnowledge(creatureName).rank < 2) {
+                    if (this.screen.playerExt.getBeastiary().getCreatureKnowledge(creatureName) == null || this.screen.playerExt.getBeastiary().getCreatureKnowledge(creatureName).getRank() < 2) {
                         continue;
                     }
                 }
@@ -93,7 +93,7 @@ public class CreatureList extends BaseList<BeastiaryScreen> {
             } else if (this.listType == Type.FAMILIAR) {
                 petType = "familiar";
             }
-            List<PetEntry> pets = this.screen.playerExt.petManager.createEntryListByType(petType);
+            List<PetEntry> pets = this.screen.playerExt.getPetManager().createEntryListByType(petType);
             pets.sort(Comparator.comparing(PetEntry::getDisplayNameString));
             for (PetEntry petEntry : pets) {
                 CreatureInfo creatureInfo = petEntry.getCreatureInfo();
@@ -123,28 +123,26 @@ public class CreatureList extends BaseList<BeastiaryScreen> {
 
         Entry creatureEntry = (Entry) entry;
         if (this.listType == Type.KNOWLEDGE) {
-            this.screen.playerExt.selectedCreature = creatureEntry.creatureInfo;
-            this.screen.playerExt.selectedSubspecies = 0;
-            this.screen.playerExt.selectedVariant = 0;
+            this.screen.playerExt.selectCreature(creatureEntry.creatureInfo);
         } else if (this.listType == Type.SUMMONABLE) {
             this.screen.playerExt.getSelectedSummonSet().setSummonType(creatureEntry.creatureInfo.getName());
 
             Subspecies subspecies = creatureEntry.creatureInfo.getSubspecies(this.screen.playerExt.getSelectedSummonSet().getSubspecies());
-            this.screen.playerExt.getSelectedSummonSet().setSubspecies(subspecies.index);
+            this.screen.playerExt.getSelectedSummonSet().setSubspecies(subspecies.getIndex());
 
             Variant variant = subspecies.getVariant(this.screen.playerExt.getSelectedSummonSet().getVariant());
-            int variantId = variant != null ? variant.index : 0;
+            int variantId = variant != null ? variant.getIndex() : 0;
             if (!this.screen.playerExt.getBeastiary().hasKnowledgeRank(creatureEntry.creatureInfo.getName(), 2)) {
                 variantId = 0;
             }
             this.screen.playerExt.getSelectedSummonSet().setVariant(variantId);
 
-            this.screen.playerExt.sendSummonSetToServer((byte) this.screen.playerExt.selectedSummonSet);
+            this.screen.playerExt.sendSummonSetToServer((byte) this.screen.playerExt.getSelectedSummonSetId());
             MessageSummonSetSelection message = new MessageSummonSetSelection(this.screen.playerExt);
             LycanitesMobs.PACKET_MANAGER.sendToServer(message);
         } else if (this.listType == Type.PET || this.listType == Type.MOUNT || this.listType == Type.FAMILIAR) {
-            this.screen.playerExt.selectedPet = creatureEntry.petEntry;
-            this.screen.playerExt.sendPetEntryToPlayer(this.screen.playerExt.selectedPet);
+            this.screen.playerExt.selectPet(creatureEntry.petEntry);
+            this.screen.playerExt.sendPetEntryToPlayer(this.screen.playerExt.getSelectedPet());
         }
     }
 
@@ -156,11 +154,11 @@ public class CreatureList extends BaseList<BeastiaryScreen> {
 
         Entry creatureEntry = (Entry) this.getEntry(index);
         if (this.listType == Type.KNOWLEDGE) {
-            return this.screen.playerExt.selectedCreature != null && this.screen.playerExt.selectedCreature.equals(creatureEntry.creatureInfo);
+            return this.screen.playerExt.isSelectedCreature(creatureEntry.creatureInfo);
         } else if (this.listType == Type.SUMMONABLE) {
             return this.screen.playerExt.getSelectedSummonSet().getCreatureInfo() != null && this.screen.playerExt.getSelectedSummonSet().getCreatureInfo().equals(creatureEntry.creatureInfo);
         } else if (this.listType == Type.PET || this.listType == Type.MOUNT || this.listType == Type.FAMILIAR) {
-            return this.screen.playerExt.selectedPet != null && this.screen.playerExt.selectedPet.equals(creatureEntry.petEntry);
+            return this.screen.playerExt.isSelectedPet(creatureEntry.petEntry);
         }
         return false;
     }
@@ -169,8 +167,9 @@ public class CreatureList extends BaseList<BeastiaryScreen> {
     protected void renderBackground(GuiGraphics stack) {
         // Automatically Refresh:
         if (this.listType == Type.PET || this.listType == Type.MOUNT || this.listType == Type.FAMILIAR) {
-            if (this.screen.playerExt.selectedPet != null && this.releaseRefresh != this.screen.playerExt.selectedPet.releaseEntity) {
-                this.releaseRefresh = this.screen.playerExt.selectedPet.releaseEntity;
+            PetEntry selectedPet = this.screen.playerExt.getSelectedPet();
+            if (selectedPet != null && this.releaseRefresh != selectedPet.isReleasePending()) {
+                this.releaseRefresh = selectedPet.isReleasePending();
                 this.refreshList();
             }
         }

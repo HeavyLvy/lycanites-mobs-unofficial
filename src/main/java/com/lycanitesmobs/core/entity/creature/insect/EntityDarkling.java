@@ -48,8 +48,8 @@ public class EntityDarkling extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextPriorityGoalIndex++, new StealthGoal(this).setStealthTime(20).setStealthAttack(true).setStealthMove(true));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
+        this.goalSelector.addGoal(this.claimPriorityGoalIndex(), new StealthGoal(this).setStealthTime(20).setStealthAttack(true).setStealthMove(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this));
     }
 
     // ========== Init ==========
@@ -268,7 +268,7 @@ public class EntityDarkling extends TameableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

@@ -13,16 +13,17 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.ToolActions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ObjectLists {
 	// Maps:
-	public static Map<String, List<ItemStack>> itemLists = new HashMap<>();
-	public static Map<String, List<EntityType>> entityLists = new HashMap<>();
-	public static Map<String, List<MobEffect>> effectLists = new HashMap<>();
-	public static Map<String, MobEffect> allEffects = new HashMap<>();
+	private static final Map<String, List<ItemStack>> itemLists = new HashMap<>();
+	private static final Map<String, List<EntityType>> entityLists = new HashMap<>();
+	private static final Map<String, List<MobEffect>> effectLists = new HashMap<>();
+	private static final Map<String, MobEffect> allEffects = new HashMap<>();
 	
 	
     // ==================================================
@@ -89,22 +90,26 @@ public class ObjectLists {
 	public static List<ItemStack> getItems(String list) {
 		list = list.toLowerCase();
 		if(!itemLists.containsKey(list))
-			return new ArrayList<>();
-		return itemLists.get(list);
+			return Collections.emptyList();
+		return Collections.unmodifiableList(itemLists.get(list));
 	}
 
 	public static List<EntityType> getEntites(String list) {
 		list = list.toLowerCase();
 		if(!entityLists.containsKey(list))
-			return new ArrayList<>();
-		return entityLists.get(list);
+			return Collections.emptyList();
+		return Collections.unmodifiableList(entityLists.get(list));
 	}
 
 	public static List<MobEffect> getEffects(String list) {
 		list = list.toLowerCase();
 		if(!effectLists.containsKey(list))
-			return new ArrayList<>();
-		return effectLists.get(list);
+			return Collections.emptyList();
+		return Collections.unmodifiableList(effectLists.get(list));
+	}
+
+	public static MobEffect getVanillaEffect(String name) {
+		return allEffects.get(name);
 	}
 	
 

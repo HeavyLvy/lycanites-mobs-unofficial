@@ -1,12 +1,11 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.pets.PetEntry;
 import com.lycanitesmobs.core.manager.PetManager;
 import com.lycanitesmobs.core.entity.pets.SummonSet;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
@@ -35,22 +34,22 @@ public class MessagePetEntry {
     }
 
     public MessagePetEntry(ExtendedPlayer playerExt, PetEntry petEntry) {
-        this.petEntryID = petEntry.petEntryID;
+        this.petEntryID = petEntry.getPetEntryID();
         this.petEntryType = petEntry.getType();
-        this.spawningActive = petEntry.spawningActive;
-        this.teleportEntity = petEntry.teleportEntity;
-        SummonSet summonSet = petEntry.summonSet;
-        this.summonType = summonSet.summonType;
-        this.subspecies = petEntry.subspeciesIndex;
-        this.variant = petEntry.variantIndex;
+        this.spawningActive = petEntry.isSpawningActive();
+        this.teleportEntity = petEntry.isTeleportRequested();
+        SummonSet summonSet = petEntry.getSummonSet();
+        this.summonType = summonSet.getSummonType();
+        this.subspecies = petEntry.getSubspeciesIndex();
+        this.variant = petEntry.getVariantIndex();
         this.behaviour = summonSet.getBehaviourByte();
-        this.petEntryEntityID = petEntry.entity != null ? petEntry.entity.getId() : -1;
-        this.petEntryEntityName = petEntry.entityName;
-        this.respawnTime = petEntry.respawnTime;
-        this.respawnTimeMax = petEntry.respawnTimeMax;
-        this.entityLevel = petEntry.entityLevel;
-        this.entityExperience = petEntry.entityExperience;
-        this.isRespawning = petEntry.isRespawning;
+        this.petEntryEntityID = petEntry.getEntity() != null ? petEntry.getEntity().getId() : -1;
+        this.petEntryEntityName = petEntry.getEntityName();
+        this.respawnTime = petEntry.getRespawnTime();
+        this.respawnTimeMax = petEntry.getRespawnTimeMax();
+        this.entityLevel = petEntry.getLevel();
+        this.entityExperience = petEntry.getExperience();
+        this.isRespawning = petEntry.isRespawning();
     }
 
     /**
@@ -63,13 +62,15 @@ public class MessagePetEntry {
             ctx.get().enqueueWork(() -> {
                 Player player = ctx.get().getSender();
                 ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
-                PetManager petManager = playerExt.petManager;
+                PetManager petManager = playerExt.getPetManager();
                 PetEntry petEntry = petManager.getEntry(message.petEntryID);
                 if (petEntry == null)
                     return;
                 petEntry.setSpawningActive(message.spawningActive);
-                petEntry.teleportEntity = message.teleportEntity;
-                SummonSet summonSet = petEntry.summonSet;
+                if (message.teleportEntity) {
+                    petEntry.requestTeleport();
+                }
+                SummonSet summonSet = petEntry.getSummonSet();
                 summonSet.readFromPacket(message.summonType, message.subspecies, message.variant, message.behaviour);
                 petEntry.onBehaviourUpdate();
             });
@@ -77,33 +78,7 @@ public class MessagePetEntry {
         }
 
         // Client Side:
-        Player player = ClientManager.getInstance().getClientPlayer();
-        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
-        if (playerExt == null)
-            return;
-        PetManager petManager = playerExt.petManager;
-        PetEntry petEntry = petManager.getEntry(message.petEntryID);
-        if (petEntry == null) {
-            petEntry = new PetEntry(message.petEntryID, message.petEntryType, player, message.summonType);
-            petManager.addEntry(petEntry);
-        }
-        petEntry.setSpawningActive(message.spawningActive);
-        petEntry.teleportEntity = message.teleportEntity;
-        petEntry.subspeciesIndex = message.subspecies;
-        petEntry.variantIndex = message.variant;
-        SummonSet summonSet = petEntry.summonSet;
-        summonSet.readFromPacket(message.summonType, message.subspecies, message.variant, message.behaviour);
-        Entity entity = null;
-        if (message.petEntryEntityID != -1) {
-            entity = player.getCommandSenderWorld().getEntity(message.petEntryEntityID);
-        }
-        petEntry.entity = entity;
-        petEntry.entityName = message.petEntryEntityName;
-        petEntry.respawnTime = message.respawnTime;
-        petEntry.respawnTimeMax = message.respawnTimeMax;
-        petEntry.entityLevel = message.entityLevel;
-        petEntry.entityExperience = message.entityExperience;
-        petEntry.isRespawning = message.isRespawning;
+        ctx.get().enqueueWork(() -> LycanitesMobs.PROXY.applyPetEntry(message));
     }
 
     /**

@@ -2,9 +2,11 @@ package com.lycanitesmobs.core.entity.projectile.hellfire;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.projectile.generic.LaserProjectileEntity;
+import com.lycanitesmobs.core.entity.projectile.misc.LaserEndProjectileEntity;
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
+import com.lycanitesmobs.core.manager.ProjectileManager;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -67,8 +69,13 @@ public class EntityHellLaser extends LaserProjectileEntity {
     //                   Get laser End
     // ==================================================
     @Override
-    public Class getLaserEndClass() {
-        return EntityHellLaserEnd.class;
+    protected LaserEndProjectileEntity createLaserEnd(Level world, double x, double y, double z) {
+        return new EntityHellLaserEnd(ProjectileManager.getInstance().getOldProjectileType(EntityHellLaserEnd.class), world, x, y, z, this);
+    }
+
+    @Override
+    protected LaserEndProjectileEntity createLaserEnd(Level world, LivingEntity shooter) {
+        return new EntityHellLaserEnd(ProjectileManager.getInstance().getOldProjectileType(EntityHellLaserEnd.class), world, shooter, this);
     }
 
 
@@ -91,9 +98,7 @@ public class EntityHellLaser extends LaserProjectileEntity {
     // ==================================================
     @Override
     public ResourceLocation getBeamTexture() {
-        if (TextureManager.getTexture(this.entityName + "Beam") == null)
-            TextureManager.addTexture(this.entityName + "Beam", "textures/item/" + this.entityName.toLowerCase() + "beam.png");
-        return TextureManager.getTexture(this.entityName + "Beam");
+        return AssetHelper.texture("textures/item/" + this.entityName.toLowerCase() + "beam.png");
     }
 
     @Override
@@ -102,9 +107,7 @@ public class EntityHellLaser extends LaserProjectileEntity {
     }
 
     public ResourceLocation getTexture() {
-        if (TextureManager.getTexture(this.entityName) == null)
-            TextureManager.addTexture(this.entityName, "textures/item/" + subTypeString() + "/" + this.entityName + ".png");
-        return TextureManager.getTexture(this.entityName);
+        return AssetHelper.texture("textures/item/" + subTypeString() + "/" + this.entityName + ".png");
     }
 
 

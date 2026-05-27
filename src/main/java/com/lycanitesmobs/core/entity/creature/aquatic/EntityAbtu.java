@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.entity.creature.aquatic;
 import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -36,7 +37,7 @@ public class EntityAbtu extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
     }
 
 	@Override
@@ -83,11 +84,11 @@ public class EntityAbtu extends TameableCreatureEntity implements Enemy {
 	
     public void spawnAlly(double x, double y, double z) {
     	AgeableCreatureEntity minion = (AgeableCreatureEntity)this.creatureInfo.createEntity(this.getCommandSenderWorld());
-    	minion.setGrowingAge(minion.growthTime);
+    	minion.setGrowingAge(minion.getInitialGrowthTime());
     	minion.moveTo(x, y, z, this.random.nextFloat() * 360.0F, 0.0F);
 		minion.setMinion(true);
 		minion.applyVariant(this.getVariantIndex());
-    	this.getCommandSenderWorld().addFreshEntity(minion);
+    	DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, minion);
         if(this.getTarget() != null)
         	minion.setLastHurtByMob(this.getTarget());
     }
@@ -132,7 +133,7 @@ public class EntityAbtu extends TameableCreatureEntity implements Enemy {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
     
     // ==================================================
     //                       Death

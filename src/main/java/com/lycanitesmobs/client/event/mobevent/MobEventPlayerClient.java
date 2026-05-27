@@ -45,7 +45,7 @@ public class MobEventPlayerClient {
         this.mobEvent = mobEvent;
         this.world = world;
         if (!world.isClientSide)
-            LMHelperClass.logWarning("", "Created a MobEventClient with a server side world, this shouldn't happen, things are going to get weird!");
+            LMHelperClass.logWarningMessage("Created a MobEventClient with a server side world, this shouldn't happen, things are going to get weird!");
     }
 
 
@@ -63,7 +63,7 @@ public class MobEventPlayerClient {
                 .append(Component.translatable("event." + (extended ? "extended" : "started") + ".suffix"));
         player.displayClientMessage(eventMessage, false);
 
-        if (player.getAbilities().instabuild && !MobEventPlayerServer.testOnCreative && "world".equalsIgnoreCase(this.mobEvent.channel)) {
+        if (player.getAbilities().instabuild && !MobEventPlayerServer.shouldTestOnCreative() && "world".equalsIgnoreCase(this.mobEvent.getChannel())) {
             return;
         }
 
@@ -71,11 +71,11 @@ public class MobEventPlayerClient {
     }
 
     public void playSound() {
-        if (ObjectManager.getSound("mobevent_" + this.mobEvent.title.toLowerCase()) == null) {
+        if (ObjectManager.getSound("mobevent_" + this.mobEvent.getTitleName().toLowerCase()) == null) {
             LMHelperClass.logWarning("MobEvent", "Sound missing for: " + this.mobEvent.getTitle());
             return;
         }
-        this.sound = new MobEventSound(ObjectManager.getSound("mobevent_" + this.mobEvent.title.toLowerCase()), SoundSource.RECORDS, ClientManager.getInstance().getClientPlayer(), this.world.random, 1.0F, 1.0F);
+        this.sound = new MobEventSound(ObjectManager.getSound("mobevent_" + this.mobEvent.getTitleName().toLowerCase()), SoundSource.RECORDS, ClientManager.getInstance().getClientPlayer(), this.world.random, 1.0F, 1.0F);
         Minecraft.getInstance().getSoundManager().play(this.sound);
     }
 
@@ -107,7 +107,7 @@ public class MobEventPlayerClient {
     @OnlyIn(Dist.CLIENT)
     public void onGUIUpdate(GuiGraphics matrixStack, BaseOverlayScreen gui, int sWidth, int sHeight) {
         Player player = ClientManager.getInstance().getClientPlayer();
-        if (player.getAbilities().instabuild && !MobEventPlayerServer.testOnCreative && "world".equalsIgnoreCase(this.mobEvent.channel)) {
+        if (player.getAbilities().instabuild && !MobEventPlayerServer.shouldTestOnCreative() && "world".equalsIgnoreCase(this.mobEvent.getChannel())) {
             return;
         }
         if (this.world == null || this.world != player.getCommandSenderWorld()) return;
@@ -152,8 +152,8 @@ public class MobEventPlayerClient {
 
     @OnlyIn(Dist.CLIENT)
     public ResourceLocation getTexture() {
-        if (TextureManager.getTexture("guimobevent" + this.mobEvent.title) == null)
-            TextureManager.addTexture("guimobevent" + this.mobEvent.title, "textures/mobevents/" + this.mobEvent.title.toLowerCase() + ".png");
-        return TextureManager.getTexture("guimobevent" + this.mobEvent.title);
+        if (TextureManager.getTexture("guimobevent" + this.mobEvent.getTitleName()) == null)
+            TextureManager.addTexture("guimobevent" + this.mobEvent.getTitleName(), "textures/mobevents/" + this.mobEvent.getTitleName().toLowerCase() + ".png");
+        return TextureManager.getTexture("guimobevent" + this.mobEvent.getTitleName());
     }
 }

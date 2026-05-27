@@ -2,24 +2,18 @@ package com.lycanitesmobs.core.data.info.creature;
 
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.data.info.ModInfo;
-import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.core.item.consumable.entity.ItemCustomSpawnEgg;
-import com.lycanitesmobs.core.item.equipment.CreatureSaddleItem;
-import com.lycanitesmobs.core.item.consumable.entity.CreatureTreatItem;
 import com.lycanitesmobs.core.item.consumable.utility.ItemSoulstone;
-import com.lycanitesmobs.core.item.consumable.utility.ItemSoulstoneFilled;
-import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.util.Lazy;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.lycanitesmobs.core.tabs.LMCreaturesGroup.creatureNames;
 
 public class CreatureType {
 
@@ -32,42 +26,42 @@ public class CreatureType {
     /**
      * The mod info of the mod this creature type belongs to.
      **/
-    public ModInfo modInfo;
+    protected ModInfo modInfo;
 
     /**
      * A map of all creatures of this type by name.
      **/
-    public Map<String, CreatureInfo> creatures = new HashMap<>();
+    protected Map<String, CreatureInfo> creatures = new HashMap<>();
 
     /**
      * A list of all creatures of this type that can be tamed.
      **/
-    public List<CreatureInfo> tameableCreatures = new ArrayList<>();
+    protected List<CreatureInfo> tameableCreatures = new ArrayList<>();
 
     /**
      * The treat item this type uses.
      **/
-    public Lazy<Item> treat;
+    protected Lazy<Item> treat;
 
     /**
      * The saddle item this type uses.
      **/
-    public Lazy<Item> saddle;
+    protected Lazy<Item> saddle;
 
     /**
      * The soulstone item this type uses.
      **/
-    public Lazy<ItemSoulstone> soulstone;
+    protected Lazy<ItemSoulstone> soulstone;
 
     /**
      * The spawn egg item this type uses.
      **/
-    public Lazy<Item> spawnEgg;
+    protected Lazy<Item> spawnEgg;
 
     /**
      * The diet type this Creature Type provides as food for predators. "none" by default.
      **/
-    public String dietProvided = "none";
+    protected String dietProvided = "none";
 
 
     /**
@@ -90,20 +84,21 @@ public class CreatureType {
     }
 
     /**
-     * Loads this creature type (should only be called during startup), generates spawn egg, etc.
-     */
-    public void init() {
-        this.createItems();
-        LMHelperClass.logDebug("Creature Type", "Loaded Creature Type: " + this.getName());
-    }
-
-    /**
      * Returns the name of this creature type. Ex: beast
      *
      * @return The name of this creature type.
      */
     public String getName() {
         return this.name;
+    }
+
+    /**
+     * Returns the mod that owns this creature type definition.
+     *
+     * @return The owning mod info.
+     */
+    public ModInfo getModInfo() {
+        return this.modInfo;
     }
 
     /**
@@ -116,12 +111,57 @@ public class CreatureType {
     }
 
     /**
+     * Returns the creatures linked to this type for read-only iteration.
+     *
+     * @return The creatures belonging to this type.
+     */
+    public Collection<CreatureInfo> getCreatures() {
+        return Collections.unmodifiableCollection(this.creatures.values());
+    }
+
+    /**
+     * Returns how many creatures are linked to this type.
+     *
+     * @return The linked creature count.
+     */
+    public int getCreatureCount() {
+        return this.creatures.size();
+    }
+
+    /**
+     * Returns the tameable creatures linked to this type for read-only iteration.
+     *
+     * @return The tameable creatures belonging to this type.
+     */
+    public List<CreatureInfo> getTameableCreatures() {
+        return Collections.unmodifiableList(this.tameableCreatures);
+    }
+
+    /**
+     * Returns if this type has at least one tameable creature.
+     *
+     * @return True if tameable creatures are linked to this type.
+     */
+    public boolean hasTameableCreatures() {
+        return !this.tameableCreatures.isEmpty();
+    }
+
+    /**
      * Generates a treat item name from this type. Ex: treat_beast
      *
      * @return The treat item name for this creature type.
      */
     public String getTreatName() {
         return "treat_" + this.getName();
+    }
+
+    /**
+     * Registers this type's treat item handle.
+     *
+     * @param treat The treat item handle.
+     */
+    public void setTreatItem(Lazy<Item> treat) {
+        this.treat = treat;
     }
 
     /**
@@ -143,6 +183,15 @@ public class CreatureType {
     }
 
     /**
+     * Registers this type's saddle item handle.
+     *
+     * @param saddle The saddle item handle.
+     */
+    public void setSaddleItem(Lazy<Item> saddle) {
+        this.saddle = saddle;
+    }
+
+    /**
      * Gets this creature type's saddle item.
      *
      * @return The saddle item for this creature type.
@@ -158,6 +207,15 @@ public class CreatureType {
      */
     public String getSoulstoneName() {
         return "soulstone_" + this.getName();
+    }
+
+    /**
+     * Registers this type's soulstone item handle.
+     *
+     * @param soulstone The soulstone item handle.
+     */
+    public void setSoulstoneItem(Lazy<ItemSoulstone> soulstone) {
+        this.soulstone = soulstone;
     }
 
     /**
@@ -179,6 +237,15 @@ public class CreatureType {
     }
 
     /**
+     * Registers this type's spawn egg item handle.
+     *
+     * @param spawnEgg The spawn egg item handle.
+     */
+    public void setSpawnEggItem(Lazy<Item> spawnEgg) {
+        this.spawnEgg = spawnEgg;
+    }
+
+    /**
      * Gets this creature type's spawn egg item.
      * Note: The Spawn Egg item requires NBT data to determine which specific Creature it spawns.
      *
@@ -186,6 +253,15 @@ public class CreatureType {
      */
     public Item getSpawnEggItem() {
         return this.spawnEgg.get();
+    }
+
+    /**
+     * Returns the diet this creature type provides as food for predators.
+     *
+     * @return The provided diet name.
+     */
+    public String getDietProvided() {
+        return this.dietProvided;
     }
 
     /**
@@ -205,35 +281,12 @@ public class CreatureType {
     }
 
     /**
-     * Creates items for this creature type such as the spawn egg item or treat item, must be called after creatures are loaded so that an egg for each creature can be added.
+     * Removes a creature from this Creature Type, used before re-linking reloaded creature definitions.
+     *
+     * @param creatureInfo The creature to remove.
      */
-    public void createItems() {
-        Item.Properties standardItemProperties = new Item.Properties();
-        // TODO: create creative tabs
-        //.tab(ItemManager.getInstance().itemsGroup)
-
-        Item.Properties smallStackItemProperties = new Item.Properties();
-        smallStackItemProperties.stacksTo(16);
-
-        Item.Properties spawnEggProperties = new Item.Properties();
-
-        // Treat:
-        this.treat = Lazy.of(() -> new CreatureTreatItem(smallStackItemProperties, this));
-        ObjectManager.addItem(this.getTreatName(), this.treat);
-
-        // Saddle:
-        this.saddle = Lazy.of(() -> new CreatureSaddleItem(smallStackItemProperties, this));
-        //this.saddleItems.put(this.getName(),this.saddle);
-        ObjectManager.addItem(this.getSaddleName(), this.saddle);
-
-
-        // Spawn Eggs:
-        this.spawnEgg = Lazy.of(() -> new ItemCustomSpawnEgg(spawnEggProperties, this));
-        ObjectManager.addItem(this.getSpawnEggName(), this.spawnEgg);
-        creatureNames.add(this.getSpawnEggName());
-
-        // Soulstone:
-        this.soulstone = Lazy.of(() -> new ItemSoulstoneFilled(standardItemProperties, this));
-        ObjectManager.addItem(this.getSoulstoneName(), this.soulstone);
+    public void removeCreature(CreatureInfo creatureInfo) {
+        this.creatures.remove(creatureInfo.getName());
+        this.tameableCreatures.remove(creatureInfo);
     }
 }

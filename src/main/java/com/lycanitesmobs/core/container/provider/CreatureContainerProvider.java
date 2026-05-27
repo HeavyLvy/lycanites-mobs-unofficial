@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class CreatureContainerProvider implements Nameable, MenuProvider {
-	public BaseCreatureEntity creature;
+	protected final BaseCreatureEntity creature;
 
 	public CreatureContainerProvider(@Nonnull BaseCreatureEntity creature) {
 		this.creature = creature;

@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class EquipmentStationEquipmentSlot extends BaseSlot {
-	public EquipmentStationContainer container;
+	protected final EquipmentStationContainer container;
 
 	/**
 	 * Constructor
@@ -17,7 +17,7 @@ public class EquipmentStationEquipmentSlot extends BaseSlot {
 	 * @param y The y display position.
 	 */
 	public EquipmentStationEquipmentSlot(EquipmentStationContainer stationContainer, int slotIndex, int x, int y) {
-		super(stationContainer.equipmentStation, slotIndex, x, y);
+		super(stationContainer.getEquipmentStation(), slotIndex, x, y);
 		this.container = stationContainer;
 	}
 

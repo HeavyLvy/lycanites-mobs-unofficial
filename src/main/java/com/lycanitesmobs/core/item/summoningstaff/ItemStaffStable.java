@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.item.summoningstaff;
 
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -39,9 +40,9 @@ public class ItemStaffStable extends ItemStaffSummoning {
     }
 
     @Override
-	protected void damageStaff(ItemStack itemStack, int amountToDamage, ServerPlayer entity) {
+	protected void damageStaff(ItemStack itemStack, int amountToDamage, ServerPlayer entity, InteractionHand hand) {
 		amountToDamage = Math.max(1, (int)Math.floor((double)amountToDamage / 2));
-		super.damageStaff(itemStack, amountToDamage, entity);
+		super.damageStaff(itemStack, amountToDamage, entity, hand);
 	}
     
 	

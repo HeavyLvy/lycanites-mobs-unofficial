@@ -10,13 +10,13 @@ import net.minecraft.world.level.Level;
 public abstract class MobEventEffect {
 
 	/** The minimum time in ticks that the event must have been active for. **/
-	public double eventTicksMin = 0;
+	private double eventTicksMin = 0;
 
 	/** The maximum time in ticks that the event must have been active for. **/
-	public double eventTicksMax = 0;
+	private double eventTicksMax = 0;
 
 	/** The interval of ticks to trigger this effect. Such as every 20 ticks for every second. **/
-	public double eventTicksN = 0;
+	private double eventTicksN = 0;
 
 	/** Creates a Mob Event Trigger from the provided JSON data. **/
 	public static MobEventEffect createFromJSON(JsonObject json) {

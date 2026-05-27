@@ -8,16 +8,16 @@ import net.minecraft.world.level.Level;
 
 public class MobEventSchedule {
 	/** The Mob Event that this Schedule starts. **/
-	public MobEvent mobEvent;
+	private final MobEvent mobEvent;
 
 	/** The dimension ID of the world. **/
-	public String dimensionId = "";
+	private String dimensionId = "";
 
 	/** The day of the world. **/
-	public int worldDay = 0;
+	private int worldDay = 0;
 
 	/** The day time (ticks) of the world. **/
-	public int dayTime = 100;
+	private int dayTime = 100;
 
 
 	/** Creates a Mob Event Schedule from the provided JSON data. **/
@@ -85,7 +85,7 @@ public class MobEventSchedule {
 	 */
 	public void start(ExtendedWorld worldExt) {
 		if(this.mobEvent == null) {
-			MobEventListener.getInstance().triggerRandomMobEvent(worldExt.world, worldExt, 1);
+			MobEventListener.getInstance().triggerRandomMobEvent(worldExt.getWorld(), worldExt, 1);
 			return;
 		}
 		worldExt.startWorldEvent(this.mobEvent);

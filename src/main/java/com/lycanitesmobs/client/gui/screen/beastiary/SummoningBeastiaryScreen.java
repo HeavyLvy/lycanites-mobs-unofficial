@@ -43,7 +43,7 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
         this.subspeciesList = new SubspeciesList(this, true, 90, subspeciesListHeight, subspeciesListY, subspeciesListY + subspeciesListHeight, this.colRightX);
         this.addRenderableWidget(this.subspeciesList);
 
-        int summoningSlots = this.playerExt.summonSetMax;
+        int summoningSlots = this.playerExt.getSummonSetMax();
         int buttonSpacing = 2;
         int buttonWidth = 32;
         int buttonHeight = 32;
@@ -58,7 +58,7 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
             buttonX += tabSpacing;
             ButtonBase tabButton = new CreatureButton(this.summoningSlotIdStart + i, buttonX, buttonY, buttonWidth, buttonHeight, Component.translatable(buttonText), i, creatureInfo, this);
             this.addRenderableWidget(tabButton);
-            if (i == this.playerExt.selectedSummonSet) {
+            if (this.playerExt.isSelectedSummonSet(i)) {
                 tabButton.active = false;
             }
             tabSpacing = buttonWidth + buttonSpacing;
@@ -116,7 +116,7 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
     protected void renderWidgets(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
         super.renderWidgets(matrixStack, mouseX, mouseY, partialTicks);
 
-        if (this.playerExt.beastiary.getSummonableList().isEmpty()) {
+        if (this.playerExt.getBeastiary().getSummonableList().isEmpty()) {
             return;
         }
 
@@ -131,7 +131,7 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
 
             // Summoning Slots:
             if (button.buttonId >= this.summoningSlotIdStart && button.buttonId < this.petCommandIdStart) {
-                button.active = button.buttonId - this.summoningSlotIdStart != this.playerExt.selectedSummonSet;
+                button.active = !this.playerExt.isSelectedSummonSet(button.buttonId - this.summoningSlotIdStart);
                 if (button instanceof CreatureButton) {
                     CreatureButton buttonCreature = (CreatureButton) button;
                     buttonCreature.creatureInfo = this.playerExt.getSummonSet(button.buttonId - this.summoningSlotIdStart).getCreatureInfo();
@@ -154,7 +154,7 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
 
                     // Stance:
                     else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.PASSIVE.id + this.petCommandIdStart) {
-                        button.active = !this.playerExt.getSelectedSummonSet().passive;
+                        button.active = !this.playerExt.getSelectedSummonSet().getPassive();
                     } else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.DEFENSIVE.id + this.petCommandIdStart) {
                         button.active = !(!this.playerExt.getSelectedSummonSet().getPassive() && !this.playerExt.getSelectedSummonSet().getAssist() && !this.playerExt.getSelectedSummonSet().getAggressive());
                     } else if (button.buttonId == BaseCreatureEntity.PET_COMMAND_ID.ASSIST.id + this.petCommandIdStart) {
@@ -188,7 +188,7 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
         int width = this.colRightWidth - marginX;
 
         // Empty:
-        if (this.playerExt.beastiary.getSummonableList().isEmpty()) {
+        if (this.playerExt.getBeastiary().getSummonableList().isEmpty()) {
             String text = Component.translatable("gui.beastiary.summoning.empty.info").getString();
             this.drawHelper.drawStringWrapped(matrixStack, text, nextX, nextY, width, 0xFFFFFF, true);
             return;
@@ -205,9 +205,9 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
         String text = "\u00A7l" + Component.translatable("gui.beastiary.player.focus").getString() + ": ";
         this.drawHelper.drawString(matrixStack, text, nextX, nextY, 0xFFFFFF);
         int barX = nextX + this.drawHelper.getStringWidth(text);
-        int focusMax = Math.round((float) this.playerExt.summonFocusMax / this.playerExt.summonFocusCharge);
-        int focusAvailable = (int) Math.floor((double) this.playerExt.summonFocus / this.playerExt.summonFocusCharge);
-        float focusFilling = ((float) this.playerExt.summonFocus / this.playerExt.summonFocusCharge) - focusAvailable;
+        int focusMax = this.playerExt.getSummonFocusMaxUnits();
+        int focusAvailable = this.playerExt.getSummonFocusAvailableUnits();
+        float focusFilling = this.playerExt.getSummonFocusFillRatio();
         this.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetSpiritEmpty"), barX, nextY, 0, 9, 9, focusMax, 10);
         this.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetSpiritUsed"), barX, nextY, 0, 9, 9, focusAvailable, 10);
         if (focusFilling > 0) {
@@ -259,42 +259,31 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
 
                 // Actions:
                 if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.PVP.id) {
-                    summonSet.pvp = !summonSet.pvp;
+                    summonSet.togglePVP();
                 }
 
                 // Stance:
                 else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.PASSIVE.id) {
-                    summonSet.passive = true;
-                    summonSet.assist = false;
-                    summonSet.aggressive = false;
+                    summonSet.setPassiveStance();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.DEFENSIVE.id) {
-                    summonSet.passive = false;
-                    summonSet.assist = false;
-                    summonSet.aggressive = false;
+                    summonSet.setDefensiveStance();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.ASSIST.id) {
-                    summonSet.passive = false;
-                    summonSet.assist = true;
-                    summonSet.aggressive = false;
+                    summonSet.setAssistStance();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.AGGRESSIVE.id) {
-                    summonSet.passive = false;
-                    summonSet.assist = true;
-                    summonSet.aggressive = true;
+                    summonSet.setAggressiveStance();
                 }
 
                 // Movement:
                 else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.FOLLOW.id) {
-                    summonSet.following = true;
-                    summonSet.sitting = false;
+                    summonSet.setFollowMovement();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.WANDER.id) {
-                    summonSet.following = false;
-                    summonSet.sitting = false;
+                    summonSet.setWanderMovement();
                 } else if (petCommandId == BaseCreatureEntity.PET_COMMAND_ID.SIT.id) {
-                    summonSet.following = false;
-                    summonSet.sitting = true;
+                    summonSet.setSitMovement();
                 }
 
-                this.playerExt.sendSummonSetToServer((byte) this.playerExt.selectedSummonSet);
-                if (this.playerExt.selectedPet == null) {
+                this.playerExt.sendSummonSetToServer((byte) this.playerExt.getSelectedSummonSetId());
+                if (!this.playerExt.hasSelectedPet()) {
                     this.mc.setScreen(new SummoningBeastiaryScreen(this.mc.player));
                 }
                 return;
@@ -306,7 +295,7 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
 
     @Override
     public MutableComponent getTitle() {
-        if (this.playerExt.beastiary.getSummonableList().isEmpty()) {
+        if (this.playerExt.getBeastiary().getSummonableList().isEmpty()) {
             return Component.translatable("gui.beastiary.summoning.empty.title");
         }
         return Component.translatable("gui.beastiary.summoning");
@@ -314,13 +303,13 @@ public class SummoningBeastiaryScreen extends BeastiaryScreen {
 
     @Override
     public int getDisplaySubspecies(CreatureInfo creatureInfo) {
-        return this.playerExt.getSelectedSummonSet().subspecies;
+        return this.playerExt.getSelectedSummonSet().getSubspecies();
     }
 
 
     @Override
     public int getDisplayVariant(CreatureInfo creatureInfo) {
-        return this.playerExt.getSelectedSummonSet().variant;
+        return this.playerExt.getSelectedSummonSet().getVariant();
     }
 
     @Override

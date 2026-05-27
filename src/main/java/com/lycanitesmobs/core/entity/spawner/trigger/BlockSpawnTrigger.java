@@ -21,57 +21,57 @@ public class BlockSpawnTrigger extends SpawnTrigger {
     /**
      * If true, only players can activate this Trigger, fake players are not counted.
      **/
-    public boolean playerOnly = false;
+    protected boolean playerOnly = false;
 
     /**
      * If true, the Block Break event will activate this trigger.
      **/
-    public boolean onBreak = true;
+    protected boolean onBreak = true;
 
     /**
      * If true, the Block Harvest event will activate this trigger.
      **/
-    public boolean onHarvest = true;
+    protected boolean onHarvest = true;
 
     /**
      * If true, this Block Place event will activate this trigger.
      **/
-    public boolean onPlace = false;
+    protected boolean onPlace = false;
 
     /**
      * A list of Blocks that match this Trigger.
      **/
-    public List<Block> blocks = new ArrayList<>();
+    protected List<Block> blocks = new ArrayList<>();
 
     /**
      * Determines if the blocks list is a blacklist or whitelist.
      **/
-    public String blocksListType = "whitelist";
+    protected String blocksListType = "whitelist";
 
     /**
      * A list of Block Materials that match this Trigger.
      **/
-    public List<Block> blockMaterials = new ArrayList<>();
+    protected List<Block> blockMaterials = new ArrayList<>();
 
     /**
      * Determines if the block materials list is a blacklist or whitelist.
      **/
-    public String blockMaterialsListType = "whitelist";
+    protected String blockMaterialsListType = "whitelist";
 
     /**
      * How to react to blocks broken with or without silk touch. Can be: "ignore", "require" or "deny". Default: "ignore".
      **/
-    public String silkTouch = "ignore";
+    protected String silkTouch = "ignore";
 
     /**
      * The minimum fortune that the harvester must have. Default: -1 (ignore)
      **/
-    public double fortuneMin = -1;
+    protected double fortuneMin = -1;
 
     /**
      * The maximum fortune that the harvester must have. Default: -1 (ignore)
      **/
-    public double fortuneMax = -1;
+    protected double fortuneMax = -1;
 
 
     /**

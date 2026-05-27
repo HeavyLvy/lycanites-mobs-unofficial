@@ -1,14 +1,16 @@
 package com.lycanitesmobs.core.item.summoningstaff;
 
-import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.special.PortalEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.item.base.BaseItem;
 import com.lycanitesmobs.core.entity.pets.SummonSet;
+import com.lycanitesmobs.core.network.packet.MessageScreenRequest;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -45,8 +47,8 @@ public class ItemStaffSummoning extends BaseItem {
         if (entity instanceof Player) {
             playerExt = ExtendedPlayer.getForPlayer((Player) entity);
         }
-        if (playerExt != null && playerExt.staffPortal != null) {
-            this.damageStaff(itemStack, playerExt.staffPortal.summonAmount, (ServerPlayer) entity);
+        if (playerExt != null && playerExt.hasStaffPortal()) {
+            this.damageStaff(itemStack, playerExt.getStaffPortal().getSummonAmount(), (ServerPlayer) entity, entity.getUsedItemHand());
         }
     }
 
@@ -68,8 +70,9 @@ public class ItemStaffSummoning extends BaseItem {
     // ========== Start ==========
     @Override
     public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
-        if (!CreatureManager.getInstance().config.isSummoningAllowed(world)) {
-            return new InteractionResultHolder<>(InteractionResult.FAIL, player.getItemInHand(hand));
+        ItemStack itemStack = player.getItemInHand(hand);
+        if (!CreatureManager.getInstance().getConfig().isSummoningAllowed(world)) {
+            return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
         }
 
         ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
@@ -78,22 +81,23 @@ public class ItemStaffSummoning extends BaseItem {
             SummonSet summonSet = playerExt.getSelectedSummonSet();
             if (summonSet.isUseable()) {
                 if (!player.getCommandSenderWorld().isClientSide) {
-                    playerExt.staffPortal = new PortalEntity((EntityType<? extends PortalEntity>) ProjectileManager.getInstance().oldProjectileTypes.get(PortalEntity.class), world, player, summonSet, this);
-                    playerExt.staffPortal.moveTo(player.position().x(), player.position().y(), player.position().z(), world.random.nextFloat() * 360.0F, 0.0F);
-                    world.addFreshEntity(playerExt.staffPortal);
+                    PortalEntity staffPortal = new PortalEntity((EntityType<? extends PortalEntity>) ProjectileManager.getInstance().getOldProjectileType(PortalEntity.class), world, player, summonSet, this);
+                    playerExt.setStaffPortal(staffPortal);
+                    staffPortal.moveTo(player.position().x(), player.position().y(), player.position().z(), world.random.nextFloat() * 360.0F, 0.0F);
+                    DeferredLevelActionManager.spawnEntity(world, player.blockPosition(), "staff_portal:" + staffPortal.getUUID(), staffPortal);
                 }
             }
             // Open Minion GUI If None Selected:
             else {
-                playerExt.staffPortal = null;
+                playerExt.clearStaffPortal();
                 if (!player.getCommandSenderWorld().isClientSide())
                     playerExt.sendAllSummonSetsToPlayer();
                 else
-                    ClientManager.getInstance().displayGuiScreen("beastiary", player);
+                    LycanitesMobs.PROXY.openScreen(MessageScreenRequest.GuiRequest.BEASTIARY.id, player);
             }
         }
         player.startUsingItem(hand);
-        return new InteractionResultHolder<>(InteractionResult.SUCCESS, player.getItemInHand(hand));
+        return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
     }
 
 
@@ -141,7 +145,7 @@ public class ItemStaffSummoning extends BaseItem {
             playerExt = ExtendedPlayer.getForPlayer((Player) entityLiving);
         }
         if (playerExt != null) {
-            playerExt.staffPortal = null;
+            playerExt.clearStaffPortal();
         }
     }
 
@@ -195,8 +199,8 @@ public class ItemStaffSummoning extends BaseItem {
     public void applyMinionBehaviour(TameableCreatureEntity minion, Player player) {
         SummonSet summonSet = ExtendedPlayer.getForPlayer(player).getSelectedSummonSet();
         summonSet.applyBehaviour(minion);
-        minion.setSubspecies(summonSet.subspecies);
-        minion.applyVariant(summonSet.variant);
+        minion.setSubspecies(summonSet.getSubspecies());
+        minion.applyVariant(summonSet.getVariant());
     }
 
     // ========== Minion Effects ==========
@@ -212,14 +216,10 @@ public class ItemStaffSummoning extends BaseItem {
         return false;
     }
 
-    protected void damageStaff(ItemStack itemStack, int amountToDamage, ServerPlayer entity) {
+    protected void damageStaff(ItemStack itemStack, int amountToDamage, ServerPlayer entity, InteractionHand hand) {
         itemStack.hurt(amountToDamage, entity.getRandom(), entity);
         if (itemStack.getCount() == 0) {
-            if (entity.getItemInHand(InteractionHand.MAIN_HAND).equals(itemStack)) {
-                entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-            } else if (entity.getItemInHand(InteractionHand.OFF_HAND).equals(itemStack)) {
-                entity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
-            }
+            entity.setItemInHand(hand, ItemStack.EMPTY);
         }
     }
 
@@ -229,9 +229,10 @@ public class ItemStaffSummoning extends BaseItem {
         if (entity instanceof Player) {
             playerExt = ExtendedPlayer.getForPlayer((Player) entity);
         }
-        if (playerExt != null && playerExt.staffPortal != null) {
-            int successCount = playerExt.staffPortal.summonCreatures();
-            this.damageStaff(itemStack, successCount, (ServerPlayer) entity);
+        if (playerExt != null && playerExt.hasStaffPortal()) {
+            PortalEntity staffPortal = playerExt.getStaffPortal();
+            int successCount = staffPortal.summonCreatures();
+            this.damageStaff(itemStack, successCount, (ServerPlayer) entity, entity.getUsedItemHand());
             return successCount > 0;
         }
         return false;

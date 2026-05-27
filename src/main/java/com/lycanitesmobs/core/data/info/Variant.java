@@ -18,60 +18,112 @@ import java.util.Map;
 public class Variant {
     // ========== Global ==========
     /** The weight used by the default subspecies. **/
-    public static int BASE_WEIGHT = 400;
+    protected static int BASE_WEIGHT = 400;
 
     /** Common weights used by most subspecies. **/
-    public static Map<String, Integer> COMMON_WEIGHTS = new HashMap<String, Integer>() {{
+    protected static Map<String, Integer> COMMON_WEIGHTS = new HashMap<String, Integer>() {{
     	put("common", 100);
     	put("uncommon", 20);
     	put("rare", 2);
     	put("legendary", 1);
     }};
 
-    public static String[] SUBSPECIES_NAMES = new String[] {"uncommon", "rare"};
+    protected static String[] SUBSPECIES_NAMES = new String[] {"uncommon", "rare"};
 
 	/** A static map containing all the global multipliers for each stat for each subspecies. **/
-	public static Map<String, Double> STAT_MULTIPLIERS = new HashMap<>();
+	protected static Map<String, Double> STAT_MULTIPLIERS = new HashMap<>();
 
     /** The drop amount scale of uncommon subspecies. **/
-    public static int UNCOMMON_DROP_SCALE = 2;
+    protected static int UNCOMMON_DROP_SCALE = 2;
 
     /** The drop amount scale of rare subspecies. **/
-    public static int RARE_DROP_SCALE = 5;
+    protected static int RARE_DROP_SCALE = 5;
 
     /** The scale of experience for uncommon subspecies. **/
-    public static double UNCOMMON_EXPERIENCE_SCALE = 2.0D;
+    protected static double UNCOMMON_EXPERIENCE_SCALE = 2.0D;
 
     /** The scale of experience for uncommon subspecies. **/
-    public static double RARE_EXPERIENCE_SCALE = 10.0D;
+    protected static double RARE_EXPERIENCE_SCALE = 10.0D;
 
 	/** The minimum amount of days before uncommon species start to spawn. **/
-	public static int UNCOMMON_SPAWN_DAY_MIN = 0;
+	protected static int UNCOMMON_SPAWN_DAY_MIN = 0;
 
 	/** The minimum amount of days before rare species start to spawn. **/
-	public static int RARE_SPAWN_DAY_MIN = 0;
+	protected static int RARE_SPAWN_DAY_MIN = 0;
 
 	/** If true, rare subspecies are able to despawn. **/
-	public static boolean RARE_DESPAWNING = false;
+	protected static boolean RARE_DESPAWNING = false;
 
     /** Whether rare subspecies should show boss health bars or not. **/
-    public static boolean RARE_HEALTH_BARS = false;
+    protected static boolean RARE_HEALTH_BARS = false;
+
+	public static int getBaseWeight() {
+		return BASE_WEIGHT;
+	}
+
+	public static String[] getSubspeciesNames() {
+		return SUBSPECIES_NAMES.clone();
+	}
+
+	public static int getCommonWeight(String subspeciesName) {
+		return COMMON_WEIGHTS.get(subspeciesName);
+	}
+
+	public static double getStatMultiplier(String subspeciesName, String statName) {
+		String key = (subspeciesName + "-" + statName).toUpperCase(Locale.ENGLISH);
+		if (!STAT_MULTIPLIERS.containsKey(key)) {
+			return 1;
+		}
+		return STAT_MULTIPLIERS.get(key);
+	}
+
+	public static int getUncommonDropScale() {
+		return UNCOMMON_DROP_SCALE;
+	}
+
+	public static int getRareDropScale() {
+		return RARE_DROP_SCALE;
+	}
+
+	public static double getUncommonExperienceScale() {
+		return UNCOMMON_EXPERIENCE_SCALE;
+	}
+
+	public static double getRareExperienceScale() {
+		return RARE_EXPERIENCE_SCALE;
+	}
+
+	public static int getUncommonSpawnDayMin() {
+		return UNCOMMON_SPAWN_DAY_MIN;
+	}
+
+	public static int getRareSpawnDayMin() {
+		return RARE_SPAWN_DAY_MIN;
+	}
+
+	public static boolean isRareDespawning() {
+		return RARE_DESPAWNING;
+	}
+
+	public static boolean showsRareHealthBars() {
+		return RARE_HEALTH_BARS;
+	}
 
 	// ========== General ==========
 	/** The index of this variant in MobInfo. Set by MobInfo when added. Should never be 0 as that is used by the default variant and will result in this variant being ignored. **/
-	public int index;
+	protected int index;
 
 	/** The size scale of this variant. **/
-	public double scale = 1.0D;
+	protected double scale = 1.0D;
 
 	/** The color of this variant. **/
-	public String color;
+	protected String color;
 
 	/** The rarity of this variant. **/
-	public String rarity = "uncommon";
+	protected String rarity = "uncommon";
 
 	/** The weight of this variant, used when randomly determining the variant of a mob. **/
-	public int weight = BASE_WEIGHT;
+	protected int weight = BASE_WEIGHT;
 
 
 	/**
@@ -79,7 +131,7 @@ public class Variant {
 	 */
 	public static void loadGlobalSettings() {
         BASE_WEIGHT = ConfigCreatureSubspecies.INSTANCE.baseWeight.get();
-		for(String subspeciesName : Variant.SUBSPECIES_NAMES) {
+		for(String subspeciesName : Variant.getSubspeciesNames()) {
 			COMMON_WEIGHTS.put(subspeciesName,  ConfigCreatureSubspecies.INSTANCE.commonWeights.get(subspeciesName).get());
 		}
 
@@ -169,6 +221,22 @@ public class Variant {
 	 */
 	public double getScale() {
 		return this.scale;
+	}
+
+	public int getIndex() {
+		return this.index;
+	}
+
+	public String getColor() {
+		return this.color;
+	}
+
+	public String getRarity() {
+		return this.rarity;
+	}
+
+	public int getWeight() {
+		return this.weight;
 	}
 
 

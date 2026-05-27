@@ -34,12 +34,12 @@ public class EntityJousteAlpha extends AgeableCreatureEntity {
     // ========== Init AI ==========
     @Override
     protected void registerGoals() {
-        this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(this.getClass()));
+        this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindAttackTargetGoal(this).addTargets(this.getClass()));
 
         super.registerGoals();
 
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this));
     }
 
 
@@ -90,7 +90,7 @@ public class EntityJousteAlpha extends AgeableCreatureEntity {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

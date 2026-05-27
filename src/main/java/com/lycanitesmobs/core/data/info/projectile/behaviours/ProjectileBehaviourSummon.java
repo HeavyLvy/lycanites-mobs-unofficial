@@ -8,6 +8,7 @@ import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.network.packet.MessageScreenRequest;
 import com.lycanitesmobs.core.entity.pets.SummonSet;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -24,37 +25,37 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
     /**
      * The id of the mob to summon.
      **/
-    public String summonMobId;
+    protected String summonMobId;
 
     /**
      * If true, the player selected minion is summoned instead of a direct entity from mobId.
      **/
-    public boolean summonMinion = false;
+    protected boolean summonMinion = false;
 
     /**
      * The chance on summoning mobs.
      **/
-    public double summonChance = 0.05;
+    protected double summonChance = 0.05;
 
     /**
      * How long in ticks the summoned creature lasts for.
      **/
-    public int summonDuration = 60;
+    protected int summonDuration = 60;
 
     /**
      * The minimum amount of mobs to summon.
      **/
-    public int summonCountMin = 1;
+    protected int summonCountMin = 1;
 
     /**
      * The maximum amount of mobs to summon.
      **/
-    public int summonCountMax = 1;
+    protected int summonCountMax = 1;
 
     /**
      * The size scale of summoned mobs.
      **/
-    public double sizeScale = 1;
+    protected double sizeScale = 1;
 
     @Override
     public void loadFromJSON(JsonObject json) {
@@ -85,7 +86,7 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
         if (projectile == null || projectile.getCommandSenderWorld().isClientSide) {
             return;
         }
-        if (!CreatureManager.getInstance().config.isSummoningAllowed(world)) {
+        if (!CreatureManager.getInstance().getConfig().isSummoningAllowed(world)) {
             return;
         }
         EntityType entityType = null;
@@ -125,7 +126,7 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
                     if (entityKey != null && LycanitesMobs.MODID.equals(entityKey.getNamespace())) {
                         entityType = fetchedType;
                     } else {
-                        LMHelperClass.logWarning("", "[ProjectileSummon] Entity type '" + this.summonMobId + "' is not from the lycanitesmobs mod namespace. Summon ignored.");
+                        LMHelperClass.logWarningMessage("[ProjectileSummon] Entity type '" + this.summonMobId + "' is not from the lycanitesmobs mod namespace. Summon ignored.");
                     }
                 }
             }
@@ -160,8 +161,8 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
                             entityTameable.setAggressive(true);
                             if (summonSet != null) {
                                 summonSet.applyBehaviour(entityTameable);
-                                entityTameable.setSubspecies(summonSet.subspecies);
-                                entityTameable.applyVariant(summonSet.variant);
+                                entityTameable.setSubspecies(summonSet.getSubspecies());
+                                entityTameable.applyVariant(summonSet.getVariant());
                             }
                         }
 
@@ -171,7 +172,11 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
                         }
                         BlockPos spawnPos = entityCreature.getFacingPosition(projectile, -1, randomAngle);
                         entity.moveTo(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), projectile.yRotO, 0.0F);
-                        entity.getCommandSenderWorld().addFreshEntity(entity);
+                        DeferredLevelActionManager.spawnEntity(
+                                projectile.getCommandSenderWorld(),
+                                spawnPos,
+                                "projectile_summon:" + entity.getUUID(),
+                                entity);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

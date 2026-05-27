@@ -46,10 +46,10 @@ public class EntityCockatrice extends RideableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
         EntityType vespidType = CreatureManager.getInstance().getEntityType("vespid");
         if(vespidType != null)
-			this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(vespidType));
+			this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindAttackTargetGoal(this).addTargets(vespidType));
     }
 	
 	
@@ -215,7 +215,7 @@ public class EntityCockatrice extends RideableCreatureEntity implements Enemy {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
 
 
     // ==================================================

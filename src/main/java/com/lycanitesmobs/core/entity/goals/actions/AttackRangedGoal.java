@@ -20,7 +20,7 @@ public class AttackRangedGoal extends Goal {
 
     private int attackStamina = 0;
     private int attackStaminaMax = 0;
-    public boolean attackOnCooldown = false;
+    private boolean attackOnCooldown = false;
     private int staminaRecoverRate = 1;
     private int staminaDrainRate = 1;
     
@@ -34,7 +34,7 @@ public class AttackRangedGoal extends Goal {
     private boolean longMemory = true;
     private boolean checkSight = true;
     private boolean mountedAttacking = true;
-    public boolean enabled = true;
+    private boolean enabled = true;
 
 	// Pathing:
 	private int repathTimeMax = 20;
@@ -105,6 +105,10 @@ public class AttackRangedGoal extends Goal {
     	this.enabled = setEnabled;
     	return this;
     }
+
+    public boolean isAttackOnCooldown() {
+        return this.attackOnCooldown;
+    }
     
     
     // ==================================================
@@ -157,7 +161,7 @@ public class AttackRangedGoal extends Goal {
     	if(!this.longMemory)
 	    	if(!this.host.useDirectNavigator() && !this.host.getNavigation().isDone())
                 return this.canUse();
-	    	else if(this.host.useDirectNavigator() && this.host.directNavigator.targetPosition == null)
+	    	else if(this.host.useDirectNavigator() && !this.host.hasDirectNavigationTarget())
                 return this.canUse();
 
     	// Should Execute:
@@ -207,7 +211,7 @@ public class AttackRangedGoal extends Goal {
             if(!this.host.useDirectNavigator())
                 this.host.getNavigation().stop();
             else
-                this.host.directNavigator.clearTargetPosition(1.0D);
+                this.host.clearDirectNavigationTarget(1.0D);
         }
         else if(--this.repathTime <= 0) {
         	this.repathTime = this.repathTimeMax;
@@ -217,7 +221,7 @@ public class AttackRangedGoal extends Goal {
             if(!this.host.useDirectNavigator())
                 this.host.getNavigation().moveTo(targetPosition.getX(), targetPosition.getY(), targetPosition.getZ(), this.speed);
             else
-                this.host.directNavigator.setTargetPosition(targetPosition, this.speed);
+                this.host.setDirectNavigationTarget(targetPosition, this.speed);
         }
 
         this.host.getLookControl().setLookAt(this.attackTarget, 30.0F, 30.0F);

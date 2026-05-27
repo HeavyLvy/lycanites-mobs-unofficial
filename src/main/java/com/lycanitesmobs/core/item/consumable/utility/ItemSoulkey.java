@@ -49,9 +49,9 @@ public class ItemSoulkey extends BaseItem {
 
         // Get Possible Altars:
         List<AltarInfo> possibleAltars = new ArrayList<>();
-        if (AltarInfo.altars.isEmpty())
-            LMHelperClass.logWarning("", "No altars have been registered, Soulkeys will not work at all.");
-        for (AltarInfo altarInfo : AltarInfo.altars.values()) {
+        if (AltarInfo.getAltars().isEmpty())
+            LMHelperClass.logWarningMessage("No altars have been registered, Soulkeys will not work at all.");
+        for (AltarInfo altarInfo : AltarInfo.getAltars().values()) {
             if (altarInfo.checkBlockEvent(player, world, pos) && altarInfo.quickCheck(player, world, pos)) {
                 possibleAltars.add(altarInfo);
             }
@@ -73,10 +73,9 @@ public class ItemSoulkey extends BaseItem {
                         player.displayClientMessage(message, false);
                         return InteractionResult.FAIL;
                     }
-                    if (!player.getAbilities().instabuild)
-                        itemStack.setCount(Math.max(0, itemStack.getCount() - 1));
-                    if (itemStack.getCount() <= 0)
-                        player.getInventory().setItem(player.getInventory().selected, ItemStack.EMPTY);
+                    if (!player.getAbilities().instabuild) {
+                        itemStack.shrink(1);
+                    }
                     MutableComponent message = Component.translatable("message.soulkey.active");
                     player.displayClientMessage(message, false);
                 }

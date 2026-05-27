@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.worldgen.dungeon;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.spawner.MobSpawn;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -116,7 +117,7 @@ public class DeferredBossSpawner {
                 spawnBoss(level, request);
                 processed++;
             } catch (Exception e) {
-                LMHelperClass.logWarning("", "[DeferredBoss] Error spawning boss: " + e.getMessage());
+                LMHelperClass.logWarningMessage("[DeferredBoss] Error spawning boss: " + e.getMessage());
             }
         }
     }
@@ -139,11 +140,11 @@ public class DeferredBossSpawner {
 
         if (entity instanceof BaseCreatureEntity creature) {
             creature.setHome(request.pos.getX(), request.pos.getY(), request.pos.getZ(), request.roomRadius);
-            creature.spawnedAsBoss = true;
+            creature.markSpawnedAsBoss();
         }
 
         request.mobSpawn.onSpawned(entity, null);
-        level.addFreshEntity(entity);
+        DeferredLevelActionManager.spawnEntityNow(level, entity);
         LMHelperClass.logDebug("Dungeon", "[DeferredBoss] Spawned boss at " + request.pos);
     }
 

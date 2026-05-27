@@ -4,10 +4,10 @@ import com.lycanitesmobs.core.data.info.gui.Beastiary;
 import com.lycanitesmobs.core.manager.CreatureManager;
 
 public class CreatureKnowledge {
-	public Beastiary beastiary;
-	public String creatureName;
-	public int rank;
-	public int experience = 0;
+	protected Beastiary beastiary;
+	protected String creatureName;
+	protected int rank;
+	protected int experience = 0;
 
 	/**
 	 * Constructor
@@ -19,6 +19,23 @@ public class CreatureKnowledge {
 	public CreatureKnowledge(Beastiary beastiary, String creatureName, int rank, int experience) {
 		this.beastiary = beastiary;
 		this.creatureName = creatureName;
+		this.rank = rank;
+		this.experience = experience;
+	}
+
+	public String getCreatureName() {
+		return this.creatureName;
+	}
+
+	public int getRank() {
+		return this.rank;
+	}
+
+	public int getExperience() {
+		return this.experience;
+	}
+
+	public void setProgress(int rank, int experience) {
 		this.rank = rank;
 		this.experience = experience;
 	}

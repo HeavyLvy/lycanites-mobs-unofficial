@@ -61,7 +61,7 @@ public class StructureSpawnInjector extends JSONLoader {
     public void loadAllFromJson(ModInfo modInfo) {
         this.configs.clear();
         LMHelperClass.logDebug("structurespawners", "=== BEGIN loading structure spawn configs ===");
-        this.loadAllJson(modInfo, "StructureSpawn", "structurespawns", "name", true, "structure_spawn", FileLoader.COMMON, StreamLoader.COMMON);
+        this.loadAllJson(modInfo, "StructureSpawn", "structurespawns", "name", true, "structure_spawn", FileLoader.common(), StreamLoader.common());
         LMHelperClass.logDebug("structurespawners", "=== DONE loading. Total configs: " + this.configs.size() + " ===");
         for (StructureSpawnConfig config : this.configs) {
             LMHelperClass.logDebug("structurespawners", "  Config '" + config.name + "': enabled=" + config.enabled
@@ -97,19 +97,18 @@ public class StructureSpawnInjector extends JSONLoader {
                 LMHelperClass.logDebug("structurespawners", "Skipping disabled config: " + config.name);
                 continue;
             }
-            Spawner oldSpawner = SpawnerManager.getInstance().spawners.get(config.name);
-            if (oldSpawner != null && oldSpawner.enabled) {
-                boolean hasStructureLocation = oldSpawner.locations.stream()
-                        .anyMatch(loc -> loc instanceof StructureSpawnLocation);
+            Spawner oldSpawner = SpawnerManager.getInstance().getSpawner(config.name);
+            if (oldSpawner != null && oldSpawner.isDefinitionEnabled()) {
+                boolean hasStructureLocation = oldSpawner.hasLocationType(StructureSpawnLocation.class);
                 if (hasStructureLocation) {
-                    oldSpawner.enabled = false;
+                    oldSpawner.disableForStructureSpawnInjection();
                     LMHelperClass.logDebug("structurespawners",
                             "Auto-disabled old structure spawner '" + config.name
                                     + "' â€” replaced by structure spawn injection.");
                 }
             } else {
                 LMHelperClass.logDebug("structurespawners", "No old spawner to disable for '" + config.name
-                        + "' (spawner=" + (oldSpawner != null ? "exists,enabled=" + oldSpawner.enabled : "null") + ")");
+                        + "' (spawner=" + (oldSpawner != null ? "exists,enabled=" + oldSpawner.isDefinitionEnabled() : "null") + ")");
             }
         }
 

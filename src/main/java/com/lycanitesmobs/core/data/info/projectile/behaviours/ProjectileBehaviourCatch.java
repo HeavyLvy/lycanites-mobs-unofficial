@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectileBehaviourCatch extends ProjectileBehaviour {
-    public List<String> catchEntityIds = new ArrayList<>();
-    public boolean resetAttackCooldown = true;
-    public boolean preventDamage = true;
+    protected List<String> catchEntityIds = new ArrayList<>();
+    protected boolean resetAttackCooldown = true;
+    protected boolean preventDamage = true;
 
     @Override
     public void loadFromJSON(JsonObject json) {

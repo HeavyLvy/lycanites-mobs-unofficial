@@ -21,23 +21,23 @@ import net.minecraft.world.inventory.Slot;
 import java.util.List;
 
 public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContainer> {
-    public BaseCreatureEntity creature;
-    public CreatureInventory creatureInventory;
+    protected BaseCreatureEntity creature;
+    protected CreatureInventory creatureInventory;
 
     /**
      * Constructor
      */
     public CreatureInventoryScreen(CreatureContainer container, Inventory playerInventory, Component name) {
         super(container, playerInventory, name);
-        this.creature = container.creature;
-        this.creatureInventory = container.creature.inventory;
+        this.creature = container.getCreature();
+        this.creatureInventory = container.getCreatureInventory();
     }
 
     @Override
     public void init() {
-        super.init();
         this.imageWidth = 176;
         this.imageHeight = 166;
+        super.init();
     }
 
     @Override
@@ -211,9 +211,9 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
 
         // XP Bar:
         this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIPetBarEmpty"), barX, barY, 0, 1, 1, barWidth, barHeight);
-        float experienceNormal = Math.min(1, (float) this.creature.getExperience() / this.creature.creatureStats.getExperienceForNextLevel());
+        float experienceNormal = Math.min(1, (float) this.creature.getExperience() / this.creature.getExperienceForNextLevel());
         this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIBarExperience"), barX, barY, 0, experienceNormal, 1, barWidth * experienceNormal, barHeight);
-        String experienceText = Component.translatable("entity.experience").getString() + ": " + this.creature.getExperience() + "/" + this.creature.creatureStats.getExperienceForNextLevel();
+        String experienceText = Component.translatable("entity.experience").getString() + ": " + this.creature.getExperience() + "/" + this.creature.getExperienceForNextLevel();
         this.drawHelper.draw(matrixStack, experienceText, barCenter - ((float) this.drawHelper.getStringWidth(experienceText) / 2), barY + 2, 0xFFFFFF);
         barY += barHeight + 1;
 
@@ -301,7 +301,7 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
         var tex = TextureManager.getTexture("GUIInventoryCreature");
 
         BaseContainer container = this.getMenu();
-        List<Slot> creatureSlots = container.slots.subList(container.specialStart, container.inventoryFinish + 1);
+        List<Slot> creatureSlots = this.getMenu().getCreatureSlotView();
         int slotWidth = 18;
         int slotHeight = 18;
         int slotU = 238;

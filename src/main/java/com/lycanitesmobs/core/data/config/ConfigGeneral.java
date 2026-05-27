@@ -51,11 +51,11 @@ public class ConfigGeneral {
             String configDirPath = new File(".") + "/config/" + LycanitesMobs.MODID;
             File configDir = new File(configDirPath);
             configDir.mkdir();
-            LMHelperClass.logWarning("", "[Config] The current configs are too old, clearing all configs now...");
+            LMHelperClass.logWarningMessage("[Config] The current configs are too old, clearing all configs now...");
             try {
                 FileUtils.cleanDirectory(configDir);
             } catch (IOException e) {
-                LMHelperClass.logWarning("", "[Config] Unable to clear the config directory! This could be a file permissions issue!");
+                LMHelperClass.logWarningMessage("[Config] Unable to clear the config directory! This could be a file permissions issue!");
                 e.printStackTrace();
             }
         }

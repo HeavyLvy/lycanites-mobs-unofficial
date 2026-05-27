@@ -4,48 +4,81 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.worldgen.dungeon.instance.SectorInstance;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DungeonTheme {
     /** Dungeon Themes set the blocks that Dungeon Sectors and Structures should use. **/
 
 	/** The unique name of this theme. Required. **/
-	public String name = "";
+	protected String name = "";
 
     /** The pattern to use on random B blocks for floors. Can be: random (default), horizontal or vertical. **/
-    public String floorPattern = "random";
+    protected String floorPattern = "random";
 
 	/** The pattern to use on random B blocks for walls. Can be: random (default), horizontal or vertical. **/
-	public String wallPattern = "random";
+	protected String wallPattern = "random";
 
 	/** The pattern to use on random B blocks for ceilings. Can be: random (default), horizontal or vertical. **/
-	public String ceilingPattern = "random";
+	protected String ceilingPattern = "random";
 
 	/** A list of blocks to use for floors. Required. **/
-	public List<ThemeBlock> floorBlocks = new ArrayList<>();
+	protected List<ThemeBlock> floorBlocks = new ArrayList<>();
 
 	/** A list of blocks to use for walls. Required. **/
-	public List<ThemeBlock> wallBlocks = new ArrayList<>();
+	protected List<ThemeBlock> wallBlocks = new ArrayList<>();
 
 	/** A list of blocks to use for ceilings. Required. **/
-	public List<ThemeBlock> ceilingBlocks = new ArrayList<>();
+	protected List<ThemeBlock> ceilingBlocks = new ArrayList<>();
 
 	/** A list of full blocks to use for lights. Optional, defaults to random wall block. **/
-	public List<ThemeBlock> lightBlocks = new ArrayList<>();
+	protected List<ThemeBlock> lightBlocks = new ArrayList<>();
 
 	/** A list of torch blocks to use for lights. Optional, defaults to air. **/
-	public List<ThemeBlock> torchBlocks = new ArrayList<>();
+	protected List<ThemeBlock> torchBlocks = new ArrayList<>();
 
 	/** A list of blocks to use for stairs. Required. **/
-	public List<ThemeBlock> stairBlocks = new ArrayList<>();
+	protected List<ThemeBlock> stairBlocks = new ArrayList<>();
 
 	/** A list of dangerous blocks to to fill pits with. Required. **/
-	public List<ThemeBlock> pitBlocks = new ArrayList<>();
+	protected List<ThemeBlock> pitBlocks = new ArrayList<>();
+
+	public String getName() {
+		return this.name;
+	}
+
+	protected List<ThemeBlock> getFloorBlocks() {
+		return Collections.unmodifiableList(this.floorBlocks);
+	}
+
+	protected List<ThemeBlock> getWallBlocks() {
+		return Collections.unmodifiableList(this.wallBlocks);
+	}
+
+	protected List<ThemeBlock> getCeilingBlocks() {
+		return Collections.unmodifiableList(this.ceilingBlocks);
+	}
+
+	public boolean containsStructureBlock(Block block) {
+		return this.containsBlock(this.ceilingBlocks, block)
+				|| this.containsBlock(this.floorBlocks, block)
+				|| this.containsBlock(this.wallBlocks, block);
+	}
+
+	private boolean containsBlock(List<ThemeBlock> themeBlocks, Block block) {
+		for (ThemeBlock themeBlock : themeBlocks) {
+			if (themeBlock.getBlock() == block) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 
     /** Loads this Dungeon Theme from the provided JSON data. **/
@@ -105,7 +138,7 @@ public class DungeonTheme {
 		}
 		else {
 			ThemeBlock themeBlock = new ThemeBlock();
-			themeBlock.block = Blocks.CAVE_AIR;
+			themeBlock.setBlock(Blocks.CAVE_AIR);
 			this.torchBlocks.add(themeBlock);
 		}
 
@@ -222,22 +255,22 @@ public class DungeonTheme {
 		if(sectorInstance != null) {
 			// Light:
 			if (patternChar == 'L') {
-				return sectorInstance.lightBlock;
+				return sectorInstance.getLightBlock();
 			}
 
 			// Torch:
 			else if (patternChar == 'T') {
-				return sectorInstance.torchBlock;
+				return sectorInstance.getTorchBlock();
 			}
 
 			// Stairs:
 			else if (patternChar == 'R') {
-				return sectorInstance.stairBlock;
+				return sectorInstance.getStairBlock();
 			}
 
 			// Pit:
 			else if (patternChar == 'P') {
-				return sectorInstance.pitBlock;
+				return sectorInstance.getPitBlock();
 			}
 		}
 
@@ -272,23 +305,23 @@ public class DungeonTheme {
 		// Get Total Weights:
 		int totalWeights = 0;
 		for(ThemeBlock themeBlock : blockList) {
-			if(themeBlock == null || themeBlock.weight < 1) {
+			if(themeBlock == null || themeBlock.getWeight() < 1) {
 				continue;
 			}
-			totalWeights += themeBlock.weight;
+			totalWeights += themeBlock.getWeight();
 		}
 
 		// Get Weighted Block:
 		int randomWeight = random.nextInt(totalWeights) + 1;
 		int searchedWeight = 0;
 		for(ThemeBlock themeBlock : blockList) {
-			if(themeBlock == null || themeBlock.weight < 1) {
+			if(themeBlock == null || themeBlock.getWeight() < 1) {
 				continue;
 			}
-			if(randomWeight <= themeBlock.weight + searchedWeight) {
+			if(randomWeight <= themeBlock.getWeight() + searchedWeight) {
 				return themeBlock.getBlockState();
 			}
-			searchedWeight += themeBlock.weight;
+			searchedWeight += themeBlock.getWeight();
 		}
 		return blockList.get(blockList.size() - 1).getBlockState();
 	}

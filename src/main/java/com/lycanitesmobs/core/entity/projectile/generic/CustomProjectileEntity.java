@@ -5,7 +5,6 @@ import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
-import com.lycanitesmobs.core.data.info.projectile.behaviours.ProjectileBehaviour;
 import com.lycanitesmobs.core.data.info.projectile.behaviours.ProjectileBehaviourLaser;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
@@ -35,7 +34,7 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
     /**
      * The Projectile Info to base this projectile from.
      **/
-    public ProjectileInfo projectileInfo;
+    protected ProjectileInfo projectileInfo;
 
     /**
      * The id of this projectile's thrower if any, used for network sync by some behaviours, -1 for none.
@@ -70,17 +69,17 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
     /**
      * The width of this projectile's laser, used by laser behaviours.
      **/
-    public float laserWidth;
+    protected float laserWidth;
 
     /**
      * The angle to fire a laser from where there is no entity aiming the laser, used by laser behaviours.
      **/
-    public float laserAngle;
+    protected float laserAngle;
 
     /**
      * A list of projectiles that was spawned by this projectile, used by behaviours.
      **/
-    public List<BaseProjectileEntity> spawnedProjectiles = new ArrayList<>();
+    protected List<BaseProjectileEntity> spawnedProjectiles = new ArrayList<>();
 
     // Data Parameters:
     protected static final EntityDataAccessor<String> PROJECTILE_NAME = SynchedEntityData.defineId(CustomProjectileEntity.class, EntityDataSerializers.STRING);
@@ -107,7 +106,7 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
     public CustomProjectileEntity(EntityType<? extends BaseProjectileEntity> entityType, Level world, LivingEntity entityLiving, ProjectileInfo projectileInfo) {
         super(entityType, world, entityLiving);
         if (projectileInfo != null)
-            this.shootFromRotation(entityLiving, entityLiving.xRotO, entityLiving.yRotO, 0.0F, (float) projectileInfo.velocity, 1.0F); // Shoot from Entity
+            this.shootFromRotation(entityLiving, entityLiving.xRotO, entityLiving.yRotO, 0.0F, (float) projectileInfo.getVelocity(), 1.0F); // Shoot from Entity
         this.modInfo = LycanitesMobs.modInfo;
         this.setProjectileInfo(projectileInfo);
     }
@@ -163,30 +162,69 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
         if (!this.getCommandSenderWorld().isClientSide) {
             this.entityData.set(PROJECTILE_NAME, this.projectileInfo.getName());
         }
-        this.modInfo = this.projectileInfo.modInfo;
+        this.modInfo = this.projectileInfo.getModInfo();
         this.entityName = this.projectileInfo.getName();
 
         // Stats:
-        this.setProjectileScale(this.projectileInfo.scale);
-        this.projectileLife = this.projectileInfo.lifetime;
-        this.setDamage(this.projectileInfo.damage);
-        this.setPierce(this.projectileInfo.pierce);
-        this.knockbackChance = this.projectileInfo.knockbackChance;
-        this.weight = this.projectileInfo.weight;
+        this.setProjectileScale(this.projectileInfo.getScale());
+        this.projectileLife = this.projectileInfo.getLifetime();
+        this.setDamage(this.projectileInfo.getDamage());
+        this.setPierce(this.projectileInfo.getPierce());
+        this.knockbackChance = this.projectileInfo.getKnockbackChance();
+        this.weight = this.projectileInfo.getWeight();
 
         // Visual:
-        this.rollSpeed = this.projectileInfo.rollSpeed;
+        this.rollSpeed = this.projectileInfo.getRollSpeed();
         if (this.rollSpeed > 0 && this.random.nextBoolean()) {
             this.rollSpeed = -this.rollSpeed;
         }
-        this.animationFrameMax = this.projectileInfo.animationFrames;
+        this.animationFrameMax = this.projectileInfo.getAnimationFrames();
 
         // Flags:
-        this.waterProof = this.projectileInfo.waterproof;
-        this.lavaProof = this.projectileInfo.lavaproof;
-        this.cutsGrass = this.projectileInfo.cutGrass;
-        this.ripper = this.projectileInfo.ripper;
-        this.pierceBlocks = this.projectileInfo.pierceBlocks;
+        this.waterProof = this.projectileInfo.isWaterproof();
+        this.lavaProof = this.projectileInfo.isLavaproof();
+        this.cutsGrass = this.projectileInfo.cutsGrass();
+        this.ripper = this.projectileInfo.isRipper();
+        this.pierceBlocks = this.projectileInfo.piercesBlocks();
+    }
+
+    public ProjectileInfo getProjectileInfo() {
+        return this.projectileInfo;
+    }
+
+    public boolean hasProjectileInfo() {
+        return this.projectileInfo != null;
+    }
+
+    public float getLaserWidth() {
+        return this.laserWidth;
+    }
+
+    public void setLaserWidth(float laserWidth) {
+        this.laserWidth = laserWidth;
+    }
+
+    public float getLaserAngle() {
+        return this.laserAngle;
+    }
+
+    public void setLaserAngle(float laserAngle) {
+        this.laserAngle = laserAngle;
+        if (!this.getCommandSenderWorld().isClientSide) {
+            this.entityData.set(LASER_ANGLE, this.laserAngle);
+        }
+    }
+
+    public int getSpawnedProjectileCount() {
+        return this.spawnedProjectiles.size();
+    }
+
+    public BaseProjectileEntity getSpawnedProjectile(int index) {
+        return this.spawnedProjectiles.get(index);
+    }
+
+    public void addSpawnedProjectile(BaseProjectileEntity projectile) {
+        this.spawnedProjectiles.add(projectile);
     }
 
 
@@ -204,27 +242,25 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
         super.tick();
 
         if (this.projectileInfo != null) {
-            for (ProjectileBehaviour behaviour : this.projectileInfo.behaviours) {
-                behaviour.onProjectileUpdate(this);
-            }
+            this.projectileInfo.onProjectileUpdate(this);
 
             // Particles:
-            if (this.getCommandSenderWorld().isClientSide && this.projectileInfo.particleCount > 0) {
-                for (int i = 0; i < this.projectileInfo.particleCount; ++i) {
+            if (this.getCommandSenderWorld().isClientSide && this.projectileInfo.getParticleCount() > 0) {
+                for (int i = 0; i < this.projectileInfo.getParticleCount(); ++i) {
                     if (this.isInWater()) {
                         if (this.projectileInfo.getWaterParticleType() != null) {
                             this.getCommandSenderWorld().addParticle(this.projectileInfo.getWaterParticleType().getType(), this.getX() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), this.getY() + this.random.nextDouble() * (double) this.getBbHeight(), this.getZ() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), 0.0D, 0.0D, 0.0D);
-                        } else if ("minecraft:dust_redstone".equalsIgnoreCase(this.projectileInfo.waterParticleId)) {
+                        } else if ("minecraft:dust_redstone".equalsIgnoreCase(this.projectileInfo.getWaterParticleId())) {
                             this.getCommandSenderWorld().addParticle(DustParticleOptions.REDSTONE, this.getX() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), this.getY() + this.random.nextDouble() * (double) this.getBbHeight(), this.getZ() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), 0.0D, 0.0D, 0.0D);
-                        } else if ("minecraft:dust_falling_dirt".equalsIgnoreCase(this.projectileInfo.waterParticleId)) {
+                        } else if ("minecraft:dust_falling_dirt".equalsIgnoreCase(this.projectileInfo.getWaterParticleId())) {
                             this.getCommandSenderWorld().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DIRT.defaultBlockState()), this.getX() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), this.getY() + this.random.nextDouble() * (double) this.getBbHeight(), this.getZ() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), 0.0D, 0.0D, 0.0D);
                         }
                     } else {
                         if (this.projectileInfo.getParticleType() != null) {
                             this.getCommandSenderWorld().addParticle(this.projectileInfo.getParticleType().getType(), this.getX() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), this.getY() + this.random.nextDouble() * (double) this.getBbHeight(), this.getZ() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), 0.0D, 0.0D, 0.0D);
-                        } else if ("minecraft:dust_redstone".equalsIgnoreCase(this.projectileInfo.particleId)) {
+                        } else if ("minecraft:dust_redstone".equalsIgnoreCase(this.projectileInfo.getParticleId())) {
                             this.getCommandSenderWorld().addParticle(DustParticleOptions.REDSTONE, this.getX() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), this.getY() + this.random.nextDouble() * (double) this.getBbHeight(), this.getZ() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), 0.0D, 0.0D, 0.0D);
-                        } else if ("minecraft:dust_falling_dirt".equalsIgnoreCase(this.projectileInfo.particleId)) {
+                        } else if ("minecraft:dust_falling_dirt".equalsIgnoreCase(this.projectileInfo.getParticleId())) {
                             this.getCommandSenderWorld().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DIRT.defaultBlockState()), this.getX() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), this.getY() + this.random.nextDouble() * (double) this.getBbHeight(), this.getZ() + (this.random.nextDouble() - 0.5D) * (double) this.getBbWidth(), 0.0D, 0.0D, 0.0D);
                         }
                     }
@@ -237,11 +273,7 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
     public boolean canDamage(LivingEntity targetEntity) {
         boolean canDamage = super.canDamage(targetEntity);
         if (this.projectileInfo != null) {
-            for (ProjectileBehaviour behaviour : this.projectileInfo.behaviours) {
-                if (!behaviour.canDamage(this, this.getCommandSenderWorld(), targetEntity, canDamage)) {
-                    canDamage = false;
-                }
-            }
+            canDamage = this.projectileInfo.canDamage(this, this.getCommandSenderWorld(), targetEntity, canDamage);
         }
         return canDamage;
     }
@@ -275,11 +307,7 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
      */
     public boolean shouldChannel() {
         if (this.projectileInfo != null) {
-            for (ProjectileBehaviour behaviour : this.projectileInfo.behaviours) {
-                if (behaviour instanceof ProjectileBehaviourLaser) {
-                    return true;
-                }
-            }
+            return this.projectileInfo.hasBehaviour(ProjectileBehaviourLaser.class);
         }
         return false;
     }
@@ -292,26 +320,24 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
     public void onDamage(LivingEntity target, float damage, boolean attackSuccess) {
         super.onDamage(target, damage, attackSuccess);
         if (!this.getCommandSenderWorld().isClientSide && attackSuccess && this.projectileInfo != null) {
-            if (this.projectileInfo.debuffsOverride != null) {
-                int duration = this.projectileInfo.effectDuration * 20;
-                int amplifier = this.projectileInfo.effectAmplifier;
-                for (String debuff : this.projectileInfo.debuffsOverride) {
+            if (this.projectileInfo.getDebuffsOverride() != null) {
+                int duration = this.projectileInfo.getEffectDuration() * 20;
+                int amplifier = this.projectileInfo.getEffectAmplifier();
+                for (String debuff : this.projectileInfo.getDebuffsOverride()) {
                     MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(debuff));
                     if (effect != null) {
                         target.addEffect(new MobEffectInstance(effect, duration, amplifier));
                     }
                 }
             } else {
-                for (ElementInfo element : this.projectileInfo.elements) {
-                    element.debuffEntity(target, this.projectileInfo.effectDuration * 20, this.projectileInfo.effectAmplifier);
+                for (ElementInfo element : this.projectileInfo.getElements()) {
+                    element.debuffEntity(target, this.projectileInfo.getEffectDuration() * 20, this.projectileInfo.getEffectAmplifier());
                 }
             }
         }
 
         if (attackSuccess && this.projectileInfo != null) {
-            for (ProjectileBehaviour behaviour : this.projectileInfo.behaviours) {
-                behaviour.onProjectileDamage(this, this.getCommandSenderWorld(), target, damage);
-            }
+            this.projectileInfo.onProjectileDamage(this, this.getCommandSenderWorld(), target, damage);
         }
     }
 
@@ -322,9 +348,7 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
             return;
         }
 
-        for (ProjectileBehaviour behaviour : this.projectileInfo.behaviours) {
-            behaviour.onProjectileImpact(this, this.getCommandSenderWorld(), impactPos);
-        }
+        this.projectileInfo.onProjectileImpact(this, this.getCommandSenderWorld(), impactPos);
     }
 
     /**
@@ -410,7 +434,7 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
 
     @Override
     public boolean isOnFire() {
-        return this.projectileInfo != null && this.projectileInfo.burningEffect;
+        return this.projectileInfo != null && this.projectileInfo.hasBurningEffect();
     }
 
 
@@ -446,7 +470,7 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
 
     @Override
     public float getBrightness() {
-        if (this.projectileInfo == null || !this.projectileInfo.glow)
+        if (this.projectileInfo == null || !this.projectileInfo.glows())
             return LMHelperClass.getBrightness(this);
         return 1.0F;
     }

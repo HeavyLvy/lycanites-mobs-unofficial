@@ -2,12 +2,14 @@ package com.lycanitesmobs.core.entity.base;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.entity.goals.actions.PlayerControlGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.CopyRiderAttackTargetGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.RevengeRiderGoal;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.ObjectLists;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -29,14 +31,14 @@ import java.util.HashMap;
 
 public abstract class RideableCreatureEntity extends TameableCreatureEntity {
 
-    public Entity lastRiddenByEntity = null;
+    protected Entity lastRiddenByEntity = null;
 
 	// Jumping:
-	public boolean mountJumping = false;
-	public float jumpPower = 0.0F;
+	protected boolean mountJumping = false;
+	protected float jumpPower = 0.0F;
 
-	public boolean abilityToggled = false;
-	public boolean inventoryToggled = false;
+	protected boolean abilityToggled = false;
+	protected boolean inventoryToggled = false;
 	
 	// ==================================================
   	//                    Constructor
@@ -51,13 +53,13 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
 	@Override
 	protected void registerGoals() {
 		// Greater Actions:
-		this.goalSelector.addGoal(this.nextPriorityGoalIndex++, new PlayerControlGoal(this));
+		this.goalSelector.addGoal(this.claimPriorityGoalIndex(), new PlayerControlGoal(this));
 
 		super.registerGoals();
 
 		// Lesser Targeting:
-		this.targetSelector.addGoal(this.nextReactTargetIndex++, new RevengeRiderGoal(this));
-		this.targetSelector.addGoal(this.nextReactTargetIndex++, new CopyRiderAttackTargetGoal(this));
+		this.targetSelector.addGoal(this.claimReactTargetGoalIndex(), new RevengeRiderGoal(this));
+		this.targetSelector.addGoal(this.claimReactTargetGoalIndex(), new CopyRiderAttackTargetGoal(this));
 	}
     
     
@@ -276,30 +278,8 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
         }
 
 		// Ability Controls:
-		if(this.getControllingPassenger() instanceof Player) {
-			Player player = (Player)this.getControllingPassenger();
-			ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
-			if(playerExt != null) {
-
-				// Mount Ability:
-				if (playerExt.isControlActive(ExtendedPlayer.CONTROL_ID.MOUNT_ABILITY)) {
-					this.mountAbility(player);
-					this.abilityToggled = true;
-				}
-				else {
-					this.abilityToggled = false;
-				}
-
-				// Player Inventory:
-				if (playerExt.isControlActive(ExtendedPlayer.CONTROL_ID.MOUNT_INVENTORY)) {
-					if (!this.inventoryToggled)
-						this.openGUI(player);
-					this.inventoryToggled = true;
-				}
-				else {
-					this.inventoryToggled = false;
-				}
-			}
+		if(this.getControllingPassenger() instanceof Player player) {
+			this.handleRiderControls(player, ExtendedPlayer.getForPlayer(player));
 		}
 
         // Apply Movement:
@@ -335,7 +315,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
                     super.travel(new Vec3(strafe, up, forward));
             }
             else
-                this.directNavigator.flightMovement(strafe, forward);
+                this.moveWithDirectNavigator(strafe, forward);
         }
 
         // Clear Jumping:
@@ -355,6 +335,32 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
         this.animationSpeed += (f4 - this.animationSpeed) * 0.4F;
         this.animationPosition += this.animationSpeed;*/
     }
+
+	public void handleRiderControls(Player player, ExtendedPlayer playerExt) {
+		if (player == null || playerExt == null || this.getControllingPassenger() != player) {
+			return;
+		}
+
+		// Mount Ability:
+		if (playerExt.isControlActive(ExtendedPlayer.CONTROL_ID.MOUNT_ABILITY)) {
+			this.mountAbility(player);
+			this.abilityToggled = true;
+		}
+		else {
+			this.abilityToggled = false;
+		}
+
+		// Player Inventory:
+		if (playerExt.isControlActive(ExtendedPlayer.CONTROL_ID.MOUNT_INVENTORY)) {
+			if (!this.inventoryToggled) {
+				this.openGUI(player);
+			}
+			this.inventoryToggled = true;
+		}
+		else {
+			this.inventoryToggled = false;
+		}
+	}
 
     // ========== Jumping Start ==========
     public void startJumping() {
@@ -415,9 +421,9 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
     	commands.putAll(super.getInteractCommands(player, itemStack));
     	
     	// Mount:
-        boolean mountingAllowed = CreatureManager.getInstance().config.mountingEnabled;
+        boolean mountingAllowed = CreatureManager.getInstance().getConfig().mountingEnabled();
         if(mountingAllowed && this.isFlying())
-            mountingAllowed = CreatureManager.getInstance().config.mountingFlightEnabled;
+            mountingAllowed = CreatureManager.getInstance().getConfig().mountingFlightEnabled();
     	if(this.canBeMounted(player) && !player.isShiftKeyDown() && !this.getCommandSenderWorld().isClientSide && mountingAllowed)
     		commands.put(COMMAND_PIORITIES.MAIN.id, "Mount");
     	
@@ -426,7 +432,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
     
     // ========== Perform Command ==========
     @Override
-    public boolean performCommand(String command, Player player, ItemStack itemStack) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack, InteractionHand hand) {
     	
     	// Mount:
     	if(command.equals("Mount")) {
@@ -437,7 +443,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
             return true;
     	}
     	
-    	return super.performCommand(command, player, itemStack);
+        return super.performCommand(command, player, itemStack, hand);
     }
     
     
@@ -510,7 +516,8 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
   	// ==================================================
     public boolean hasSaddle() {
     	ItemStack saddleStack = this.inventory.getEquipmentStack("saddle");
-    	return !saddleStack.isEmpty() && saddleStack.getItem() == this.creatureInfo.creatureType.getSaddleItem();
+        CreatureType creatureType = this.creatureInfo.getCreatureType();
+        return creatureType != null && !saddleStack.isEmpty() && saddleStack.getItem() == creatureType.getSaddleItem();
     }
 
 	

@@ -50,13 +50,13 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         this.hitAreaWidthScale = 2F;
 
         // Boss:
-        this.damageMax = BaseCreatureEntity.BOSS_DAMAGE_LIMIT;
-        this.damageLimit = BaseCreatureEntity.BOSS_DAMAGE_LIMIT;
+        this.damageMax = BaseCreatureEntity.getBossDamageLimit();
+        this.damageLimit = BaseCreatureEntity.getBossDamageLimit();
     }
 
     @Override
     protected void registerGoals() {
-        this.targetSelector.addGoal(this.nextFindTargetIndex, new FindNearbyPlayersGoal(this));
+        this.targetSelector.addGoal(this.currentFindTargetGoalIndex(), new FindNearbyPlayersGoal(this));
 
         this.consumptionDuration = 15 * 20;
         this.consumptionWindUp = 3 * 20;
@@ -64,35 +64,35 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         int consumptionGoalCooldown = 20 * 20;
 
         // All Phases:
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new FaceTargetGoal(this));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new HealWhenNoPlayersGoal(this));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new SummonMinionsGoal(this).setMinionInfo("banshee").setAntiFlight(true));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new FireProjectilesGoal(this).setProjectile("spectralbolt").setFireRate(40).setVelocity(1.6F).setScale(8F).setAllPlayers(true).setOverhead(true).setOffset(new Vector3d(0, 6, 0)));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new FireProjectilesGoal(this).setProjectile("spectralbolt").setFireRate(60).setVelocity(1.6F).setScale(8F).setOverhead(true).setOffset(new Vector3d(0, 8, 0)));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new EffectAuraGoal(this).setEffect("decay").setAmplifier(0).setEffectSeconds(5).setRange(52).setCheckSight(false).setTargetTypes(TARGET_TYPES.ENEMY.id));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new FaceTargetGoal(this));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new HealWhenNoPlayersGoal(this));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new SummonMinionsGoal(this).setMinionInfo("banshee").setAntiFlight(true));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new FireProjectilesGoal(this).setProjectile("spectralbolt").setFireRate(40).setVelocity(1.6F).setScale(8F).setAllPlayers(true).setOverhead(true).setOffset(new Vector3d(0, 6, 0)));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new FireProjectilesGoal(this).setProjectile("spectralbolt").setFireRate(60).setVelocity(1.6F).setScale(8F).setOverhead(true).setOffset(new Vector3d(0, 8, 0)));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new EffectAuraGoal(this).setEffect("decay").setAmplifier(0).setEffectSeconds(5).setRange(52).setCheckSight(false).setTargetTypes(TARGET_TYPES.ENEMY.id));
 
         // Phase 1:
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new SummonMinionsGoal(this).setMinionInfo("reaper").setSummonRate(20 * 5).setSummonCap(5).setPerPlayer(true)
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new SummonMinionsGoal(this).setMinionInfo("reaper").setSummonRate(20 * 5).setSummonCap(5).setPerPlayer(true)
                 .setConditions(new GoalConditions().setBattlePhase(0)));
         this.consumptionGoalP0 = new ForceGoal(this).setRange(64F).setCooldown(consumptionGoalCooldown).setDuration(this.consumptionDuration).setWindUp(this.consumptionWindUp).setForce(-1F).setPhase(0).setDismount(true);
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new EffectAuraGoal(this).setRange(1F).setCooldown(consumptionGoalCooldown + this.consumptionWindUp).setDuration(this.consumptionDuration - this.consumptionWindUp).setTickRate(5).setDamageAmount(1000).setCheckSight(false)
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new EffectAuraGoal(this).setRange(1F).setCooldown(consumptionGoalCooldown + this.consumptionWindUp).setDuration(this.consumptionDuration - this.consumptionWindUp).setTickRate(5).setDamageAmount(1000).setCheckSight(false)
                 .setTargetTypes((byte) (TARGET_TYPES.ALLY.id | TARGET_TYPES.ENEMY.id))
                 .setConditions(new GoalConditions().setBattlePhase(0)));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, this.consumptionGoalP0);
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), this.consumptionGoalP0);
 
         // Phase 2:
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new SummonMinionsGoal(this).setMinionInfo("geist").setSummonRate(20 * 5).setSummonCap(5).setPerPlayer(true)
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new SummonMinionsGoal(this).setMinionInfo("geist").setSummonRate(20 * 5).setSummonCap(5).setPerPlayer(true)
                 .setConditions(new GoalConditions().setBattlePhase(1)));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new SummonMinionsGoal(this).setMinionInfo("epion").setSummonRate(20 * 5).setSummonCap(3).setPerPlayer(true)
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new SummonMinionsGoal(this).setMinionInfo("epion").setSummonRate(20 * 5).setSummonCap(3).setPerPlayer(true)
                 .setConditions(new GoalConditions().setBattlePhase(1)));
 
         // Phase 3:
         this.consumptionGoalP2 = new ForceGoal(this).setRange(64F).setCooldown(consumptionGoalCooldown).setDuration(this.consumptionDuration).setWindUp(this.consumptionWindUp).setForce(-1F).setPhase(2).setDismount(true);
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, this.consumptionGoalP2);
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new EffectAuraGoal(this).setRange(1F).setCooldown(consumptionGoalCooldown + this.consumptionWindUp).setDuration(this.consumptionDuration - this.consumptionWindUp).setTickRate(5).setDamageAmount(1000).setCheckSight(false)
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), this.consumptionGoalP2);
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new EffectAuraGoal(this).setRange(1F).setCooldown(consumptionGoalCooldown + this.consumptionWindUp).setDuration(this.consumptionDuration - this.consumptionWindUp).setTickRate(5).setDamageAmount(1000).setCheckSight(false)
                 .setTargetTypes((byte) (TARGET_TYPES.ALLY.id | TARGET_TYPES.ENEMY.id))
                 .setConditions(new GoalConditions().setBattlePhase(2)));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new FireProjectilesGoal(this).setProjectile("lobdarklings").setFireRate(10 * 20).setVelocity(0.8F).setScale(2F).setRandomCount(3).setAngle(360).setPhase(2));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new FireProjectilesGoal(this).setProjectile("lobdarklings").setFireRate(10 * 20).setVelocity(0.8F).setScale(2F).setRandomCount(3).setAngle(360).setPhase(2));
 
         super.registerGoals();
     }
@@ -199,10 +199,10 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         }
 
         if (this.getBattlePhase() == 0) {
-            return this.consumptionGoalP0.cooldownTime <= 0;
+            return this.consumptionGoalP0.isCooledDown();
         }
         if (this.getBattlePhase() == 2) {
-            return this.consumptionGoalP2.cooldownTime <= 0;
+            return this.consumptionGoalP2.isCooledDown();
         }
 
         return super.extraAnimation01();
@@ -213,10 +213,10 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         boolean minionAdded = super.addMinion(minion);
         if (minionAdded && minion instanceof BaseCreatureEntity) {
             BaseCreatureEntity minionCreature = (BaseCreatureEntity) minion;
-            minionCreature.targetSelector.addGoal(minionCreature.nextFindTargetIndex++, new CopyMasterAttackTargetGoal(minionCreature));
+            minionCreature.targetSelector.addGoal(minionCreature.claimFindTargetGoalIndex(), new CopyMasterAttackTargetGoal(minionCreature));
             if (minion instanceof EntityGeist) {
-                minionCreature.goalSelector.addGoal(minionCreature.nextIdleGoalIndex++, new GrowGoal(minionCreature).setGrowthAmount(0.1F).setTickRate(20));
-                minionCreature.goalSelector.addGoal(minionCreature.nextIdleGoalIndex++, new SuicideGoal(minionCreature).setCountdown(20 * 20));
+                minionCreature.goalSelector.addGoal(minionCreature.claimIdleGoalIndex(), new GrowGoal(minionCreature).setGrowthAmount(0.1F).setTickRate(20));
+                minionCreature.goalSelector.addGoal(minionCreature.claimIdleGoalIndex(), new SuicideGoal(minionCreature).setCountdown(20 * 20));
             }
         }
         return minionAdded;
@@ -270,7 +270,7 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         }
         if (entity instanceof Player) {
             Player player = (Player) entity;
-            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
+            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().getConfig().bossAntiFlight()) {
                 return true;
             }
         }

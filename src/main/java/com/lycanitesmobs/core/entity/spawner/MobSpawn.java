@@ -32,14 +32,14 @@ public class MobSpawn {
      * for default values).
      *
      */
-    public CreatureInfo creatureInfo;
+    protected CreatureInfo creatureInfo;
 
     /**
      * The entity class that this Mob Spawn should spawn if not using a MobInfo
      * (for non-Lycanites Mobs entities).
      *
      */
-    public EntityType<? extends LivingEntity> entityType;
+    protected EntityType<? extends LivingEntity> entityType;
 
     /**
      * If set to true, the Forge Can Spawn Event is fired but its result is
@@ -169,7 +169,7 @@ public class MobSpawn {
      * health bar. Default: false.
      *
      */
-    public boolean spawnAsBoss = false;
+    protected boolean spawnAsBoss = false;
 
     /**
      * A list of item drops to add to a mob spawned by this MobSpawn.
@@ -182,23 +182,23 @@ public class MobSpawn {
      * dungeon (how far down/up) for this mob to show up in. Default -1.
      *
      */
-    public int dungeonLevelMin = -1;
+    protected int dungeonLevelMin = -1;
 
     /**
      * For dungeon spawning, if above the min, this is the maximum level of the
      * dungeon (how far down/up) for this mob to show up in. Default -1.
      *
      */
-    public int dungeonLevelMax = -1;
+    protected int dungeonLevelMax = -1;
 
     /**
      * For dungeon spawning, if true, this mob spawn entry is only to be used
      * for boss sectors, if false it is only to be used for spawners.
      *
      */
-    public boolean dungeonBoss = false;
+    protected boolean dungeonBoss = false;
 
-    public String mobId;
+    protected String mobId;
 
     /**
      * Loads this Spawn Condition from the provided JSON data.
@@ -269,6 +269,54 @@ public class MobSpawn {
 
     public MobSpawn(EntityType entityType) {
         this.entityType = entityType;
+    }
+
+    public CreatureInfo getCreatureInfo() {
+        return this.creatureInfo;
+    }
+
+    public boolean hasCreatureInfo() {
+        return this.creatureInfo != null;
+    }
+
+    public boolean hasResolvedEntitySource() {
+        return this.entityType != null || this.mobId != null;
+    }
+
+    public EntityType<? extends LivingEntity> getEntityType() {
+        return this.entityType;
+    }
+
+    public boolean ignoresForgeCanSpawnEvent() {
+        return this.ignoreForgeCanSpawnEvent;
+    }
+
+    public boolean ignoresMobInstanceConditions() {
+        return this.ignoreMobInstanceConditions;
+    }
+
+    public boolean ignoresLightLevel() {
+        return this.ignoreLightLevel;
+    }
+
+    public boolean ignoresGroupLimit() {
+        return this.ignoreGroupLimit;
+    }
+
+    public boolean spawnsAsBoss() {
+        return this.spawnAsBoss;
+    }
+
+    public boolean isDungeonBossEntry() {
+        return this.dungeonBoss;
+    }
+
+    public boolean isAboveDungeonLevel(int levelMax) {
+        return this.dungeonLevelMin >= 0 && this.dungeonLevelMin > levelMax;
+    }
+
+    public boolean isBelowDungeonLevel(int levelMin) {
+        return this.dungeonLevelMax >= 0 && this.dungeonLevelMax < levelMin;
     }
 
     /**
@@ -392,19 +440,19 @@ public class MobSpawn {
                 : (this.entityType != null ? this.entityType.toString() : "unknown");
 
         // Global Check:
-        if (!CreatureManager.getInstance().spawnConfig.isAllowedGlobal(world)) {
+        if (!CreatureManager.getInstance().getSpawnConfig().isAllowedGlobal(world)) {
             return false;
         }
 
         // CreatureInfo Enabled:
         if (this.creatureInfo != null) {
             // Enabled:
-            if (!this.creatureInfo.enabled || !this.creatureInfo.creatureSpawn.enabled) {
+            if (!this.creatureInfo.isEnabled() || !this.creatureInfo.getCreatureSpawn().isEnabled()) {
                 return false;
             }
 
             // Peaceful Difficulty:
-            if (world.getDifficulty() == Difficulty.PEACEFUL && !this.creatureInfo.peaceful) {
+            if (world.getDifficulty() == Difficulty.PEACEFUL && !this.creatureInfo.isPeaceful()) {
                 return false;
             }
         }
@@ -422,12 +470,12 @@ public class MobSpawn {
         // CreatureInfo World:
         if (this.creatureInfo != null) {
             // Minimum World Day:
-            if (this.creatureInfo.creatureSpawn.worldDayMin > 0) {
+            if (this.creatureInfo.getCreatureSpawn().getWorldDayMin() > 0) {
                 ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
                 if (worldExt != null) {
                     int day = (int) Math
-                            .floor((worldExt.useTotalWorldTime ? world.getGameTime() : world.getDayTime()) / 24000D);
-                    if (day < this.creatureInfo.creatureSpawn.worldDayMin) {
+                            .floor(worldExt.getConfiguredDayBaseTime(world) / 24000D);
+                    if (day < this.creatureInfo.getCreatureSpawn().getWorldDayMin()) {
                         return false;
                     }
                 }
@@ -435,13 +483,13 @@ public class MobSpawn {
 
             // Dimension:
             if (!forceIgnoreDimension && !this.ignoreDimension
-                    && !this.creatureInfo.creatureSpawn.isAllowedDimension(world)) {
+                    && !this.creatureInfo.getCreatureSpawn().isAllowedDimension(world)) {
                 return false;
             }
 
             // Biome:
             if (biome != null && this.shouldCheckBiome()) {
-                if (!this.creatureInfo.creatureSpawn.isValidBiome(world, biome)) {
+                if (!this.creatureInfo.getCreatureSpawn().isValidBiome(world, biome)) {
                     return false;
                 }
             }
@@ -489,7 +537,7 @@ public class MobSpawn {
             return this.weight;
         }
         if (this.creatureInfo != null) {
-            return this.creatureInfo.creatureSpawn.spawnWeight;
+            return this.creatureInfo.getCreatureSpawn().getSpawnWeight();
         }
         return 8;
     }
@@ -507,7 +555,7 @@ public class MobSpawn {
             return false;
         }
         if (this.creatureInfo != null) {
-            return this.creatureInfo.creatureSpawn.despawnNatural;
+            return this.creatureInfo.getCreatureSpawn().despawnsNaturally();
         }
         return true;
     }
@@ -525,7 +573,7 @@ public class MobSpawn {
             return true;
         }
         if (this.creatureInfo != null) {
-            return !this.creatureInfo.creatureSpawn.ignoreBiome;
+            return !this.creatureInfo.getCreatureSpawn().ignoresBiome();
         }
         return false;
     }
@@ -597,9 +645,9 @@ public class MobSpawn {
             for (ItemDrop itemDrop : this.mobDrops) {
                 entityCreature.addSavedItemDrop(itemDrop);
             }
-            entityCreature.spawnedAsBoss = this.spawnAsBoss;
+            entityCreature.setSpawnedAsBoss(this.spawnAsBoss);
 
-            entityCreature.firstSpawn = firstSpawn;
+            entityCreature.applySpawnLifecycleState(firstSpawn);
         }
     }
 

@@ -19,15 +19,15 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class BlockStairsCustom extends StairBlock implements BlockTypeGetter {
-    public String blockName = "BlockBase";
-    public ResourceLocation registryName;
+    private String blockName = "BlockBase";
+    private ResourceLocation registryName;
 
     // ==================================================
     //                   Constructor
     // ==================================================
     public BlockStairsCustom(Block.Properties properties, BlockBase block) {
         super(block.defaultBlockState(), properties);
-        this.setRegistryName(LycanitesMobs.MODID, block.blockName + "_stairs");
+        this.setRegistryName(LycanitesMobs.MODID, block.getBlockName() + "_stairs");
     }
 
     public ResourceLocation getRegistryName() {

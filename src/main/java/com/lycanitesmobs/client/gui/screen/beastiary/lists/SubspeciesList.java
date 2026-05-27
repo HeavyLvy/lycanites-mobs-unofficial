@@ -39,7 +39,7 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 		this.replaceEntries(new ArrayList<>());
 
 		if(!this.summoning) {
-			this.creature = this.screen.playerExt.selectedCreature;
+			this.creature = this.screen.playerExt.getSelectedCreature();
 		}
 		else {
 			this.creature = this.screen.playerExt.getSelectedSummonSet().getCreatureInfo();
@@ -49,9 +49,9 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 		}
 
 		int index = 0;
-		for(Subspecies subspecies : this.creature.subspecies.values()) {
-			this.addEntry(new Entry(this, index++, subspecies.index, 0));
-			for (int variantIndex : subspecies.variants.keySet()) {
+		for(Subspecies subspecies : this.creature.getSubspeciesEntries()) {
+			this.addEntry(new Entry(this, index++, subspecies.getIndex(), 0));
+			for (int variantIndex : subspecies.getVariantIndexes()) {
 				if(!this.screen.playerExt.getBeastiary().hasKnowledgeRank(this.creature.getName(), 2)) {
 					continue;
 				}
@@ -59,10 +59,10 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 				if(variant == null) {
 					continue;
 				}
-				if (this.summoning && "rare".equals(variant.rarity)) {
+				if (this.summoning && "rare".equals(variant.getRarity())) {
 					continue;
 				}
-				this.addEntry(new Entry(this, index++, subspecies.index, variant.index));
+				this.addEntry(new Entry(this, index++, subspecies.getIndex(), variant.getIndex()));
 			}
 		}
 	}
@@ -74,13 +74,12 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 			return;
 		}
 		if(!this.summoning) {
-			this.screen.playerExt.selectedSubspecies = ((Entry)entry).subspeciesIndex;
-			this.screen.playerExt.selectedVariant = ((Entry)entry).variantIndex;
+			this.screen.playerExt.selectSubspeciesVariant(((Entry)entry).subspeciesIndex, ((Entry)entry).variantIndex);
 		}
 		else {
 			this.screen.playerExt.getSelectedSummonSet().setSubspecies(((Entry)entry).subspeciesIndex);
 			this.screen.playerExt.getSelectedSummonSet().setVariant(((Entry)entry).variantIndex);
-			this.screen.playerExt.sendSummonSetToServer((byte)this.screen.playerExt.selectedSummonSet);
+			this.screen.playerExt.sendSummonSetToServer((byte)this.screen.playerExt.getSelectedSummonSetId());
 		}
 	}
 
@@ -89,8 +88,7 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 		if(!(this.getEntry(index) instanceof Entry))
 			return false;
 		if(!this.summoning) {
-			return this.screen.playerExt.selectedSubspecies == ((Entry)this.getEntry(index)).subspeciesIndex &&
-					this.screen.playerExt.selectedVariant == ((Entry)this.getEntry(index)).variantIndex;
+			return this.screen.playerExt.isSelectedSubspeciesVariant(((Entry)this.getEntry(index)).subspeciesIndex, ((Entry)this.getEntry(index)).variantIndex);
 		}
 		else {
 			return this.screen.playerExt.getSelectedSummonSet().getSubspecies() == ((Entry)this.getEntry(index)).subspeciesIndex &&
@@ -101,7 +99,7 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 	@Override
 	protected void renderBackground(GuiGraphics stack) {
 		if(!this.summoning) {
-			if(this.creature != this.screen.playerExt.selectedCreature) {
+			if(this.creature != this.screen.playerExt.getSelectedCreature()) {
 				this.refreshList();
 			}
 		}
@@ -132,7 +130,7 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 		public void render(GuiGraphics guiGraphics, int index, int top, int left, int bottom, int right, int mouseX, int mouseY, boolean focus, float partialTicks) {
 			Subspecies subspecies = this.parentList.creature.getSubspecies(this.subspeciesIndex);
 			MutableComponent subspeciesName = Component.literal("");
-			if(subspecies.name != null) {
+			if(subspecies.getName() != null) {
 				subspeciesName = Component.literal(" ").append(subspecies.getTitle());
 			}
 

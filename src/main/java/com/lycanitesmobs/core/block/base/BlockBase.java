@@ -37,36 +37,40 @@ public class BlockBase extends Block implements BlockTypeGetter {
 
     public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
     // Properties:
-    public String blockName = "block_base";
-    public ResourceLocation registryName;
+    protected String blockName = "block_base";
+    private ResourceLocation registryName;
     // Stats:
     /**
      * If set to a value above 0, the block will update on the specified number of ticks.
      **/
-    public int tickRate = 0;
+    protected int tickRate = 0;
     /**
      * If true, this block will be set to air on it's first tick, useful for blocks that despawn over time like fire.
      **/
-    public boolean removeOnTick = false;
+    protected boolean removeOnTick = false;
     /**
      * If true after performing a tick update, another tick update will be scheduled thus creating a loop.
      **/
-    public boolean loopTicks = true;
+    protected boolean loopTicks = true;
     /**
      * Will falling blocks such as sand or gravel destroy this block if they land on it?
      */
-    public boolean canBeCrushed = false;
+    protected boolean canBeCrushed = false;
 
     /**
      * If true, this block cannot be broken or even hit like a solid block.
      **/
-    public boolean noBreakCollision = false;
+    protected boolean noBreakCollision = false;
 
     public BlockBase(Block.Properties properties, String name) {
         super(properties);
         this.blockName = name;
         this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
         blockNames.add(name);
+    }
+
+    public String getBlockName() {
+        return this.blockName;
     }
 
     @Nullable

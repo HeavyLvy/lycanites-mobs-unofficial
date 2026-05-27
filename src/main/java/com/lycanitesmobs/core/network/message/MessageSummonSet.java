@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.pets.SummonSet;
 import net.minecraft.network.FriendlyByteBuf;
@@ -22,9 +22,9 @@ public class MessageSummonSet {
 
     public MessageSummonSet(ExtendedPlayer playerExt, byte summonSetID) {
         this.summonSetID = summonSetID;
-        this.summonType = playerExt.getSummonSet(summonSetID).summonType;
-        this.subpsecies = playerExt.getSummonSet(summonSetID).subspecies;
-        this.variant = playerExt.getSummonSet(summonSetID).variant;
+        this.summonType = playerExt.getSummonSet(summonSetID).getSummonType();
+        this.subpsecies = playerExt.getSummonSet(summonSetID).getSubspecies();
+        this.variant = playerExt.getSummonSet(summonSetID).getVariant();
         this.behaviour = playerExt.getSummonSet(summonSetID).getBehaviourByte();
     }
 
@@ -46,13 +46,7 @@ public class MessageSummonSet {
         }
 
         // Client Side:
-        Player player = ClientManager.getInstance().getClientPlayer();
-        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
-        if (playerExt == null)
-            return;
-
-        SummonSet summonSet = playerExt.getSummonSet(message.summonSetID);
-        summonSet.readFromPacket(message.summonType, message.subpsecies, message.variant, message.behaviour);
+        ctx.get().enqueueWork(() -> LycanitesMobs.PROXY.applySummonSet(message));
     }
 
     /**

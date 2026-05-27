@@ -4,19 +4,20 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.manager.TextureManager;
-import com.lycanitesmobs.client.renderer.item.EquipmentPartRenderer;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import com.lycanitesmobs.core.manager.ElementManager;
 import com.lycanitesmobs.core.item.base.BaseItem;
 import com.lycanitesmobs.core.item.consumable.entity.ChargeItem;
+import com.lycanitesmobs.core.item.equipment.features.DamageEquipmentFeature;
+import com.lycanitesmobs.core.item.equipment.features.EffectEquipmentFeature;
 import com.lycanitesmobs.core.item.equipment.features.EquipmentFeature;
+import com.lycanitesmobs.core.item.equipment.features.HarvestEquipmentFeature;
+import com.lycanitesmobs.core.item.equipment.features.ProjectileEquipmentFeature;
+import com.lycanitesmobs.core.item.equipment.features.SlotEquipmentFeature;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -38,53 +39,53 @@ public class ItemEquipmentPart extends BaseItem {
     /**
      * The base amount of experience needed to level up, this is increased by the part's level scaled.
      **/
-    public static int BASE_LEVELUP_EXPERIENCE = 500;
+    protected static final int BASE_LEVELUP_EXPERIENCE = 500;
 
     /**
      * A map of mob classes and parts that they drop.
      **/
-    public static Map<String, List<ItemEquipmentPart>> MOB_PART_DROPS = new HashMap<>();
+    protected static final Map<String, List<ItemEquipmentPart>> MOB_PART_DROPS = new HashMap<>();
 
     /**
      * A list of all features this part has.
      **/
-    public List<EquipmentFeature> features = new ArrayList<>();
+    protected List<EquipmentFeature> features = new ArrayList<>();
 
     /**
      * The Elements of this part, used to determine what charges can be used to upgrade this part along with other future features.
      **/
-    public List<ElementInfo> elements = new ArrayList<>();
+    protected List<ElementInfo> elements = new ArrayList<>();
 
     /**
      * Name fragments used by {@link EquipmentNameGenerator} when building dynamic equipment names.
      * Loaded from the "equipmentNames" array in the part's JSON config.
      **/
-    public List<String> equipmentNames = new ArrayList<>();
+    protected List<String> equipmentNames = new ArrayList<>();
 
     /**
      * The slot type that this part must fit into. Can be: base, head, blade, axe, pike or jewel.
      **/
-    public String slotType;
+    protected String slotType;
 
     /**
      * The id of the mob that drops this part.
      **/
-    public String dropMobId;
+    protected String dropMobId;
 
     /**
      * The default chance of the part being dropped by a mob.
      **/
-    public float dropChance = 1;
+    protected float dropChance = 1;
 
     /**
      * The minimum random level that this part can be.
      **/
-    public int levelMin = 1;
+    protected int levelMin = 1;
 
     /**
      * The maximum random level that this part can be.
      **/
-    public int levelMax = 3;
+    protected int levelMax = 3;
 
 
     /**
@@ -97,6 +98,131 @@ public class ItemEquipmentPart extends BaseItem {
 
     public static String getPartName(JsonObject json) {
         return "equipmentpart_" + json.get("itemName").getAsString();
+    }
+
+    public static List<ItemEquipmentPart> getMobPartDrops(String mobId) {
+        return MOB_PART_DROPS.containsKey(mobId) ? Collections.unmodifiableList(MOB_PART_DROPS.get(mobId)) : Collections.emptyList();
+    }
+
+    public static boolean hasMobPartDrops(String mobId) {
+        return MOB_PART_DROPS.containsKey(mobId);
+    }
+
+    public List<String> getEquipmentNames() {
+        return Collections.unmodifiableList(this.equipmentNames);
+    }
+
+    public List<EquipmentFeature> getActiveFeaturesByType(ItemStack itemStack, String featureType) {
+        List<EquipmentFeature> activeFeatures = new ArrayList<>();
+        int level = this.getPartLevel(itemStack);
+        for (EquipmentFeature feature : this.features) {
+            if (feature.isActive(itemStack, level) && feature.getFeatureType().equalsIgnoreCase(featureType)) {
+                activeFeatures.add(feature);
+            }
+        }
+        return activeFeatures;
+    }
+
+    public List<String> getActiveSlotTypes(ItemStack itemStack) {
+        List<String> slotTypes = new ArrayList<>();
+        int level = this.getPartLevel(itemStack);
+        for (EquipmentFeature feature : this.features) {
+            if (feature instanceof SlotEquipmentFeature slotFeature && slotFeature.isActive(itemStack, level)) {
+                slotTypes.add(slotFeature.getSlotType());
+            }
+        }
+        return slotTypes;
+    }
+
+    public FeatureStats getActiveFeatureStats(ItemStack itemStack) {
+        int level = this.getPartLevel(itemStack);
+        double totalDamage = 0;
+        double totalCooldown = 0;
+        int damageFeatureCount = 0;
+        double totalSweep = 0;
+        double totalKnockback = 0;
+        double totalRange = 0;
+        float pickaxeSpeed = 0;
+        float axeSpeed = 0;
+        float shovelSpeed = 0;
+        int pickaxeLevel = -1;
+        int axeLevel = -1;
+        int shovelLevel = -1;
+        Set<String> harvestTypes = new HashSet<>();
+        float totalHarvestSpeed = 0;
+        double projectileScore = 0;
+        int effectCount = 0;
+
+        for (EquipmentFeature feature : this.features) {
+            if (!feature.isActive(itemStack, level)) {
+                continue;
+            }
+            if (feature instanceof DamageEquipmentFeature damageFeature) {
+                totalDamage += damageFeature.getDamageAmount();
+                totalCooldown += damageFeature.getDamageCooldown();
+                damageFeatureCount++;
+                totalSweep += damageFeature.getDamageSweep();
+                totalKnockback += damageFeature.getDamageKnockback();
+                totalRange += damageFeature.getDamageRange();
+            } else if (feature instanceof HarvestEquipmentFeature harvestFeature) {
+                String harvestType = harvestFeature.getHarvestType().toLowerCase();
+                harvestTypes.add(harvestType);
+                totalHarvestSpeed += harvestFeature.getHarvestSpeed();
+                switch (harvestType) {
+                    case "pickaxe" -> {
+                        pickaxeSpeed += harvestFeature.getHarvestSpeed();
+                        pickaxeLevel = Math.max(pickaxeLevel, harvestFeature.getHarvestLevel());
+                    }
+                    case "axe" -> {
+                        axeSpeed += harvestFeature.getHarvestSpeed();
+                        axeLevel = Math.max(axeLevel, harvestFeature.getHarvestLevel());
+                    }
+                    case "shovel" -> {
+                        shovelSpeed += harvestFeature.getHarvestSpeed();
+                        shovelLevel = Math.max(shovelLevel, harvestFeature.getHarvestLevel());
+                    }
+                }
+            } else if (feature instanceof ProjectileEquipmentFeature projectileFeature) {
+                double cooldown = Math.max(projectileFeature.getCooldown(), 1);
+                projectileScore += (projectileFeature.getBonusDamage() + 1.0) * projectileFeature.getCount() / cooldown * 20.0;
+            } else if (feature instanceof EffectEquipmentFeature) {
+                effectCount++;
+            }
+        }
+
+        return new FeatureStats(
+                totalDamage,
+                totalCooldown,
+                damageFeatureCount,
+                totalSweep,
+                totalKnockback,
+                totalRange,
+                pickaxeSpeed,
+                axeSpeed,
+                shovelSpeed,
+                pickaxeLevel,
+                axeLevel,
+                shovelLevel,
+                Set.copyOf(harvestTypes),
+                totalHarvestSpeed,
+                projectileScore,
+                effectCount);
+    }
+
+    public String getSlotType() {
+        return this.slotType;
+    }
+
+    public float getDropChance() {
+        return this.dropChance;
+    }
+
+    public int getLevelMax() {
+        return this.levelMax;
+    }
+
+    public boolean isAtMaxLevel(ItemStack itemStack) {
+        return this.getPartLevel(itemStack) >= this.levelMax;
     }
 
     /**
@@ -151,13 +277,11 @@ public class ItemEquipmentPart extends BaseItem {
             while (jsonIterator.hasNext()) {
                 JsonObject featureJson = jsonIterator.next().getAsJsonObject();
                 if (!this.addFeature(EquipmentFeature.createFromJSON(featureJson))) {
-                    LMHelperClass.logWarning("", "[Equipment] The feature " + featureJson.toString() + " was unable to be added, check the JSON format.");
+                    LMHelperClass.logWarningMessage("[Equipment] The feature " + featureJson.toString() + " was unable to be added, check the JSON format.");
                 }
             }
         }
         this.sortFeatures();
-
-        TextureManager.addTexture(this.itemName, "textures/equipment/" + this.itemName + ".png");
     }
 
     @Override
@@ -171,7 +295,7 @@ public class ItemEquipmentPart extends BaseItem {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-        if (!Screen.hasShiftDown()) {
+        if (!LycanitesMobs.PROXY.isShiftKeyDown()) {
             tooltip.add(Component.translatable("item.lycanitesmobs.equipment.shiftinfo").withStyle(ChatFormatting.GREEN));
             return;
         }
@@ -242,13 +366,7 @@ public class ItemEquipmentPart extends BaseItem {
 
     @Override
     public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(new IClientItemExtensions() {
-
-            @Override
-            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return new EquipmentPartRenderer();
-            }
-        });
+        consumer.accept(LycanitesMobs.PROXY.createEquipmentPartItemExtensions());
     }
 
     /**
@@ -269,11 +387,11 @@ public class ItemEquipmentPart extends BaseItem {
      **/
     public boolean addFeature(EquipmentFeature feature) {
         if (feature == null) {
-            LMHelperClass.logWarning("", "[Equipment] Unable to add a null feature to " + this);
+            LMHelperClass.logWarningMessage("[Equipment] Unable to add a null feature to " + this);
             return false;
         }
-        if (feature.featureType == null) {
-            LMHelperClass.logWarning("", "[Equipment] Feature type not set for part " + this);
+        if (feature.getFeatureType() == null) {
+            LMHelperClass.logWarningMessage("[Equipment] Feature type not set for part " + this);
             return false;
         }
         this.features.add(feature);
@@ -284,7 +402,7 @@ public class ItemEquipmentPart extends BaseItem {
      * Cycles through all features and organises them.
      **/
     public void sortFeatures() {
-        Comparator<EquipmentFeature> comparator = (o1, o2) -> o1.featureType.compareToIgnoreCase(o2.featureType);
+        Comparator<EquipmentFeature> comparator = (o1, o2) -> o1.getFeatureType().compareToIgnoreCase(o2.getFeatureType());
         this.features.sort(comparator);
     }
 
@@ -553,5 +671,24 @@ public class ItemEquipmentPart extends BaseItem {
             elementNames.append(element.getTitle());
         }
         return elementNames;
+    }
+
+    public record FeatureStats(
+            double totalDamage,
+            double totalCooldown,
+            int damageFeatureCount,
+            double totalSweep,
+            double totalKnockback,
+            double totalRange,
+            float pickaxeSpeed,
+            float axeSpeed,
+            float shovelSpeed,
+            int pickaxeLevel,
+            int axeLevel,
+            int shovelLevel,
+            Set<String> harvestTypes,
+            float totalHarvestSpeed,
+            double projectileScore,
+            int effectCount) {
     }
 }

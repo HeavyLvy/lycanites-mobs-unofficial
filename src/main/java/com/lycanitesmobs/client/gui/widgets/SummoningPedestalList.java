@@ -56,7 +56,7 @@ public class SummoningPedestalList extends BaseList<SummoningPedestalScreen> {
 			int levelBarHeight = 9;
 			int levelBarX = left + 20;
 			int levelBarY = top - levelBarHeight - 6;
-			int level = creatureInfo.summonCost;
+			int level = creatureInfo.getSummonCost();
 			if(level <= 10) {
 				this.parentGUI.screen.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetLevel"), levelBarX, levelBarY, 0, levelBarWidth, levelBarHeight, level, 10);
 			}

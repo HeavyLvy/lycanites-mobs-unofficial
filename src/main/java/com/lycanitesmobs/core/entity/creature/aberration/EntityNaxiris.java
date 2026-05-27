@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.data.info.ObjectLists;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EntityNaxiris extends RideableCreatureEntity {
-    public boolean griefing = true;
+    protected boolean griefing = true;
 
     // ==================================================
     //                    Constructor
@@ -42,7 +43,7 @@ public class EntityNaxiris extends RideableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.25D).setRange(40.0F).setMinChaseDistance(10.0F).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.25D).setRange(40.0F).setMinChaseDistance(10.0F).setLongMemory(false));
     }
 
     @Override
@@ -125,7 +126,7 @@ public class EntityNaxiris extends RideableCreatureEntity {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
 
@@ -195,7 +196,7 @@ public class EntityNaxiris extends RideableCreatureEntity {
             ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile("arcanelaserstorm");
             if (projectileInfo != null) {
                 BaseProjectileEntity projectile = projectileInfo.createProjectile(this.getCommandSenderWorld(), player);
-                this.getCommandSenderWorld().addFreshEntity(projectile);
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
                 this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
                 this.triggerAttackCooldown();
             }

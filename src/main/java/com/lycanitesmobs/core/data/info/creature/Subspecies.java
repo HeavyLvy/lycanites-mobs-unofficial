@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.data.info.Variant;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
-import com.lycanitesmobs.core.manager.ElementManager;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
 import com.lycanitesmobs.core.entity.spawner.condition.SpawnCondition;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -23,43 +22,47 @@ public class Subspecies {
     /**
      * A map of creature variants available to this subspecies.
      **/
-    public Map<Integer, Variant> variants = new HashMap<>();
+    protected Map<Integer, Variant> variants = new HashMap<>();
 
     /**
      * The index of this subspecies in creature info. Set by creature info when added. Should never be 0 as that is used by the default and will result in this subspecies being ignored.
      **/
-    public int index;
+    protected int index;
 
     /**
      * Higher priority Subspecies will always spawn in place of lower priority ones if they can spawn (conditions are met) regardless of weight. Only increase this above 0 if a subspecies has conditions otherwise they will stop standard/base Subspecies from showing up.
      **/
-    public int priority = 0;
+    protected int priority = 0;
 
     /**
      * The name of this subspecies. Null for the default normal subspecies.
      **/
-    public String name;
+    protected String name;
 
     /**
-     * The class name of the model this subspecies should use, loaded client side only. If null, the default Creature model is used instead.
+     * The model class this subspecies should use, loaded client side only. If null, the default Creature model is used instead.
      **/
     @Nullable
-    public String modelClassName;
+    protected String modelClassName;
 
     /**
      * The Elements of this subspecies, affects buffs and debuffs amongst other things.
      **/
-    public List<ElementInfo> elements = new ArrayList<>();
+    protected List<ElementInfo> elements = new ArrayList<>();
+    /**
+     * Parsed element names. Resolved into elements by CreatureInfoReferenceLinker.
+     **/
+    protected List<String> elementNames = new ArrayList<>();
 
     /**
      * A list of Spawn Conditions required for this subspecies to spawn.
      **/
-    public List<SpawnCondition> spawnConditions = new ArrayList<>();
+    protected List<SpawnCondition> spawnConditions = new ArrayList<>();
 
     /**
      * The offset relative to this subspecies width and height that riding entities should be offset by.
      **/
-    public Vector3d mountOffset = new Vector3d(0.0D, 1.0D, 0.0D);
+    protected Vector3d mountOffset = new Vector3d(0.0D, 1.0D, 0.0D);
 
 
     public static Subspecies createFromJSON(CreatureInfo creatureInfo, JsonObject json) {
@@ -78,12 +81,11 @@ public class Subspecies {
                 JsonObject jsonObject = jsonElement.getAsJsonObject();
                 Variant variant = Variant.createFromJSON(creatureInfo, jsonObject);
                 if (variant != null) {
-                    subspecies.variants.put(variant.index, variant);
+                    subspecies.variants.put(variant.getIndex(), variant);
                 }
             }
         }
 
-        // Model Class:
         if (json.has("modelClass")) {
             subspecies.modelClassName = json.get("modelClass").getAsString();
         }
@@ -101,15 +103,7 @@ public class Subspecies {
         if (json.has("elements")) {
             elementNames = JSONHelper.getJsonStrings(json.get("elements").getAsJsonArray());
         }
-        subspecies.elements.clear();
-        for (String elementName : elementNames) {
-            ElementInfo element = ElementManager.getInstance().getElement(elementName);
-            if (element == null) {
-                LMHelperClass.logWarningMessage("[Creature] Skipping unknown element '" + elementName + "' for subspecies '" + subspecies.name + "'. If you have updated the mod, clear your creature configs.");
-                continue;
-            }
-            subspecies.elements.add(element);
-        }
+        subspecies.elementNames = elementNames;
 
         // Conditions:
         if (json.has("conditions")) {
@@ -142,15 +136,28 @@ public class Subspecies {
 
 
     /**
-     * Loads this subspecies, used for adding new sounds, etc. Can only be done during startup.
+     * Compatibility no-op. Subspecies sound registration is now owned by CreatureBootstrapHelper.
      */
     public void load(CreatureInfo creatureInfo) {
-        if (this.name != null && !creatureInfo.loadedSubspeciesSkins.contains(this.name)) {
-            creatureInfo.addSounds("." + this.name);
-            creatureInfo.loadedSubspeciesSkins.add(this.name);
-        }
     }
 
+    public int getIndex() {
+        return this.index;
+    }
+
+    public int getPriority() {
+        return this.priority;
+    }
+
+    @Nullable
+    public String getName() {
+        return this.name;
+    }
+
+    @Nullable
+    public Vector3d getMountOffset() {
+        return this.mountOffset;
+    }
 
     /**
      * Gets the display name of this Subspecies.
@@ -162,6 +169,48 @@ public class Subspecies {
             return Component.translatable("subspecies." + this.name);
         }
         return Component.literal("");
+    }
+
+    /**
+     * Returns the client model class name parsed for this subspecies.
+     *
+     * @return The model class name or null when using the creature's base model.
+     */
+    @Nullable
+    public String getModelClassName() {
+        return this.modelClassName;
+    }
+
+    /**
+     * Returns the variant indexes available to this subspecies.
+     *
+     * @return The variant indexes.
+     */
+    public Set<Integer> getVariantIndexes() {
+        return Collections.unmodifiableSet(this.variants.keySet());
+    }
+
+    /**
+     * Returns the linked elements for this subspecies.
+     *
+     * @return The linked elements.
+     */
+    public List<ElementInfo> getElements() {
+        return Collections.unmodifiableList(this.elements);
+    }
+
+    public void setLinkedElements(Collection<ElementInfo> elements) {
+        this.elements.clear();
+        this.elements.addAll(elements);
+    }
+
+    /**
+     * Returns parsed element names before or after reference linking.
+     *
+     * @return The parsed element names.
+     */
+    public List<String> getElementNames() {
+        return Collections.unmodifiableList(this.elementNames);
     }
 
 
@@ -205,13 +254,13 @@ public class Subspecies {
         LMHelperClass.logDebug("Subspecies", "Variants Available: " + this.variants.size());
 
         // Get Weights:
-        int baseSpeciesWeightScaled = Variant.BASE_WEIGHT;
+        int baseSpeciesWeightScaled = Variant.getBaseWeight();
         if (rare) {
             baseSpeciesWeightScaled = Math.round((float) baseSpeciesWeightScaled / 4);
         }
         int totalWeight = baseSpeciesWeightScaled;
         for (Variant variant : this.variants.values()) {
-            totalWeight += variant.weight;
+            totalWeight += variant.getWeight();
         }
         LMHelperClass.logDebug("Subspecies", "Total Weight: " + totalWeight);
 
@@ -226,14 +275,14 @@ public class Subspecies {
         // Get Random Subspecies:
         int checkWeight = baseSpeciesWeightScaled;
         for (Variant variant : this.variants.values()) {
-            checkWeight += variant.weight;
+            checkWeight += variant.getWeight();
             if (roll <= checkWeight) {
                 LMHelperClass.logDebug("Subspecies", "Variant selected: " + variant.toString());
                 return variant;
             }
         }
 
-        LMHelperClass.logWarning("", "The roll was higher than the Total Weight, this shouldn't happen.");
+        LMHelperClass.logWarningMessage("The roll was higher than the Total Weight, this shouldn't happen.");
         return null;
     }
 
@@ -260,13 +309,13 @@ public class Subspecies {
      * @return The varaint the child should have, null for base variant.
      */
     public Variant getChildVariant(LivingEntity entity, @Nullable Variant hostVariant, @Nullable Variant partnerVariant) {
-        int hostVariantIndex = (hostVariant != null ? hostVariant.index : 0);
-        int partnerVariantIndex = (partnerVariant != null ? partnerVariant.index : 0);
+        int hostVariantIndex = (hostVariant != null ? hostVariant.getIndex() : 0);
+        int partnerVariantIndex = (partnerVariant != null ? partnerVariant.getIndex() : 0);
         if (hostVariant == partnerVariant)
             return hostVariant;
 
-        int hostWeight = (hostVariant != null ? hostVariant.weight : Variant.BASE_WEIGHT);
-        int partnerWeight = (partnerVariant != null ? partnerVariant.weight : Variant.BASE_WEIGHT);
+        int hostWeight = (hostVariant != null ? hostVariant.getWeight() : Variant.getBaseWeight());
+        int partnerWeight = (partnerVariant != null ? partnerVariant.getWeight() : Variant.getBaseWeight());
         int roll = entity.getRandom().nextInt(hostWeight + partnerWeight);
         if (roll > hostWeight)
             return partnerVariant;

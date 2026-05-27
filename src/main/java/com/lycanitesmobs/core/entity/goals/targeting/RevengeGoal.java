@@ -77,9 +77,9 @@ public class RevengeGoal extends FindAttackTargetGoal {
 		}
 
     	// Group Check:
-		boolean shouldRevenge = this.host.creatureInfo.getGroups().isEmpty();
+		boolean shouldRevenge = this.host.getCreatureInfo().getGroups().isEmpty();
 		boolean shouldPackHunt = false;
-		for(CreatureGroup group : this.host.creatureInfo.getGroups()) {
+		for(CreatureGroup group : this.host.getCreatureInfo().getGroups()) {
 			if (group.shouldRevenge(this.target)) {
 				shouldRevenge = true;
 			}

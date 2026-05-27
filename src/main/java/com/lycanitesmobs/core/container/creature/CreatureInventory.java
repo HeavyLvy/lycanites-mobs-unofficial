@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.container.creature;
 
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
+import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -23,36 +24,36 @@ import java.util.Map;
 public class CreatureInventory implements Container {
 
     // Basic Armor Values: (Copied values from EntityHorse)
-    public static final Map<String, Integer> armorValues = new HashMap<>();
+    private static final Map<String, Integer> ARMOR_VALUES = new HashMap<>();
     static {
-		armorValues.put("Leather", 5);
-		armorValues.put("Iron", 10);
-		armorValues.put("Gold", 15);
-		armorValues.put("Chain", 17);
-		armorValues.put("Diamond", 20);
+		ARMOR_VALUES.put("Leather", 5);
+		ARMOR_VALUES.put("Iron", 10);
+		ARMOR_VALUES.put("Gold", 15);
+		ARMOR_VALUES.put("Chain", 17);
+		ARMOR_VALUES.put("Diamond", 20);
     }
 
     // Equipment Types:
-    public static final List<String> equipmentTypes = new ArrayList<>();
+    private static final List<String> EQUIPMENT_TYPES = new ArrayList<>();
     static {
-        equipmentTypes.add("head");
-        equipmentTypes.add("chest");
-        equipmentTypes.add("legs");
-        equipmentTypes.add("feet");
-        equipmentTypes.add("saddle");
-        equipmentTypes.add("bag");
+        EQUIPMENT_TYPES.add("head");
+        EQUIPMENT_TYPES.add("chest");
+        EQUIPMENT_TYPES.add("legs");
+        EQUIPMENT_TYPES.add("feet");
+        EQUIPMENT_TYPES.add("saddle");
+        EQUIPMENT_TYPES.add("bag");
     }
 	
 	// Properties:
-	public BaseCreatureEntity creature;
-	public String inventoryName;
+	protected final BaseCreatureEntity creature;
+	protected final String inventoryName;
 	protected NonNullList<ItemStack> inventoryContents;
     protected boolean basicArmor = true;
     protected int nextEquipmentSlot = 0;
 
     // Equipment Slots:
-    public Map<String, Integer> equipmentTypeToSlot = new HashMap<>();
-    public Map<Integer, String> equipmentSlotToType = new HashMap<>();
+    protected final Map<String, Integer> equipmentTypeToSlot = new HashMap<>();
+    protected final Map<Integer, String> equipmentSlotToType = new HashMap<>();
 
     // ==================================================
     //                    Data Parameters
@@ -73,7 +74,7 @@ public class CreatureInventory implements Container {
 
     /** Registers parameters to the provided datamanager. **/
     public static void registerData(SynchedEntityData dataManager) {
-        for(String equipmentType : equipmentTypes)
+        for(String equipmentType : EQUIPMENT_TYPES)
             dataManager.define(getEquipmentDataParameter(equipmentType), ItemStack.EMPTY);
     }
 
@@ -103,6 +104,10 @@ public class CreatureInventory implements Container {
     public String getName() {
         return this.inventoryName + Component.translatable("entity.level").getString() + " " + this.creature.getMobLevel();
     }
+
+	public BaseCreatureEntity getCreature() {
+		return this.creature;
+	}
 
     public MutableComponent getDisplayName() {
         return Component.translatable(this.getName());
@@ -388,6 +393,10 @@ public class CreatureInventory implements Container {
 		else
 			return null;
 	}
+
+	public boolean isEquipmentSlot(int slotID) {
+		return this.getTypeFromSlot(slotID) != null;
+	}
 	
 	// ========== Get Equipment ==========
 	public ItemStack getEquipmentStack(String type) {
@@ -447,7 +456,8 @@ public class CreatureInventory implements Container {
 		}
 		
 		// Saddle:
-		if(this.creature instanceof RideableCreatureEntity && itemStack.getItem() == this.creature.creatureInfo.creatureType.getSaddleItem()) {
+		CreatureType creatureType = this.creature.getCreatureType();
+		if(this.creature instanceof RideableCreatureEntity && creatureType != null && itemStack.getItem() == creatureType.getSaddleItem()) {
 			return "saddle";
 		}
 		
@@ -503,8 +513,8 @@ public class CreatureInventory implements Container {
         	if(armorStack != null) {
             	if(armorStack.getItem() instanceof ArmorItem)
 	                totalArmor += ((ArmorItem)armorStack.getItem()).getDefense();
-            	else if(this.getEquipmentGrade(armorSlot) != null && this.armorValues.containsKey(this.getEquipmentGrade(armorSlot)))
-            		totalArmor += this.armorValues.get(this.getEquipmentGrade(armorSlot));
+            	else if(this.getEquipmentGrade(armorSlot) != null && ARMOR_VALUES.containsKey(this.getEquipmentGrade(armorSlot)))
+            		totalArmor += ARMOR_VALUES.get(this.getEquipmentGrade(armorSlot));
         	}
         }
         return totalArmor;

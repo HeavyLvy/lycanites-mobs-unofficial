@@ -35,10 +35,10 @@ public class MobEventsCommand {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
-		MobEventManager.getInstance().mobEventsEnabled = true;
+		MobEventManager.getInstance().setMobEventsEnabled(true);
 		ConfigMobEvent.INSTANCE.mobEventsEnabled.set(true);
 		ConfigMobEvent.INSTANCE.mobEventsEnabled.save();
-		MobEventManager.getInstance().mobEventsRandom = true;
+		MobEventManager.getInstance().setRandomMobEventsEnabled(true);
 		ConfigMobEvent.INSTANCE.mobEventsRandom.set(true);
 		ConfigMobEvent.INSTANCE.mobEventsRandom.save();
 		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevents.enable"), true);
@@ -49,7 +49,7 @@ public class MobEventsCommand {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
-		MobEventManager.getInstance().mobEventsRandom = false;
+		MobEventManager.getInstance().setRandomMobEventsEnabled(false);
 		ConfigMobEvent.INSTANCE.mobEventsRandom.set(false);
 		ConfigMobEvent.INSTANCE.mobEventsRandom.save();
 		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevents.disable"), true);
@@ -60,7 +60,7 @@ public class MobEventsCommand {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
-		MobEventPlayerServer.testOnCreative = true;
+		MobEventPlayerServer.setTestOnCreative(true);
 		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevents.creative.enable"), true);
 		return 0;
 	}
@@ -69,7 +69,7 @@ public class MobEventsCommand {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
-		MobEventPlayerServer.testOnCreative = false;
+		MobEventPlayerServer.setTestOnCreative(false);
 		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevents.creative.disable"), true);
 		return 0;
 	}
@@ -79,8 +79,8 @@ public class MobEventsCommand {
 			return 0;
 		}
 		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevents.list"), true);
-		for(MobEvent mobEvent : MobEventManager.getInstance().mobEvents.values()) {
-			String eventName = mobEvent.name + " (" + mobEvent.getTitle().getString() + ")";
+		for(MobEvent mobEvent : MobEventManager.getInstance().getMobEvents()) {
+			String eventName = mobEvent.getName() + " (" + mobEvent.getTitle().getString() + ")";
 			context.getSource().sendSuccess(() -> Component.literal(eventName), true);
 		}
 		return 0;

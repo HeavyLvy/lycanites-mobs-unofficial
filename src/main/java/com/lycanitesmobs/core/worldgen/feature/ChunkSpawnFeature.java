@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.worldgen.feature;
 
-import com.lycanitesmobs.core.event.SpawnerEventListener;
+import com.lycanitesmobs.core.entity.spawner.SpawnerTriggerDispatcher;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
@@ -22,7 +22,7 @@ public class ChunkSpawnFeature extends Feature<NoneFeatureConfiguration> {
         if (level instanceof WorldGenRegion region) {
             BlockPos origin = context.origin();
             ChunkPos chunkPos = new ChunkPos(origin);
-            SpawnerEventListener.getInstance().onChunkGenerate(
+            SpawnerTriggerDispatcher.getInstance().onChunkGenerate(
                     region.getLevel().dimension().location().toString(),
                     chunkPos
             );

@@ -33,17 +33,17 @@ public class EntityApollyon extends TameableCreatureEntity implements Enemy {
     protected void registerGoals() {
         super.registerGoals();
 
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new FaceTargetGoal(this));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex, new ChaseGoal(this).setMinDistance(16F).setMaxDistance(64F).setSpeed(1));
-//        this.goalSelector.addGoal(this.nextCombatGoalIndex, new BuildAroundTargetGoal(this).setBlock(ObjectManager.getBlock("doomfire")).setTickRate(40).setRange(3).setEnclose(true).setTargetBit(TARGET_BITS.ATTACK));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(1.0D).setRange(32.0F).setMinChaseDistance(16.0F).setChaseTime(-1));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex, new EffectAuraGoal(this).setEffect(MobEffects.DAMAGE_BOOST).setAmplifier(2).setEffectSeconds(2).setRange(32).setCheckSight(false)
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new FaceTargetGoal(this));
+        this.goalSelector.addGoal(this.currentCombatGoalIndex(), new ChaseGoal(this).setMinDistance(16F).setMaxDistance(64F).setSpeed(1));
+//        this.goalSelector.addGoal(this.currentCombatGoalIndex(), new BuildAroundTargetGoal(this).setBlock(ObjectManager.getBlock("doomfire")).setTickRate(40).setRange(3).setEnclose(true).setTargetBit(TARGET_BITS.ATTACK));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(1.0D).setRange(32.0F).setMinChaseDistance(16.0F).setChaseTime(-1));
+        this.goalSelector.addGoal(this.currentCombatGoalIndex(), new EffectAuraGoal(this).setEffect(MobEffects.DAMAGE_BOOST).setAmplifier(2).setEffectSeconds(2).setRange(32).setCheckSight(false)
                 .setTargetTypes(TARGET_TYPES.ALLY.id).setTargetCreatureType("demon"));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex, new EffectAuraGoal(this).setEffect(MobEffects.MOVEMENT_SPEED).setAmplifier(2).setEffectSeconds(2).setRange(32).setCheckSight(false)
+        this.goalSelector.addGoal(this.currentCombatGoalIndex(), new EffectAuraGoal(this).setEffect(MobEffects.MOVEMENT_SPEED).setAmplifier(2).setEffectSeconds(2).setRange(32).setCheckSight(false)
                 .setTargetTypes(TARGET_TYPES.ALLY.id).setTargetCreatureType("demon"));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex, new EffectAuraGoal(this).setEffect(MobEffects.DAMAGE_RESISTANCE).setAmplifier(2).setEffectSeconds(2).setRange(32).setCheckSight(false)
+        this.goalSelector.addGoal(this.currentCombatGoalIndex(), new EffectAuraGoal(this).setEffect(MobEffects.DAMAGE_RESISTANCE).setAmplifier(2).setEffectSeconds(2).setRange(32).setCheckSight(false)
                 .setTargetTypes(TARGET_TYPES.ALLY.id).setTargetCreatureType("demon"));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex, new SummonMinionsGoal(this).setMinionInfo("belphegor").setSummonCap(2)
+        this.goalSelector.addGoal(this.currentCombatGoalIndex(), new SummonMinionsGoal(this).setMinionInfo("belphegor").setSummonCap(2)
                 .setConditions(new GoalConditions().setRareVariantOnly(true)));
     }
 
@@ -76,7 +76,7 @@ public class EntityApollyon extends TameableCreatureEntity implements Enemy {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
 
     public boolean petControlsEnabled() { return true; }
 }

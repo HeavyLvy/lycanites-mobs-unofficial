@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class CapabilityProviderPlayer implements ICapabilityProvider, ICapabilitySerializable<CompoundTag> {
-	public static Capability<ExtendedPlayer> EXTENDED_PLAYER = CapabilityManager.get(new CapabilityToken<ExtendedPlayer>() {});
+	public static final Capability<ExtendedPlayer> EXTENDED_PLAYER = CapabilityManager.get(new CapabilityToken<ExtendedPlayer>() {});
 
 	private ExtendedPlayer instance = null;
 	private final LazyOptional<ExtendedPlayer> optional= LazyOptional.of(this::createInstance);;

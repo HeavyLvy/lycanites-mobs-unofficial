@@ -20,27 +20,27 @@ public class SpawnLocation {
     /**
      * The minimum xyz distances in blocks from the central spawn position to spawn from. Required.
      **/
-    public Vec3i rangeMin = new Vec3i(0, 0, 0);
+    protected Vec3i rangeMin = new Vec3i(0, 0, 0);
 
     /**
      * The maximum xyz distances in blocks from the central spawn position to spawn from. Required.
      **/
-    public Vec3i rangeMax = new Vec3i(0, 0, 0);
+    protected Vec3i rangeMax = new Vec3i(0, 0, 0);
 
     /**
      * The minimum allowed y height.
      **/
-    public int yMin = -1;
+    protected int yMin = -1;
 
     /**
      * The maximum allowed y height.
      **/
-    public int yMax = -1;
+    protected int yMax = -1;
 
     /**
      * Determines the order that the returned positions should be in. Can be: difficulty, random, near or far (from the trigger position).
      **/
-    public String sorting = "difficulty";
+    protected String sorting = "difficulty";
 
 
     /**
@@ -146,5 +146,18 @@ public class SpawnLocation {
             Collections.sort(spawnPositions, new CoordSorterFurthest(triggerPos));
         }
         return spawnPositions;
+    }
+
+    /**
+     * Returns true when the X/Z column is already available for safe spawn probing.
+     * Spawn locations run from tick/worldgen-adjacent paths, so they must not force
+     * synchronous chunk work while sampling candidates near a loaded boundary.
+     */
+    protected boolean isColumnLoaded(Level world, int x, int z) {
+        return world != null && world.getChunkSource().hasChunk(x >> 4, z >> 4);
+    }
+
+    protected boolean isBlockLoaded(Level world, BlockPos blockPos) {
+        return blockPos != null && this.isColumnLoaded(world, blockPos.getX(), blockPos.getZ());
     }
 }

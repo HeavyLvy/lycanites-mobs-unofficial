@@ -1,4 +1,4 @@
-package com.lycanitesmobs.core.util.helpers;
+package com.lycanitesmobs.client.util.helpers;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;

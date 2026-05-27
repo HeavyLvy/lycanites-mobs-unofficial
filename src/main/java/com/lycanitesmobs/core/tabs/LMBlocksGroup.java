@@ -18,8 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.lycanitesmobs.core.manager.ObjectManager.blockItems;
-
 public class LMBlocksGroup {
     public static final List<String> blockNames = new ArrayList<>();
     public CreativeModeTab.Builder builder = CreativeModeTab.builder();
@@ -36,7 +34,7 @@ public class LMBlocksGroup {
 
                     List<String> remaining = new ArrayList<>();
 
-                    for (Map.Entry<String, Lazy<? extends BlockItem>> entry : blockItems.entrySet()) {
+                    for (Map.Entry<String, Lazy<? extends BlockItem>> entry : ObjectManager.getBlockItemEntries()) {
                         String name = entry.getKey();
                         if (ObjectManager.getBlock(name) != null) {
                             remaining.add(name);

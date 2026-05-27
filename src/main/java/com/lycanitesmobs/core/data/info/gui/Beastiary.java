@@ -18,13 +18,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class Beastiary {
-    public ExtendedPlayer extendedPlayer;
-    public Map<String, CreatureKnowledge> creatureKnowledgeList = new HashMap<>();
+    protected ExtendedPlayer extendedPlayer;
+    protected Map<String, CreatureKnowledge> creatureKnowledgeList = new HashMap<>();
 
     /**
      * Constructor
@@ -40,6 +43,34 @@ public class Beastiary {
     //                     Knowledge
     // ==================================================
 
+    public ExtendedPlayer getExtendedPlayer() {
+        return this.extendedPlayer;
+    }
+
+    public boolean hasCreatureKnowledge() {
+        return !this.creatureKnowledgeList.isEmpty();
+    }
+
+    public int getCreatureKnowledgeCount() {
+        return this.creatureKnowledgeList.size();
+    }
+
+    public Set<String> getCreatureKnowledgeNames() {
+        return Collections.unmodifiableSet(this.creatureKnowledgeList.keySet());
+    }
+
+    public Collection<CreatureKnowledge> getCreatureKnowledgeValues() {
+        return Collections.unmodifiableCollection(this.creatureKnowledgeList.values());
+    }
+
+    public void clearCreatureKnowledge() {
+        this.creatureKnowledgeList.clear();
+    }
+
+    public void putCreatureKnowledge(CreatureKnowledge creatureKnowledge) {
+        this.creatureKnowledgeList.put(creatureKnowledge.getCreatureName(), creatureKnowledge);
+    }
+
     /**
      * Adds Creature Knowledge to this Beastiary after checking rank, etc.
      *
@@ -48,26 +79,25 @@ public class Beastiary {
      * @return True if new knowledge is added and false if not.
      */
     public boolean addCreatureKnowledge(CreatureKnowledge newKnowledge, boolean sendToClient) {
-        CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(newKnowledge.creatureName);
+        CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(newKnowledge.getCreatureName());
         if (creatureInfo == null)
             return false;
-        if (creatureInfo.dummy)
+        if (creatureInfo.isDummy())
             return false;
 
         CreatureKnowledge currentKnowledge = this.getCreatureKnowledge(creatureInfo.getName());
         if (currentKnowledge != null) {
-            currentKnowledge.rank = newKnowledge.rank;
-            currentKnowledge.experience = newKnowledge.experience;
+            currentKnowledge.setProgress(newKnowledge.getRank(), newKnowledge.getExperience());
             if (sendToClient) {
                 this.sendToClient(currentKnowledge);
             }
             return true;
         }
 
-        this.creatureKnowledgeList.put(newKnowledge.creatureName, newKnowledge);
+        this.putCreatureKnowledge(newKnowledge);
         if (sendToClient) {
             this.sendAddedMessage(newKnowledge);
-            if (!this.extendedPlayer.player.getCommandSenderWorld().isClientSide) {
+            if (!this.extendedPlayer.getPlayer().getCommandSenderWorld().isClientSide) {
                 this.sendToClient(newKnowledge);
             }
         }
@@ -87,7 +117,7 @@ public class Beastiary {
             return null;
         }
 
-        CreatureInfo creatureInfo = ((BaseCreatureEntity) entity).creatureInfo;
+        CreatureInfo creatureInfo = ((BaseCreatureEntity) entity).getCreatureInfo();
         CreatureKnowledge newKnowledge = this.getCreatureKnowledge(creatureInfo.getName());
         if (newKnowledge == null) {
             newKnowledge = new CreatureKnowledge(this.extendedPlayer.getBeastiary(), creatureInfo.getName(), 1, experience);
@@ -109,36 +139,36 @@ public class Beastiary {
      * @param creatureKnowledge The creature knowledge that was added.
      */
     public void sendAddedMessage(CreatureKnowledge creatureKnowledge) {
-        if (this.extendedPlayer.player.getCommandSenderWorld().isClientSide || !CreatureManager.getInstance().config.beastiaryKnowledgeMessages) {
+        if (this.extendedPlayer.getPlayer().getCommandSenderWorld().isClientSide || !CreatureManager.getInstance().getConfig().beastiaryKnowledgeMessages()) {
             return;
         }
         CreatureInfo creatureInfo = creatureKnowledge.getCreatureInfo();
         String messageKey = "message.beastiary.rank";
-        if (creatureKnowledge.rank == 1) {
+        if (creatureKnowledge.getRank() == 1) {
             messageKey = "message.beastiary.new";
         }
         String messageText = Component.translatable(messageKey).getString();
         messageText = messageText.replaceAll("%creature%", "" + creatureInfo.getTitle().getString());
-        messageText = messageText.replaceAll("%rank%", "" + creatureKnowledge.rank);
+        messageText = messageText.replaceAll("%rank%", "" + creatureKnowledge.getRank());
         MutableComponent message = Component.literal(messageText);
-        this.extendedPlayer.player.displayClientMessage(message, false);
+        this.extendedPlayer.getPlayer().displayClientMessage(message, false);
 
-        if (creatureInfo.isSummonable() && creatureKnowledge.rank == 2) {
+        if (creatureInfo.isSummonable() && creatureKnowledge.getRank() == 2) {
             MutableComponent summonMessage = Component.translatable("message.beastiary.summonable.prefix")
                     .append(" ")
                     .append(creatureInfo.getTitle())
                     .append(" ")
                     .append(Component.translatable("message.beastiary.summonable.suffix"));
-            this.extendedPlayer.player.displayClientMessage(summonMessage, false);
+            this.extendedPlayer.getPlayer().displayClientMessage(summonMessage, false);
         }
 
-        if (creatureInfo.isTameable() && creatureKnowledge.rank == 2) {
+        if (creatureInfo.isTameable() && creatureKnowledge.getRank() == 2) {
             MutableComponent tameMessage = Component.translatable("message.beastiary.tameable.prefix")
                     .append(" ")
                     .append(creatureInfo.getTitle())
                     .append(" ")
                     .append(Component.translatable("message.beastiary.tameable.suffix"));
-            this.extendedPlayer.player.displayClientMessage(tameMessage, false);
+            this.extendedPlayer.getPlayer().displayClientMessage(tameMessage, false);
         }
     }
 
@@ -149,24 +179,24 @@ public class Beastiary {
      * @param creatureKnowledge The creature knowledge that was trying to be added.
      */
     public void sendKnownMessage(CreatureKnowledge creatureKnowledge) {
-        if (this.extendedPlayer.player.getCommandSenderWorld().isClientSide) {
+        if (this.extendedPlayer.getPlayer().getCommandSenderWorld().isClientSide) {
             return;
         }
         CreatureInfo creatureInfo = creatureKnowledge.getCreatureInfo();
         CreatureKnowledge currentKnowledge = this.extendedPlayer.getBeastiary().getCreatureKnowledge(creatureInfo.getName());
         MutableComponent message = Component.translatable("message.beastiary.known.prefix")
-                .append(" " + currentKnowledge.rank + " ")
+                .append(" " + currentKnowledge.getRank() + " ")
                 .append(Component.translatable("message.beastiary.known.of"))
                 .append(" ")
                 .append(creatureInfo.getTitle())
                 .append(" ")
                 .append(Component.translatable("message.beastiary.known.suffix"));
-        this.extendedPlayer.player.displayClientMessage(message, false);
+        this.extendedPlayer.getPlayer().displayClientMessage(message, false);
     }
 
 
     /**
-     * Returns the current knowledge of the provided creature. Use CreatureKnowledge.rank to get the current rank of knowledge the player has.
+     * Returns the current knowledge of the provided creature. Use CreatureKnowledge.getRank() to get the current rank of knowledge the player has.
      *
      * @param creatureName The name of the creature to get the knowledge of.
      * @return The creature knowledge or knowledge if there is no knowledge.
@@ -192,7 +222,7 @@ public class Beastiary {
         if (creatureKnowledge == null) {
             return false;
         }
-        return creatureKnowledge.rank >= rank;
+        return creatureKnowledge.getRank() >= rank;
     }
 
 
@@ -210,7 +240,7 @@ public class Beastiary {
         int creaturesDescovered = 0;
         for (Entry<String, CreatureKnowledge> creatureKnowledgeEntry : this.creatureKnowledgeList.entrySet()) {
             if (creatureKnowledgeEntry.getValue() != null) {
-                if (creatureKnowledgeEntry.getValue().getCreatureInfo().creatureType == creatureType) {
+                if (creatureKnowledgeEntry.getValue().getCreatureInfo().isCreatureType(creatureType)) {
                     creaturesDescovered++;
                 }
             }
@@ -227,7 +257,7 @@ public class Beastiary {
         int minionIndex = 0;
         for (String minionName : this.creatureKnowledgeList.keySet()) {
             CreatureKnowledge creatureKnowledge = this.creatureKnowledgeList.get(minionName);
-            if (creatureKnowledge.rank >= 2 && SummonSet.isSummonableCreature(minionName)) {
+            if (creatureKnowledge.getRank() >= 2 && SummonSet.isSummonableCreature(minionName)) {
                 minionList.put(minionIndex++, minionName);
             }
         }
@@ -243,7 +273,7 @@ public class Beastiary {
      * Sends CreatureKnowledge to the client. For when it's added or changed server side but needs updated client side.
      **/
     public void sendToClient(CreatureKnowledge newKnowledge) {
-        if (this.extendedPlayer.player.getCommandSenderWorld().isClientSide) {
+        if (this.extendedPlayer.getPlayer().getCommandSenderWorld().isClientSide) {
             return;
         }
         MessageCreatureKnowledge message = new MessageCreatureKnowledge(newKnowledge);
@@ -269,7 +299,7 @@ public class Beastiary {
     public void readFromNBT(CompoundTag nbtTagCompound) {
         if (!nbtTagCompound.contains("CreatureKnowledge"))
             return;
-        this.creatureKnowledgeList.clear();
+        this.clearCreatureKnowledge();
         ListTag knowledgeList = nbtTagCompound.getList("CreatureKnowledge", 10);
         for (int i = 0; i < knowledgeList.size(); ++i) {
             CompoundTag nbtKnowledge = knowledgeList.getCompound(i);
@@ -302,9 +332,9 @@ public class Beastiary {
         for (Entry<String, CreatureKnowledge> creatureKnowledgeEntry : creatureKnowledgeList.entrySet()) {
             CreatureKnowledge creatureKnowledge = creatureKnowledgeEntry.getValue();
             CompoundTag nbtKnowledge = new CompoundTag();
-            nbtKnowledge.putString("CreatureName", creatureKnowledge.creatureName);
-            nbtKnowledge.putInt("Rank", creatureKnowledge.rank);
-            nbtKnowledge.putInt("Experience", creatureKnowledge.experience);
+            nbtKnowledge.putString("CreatureName", creatureKnowledge.getCreatureName());
+            nbtKnowledge.putInt("Rank", creatureKnowledge.getRank());
+            nbtKnowledge.putInt("Experience", creatureKnowledge.getExperience());
             knowledgeList.add(nbtKnowledge);
         }
         nbtTagCompound.put("CreatureKnowledge", knowledgeList);

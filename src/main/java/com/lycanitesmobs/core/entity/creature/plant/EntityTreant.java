@@ -1,10 +1,10 @@
 package com.lycanitesmobs.core.entity.creature.plant;
 
 import com.lycanitesmobs.core.entity.IGroupHeavy;
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.data.info.ObjectLists;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
@@ -47,8 +47,8 @@ public class EntityTreant extends BaseCreatureEntity implements Enemy, IGroupHea
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this));
     }
 
 
@@ -142,7 +142,7 @@ public class EntityTreant extends BaseCreatureEntity implements Enemy, IGroupHea
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
     // ==================================================
     //                       Visuals
@@ -154,16 +154,12 @@ public class EntityTreant extends BaseCreatureEntity implements Enemy, IGroupHea
     public ResourceLocation getTexture() {
         if (this.hasCustomName() && "Wicked Treant".equals(this.getCustomName().getString())) {
             String textureName = this.getTextureName() + "_wicked";
-            if (TextureManager.getTexture(textureName) == null)
-                TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
-            return TextureManager.getTexture(textureName);
+            return AssetHelper.entityTexture(textureName);
         }
 
         if (this.hasCustomName() && "Salty Tree".equals(this.getCustomName().getString())) {
             String textureName = this.getTextureName() + "_saltytree";
-            if (TextureManager.getTexture(textureName) == null)
-                TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
-            return TextureManager.getTexture(textureName);
+            return AssetHelper.entityTexture(textureName);
         }
 
         return super.getTexture();

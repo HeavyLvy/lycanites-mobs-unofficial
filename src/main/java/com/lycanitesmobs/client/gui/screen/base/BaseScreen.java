@@ -1,7 +1,7 @@
 package com.lycanitesmobs.client.gui.screen.base;
 
 import com.lycanitesmobs.client.gui.buttons.ButtonBase;
-import com.lycanitesmobs.core.util.helpers.DrawHelper;
+import com.lycanitesmobs.client.util.helpers.DrawHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.Util;
@@ -143,7 +143,7 @@ public abstract class BaseScreen extends Screen implements Button.OnPress {
         try {
             Util.getPlatform().openUri(uri);
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "Unable to open link: " + uri.toString());
+            LMHelperClass.logWarningMessage("Unable to open link: " + uri.toString());
             e.printStackTrace();
         }
     }

@@ -36,7 +36,7 @@ public class BlockFrostweb extends BlockBase {
         this.setRegistryName(LycanitesMobs.MODID, this.blockName.toLowerCase());
         this.registerDefaultState(this.getStateDefinition().any().setValue(AGE, 0));
 
-        ItemManager.getInstance().cutoutBlocks.add(this);
+        ItemManager.getInstance().registerCutoutBlock(this);
     }
 
     @Override

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class WorldGenManager {
     private static final WorldGenManager INSTANCE = new WorldGenManager();
@@ -53,15 +54,14 @@ public class WorldGenManager {
             FEATURES.register("dungeon", () -> new DungeonFeature(NoneFeatureConfiguration.CODEC));
 */
 
-    public final Map<String, Holder<PlacedFeature>> fluidPlacedFeatures = new HashMap<>();
+    private final Map<String, Holder<PlacedFeature>> fluidPlacedFeatures = new HashMap<>();
 
     public static void register(IEventBus modBus) {
         FEATURES.register(modBus);
     }
 
     public void setupFluidFeatures() {
-        for (String fluidName : FluidManager.getInstance().worldgenFluidBlocks.keySet()) {
-            BaseLiquidBlock fluidBlock = FluidManager.getInstance().worldgenFluidBlocks.get(fluidName);
+        FluidManager.getInstance().forEachWorldgenFluidBlock((fluidName, fluidBlock) -> {
             BlockState state = fluidBlock.defaultBlockState();
 
             LakeFeature.Configuration lakeConfig = new LakeFeature.Configuration(
@@ -136,8 +136,16 @@ public class WorldGenManager {
                     springPlacement.toArray(new PlacementModifier[0])
             );
 
-            fluidPlacedFeatures.put(fluidName + "_lake", lakePlaced);
-            fluidPlacedFeatures.put(fluidName + "_spring", springPlaced);
-        }
+            addFluidPlacedFeature(fluidName + "_lake", lakePlaced);
+            addFluidPlacedFeature(fluidName + "_spring", springPlaced);
+        });
+    }
+
+    private void addFluidPlacedFeature(String name, Holder<PlacedFeature> placedFeature) {
+        this.fluidPlacedFeatures.put(name, placedFeature);
+    }
+
+    public void forEachFluidPlacedFeature(BiConsumer<String, Holder<PlacedFeature>> action) {
+        this.fluidPlacedFeatures.forEach(action);
     }
 }

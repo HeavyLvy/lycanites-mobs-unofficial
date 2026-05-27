@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.entity.projectile.generic.RapidFireProjectileEntit
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -46,7 +47,7 @@ public class EntityIgnibus extends RideableCreatureEntity implements IGroupHeavy
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setStaminaTime(100).setRange(20.0F).setMinChaseDistance(10.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setStaminaTime(100).setRange(20.0F).setMinChaseDistance(10.0F));
     }
 
     @Override
@@ -140,7 +141,7 @@ public class EntityIgnibus extends RideableCreatureEntity implements IGroupHeavy
             for (int projectileY = -1; projectileY <= 1; projectileY++) {
                 Vector3d offset = this.getFacingPositionDouble(0, -6D + (0.5D * projectileY), 0, 4, this.yRot);
                 offset.add(this.getFacingPositionDouble(0, 0, 0, 2D * projectileX, this.yRot + 90D));
-                RapidFireProjectileEntity projectile = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+                RapidFireProjectileEntity projectile = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
                 this.fireProjectile(projectile, target, range, 0, offset, 0.6f, 3f, 4F);
             }
         }
@@ -196,36 +197,36 @@ public class EntityIgnibus extends RideableCreatureEntity implements IGroupHeavy
             // Type:
             List<RapidFireProjectileEntity> projectiles = new ArrayList<>();
 
-            RapidFireProjectileEntity projectileEntry = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), player, 15, 3);
+            RapidFireProjectileEntity projectileEntry = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), player, 15, 3);
             projectiles.add(projectileEntry);
 
-            RapidFireProjectileEntity projectileEntry2 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-            projectileEntry2.offsetX += 1.0D;
+            RapidFireProjectileEntity projectileEntry2 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+            projectileEntry2.addOffset(1.0D, 0, 0);
             projectileEntry2.setProjectileScale(0.25f);
             projectiles.add(projectileEntry2);
 
-            RapidFireProjectileEntity projectileEntry3 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-            projectileEntry3.offsetX -= 1.0D;
+            RapidFireProjectileEntity projectileEntry3 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+            projectileEntry3.addOffset(-1.0D, 0, 0);
             projectileEntry3.setProjectileScale(0.25f);
             projectiles.add(projectileEntry3);
 
-            RapidFireProjectileEntity projectileEntry4 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-            projectileEntry4.offsetZ += 1.0D;
+            RapidFireProjectileEntity projectileEntry4 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+            projectileEntry4.addOffset(0, 0, 1.0D);
             projectileEntry4.setProjectileScale(0.25f);
             projectiles.add(projectileEntry4);
 
-            RapidFireProjectileEntity projectileEntry5 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-            projectileEntry5.offsetZ -= 1.0D;
+            RapidFireProjectileEntity projectileEntry5 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+            projectileEntry5.addOffset(0, 0, -1.0D);
             projectileEntry5.setProjectileScale(0.25f);
             projectiles.add(projectileEntry5);
 
-            RapidFireProjectileEntity projectileEntry6 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-            projectileEntry6.offsetY += 1.0D;
+            RapidFireProjectileEntity projectileEntry6 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+            projectileEntry6.addOffset(0, 1.0D, 0);
             projectileEntry6.setProjectileScale(0.25f);
             projectiles.add(projectileEntry6);
 
-            RapidFireProjectileEntity projectileEntry7 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-            projectileEntry7.offsetY -= 10D;
+            RapidFireProjectileEntity projectileEntry7 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+            projectileEntry7.addOffset(0, -10D, 0);
             projectileEntry7.setProjectileScale(0.25f);
             projectiles.add(projectileEntry7);
 
@@ -241,7 +242,7 @@ public class EntityIgnibus extends RideableCreatureEntity implements IGroupHeavy
 
                 // Launch:
                 this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-                this.getCommandSenderWorld().addFreshEntity(projectile);
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
             }
             this.triggerAttackCooldown();
         }

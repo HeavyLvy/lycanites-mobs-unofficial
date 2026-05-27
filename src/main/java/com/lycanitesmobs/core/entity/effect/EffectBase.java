@@ -1,14 +1,14 @@
 package com.lycanitesmobs.core.entity.effect;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.manager.TextureManager;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 
 public class EffectBase extends MobEffect {
-	public String name;
-	public ResourceLocation registryName;
+	private final String name;
+	private ResourceLocation registryName;
 	
 	// ==================================================
 	//                    Constructor
@@ -17,7 +17,6 @@ public class EffectBase extends MobEffect {
 		super(badEffect ? MobEffectCategory.HARMFUL : MobEffectCategory.BENEFICIAL, color);
 		this.name = name;
 		this.setRegistryName(LycanitesMobs.MODID, name);
-		TextureManager.addTexture("effect." + name, "textures/mob_effect/" + name + ".png");
 	}
 
 	public ResourceLocation getRegistryName() {
@@ -35,6 +34,10 @@ public class EffectBase extends MobEffect {
 	public boolean isInstantenous() {
         return false;
     }
+
+	public ResourceLocation getTexture() {
+		return AssetHelper.texture("textures/mob_effect/" + this.name + ".png");
+	}
 	
 
 	// ==================================================

@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -16,7 +16,7 @@ public class MessageSummonSetSelection {
     }
 
     public MessageSummonSetSelection(ExtendedPlayer playerExt) {
-        this.summonSetID = (byte) playerExt.selectedSummonSet;
+        this.summonSetID = (byte) playerExt.getSelectedSummonSetId();
     }
 
     /**
@@ -35,11 +35,7 @@ public class MessageSummonSetSelection {
         }
 
         // Client Side:
-        Player player = ClientManager.getInstance().getClientPlayer();
-        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
-        if (playerExt == null)
-            return;
-        playerExt.setSelectedSummonSet(message.summonSetID);
+        ctx.get().enqueueWork(() -> LycanitesMobs.PROXY.applySelectedSummonSet(message.summonSetID));
     }
 
     /**

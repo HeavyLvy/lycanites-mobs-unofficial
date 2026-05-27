@@ -239,7 +239,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
      * @param y            The y position to draw from.
      */
     public void drawLevel(GuiGraphics matrixStack, CreatureInfo creatureInfo, ResourceLocation texture, int x, int y) {
-        int level = creatureInfo.summonCost;
+        int level = creatureInfo.getSummonCost();
         if (level <= 10) {
             this.drawHelper.drawBar(matrixStack, texture, x, y, 0, 9, 9, level, 10);
         }
@@ -260,7 +260,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
                 }
             }
 
-            if (this.creaturePreviewEntity == null || this.creaturePreviewEntity.getClass() != creatureInfo.entityClass || !subspeciesMatch) {
+            if (this.creaturePreviewEntity == null || this.creaturePreviewEntity.getClass() != creatureInfo.getEntityClass() || !subspeciesMatch) {
                 this.creaturePreviewEntity = creatureInfo.createEntity(this.player.getCommandSenderWorld());
                 this.creaturePreviewEntity.setOnGround(true);
                 if (this.creaturePreviewEntity instanceof BaseCreatureEntity) {
@@ -276,8 +276,8 @@ public abstract class BeastiaryScreen extends BaseScreen {
 
             if (this.creaturePreviewEntity != null) {
                 int creatureSize = Math.round((float) this.windowHeight / 6);
-                double creatureWidth = creatureInfo.width;
-                double creatureHeight = creatureInfo.height;
+                double creatureWidth = creatureInfo.getWidth();
+                double creatureHeight = creatureInfo.getHeight();
                 int scale = (int) Math.round((2.5F / Math.max(creatureWidth, creatureHeight)) * creatureSize);
                 int posX = x;
                 int posY = y + 80;
@@ -286,7 +286,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
                 this.creaturePreviewTicks += partialTicks;
                 if (this.creaturePreviewEntity instanceof BaseCreatureEntity) {
                     BaseCreatureEntity previewCreatureBase = (BaseCreatureEntity) this.creaturePreviewEntity;
-                    previewCreatureBase.onlyRenderTicks = this.creaturePreviewTicks;
+                    previewCreatureBase.setOnlyRenderTicks(this.creaturePreviewTicks);
                 }
 
                 matrixStack.pose().pushPose();
@@ -295,7 +295,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
                 matrixStack.pose().popPose();
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "An exception occurred when trying to preview a creature in the Beastiary.");
+            LMHelperClass.logWarningMessage("An exception occurred when trying to preview a creature in the Beastiary.");
             e.printStackTrace();
         }
     }
@@ -307,7 +307,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
      * @param creatureInfo The Creature Info being displayed.
      */
     public int getDisplaySubspecies(CreatureInfo creatureInfo) {
-        return this.playerExt.selectedSubspecies;
+        return this.playerExt.getSelectedSubspecies();
     }
 
 
@@ -317,7 +317,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
      * @param creatureInfo The Creature Info being displayed.
      */
     public int getDisplayVariant(CreatureInfo creatureInfo) {
-        return this.playerExt.selectedVariant;
+        return this.playerExt.getSelectedVariant();
     }
 
     /**
@@ -327,8 +327,8 @@ public abstract class BeastiaryScreen extends BaseScreen {
      */
     public void playCreatureSelectSound(CreatureInfo creatureInfo) {
         String soundSuffix = "";
-        if (creatureInfo.getSubspecies(this.playerExt.selectedSubspecies).name != null) {
-            soundSuffix += "." + creatureInfo.getSubspecies(this.playerExt.selectedSubspecies).name;
+        if (creatureInfo.getSubspecies(this.playerExt.getSelectedSubspecies()).getName() != null) {
+            soundSuffix += "." + creatureInfo.getSubspecies(this.playerExt.getSelectedSubspecies()).getName();
         }
         SoundEvent soundEvent = ObjectManager.getSound(creatureInfo.getName() + soundSuffix + "_say");
         this.player.getCommandSenderWorld().playSound(this.player, this.player.position().x(), this.player.position().y(), this.player.position().z(), soundEvent, SoundSource.NEUTRAL, 1, 1);

@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.entity.dispenser;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
@@ -51,7 +52,7 @@ public class BaseProjectileDispenseBehaviour extends AbstractProjectileDispenseB
             return stack;
 
         projectile.shoot((double) facing.getStepX(), (double) facing.getStepY(), (double) facing.getStepZ(), this.getPower(), this.getUncertainty());
-        world.addFreshEntity(projectile);
+        DeferredLevelActionManager.spawnEntity(world, blockSource.getPos(), null, (net.minecraft.world.entity.Entity) projectile);
         stack.split(1);
 
         return stack;
@@ -76,7 +77,7 @@ public class BaseProjectileDispenseBehaviour extends AbstractProjectileDispenseB
     @Override
     protected float getPower() {
         if (this.projectileInfo != null) {
-            return (float) this.projectileInfo.velocity;
+            return (float) this.projectileInfo.getVelocity();
         }
         return 1.1F;
     }

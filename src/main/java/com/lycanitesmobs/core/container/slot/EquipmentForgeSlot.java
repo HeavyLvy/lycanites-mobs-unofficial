@@ -5,8 +5,6 @@ import com.lycanitesmobs.core.container.block.EquipmentForgeContainer;
 import com.lycanitesmobs.core.container.creature.CreatureInventory;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
-import com.lycanitesmobs.core.item.equipment.features.EquipmentFeature;
-import com.lycanitesmobs.core.item.equipment.features.SlotEquipmentFeature;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -15,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EquipmentForgeSlot extends BaseSlot {
-	public String type;
-	public EquipmentForgeContainer containerForge;
-	public List<EquipmentForgeSlot> childSlots = new ArrayList<>();
+	protected String type;
+	protected final EquipmentForgeContainer containerForge;
+	protected final List<EquipmentForgeSlot> childSlots = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -28,9 +26,13 @@ public class EquipmentForgeSlot extends BaseSlot {
 	 * @param type The Equipment item type for this slot. Can be any part slot type or "piece" for an assembled piece of equipment or "none" when unavailable.
 	 */
 	public EquipmentForgeSlot(EquipmentForgeContainer containerForge, int slotIndex, int x, int y, String type) {
-		super(containerForge.equipmentForge, slotIndex, x, y);
+		super(containerForge.getEquipmentForge(), slotIndex, x, y);
 		this.containerForge = containerForge;
 		this.type = type;
+	}
+
+	public String getType() {
+		return this.type;
 	}
 
 
@@ -39,13 +41,13 @@ public class EquipmentForgeSlot extends BaseSlot {
 		Item item = itemStack.getItem();
 		if(item instanceof ItemEquipmentPart) {
 			ItemEquipmentPart equipmentPart = (ItemEquipmentPart)item;
-			return this.type.equals(equipmentPart.slotType) && equipmentPart.getPartLevel(itemStack) <= this.containerForge.equipmentForge.getForgeLevel();
+			return this.type.equals(equipmentPart.getSlotType()) && equipmentPart.getPartLevel(itemStack) <= this.containerForge.getForgeLevel();
 		}
 		else if(item instanceof ItemEquipment) {
-			if(this.containerForge.equipmentForge.getForgeLevel() < 3) {
+			if(this.containerForge.getForgeLevel() < 3) {
 				ItemEquipment equipment = (ItemEquipment)item;
 				int equipmentLevel = equipment.getHighestLevel(itemStack);
-				if(equipmentLevel > this.containerForge.equipmentForge.getForgeLevel()) {
+				if(equipmentLevel > this.containerForge.getForgeLevel()) {
 					return false;
 				}
 			}
@@ -76,7 +78,7 @@ public class EquipmentForgeSlot extends BaseSlot {
 	@Override
 	public int getMaxStackSize() {
 		if(this.container instanceof CreatureInventory)
-			if(((CreatureInventory)this.container).getTypeFromSlot(this.getSlotIndex()) != null)
+			if(((CreatureInventory)this.container).isEquipmentSlot(this.getSlotIndex()))
 				return 1;
         return this.container.getMaxStackSize();
     }
@@ -162,9 +164,9 @@ public class EquipmentForgeSlot extends BaseSlot {
 
 		// Equipment Piece:
 		if(item instanceof ItemEquipment) {
-			int forgeLevel = this.containerForge.equipmentForge.getForgeLevel();
+			int forgeLevel = this.containerForge.getForgeLevel();
 			if(forgeLevel < 3) {
-				((ItemEquipment)item).applyLevelCap(itemStack, this.containerForge.equipmentForge.getForgeLevel());
+				((ItemEquipment)item).applyLevelCap(itemStack, this.containerForge.getForgeLevel());
 			}
 		}
 
@@ -209,22 +211,16 @@ public class EquipmentForgeSlot extends BaseSlot {
 			ItemEquipmentPart itemEquipmentPart = (ItemEquipmentPart) item;
 
 			int axeSlots = 0;
-			for (EquipmentFeature feature : itemEquipmentPart.features) {
-				if (feature instanceof SlotEquipmentFeature) {
-					SlotEquipmentFeature slotFeature = (SlotEquipmentFeature) feature;
-					int level = itemEquipmentPart.getPartLevel(this.getItem());
-					if (slotFeature.isActive(this.getItem(), level)) {
-						int index = 0;
-						if (slotFeature.slotType.equals("axe")) {
-							index = ++axeSlots;
-						}
-						else if (slotFeature.slotType.equals("pommel")) {
-							index = 1;
-						}
-						if (!updatedChildSlots.contains(index) && this.updateChildSlot(index, slotFeature.slotType)) {
-							updatedChildSlots.add(index);
-						}
-					}
+			for (String slotType : itemEquipmentPart.getActiveSlotTypes(this.getItem())) {
+				int index = 0;
+				if (slotType.equals("axe")) {
+					index = ++axeSlots;
+				}
+				else if (slotType.equals("pommel")) {
+					index = 1;
+				}
+				if (!updatedChildSlots.contains(index) && this.updateChildSlot(index, slotType)) {
+					updatedChildSlots.add(index);
 				}
 			}
 		}

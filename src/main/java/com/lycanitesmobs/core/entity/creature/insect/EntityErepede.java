@@ -4,6 +4,7 @@ import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.block.Material;
 import net.minecraft.world.damagesource.DamageSource;
@@ -39,7 +40,7 @@ public class EntityErepede extends RideableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setRange(14.0F).setMinChaseDistance(6.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setRange(14.0F).setMinChaseDistance(6.0F));
     }
 
 
@@ -90,7 +91,7 @@ public class EntityErepede extends RideableCreatureEntity {
             ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile("mudshot");
             if (projectileInfo != null) {
                 BaseProjectileEntity projectile = projectileInfo.createProjectile(this.getCommandSenderWorld(), player);
-                this.getCommandSenderWorld().addFreshEntity(projectile);
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
                 this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
                 this.triggerAttackCooldown();
             }
@@ -132,7 +133,7 @@ public class EntityErepede extends RideableCreatureEntity {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

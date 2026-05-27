@@ -1,6 +1,6 @@
 package com.lycanitesmobs.client.gui.buttons;
 
-import com.lycanitesmobs.core.util.helpers.DrawHelper;
+import com.lycanitesmobs.client.util.helpers.DrawHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;

@@ -22,22 +22,22 @@ public abstract class MobEventTrigger {
     /**
      * The Mob Event using this Trigger.
      **/
-    public MobEvent mobEvent;
+    private final MobEvent mobEvent;
 
     /**
      * A list of Spawn Conditions that this Trigger will check.
      **/
-    public List<SpawnCondition> conditions = new ArrayList<>();
+    private final List<SpawnCondition> conditions = new ArrayList<>();
 
     /**
      * Determines how many Trigger specific Conditions must be met. If 0 or less all are required.
      **/
-    public int conditionsRequired = 0;
+    private int conditionsRequired = 0;
 
     /**
      * Forces the subspecies of mobs to spawn from this event, if less that 0 subspecies are random as normal.
      **/
-    public int subspecies = -1;
+    private int subspecies = -1;
 
 
     /**
@@ -125,12 +125,16 @@ public abstract class MobEventTrigger {
         return false;
     }
 
+    protected int getSubspecies() {
+        return this.subspecies;
+    }
+
 
     /**
      * Triggers an actual spawn, this does not check conditions, it just triggers.
      **/
     public boolean trigger(Level world, Player player, BlockPos pos, int level, int variant) {
-        LMHelperClass.logDebug("MobEvents", "Trigger Fired: " + this + " for: " + this.mobEvent.name + " channel: " + this.mobEvent.channel);
+        LMHelperClass.logDebug("MobEvents", "Trigger Fired: " + this + " for: " + this.mobEvent.getName() + " channel: " + this.mobEvent.getChannel());
         return this.mobEvent.trigger(world, player, pos, level, variant);
     }
 }

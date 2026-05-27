@@ -21,7 +21,7 @@ import java.util.List;
 
 public class EntityEechetik extends TameableCreatureEntity implements Enemy {
 
-    public int myceliumRadius = 2;
+    protected int myceliumRadius = 2;
 
     // ==================================================
     //                    Constructor
@@ -41,7 +41,7 @@ public class EntityEechetik extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(true));
     }
 
     @Override
@@ -143,7 +143,7 @@ public class EntityEechetik extends TameableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

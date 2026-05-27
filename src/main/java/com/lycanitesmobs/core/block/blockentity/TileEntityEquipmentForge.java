@@ -182,7 +182,7 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 
     @Override
     public void onGuiButton(int buttonId) {
-        LMHelperClass.logDebug("", "Received button packet id: " + buttonId);
+        LMHelperClass.logDebug("Equipment", "Received button packet id: " + buttonId);
     }
 
 

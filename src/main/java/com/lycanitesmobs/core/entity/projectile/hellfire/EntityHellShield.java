@@ -1,11 +1,9 @@
 package com.lycanitesmobs.core.entity.projectile.hellfire;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -17,7 +15,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class EntityHellShield extends BaseProjectileEntity {
 
     // Properties:
-    public Entity shootingEntity;
+    protected Entity shootingEntity;
 
     // ==================================================
     //                   Constructors

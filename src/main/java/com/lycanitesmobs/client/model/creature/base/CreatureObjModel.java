@@ -212,7 +212,7 @@ public class CreatureObjModel extends CreatureModel {
         );
         this.objParts = this.objModel.objParts;
         if (this.objParts.isEmpty())
-            LMHelperClass.logWarning("", "Unable to load model obj for: " + name + "");
+            LMHelperClass.logWarningMessage("Unable to load model obj for: " + name + "");
 
         this.animator = new Animator(this);
 
@@ -234,7 +234,7 @@ public class CreatureObjModel extends CreatureModel {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "Unable to load model parts json for: " + name + "");
+            LMHelperClass.logWarningMessage("Unable to load model parts json for: " + name + "");
         }
 
         for (AnimationPart part : this.animationParts.values()) {
@@ -268,7 +268,7 @@ public class CreatureObjModel extends CreatureModel {
      */
     public void addAnimationPart(AnimationPart animationPart) {
         if (this.animationParts.containsKey(animationPart.name)) {
-            //LycanitesMobs.logWarning("", "Tried to add an animation part that already exists: " + animationPart.name + ".");
+            // LMHelperClass.logWarningMessage("Tried to add an animation part that already exists: " + animationPart.name + ".");
             return;
         }
         if (animationPart.parentName != null) {
@@ -303,8 +303,8 @@ public class CreatureObjModel extends CreatureModel {
         }
 
         if (entity != null) {
-            if (entity.onlyRenderTicks >= 0) {
-                loop = entity.onlyRenderTicks;
+            if (entity.getOnlyRenderTicks() >= 0) {
+                loop = entity.getOnlyRenderTicks();
             }
         }
 

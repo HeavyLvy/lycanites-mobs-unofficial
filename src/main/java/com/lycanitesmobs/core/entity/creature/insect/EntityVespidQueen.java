@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.insect;
 
 import com.lycanitesmobs.core.manager.DungeonManager;
+import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.util.CreatureStructure;
@@ -9,7 +10,9 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.StayByHomeGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.item.consumable.entity.CreatureTreatItem;
+import com.lycanitesmobs.core.util.ContextUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.Difficulty;
@@ -25,7 +28,7 @@ import net.minecraft.world.level.Level;
 import com.lycanitesmobs.core.entity.creature.beast.EntityConba;
 
 public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
-    public final CreatureStructure creatureStructure;
+    private final CreatureStructure creatureStructure;
     protected int swarmLimit = 10;
 
     public EntityVespidQueen(EntityType<? extends EntityVespidQueen> entityType, Level world) {
@@ -49,13 +52,13 @@ public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(true));
-        this.goalSelector.addGoal(this.nextTravelGoalIndex++, new StayByHomeGoal(this));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(true));
+        this.goalSelector.addGoal(this.claimTravelGoalIndex(), new StayByHomeGoal(this));
 
-        this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(this.getType()));
+        this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindAttackTargetGoal(this).addTargets(this.getType()));
         EntityType conbaType = CreatureManager.getInstance().getEntityType("conba");
         if (conbaType != null)
-            this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(conbaType));
+            this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindAttackTargetGoal(this).addTargets(conbaType));
     }
 
     @Override
@@ -98,7 +101,7 @@ public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
 
         // Don't Keep Infected Conbas Targeted:
         if (this.getTarget() instanceof EntityConba) {
-            if (((EntityConba) this.getTarget()).vespidInfection) {
+            if (((EntityConba) this.getTarget()).isVespidInfected()) {
                 this.setTarget(null);
             }
         }
@@ -128,7 +131,8 @@ public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
             if (random <= 0.05F) {
                 LivingEntity minion = this.spawnAlly(this.position().x() - 2 + (random * 4), this.position().y(), this.position().z() - 2 + (random * 4));
                 if (minion instanceof AgeableCreatureEntity) {
-                    ((AgeableCreatureEntity) minion).setGrowingAge(((AgeableCreatureEntity) minion).growthTime);
+                    AgeableCreatureEntity ageableMinion = (AgeableCreatureEntity) minion;
+                    ageableMinion.setGrowingAge(ageableMinion.getInitialGrowthTime());
                 }
             }
         }
@@ -140,10 +144,18 @@ public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
         if (minion instanceof BaseCreatureEntity) {
             ((BaseCreatureEntity) minion).applyVariant(this.getVariantIndex());
         }
-        this.getCommandSenderWorld().addFreshEntity(minion);
+        DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, minion);
         if (this.getTarget() != null)
             minion.setLastHurtByMob(this.getTarget());
         return minion;
+    }
+
+    public ContextUtils.CreatureBuildTask getBuildTaskFor(EntityVespid vespid) {
+        return this.creatureStructure.getBuildTask(vespid);
+    }
+
+    public void completeBuildTask(ContextUtils.CreatureBuildTask creatureBuildTask) {
+        this.creatureStructure.completeBuildTask(creatureBuildTask);
     }
 
     @Override
@@ -152,7 +164,7 @@ public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
             return false;
 
         if (target instanceof EntityConba) {
-            ((EntityConba) target).vespidInfection = true;
+            ((EntityConba) target).infectWithVespids();
             return true;
         }
 
@@ -162,7 +174,7 @@ public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
     @Override
     public boolean canAttack(LivingEntity targetEntity) {
         if (targetEntity instanceof EntityConba)
-            if (((EntityConba) targetEntity).vespidInfection)
+            if (((EntityConba) targetEntity).isVespidInfected())
                 return false;
         if (targetEntity instanceof EntityVespid) {
             if (!((EntityVespid) targetEntity).hasMaster() || ((EntityVespid) targetEntity).getMasterTarget() == this)
@@ -183,13 +195,14 @@ public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
 
     @Override
     public boolean isTamingItem(ItemStack itemStack) {
-        if (itemStack.isEmpty() || this.creatureInfo.creatureType == null) {
+        CreatureType creatureType = this.creatureInfo.getCreatureType();
+        if (itemStack.isEmpty() || creatureType == null) {
             return false;
         }
 
         if (itemStack.getItem() instanceof CreatureTreatItem) {
             CreatureTreatItem itemTreat = (CreatureTreatItem) itemStack.getItem();
-            if (itemTreat.getCreatureType() == this.creatureInfo.creatureType) {
+            if (itemTreat.getCreatureType() == creatureType) {
                 return true;
             }
         }
@@ -220,7 +233,7 @@ public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     @Override

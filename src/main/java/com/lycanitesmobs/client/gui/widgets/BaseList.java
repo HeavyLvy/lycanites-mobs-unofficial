@@ -1,7 +1,7 @@
 package com.lycanitesmobs.client.gui.widgets;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.util.helpers.DrawHelper;
+import com.lycanitesmobs.client.util.helpers.DrawHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -70,13 +70,18 @@ public abstract class BaseList<S> extends AbstractSelectionList<BaseListEntry> {
             this.renderBackground(guiGraphics);
 
             double scaleFactor = Minecraft.getInstance().getWindow().getGuiScale();
-            int scissorX = (int) ((float) this.getLeft() * scaleFactor);
-            int scissorTop = Minecraft.getInstance().getWindow().getScreenHeight() - (int) ((float) this.getTop() * scaleFactor);
-            int scissorBottom = Minecraft.getInstance().getWindow().getScreenHeight() - (int) ((float) this.getBottom() * scaleFactor);
-            int scissorWidth = (int) ((float) this.getWidth() * scaleFactor);
-            int scissorHeight = scissorTop - scissorBottom;
+            int windowHeight = Minecraft.getInstance().getWindow().getScreenHeight();
+            int scissorLeft = (int) Math.floor(this.getLeft() * scaleFactor);
+            int scissorRight = (int) Math.ceil(this.getRight() * scaleFactor);
+            int scissorTop = (int) Math.floor(this.getTop() * scaleFactor);
+            int scissorBottom = (int) Math.ceil(this.getBottom() * scaleFactor);
+            int scissorWidth = scissorRight - scissorLeft;
+            int scissorHeight = scissorBottom - scissorTop;
+            if (scissorWidth <= 0 || scissorHeight <= 0) {
+                return;
+            }
 
-            RenderSystem.enableScissor(scissorX, scissorBottom, scissorWidth, scissorHeight);
+            RenderSystem.enableScissor(scissorLeft, windowHeight - scissorBottom, scissorWidth, scissorHeight);
 
             RenderSystem.disableCull();
             RenderSystem.defaultBlendFunc();

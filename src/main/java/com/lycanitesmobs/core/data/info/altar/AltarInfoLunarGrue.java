@@ -152,8 +152,8 @@ public class AltarInfoLunarGrue extends AltarInfo {
         }
 
         // Spawn Mini Boss:
-        entityGrue.altarSummoned = true;
-        entityGrue.forceBossHealthBar = true;
+        entityGrue.markAltarSummoned();
+        entityGrue.forceBossHealthBar();
         entityGrue.applyVariant(3);
         entityGrue.moveTo(x, y - 2, z, 0, 0);
         this.spawnDeferred(world, pos, "altar_spawn:" + this.name + ":" + pos.asLong(), entityGrue,

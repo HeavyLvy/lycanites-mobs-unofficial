@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class CreaturePathNavigator extends GroundPathNavigation {
 
-    public BaseCreatureEntity entityCreature;
+    protected BaseCreatureEntity entityCreature;
     protected BlockPos climbTargetPos;
 
     public CreaturePathNavigator(BaseCreatureEntity entityCreature, Level world) {
@@ -224,7 +224,7 @@ public class CreaturePathNavigator extends GroundPathNavigation {
                 if (blockState.is(Blocks.WATER) && !this.entityCreature.waterDamage()) {
                     return true;
                 }
-                if (blockState.is(Blocks.LAVA) && this.entityCreature.isLavaCreature) {
+                if (blockState.is(Blocks.LAVA) && this.entityCreature.isLavaCreature()) {
                     return true;
                 }
             }
@@ -246,7 +246,7 @@ public class CreaturePathNavigator extends GroundPathNavigation {
         if (pathNodeType == BlockPathTypes.WATER) {
             return this.entityCreature.canWade() || this.entityCreature.isStrongSwimmer();
         } else if (pathNodeType == BlockPathTypes.LAVA) {
-            return this.entityCreature.isLavaCreature;
+            return this.entityCreature.isLavaCreature();
         } else {
             return pathNodeType != BlockPathTypes.OPEN;
         }

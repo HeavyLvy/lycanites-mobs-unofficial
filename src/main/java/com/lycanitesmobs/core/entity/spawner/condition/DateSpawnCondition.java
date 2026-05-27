@@ -13,27 +13,27 @@ public class DateSpawnCondition extends SpawnCondition {
     /**
      * The minimum month that is must be.
      **/
-    public int monthMin = -1;
+    protected int monthMin = -1;
 
     /**
      * The maximum month that is must be.
      **/
-    public int monthMax = -1;
+    protected int monthMax = -1;
 
     /**
      * The minimum day of the month it must be.
      **/
-    public int dayMin = -1;
+    protected int dayMin = -1;
 
     /**
      * The maximum day of the month it must be.
      **/
-    public int dayMax = -1;
+    protected int dayMax = -1;
 
     /**
      * A season to check for. Can be "valentines", "easter", "midsummer", "halloween", "yuletide"/"christmas" or "newyear".
      **/
-    public String season = "";
+    protected String season = "";
 
 
     @Override

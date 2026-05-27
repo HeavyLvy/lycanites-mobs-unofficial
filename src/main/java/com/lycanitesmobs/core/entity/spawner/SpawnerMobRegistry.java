@@ -4,6 +4,7 @@ import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,12 +14,12 @@ public class SpawnerMobRegistry {
     /**
      * A static map of each SpawnerMobRegistry by Spawner name. Note that even if a Spawner name is not found via JSON, a SpawnerMobRegistry is still created for it.
      **/
-    public static Map<String, SpawnerMobRegistry> SPAWNER_MOB_REGISTRIES = new HashMap<>();
+    protected static Map<String, SpawnerMobRegistry> SPAWNER_MOB_REGISTRIES = new HashMap<>();
 
     /**
      * A map of all MobSpawns added to this SpawnerMobRegistry.
      **/
-    public Map<CreatureInfo, MobSpawn> mobSpawns = new HashMap<>();
+    protected Map<CreatureInfo, MobSpawn> mobSpawns = new HashMap<>();
 
 
     /**
@@ -28,10 +29,14 @@ public class SpawnerMobRegistry {
      * @return A collection of MobSpawns, returns null if no global MobSpawns exists for the Spawner.
      **/
     public static Collection<MobSpawn> getMobSpawns(String spawnerName) {
-        if (SPAWNER_MOB_REGISTRIES.containsKey(spawnerName.toLowerCase())) {
-            return SPAWNER_MOB_REGISTRIES.get(spawnerName.toLowerCase()).mobSpawns.values();
+        if (SPAWNER_MOB_REGISTRIES.containsKey(getRegistryKey(spawnerName))) {
+            return Collections.unmodifiableCollection(SPAWNER_MOB_REGISTRIES.get(getRegistryKey(spawnerName)).mobSpawns.values());
         }
         return null;
+    }
+
+    public static void clearRegistries() {
+        SPAWNER_MOB_REGISTRIES.clear();
     }
 
 
@@ -43,21 +48,22 @@ public class SpawnerMobRegistry {
      **/
     public static void createSpawn(CreatureInfo creatureInfo, String spawnerName) {
         if (creatureInfo == null) {
-            LMHelperClass.logWarning("", "Tried to create a global Mob Spawn to " + spawnerName + " from a null Creature Info!");
+            LMHelperClass.logWarningMessage("Tried to create a global Mob Spawn to " + spawnerName + " from a null Creature Info!");
             return;
         }
         if (spawnerName == null) {
-            LMHelperClass.logWarning("", "Tried to create a global Mob Spawn for " + creatureInfo.getName() + " with a null Spawner Name!");
+            LMHelperClass.logWarningMessage("Tried to create a global Mob Spawn for " + creatureInfo.getName() + " with a null Spawner Name!");
             return;
         }
 
         MobSpawn mobSpawn = new MobSpawn(creatureInfo);
 
-        if (!SPAWNER_MOB_REGISTRIES.containsKey(spawnerName)) {
-            SPAWNER_MOB_REGISTRIES.put(spawnerName, new SpawnerMobRegistry());
+        String registryKey = getRegistryKey(spawnerName);
+        if (!SPAWNER_MOB_REGISTRIES.containsKey(registryKey)) {
+            SPAWNER_MOB_REGISTRIES.put(registryKey, new SpawnerMobRegistry());
         }
-        if (!SPAWNER_MOB_REGISTRIES.get(spawnerName).addMobSpawn(mobSpawn)) {
-            LMHelperClass.logWarning("", "Tried to create a duplicate global MobSpawn for " + creatureInfo.getName() + " in Spawner: " + spawnerName + "!");
+        if (!SPAWNER_MOB_REGISTRIES.get(registryKey).addMobSpawn(mobSpawn)) {
+            LMHelperClass.logWarningMessage("Tried to create a duplicate global MobSpawn for " + creatureInfo.getName() + " in Spawner: " + spawnerName + "!");
         }
 
     }
@@ -70,10 +76,14 @@ public class SpawnerMobRegistry {
      * @return True on success, false on failure (if it already exists).
      **/
     public boolean addMobSpawn(MobSpawn mobSpawn) {
-        if (this.mobSpawns.containsKey(mobSpawn.creatureInfo)) {
+        if (this.mobSpawns.containsKey(mobSpawn.getCreatureInfo())) {
             return false;
         }
-        this.mobSpawns.put(mobSpawn.creatureInfo, mobSpawn);
+        this.mobSpawns.put(mobSpawn.getCreatureInfo(), mobSpawn);
         return true;
+    }
+
+    protected static String getRegistryKey(String spawnerName) {
+        return spawnerName.toLowerCase();
     }
 }

@@ -1,11 +1,9 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.blockentity.TileEntitySummoningPedestal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -33,6 +31,11 @@ public class MessageSummoningPedestalStats {
         this.z = z;
     }
 
+    public MessageSummoningPedestalStats(TileEntitySummoningPedestal.SummoningPedestalStats stats, BlockPos blockPos) {
+        this(stats.capacity(), stats.summonProgress(), stats.summoningFuel(), stats.summoningFuelMax(),
+                blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    }
+
     /**
      * Called when this message is received.
      */
@@ -41,19 +44,7 @@ public class MessageSummoningPedestalStats {
         if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
             return;
 
-        ctx.get().enqueueWork(() -> {
-            Player player = ClientManager.getInstance().getClientPlayer();
-            BlockEntity tileEntity = player.getCommandSenderWorld().getBlockEntity(new BlockPos(message.x, message.y, message.z));
-            TileEntitySummoningPedestal summoningPedestal = null;
-            if (tileEntity instanceof TileEntitySummoningPedestal)
-                summoningPedestal = (TileEntitySummoningPedestal) tileEntity;
-            if (summoningPedestal == null)
-                return;
-            summoningPedestal.capacity = message.capacity;
-            summoningPedestal.summonProgress = message.progress;
-            summoningPedestal.summoningFuel = message.fuel;
-            summoningPedestal.summoningFuelMax = message.fuelMax;
-        });
+        ctx.get().enqueueWork(() -> LycanitesMobs.PROXY.applySummoningPedestalStats(message));
     }
 
     /**

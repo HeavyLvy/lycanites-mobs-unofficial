@@ -1,12 +1,8 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.client.manager.ClientManager;
-import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
+import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -32,17 +28,8 @@ public class MessageEntityPickedUp {
         if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
             return;
 
-        Player player = ClientManager.getInstance().getClientPlayer();
-        Level world = player.getCommandSenderWorld();
-        Entity pickedUpEntity = world.getEntity(message.pickedUpEntityID);
-        Entity pickedUpByEntity = message.pickedUpByEntityID != 0 ? world.getEntity(message.pickedUpByEntityID) : null;
-
-        if (!(pickedUpEntity instanceof LivingEntity))
-            return;
-        ExtendedEntity pickedUpEntityExt = ExtendedEntity.getForEntity((LivingEntity) pickedUpEntity);
-        if (pickedUpEntityExt != null)
-            pickedUpEntityExt.setPickedUpByEntity(pickedUpByEntity);
-        return;
+        ctx.get().enqueueWork(() ->
+                LycanitesMobs.PROXY.applyEntityPickedUp(message.pickedUpEntityID, message.pickedUpByEntityID));
     }
 
     /**

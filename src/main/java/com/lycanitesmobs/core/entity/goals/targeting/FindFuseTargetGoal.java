@@ -127,11 +127,11 @@ public class FindFuseTargetGoal extends TargetingGoal {
     // ==================================================
     @Override
     public boolean canUse() {
-        if (!CreatureManager.getInstance().config.elementalFusion) {
+        if (!CreatureManager.getInstance().getConfig().elementalFusion()) {
             return false;
         }
 
-        if (this.host.updateTick % 20 != 0) {
+        if (!this.host.isUpdateTickMultiple(20)) {
             return false;
         }
         if (this.host.isPetType("familiar")) {

@@ -32,7 +32,7 @@ public class SleepSpawnTrigger extends BlockSpawnTrigger {
 		// Trigger:
 		boolean success = this.trigger(world, player, spawnPos, 0, 0);
 		if(this.cooldown > -1 && playerExt != null) {
-			this.playerUsedTicks.put(player, playerExt.timePlayed);
+			this.playerUsedTicks.put(player, playerExt.getTimePlayed());
 		}
 		return success;
 	}

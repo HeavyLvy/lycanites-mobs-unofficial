@@ -4,9 +4,9 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.creature.aberration.EntityFear;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.network.message.MessageEntityVelocity;
+import com.lycanitesmobs.core.util.math.SchismMath;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -93,7 +93,7 @@ public class FearMoveGoal extends Goal {
             MobEffect fear = ObjectManager.getEffect("fear");
             MobEffectInstance inst = fear != null ? player.getEffect(fear) : null;
             int amplifier = inst != null ? inst.getAmplifier() : 0;
-            float scale = Mth.clamp(amplifier / MAX_AMPLIFIER, 0.0F, 1.0F);
+            float scale = SchismMath.clamp(amplifier / MAX_AMPLIFIER, 0.0F, 1.0F);
 
             double distToEntity = player.distanceTo(this.fearEntity);
             double pushX, pushZ;
@@ -112,7 +112,7 @@ public class FearMoveGoal extends Goal {
                 }
                 fleeAngle += (player.getRandom().nextDouble() - 0.5) * 2.0 * FLEE_WOBBLE_MAX;
 
-                double fleeStrength = Mth.lerp(scale, FLEE_STRENGTH_AT_MIN, FLEE_STRENGTH_AT_MAX);
+                double fleeStrength = SchismMath.lerp(scale, FLEE_STRENGTH_AT_MIN, FLEE_STRENGTH_AT_MAX);
                 pushX = Math.cos(fleeAngle) * fleeStrength;
                 pushZ = Math.sin(fleeAngle) * fleeStrength;
             } else {
@@ -128,13 +128,13 @@ public class FearMoveGoal extends Goal {
                         state.tugPhase = 1;
                     }
                 } else {
-                    double tugStrength = Mth.lerp(scale, TUG_STRENGTH_AT_MIN, TUG_STRENGTH_AT_MAX);
+                    double tugStrength = SchismMath.lerp(scale, TUG_STRENGTH_AT_MIN, TUG_STRENGTH_AT_MAX);
                     pushX = Math.cos(state.tugAngle) * tugStrength;
                     pushZ = Math.sin(state.tugAngle) * tugStrength;
 
                     if (state.tugPhase >= TUG_DURATION) {
-                        int pauseMin = (int) Mth.lerp(scale, TUG_PAUSE_MIN_AT_MIN, TUG_PAUSE_MIN_AT_MAX);
-                        int pauseMax = (int) Mth.lerp(scale, TUG_PAUSE_MAX_AT_MIN, TUG_PAUSE_MAX_AT_MAX);
+                        int pauseMin = (int) SchismMath.lerp(scale, TUG_PAUSE_MIN_AT_MIN, TUG_PAUSE_MIN_AT_MAX);
+                        int pauseMax = (int) SchismMath.lerp(scale, TUG_PAUSE_MAX_AT_MIN, TUG_PAUSE_MAX_AT_MAX);
                         int pause = pauseMin + player.getRandom().nextInt(Math.max(pauseMax - pauseMin + 1, 1));
                         state.tugPhase = -pause;
                     }

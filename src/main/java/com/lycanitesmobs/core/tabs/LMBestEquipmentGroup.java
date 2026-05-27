@@ -3,7 +3,6 @@ package com.lycanitesmobs.core.tabs;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
-import com.lycanitesmobs.core.item.equipment.features.*;
 import com.lycanitesmobs.core.manager.EquipmentPartManager;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import net.minecraft.network.chat.Component;
@@ -56,7 +55,7 @@ public class LMBestEquipmentGroup {
             var item = ObjectManager.getItem(name);
             if (item instanceof ItemEquipmentPart part) {
                 ItemStack partStack = new ItemStack(part);
-                part.setLevel(partStack, part.levelMax);
+                part.setLevel(partStack, part.getLevelMax());
                 part.setSharpness(partStack, ItemEquipment.SHARPNESS_MAX);
                 part.setMana(partStack, ItemEquipment.MANA_MAX);
                 equipmentItem.addEquipmentPart(icon, partStack, slot++);
@@ -107,15 +106,15 @@ public class LMBestEquipmentGroup {
      * Computes all valid equipment combinations and returns the best ones per category.
      */
     private List<ItemStack> computeBestEquipment() {
-        Map<String, Lazy<ItemEquipmentPart>> allParts = EquipmentPartManager.getInstance().equipmentParts;
+        Set<Map.Entry<String, Lazy<ItemEquipmentPart>>> allParts = EquipmentPartManager.getInstance().getEquipmentPartEntries();
         if (allParts.isEmpty()) return Collections.emptyList();
 
         Map<String, List<PartEntry>> bySlot = new HashMap<>();
-        for (Map.Entry<String, Lazy<ItemEquipmentPart>> entry : allParts.entrySet()) {
+        for (Map.Entry<String, Lazy<ItemEquipmentPart>> entry : allParts) {
             ItemEquipmentPart part = entry.getValue().get();
             if (part == null) continue;
-            PartEntry pe = new PartEntry(part, entry.getKey(), part.levelMax);
-            bySlot.computeIfAbsent(part.slotType, k -> new ArrayList<>()).add(pe);
+            PartEntry pe = new PartEntry(part, entry.getKey(), part.getLevelMax());
+            bySlot.computeIfAbsent(part.getSlotType(), k -> new ArrayList<>()).add(pe);
         }
 
         List<PartEntry> bases = bySlot.getOrDefault("base", Collections.emptyList());
@@ -211,14 +210,7 @@ public class LMBestEquipmentGroup {
         List<String> slots = new ArrayList<>();
         ItemStack fakeStack = new ItemStack(pe.part);
         pe.part.setLevel(fakeStack, pe.level);
-        for (EquipmentFeature feature : pe.part.features) {
-            if (feature instanceof SlotEquipmentFeature slotFeature) {
-                if (feature.isActive(fakeStack, pe.level)) {
-                    slots.add(slotFeature.slotType);
-                }
-            }
-        }
-        return slots;
+        return pe.part.getActiveSlotTypes(fakeStack);
     }
 
     /**
@@ -277,7 +269,7 @@ public class LMBestEquipmentGroup {
         double totalKnockback = 0;
         double totalRange = 0;
 
-        float pickaxeSpeed = 0, axeSpeed = 0, shovelSpeed = 0, hoeSpeed = 0, swordSpeed = 0, shearsSpeed = 0;
+        float pickaxeSpeed = 0, axeSpeed = 0, shovelSpeed = 0;
         int pickaxeLevel = -1, axeLevel = -1, shovelLevel = -1;
         Set<String> harvestTypes = new HashSet<>();
         float totalHarvestSpeed = 0;
@@ -288,42 +280,23 @@ public class LMBestEquipmentGroup {
         for (PartEntry pe : candidate.parts) {
             ItemStack fakeStack = new ItemStack(pe.part);
             pe.part.setLevel(fakeStack, pe.level);
-
-            for (EquipmentFeature feature : pe.part.features) {
-                if (!feature.isActive(fakeStack, pe.level)) continue;
-
-                if (feature instanceof DamageEquipmentFeature dmg) {
-                    totalDamage += dmg.damageAmount;
-                    totalCooldown += dmg.damageCooldown;
-                    damageFeatureCount++;
-                    totalSweep += dmg.damageSweep;
-                    totalKnockback += dmg.damageKnockback;
-                    totalRange += dmg.damageRange;
-                } else if (feature instanceof HarvestEquipmentFeature harvest) {
-                    String type = harvest.harvestType.toLowerCase();
-                    harvestTypes.add(type);
-                    totalHarvestSpeed += harvest.harvestSpeed;
-                    switch (type) {
-                        case "pickaxe" -> {
-                            pickaxeSpeed += harvest.harvestSpeed;
-                            pickaxeLevel = Math.max(pickaxeLevel, harvest.harvestLevel);
-                        }
-                        case "axe" -> {
-                            axeSpeed += harvest.harvestSpeed;
-                            axeLevel = Math.max(axeLevel, harvest.harvestLevel);
-                        }
-                        case "shovel" -> {
-                            shovelSpeed += harvest.harvestSpeed;
-                            shovelLevel = Math.max(shovelLevel, harvest.harvestLevel);
-                        }
-                    }
-                } else if (feature instanceof ProjectileEquipmentFeature proj) {
-                    double cd = Math.max(proj.cooldown, 1);
-                    projectileScore += (proj.bonusDamage + 1.0) * proj.count / cd * 20.0;
-                } else if (feature instanceof EffectEquipmentFeature) {
-                    effectCount++;
-                }
-            }
+            ItemEquipmentPart.FeatureStats stats = pe.part.getActiveFeatureStats(fakeStack);
+            totalDamage += stats.totalDamage();
+            totalCooldown += stats.totalCooldown();
+            damageFeatureCount += stats.damageFeatureCount();
+            totalSweep += stats.totalSweep();
+            totalKnockback += stats.totalKnockback();
+            totalRange += stats.totalRange();
+            pickaxeSpeed += stats.pickaxeSpeed();
+            axeSpeed += stats.axeSpeed();
+            shovelSpeed += stats.shovelSpeed();
+            pickaxeLevel = Math.max(pickaxeLevel, stats.pickaxeLevel());
+            axeLevel = Math.max(axeLevel, stats.axeLevel());
+            shovelLevel = Math.max(shovelLevel, stats.shovelLevel());
+            totalHarvestSpeed += stats.totalHarvestSpeed();
+            projectileScore += stats.projectileScore();
+            effectCount += stats.effectCount();
+            harvestTypes.addAll(stats.harvestTypes());
         }
 
         double avgCooldown = damageFeatureCount > 0 ? totalCooldown / damageFeatureCount : 4.0;

@@ -16,10 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <p>
  * The lightmap is a 16x16 texture: X = block light level (0-15), Y = sky light level (0-15).
  * <p>
- * <b>Phase 1 — Block light:</b> For each sky-light row, lerp every block-light column
+ * <b>Phase 1 - Block light:</b> For each sky-light row, lerp every block-light column
  * toward column 0 (zero block light). Torches, lanterns, etc. appear to go out.
  * <p>
- * <b>Phase 2 — Sky light:</b> Lerp every pixel toward row 0 (zero sky light).
+ * <b>Phase 2 - Sky light:</b> Lerp every pixel toward row 0 (zero sky light).
  * Sunlight/moonlight fades. At max, only the ambient minimum remains.
  * <p>
  * Both phases operate on the already-computed vanilla lightmap, just before GPU upload.

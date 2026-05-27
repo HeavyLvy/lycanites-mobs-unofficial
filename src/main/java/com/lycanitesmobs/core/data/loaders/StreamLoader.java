@@ -14,9 +14,9 @@ import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 public class StreamLoader {
-    public static StreamLoader CLIENT;
-    public static StreamLoader SERVER;
-    public static StreamLoader COMMON;
+    private static StreamLoader CLIENT;
+    private static StreamLoader SERVER;
+    private static StreamLoader COMMON;
 
     /**
      * Creates and initializes all file loaders for the provided mod domain.
@@ -27,7 +27,19 @@ public class StreamLoader {
         CLIENT = new StreamLoader("assets", domain);
         SERVER = new StreamLoader("data", domain);
         COMMON = new StreamLoader("common", domain);
-        LMHelperClass.logDebug("", "All StreamLoaders initialized successfully.");
+        LMHelperClass.logInfoMessage("All StreamLoaders initialized successfully.");
+    }
+
+    public static StreamLoader client() {
+        return CLIENT;
+    }
+
+    public static StreamLoader server() {
+        return SERVER;
+    }
+
+    public static StreamLoader common() {
+        return COMMON;
     }
 
     private final String rootPath;

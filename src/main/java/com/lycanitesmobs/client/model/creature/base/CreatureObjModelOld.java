@@ -131,7 +131,7 @@ public class CreatureObjModelOld extends CreatureModel {
 
     public CreatureObjModelOld initModel(String name, ModInfo modInfo, String path, ResourceManager resourceManager) {
         CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(name);
-        if (creatureInfo != null && !creatureInfo.enabled) {
+        if (creatureInfo != null && !creatureInfo.isEnabled()) {
             return this;
         }
 
@@ -142,7 +142,7 @@ public class CreatureObjModelOld extends CreatureModel {
         this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"), resourceManager);
         this.wavefrontParts = this.objModel.objParts;
         if (this.wavefrontParts.isEmpty())
-            LMHelperClass.logWarning("", "Unable to load (old format) model obj for: " + name + "");
+            LMHelperClass.logWarningMessage("Unable to load (old format) model obj for: " + name + "");
 
         this.loadPartsJson(resourceManager);
 
@@ -229,7 +229,7 @@ public class CreatureObjModelOld extends CreatureModel {
         }
 
         if (entity != null) {
-            if (entity.onlyRenderTicks >= 0) loop = entity.onlyRenderTicks;
+            if (entity.getOnlyRenderTicks() >= 0) loop = entity.getOnlyRenderTicks();
         }
 
         for (ObjPart part : this.wavefrontParts) {

@@ -10,7 +10,7 @@ import net.minecraft.world.level.Level;
 
 public class AltarMobEventTrigger extends MobEventTrigger {
 	/** The Altar to trigger from. TODO Altars should be created via JSON here instead. **/
-	public AltarInfo altar;
+	protected AltarInfo altar;
 
 
 	/** Constructor **/
@@ -23,7 +23,7 @@ public class AltarMobEventTrigger extends MobEventTrigger {
 	public void loadFromJSON(JsonObject json) {
 		this.altar = AltarInfo.getAltar(json.get("altarName").getAsString());
 		if(this.altar != null)
-			this.altar.mobEventTrigger = this;
+			this.altar.attachMobEventTrigger(this);
 
 		super.loadFromJSON(json);
 	}
@@ -54,6 +54,6 @@ public class AltarMobEventTrigger extends MobEventTrigger {
 	 */
 	public void onRemove() {
 		if(this.altar != null)
-			this.altar.mobEventTrigger = null;
+			this.altar.clearMobEventTrigger(this);
 	}
 }

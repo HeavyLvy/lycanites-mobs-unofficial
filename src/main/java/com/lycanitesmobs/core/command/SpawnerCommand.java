@@ -27,7 +27,7 @@ public class SpawnerCommand {
 		}
 		String spawnerName = StringArgumentType.getString(context, "spawner");
 		int level = Math.max(1, IntegerArgumentType.getInteger(context, "level"));
-		if(!SpawnerManager.getInstance().spawners.containsKey(spawnerName)) {
+		if(!SpawnerManager.getInstance().hasSpawner(spawnerName)) {
 			context.getSource().sendSuccess(() -> Component.translatable("lyc.command.spawner.test.unknown"), true);
 			return 0;
 		}
@@ -40,7 +40,7 @@ public class SpawnerCommand {
 			pos = new BlockPos(player.blockPosition());
 		}
 
-		SpawnerManager.getInstance().spawners.get(spawnerName).trigger(world, player, null, pos, level, 1, 0);
+		SpawnerManager.getInstance().getSpawner(spawnerName).trigger(world, player, null, pos, level, 1, 0);
 		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.spawner.test"), true);
 		return 0;
 	}

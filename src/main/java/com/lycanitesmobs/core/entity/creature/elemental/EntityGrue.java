@@ -1,10 +1,10 @@
 package com.lycanitesmobs.core.entity.creature.elemental;
 
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.StealthGoal;
 import com.lycanitesmobs.core.data.info.ObjectLists;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -50,8 +50,8 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextPriorityGoalIndex++, new StealthGoal(this).setStealthTime(20).setStealthAttack(true).setStealthMove(true));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(true));
+        this.goalSelector.addGoal(this.claimPriorityGoalIndex(), new StealthGoal(this).setStealthTime(20).setStealthAttack(true).setStealthMove(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(true));
     }
 
 
@@ -206,7 +206,7 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================
@@ -243,8 +243,6 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
         if (!"".equals(suffix)) {
             textureName += "_" + suffix;
         }
-        if (TextureManager.getTexture(textureName) == null)
-            TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
-        return TextureManager.getTexture(textureName);
+        return AssetHelper.entityTexture(textureName);
     }
 }

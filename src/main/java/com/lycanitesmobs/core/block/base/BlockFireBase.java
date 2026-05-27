@@ -38,11 +38,11 @@ public class BlockFireBase extends BlockBase {
     public static final BooleanProperty UP = PipeBlock.UP;
     private static final Map<Direction, BooleanProperty> FACING_TO_PROPERTY_MAP = PipeBlock.PROPERTY_BY_DIRECTION.entrySet().stream().filter((p_199776_0_) -> p_199776_0_.getKey() != Direction.DOWN).collect(Util.toMap());
     private final Map<BlockState, VoxelShape> shapesCache;
-    public boolean dieInRain = true;
-    public boolean triggerTNT = true;
-    public int agingRate = 3;
-    public float spreadChance = 1;
-    public boolean removeOnNoFireTick;
+    protected boolean dieInRain = true;
+    protected boolean triggerTNT = true;
+    protected int agingRate = 3;
+    protected float spreadChance = 1;
+    protected boolean removeOnNoFireTick;
     private static final VoxelShape UP_AABB = Block.box(0.0D, 15.0D, 0.0D, 16.0D, 16.0D, 16.0D);
     private static final VoxelShape WEST_AABB = Block.box(0.0D, 0.0D, 0.0D, 1.0D, 16.0D, 16.0D);
     private static final VoxelShape EAST_AABB = Block.box(15.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
@@ -74,7 +74,7 @@ public class BlockFireBase extends BlockBase {
         this.shapesCache = ImmutableMap.copyOf(this.stateDefinition.getPossibleStates().stream().filter((p_53497_) -> {
             return p_53497_.getValue(AGE) == 0;
         }).collect(Collectors.toMap(Function.identity(), BlockFireBase::calculateShape)));
-        ItemManager.getInstance().cutoutBlocks.add(this);
+        ItemManager.getInstance().registerCutoutBlock(this);
     }
 
     private static VoxelShape calculateShape(BlockState p_53491_) {

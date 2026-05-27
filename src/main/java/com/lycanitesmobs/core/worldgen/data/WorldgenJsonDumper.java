@@ -2,7 +2,6 @@ package com.lycanitesmobs.core.worldgen.data;
 
 import com.google.gson.*;
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.block.liquid.BaseLiquidBlock;
 import com.lycanitesmobs.core.manager.DungeonManager;
 import com.lycanitesmobs.core.manager.FluidManager;
 import com.lycanitesmobs.core.manager.WorldGenManager;
@@ -84,12 +83,12 @@ public class WorldgenJsonDumper {
         WorldGenManager worldGen = WorldGenManager.getInstance();
         Map<String, List<String>> fluidToFeatures = new HashMap<>();
 
-        for (String key : worldGen.fluidPlacedFeatures.keySet()) {
+        worldGen.forEachFluidPlacedFeature((key, placedFeature) -> {
             int idx = key.indexOf('_');
             String fluid = idx >= 0 ? key.substring(0, idx) : key;
             String featureId = LycanitesMobs.MODID + ":" + key;
             fluidToFeatures.computeIfAbsent(fluid, k -> new ArrayList<>()).add(featureId);
-        }
+        });
 
         for (Map.Entry<String, List<String>> entry : fluidToFeatures.entrySet()) {
             String fluid = entry.getKey();
@@ -112,23 +111,23 @@ public class WorldgenJsonDumper {
         WorldGenManager worldGen = WorldGenManager.getInstance();
         Map<String, BiomeSpec> seen = new HashMap<>();
 
-        for (String key : worldGen.fluidPlacedFeatures.keySet()) {
+        worldGen.forEachFluidPlacedFeature((key, placedFeature) -> {
             int idx = key.indexOf('_');
             String fluid = idx >= 0 ? key.substring(0, idx) : key;
 
             if (seen.containsKey(fluid)) {
-                continue;
+                return;
             }
 
             BiomeSpec spec = biomeSpecForFluid(fluid);
             if (spec == null) {
-                continue;
+                return;
             }
             seen.put(fluid, spec);
 
             String tagPath = "tags/worldgen/biome/has_" + fluid + "_pools.json";
-            write(root, tagPath, biomeTag(spec.biomes));
-        }
+            writeUnchecked(root, tagPath, biomeTag(spec.biomes));
+        });
     }
 
     private static JsonObject biomeTag(List<String> biomes) {
@@ -160,12 +159,12 @@ public class WorldgenJsonDumper {
         WorldGenManager worldGen = WorldGenManager.getInstance();
         Map<String, List<String>> fluidToFeatures = new HashMap<>();
 
-        for (String key : worldGen.fluidPlacedFeatures.keySet()) {
+        worldGen.forEachFluidPlacedFeature((key, placedFeature) -> {
             int idx = key.indexOf('_');
             String fluid = idx >= 0 ? key.substring(0, idx) : key;
             String featureId = LycanitesMobs.MODID + ":" + key;
             fluidToFeatures.computeIfAbsent(fluid, k -> new ArrayList<>()).add(featureId);
-        }
+        });
 
         for (Map.Entry<String, List<String>> entry : fluidToFeatures.entrySet()) {
             String fluid = entry.getKey();
@@ -381,15 +380,15 @@ public class WorldgenJsonDumper {
     private static void dumpConfiguredFeatureDungeon(Path root) throws IOException {
         DungeonManager dungeonManager = DungeonManager.getInstance();
 
-        for (DungeonSchematic schematic : dungeonManager.schematics.values()) {
+        for (DungeonSchematic schematic : dungeonManager.getSchematics()) {
             JsonObject rootJson = new JsonObject();
             rootJson.addProperty("type", LycanitesMobs.MODID + ":dungeon");
 
             JsonObject config = new JsonObject();
-            config.addProperty("schematic", schematic.name);
+            config.addProperty("schematic", schematic.getName());
             rootJson.add("config", config);
 
-            String fileName = "worldgen/configured_feature/dungeon_" + schematic.name + ".json";
+            String fileName = "worldgen/configured_feature/dungeon_" + schematic.getName() + ".json";
             write(root, fileName, rootJson);
         }
     }
@@ -444,9 +443,9 @@ public class WorldgenJsonDumper {
     private static void dumpPlacedFeatureDungeon(Path root) throws IOException {
         DungeonManager dungeonManager = DungeonManager.getInstance();
 
-        for (DungeonSchematic schematic : dungeonManager.schematics.values()) {
+        for (DungeonSchematic schematic : dungeonManager.getSchematics()) {
             JsonObject rootJson = new JsonObject();
-            rootJson.addProperty("feature", LycanitesMobs.MODID + ":dungeon_" + schematic.name);
+            rootJson.addProperty("feature", LycanitesMobs.MODID + ":dungeon_" + schematic.getName());
             JsonArray placement = new JsonArray();
 
             JsonObject inSquare = new JsonObject();
@@ -464,31 +463,44 @@ public class WorldgenJsonDumper {
 
             rootJson.add("placement", placement);
 
-            String fileName = "worldgen/placed_feature/dungeon_" + schematic.name + ".json";
+            String fileName = "worldgen/placed_feature/dungeon_" + schematic.getName() + ".json";
             write(root, fileName, rootJson);
         }
     }
 
     private static void dumpFluidFeatures(Path root) throws IOException {
-        Map<String, BaseLiquidBlock> map = FluidManager.getInstance().worldgenFluidBlocks;
-        for (Map.Entry<String, BaseLiquidBlock> entry : map.entrySet()) {
-            String fluidName = entry.getKey();
-            BaseLiquidBlock block = entry.getValue();
+        FluidManager.getInstance().forEachWorldgenFluidBlock((fluidName, block) -> {
 
             ResourceLocation blockId = ForgeRegistries.BLOCKS.getKey(block);
             ResourceLocation fluidId = ForgeRegistries.FLUIDS.getKey(block.getFluid());
             if (blockId == null || fluidId == null) {
-                continue;
+                return;
             }
 
-            dumpConfiguredLake(root, fluidName, blockId);
-            dumpConfiguredSpring(root, fluidName, fluidId);
-            dumpPlacedLake(root, fluidName);
-            dumpPlacedSpring(root, fluidName);
+            writeFluidFeatureFiles(root, fluidName, blockId, fluidId);
+        });
+    }
+
+    private static void writeFluidFeatureFiles(Path root, String fluidName, ResourceLocation blockId, ResourceLocation fluidId) {
+        writeUnchecked(root, "worldgen/configured_feature/" + fluidName + "_lake.json", configuredLakeJson(blockId));
+        writeUnchecked(root, "worldgen/configured_feature/" + fluidName + "_spring.json", configuredSpringJson(fluidId));
+        writeUnchecked(root, "worldgen/placed_feature/" + fluidName + "_lake.json", placedLakeJson(fluidName));
+        writeUnchecked(root, "worldgen/placed_feature/" + fluidName + "_spring.json", placedSpringJson(fluidName));
+    }
+
+    private static void writeUnchecked(Path root, String path, JsonObject json) {
+        try {
+            write(root, path, json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
     private static void dumpConfiguredLake(Path root, String fluidName, ResourceLocation blockId) throws IOException {
+        write(root, "worldgen/configured_feature/" + fluidName + "_lake.json", configuredLakeJson(blockId));
+    }
+
+    private static JsonObject configuredLakeJson(ResourceLocation blockId) {
         JsonObject rootJson = new JsonObject();
         rootJson.addProperty("type", "minecraft:lake");
 
@@ -510,10 +522,14 @@ public class WorldgenJsonDumper {
 
         rootJson.add("config", config);
 
-        write(root, "worldgen/configured_feature/" + fluidName + "_lake.json", rootJson);
+        return rootJson;
     }
 
     private static void dumpConfiguredSpring(Path root, String fluidName, ResourceLocation fluidId) throws IOException {
+        write(root, "worldgen/configured_feature/" + fluidName + "_spring.json", configuredSpringJson(fluidId));
+    }
+
+    private static JsonObject configuredSpringJson(ResourceLocation fluidId) {
         JsonObject rootJson = new JsonObject();
         rootJson.addProperty("type", "minecraft:spring_feature");
 
@@ -536,7 +552,7 @@ public class WorldgenJsonDumper {
 
         rootJson.add("config", config);
 
-        write(root, "worldgen/configured_feature/" + fluidName + "_spring.json", rootJson);
+        return rootJson;
     }
 
 
@@ -547,6 +563,10 @@ public class WorldgenJsonDumper {
     }
 
     private static void dumpPlacedLake(Path root, String fluidName) throws IOException {
+        write(root, "worldgen/placed_feature/" + fluidName + "_lake.json", placedLakeJson(fluidName));
+    }
+
+    private static JsonObject placedLakeJson(String fluidName) {
         JsonObject rootJson = new JsonObject();
         rootJson.addProperty("feature", LycanitesMobs.MODID + ":" + fluidName + "_lake");
 
@@ -572,10 +592,14 @@ public class WorldgenJsonDumper {
 
         rootJson.add("placement", placement);
 
-        write(root, "worldgen/placed_feature/" + fluidName + "_lake.json", rootJson);
+        return rootJson;
     }
 
     private static void dumpPlacedSpring(Path root, String fluidName) throws IOException {
+        write(root, "worldgen/placed_feature/" + fluidName + "_spring.json", placedSpringJson(fluidName));
+    }
+
+    private static JsonObject placedSpringJson(String fluidName) {
         JsonObject rootJson = new JsonObject();
         rootJson.addProperty("feature", LycanitesMobs.MODID + ":" + fluidName + "_spring");
 
@@ -596,7 +620,7 @@ public class WorldgenJsonDumper {
 
         rootJson.add("placement", placement);
 
-        write(root, "worldgen/placed_feature/" + fluidName + "_spring.json", rootJson);
+        return rootJson;
     }
 
 }

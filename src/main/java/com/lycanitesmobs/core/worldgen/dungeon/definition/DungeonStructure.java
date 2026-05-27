@@ -6,16 +6,32 @@ public class DungeonStructure {
     /** Dungeon sectors can be corridors, rooms, entrances, etc that make up a dungeon. **/
 
 	/** The unique name of this sector. Required. **/
-	public String name = "";
+	protected String name = "";
 
     /** The type of structure that this is. Can be: decoration (default), feature, altar or arena. **/
-    public String type = "decoration";
+    protected String type = "decoration";
 
 	/** The weight to use for this structure when selecting randomly. **/
-	public int weight = 8;
+	protected int weight = 8;
 
 	/** The resource location path to the nbt data for this structure. **/
-	public String nbt = "";
+	protected String nbt = "";
+
+	public String getName() {
+		return this.name;
+	}
+
+	public String getType() {
+		return this.type;
+	}
+
+	public int getWeight() {
+		return this.weight;
+	}
+
+	public String getNbt() {
+		return this.nbt;
+	}
 
 
     /** Loads this Dungeon Sector from the provided JSON data. **/

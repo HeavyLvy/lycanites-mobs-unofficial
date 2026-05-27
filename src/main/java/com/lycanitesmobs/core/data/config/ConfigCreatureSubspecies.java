@@ -35,14 +35,14 @@ public class ConfigCreatureSubspecies {
 				.translation(CoreConfig.CONFIG_PREFIX + "creature.variant.baseWeight")
 				.define("baseWeight", 400);
 
-		for(String variantName : Variant.SUBSPECIES_NAMES) {
+		for(String variantName : Variant.getSubspeciesNames()) {
 			commonWeights.put(variantName, builder
 					.comment("Subspecies weight for " + variantName + ".")
 					.translation(CoreConfig.CONFIG_PREFIX + "creature.variant.weights." + variantName)
-					.define("weights." + variantName, Variant.COMMON_WEIGHTS.get(variantName)));
+					.define("weights." + variantName, Variant.getCommonWeight(variantName)));
 		}
 
-		for(String variantName : Variant.SUBSPECIES_NAMES) {
+		for(String variantName : Variant.getSubspeciesNames()) {
 			Map<String, ForgeConfigSpec.ConfigValue<Double>> statMultipliers = new HashMap<>();
 			for (String statName : CreatureStats.STAT_NAMES) {
 				double defaultValue = 1.0;

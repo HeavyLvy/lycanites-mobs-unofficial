@@ -15,6 +15,7 @@ import org.apache.commons.io.IOUtils;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.InputStream;
@@ -31,12 +32,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerFamiliars {
     public static PlayerFamiliars INSTANCE = new PlayerFamiliars();
-    public Map<UUID, Map<UUID, PetEntry>> playerFamiliars = new ConcurrentHashMap<>();
-    public Map<UUID, Long> playerFamiliarLoadedTimes = new ConcurrentHashMap<>();
-    public List<String> familiarBlacklist = new ArrayList<>();
-    public java.util.Set<UUID> familiarLoadsInFlight = ConcurrentHashMap.newKeySet();
-    public java.util.Set<UUID> pendingFamiliars = ConcurrentHashMap.newKeySet();
-    public SSLContext sslContext;
+    protected Map<UUID, Map<UUID, PetEntry>> playerFamiliars = new ConcurrentHashMap<>();
+    protected Map<UUID, Long> playerFamiliarLoadedTimes = new ConcurrentHashMap<>();
+    protected List<String> familiarBlacklist = new ArrayList<>();
+    protected java.util.Set<UUID> familiarLoadsInFlight = ConcurrentHashMap.newKeySet();
+    protected java.util.Set<UUID> pendingFamiliars = ConcurrentHashMap.newKeySet();
+    protected SSLContext sslContext;
 
     public PlayerFamiliars() {
         // Trust Self Signed SSL Certificates:
@@ -75,7 +76,7 @@ public class PlayerFamiliars {
             try {
                 this.loadForPlayerUUID(this.playerUUID);
             } finally {
-                PlayerFamiliars.INSTANCE.familiarLoadsInFlight.remove(this.playerUUID);
+                PlayerFamiliars.INSTANCE.finishFamiliarLoad(this.playerUUID);
             }
         }
 
@@ -84,7 +85,7 @@ public class PlayerFamiliars {
             try {
                 URL url = new URL(LycanitesMobs.serviceAPI + "/familiars?minecraft_uuid=" + uuid.toString());
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setSSLSocketFactory(PlayerFamiliars.INSTANCE.sslContext.getSocketFactory());
+                urlConnection.setSSLSocketFactory(PlayerFamiliars.INSTANCE.getSocketFactory());
                 urlConnection.setRequestProperty("Authorization", "Bearer 7ed1f44cbc1aff693e604075f23d56402983a4a0"); // This is a public api so the key is safe to be exposed like this. :)
                 String osName = System.getProperty("os.name");
                 urlConnection.setRequestProperty("User-Agent", "Minecraft " + LycanitesMobs.versionMC + " (" + osName + ") LycanitesMobs " + LycanitesMobs.versionNumber);
@@ -96,16 +97,16 @@ public class PlayerFamiliars {
                 } finally {
                     inputStream.close();
                 }
-                LMHelperClass.logInfo("", "Online familiars loaded successfully for " + uuid + ".");
+                LMHelperClass.logInfoMessage("Online familiars loaded successfully for " + uuid + ".");
             } catch (Throwable e) {
-                LMHelperClass.logInfo("", "Unable to access the online familiars service.");
+                LMHelperClass.logInfoMessage("Unable to access the online familiars service.");
                 e.printStackTrace();
                 return;
             }
 
             // Parse JSON File:
             PlayerFamiliars.INSTANCE.parseFamiliarJSON(uuid, jsonString);
-            PlayerFamiliars.INSTANCE.pendingFamiliars.add(uuid);
+            PlayerFamiliars.INSTANCE.markFamiliarsPending(uuid);
         }
     }
 
@@ -140,8 +141,8 @@ public class PlayerFamiliars {
                     double familiar_size = familiarJson.get("familiar_size").getAsDouble();
                     if (familiar_size <= 0) { // Default Reduced Size:
                         familiar_size = 0.5D;
-                        if (creatureVariant != null && creatureVariant.scale != 1) {
-                            familiar_size *= 1 / creatureVariant.scale;
+                        if (creatureVariant != null && creatureVariant.getScale() != 1) {
+                            familiar_size *= 1 / creatureVariant.getScale();
                         }
                     }
 
@@ -159,17 +160,17 @@ public class PlayerFamiliars {
                 }
             }
         } catch (Exception e) {
-            /*LycanitesMobs.logWarning("", "A problem occurred when loading online player familiars:");
+            /*LMHelperClass.logWarningMessage("A problem occurred when loading online player familiars:");
             e.printStackTrace();*/
         }
-        this.playerFamiliars.put(playerUUID, parsedEntries);
+        this.cacheFamiliars(playerUUID, parsedEntries);
     }
 
     public Map<UUID, PetEntry> getFamiliarsForPlayer(Player player) {
         UUID playerUUID = player.getUUID();
         long currentTime = System.currentTimeMillis() / 1000;
         long loadedTime = this.getPlayerFamiliarLoadedTime(player);
-        if ((loadedTime < 0 || currentTime - loadedTime > 30 * 60) && this.familiarLoadsInFlight.add(playerUUID)) {
+        if ((loadedTime < 0 || currentTime - loadedTime > 30 * 60) && this.tryBeginFamiliarLoad(playerUUID)) {
             this.updatePlayerFamiliarLoadedTime(playerUUID);
             FamiliarLoader familiarLoader = new FamiliarLoader(playerUUID);
             Thread thread = new Thread(familiarLoader, "LycanitesFamiliars-" + playerUUID);
@@ -181,12 +182,36 @@ public class PlayerFamiliars {
         if (this.playerFamiliars.containsKey(playerUUID)) {
             playerFamiliarEntries.putAll(this.playerFamiliars.get(playerUUID));
             for (PetEntry familiarEntry : playerFamiliarEntries.values()) {
-                if (familiarEntry.host == null) {
-                    familiarEntry.host = player;
+                if (familiarEntry.getOwner() == null) {
+                    familiarEntry.setOwner(player);
                 }
             }
         }
         return playerFamiliarEntries;
+    }
+
+    public boolean hasLoadedFamiliar(UUID playerUUID, UUID familiarUUID) {
+        return this.playerFamiliars.containsKey(playerUUID) && this.playerFamiliars.get(playerUUID).containsKey(familiarUUID);
+    }
+
+    protected boolean tryBeginFamiliarLoad(UUID playerUUID) {
+        return this.familiarLoadsInFlight.add(playerUUID);
+    }
+
+    protected void finishFamiliarLoad(UUID playerUUID) {
+        this.familiarLoadsInFlight.remove(playerUUID);
+    }
+
+    protected SSLSocketFactory getSocketFactory() {
+        return this.sslContext.getSocketFactory();
+    }
+
+    protected void cacheFamiliars(UUID playerUUID, Map<UUID, PetEntry> entries) {
+        this.playerFamiliars.put(playerUUID, entries);
+    }
+
+    protected void markFamiliarsPending(UUID playerUUID) {
+        this.pendingFamiliars.add(playerUUID);
     }
 
     public long getPlayerFamiliarLoadedTime(Player player) {

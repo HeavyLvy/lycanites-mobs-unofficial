@@ -1,6 +1,5 @@
 package com.lycanitesmobs.client.manager;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.model.creature.base.CreatureObjModel;
 import com.lycanitesmobs.client.model.creature.base.CreatureObjModelOld;
 import com.lycanitesmobs.client.model.projectile.base.ProjectileObjModel;
@@ -93,14 +92,14 @@ public class ModelManager {
     public void createModels() {
         try {
             // Creature Models:
-            for (CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
-                if (creatureInfo.dummy) {
+            for (CreatureInfo creatureInfo : CreatureManager.getInstance().getCreatures()) {
+                if (creatureInfo.isDummy()) {
                     continue;
                 }
-                this.creatureModels.put(creatureInfo, (CreatureModel) Class.forName(creatureInfo.modelClassName).getConstructor().newInstance());
-                for (Subspecies subspecies : creatureInfo.subspecies.values()) {
-                    if (subspecies.modelClassName != null) {
-                        this.creatureSubspeciesModels.put(subspecies, (CreatureModel) Class.forName(subspecies.modelClassName).getConstructor().newInstance());
+                this.creatureModels.put(creatureInfo, (CreatureModel) Class.forName(creatureInfo.getModelClassName()).getConstructor().newInstance());
+                for (Subspecies subspecies : creatureInfo.getSubspeciesEntries()) {
+                    if (subspecies.getModelClassName() != null) {
+                        this.creatureSubspeciesModels.put(subspecies, (CreatureModel) Class.forName(subspecies.getModelClassName()).getConstructor().newInstance());
                     }
                 }
             }
@@ -112,9 +111,9 @@ public class ModelManager {
 
         try {
             // Projectile Models:
-            for (ProjectileInfo projectileInfo : ProjectileManager.getInstance().projectiles.values()) {
-                if (projectileInfo.modelClassName != null) {
-                    this.projectileModels.put(projectileInfo, (ProjectileModel) Class.forName(projectileInfo.modelClassName).getConstructor().newInstance());
+            for (ProjectileInfo projectileInfo : ProjectileManager.getInstance().getProjectiles()) {
+                if (projectileInfo.getModelClassName() != null) {
+                    this.projectileModels.put(projectileInfo, (ProjectileModel) Class.forName(projectileInfo.getModelClassName()).getConstructor().newInstance());
                 }
             }
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException |
@@ -125,7 +124,7 @@ public class ModelManager {
 
         // Equipment Models:
         this.equipmentModel = new EquipmentModel();
-        for (String equipmentPartName : EquipmentPartManager.getInstance().equipmentParts.keySet()) {
+        for (String equipmentPartName : EquipmentPartManager.getInstance().getEquipmentPartNames()) {
             this.equipmentPartModels.put((ItemEquipmentPart) ObjectManager.getItem(equipmentPartName), new ModelEquipmentPart((ItemEquipmentPart) ObjectManager.getItem(equipmentPartName)));
         }
     }

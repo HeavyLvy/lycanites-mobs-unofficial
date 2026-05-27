@@ -20,12 +20,24 @@ public class ThemeBlock {
     /**
      * The block to use.
      **/
-    public String blockId;
+    protected String blockId;
 
     /**
      * The weight for randomly using this block.
      **/
-    public int weight = 8;
+    protected int weight = 8;
+
+    public void setBlock(Block block) {
+        this.block = block;
+    }
+
+    public String getBlockId() {
+        return this.blockId;
+    }
+
+    public int getWeight() {
+        return this.weight;
+    }
 
 
     /**
@@ -35,7 +47,7 @@ public class ThemeBlock {
         if (json.has("blockId")) {
             this.blockId = json.get("blockId").getAsString().toLowerCase();
         } else {
-            LMHelperClass.logWarning("", "Error adding Dungeon Theme Block: JSON value 'blockId' has not been set.");
+            LMHelperClass.logWarningMessage("Error adding Dungeon Theme Block: JSON value 'blockId' has not been set.");
         }
 
         if (json.has("weight")) {

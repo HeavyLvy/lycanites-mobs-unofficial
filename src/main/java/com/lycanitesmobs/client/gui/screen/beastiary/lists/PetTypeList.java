@@ -37,7 +37,7 @@ public class PetTypeList extends CreatureFilterList {
 	@Override
 	public void setSelected(@Nullable BaseListEntry entry) {
 		super.setSelected(entry);
-		this.screen.playerExt.selectedPetType = this.getSelectedIndex();
+		this.screen.playerExt.selectPetType(this.getSelectedIndex());
 		for(CreatureList creatureList : this.filteredLists) {
 			if(creatureList != null) {
 				this.updateCreatureListType(creatureList);
@@ -47,7 +47,7 @@ public class PetTypeList extends CreatureFilterList {
 
 	@Override
 	protected boolean isSelectedItem(int index) {
-		return this.screen.playerExt.selectedPetType == index;
+		return this.screen.playerExt.getSelectedPetType() == index;
 	}
 
 	/**

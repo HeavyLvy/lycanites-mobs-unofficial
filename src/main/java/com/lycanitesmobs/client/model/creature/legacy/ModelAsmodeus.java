@@ -187,7 +187,7 @@ public class ModelAsmodeus extends CreatureObjModelOld {
             EntityAsmodeus entityAsmodeus = (EntityAsmodeus) entity;
             if (entityAsmodeus.isAttackOnCooldown()) {
                 rotZ -= loop * 30;
-            } else if (entityAsmodeus.aiRangedAttack != null && !entityAsmodeus.aiRangedAttack.attackOnCooldown) {
+            } else if (entityAsmodeus.hasRangedAttackGoal() && !entityAsmodeus.isRangedAttackGoalCoolingDown()) {
                 rotZ -= loop * 7.5F;
             }
         }

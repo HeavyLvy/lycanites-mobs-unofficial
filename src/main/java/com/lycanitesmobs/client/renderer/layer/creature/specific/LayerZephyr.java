@@ -34,7 +34,7 @@ public class LayerZephyr extends LayerCreatureBase {
     public ResourceLocation getLayerTexture(BaseCreatureEntity entity) {
         String textureName = entity.getTextureName();
         if (entity.getVariant() != null) {
-            textureName += "_" + entity.getVariant().color;
+            textureName += "_" + entity.getVariant().getColor();
         }
         textureName += "_ribbon";
         if (TextureManager.getTexture(textureName) == null)

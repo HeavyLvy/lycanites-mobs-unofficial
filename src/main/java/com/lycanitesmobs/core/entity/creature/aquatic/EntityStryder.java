@@ -47,7 +47,7 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
     }
 
     private int pickupTime = 0;
@@ -231,7 +231,7 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     public boolean petControlsEnabled() {

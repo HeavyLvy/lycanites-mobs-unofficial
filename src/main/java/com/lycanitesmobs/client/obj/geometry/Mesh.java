@@ -49,7 +49,7 @@ public class Mesh {
                     if (normal == null) {
                         String message = "[Lycanites Mobs Debug]: Normal vector is null";
                         if (!logs.contains(message)) {
-                            LMHelperClass.logWarning("", message);
+                            LMHelperClass.logWarningMessage( message);
                             logs.add(message);
                         }
                         normal = new Vector3o(0, 0, 0);

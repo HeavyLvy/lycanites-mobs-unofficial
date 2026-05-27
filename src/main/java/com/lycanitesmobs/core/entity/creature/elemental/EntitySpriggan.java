@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.ObjectLists;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -26,7 +27,7 @@ import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraftforge.common.IPlantable;
 
 public class EntitySpriggan extends TameableCreatureEntity implements Enemy {
-    public int farmingRate = 20;
+    protected int farmingRate = 20;
 
     // ==================================================
     //                    Constructor
@@ -46,7 +47,7 @@ public class EntitySpriggan extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setStaminaTime(100).setRange(8.0F).setMinChaseDistance(4.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setStaminaTime(100).setRange(8.0F).setMinChaseDistance(4.0F));
     }
 
     @Override
@@ -118,7 +119,7 @@ public class EntitySpriggan extends TameableCreatureEntity implements Enemy {
         }
 
         // Particles:
-        if (this.getCommandSenderWorld().isClientSide && !CreatureManager.getInstance().config.disableBlockParticles)
+        if (this.getCommandSenderWorld().isClientSide && !CreatureManager.getInstance().getConfig().disableBlockParticles())
             for (int i = 0; i < 2; ++i) {
                 this.getCommandSenderWorld().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.TALL_GRASS.defaultBlockState()),
                         this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width,
@@ -144,7 +145,7 @@ public class EntitySpriggan extends TameableCreatureEntity implements Enemy {
 
         // Update Laser:
         if (this.projectile != null && this.projectile.isAlive()) {
-            this.projectile.projectileLife = 20;
+            this.projectile.setProjectileLife(20);
         } else {
             this.projectile = null;
         }
@@ -156,7 +157,7 @@ public class EntitySpriggan extends TameableCreatureEntity implements Enemy {
 
             // Launch:
             this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-            this.getCommandSenderWorld().addFreshEntity(projectile);
+            DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
         }
 
         super.attackRanged(target, range);
@@ -213,7 +214,7 @@ public class EntitySpriggan extends TameableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     @Override

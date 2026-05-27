@@ -83,9 +83,9 @@ public class WanderGoal extends Goal {
 			}
 		}
 		else {
-			return !this.host.directNavigator.atTargetPosition() && this.host.directNavigator.isTargetPositionValid();
+			return !this.host.isDirectNavigationAtTarget() && this.host.isDirectNavigationTargetValid();
 		}
-		//return this.host.getRNG().nextInt(100) != 0 && !this.host.directNavigator.atTargetPosition() && this.host.directNavigator.isTargetPositionValid();
+		//return this.host.getRNG().nextInt(100) != 0 && !this.host.isDirectNavigationAtTarget() && this.host.isDirectNavigationTargetValid();
 	}
 
 
@@ -98,6 +98,6 @@ public class WanderGoal extends Goal {
 			this.host.getNavigation().moveTo(this.xPosition, this.yPosition, this.zPosition, this.speed);
 		}
 		else
-			this.host.directNavigator.setTargetPosition(new BlockPos((int) this.xPosition, (int) this.yPosition, (int) this.zPosition), this.speed);
+			this.host.setDirectNavigationTarget(new BlockPos((int) this.xPosition, (int) this.yPosition, (int) this.zPosition), this.speed);
 	}
 }

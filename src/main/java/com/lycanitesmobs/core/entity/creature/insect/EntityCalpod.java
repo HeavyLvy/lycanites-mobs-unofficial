@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.entity.creature.insect;
 
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
@@ -31,7 +32,7 @@ public class EntityCalpod extends BaseCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(true));
     }
 
 	@Override
@@ -80,7 +81,7 @@ public class EntityCalpod extends BaseCreatureEntity implements Enemy {
     	minion.moveTo(x, y, z, this.random.nextFloat() * 360.0F, 0.0F);
 		minion.setMinion(true);
 		minion.applyVariant(this.getVariantIndex());
-		this.getCommandSenderWorld().addFreshEntity(minion);
+		DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, minion);
         if(this.getTarget() != null)
         	minion.setLastHurtByMob(this.getTarget());
     }
@@ -101,7 +102,7 @@ public class EntityCalpod extends BaseCreatureEntity implements Enemy {
 	@Override
 	public int getNoBagSize() { return 0; }
 	@Override
-	public int getBagSize() { return this.creatureInfo.bagSize; }
+	public int getBagSize() { return this.creatureInfo.getBagSize(); }
 	// ==================================================
 	//                     Abilities
 	// ==================================================

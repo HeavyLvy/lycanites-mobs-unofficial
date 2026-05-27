@@ -33,10 +33,10 @@ public class CreatureTypeList extends CreatureFilterList {
 
 		int typeIndex = 0;
 		List<CreatureType> creatureTypes = new ArrayList<>();
-		creatureTypes.addAll(CreatureManager.getInstance().creatureTypes.values());
+		creatureTypes.addAll(CreatureManager.getInstance().getCreatureTypes());
 		creatureTypes.sort(Comparator.comparing(CreatureType::getName));
 		for(CreatureType creatureType : creatureTypes) {
-			if(this.screen.playerExt.beastiary.getCreaturesDiscovered(creatureType) > 0) {
+			if(this.screen.playerExt.getBeastiary().getCreaturesDiscovered(creatureType) > 0) {
 				this.addEntry(new Entry(this, typeIndex++, creatureType));
 			}
 		}
@@ -45,8 +45,7 @@ public class CreatureTypeList extends CreatureFilterList {
 	@Override
 	public void setSelected(@Nullable BaseListEntry entry) {
 		if(entry instanceof Entry) {
-			this.screen.playerExt.selectedCreatureType = ((Entry) entry).creatureType;
-			this.screen.playerExt.selectedCreature = null;
+			this.screen.playerExt.selectCreatureType(((Entry) entry).creatureType);
 		}
 		super.setSelected(entry);
 	}
@@ -55,15 +54,15 @@ public class CreatureTypeList extends CreatureFilterList {
 	protected boolean isSelectedItem(int index) {
 		if(!(this.getEntry(index) instanceof Entry))
 			return false;
-		return this.screen.playerExt.selectedCreatureType != null && this.screen.playerExt.selectedCreatureType.equals(((Entry)this.getEntry(index)).creatureType);
+		return this.screen.playerExt.isSelectedCreatureType(((Entry)this.getEntry(index)).creatureType);
 	}
 
 	@Override
 	public boolean canListCreature(CreatureInfo creatureInfo, CreatureList.Type listType) {
-		if(this.screen.playerExt.selectedCreatureType == null || creatureInfo == null) {
+		if(!this.screen.playerExt.hasSelectedCreatureType() || creatureInfo == null) {
 			return false;
 		}
-		return creatureInfo.creatureType == this.screen.playerExt.selectedCreatureType;
+		return creatureInfo.isCreatureType(this.screen.playerExt.getSelectedCreatureType());
 	}
 
 	/**

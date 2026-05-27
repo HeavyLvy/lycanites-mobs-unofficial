@@ -34,10 +34,10 @@ public class ElementList extends BaseList<ElementsBeastiaryScreen> {
     public void createEntries() {
         int index = 0;
         List<ElementInfo> elements = new ArrayList<>();
-        elements.addAll(ElementManager.getInstance().elements.values());
+        elements.addAll(ElementManager.getInstance().getElements());
         elements.sort(Comparator.comparing(ElementInfo::getName));
         for (ElementInfo elementInfo : elements) {
-            this.addEntry(new Entry(this, index++, elementInfo.name));
+            this.addEntry(new Entry(this, index++, elementInfo.getName()));
         }
     }
 

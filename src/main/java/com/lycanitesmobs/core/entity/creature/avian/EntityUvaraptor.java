@@ -9,6 +9,9 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 public class EntityUvaraptor extends RideableCreatureEntity {
+    private static final int MOUNT_ABILITY_BOOST_TICKS = 10;
+
+    protected int mountAbilityBoostTicks = 0;
     
     // ==================================================
  	//                    Constructor
@@ -35,8 +38,8 @@ public class EntityUvaraptor extends RideableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this));
     }
 	
 	
@@ -47,6 +50,10 @@ public class EntityUvaraptor extends RideableCreatureEntity {
 	@Override
     public void aiStep() {
         super.aiStep();
+
+        if (this.mountAbilityBoostTicks > 0) {
+            this.mountAbilityBoostTicks--;
+        }
         
         // Random Leaping:
         if(!this.isTamed() && this.onGround() && !this.getCommandSenderWorld().isClientSide) {
@@ -68,8 +75,10 @@ public class EntityUvaraptor extends RideableCreatureEntity {
 	// ========== Movement Speed Modifier ==========
 	@Override
 	public float getAISpeedModifier() {
-		if(!this.onGround())
+		if(!this.onGround() && !this.hasRiderTarget())
 			return 5.0F;
+		if(!this.onGround())
+			return this.mountAbilityBoostTicks > 0 ? 5.0F : 2.0F;
 		return 1.0F;
 	}
 
@@ -88,16 +97,18 @@ public class EntityUvaraptor extends RideableCreatureEntity {
     // ==================================================
     //                   Mount Ability
     // ==================================================
+    @Override
     public void mountAbility(Entity rider) {
+        if(this.getCommandSenderWorld().isClientSide())
+            return;
     	if(this.abilityToggled)
     		return;
     	if(this.getStamina() < this.getStaminaCost())
     		return;
     	
     	this.playJumpSound();
-		if(this.getCommandSenderWorld().isClientSide()) {
-			this.leap(2.0D, 3D);
-		}
+        this.mountAbilityBoostTicks = MOUNT_ABILITY_BOOST_TICKS;
+        this.leap(2.0D, 3D);
     	
     	this.applyStaminaCost();
     }
@@ -121,7 +132,7 @@ public class EntityUvaraptor extends RideableCreatureEntity {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
     
     // ==================================================
    	//                     Immunities

@@ -34,7 +34,7 @@ public class LMCreaturesGroup {
                     for (String item : creatureNames) {
                         var i = ObjectManager.getItem(item);
                         if (i instanceof ItemCustomSpawnEgg spawnEgg) {
-                            for (CreatureInfo creatureInfo : spawnEgg.getCreatureType().creatures.values()) {
+                            for (CreatureInfo creatureInfo : spawnEgg.getCreatureType().getCreatures()) {
                                 ItemStack itemstack = new ItemStack(i, 1);
                                 spawnEgg.applyCreatureInfoToItemStack(itemstack, creatureInfo);
                                 entries.accept(itemstack);

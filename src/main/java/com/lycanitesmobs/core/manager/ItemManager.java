@@ -74,8 +74,8 @@ public class ItemManager extends JSONLoader {
     public static final RegistryObject<CreativeModeTab> equipmentPartsTab = TABS.register(LycanitesMobs.MODID + ".equipmentparts", equipmentPartsGroup::build);
     public static final RegistryObject<CreativeModeTab> bestEquipmentTab = TABS.register(LycanitesMobs.MODID + ".bestequipment", bestEquipmentGroup::build);
     public static final Map<String, Item.Properties> registryItems = new HashMap<>();
-    public static ItemManager INSTANCE;
-    public static Map<String, ItemInfo> items = new HashMap<>();
+    protected static ItemManager INSTANCE;
+    protected static final Map<String, ItemInfo> items = new HashMap<>();
 
     public static void register(IEventBus modEventBus) {
         TABS.register(modEventBus);
@@ -84,15 +84,15 @@ public class ItemManager extends JSONLoader {
     /**
      * A list of blocks that need to use the cutout renderer.
      **/
-    public List<Block> cutoutBlocks = new ArrayList<>();
+    protected final List<Block> cutoutBlocks = new ArrayList<>();
     /**
      * A list of mod groups that have loaded with this manager.
      **/
-    public List<ModInfo> loadedGroups = new ArrayList<>();
+    protected final List<ModInfo> loadedGroups = new ArrayList<>();
     /**
      * Handles all global item general config settings.
      **/
-    public ItemConfig config;
+    protected ItemConfig config;
 
     /**
      * Returns the main Item Manager instance or creates it and returns it.
@@ -102,6 +102,24 @@ public class ItemManager extends JSONLoader {
             INSTANCE = new ItemManager();
         }
         return INSTANCE;
+    }
+
+    public static Collection<ItemInfo> getItemInfos() {
+        return Collections.unmodifiableCollection(items.values());
+    }
+
+    public static boolean hasItemInfo(String name) {
+        return items.containsKey(name);
+    }
+
+    public List<Block> getCutoutBlocks() {
+        return Collections.unmodifiableList(this.cutoutBlocks);
+    }
+
+    public void registerCutoutBlock(Block block) {
+        if (!this.cutoutBlocks.contains(block)) {
+            this.cutoutBlocks.add(block);
+        }
     }
 
     /**
@@ -118,11 +136,15 @@ public class ItemManager extends JSONLoader {
      * Loads all JSON Items.
      **/
     public void loadAllFromJson(ModInfo modInfo) {
+        this.rememberLoadedGroup(modInfo);
+        this.loadAllJson(modInfo, "Items", "items", "name", true, null, FileLoader.common(), StreamLoader.common());
+        LMHelperClass.logDebug("Items", "Complete! " + this.items.size() + " JSON Items Loaded In Total.");
+    }
+
+    protected void rememberLoadedGroup(ModInfo modInfo) {
         if (!this.loadedGroups.contains(modInfo)) {
             this.loadedGroups.add(modInfo);
         }
-        this.loadAllJson(modInfo, "Items", "items", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
-        LMHelperClass.logDebug("Items", "Complete! " + this.items.size() + " JSON Items Loaded In Total.");
     }
 
     /*private static final DeferredRegister<Item> ITEM_DEFERRED_REGISTER = DeferredRegister.create(ForgeRegistries.ITEMS, LycanitesMobs.MODID);
@@ -270,30 +292,30 @@ public class ItemManager extends JSONLoader {
         Item item = itemStack.getItem();
         Object locationObj = LMHelperClass.convertObjectToDesired(item, "resourcelocation");
         if (locationObj instanceof ResourceLocation location) {
-            if (ItemConfig.lowEquipmentSharpnessItems != null) {
-                for (String itemId : ItemConfig.lowEquipmentSharpnessItems) {
+            if (ItemConfig.getLowEquipmentSharpnessItems() != null) {
+                for (String itemId : ItemConfig.getLowEquipmentSharpnessItems()) {
                     if (new ResourceLocation(itemId).equals(location)) {
-                        return ItemConfig.lowEquipmentRepairAmount;
+                        return ItemConfig.getLowEquipmentRepairAmount();
                     }
                 }
             }
-            if (ItemConfig.mediumEquipmentSharpnessItems != null) {
-                for (String itemId : ItemConfig.mediumEquipmentSharpnessItems) {
+            if (ItemConfig.getMediumEquipmentSharpnessItems() != null) {
+                for (String itemId : ItemConfig.getMediumEquipmentSharpnessItems()) {
                     if (new ResourceLocation(itemId).equals(location)) {
-                        return ItemConfig.mediumEquipmentRepairAmount;
+                        return ItemConfig.getMediumEquipmentRepairAmount();
                     }
                 }
             }
 
-            if (ItemConfig.highEquipmentSharpnessItems != null) {
-                for (String itemId : ItemConfig.highEquipmentSharpnessItems) {
+            if (ItemConfig.getHighEquipmentSharpnessItems() != null) {
+                for (String itemId : ItemConfig.getHighEquipmentSharpnessItems()) {
                     if (new ResourceLocation(itemId).equals(location)) {
-                        return ItemConfig.highEquipmentRepairAmount;
+                        return ItemConfig.getHighEquipmentRepairAmount();
                     }
                 }
             }
-            if (ItemConfig.maxEquipmentSharpnessItems != null) {
-                for (String itemId : ItemConfig.maxEquipmentSharpnessItems) {
+            if (ItemConfig.getMaxEquipmentSharpnessItems() != null) {
+                for (String itemId : ItemConfig.getMaxEquipmentSharpnessItems()) {
                     if (new ResourceLocation(itemId).equals(location)) {
                         return ItemEquipment.SHARPNESS_MAX;
                     }
@@ -319,31 +341,31 @@ public class ItemManager extends JSONLoader {
         Object locationObj = LMHelperClass.convertObjectToDesired(item, "resourcelocation");
         if (locationObj instanceof ResourceLocation location) {
             if (item instanceof ChargeItem) {
-                return ItemConfig.highEquipmentRepairAmount;
+                return ItemConfig.getHighEquipmentRepairAmount();
             }
-            if (ItemConfig.lowEquipmentManaItems != null) {
-                for (String itemId : ItemConfig.lowEquipmentManaItems) {
+            if (ItemConfig.getLowEquipmentManaItems() != null) {
+                for (String itemId : ItemConfig.getLowEquipmentManaItems()) {
                     if (new ResourceLocation(itemId).equals(location)) {
-                        return ItemConfig.lowEquipmentRepairAmount;
+                        return ItemConfig.getLowEquipmentRepairAmount();
                     }
                 }
             }
-            if (ItemConfig.mediumEquipmentManaItems != null) {
-                for (String itemId : ItemConfig.mediumEquipmentManaItems) {
+            if (ItemConfig.getMediumEquipmentManaItems() != null) {
+                for (String itemId : ItemConfig.getMediumEquipmentManaItems()) {
                     if (new ResourceLocation(itemId).equals(location)) {
-                        return ItemConfig.mediumEquipmentRepairAmount;
+                        return ItemConfig.getMediumEquipmentRepairAmount();
                     }
                 }
             }
-            if (ItemConfig.highEquipmentManaItems != null) {
-                for (String itemId : ItemConfig.highEquipmentManaItems) {
+            if (ItemConfig.getHighEquipmentManaItems() != null) {
+                for (String itemId : ItemConfig.getHighEquipmentManaItems()) {
                     if (new ResourceLocation(itemId).equals(location)) {
-                        return ItemConfig.highEquipmentRepairAmount;
+                        return ItemConfig.getHighEquipmentRepairAmount();
                     }
                 }
             }
-            if (ItemConfig.maxEquipmentManaItems != null) {
-                for (String itemId : ItemConfig.maxEquipmentManaItems) {
+            if (ItemConfig.getMaxEquipmentManaItems() != null) {
+                for (String itemId : ItemConfig.getMaxEquipmentManaItems()) {
                     if (new ResourceLocation(itemId).equals(location)) {
                         return ItemEquipment.MANA_MAX;
                     }

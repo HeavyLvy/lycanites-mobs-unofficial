@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.entity.projectile.generic;
 
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -12,11 +13,12 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
 
 public class RapidFireProjectileEntity extends BaseProjectileEntity {
     // Properties:
-    public LivingEntity shootingEntity;
+    protected LivingEntity shootingEntity;
     private float projectileWidth = 0.2f;
     private float projectileHeight = 0.2f;
 
@@ -27,9 +29,9 @@ public class RapidFireProjectileEntity extends BaseProjectileEntity {
     private int rapidDelay = 5;
 
     // Offsets:
-    public double offsetX = 0;
-    public double offsetY = 0;
-    public double offsetZ = 0;
+    protected double offsetX = 0;
+    protected double offsetY = 0;
+    protected double offsetZ = 0;
 
     // ==================================================
     //                   Constructors
@@ -135,6 +137,12 @@ public class RapidFireProjectileEntity extends BaseProjectileEntity {
         this.rapidTime += addTime;
     }
 
+    public void addOffset(double x, double y, double z) {
+        this.offsetX += x;
+        this.offsetY += y;
+        this.offsetZ += z;
+    }
+
 
     // ==================================================
     //                 Fire Projectile
@@ -148,20 +156,22 @@ public class RapidFireProjectileEntity extends BaseProjectileEntity {
             Projectile projectile;
 
             if (this.shootingEntity == null) {
+                Vec3 shotDirection = this.getShotDirection();
                 if (this.projectileInfo != null) {
                     projectile = this.projectileInfo.createProjectile(this.getCommandSenderWorld(), this.position().x(), this.position().y(), this.position().z());
-                    projectile.shoot(this.getDeltaMovement().x, this.getDeltaMovement().y, this.getDeltaMovement().z, (float) this.projectileInfo.velocity, 0);
+                    projectile.shoot(shotDirection.x, shotDirection.y, shotDirection.z, (float) this.projectileInfo.getVelocity(), 0);
                 } else {
                     projectile = ProjectileManager.getInstance().createOldProjectile(this.projectileClass, world, this.position().x(), this.position().y(), this.position().z());
-                    projectile.shoot(this.getDeltaMovement().x, this.getDeltaMovement().y, this.getDeltaMovement().z, 1, 1);
+                    projectile.shoot(shotDirection.x, shotDirection.y, shotDirection.z, 1, 1);
                 }
             } else {
+                Vec3 shotDirection = this.getShotDirection();
                 if (this.projectileInfo != null) {
                     projectile = this.projectileInfo.createProjectile(this.getCommandSenderWorld(), this.shootingEntity);
-                    projectile.shoot(this.getDeltaMovement().x, this.getDeltaMovement().y, this.getDeltaMovement().z, (float) this.projectileInfo.velocity, 0);
+                    projectile.shoot(shotDirection.x, shotDirection.y, shotDirection.z, (float) this.projectileInfo.getVelocity(), 0);
                 } else {
                     projectile = ProjectileManager.getInstance().createOldProjectile(this.projectileClass, world, this.shootingEntity);
-                    projectile.shoot(this.getDeltaMovement().x, this.getDeltaMovement().y, this.getDeltaMovement().z, 1, 1);
+                    projectile.shoot(shotDirection.x, shotDirection.y, shotDirection.z, 1, 1);
                 }
                 if (projectile instanceof ThrowableProjectile) {
                     ThrowableProjectile entityThrowable = (ThrowableProjectile) projectile;
@@ -173,11 +183,25 @@ public class RapidFireProjectileEntity extends BaseProjectileEntity {
                 ((BaseProjectileEntity) projectile).setProjectileScale(this.projectileScale);
             }
 
-            world.addFreshEntity(projectile);
+            DeferredLevelActionManager.spawnEntity(world, this.blockPosition(), null, (net.minecraft.world.entity.Entity) projectile);
         } catch (Exception e) {
             System.out.println("[WARNING] [LycanitesMobs] EntityRapidFire was unable to instantiate the given projectile class.");
             e.printStackTrace();
         }
+    }
+
+    private Vec3 getShotDirection() {
+        Vec3 direction = this.getDeltaMovement();
+        if (direction.lengthSqr() > 0.0001D) {
+            return direction;
+        }
+        if (this.shootingEntity != null) {
+            direction = this.shootingEntity.getLookAngle();
+            if (direction.lengthSqr() > 0.0001D) {
+                return direction;
+            }
+        }
+        return new Vec3(0, 0, 1);
     }
 
 

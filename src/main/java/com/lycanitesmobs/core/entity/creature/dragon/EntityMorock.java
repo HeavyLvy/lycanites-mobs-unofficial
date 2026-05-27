@@ -35,7 +35,7 @@ public class EntityMorock extends RideableCreatureEntity implements Enemy, IGrou
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
     }
 
 
@@ -164,7 +164,7 @@ public class EntityMorock extends RideableCreatureEntity implements Enemy, IGrou
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

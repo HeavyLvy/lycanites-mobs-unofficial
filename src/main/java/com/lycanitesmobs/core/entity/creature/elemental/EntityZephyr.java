@@ -17,8 +17,6 @@ import org.joml.Vector3d;
 
 public class EntityZephyr extends TameableCreatureEntity implements Enemy, IFusable {
 
-    public float fireDamageAbsorbed = 0;
-
     // ==================================================
     //                    Constructor
     // ==================================================
@@ -37,7 +35,7 @@ public class EntityZephyr extends TameableCreatureEntity implements Enemy, IFusa
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setRange(16.0F).setMinChaseDistance(8.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setRange(16.0F).setMinChaseDistance(8.0F));
     }
 
 
@@ -48,16 +46,6 @@ public class EntityZephyr extends TameableCreatureEntity implements Enemy, IFusa
     @Override
     public void aiStep() {
         super.aiStep();
-
-        if (!this.getCommandSenderWorld().isClientSide) {
-
-            // Environmental Transformation:
-            if (!this.isTamed()) {
-                if (this.fireDamageAbsorbed >= 10) {
-                    this.transform(CreatureManager.getInstance().getEntityType("zephyr"), null, false);
-                }
-            }
-        }
 
         // Particles:
         //if(this.getEntityWorld().isRemote)
@@ -103,7 +91,7 @@ public class EntityZephyr extends TameableCreatureEntity implements Enemy, IFusa
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
 
@@ -122,7 +110,6 @@ public class EntityZephyr extends TameableCreatureEntity implements Enemy, IFusa
     public boolean isInvulnerableTo(DamageSource source) {
         if (source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.CACTUS)) return true;
         if (source.is(DamageTypes.LIGHTNING_BOLT) && !this.isTamed()) {
-            this.transform(CreatureManager.getInstance().getEntityType("zephyr"), null, false);
             return true;
         }
         return super.isInvulnerableTo(source);
@@ -131,7 +118,6 @@ public class EntityZephyr extends TameableCreatureEntity implements Enemy, IFusa
     @Override
     public boolean hurt(DamageSource source, float amount) {
         if (source.is(DamageTypeTags.IS_FIRE)) {
-            this.fireDamageAbsorbed += amount;
             return false;
         }
         return super.hurt(source, amount);

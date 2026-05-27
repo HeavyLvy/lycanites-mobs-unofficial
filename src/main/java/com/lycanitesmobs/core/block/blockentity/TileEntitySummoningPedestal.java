@@ -2,6 +2,7 @@ package com.lycanitesmobs.core.block.blockentity;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.special.BlockSummoningPedestal;
+import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.config.ConfigExtra;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
@@ -45,30 +46,30 @@ import java.util.UUID;
 
 public class TileEntitySummoningPedestal extends TileEntityBase {
 
-    public long updateTick = 0;
+    protected long updateTick = 0;
 
     // Summoning Properties:
-    public PortalEntity summoningPortal;
-    public UUID ownerUUID;
-    public SummonSet summonSet;
-    public int summonAmount = 1;
+    protected PortalEntity summoningPortal;
+    protected UUID ownerUUID;
+    protected SummonSet summonSet;
+    protected int summonAmount = 1;
 
     // Summoning Stats:
-    public int capacityCharge = 100;
-    public int capacity = 0;
-    public int capacityMax = (this.capacityCharge * 10);
-    public int summonProgress = 0;
-    public int summonProgressMax = 3 * 60;
+    protected int capacityCharge = 100;
+    protected int capacity = 0;
+    protected int capacityMax = (this.capacityCharge * 10);
+    protected int summonProgress = 0;
+    protected int summonProgressMax = 3 * 60;
 
     // Inventory:
-    public String inventoryName = "";
-    public NonNullList<ItemStack> itemStacks = NonNullList.withSize(3, ItemStack.EMPTY);
-    public int summoningFuel = 0;
-    public int summoningFuelMax;
-    public int summoningFuelAmount = 10 * 60 * 20; // 10 minutes per Redstone Dust
+    protected String inventoryName = "";
+    protected NonNullList<ItemStack> itemStacks = NonNullList.withSize(3, ItemStack.EMPTY);
+    protected int summoningFuel = 0;
+    protected int summoningFuelMax;
+    protected int summoningFuelAmount = 10 * 60 * 20; // 10 minutes per Redstone Dust
 
     // Summoned Minions:
-    public List<BaseCreatureEntity> minions = new ArrayList<>();
+    protected List<BaseCreatureEntity> minions = new ArrayList<>();
     protected String[] loadMinionIDs; // Temporary array for initially populating from NBT data in update.
 
     // Block:
@@ -131,7 +132,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         // Summoning:
         if (this.summonSet != null && this.summonSet.getCreatureInfo() != null) {
             if (this.summonSet.getFollowing()) {
-                this.summonSet.following = false;
+                this.summonSet.setFollowing(false);
             }
 
             // Summoning Portal:
@@ -142,17 +143,19 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
             // Update Minions:
             if (this.updateTick % 100 == 0) {
                 this.capacity = 0;
-                for (BaseCreatureEntity minion : this.minions.toArray(new BaseCreatureEntity[this.minions.size()])) {
+                Iterator<BaseCreatureEntity> minionIterator = this.minions.iterator();
+                while (minionIterator.hasNext()) {
+                    BaseCreatureEntity minion = minionIterator.next();
                     if (minion == null || !minion.isAlive())
-                        this.minions.remove(minion);
+                        minionIterator.remove();
                     else {
-                        this.capacity += (minion.creatureInfo.summonCost * this.capacityCharge);
+                        this.capacity += (minion.getSummonCost() * this.capacityCharge);
                     }
                 }
             }
 
             // Check Capacity:
-            if (this.capacity + this.summonSet.getCreatureInfo().summonCost > this.capacityMax) {
+            if (this.capacity + this.summonSet.getCreatureInfo().getSummonCost() > this.capacityMax) {
                 this.summonProgress = 0;
             }
 
@@ -178,7 +181,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
                     if (this.summonProgress++ >= this.summonProgressMax) {
                         this.summoningPortal.summonCreatures();
                         this.summonProgress = 0;
-                        this.capacity = Math.min(this.capacity + (this.capacityCharge * this.summonSet.getCreatureInfo().summonCost), this.capacityMax);
+                        this.capacity = Math.min(this.capacity + (this.capacityCharge * this.summonSet.getCreatureInfo().getSummonCost()), this.capacityMax);
                     }
                 }
             }
@@ -195,7 +198,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
 
         // Sync To Client:
         if (this.updateTick % 20 == 0) {
-            MessageSummoningPedestalStats message = new MessageSummoningPedestalStats(this.capacity, this.summonProgress, this.summoningFuel, this.summoningFuelMax, this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ());
+            MessageSummoningPedestalStats message = new MessageSummoningPedestalStats(this.getStatsSnapshot(), this.getBlockPos());
             LycanitesMobs.PACKET_MANAGER.sendToAllAround(message, this.getLevel(), Vec3.atLowerCornerOf(this.getBlockPos()), 5);
         }
 
@@ -250,6 +253,30 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
      * Returns the class that this is summoning.
      **/
     @Nullable
+    public SummonSet getSummonSet() {
+        return this.summonSet;
+    }
+
+    public boolean hasSummonSet() {
+        return this.summonSet != null;
+    }
+
+    public SummonSet getOrCreateSummonSet(ExtendedPlayer playerExt) {
+        if (this.summonSet == null) {
+            this.summonSet = new SummonSet(playerExt);
+        }
+        return this.summonSet;
+    }
+
+    public void selectSummonType(ExtendedPlayer playerExt, String summonType) {
+        this.getOrCreateSummonSet(playerExt).setSummonType(summonType);
+    }
+
+    public void applySummonSetPacket(String summonType, int subspecies, int variant, byte behaviour) {
+        this.getOrCreateSummonSet(null).readFromPacket(summonType, subspecies, variant, behaviour);
+    }
+
+    @Nullable
     public EntityType getSummonType() {
         if (this.summonSet == null) {
             return null;
@@ -268,6 +295,10 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         return this.summonSet.getCreatureInfo();
     }
 
+    public int getSummonAmount() {
+        return this.summonAmount;
+    }
+
     /**
      * Sets the Summon Set for this to use.
      **/
@@ -276,12 +307,10 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
             return;
         }
         this.summonSet = new SummonSet(null);
-        this.summonSet.setSummonType(summonSet.summonType);
-        this.summonSet.sitting = summonSet.getSitting();
-        this.summonSet.following = false;
-        this.summonSet.passive = summonSet.getPassive();
-        this.summonSet.aggressive = summonSet.getAggressive();
-        this.summonSet.pvp = summonSet.getPVP();
+        this.summonSet.setSummonType(summonSet.getSummonType());
+        this.summonSet.setMovement(summonSet.getSitting(), false);
+        this.summonSet.setStance(summonSet.getPassive(), summonSet.getAssist(), summonSet.getAggressive());
+        this.summonSet.setPVP(summonSet.getPVP());
     }
 
 
@@ -293,11 +322,21 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
     public void applyMinionBehaviour(TameableCreatureEntity minion) {
         if (this.summonSet != null) {
             this.summonSet.applyBehaviour(minion);
-            minion.setSubspecies(this.summonSet.subspecies);
-            minion.applyVariant(this.summonSet.variant);
+            minion.setSubspecies(this.summonSet.getSubspecies());
+            minion.applyVariant(this.summonSet.getVariant());
         }
-        this.minions.add(minion);
+        this.registerMinion(minion);
         minion.setHome(this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ(), 20);
+    }
+
+    public void registerMinion(BaseCreatureEntity minion) {
+        if (minion == null) {
+            return;
+        }
+        if (!this.minions.contains(minion)) {
+            this.minions.add(minion);
+        }
+        minion.bindSummoningPedestal(this);
     }
 
 
@@ -485,7 +524,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
             }
             for (ItemStack drop : drops) {
                 CustomItemEntity entityItem = new CustomItemEntity(level, blockPos.getX(), blockPos.getY() + 0.5D, blockPos.getZ(), drop);
-                level.addFreshEntity(entityItem);
+                DeferredLevelActionManager.spawnEntityNow(level, entityItem);
             }
         });
     }
@@ -507,11 +546,57 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
                 return;
             }
 
-            PortalEntity portal = new PortalEntity((EntityType<? extends PortalEntity>) ProjectileManager.getInstance().oldProjectileTypes.get(PortalEntity.class), level, this);
+            PortalEntity portal = new PortalEntity((EntityType<? extends PortalEntity>) ProjectileManager.getInstance().getOldProjectileType(PortalEntity.class), level, this);
             portal.setProjectileScale(6);
             this.summoningPortal = portal;
-            level.addFreshEntity(portal);
+            DeferredLevelActionManager.spawnEntityNow(level, portal);
         });
+    }
+
+
+    // ========== Summoning Stats ==========
+
+    public SummoningPedestalStats getStatsSnapshot() {
+        return new SummoningPedestalStats(this.capacity, this.capacityCharge, this.capacityMax, this.summonProgress,
+                this.summonProgressMax, this.summoningFuel, this.summoningFuelMax);
+    }
+
+    public void applyStatsSnapshot(SummoningPedestalStats stats) {
+        this.capacity = stats.capacity();
+        this.capacityCharge = stats.capacityCharge();
+        this.capacityMax = stats.capacityMax();
+        this.summonProgress = stats.summonProgress();
+        this.summonProgressMax = stats.summonProgressMax();
+        this.summoningFuel = stats.summoningFuel();
+        this.summoningFuelMax = stats.summoningFuelMax();
+    }
+
+    public void applyNetworkStats(int capacity, int summonProgress, int summoningFuel, int summoningFuelMax) {
+        this.capacity = capacity;
+        this.summonProgress = summonProgress;
+        this.summoningFuel = summoningFuel;
+        this.summoningFuelMax = summoningFuelMax;
+    }
+
+    public float getFuelFillRatio() {
+        if (this.summoningFuelMax <= 0) {
+            return 0;
+        }
+        return (float) this.summoningFuel / this.summoningFuelMax;
+    }
+
+    public int getCapacityUnits() {
+        if (this.capacityCharge <= 0) {
+            return 0;
+        }
+        return this.capacity / this.capacityCharge;
+    }
+
+    public float getSummonProgressRatio() {
+        if (this.summonProgressMax <= 0) {
+            return 0;
+        }
+        return (float) this.summonProgress / this.summonProgressMax;
     }
 
 
@@ -615,5 +700,16 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         nbtTagCompound.putInt("Fuel", this.summoningFuel);
         nbtTagCompound.putInt("FuelMax", this.summoningFuelMax);
         ContainerHelper.saveAllItems(nbtTagCompound, this.itemStacks);
+    }
+
+    public record SummoningPedestalStats(
+            int capacity,
+            int capacityCharge,
+            int capacityMax,
+            int summonProgress,
+            int summonProgressMax,
+            int summoningFuel,
+            int summoningFuelMax
+    ) {
     }
 }

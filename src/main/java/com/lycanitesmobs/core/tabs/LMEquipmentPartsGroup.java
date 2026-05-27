@@ -39,7 +39,7 @@ public class LMEquipmentPartsGroup {
                         if (item == null) continue;
 
                         if (item instanceof ItemEquipmentPart part) {
-                            for (int level = 1; level <= part.levelMax; level++) {
+                            for (int level = 1; level <= part.getLevelMax(); level++) {
                                 ItemStack stack = new ItemStack(part, 1);
                                 part.setLevel(stack, level);
                                 entries.accept(stack);

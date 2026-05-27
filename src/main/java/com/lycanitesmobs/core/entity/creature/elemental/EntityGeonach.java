@@ -22,9 +22,9 @@ import net.minecraft.world.level.block.Blocks;
 
 public class EntityGeonach extends TameableCreatureEntity implements Enemy, IFusable {
 
-    public int blockBreakRadius = 0;
+    private int blockBreakRadius = 0;
 
-    public float fireDamageAbsorbed = 0;
+    private float fireDamageAbsorbed = 0;
 
     // ==================================================
     //                    Constructor
@@ -45,9 +45,9 @@ public class EntityGeonach extends TameableCreatureEntity implements Enemy, IFus
 
     @Override
     protected void registerGoals() {
-        this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(EntityType.SILVERFISH));
+        this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindAttackTargetGoal(this).addTargets(EntityType.SILVERFISH));
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(true));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class EntityGeonach extends TameableCreatureEntity implements Enemy, IFus
         }
 
         // Particles:
-        if (this.getCommandSenderWorld().isClientSide && !CreatureManager.getInstance().config.disableBlockParticles)
+        if (this.getCommandSenderWorld().isClientSide && !CreatureManager.getInstance().getConfig().disableBlockParticles())
             for (int i = 0; i < 2; ++i) {
                 this.getCommandSenderWorld().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
                         this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width,
@@ -197,7 +197,7 @@ public class EntityGeonach extends TameableCreatureEntity implements Enemy, IFus
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
     // ==================================================
     //                     Immunities

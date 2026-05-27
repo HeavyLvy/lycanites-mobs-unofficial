@@ -11,16 +11,17 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class BaseContainer extends AbstractContainerMenu {
-	public Map<Integer, String> specialSlots = new HashMap<>();
-	public int playerInventoryStart = -1;
-	public int playerInventoryFinish = -1;
-	public int inventoryStart = -1;
-	public int inventoryFinish = -1;
-	public int specialStart = -1;
-	public int specialFinish = -1;
+	protected Map<Integer, String> specialSlots = new HashMap<>();
+	protected int playerInventoryStart = -1;
+	protected int playerInventoryFinish = -1;
+	protected int inventoryStart = -1;
+	protected int inventoryFinish = -1;
+	protected int specialStart = -1;
+	protected int specialFinish = -1;
 	
 	// ==================================================
   	//                    Constructor
@@ -168,6 +169,37 @@ public abstract class BaseContainer extends AbstractContainerMenu {
 
 	public boolean isPlayerSlot(int slotID) {
 		return slotID >= this.playerInventoryStart && slotID <= this.playerInventoryFinish;
+	}
+
+	public int getPlayerInventoryStart() {
+		return this.playerInventoryStart;
+	}
+
+	public int getPlayerInventoryFinish() {
+		return this.playerInventoryFinish;
+	}
+
+	public int getInventoryStart() {
+		return this.inventoryStart;
+	}
+
+	public int getInventoryFinish() {
+		return this.inventoryFinish;
+	}
+
+	public int getSpecialStart() {
+		return this.specialStart;
+	}
+
+	public int getSpecialFinish() {
+		return this.specialFinish;
+	}
+
+	public List<Slot> getInventorySlotView() {
+		if (this.inventoryStart < 0 || this.inventoryFinish < 0 || this.inventoryStart >= this.slots.size()) {
+			return List.of();
+		}
+		return this.slots.subList(this.inventoryStart, Math.min(this.inventoryFinish, this.slots.size()));
 	}
 	
 	public boolean sortToSpecialSlots(ItemStack slotStack) {

@@ -3,24 +3,22 @@ package com.lycanitesmobs.core.entity.spawner;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
-import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.entity.spawner.trigger.ChunkSpawnTrigger;
 import com.lycanitesmobs.core.event.SpawnerEventListener;
+import com.lycanitesmobs.core.event.mobevent.MobEvent;
+import com.lycanitesmobs.core.event.mobevent.MobEventPlayerServer;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.SpawnerManager;
-import com.lycanitesmobs.core.event.mobevent.MobEvent;
-import com.lycanitesmobs.core.event.mobevent.MobEventPlayerServer;
 import com.lycanitesmobs.core.entity.spawner.condition.SpawnCondition;
 import com.lycanitesmobs.core.entity.spawner.location.SpawnLocation;
-import com.lycanitesmobs.core.entity.spawner.trigger.ChunkSpawnTrigger;
 import com.lycanitesmobs.core.entity.spawner.trigger.SpawnTrigger;
-import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -29,14 +27,12 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Spawner {
     /** Spawners are loaded from JSON and operate around their Triggers, Conditions and Locations. **/
@@ -44,107 +40,107 @@ public class Spawner {
     /**
      * A list of all Spawn Conditions which determine if the Triggers should be active or not.
      **/
-    public List<SpawnCondition> conditions = new ArrayList<>();
+    protected List<SpawnCondition> conditions = new ArrayList<>();
 
     /**
      * A list of all Spawn Triggers which listen to events and ticks and attempt a spawn, if conditions are met.
      **/
-    public List<SpawnTrigger> triggers = new ArrayList<>();
+    protected List<SpawnTrigger> triggers = new ArrayList<>();
 
     /**
      * A list of all Spawn Locations which are used to determine where this Spawner can actually spawn the mob, some Triggers require a specific spawn location other provide an area.
      **/
-    public List<SpawnLocation> locations = new ArrayList<>();
+    protected List<SpawnLocation> locations = new ArrayList<>();
 
     /**
      * A list of all Mobs that can be spawned by this spawner.
      **/
-    public List<MobSpawn> mobSpawns = new ArrayList<>();
+    protected List<MobSpawn> mobSpawns = new ArrayList<>();
 
     /**
      * The name of this spawner, must be unique, used by creatures/groups when entering spawners.
      **/
-    public String name;
+    protected String name;
 
     /**
      * The name of this spawner when, used by creatures/groups when entering spawners. By default this copies the name but can be changed and doesn't have to be unique.
      **/
-    public String sharedName;
+    protected String sharedName;
 
     /**
      * If set to true and this spawner is a default spawner, it will reset when loading. This must be set to false or removed from the json if it is a customised spawner.
      **/
-    public boolean loadDefault = true;
+    protected boolean loadDefault = true;
 
     /**
      * Can be set to false to completely disable this Spawner.
      **/
-    public boolean enabled = true;
+    protected boolean enabled = true;
 
     /**
      * Determines how many Conditions must be met. If 0 or less all are required.
      **/
-    public int conditionsRequired = 0;
+    protected int conditionsRequired = 0;
 
     /**
      * Sets how many times any Trigger must activate (per player) before a wave is spawned. Only supported by player based triggers
      **/
-    public int triggersRequired = 1;
+    protected int triggersRequired = 1;
 
     /**
      * A list of messages to send to the player whenever the associated count is reached.
      **/
-    public Map<Integer, String> triggerCountMessages = new HashMap<>();
+    protected Map<Integer, String> triggerCountMessages = new HashMap<>();
 
     /**
      * Determines how a Location is chosen if there are multiple. Can be: order, random or combine.
      **/
-    public String multipleLocations = "combine";
+    protected String multipleLocations = "combine";
 
     /**
      * The minimum amount of mobs to spawn each wave.
      **/
-    public int mobCountMin = 1;
+    protected int mobCountMin = 1;
 
     /**
      * The maximum amount of mobs to spawn each wave.
      **/
-    public int mobCountMax = 1;
+    protected int mobCountMax = 1;
 
     /**
      * If true, this Spawner will divide the amount of mobs to spawn by the amount of players near the trigger player (does not affect non-player triggers).
      **/
-    public boolean mobCountPlayerScaling = true;
+    protected boolean mobCountPlayerScaling = true;
 
     /**
      * How far to search around a player for finding nearby other player for mob spawn scaling.
      **/
-    public int mobCountPlayerRange = 64;
+    protected int mobCountPlayerRange = 64;
 
     /**
      * If true, this Spawner will ignore all mob dimension checks (not Spawn Condition checks), this bypasses the checks in MobSpawns and SpawnInfos.
      **/
-    public boolean ignoreDimensions = false;
+    protected boolean ignoreDimensions = false;
 
     /**
      * If true, this Spawner will ignore all biome checks, this bypasses the checks in MobSpawns and SpawnInfos.
      **/
-    public boolean ignoreBiomes = false;
+    protected boolean ignoreBiomes = false;
 
     /**
      * If true, this Spawner will ignore collision checks, this may cause mobs to become stuck and suffocate.
      **/
-    public boolean ignoreCollision = false;
+    protected boolean ignoreCollision = false;
 
     /**
      * If true, this Spawner will ignore light level checks, this bypasses the checks in MobSpawns and SpawnInfos.
      **/
-    public boolean ignoreLightLevel = false;
+    protected boolean ignoreLightLevel = false;
 
     /**
      * If true, this Spawner will ignore group limit checks, this bypasses the checks in MobSpawns and SpawnInfos.
      **/
-    public boolean ignoreGroupLimit = false;
+    protected boolean ignoreGroupLimit = false;
 
     /**
      * The range of how far this Spawner should check for surrounding mobs of the same type.
@@ -159,38 +155,171 @@ public class Spawner {
     /**
      * If true, mobs spawned by this Spawner will not naturally despawn.
      **/
-    public boolean forceNoDespawn = false;
+    protected boolean forceNoDespawn = false;
 
     /**
      * If true, actions caused by this spawner such as block destruction can trigger additional spawn triggers creating a spawner chain.
      **/
-    public boolean chainSpawning = true;
+    protected boolean chainSpawning = true;
 
     /**
      * If true, this Spawner will act as enabled even if it can't find any mobs to spawn, useful if you just want to use trigger messages, etc.
      **/
-    public boolean enableWithoutMobs = false;
+    protected boolean enableWithoutMobs = false;
 
     /**
      * If set, this is the name of the mob event that must be active, otherwise this Spawner is always active.
      **/
-    public String eventName = "";
+    protected String eventName = "";
 
     /**
      * If set, when a mob is spawned, blocks in the radius around the spawned mob will be destroyed.
      **/
-    public int blockBreakRadius = -1;
+    protected int blockBreakRadius = -1;
 
     /**
      * If true, spawned mobs will not drop any items until a player has damaged them in some way.
      **/
     protected boolean dropsRequirePlayerDamage = false;
 
+    protected Map<Player, Integer> triggerCounts = new WeakHashMap<>();
 
-    /**
-     * Stores how many times each player has triggered any of this spawners Spawn Triggers, the count is reset when a wave is spawned.
-     **/
-    protected Map<Player, Integer> triggerCounts = new HashMap<>();
+    public List<SpawnCondition> getConditions() {
+        return Collections.unmodifiableList(this.conditions);
+    }
+
+    public List<SpawnTrigger> getTriggers() {
+        return Collections.unmodifiableList(this.triggers);
+    }
+
+    public List<SpawnLocation> getLocations() {
+        return Collections.unmodifiableList(this.locations);
+    }
+
+    public List<MobSpawn> getMobSpawns() {
+        return Collections.unmodifiableList(this.mobSpawns);
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getSharedName() {
+        return this.sharedName;
+    }
+
+    public boolean isLoadDefault() {
+        return this.loadDefault;
+    }
+
+    public boolean isDefinitionEnabled() {
+        return this.enabled;
+    }
+
+    public int getConditionsRequired() {
+        return this.conditionsRequired;
+    }
+
+    public int getTriggersRequired() {
+        return this.triggersRequired;
+    }
+
+    public boolean hasTriggerCountMessage(int count) {
+        return this.triggerCountMessages.containsKey(count);
+    }
+
+    public String getTriggerCountMessage(int count) {
+        return this.triggerCountMessages.get(count);
+    }
+
+    public String getMultipleLocations() {
+        return this.multipleLocations;
+    }
+
+    public int getMobCountMin() {
+        return this.mobCountMin;
+    }
+
+    public int getMobCountMax() {
+        return this.mobCountMax;
+    }
+
+    public boolean usesMobCountPlayerScaling() {
+        return this.mobCountPlayerScaling;
+    }
+
+    public int getMobCountPlayerRange() {
+        return this.mobCountPlayerRange;
+    }
+
+    public boolean ignoresDimensions() {
+        return this.ignoreDimensions;
+    }
+
+    public boolean ignoresBiomes() {
+        return this.ignoreBiomes;
+    }
+
+    public boolean ignoresCollision() {
+        return this.ignoreCollision;
+    }
+
+    public boolean ignoresLightLevel() {
+        return this.ignoreLightLevel;
+    }
+
+    public boolean ignoresGroupLimit() {
+        return this.ignoreGroupLimit;
+    }
+
+    public double getGroupLimitRange() {
+        return this.groupLimitRange;
+    }
+
+    public boolean ignoresForgeCanSpawnEvent() {
+        return this.ignoreForgeCanSpawnEvent;
+    }
+
+    public boolean forcesNoDespawn() {
+        return this.forceNoDespawn;
+    }
+
+    public boolean allowsChainSpawning() {
+        return this.chainSpawning;
+    }
+
+    public boolean enablesWithoutMobs() {
+        return this.enableWithoutMobs;
+    }
+
+    public String getEventName() {
+        return this.eventName;
+    }
+
+    public boolean hasEventName() {
+        return !"".equals(this.eventName);
+    }
+
+    public int getBlockBreakRadius() {
+        return this.blockBreakRadius;
+    }
+
+    public boolean dropsRequirePlayerDamage() {
+        return this.dropsRequirePlayerDamage;
+    }
+
+    public boolean hasLocationType(Class<? extends SpawnLocation> locationType) {
+        for (SpawnLocation location : this.locations) {
+            if (locationType.isInstance(location)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void disableForStructureSpawnInjection() {
+        this.enabled = false;
+    }
 
 
     /**
@@ -299,7 +428,7 @@ public class Spawner {
                 SpawnTrigger spawnTrigger = SpawnTrigger.createFromJSON(triggerJson, this);
                 this.triggers.add(spawnTrigger);
                 if (this.enabled) {
-                    SpawnerEventListener.getInstance().addTrigger(spawnTrigger);
+                    SpawnerTriggerDispatcher.getInstance().addTrigger(spawnTrigger);
                 }
             }
         }
@@ -335,7 +464,7 @@ public class Spawner {
      **/
     public void destroy() {
         for (SpawnTrigger spawnTrigger : this.triggers) {
-            SpawnerEventListener.getInstance().removeTrigger(spawnTrigger);
+            SpawnerTriggerDispatcher.getInstance().removeTrigger(spawnTrigger);
         }
         SpawnerManager.getInstance().removeSpawner(this);
     }
@@ -345,26 +474,24 @@ public class Spawner {
      * Returns true if this Spawner is considered enabled, this is checked first before major logging and more in depth checks are done in canSpawn().
      **/
     public boolean isEnabled(Level world, Player player) {
-        if (!this.enabled || CreatureManager.getInstance().spawnConfig.disableAllSpawning || !world.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
+        if (!this.enabled) {
+            return false;
+        }
+        if (CreatureManager.getInstance().getSpawnConfig().disableAllSpawning()) {
+            return false;
+        }
+        if (!world.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
             return false;
         }
 
-        // Event Spawner Check:
-        if (!"".equals(this.eventName)) {
+        if (this.hasEventName()) {
             ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
-            if (worldExt == null) {
-                return false;
-            }
-            if (worldExt.getMobEventPlayerServer(this.eventName) == null) {
+            if (worldExt == null || worldExt.getMobEventPlayerServer(this.eventName) == null) {
                 return false;
             }
         }
 
-        if (!this.enableWithoutMobs && this.mobSpawns.isEmpty() && SpawnerMobRegistry.getMobSpawns(this.sharedName) == null) {
-            return false;
-        }
-
-        return true;
+        return this.enableWithoutMobs || !this.mobSpawns.isEmpty() || SpawnerMobRegistry.getMobSpawns(this.sharedName) != null;
     }
 
 
@@ -372,8 +499,8 @@ public class Spawner {
      * Returns true if Triggers are allowed to operate for this Spawner.
      **/
     public boolean canSpawn(Level world, Player player, BlockPos triggerPos) {
-        if (!SpawnerManager.getInstance().globalSpawnConditions.isEmpty()) {
-            for (SpawnCondition condition : SpawnerManager.getInstance().globalSpawnConditions) {
+        if (!SpawnerManager.getInstance().getGlobalSpawnConditions().isEmpty()) {
+            for (SpawnCondition condition : SpawnerManager.getInstance().getGlobalSpawnConditions()) {
                 if (!condition.isMet(world, player, triggerPos)) {
                     return false;
                 }
@@ -385,12 +512,10 @@ public class Spawner {
         }
 
         int conditionsMet = 0;
-        int conditionsRequired = this.conditionsRequired > 0 ? this.conditionsRequired : this.conditions.size();
+        int requiredConditions = this.conditionsRequired > 0 ? this.conditionsRequired : this.conditions.size();
         for (SpawnCondition condition : this.conditions) {
-            if (condition.isMet(world, player, triggerPos)) {
-                if (++conditionsMet >= conditionsRequired) {
-                    return true;
-                }
+            if (condition.isMet(world, player, triggerPos) && ++conditionsMet >= requiredConditions) {
+                return true;
             }
         }
 
@@ -414,47 +539,53 @@ public class Spawner {
         if (!this.isEnabled(world, player)) {
             return false;
         }
-
         if (!this.canSpawn(world, player, triggerPos)) {
             return false;
         }
+        if (!this.shouldExecuteSpawn(player, countAmount)) {
+            return false;
+        }
+        return this.doSpawn(world, player, spawnTrigger, triggerPos, level, chain);
+    }
 
-        // Only One Trigger Required:
+    private boolean shouldExecuteSpawn(Player player, int countAmount) {
         if (this.triggersRequired <= 1 || player == null) {
-            return this.doSpawn(world, player, spawnTrigger, triggerPos, level, chain);
+            return true;
         }
 
-        // Get Current Count:
         if (!this.triggerCounts.containsKey(player)) {
             this.triggerCounts.put(player, Math.max(countAmount, 0));
         }
+
         int currentCount = this.triggerCounts.get(player);
         int lastCount = currentCount;
 
-        // Change Count:
         if (countAmount == 0) {
             currentCount = 0;
-        } else {
+        }
+        else {
             currentCount += countAmount;
         }
-        if (currentCount != lastCount) {
-            if (this.triggerCountMessages.containsKey(currentCount)) {
-                MutableComponent message = Component.translatable(this.triggerCountMessages.get(currentCount));
-                ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(player);
-                if (extendedPlayer != null) {
-                    extendedPlayer.sendOverlayMessage(message);
-                }
+
+        if (currentCount != lastCount && this.hasTriggerCountMessage(currentCount)) {
+            MutableComponent message = Component.translatable(this.getTriggerCountMessage(currentCount));
+            ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(player);
+            if (extendedPlayer != null) {
+                extendedPlayer.sendOverlayMessage(message);
             }
         }
 
-        // Required Count Met:
         if (currentCount >= this.triggersRequired) {
             this.triggerCounts.put(player, 0);
-            return this.doSpawn(world, player, spawnTrigger, triggerPos, level, chain);
+            return true;
         }
 
         this.triggerCounts.put(player, currentCount);
         return false;
+    }
+
+    public void clearTriggerCount(Player player) {
+        this.triggerCounts.remove(player);
     }
 
     // TODO: Replace this with something better
@@ -469,43 +600,15 @@ public class Spawner {
      * @param chain        How far along a spawner chain this trigger is, this increases whenever the actions of one spawner trigger another spawner and is used to prevent loops, etc.
      * @return True on a successful spawn and false on failure.
      **/
-    public boolean doSpawn(Level world, Player player, SpawnTrigger spawnTrigger, BlockPos triggerPos, int level, int chain) {
-        // Get Amount of Mobs To Spawn:
-        int mobCount = this.mobCountMin;
-        if (this.mobCountMax > this.mobCountMin) {
-            mobCount = world.random.nextInt(this.mobCountMax - this.mobCountMin) + this.mobCountMin;
-        }
-        if (player != null && this.mobCountPlayerScaling) {
-            int nearbyPlayers = 0;
-            List<? extends Player> allPlayers = world.players();
-            for (Player targetPlayer : allPlayers) {
-                if (targetPlayer.isCreative() || targetPlayer.isSpectator()) {
-                    if (!SpawnerEventListener.testOnCreative)
-                        continue;
-                }
-                if (targetPlayer.distanceTo(player) > this.mobCountPlayerRange) {
-                    continue;
-                }
-                nearbyPlayers++;
-            }
-            if (nearbyPlayers > 0) {
-                mobCount = (int) Math.ceil((double) mobCount / nearbyPlayers);
-            }
-        }
-
+    private boolean doSpawn(Level world, Player player, SpawnTrigger spawnTrigger, BlockPos triggerPos, int level, int chain) {
+        int mobCount = this.getMobCount(world, player);
         ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
 
-        List<MobSpawn> allRegistered = new ArrayList<>(this.mobSpawns);
-        Collection<MobSpawn> globalRegistered = SpawnerMobRegistry.getMobSpawns(this.sharedName);
-        if (globalRegistered != null) allRegistered.addAll(0, globalRegistered);
-
-        // Get Positions:
         List<BlockPos> spawnPositions = this.getSpawnPos(world, player, triggerPos);
-        // Restrict To Chunk On Chunk Spawn Trigger:
         if (spawnTrigger instanceof ChunkSpawnTrigger) {
             spawnPositions.removeIf(spawnPos ->
-                spawnPos.getX() < triggerPos.getX() - 8 || spawnPos.getX() > triggerPos.getX() + 8 ||
-                spawnPos.getZ() < triggerPos.getZ() - 8 || spawnPos.getZ() > triggerPos.getZ() + 8
+                    spawnPos.getX() < triggerPos.getX() - 8 || spawnPos.getX() > triggerPos.getX() + 8 ||
+                            spawnPos.getZ() < triggerPos.getZ() - 8 || spawnPos.getZ() > triggerPos.getZ() + 8
             );
         }
         if (spawnPositions.isEmpty()) {
@@ -513,7 +616,6 @@ public class Spawner {
         }
         Collections.shuffle(spawnPositions);
 
-        // Get Biomes:
         List<Biome> biomes = null;
         Map<BlockPos, Biome> positionBiomeCache = new HashMap<>();
         if (!this.ignoreBiomes) {
@@ -525,9 +627,9 @@ public class Spawner {
             }
             biomes = new ArrayList<>(biomeSet);
         }
-        // Get Mobs:
-        Map<Biome, List<MobSpawn>> mobSpawns = this.getMobSpawns(world, player, spawnPositions.size(), biomes);
-        if (mobSpawns.isEmpty()) {
+
+        Map<Biome, List<MobSpawn>> availableMobSpawns = this.getMobSpawns(world, player, spawnPositions.size(), biomes);
+        if (availableMobSpawns.isEmpty()) {
             return false;
         }
 
@@ -537,66 +639,91 @@ public class Spawner {
             if (mobsSpawned >= mobCount) {
                 break;
             }
+
             Biome spawnBiome = positionBiomeCache.getOrDefault(spawnPos, world.getBiomeManager().getBiome(spawnPos).get());
-
-            // Choose Mob To Spawn:
-            MobSpawn mobSpawn = null;
-
-            if (mobSpawns.containsKey(null)) {
-                mobSpawn = this.chooseMobToSpawn(world, mobSpawns.get(null));
-            } else if (mobSpawns.containsKey(spawnBiome)) {
-                mobSpawn = this.chooseMobToSpawn(world, mobSpawns.get(spawnBiome));
-            }
+            MobSpawn mobSpawn = this.chooseSpawnForBiome(world, availableMobSpawns, spawnBiome);
             if (mobSpawn == null) {
                 continue;
             }
-
-            if (mobSpawn.creatureInfo != null) {
-                String creatureName = mobSpawn.creatureInfo.getName();
-                int groupMax = mobSpawn.creatureInfo.creatureSpawn.spawnGroupMax;
-                if (groupMax > 0) {
-                    int alreadySpawned = spawnGroupCounts.getOrDefault(creatureName, 0);
-                    if (alreadySpawned >= groupMax) {
-                        continue;
-                    }
-                }
+            if (this.exceedsBatchGroupLimit(mobSpawn, spawnGroupCounts)) {
+                continue;
             }
 
-            // Create Entity:
             LivingEntity entityLiving = mobSpawn.createEntity(world);
             if (entityLiving == null) {
                 continue;
             }
 
-            // Attempt To Spawn LivingEntity:
             entityLiving.moveTo((double) spawnPos.getX() + 0.5D, (double) spawnPos.getY(), (double) spawnPos.getZ() + 0.5D, world.random.nextFloat() * 360.0F, 0.0F);
 
-            // Forge Can Spawn Event:
-            Event.Result canSpawn = Event.Result.ALLOW;
-            if (entityLiving instanceof Mob) {
-                BlockPos blockPos = new BlockPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
-                canSpawn = new MobSpawnEvent.SpawnPlacementCheck(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, blockPos, world.getRandom(), false).getResult();
-                if (canSpawn == Event.Result.DENY && !this.ignoreForgeCanSpawnEvent && !mobSpawn.ignoreForgeCanSpawnEvent) {
-                    continue;
-                }
+            Event.Result canSpawn = this.checkForgeSpawnPlacement(world, entityLiving, spawnPos);
+            if (canSpawn == Event.Result.DENY && !this.ignoreForgeCanSpawnEvent && !mobSpawn.ignoresForgeCanSpawnEvent()) {
+                continue;
             }
 
-            // Mob Instance Spawn Check:
             if (!this.mobInstanceSpawnCheck(entityLiving, mobSpawn, world, player, spawnPos, level, canSpawn == Event.Result.ALLOW)) {
                 continue;
             }
 
-            // Spawn The Mob:
             this.spawnEntity(world, worldExt, entityLiving, spawnPos, level, mobSpawn, player, chain, canSpawn == Event.Result.ALLOW);
-
             mobsSpawned++;
 
-            if (mobSpawn.creatureInfo != null) {
-                spawnGroupCounts.merge(mobSpawn.creatureInfo.getName(), 1, Integer::sum);
+            if (mobSpawn.hasCreatureInfo()) {
+                spawnGroupCounts.merge(mobSpawn.getCreatureInfo().getName(), 1, Integer::sum);
             }
         }
 
         return mobsSpawned > 0;
+    }
+
+    private int getMobCount(Level world, Player player) {
+        int mobCount = this.mobCountMin;
+        if (this.mobCountMax > this.mobCountMin) {
+            mobCount = world.random.nextInt(this.mobCountMax - this.mobCountMin) + this.mobCountMin;
+        }
+        if (player != null && this.mobCountPlayerScaling) {
+            int nearbyPlayers = 0;
+            for (Player targetPlayer : world.players()) {
+                if ((targetPlayer.isCreative() || targetPlayer.isSpectator()) && !SpawnerEventListener.shouldTestCreative()) {
+                    continue;
+                }
+                if (targetPlayer.distanceTo(player) > this.mobCountPlayerRange) {
+                    continue;
+                }
+                nearbyPlayers++;
+            }
+            if (nearbyPlayers > 0) {
+                mobCount = (int) Math.ceil((double) mobCount / nearbyPlayers);
+            }
+        }
+        return mobCount;
+    }
+
+    private MobSpawn chooseSpawnForBiome(Level world, Map<Biome, List<MobSpawn>> mobSpawns, Biome spawnBiome) {
+        if (mobSpawns.containsKey(null)) {
+            return this.chooseMobToSpawn(world, mobSpawns.get(null));
+        }
+        if (mobSpawns.containsKey(spawnBiome)) {
+            return this.chooseMobToSpawn(world, mobSpawns.get(spawnBiome));
+        }
+        return null;
+    }
+
+    private boolean exceedsBatchGroupLimit(MobSpawn mobSpawn, Map<String, Integer> spawnGroupCounts) {
+        if (!mobSpawn.hasCreatureInfo()) {
+            return false;
+        }
+        String creatureName = mobSpawn.getCreatureInfo().getName();
+        int groupMax = mobSpawn.getCreatureInfo().getCreatureSpawn().getSpawnGroupMax();
+        return groupMax > 0 && spawnGroupCounts.getOrDefault(creatureName, 0) >= groupMax;
+    }
+
+    private Event.Result checkForgeSpawnPlacement(Level world, LivingEntity entityLiving, BlockPos spawnPos) {
+        if (!(entityLiving instanceof Mob)) {
+            return Event.Result.ALLOW;
+        }
+        BlockPos blockPos = new BlockPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
+        return new MobSpawnEvent.SpawnPlacementCheck(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, blockPos, world.getRandom(), false).getResult();
     }
 
 
@@ -608,7 +735,7 @@ public class Spawner {
      * @param triggerPos The location that the spawn was triggered, usually used as the center for spawning around or on.
      * @return True on a successful spawn and false on failure.
      **/
-    public List<BlockPos> getSpawnPos(Level world, Player player, BlockPos triggerPos) {
+    private List<BlockPos> getSpawnPos(Level world, Player player, BlockPos triggerPos) {
         List<BlockPos> spawnPositions = new ArrayList<>();
 
         if (this.locations.isEmpty()) {
@@ -641,8 +768,7 @@ public class Spawner {
             if (possibleSpawnPosLists.size() == 1) {
                 return possibleSpawnPosLists.get(0);
             }
-            int randomIndex = world.random.nextInt(possibleSpawnPosLists.size());
-            return possibleSpawnPosLists.get(randomIndex);
+            return possibleSpawnPosLists.get(world.random.nextInt(possibleSpawnPosLists.size()));
         }
 
         if ("combine".equals(this.multipleLocations)) {
@@ -664,7 +790,7 @@ public class Spawner {
      * @param biomes     A list of all biomes within the spawning area. If null, biome checks will be ignored, all mob spawn will be added to a null map key.
      * @return A map of biomes and mob spawn lists with each mob spawn available to each biome.
      **/
-    public Map<Biome, List<MobSpawn>> getMobSpawns(Level world, @Nullable Player player, int blockCount, @Nullable List<Biome> biomes) {
+    private Map<Biome, List<MobSpawn>> getMobSpawns(Level world, @Nullable Player player, int blockCount, @Nullable List<Biome> biomes) {
         Map<Biome, List<MobSpawn>> mobSpawns = new HashMap<>();
 
         if (biomes == null) {
@@ -687,19 +813,16 @@ public class Spawner {
      * @param biome      The biome to spawn in.
      * @return A list of mob spawns.
      */
-    public List<MobSpawn> getBiomeSpawns(Level world, @Nullable Player player, int blockCount, @Nullable Biome biome) {
+    private List<MobSpawn> getBiomeSpawns(Level world, @Nullable Player player, int blockCount, @Nullable Biome biome) {
         List<MobSpawn> possibleSpawns = new ArrayList<>();
 
-        // Global Spawns:
         Collection<MobSpawn> globalSpawns = SpawnerMobRegistry.getMobSpawns(this.sharedName);
         if (globalSpawns != null) {
             possibleSpawns.addAll(globalSpawns);
         }
 
-        // Local Spawns:
         possibleSpawns.addAll(this.mobSpawns);
 
-        // Get Viable Spawns:
         List<MobSpawn> viableMobSpawns = new ArrayList<>();
         for (MobSpawn possibleMobSpawn : possibleSpawns) {
             if (possibleMobSpawn.canSpawn(world, blockCount, biome, this.ignoreDimensions)) {
@@ -716,8 +839,7 @@ public class Spawner {
      * @param mobSpawns A list of MobSpawns to choose from.
      * @return The MobSpawn of the mob to spawn or null if no mob can be spawned.
      **/
-    public MobSpawn chooseMobToSpawn(Level world, List<MobSpawn> mobSpawns) {
-        // Get Weights:
+    private MobSpawn chooseMobToSpawn(Level world, List<MobSpawn> mobSpawns) {
         int totalWeights = 0;
         for (MobSpawn mobSpawn : mobSpawns) {
             totalWeights += mobSpawn.getWeight();
@@ -726,11 +848,7 @@ public class Spawner {
             return null;
         }
 
-        // Pick Random Spawn Using Weights:
-        int randomWeight = 1;
-        if (totalWeights > 1) {
-            randomWeight = world.random.nextInt(totalWeights);
-        }
+        int randomWeight = totalWeights > 1 ? world.random.nextInt(totalWeights) : 1;
         int searchWeight = 0;
         MobSpawn chosenMobSpawn = null;
         for (MobSpawn mobSpawn : mobSpawns) {
@@ -755,27 +873,21 @@ public class Spawner {
      * @param forgeForced  If true, the Forge Can Spawn Event wants to force this mob to spawn.
      * @return True if the check has passed.
      **/
-    public boolean mobInstanceSpawnCheck(LivingEntity entityLiving, MobSpawn mobSpawn, Level world, Player player, BlockPos spawnPos, int level, boolean forgeForced) {
-        // Lycanites Mobs:
-        if (entityLiving instanceof BaseCreatureEntity) {
-            BaseCreatureEntity entityCreature = (BaseCreatureEntity) entityLiving;
-            String mobName = entityCreature.creatureInfo.getName();
-
+    private boolean mobInstanceSpawnCheck(LivingEntity entityLiving, MobSpawn mobSpawn, Level world, Player player, BlockPos spawnPos, int level, boolean forgeForced) {
+        if (entityLiving instanceof BaseCreatureEntity entityCreature) {
             if (!this.ignoreCollision && !entityCreature.checkSpawnCollision(world, spawnPos)) {
                 return false;
             }
 
-            if (mobSpawn.ignoreMobInstanceConditions) {
+            if (mobSpawn.ignoresMobInstanceConditions()) {
                 return true;
             }
 
-            if (!this.ignoreLightLevel && !mobSpawn.ignoreLightLevel) {
-                if (!entityCreature.checkSpawnLightLevel(world, spawnPos)) {
-                    return false;
-                }
+            if (!this.ignoreLightLevel && !mobSpawn.ignoresLightLevel() && !entityCreature.checkSpawnLightLevel(world, spawnPos)) {
+                return false;
             }
 
-            boolean checkGroupLimit = !this.ignoreGroupLimit && !mobSpawn.ignoreGroupLimit;
+            boolean checkGroupLimit = !this.ignoreGroupLimit && !mobSpawn.ignoresGroupLimit();
             double effectiveGroupRange = checkGroupLimit ? this.groupLimitRange : 0;
             if (!entityCreature.checkSpawnLimits(world, spawnPos, effectiveGroupRange)) {
                 return false;
@@ -784,9 +896,8 @@ public class Spawner {
             return true;
         }
 
-        // Vanilla or Other Mod Mob:
-        if (!mobSpawn.ignoreMobInstanceConditions && entityLiving instanceof Mob) {
-            return ((Mob) entityLiving).checkSpawnRules(world, MobSpawnType.NATURAL);
+        if (!mobSpawn.ignoresMobInstanceConditions() && entityLiving instanceof Mob mobEntity) {
+            return mobEntity.checkSpawnRules(world, MobSpawnType.NATURAL);
         }
         return true;
     }
@@ -797,31 +908,25 @@ public class Spawner {
      * @param world        The world to spawn in.
      * @param entityLiving The entity to spawn.
      */
-    public void spawnEntity(Level world, ExtendedWorld worldExt, LivingEntity entityLiving, BlockPos spawnPos, int level, MobSpawn mobSpawn, Player player, int chain, boolean callInitialSpawn) {
-        // Before Spawn:
-        entityLiving.setPortalCooldown(); // Start Portal Cooldown
+    private void spawnEntity(Level world, ExtendedWorld worldExt, LivingEntity entityLiving, BlockPos spawnPos, int level, MobSpawn mobSpawn, Player player, int chain, boolean callInitialSpawn) {
+        entityLiving.setPortalCooldown();
 
-        BaseCreatureEntity entityCreature;
-        if (entityLiving instanceof BaseCreatureEntity) {
-            entityCreature = (BaseCreatureEntity) entityLiving;
-            entityCreature.forceNoDespawn = this.forceNoDespawn;
-            entityCreature.spawnedRare = level > 0;
+        if (entityLiving instanceof BaseCreatureEntity entityCreature) {
+            entityCreature.applySpawnerSpawnState(this.forceNoDespawn, level > 0);
             if (this.blockBreakRadius > -1 && chain == 0) {
                 BlockPos creaturePos = entityLiving.blockPosition();
                 entityCreature.destroyArea(creaturePos.getX(), creaturePos.getY() - 1, creaturePos.getZ(), 100, true, this.blockBreakRadius, this.chainSpawning ? player : null, chain + 1);
             }
             entityCreature.setDropsRequirePlayerDamage(this.dropsRequirePlayerDamage);
 
-            // Apply Mob Event:
-            if (!"".equals(this.eventName) && worldExt != null) {
+            if (this.hasEventName() && worldExt != null) {
                 MobEventPlayerServer mobEventPlayerServer = worldExt.getMobEventPlayerServer(this.eventName);
                 if (mobEventPlayerServer != null) {
-                    entityCreature.spawnEventType = mobEventPlayerServer.mobEvent.title;
-
-                    // World Event Binding:
-                    if (mobEventPlayerServer.mobEvent.name.equals(worldExt.getWorldEventName())) {
-                        entityCreature.spawnEventCount = worldExt.getWorldEventCount();
+                    int spawnEventCount = -1;
+                    if (mobEventPlayerServer.getMobEventName().equals(worldExt.getWorldEventName())) {
+                        spawnEventCount = worldExt.getWorldEventCount();
                     }
+                    entityCreature.applySpawnEvent(mobEventPlayerServer.getMobEvent().getTitleName(), spawnEventCount);
                 }
             }
         }
@@ -833,24 +938,15 @@ public class Spawner {
             }
 
             mobSpawn.onSpawned(entityLiving, player);
-            if (!"".equals(this.eventName) && worldExt != null) {
+            if (this.hasEventName() && worldExt != null) {
                 MobEventPlayerServer mobEventPlayerServer = worldExt.getMobEventPlayerServer(this.eventName);
                 if (mobEventPlayerServer != null) {
-                    MobEvent mobEvent = mobEventPlayerServer.mobEvent;
-                    mobEvent.onSpawn(entityLiving, mobEventPlayerServer.world, mobEventPlayerServer.player, mobEventPlayerServer.origin, mobEventPlayerServer.level, mobEventPlayerServer.ticks, -1);
+                    MobEvent mobEvent = mobEventPlayerServer.getMobEvent();
+                    mobEvent.onSpawn(entityLiving, mobEventPlayerServer.getWorld(), mobEventPlayerServer.getPlayer(), mobEventPlayerServer.getOrigin(), mobEventPlayerServer.getLevel(), mobEventPlayerServer.getTicks(), -1);
                 }
             }
         };
 
-        if (world instanceof ServerLevel serverLevel) {
-            DeferredLevelActionManager.enqueue(serverLevel, spawnPos, "spawner_spawn:" + entityLiving.getUUID(), levelAccessor -> {
-                levelAccessor.addFreshEntity(entityLiving);
-                afterSpawn.run();
-            });
-            return;
-        }
-
-        world.addFreshEntity(entityLiving);
-        afterSpawn.run();
+        DeferredLevelActionManager.spawnEntity(world, spawnPos, "spawner_spawn:" + entityLiving.getUUID(), entityLiving, afterSpawn);
     }
 }

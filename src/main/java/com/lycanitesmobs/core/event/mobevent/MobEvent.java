@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
-import com.lycanitesmobs.client.event.mobevent.MobEventPlayerClient;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.event.MobEventListener;
 import com.lycanitesmobs.core.manager.MobEventManager;
@@ -28,62 +27,86 @@ public class MobEvent {
     /**
      * A list of all Spawn Conditions which determine if the Triggers should be active or not.
      **/
-    protected List<SpawnCondition> conditions = new ArrayList<>();
+    private final List<SpawnCondition> conditions = new ArrayList<>();
 
     /**
      * A list of all <Mob Event Triggers which listen to events and ticks and attempt to start an event, if conditions are met.
      **/
-    protected List<MobEventTrigger> triggers = new ArrayList<>();
+    private final List<MobEventTrigger> triggers = new ArrayList<>();
 
     /**
      * A list of all Mob Event Effects which perform various actions during an event.
      **/
-    protected List<MobEventEffect> effects = new ArrayList<>();
+    private final List<MobEventEffect> effects = new ArrayList<>();
 
     /**
      * The unique name of this mob event.
      **/
-    public String name = "mobevent";
+    private String name = "mobevent";
 
     /**
      * The title of this mob event, can be the same as other mob events, this is used for the event's printed name, textures and sounds.
      **/
-    public String title = "mobevent";
+    private String title = "mobevent";
 
     /**
      * Whether this event is active or not, this bypasses all checks and triggers, etc.
      **/
-    protected boolean enabled = true;
+    private boolean enabled = true;
 
     /**
      * The channel that this event should use. Can be: world (affects all players in the world), boss (for boss events) or player (the event is unique to the player, for area events).
      **/
-    public String channel = "world";
+    private String channel = "world";
 
     /**
      * How long (in ticks) this mob event will be in the spawning phase for. After this the event is considered over but spawned mobs may linger.
      **/
-    public int duration = 60 * 20;
+    private int duration = 60 * 20;
 
     /**
      * Determines how many Conditions must be met. If 0 or less all are required.
      **/
-    protected int conditionsRequired = 0;
+    private int conditionsRequired = 0;
 
     /**
      * If set to true, this mob will ignore Group Limit checks.
      **/
-    protected boolean interuptWorldEvents = false;
+    private boolean interuptWorldEvents = false;
 
     /**
      * The minimum amount of levels to give a mob spawned by this event.
      **/
-    protected int levelBoostMin = 0;
+    private int levelBoostMin = 0;
 
     /**
      * The maximum amount of levels to give a mob spawned by this event.
      **/
-    protected int levelBoostMax = 9;
+    private int levelBoostMax = 9;
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getTitleName() {
+        return this.title;
+    }
+
+    public String getChannel() {
+        return this.channel;
+    }
+
+    public boolean isWorldChannel() {
+        return "world".equalsIgnoreCase(this.channel);
+    }
+
+    public boolean isBossChannel() {
+        return "boss".equalsIgnoreCase(this.channel);
+    }
+
+    public int getDuration() {
+        return this.duration;
+    }
 
 
     /**
@@ -193,7 +216,7 @@ public class MobEvent {
             return false;
         }
 
-        if (!this.enabled || !MobEventManager.getInstance().mobEventsEnabled) {
+        if (!this.enabled || !MobEventManager.getInstance().areMobEventsEnabled()) {
             LMHelperClass.logDebug("MobEvents", "Mob Events System Disabled");
             return false;
         }
@@ -203,7 +226,7 @@ public class MobEvent {
             return false;
         }
 
-        if ("world".equalsIgnoreCase(this.channel) && worldExt.getWorldEvent() != null && !this.interuptWorldEvents) {
+        if (this.isWorldChannel() && worldExt.getWorldEvent() != null && !this.interuptWorldEvents) {
             return false;
         }
 
@@ -213,9 +236,9 @@ public class MobEvent {
         }
 
         // Global Conditions:
-        if (!MobEventManager.getInstance().globalEventConditions.isEmpty()) {
-            LMHelperClass.logDebug("MobEvents", "Global Conditions Required: " + MobEventManager.getInstance().globalEventConditions.size());
-            for (SpawnCondition condition : MobEventManager.getInstance().globalEventConditions) {
+        if (!MobEventManager.getInstance().getGlobalEventConditions().isEmpty()) {
+            LMHelperClass.logDebug("MobEvents", "Global Conditions Required: " + MobEventManager.getInstance().getGlobalEventConditions().size());
+            for (SpawnCondition condition : MobEventManager.getInstance().getGlobalEventConditions()) {
                 if (!condition.isMet(world, player, position)) {
                     LMHelperClass.logDebug("MobEvents", "Global Condition: " + condition + "Failed");
                     return false;
@@ -264,7 +287,7 @@ public class MobEvent {
             return false;
         }
 
-        if ("world".equalsIgnoreCase(this.channel)) {
+        if (this.isWorldChannel()) {
             worldExt.startWorldEvent(this);
         } else if (pos != null) {
             worldExt.startMobEvent(this, player, pos, level, variant);
@@ -312,8 +335,8 @@ public class MobEvent {
             }
             entityCreature.addLevel(levelBoost);
 
-            if (!entityCreature.isTemporary && !"boss".equalsIgnoreCase(this.channel)) {
-                entityCreature.setTemporary(MobEventManager.getInstance().defaultMobDuration);
+            if (!entityCreature.isTemporary() && !this.isBossChannel()) {
+                entityCreature.setTemporary(MobEventManager.getInstance().getDefaultMobDuration());
             }
 
             if (variant >= 0) {
@@ -333,13 +356,4 @@ public class MobEvent {
         return new MobEventPlayerServer(this, world);
     }
 
-    /**
-     * Creates and returns a Client Side event player instance for this event.
-     *
-     * @param world The world the event is taking place in.
-     * @return
-     */
-    public MobEventPlayerClient getClientEventPlayer(Level world) {
-        return new MobEventPlayerClient(this, world);
-    }
 }

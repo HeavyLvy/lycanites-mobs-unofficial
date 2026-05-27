@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -30,7 +31,7 @@ import org.joml.Vector3d;
 
 public class EntityCherufe extends BaseCreatureEntity implements Enemy {
 
-    public int blockMeltingRadius = 2;
+    private int blockMeltingRadius = 2;
 
     // ==================================================
     //                    Constructor
@@ -53,7 +54,7 @@ public class EntityCherufe extends BaseCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(1.0D).setRange(16.0F).setMinChaseDistance(8.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(1.0D).setRange(16.0F).setMinChaseDistance(8.0F));
     }
 
     @Override
@@ -114,7 +115,7 @@ public class EntityCherufe extends BaseCreatureEntity implements Enemy {
                     projectile.setProjectileScale(2f);
                     projectile.shoot((2 * this.getRandom().nextFloat()) - 1, this.getRandom().nextFloat(), (2 * this.getRandom().nextFloat()) - 1, 1.2F, 6.0F);
                     this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-                    this.getCommandSenderWorld().addFreshEntity(projectile);
+                    DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
                 }
             }
         }
@@ -219,7 +220,7 @@ public class EntityCherufe extends BaseCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

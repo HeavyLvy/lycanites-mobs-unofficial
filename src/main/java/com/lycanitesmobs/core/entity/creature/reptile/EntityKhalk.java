@@ -21,7 +21,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class EntityKhalk extends TameableCreatureEntity implements Enemy, IGroupHeavy {
 
-    public boolean lavaDeath = true;
+    protected boolean lavaDeath = true;
 
     // ==================================================
     //                    Constructor
@@ -48,7 +48,7 @@ public class EntityKhalk extends TameableCreatureEntity implements Enemy, IGroup
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this));
     }
 
     @Override
@@ -158,7 +158,7 @@ public class EntityKhalk extends TameableCreatureEntity implements Enemy, IGroup
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

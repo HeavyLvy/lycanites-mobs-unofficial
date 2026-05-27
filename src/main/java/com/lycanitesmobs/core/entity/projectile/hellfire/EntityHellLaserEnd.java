@@ -4,8 +4,8 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.projectile.misc.LaserEndProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.LaserProjectileEntity;
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
@@ -53,9 +53,7 @@ public class EntityHellLaserEnd extends LaserEndProjectileEntity {
 
     @Override
     public ResourceLocation getTexture() {
-        if (TextureManager.getTexture(this.entityName + "End") == null)
-            TextureManager.addTexture(this.entityName + "End", "textures/item/" + subTypeString() + "/" + this.entityName.toLowerCase() + "_end.png");
-        return TextureManager.getTexture(this.entityName + "End");
+        return AssetHelper.texture("textures/item/" + subTypeString() + "/" + this.entityName.toLowerCase() + "_end.png");
     }
 
 

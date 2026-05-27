@@ -1,50 +1,46 @@
 package com.lycanitesmobs.core.data.info.creature;
 
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
-import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
-import com.lycanitesmobs.core.entity.goals.targeting.RevengeGoal;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Animal;
 
 public class ExtraMobBehaviour {
 	// ========== Mob ==========
 	/** The INSTANCE of the mob this extra behaviour belongs to. **/
-	public BaseCreatureEntity host;
+	protected BaseCreatureEntity host;
 	
 	// ========== Stats ==========
-    public double multiplierHealth = 1.0D;
-	public double multiplierDefense = 1.0D;
-	public double multiplierArmor = 1.0D;
-	public double multiplierSpeed = 1.0D;
-	public double multiplierDamage = 1.0D;
-	public double multiplierHaste = 1.0D;
-	public double multiplierEffect = 1.0D;
-	public double multiplierPierce = 1.0D;
+    protected double multiplierHealth = 1.0D;
+	protected double multiplierDefense = 1.0D;
+	protected double multiplierArmor = 1.0D;
+	protected double multiplierSpeed = 1.0D;
+	protected double multiplierDamage = 1.0D;
+	protected double multiplierHaste = 1.0D;
+	protected double multiplierEffect = 1.0D;
+	protected double multiplierPierce = 1.0D;
 
-    public int boostHealth = 0;
-	public int boostDefense = 0;
-	public int boostArmor = 0;
-	public int boostSpeed = 0;
-	public int boostDamage = 0;
-	public int boostHaste = 0;
-	public int boostEffect = 0;
-	public int boostPierce = 0;
+    protected int boostHealth = 0;
+	protected int boostDefense = 0;
+	protected int boostArmor = 0;
+	protected int boostSpeed = 0;
+	protected int boostDamage = 0;
+	protected int boostHaste = 0;
+	protected int boostEffect = 0;
+	protected int boostPierce = 0;
 	
 	// ========== Overrides ==========
-	public boolean aggressiveOverride = false;
-	public boolean flightOverride = false;
-	public boolean swimmingOverride = false;
-	public boolean waterBreathingOverride = false;
-	public boolean fireImmunityOverride = false;
-	public boolean stealthOverride = false;
-	public boolean itemPickupOverride = false;
-	public int inventorySizeOverride = 0;
-	public double itemDropMultiplierOverride = 1;
+	protected boolean aggressiveOverride = false;
+	protected boolean flightOverride = false;
+	protected boolean swimmingOverride = false;
+	protected boolean waterBreathingOverride = false;
+	protected boolean fireImmunityOverride = false;
+	protected boolean stealthOverride = false;
+	protected boolean itemPickupOverride = false;
+	protected int inventorySizeOverride = 0;
+	protected double itemDropMultiplierOverride = 1;
 	
 	// ========== AI ==========
-	public boolean aiAttackPlayers = false;
-	public boolean aiDefendAnimals = false;
+	protected boolean aiAttackPlayers = false;
+	protected boolean aiDefendAnimals = false;
 	
 	
     // ==================================================
@@ -55,6 +51,118 @@ public class ExtraMobBehaviour {
 	}
 	
 	
+	public BaseCreatureEntity host() {
+		return this.host;
+	}
+
+	public double multiplierHealth() {
+		return this.multiplierHealth;
+	}
+
+	public double multiplierDefense() {
+		return this.multiplierDefense;
+	}
+
+	public double multiplierArmor() {
+		return this.multiplierArmor;
+	}
+
+	public double multiplierSpeed() {
+		return this.multiplierSpeed;
+	}
+
+	public double multiplierDamage() {
+		return this.multiplierDamage;
+	}
+
+	public double multiplierHaste() {
+		return this.multiplierHaste;
+	}
+
+	public double multiplierEffect() {
+		return this.multiplierEffect;
+	}
+
+	public double multiplierPierce() {
+		return this.multiplierPierce;
+	}
+
+	public int boostHealth() {
+		return this.boostHealth;
+	}
+
+	public int boostDefense() {
+		return this.boostDefense;
+	}
+
+	public int boostArmor() {
+		return this.boostArmor;
+	}
+
+	public int boostSpeed() {
+		return this.boostSpeed;
+	}
+
+	public int boostDamage() {
+		return this.boostDamage;
+	}
+
+	public int boostHaste() {
+		return this.boostHaste;
+	}
+
+	public int boostEffect() {
+		return this.boostEffect;
+	}
+
+	public int boostPierce() {
+		return this.boostPierce;
+	}
+
+	public boolean aggressiveOverride() {
+		return this.aggressiveOverride;
+	}
+
+	public boolean flightOverride() {
+		return this.flightOverride;
+	}
+
+	public boolean swimmingOverride() {
+		return this.swimmingOverride;
+	}
+
+	public boolean waterBreathingOverride() {
+		return this.waterBreathingOverride;
+	}
+
+	public boolean fireImmunityOverride() {
+		return this.fireImmunityOverride;
+	}
+
+	public boolean stealthOverride() {
+		return this.stealthOverride;
+	}
+
+	public boolean itemPickupOverride() {
+		return this.itemPickupOverride;
+	}
+
+	public int inventorySizeOverride() {
+		return this.inventorySizeOverride;
+	}
+
+	public double itemDropMultiplierOverride() {
+		return this.itemDropMultiplierOverride;
+	}
+
+	public boolean aiAttackPlayers() {
+		return this.aiAttackPlayers;
+	}
+
+	public boolean aiDefendAnimals() {
+		return this.aiDefendAnimals;
+	}
+
 	// ==================================================
     //                        NBT
     // ==================================================
@@ -145,24 +253,11 @@ public class ExtraMobBehaviour {
     	// AI:
     	if(nbtTagCompound.contains("AIAttackPlayers")) {
     		this.aiAttackPlayers = nbtTagCompound.getBoolean("AIAttackPlayers");
-    		this.host.targetSelector.removeGoal(this.host.aiTargetPlayer);
-    		if(this.aiAttackPlayers) {
-    			if(this.host.aiTargetPlayer == null) {
-    				this.host.aiTargetPlayer = new FindAttackTargetGoal(this.host).addTargets(EntityType.PLAYER);
-				}
-    			this.host.targetSelector.addGoal(9, this.host.aiTargetPlayer);
-    		}
     	}
     	if(nbtTagCompound.contains("AIDefendAnimals")) {
     		this.aiDefendAnimals = nbtTagCompound.getBoolean("AIDefendAnimals");
-    		this.host.targetSelector.removeGoal(this.host.aiDefendAnimals);
-    		if(this.aiDefendAnimals) {
-				if(this.host.aiDefendAnimals == null) {
-					this.host.aiDefendAnimals = new RevengeGoal(this.host).setHelpClasses(Animal.class);
-				}
-    			this.host.targetSelector.addGoal(10, this.host.aiDefendAnimals);
-    		}
     	}
+		this.host.configureExtraBehaviourGoals(this.aiAttackPlayers, this.aiDefendAnimals);
     }
     
     // ========== Write ==========

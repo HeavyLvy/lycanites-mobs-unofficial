@@ -1,8 +1,6 @@
 package com.lycanitesmobs.core.network.message;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.util.helpers.LMHelperClass;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -29,7 +27,7 @@ public class MessageOverlayMessage {
         if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
             return;
 
-        Minecraft.getInstance().gui.setOverlayMessage(message.message, false);
+        ctx.get().enqueueWork(() -> LycanitesMobs.PROXY.showOverlayMessage(message.message));
     }
 
     /**

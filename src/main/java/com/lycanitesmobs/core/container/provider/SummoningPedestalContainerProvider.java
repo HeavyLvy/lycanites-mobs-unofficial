@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SummoningPedestalContainerProvider implements Nameable, MenuProvider {
-    public TileEntitySummoningPedestal summoningPedestal;
+    protected final TileEntitySummoningPedestal summoningPedestal;
 
     public SummoningPedestalContainerProvider(@Nonnull TileEntitySummoningPedestal summoningPedestal) {
         this.summoningPedestal = summoningPedestal;

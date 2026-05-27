@@ -14,7 +14,7 @@ import java.util.List;
 
 public class EntityNymph extends TameableCreatureEntity {
 
-	public int healingRate = 20;
+	protected int healingRate = 20;
 
     // ==================================================
  	//                    Constructor
@@ -129,5 +129,5 @@ public class EntityNymph extends TameableCreatureEntity {
 	@Override
 	public int getNoBagSize() { return 0; }
 	@Override
-	public int getBagSize() { return this.creatureInfo.bagSize; }
+	public int getBagSize() { return this.creatureInfo.getBagSize(); }
 }

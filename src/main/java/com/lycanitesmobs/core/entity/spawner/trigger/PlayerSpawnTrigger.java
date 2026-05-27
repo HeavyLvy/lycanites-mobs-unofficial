@@ -13,19 +13,19 @@ public class PlayerSpawnTrigger extends SpawnTrigger {
 	/** Has a random chance of triggering after so many player ticks. **/
 
 	/** If true, creative players will also activate this trigger. **/
-	public boolean creative = false;
+	protected boolean creative = false;
 
 	/** How many ticks between trigger attempts. **/
-	public double tickRate = 400;
+	protected double tickRate = 400;
 
 	/** The minimum distance the player must be away from the last tick position. **/
-	public double lastTickDistanceMin = -1;
+	protected double lastTickDistanceMin = -1;
 
 	/** The maximum distance the player must be away from the last tick position. **/
-	public double lastTickDistanceMax = -1;
+	protected double lastTickDistanceMax = -1;
 
 	/** If true, the world time that the player is in is used instead of the player's ticks. **/
-	public boolean useWorldTime = false;
+	protected boolean useWorldTime = false;
 
 	/** Stores the position of a player from the last tick for calculating distance. **/
 	protected Map<Player, BlockPos> lastTickPositions = new HashMap<>();
@@ -61,7 +61,7 @@ public class PlayerSpawnTrigger extends SpawnTrigger {
 	/** Called every player tick. **/
 	public void onTick(Player player, long ticks) {
 		// Creative:
-		if(!SpawnerEventListener.testOnCreative && (!this.creative && (player.isCreative() || player.isSpectator()))) {
+		if(!SpawnerEventListener.shouldTestCreative() && (!this.creative && (player.isCreative() || player.isSpectator()))) {
 			return;
 		}
 

@@ -27,8 +27,8 @@ public class EntityDawon extends TameableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(ZombifiedPiglin.class).setSpeed(1.5D).setDamageScale(8.0D).setRange(2.5D));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setSpeed(1.5D));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setTargetClass(ZombifiedPiglin.class).setSpeed(1.5D).setDamageScale(8.0D).setRange(2.5D));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setSpeed(1.5D));
     }
 
 
@@ -66,7 +66,7 @@ public class EntityDawon extends TameableCreatureEntity {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
     
     // ==================================================
     //                     Immunities

@@ -1,4 +1,4 @@
-package com.lycanitesmobs.core.compatibility;
+package com.lycanitesmobs.client.compatibility;
 
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
 import net.irisshaders.iris.api.v0.IrisApi;

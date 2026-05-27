@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.BreakDoorGoal;
 import com.lycanitesmobs.core.entity.goals.actions.MoveVillageGoal;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -25,7 +26,7 @@ import net.minecraft.world.level.block.Blocks;
 
 public class EntityGeist extends AgeableCreatureEntity implements Enemy {
 
-    public boolean shadowfireDeath = true;
+    protected boolean shadowfireDeath = true;
 
     public EntityGeist(EntityType<? extends EntityGeist> entityType, Level world) {
         super(entityType, world);
@@ -43,13 +44,13 @@ public class EntityGeist extends AgeableCreatureEntity implements Enemy {
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(this.nextTravelGoalIndex++, new MoveVillageGoal(this));
+        this.goalSelector.addGoal(this.claimTravelGoalIndex(), new MoveVillageGoal(this));
 
         super.registerGoals();
 
-        this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new BreakDoorGoal(this));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
+        this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new BreakDoorGoal(this));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this));
 
         if (this.getNavigation() instanceof GroundPathNavigation) {
             GroundPathNavigation pathNavigateGround = (GroundPathNavigation) this.getNavigation();
@@ -86,7 +87,7 @@ public class EntityGeist extends AgeableCreatureEntity implements Enemy {
                 zombievillagerentity.setCustomNameVisible(villagerentity.isCustomNameVisible());
             }
 
-            this.getCommandSenderWorld().addFreshEntity(zombievillagerentity);
+            DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, zombievillagerentity);
             this.getCommandSenderWorld().levelEvent(null, 1016, zombievillagerentity.blockPosition(), 0);
         }
     }

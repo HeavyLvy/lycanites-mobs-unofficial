@@ -126,7 +126,7 @@ public final class RecolorTextureCache {
         try {
             Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(original);
             if (resource.isEmpty()) {
-                LMHelperClass.logWarning("", "[Lycanites Mobs] Recolor: texture not found: " + original);
+                LMHelperClass.logWarningMessage("[Recolor] Texture not found: " + original);
                 return null;
             }
 
@@ -180,11 +180,11 @@ public final class RecolorTextureCache {
 
             Minecraft.getInstance().getTextureManager().register(recoloredLoc, dynamicTexture);
 
-            LMHelperClass.logDebug("", "[Lycanites Mobs] Recolored texture cached: " + recoloredLoc);
+            LMHelperClass.logDebug("Resources", "Recolored texture cached: " + recoloredLoc);
             return recoloredLoc;
 
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "[Lycanites Mobs] Failed to recolor texture: " + original + " — " + e.getMessage());
+            LMHelperClass.logWarningMessage("[Recolor] Failed to recolor texture: " + original + " - " + e.getMessage());
             return null;
         }
     }

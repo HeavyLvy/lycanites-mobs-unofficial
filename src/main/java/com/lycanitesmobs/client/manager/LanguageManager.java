@@ -92,7 +92,7 @@ public class LanguageManager {
 		int laodedLangFiles = 0;
 		for (String language : languageList) {
 			String languageDir = String.format("lang/%s/", language);
-			Path languageDirPath = FileLoader.CLIENT.getPath(languageDir);
+			Path languageDirPath = FileLoader.client().getPath(languageDir);
 			try {
 				// Iterate Language Directories:
 				Iterator<Path> languageDirIter = Files.walk(languageDirPath).iterator();

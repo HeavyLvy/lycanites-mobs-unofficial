@@ -4,6 +4,7 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
@@ -25,7 +26,7 @@ import java.util.List;
 
 public class EntityVolcan extends TameableCreatureEntity implements Enemy {
 
-    public int blockMeltingRadius = 2;
+    private int blockMeltingRadius = 2;
 
     // ==================================================
     //                    Constructor
@@ -149,15 +150,15 @@ public class EntityVolcan extends TameableCreatureEntity implements Enemy {
 
     // ========== Perform Command ==========
     @Override
-    public boolean performCommand(String command, Player player, ItemStack itemStack) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack, InteractionHand hand) {
 
         // Water:
         if (command.equals("Water")) {
-            this.replacePlayersItem(player, itemStack, new ItemStack(Items.LAVA_BUCKET));
+            this.replacePlayersItem(player, hand, itemStack, new ItemStack(Items.LAVA_BUCKET));
             return true;
         }
 
-        return super.performCommand(command, player, itemStack);
+        return super.performCommand(command, player, itemStack, hand);
     }
 
 
@@ -189,7 +190,7 @@ public class EntityVolcan extends TameableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

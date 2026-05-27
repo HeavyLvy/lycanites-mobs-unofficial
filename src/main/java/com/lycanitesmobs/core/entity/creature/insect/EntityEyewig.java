@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -31,8 +32,8 @@ public class EntityEyewig extends RideableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false).setMaxChaseDistanceSq(4.0F));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setStaminaTime(100).setRange(8.0F).setMinChaseDistance(4.0F).setMountedAttacking(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false).setMaxChaseDistanceSq(4.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setStaminaTime(100).setRange(8.0F).setMinChaseDistance(4.0F).setMountedAttacking(false));
     }
 
 
@@ -61,7 +62,7 @@ public class EntityEyewig extends RideableCreatureEntity {
 
         // Update Laser:
         if (this.projectile != null && this.projectile.isAlive()) {
-            this.projectile.projectileLife = 20;
+            this.projectile.setProjectileLife(20);
         } else {
             this.projectile = null;
         }
@@ -73,7 +74,7 @@ public class EntityEyewig extends RideableCreatureEntity {
 
             // Launch:
             this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-            this.getCommandSenderWorld().addFreshEntity(projectile);
+            DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
         }
 
         super.attackRanged(target, range);
@@ -102,7 +103,7 @@ public class EntityEyewig extends RideableCreatureEntity {
 
         // Update Laser:
         if (this.abilityProjectile != null && this.abilityProjectile.isAlive()) {
-            this.abilityProjectile.projectileLife = 20;
+            this.abilityProjectile.setProjectileLife(20);
         } else {
             this.abilityProjectile = null;
         }
@@ -117,7 +118,7 @@ public class EntityEyewig extends RideableCreatureEntity {
 
             // Launch:
             this.playSound(this.abilityProjectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-            this.getCommandSenderWorld().addFreshEntity(this.abilityProjectile);
+            DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, this.abilityProjectile);
         }
 
         this.applyStaminaCost();
@@ -163,7 +164,7 @@ public class EntityEyewig extends RideableCreatureEntity {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
 

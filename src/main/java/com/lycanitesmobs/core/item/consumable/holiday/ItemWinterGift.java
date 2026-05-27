@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.item.consumable.holiday;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.data.info.ObjectLists;
@@ -73,7 +74,7 @@ public class ItemWinterGift extends BaseItem {
         dropStack.setCount(1 + player.getRandom().nextInt(4));
         CustomItemEntity entityItem = new CustomItemEntity(world, player.position().x(), player.position().y(), player.position().z(), dropStack);
         entityItem.setPickUpDelay(10);
-        world.addFreshEntity(entityItem);
+        DeferredLevelActionManager.spawnEntity(world, player.blockPosition(), null, entityItem);
     }
 
 
@@ -99,21 +100,21 @@ public class ItemWinterGift extends BaseItem {
                 if (entity instanceof BaseCreatureEntity) {
                     BaseCreatureEntity entityCreature = (BaseCreatureEntity) entity;
                     entityCreature.addLevel(world.random.nextInt(10));
-                    if (entityCreature.creatureInfo.getName().equals("wildkin"))
+                    if (entityCreature.getCreatureDefinitionName().equals("wildkin"))
                         entityCreature.setCustomName(Component.literal("Gooderness"));
-                    else if (entityCreature.creatureInfo.getName().equals("jabberwock"))
+                    else if (entityCreature.getCreatureDefinitionName().equals("jabberwock"))
                         entityCreature.setCustomName(Component.literal("Rudolph"));
-                    else if (entityCreature.creatureInfo.getName().equals("ent"))
+                    else if (entityCreature.getCreatureDefinitionName().equals("ent"))
                         entityCreature.setCustomName(Component.literal("Salty Tree"));
-                    else if (entityCreature.creatureInfo.getName().equals("treant"))
+                    else if (entityCreature.getCreatureDefinitionName().equals("treant"))
                         entityCreature.setCustomName(Component.literal("Salty Tree"));
-                    else if (entityCreature.creatureInfo.getName().equals("reaper"))
+                    else if (entityCreature.getCreatureDefinitionName().equals("reaper"))
                         entityCreature.setCustomName(Component.literal("Satan Claws"));
-                    else if (entityCreature.creatureInfo.getName().equals("behemoth"))
+                    else if (entityCreature.getCreatureDefinitionName().equals("behemoth"))
                         entityCreature.setCustomName(Component.literal("Krampus"));
                 }
 
-                world.addFreshEntity(entity);
+                DeferredLevelActionManager.spawnEntity(world, player.blockPosition(), null, entity);
             }
         }
     }

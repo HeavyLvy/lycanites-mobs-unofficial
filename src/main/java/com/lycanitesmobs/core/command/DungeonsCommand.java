@@ -33,9 +33,9 @@ public class DungeonsCommand {
         String remaining = builder.getRemaining().toLowerCase();
         DungeonManager manager = DungeonManager.getInstance();
         for (DungeonSchematic schematic : manager.getSchematics()) {
-            if (schematic == null || schematic.name == null)
+            if (schematic == null || schematic.getName() == null)
                 continue;
-            String name = schematic.name;
+            String name = schematic.getName();
             if (remaining.isEmpty() || name.toLowerCase().startsWith(remaining)) {
                 builder.suggest(name);
             }
@@ -105,9 +105,9 @@ public class DungeonsCommand {
 
             if (nearby != null && !nearby.isEmpty()) {
                 for (DungeonInstance instance : nearby) {
-                    if (instance == null || instance.schematic == null || instance.schematic.name == null)
+                    if (instance == null || instance.getSchematic() == null || instance.getSchematic().getName() == null)
                         continue;
-                    if (!instance.schematic.name.equalsIgnoreCase(targetName))
+                    if (!instance.getSchematic().getName().equalsIgnoreCase(targetName))
                         continue;
                     BlockPos dungeonOrigin = instance.getOrigin();
                     if (dungeonOrigin == null)
@@ -127,7 +127,7 @@ public class DungeonsCommand {
             DungeonInstance finalClosest = closestInstance;
             source.sendSuccess(
                     () -> Component.literal(
-                            "Nearest generated \"" + finalClosest.schematic.name + "\" at " +
+                            "Nearest generated \"" + finalClosest.getSchematic().getName() + "\" at " +
                                     pos.getX() + ", " + pos.getY() + ", " + pos.getZ() +
                                     " (" + String.format("%.1f", distance) + " blocks away)"),
                     false);
@@ -137,7 +137,7 @@ public class DungeonsCommand {
         DungeonSchematic schematic = DungeonManager.getInstance()
                 .getSchematics()
                 .stream()
-                .filter(s -> s != null && s.name != null && s.name.equalsIgnoreCase(targetName))
+                .filter(s -> s != null && s.getName() != null && s.getName().equalsIgnoreCase(targetName))
                 .findFirst()
                 .orElse(null);
 
@@ -167,13 +167,13 @@ public class DungeonsCommand {
                                 HoverEvent.Action.SHOW_TEXT,
                                 Component.literal("Click to teleport"))));
 
-        Component message = Component.literal("Nearest " + schematic.name + " is at ")
+        Component message = Component.literal("Nearest " + schematic.getName() + " is at ")
                 .append(coords)
                 .append(Component.literal(" (" + String.format("%.0f", distanceTheo) + " blocks away)"));
 
         source.sendSuccess(() -> message, false);
 
-        String nativeCmd = "/locate structure lycanitesmobs:" + schematic.name;
+        String nativeCmd = "/locate structure lycanitesmobs:" + schematic.getName();
         source.sendSuccess(() -> Component.literal("Tip: ").withStyle(ChatFormatting.GRAY)
                 .append(Component.literal(nativeCmd).withStyle(style -> style
                         .withColor(ChatFormatting.AQUA)

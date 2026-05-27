@@ -2,10 +2,11 @@ package com.lycanitesmobs.core.entity.projectile.hellfire;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.creature.demon.EntityRahovart;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
@@ -17,15 +18,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class EntityHellfireBarrier extends BaseProjectileEntity {
 
     // Properties:
-    public EntityHellfireWall[][] hellfireWalls;
+    protected EntityHellfireWall[][] hellfireWalls;
     protected int hellfireWidth = 5;
     protected int hellfireHeight = 3;
     protected int hellfireSize = 10;
-    public boolean wall = false;
-    public int time = 0;
-    public int timeMax = 2 * 20;
-    public float angle = 90;
-    public double rotation = 0;
+    protected boolean wall = false;
+    protected int time = 0;
+    protected int timeMax = 2 * 20;
+    protected float angle = 90;
+    protected double rotation = 0;
 
     // ==================================================
     //                   Constructors
@@ -61,6 +62,18 @@ public class EntityHellfireBarrier extends BaseProjectileEntity {
         return false;
     }
 
+    public void setWallMode(boolean wall) {
+        this.wall = wall;
+    }
+
+    public void resetTime() {
+        this.time = 0;
+    }
+
+    public void setRotation(double rotation) {
+        this.rotation = rotation;
+    }
+
 
     // ==================================================
     //                      Update
@@ -81,15 +94,15 @@ public class EntityHellfireBarrier extends BaseProjectileEntity {
                 for (int col = 0; col < this.hellfireWidth; col++) {
                     if (this.getOwner() != null) {
                         if (this.wall) {
-                            hellfireWalls[row][col] = new EntityHellfireWall(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireWall.class), this.getCommandSenderWorld(), (LivingEntity) this.getShooter());
+                            hellfireWalls[row][col] = new EntityHellfireWall(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireWall.class), this.getCommandSenderWorld(), (LivingEntity) this.getShooter());
                         } else {
-                            hellfireWalls[row][col] = new EntityHellfireBarrierPart(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireBarrierPart.class), this.getCommandSenderWorld(), (LivingEntity) this.getShooter());
+                            hellfireWalls[row][col] = new EntityHellfireBarrierPart(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireBarrierPart.class), this.getCommandSenderWorld(), (LivingEntity) this.getShooter());
                         }
                     } else {
                         if (this.wall) {
-                            hellfireWalls[row][col] = new EntityHellfireWall(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireWall.class), this.getCommandSenderWorld(), this.position().x(), this.position().y() + (this.hellfireSize * row), this.position().z());
+                            hellfireWalls[row][col] = new EntityHellfireWall(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireWall.class), this.getCommandSenderWorld(), this.position().x(), this.position().y() + (this.hellfireSize * row), this.position().z());
                         } else {
-                            hellfireWalls[row][col] = new EntityHellfireBarrierPart(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireBarrierPart.class), this.getCommandSenderWorld(), this.position().x(), this.position().y() + (this.hellfireSize * row), this.position().z());
+                            hellfireWalls[row][col] = new EntityHellfireBarrierPart(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireBarrierPart.class), this.getCommandSenderWorld(), this.position().x(), this.position().y() + (this.hellfireSize * row), this.position().z());
                         }
                     }
 
@@ -101,10 +114,9 @@ public class EntityHellfireBarrier extends BaseProjectileEntity {
                             this.position().y() + (this.hellfireSize * row),
                             this.position().z() + z
                     );
-                    this.hellfireWalls[row][col].projectileLife = 2 * 20;
-
-                    this.getCommandSenderWorld().addFreshEntity(hellfireWalls[row][col]);
+                    this.hellfireWalls[row][col].setProjectileLife(2 * 20);
                     this.hellfireWalls[row][col].setProjectileScale(this.hellfireSize * 2.5F);
+                    DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.hellfireWalls[row][col].blockPosition(), null, this.hellfireWalls[row][col]);
                 }
             }
         }
@@ -121,7 +133,7 @@ public class EntityHellfireBarrier extends BaseProjectileEntity {
                         this.position().y() + (this.hellfireSize * row),
                         this.position().z() + z
                 );
-                this.hellfireWalls[row][col].projectileLife = 2 * 20;
+                this.hellfireWalls[row][col].setProjectileLife(2 * 20);
 
                 if (!this.isAlive())
                     this.hellfireWalls[row][col].remove(RemovalReason.DISCARDED);
@@ -183,8 +195,6 @@ public class EntityHellfireBarrier extends BaseProjectileEntity {
     }
 
     public ResourceLocation getTexture() {
-        if (TextureManager.getTexture(this.entityName) == null)
-            TextureManager.addTexture(this.entityName, "textures/particles/" + subTypeString() + "/" + this.entityName + ".png");
-        return TextureManager.getTexture(this.entityName);
+        return AssetHelper.texture("textures/particles/" + subTypeString() + "/" + this.entityName + ".png");
     }
 }

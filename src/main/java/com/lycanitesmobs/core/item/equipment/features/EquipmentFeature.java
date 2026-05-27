@@ -9,13 +9,13 @@ import javax.annotation.Nullable;
 
 public class EquipmentFeature {
 	/** The type of feature that this is. **/
-	public String featureType;
+	protected String featureType;
 
 	/** The minimun level the part must be for this feature to be enabled. **/
-	public int levelMin = -1;
+	protected int levelMin = -1;
 
 	/** The maximun level the part must be for this feature to be enabled. **/
-	public int levelMax = -1;
+	protected int levelMax = -1;
 
 
 	/** Loads a Tool Feature from the provided JSON data. **/
@@ -60,6 +60,10 @@ public class EquipmentFeature {
 
 		if(json.has("levelMax"))
 			this.levelMax = json.get("levelMax").getAsInt();
+	}
+
+	public String getFeatureType() {
+		return this.featureType;
 	}
 
 

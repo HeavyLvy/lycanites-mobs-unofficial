@@ -48,8 +48,8 @@ public class CopyOwnerAttackTargetGoal extends TargetingGoal {
 		if(this.target == null) {
 			ExtendedEntity extendedOwner = ExtendedEntity.getForEntity(owner);
 			if(extendedOwner != null) {
-				this.target = extendedOwner.lastAttackedEntity;
-				lastAttackedTime = extendedOwner.lastAttackedTime;
+				this.target = extendedOwner.getLastAttackedEntity();
+				lastAttackedTime = extendedOwner.getLastAttackedTime();
 			}
 		}
 		if(this.target == null) {

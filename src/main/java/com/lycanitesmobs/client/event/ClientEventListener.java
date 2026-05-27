@@ -16,6 +16,7 @@ import com.lycanitesmobs.client.loader.ModelReloadListener;
 import com.lycanitesmobs.client.manager.KeyManager;
 import com.lycanitesmobs.client.manager.TabManager;
 import com.lycanitesmobs.client.model.blocky.*;
+import com.lycanitesmobs.client.item.ItemColorCustomSpawnEgg;
 import com.lycanitesmobs.client.renderer.entity.creature.BlockyRenderer;
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.client.renderer.entity.projectile.ProjectileRenderFactory;
@@ -30,7 +31,6 @@ import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
-import com.lycanitesmobs.core.item.consumable.entity.ItemColorCustomSpawnEgg;
 import com.lycanitesmobs.core.item.consumable.entity.ItemCustomSpawnEgg;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.manager.ItemManager;
@@ -68,6 +68,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 
 @Mod.EventBusSubscriber(
@@ -80,7 +81,7 @@ public class ClientEventListener {
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
         var colors = event.getItemColors();
 
-        for (CreatureType creatureType : CreatureManager.getInstance().creatureTypes.values()) {
+        for (CreatureType creatureType : CreatureManager.getInstance().getCreatureTypes()) {
             Item item = ObjectManager.getItem(creatureType.getSpawnEggName());
             if (item == null) {
                 continue;
@@ -123,12 +124,12 @@ public class ClientEventListener {
 
     @SubscribeEvent
     public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
-        LycanitesMobs.LOGGER.info("LycanitesMobs: Registering Renderers!" + CreatureManager.getInstance().creatures.size());
+        LycanitesMobs.LOGGER.info("LycanitesMobs: Registering Renderers!" + CreatureManager.getInstance().getCreatureCount());
         // Creatures:
-        for (CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
+        for (CreatureInfo creatureInfo : CreatureManager.getInstance().getCreatures()) {
             //LMHelperClass.logInfoMessage("CI Name: " + creatureInfo.getName());
             var registerBlocky = false;
-            if (creatureInfo.dummy) {
+            if (creatureInfo.isDummy()) {
                 if ("fear".equals(creatureInfo.getName())) {
                     event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), FearRenderer::new);
                 } else {
@@ -154,12 +155,12 @@ public class ClientEventListener {
                     continue;
                 }
             }
-            event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new CreatureRenderer<>(creatureInfo.getName(), dispatcher, (float) creatureInfo.width / 2));
+            event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new CreatureRenderer<>(creatureInfo.getName(), dispatcher, (float) creatureInfo.getWidth() / 2));
         }
 
         // Projectiles:
-        for (ProjectileInfo projectileInfo : ProjectileManager.getInstance().projectiles.values()) {
-            if (projectileInfo.modelClassName != null) {
+        for (ProjectileInfo projectileInfo : ProjectileManager.getInstance().getProjectiles()) {
+            if (projectileInfo.hasModel()) {
                 //Here we retain the factory since we are choosing the renderer based off the projectileInfo. Later on we can get rid of this and do individual renderers.
                 event.registerEntityRenderer(LMHelperClass.cast(projectileInfo.getEntityType()), (dispatcher) -> new ProjectileRenderFactory<CustomProjectileEntity>(projectileInfo).createRenderFor(dispatcher));
             } else {
@@ -168,20 +169,22 @@ public class ClientEventListener {
         }
 
         // Old Sprite Projectiles:
-        for (String projectileName : ProjectileManager.getInstance().oldSpriteProjectiles.keySet()) {
-            Class projectileClass = ProjectileManager.getInstance().oldSpriteProjectiles.get(projectileName);
-            event.registerEntityRenderer(LMHelperClass.cast(ProjectileManager.getInstance().oldProjectileTypes.get(projectileClass)), (dispatcher) -> new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, false).createRenderFor(dispatcher));
+        for (Map.Entry<String, Class<? extends Entity>> projectileEntry : ProjectileManager.getInstance().getOldSpriteProjectileEntries()) {
+            String projectileName = projectileEntry.getKey();
+            Class<? extends Entity> projectileClass = projectileEntry.getValue();
+            event.registerEntityRenderer(LMHelperClass.cast(ProjectileManager.getInstance().getOldProjectileType(projectileClass)), (dispatcher) -> new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, false).createRenderFor(dispatcher));
         }
 
         // Old Model Projectiles:
-        for (String projectileName : ProjectileManager.getInstance().oldModelProjectiles.keySet()) {
-            Class projectileClass = ProjectileManager.getInstance().oldModelProjectiles.get(projectileName);
-            event.registerEntityRenderer(ProjectileManager.getInstance().oldProjectileTypes.get(projectileClass), (dispatcher) -> new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, true).createRenderFor(dispatcher));
+        for (Map.Entry<String, Class<? extends Entity>> projectileEntry : ProjectileManager.getInstance().getOldModelProjectileEntries()) {
+            String projectileName = projectileEntry.getKey();
+            Class<? extends Entity> projectileClass = projectileEntry.getValue();
+            event.registerEntityRenderer(ProjectileManager.getInstance().getOldProjectileType(projectileClass), (dispatcher) -> new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, true).createRenderFor(dispatcher));
         }
 
         // Special Entities:
-        for (Class specialClass : ObjectManager.specialEntities.values()) {
-            event.registerEntityRenderer(LMHelperClass.cast(ObjectManager.specialEntityTypes.get(specialClass)), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
+        for (Class<? extends Entity> specialClass : ObjectManager.getSpecialEntityClasses()) {
+            event.registerEntityRenderer(LMHelperClass.cast(ObjectManager.getSpecialEntityType(specialClass)), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
         }
 
     }
@@ -217,8 +220,8 @@ public class ClientEventListener {
 
         if (event.getItemStack().getItem() instanceof ItemSoulgazer) {
             ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(event.getEntity());
-            if (extendedPlayer != null && extendedPlayer.creatureStudyCooldown > 0) {
-                event.getToolTip().add(Component.translatable("message.beastiary.study.cooldown").append(" " + String.format("%.0f", (float) extendedPlayer.creatureStudyCooldown / 20) + "s").withStyle(ChatFormatting.BLUE));
+            if (extendedPlayer != null && extendedPlayer.hasCreatureStudyCooldown()) {
+                event.getToolTip().add(Component.translatable("message.beastiary.study.cooldown").append(" " + String.format("%.0f", extendedPlayer.getCreatureStudyCooldownSeconds()) + "s").withStyle(ChatFormatting.BLUE));
             }
         }
     }
@@ -298,7 +301,7 @@ public class ClientEventListener {
 
         // Mount Inventory: Adds to control states.
         if (KeyManager.mountInventory.consumeClick()) {
-            controlStates += ExtendedPlayer.CONTROL_ID.MOUNT_INVENTORY.id;
+            controlStates += ExtendedPlayer.CONTROL_ID.MOUNT_INVENTORY.id();
         }
 
         // Beastiary Index:
@@ -331,33 +334,33 @@ public class ClientEventListener {
             // ========== Action Controls ==========
             // Vanilla Jump: Adds to control states.
             if (mc.options.keyJump.isDown())
-                controlStates += ExtendedPlayer.CONTROL_ID.JUMP.id;
+                controlStates += ExtendedPlayer.CONTROL_ID.JUMP.id();
 
             // Descend: Adds to control states.
             if (KeyManager.descend.isDown())
-                controlStates += ExtendedPlayer.CONTROL_ID.DESCEND.id;
+                controlStates += ExtendedPlayer.CONTROL_ID.DESCEND.id();
 
             // Mount Ability: Adds to control states.
             if (KeyManager.dismount.isDown())
-                controlStates += ExtendedPlayer.CONTROL_ID.MOUNT_DISMOUNT.id;
+                controlStates += ExtendedPlayer.CONTROL_ID.MOUNT_DISMOUNT.id();
 
             // Mount Ability: Adds to control states.
             if (KeyManager.mountAbility.isDown())
-                controlStates += ExtendedPlayer.CONTROL_ID.MOUNT_ABILITY.id;
+                controlStates += ExtendedPlayer.CONTROL_ID.MOUNT_ABILITY.id();
 
             // Attack Key Pressed:
             if (Minecraft.getInstance().options.keyAttack.isDown()) {
-                controlStates += ExtendedPlayer.CONTROL_ID.ATTACK.id;
+                controlStates += ExtendedPlayer.CONTROL_ID.ATTACK.id();
             }
         }
 
 
         // ========== Sync Controls To Server ==========
-        if (controlStates == playerExt.controlStates)
+        if (controlStates == playerExt.getControlStates())
             return;
         MessagePlayerControl message = new MessagePlayerControl(controlStates);
         LycanitesMobs.PACKET_MANAGER.sendToServer(message);
-        playerExt.controlStates = controlStates;
+        playerExt.updateControlStates(controlStates);
     }
 
 

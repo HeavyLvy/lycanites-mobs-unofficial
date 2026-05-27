@@ -1,6 +1,6 @@
 package com.lycanitesmobs.client.manager;
 
-import com.lycanitesmobs.core.util.helpers.DrawHelper;
+import com.lycanitesmobs.client.util.helpers.DrawHelper;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

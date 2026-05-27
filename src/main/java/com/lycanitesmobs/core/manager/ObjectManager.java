@@ -9,6 +9,7 @@ import com.lycanitesmobs.core.container.block.SummoningPedestalContainer;
 import com.lycanitesmobs.core.container.creature.CreatureContainer;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.data.info.ObjectLists;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -36,9 +37,11 @@ import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.lycanitesmobs.core.tabs.LMItemsGroup.itemNames;
@@ -47,32 +50,31 @@ import static com.lycanitesmobs.core.tabs.LMItemsGroup.itemNames;
 public class ObjectManager {
 
     // ========== Items/Blocks ==========
-    public static final Map<String, Supplier<? extends Item>> items = new HashMap<>();
-    public static final Map<String, Lazy<? extends BlockItem>> blockItems = new HashMap<>();
-    public static final Map<String, Lazy<? extends Block>> blocks = new HashMap<>();
-    public static final Map<String, Lazy<? extends LiquidBlock>> liquidBlocks = new HashMap<>();
+    private static final Map<String, Supplier<? extends Item>> items = new HashMap<>();
+    private static final Map<String, Lazy<? extends BlockItem>> blockItems = new HashMap<>();
+    private static final Map<String, Lazy<? extends Block>> blocks = new HashMap<>();
+    private static final Map<String, Lazy<? extends LiquidBlock>> liquidBlocks = new HashMap<>();
     // ========== Entities ==========
-    public static final Map<String, Lazy<? extends EntityType<?>>> entityTypes = new HashMap<>();
+    private static final Map<String, Lazy<? extends EntityType<?>>> entityTypes = new HashMap<>();
     // ========== Containers ==========
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, LycanitesMobs.MODID);
-    public static ObjectManager INSTANCE;
-    public static ModInfo currentModInfo;
-    public static Map<String, Class> tileEntities = new HashMap<>();
-    public static Map<Class<? extends BlockEntity>, BlockEntityType<? extends BlockEntity>> tileEntityTypes = new HashMap<>();
-    public static Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
-    public static Map<Block, Item> buckets = new HashMap<>();
+    private static ObjectManager INSTANCE;
+    private static ModInfo currentModInfo;
+    private static final Map<String, Class> tileEntities = new HashMap<>();
+    private static final Map<Class<? extends BlockEntity>, BlockEntityType<? extends BlockEntity>> tileEntityTypes = new HashMap<>();
+    private static final Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
+    private static final Map<Block, Item> buckets = new HashMap<>();
     // ========== Creative Mode Tabs ==========
-    public static Map<Item, ModInfo> itemGroups = new HashMap<>();
+    private static final Map<Item, ModInfo> itemGroups = new HashMap<>();
     // ========== Damage Sources/Effects ==========
-    public static Map<String, EffectBase> effects = new HashMap<>();
+    private static final Map<String, EffectBase> effects = new HashMap<>();
     // ========== Sounds ==========
-    public static Map<String, ResourceLocation> soundNames = new HashMap<>();
-    public static Map<String, Lazy<? extends SoundEvent>> sounds = new HashMap<>();
-    public static Map<String, Class<? extends Entity>> specialEntities = new HashMap<>();
-    public static Map<Class<? extends Entity>, Constructor<? extends Entity>> specialEntityConstructors = new HashMap<>();
-    public static Map<Class<? extends Entity>, EntityType<? extends Entity>> specialEntityTypes = new HashMap<>();
+    private static final Map<String, ResourceLocation> soundNames = new HashMap<>();
+    private static final Map<String, Lazy<? extends SoundEvent>> sounds = new HashMap<>();
+    private static final Map<String, Class<? extends Entity>> specialEntities = new HashMap<>();
+    private static final Map<Class<? extends Entity>, EntityType<? extends Entity>> specialEntityTypes = new HashMap<>();
 
-    public static Map<String, ResourceKey<DamageType>> damageTypeKeys = new HashMap<>();
+    private static final Map<String, ResourceKey<DamageType>> damageTypeKeys = new HashMap<>();
 
 
     /**
@@ -149,21 +151,28 @@ public class ObjectManager {
     }
 
     // ========== Special Entity ==========
-    public static void addSpecialEntity(String name, Class<? extends Entity> entityClass, Constructor<? extends Entity> specialEntityConstructor) {
+    public static void addSpecialEntity(String name, Class<? extends Entity> entityClass) {
         specialEntities.put(name, entityClass);
-        specialEntityConstructors.put(entityClass, specialEntityConstructor);
+    }
+
+    public static void addEntityType(String name, EntityType.Builder<?> builder) {
+        entityTypes.put(name, () -> builder.build(name));
+    }
+
+    public static void registerTileEntityType(Class<? extends BlockEntity> tileEntityClass, BlockEntityType<? extends BlockEntity> tileEntityType) {
+        tileEntityTypes.put(tileEntityClass, tileEntityType);
     }
 
     // ========== Damage Source ==========
     public static void addDamageType(String name) {
-        ResourceKey<DamageType> key = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(LycanitesMobs.MODID, name.toLowerCase()));
+        ResourceKey<DamageType> key = ResourceKey.create(Registries.DAMAGE_TYPE, AssetHelper.modResource(name.toLowerCase()));
         damageTypeKeys.put(name.toLowerCase(), key);
     }
 
     // ========== Sound ==========
     public static void addSound(String name, String path) {
         name = name.toLowerCase();
-        ResourceLocation resourceLocation = new ResourceLocation(LycanitesMobs.MODID, path);
+        ResourceLocation resourceLocation = AssetHelper.modResource(path);
         soundNames.put(name, resourceLocation);
         sounds.put(name, Lazy.of(() -> SoundEvent.createVariableRangeEvent(resourceLocation)));
     }
@@ -194,6 +203,10 @@ public class ObjectManager {
         return items.get(name).get();
     }
 
+    public static boolean hasItem(String name) {
+        return items.containsKey(name.toLowerCase());
+    }
+
     // ========== Fluid ==========
     public static ForgeFlowingFluid getFluid(String name) {
         name = name.toLowerCase();
@@ -202,11 +215,19 @@ public class ObjectManager {
         return fluids.get(name);
     }
 
+    public static Item getBucket(Block block) {
+        return buckets.get(block);
+    }
+
     // ========== Tile Entity ==========
     public static Class getTileEntity(String name) {
         name = name.toLowerCase();
         if (!tileEntities.containsKey(name)) return null;
         return tileEntities.get(name);
+    }
+
+    public static BlockEntityType<?> getTileEntityType(Class<? extends BlockEntity> tileEntityClass) {
+        return tileEntityTypes.get(tileEntityClass);
     }
 
     // ========== Potion Effect ==========
@@ -245,18 +266,49 @@ public class ObjectManager {
         return sounds.get(name).get();
     }
 
+    public static EntityType<? extends Entity> getSpecialEntityType(Class<? extends Entity> entityClass) {
+        return specialEntityTypes.get(entityClass);
+    }
+
+    public static Collection<Class<? extends Entity>> getSpecialEntityClasses() {
+        return Collections.unmodifiableCollection(specialEntities.values());
+    }
+
+    public static Set<Map.Entry<String, Lazy<? extends EntityType<?>>>> getEntityTypeEntries() {
+        return Collections.unmodifiableSet(entityTypes.entrySet());
+    }
+
+    public static Collection<Lazy<? extends Block>> getBlockSuppliers() {
+        return Collections.unmodifiableCollection(blocks.values());
+    }
+
+    public static Collection<Lazy<? extends LiquidBlock>> getLiquidBlockSuppliers() {
+        return Collections.unmodifiableCollection(liquidBlocks.values());
+    }
+
+    public static Set<Map.Entry<String, Lazy<? extends BlockItem>>> getBlockItemEntries() {
+        return Collections.unmodifiableSet(blockItems.entrySet());
+    }
+
+    public static Set<Map.Entry<String, Supplier<? extends Item>>> getItemSupplierEntries() {
+        return Collections.unmodifiableSet(items.entrySet());
+    }
+
+    public static Collection<EffectBase> getEffects() {
+        return Collections.unmodifiableCollection(effects.values());
+    }
+
+    public static Collection<ForgeFlowingFluid> getFluids() {
+        return Collections.unmodifiableCollection(fluids.values());
+    }
+
 
     @Nonnull
     public static EntityType<? extends LivingEntity> getEntityType(String name) {
         LMHelperClass.environmentRunnable(false, () -> {
-            LMHelperClass.logInfo("", "EntityType: " + name);
+            LMHelperClass.logInfoMessage("EntityType: " + name);
         });
         return (EntityType<? extends LivingEntity>) entityTypes.get(name).get();
-    }
-
-    public static void addEntityType(String name, EntityType.Builder<? extends LivingEntity> builder) {
-        entityTypes.put(name, () -> builder.build(name));
-
     }
 
     public static void registerContainers(IEventBus event) {

@@ -7,10 +7,10 @@ import net.minecraft.world.level.Level;
 
 public class ProjectileBehaviourDrainHealth extends ProjectileBehaviour {
 	/** The scale of damage converted into healing. **/
-	public float rate = 0.5F;
+	protected float rate = 0.5F;
 
 	/** The scale of damage converted into healing for the attacker's mount if they are riding one. **/
-	public float mountRate = 0.1F;
+	protected float mountRate = 0.1F;
 
 	@Override
 	public void loadFromJSON(JsonObject json) {

@@ -1,12 +1,9 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.client.manager.ClientManager;
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -22,9 +19,9 @@ public class MessageCreatureKnowledge {
     }
 
     public MessageCreatureKnowledge(CreatureKnowledge creatureKnowledge) {
-        this.creatureName = creatureKnowledge.creatureName;
-        this.rank = creatureKnowledge.rank;
-        this.experience = creatureKnowledge.experience;
+        this.creatureName = creatureKnowledge.getCreatureName();
+        this.rank = creatureKnowledge.getRank();
+        this.experience = creatureKnowledge.getExperience();
     }
 
     /**
@@ -35,12 +32,11 @@ public class MessageCreatureKnowledge {
         if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
             return;
 
-        Player player = ClientManager.getInstance().getClientPlayer();
-        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
-        if (playerExt == null)
-            return;
-
-        playerExt.beastiary.addCreatureKnowledge(new CreatureKnowledge(playerExt.beastiary, message.creatureName, message.rank, message.experience), false);
+        ctx.get().enqueueWork(() ->
+                LycanitesMobs.PROXY.applyCreatureKnowledge(
+                        message.creatureName,
+                        message.rank,
+                        message.experience));
     }
 
     /**
@@ -53,7 +49,7 @@ public class MessageCreatureKnowledge {
             message.rank = packet.readInt();
             message.experience = packet.readInt();
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "There was a problem decoding the packet: " + packet + ".");
+            LMHelperClass.logWarningMessage("There was a problem decoding the packet: " + packet + ".");
             e.printStackTrace();
         }
         return message;

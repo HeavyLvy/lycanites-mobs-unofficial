@@ -16,9 +16,9 @@ import net.minecraftforge.common.extensions.IForgeMenuType;
 
 public class EquipmentStationContainer extends BaseContainer {
     public static final MenuType<EquipmentStationContainer> TYPE = (MenuType<EquipmentStationContainer>) IForgeMenuType.create(EquipmentStationContainer::new)/*.setRegistryName(LycanitesMobs.MODID, "equipment_station")*/;
-    public EquipmentStationTileEntity equipmentStation;
-    EquipmentStationEquipmentSlot equipmentSlot;
-    EquipmentStationRepairSlot repairSlot;
+    protected final EquipmentStationTileEntity equipmentStation;
+    protected EquipmentStationEquipmentSlot equipmentSlot;
+    protected EquipmentStationRepairSlot repairSlot;
 
     /**
      * Client Constructor
@@ -57,6 +57,10 @@ public class EquipmentStationContainer extends BaseContainer {
             this.addSlot(this.equipmentSlot);
         }
         this.inventoryFinish = this.inventoryStart + slots;
+    }
+
+    public EquipmentStationTileEntity getEquipmentStation() {
+        return this.equipmentStation;
     }
 
     @Override

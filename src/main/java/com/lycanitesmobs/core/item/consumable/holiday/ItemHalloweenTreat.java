@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.item.consumable.holiday;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.data.info.ObjectLists;
@@ -73,7 +74,7 @@ public class ItemHalloweenTreat extends BaseItem {
         dropStack.setCount(1 + player.getRandom().nextInt(4));
         CustomItemEntity entityItem = new CustomItemEntity(world, player.position().x(), player.position().y(), player.position().z(), dropStack);
         entityItem.setPickUpDelay(10);
-        world.addFreshEntity(entityItem);
+        DeferredLevelActionManager.spawnEntity(world, player.blockPosition(), null, entityItem);
     }
 
 
@@ -99,17 +100,17 @@ public class ItemHalloweenTreat extends BaseItem {
                 if (entity instanceof BaseCreatureEntity) {
                     BaseCreatureEntity entityCreature = (BaseCreatureEntity) entity;
                     entityCreature.addLevel(world.random.nextInt(10));
-                    if (entityCreature.creatureInfo.getName().equals("ent"))
+                    if (entityCreature.getCreatureDefinitionName().equals("ent"))
                         entityCreature.setCustomName(Component.literal("Twisted Ent"));
-                    else if (entityCreature.creatureInfo.getName().equals("treant"))
+                    else if (entityCreature.getCreatureDefinitionName().equals("treant"))
                         entityCreature.setCustomName(Component.literal("Wicked Treant"));
-                    else if (entityCreature.creatureInfo.getName().equals("epion"))
+                    else if (entityCreature.getCreatureDefinitionName().equals("epion"))
                         entityCreature.setCustomName(Component.literal("Vampire Bat"));
-                    else if (entityCreature.creatureInfo.getName().equals("grue"))
+                    else if (entityCreature.getCreatureDefinitionName().equals("grue"))
                         entityCreature.setCustomName(Component.literal("Shadow Clown"));
                 }
 
-                world.addFreshEntity(entity);
+                DeferredLevelActionManager.spawnEntity(world, player.blockPosition(), null, entity);
             }
         }
     }

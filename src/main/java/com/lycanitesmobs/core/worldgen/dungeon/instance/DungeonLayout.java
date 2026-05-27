@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.worldgen.dungeon.instance;
 
 import com.lycanitesmobs.core.data.config.ConfigDungeons;
-import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSector;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -21,24 +21,32 @@ public class DungeonLayout {
     private static final int MAX_RADIUS = 112;
 
     /**
+     * A deferred structure piece must also cover the one-block sector build margin
+     * used when indexing sector chunks.
+     */
+    public static int getMaximumReferenceRadius() {
+        return MAX_RADIUS + 1;
+    }
+
+    /**
      * The Dungeon Instance that this Layout belongs to.
      **/
-    public DungeonInstance dungeonInstance;
+    protected DungeonInstance dungeonInstance;
 
     /**
      * A list of generated Sector Instances.
      **/
-    public List<SectorInstance> sectors = new ArrayList<>();
+    protected List<SectorInstance> sectors = new ArrayList<>();
 
     /**
      * A map that stores all sectors in each ChunkPos. Used for finding nearby sectors when collision detecting and when world generating.
      **/
-    public Map<ChunkPos, List<SectorInstance>> sectorChunkMap = new HashMap<>();
+    protected Map<ChunkPos, List<SectorInstance>> sectorChunkMap = new HashMap<>();
 
     /**
      * The starting connector to use, this should have no parent Sector Instance assigned.
      **/
-    public SectorConnector originConnector;
+    protected SectorConnector originConnector;
 
     /**
      * A list of open Sector Connectors for stemming from.
@@ -55,6 +63,88 @@ public class DungeonLayout {
         this.dungeonInstance = dungeonInstance;
     }
 
+    public DungeonInstance getDungeonInstance() {
+        return this.dungeonInstance;
+    }
+
+    public List<SectorInstance> getSectors() {
+        return Collections.unmodifiableList(this.sectors);
+    }
+
+    public boolean hasSectors() {
+        return !this.sectors.isEmpty();
+    }
+
+    public SectorInstance getFirstSector() {
+        return this.sectors.isEmpty() ? null : this.sectors.get(0);
+    }
+
+    public boolean hasSectorsInChunk(ChunkPos chunkPos) {
+        return this.sectorChunkMap.containsKey(chunkPos);
+    }
+
+    public List<SectorInstance> getSectorsInChunk(ChunkPos chunkPos) {
+        return this.sectorChunkMap.getOrDefault(chunkPos, Collections.emptyList());
+    }
+
+    public int getChunkCount() {
+        return this.sectorChunkMap.size();
+    }
+
+    void resetGeneratedGraph() {
+        this.sectors.clear();
+        this.sectorChunkMap.clear();
+        this.openConnectors.clear();
+        this.originConnector = null;
+    }
+
+    void clearOpenConnectors() {
+        this.openConnectors.clear();
+    }
+
+    int getOpenConnectorCount() {
+        return this.openConnectors.size();
+    }
+
+    List<SectorConnector> getOpenConnectorSnapshot() {
+        return List.copyOf(this.openConnectors);
+    }
+
+    void addOpenConnectors(Collection<SectorConnector> connectors) {
+        this.openConnectors.addAll(connectors);
+    }
+
+    SectorConnector createOriginConnector(RandomSource random) {
+        this.originConnector = new SectorConnector(
+                this.getOrigin(),
+                null,
+                0,
+                Direction.from2DDataValue(random.nextInt(4))
+        );
+        return this.originConnector;
+    }
+
+    void closeOpenConnector(SectorConnector connector) {
+        this.openConnectors.remove(connector);
+        connector.close();
+    }
+
+    BlockPos getOrigin() {
+        return this.dungeonInstance.getOrigin();
+    }
+
+    int getRandomSectorCount(RandomSource random) {
+        return this.dungeonInstance.schematic.getRandomSectorCount(random);
+    }
+
+    DungeonSector getRandomSector(String type, RandomSource random) {
+        return this.dungeonInstance.schematic.getRandomSector(type, random);
+    }
+
+    String getNextConnectingSector(String type, RandomSource random) {
+        return this.dungeonInstance.schematic.getNextConnectingSector(type, random);
+    }
+
 
     /**
      * Checks if a connected sector's occupied bounds are within MAX_RADIUS of the dungeon origin.
@@ -64,7 +154,7 @@ public class DungeonLayout {
      * @return True if the sector is within bounds.
      */
     public boolean isWithinBounds(SectorInstance sector) {
-        BlockPos origin = this.dungeonInstance.originPos;
+        BlockPos origin = this.dungeonInstance.getOrigin();
         BlockPos min = sector.getOccupiedBoundsMin();
         BlockPos max = sector.getOccupiedBoundsMax();
 
@@ -79,24 +169,19 @@ public class DungeonLayout {
      * Generates (or regenerates) this entire Dungeon Layout.
      */
     public void generate(RandomSource random) {
-        this.sectors.clear();
-        this.sectorChunkMap.clear();
-        this.openConnectors.clear();
+        this.resetGeneratedGraph();
 
-        // Start:
         SectorInstance entranceSector = this.start(random);
         LMHelperClass.logDebug("Dungeon", "Created Entrance Sector: " + entranceSector);
-        this.openConnectors.clear();
+        this.clearOpenConnectors();
 
-        // Underground Levels:
         SectorInstance exitSector = entranceSector;
         int level = 1;
         boolean onLastLevel = false;
         while (!onLastLevel && level <= 10) {
-            int sectorCount = this.dungeonInstance.schematic.getRandomSectorCount(random);
+            int sectorCount = this.getRandomSectorCount(random);
             LMHelperClass.logDebug("Dungeon", "Starting Underground Level -" + level + " - Sector Count: " + sectorCount);
 
-            // Snake:
             int snakeCount = Math.round((float) sectorCount * 0.4f);
             exitSector = this.snake(random, exitSector, Math.max(3, snakeCount));
             LMHelperClass.logDebug("Dungeon", "Snake Sectors: " + snakeCount + " - From Sector: " + exitSector);
@@ -104,9 +189,8 @@ public class DungeonLayout {
                 onLastLevel = true;
             }
 
-            // Stem:
             sectorCount -= snakeCount;
-            LMHelperClass.logDebug("Dungeon", "Stem Sectors: " + sectorCount + " Open Snake Sectors: " + this.openConnectors.size());
+            LMHelperClass.logDebug("Dungeon", "Stem Sectors: " + sectorCount + " Open Snake Sectors: " + this.getOpenConnectorCount());
             while (sectorCount > 0) {
                 int stemmedSectors = this.stem(random, sectorCount).size();
                 if (stemmedSectors == 0) {
@@ -116,31 +200,28 @@ public class DungeonLayout {
                 sectorCount -= stemmedSectors;
             }
 
-            this.openConnectors.clear();
+            this.clearOpenConnectors();
             LMHelperClass.logDebug("Dungeon", "Completed Underground Level -" + level + (onLastLevel ? " (Final)" : ""));
             level++;
         }
 
-        // Tower Levels:
         if (random.nextDouble() <= ConfigDungeons.INSTANCE.towerChance.get()) {
             exitSector = entranceSector;
             level = 1;
             while (level <= 10) {
                 LMHelperClass.logDebug("Dungeon", "Starting Tower Level " + level);
 
-                // Tower:
                 exitSector = this.tower(random, exitSector);
                 LMHelperClass.logDebug("Dungeon", "Tower Sector: " + exitSector);
                 if (exitSector == null) {
                     break;
                 }
 
-                // Ledge:
                 int ledgeCount = random.nextInt(exitSector.getOpenConnectors(null).size()) + 1;
                 LMHelperClass.logDebug("Dungeon", "Ledges: " + ledgeCount);
                 this.ledge(random, exitSector, ledgeCount);
 
-                this.openConnectors.clear();
+                this.clearOpenConnectors();
                 LMHelperClass.logDebug("Dungeon", "Completed Tower Level " + level);
                 level++;
             }
@@ -151,25 +232,50 @@ public class DungeonLayout {
 
 
     /**
-     * Startup Phase - Starts generation by creating an entrance.
+     * Adds a Sector Instance to this Dungeon Layout for reference. Also adds all open Sector Connectors that it has.
      *
-     * @param random The instance of Random to use.
-     * @return The generated entrance sector.
+     * @param sectorInstance The Sector Instance to add.
      */
-    public SectorInstance start(RandomSource random) {
-        this.originConnector = new SectorConnector(
-                this.dungeonInstance.originPos,
-                null,
-                0,
-                Direction.from2DDataValue(random.nextInt(4))
-        );
-        DungeonSector entranceDungeonSector = this.dungeonInstance.schematic.getRandomSector("entrance", random);
+    public void addSectorInstance(SectorInstance sectorInstance) {
+        this.sectors.add(sectorInstance);
+
+        this.dungeonInstance.expandChunkBounds(sectorInstance);
+
+        for (ChunkPos chunkPos : sectorInstance.getChunkPositions()) {
+            if (!this.sectorChunkMap.containsKey(chunkPos)) {
+                this.sectorChunkMap.put(chunkPos, new ArrayList<>());
+            }
+            this.sectorChunkMap.get(chunkPos).add(sectorInstance);
+        }
+
+        if (!sectorInstance.isSectorType("stairs")) {
+            this.addOpenConnectors(sectorInstance.getOpenConnectors(null));
+        }
+    }
+
+    public List<SectorInstance> getNearbySectors(SectorInstance sectorInstance) {
+        List<SectorInstance> nearbySectors = new ArrayList<>();
+        for (ChunkPos chunkPos : sectorInstance.getChunkPositions()) {
+            if (this.sectorChunkMap.containsKey(chunkPos)) {
+                for (SectorInstance nearbySector : this.sectorChunkMap.get(chunkPos)) {
+                    if (!nearbySectors.contains(nearbySector)) {
+                        nearbySectors.add(nearbySector);
+                    }
+                }
+            }
+        }
+        return nearbySectors;
+    }
+
+    private SectorInstance start(RandomSource random) {
+        SectorConnector originConnector = this.createOriginConnector(random);
+        DungeonSector entranceDungeonSector = this.getRandomSector("entrance", random);
         SectorInstance entranceSector = new SectorInstance(this, entranceDungeonSector, random);
-        entranceSector.connect(this.originConnector);
+        entranceSector.connect(originConnector);
         entranceSector.init(random);
         this.addSectorInstance(entranceSector);
 
-        DungeonSector dungeonSector = this.dungeonInstance.schematic.getRandomSector("stairs", random);
+        DungeonSector dungeonSector = this.getRandomSector("stairs", random);
         SectorInstance sectorInstance = new SectorInstance(this, dungeonSector, random);
         SectorConnector stairsConnector = entranceSector.getRandomConnector(random, sectorInstance);
         if (stairsConnector == null) {
@@ -182,16 +288,7 @@ public class DungeonLayout {
         return sectorInstance;
     }
 
-
-    /**
-     * First Underground Phase - Generates a linear set of sectors from the starting sector to a finishing sector.
-     *
-     * @param random      The instance of Random to use.
-     * @param startSector The Sector Instance to snake from.
-     * @param length      How many sectors to generate.
-     * @return The end sector or null if it is the finish sector.
-     */
-    public SectorInstance snake(RandomSource random, SectorInstance startSector, int length) {
+    private SectorInstance snake(RandomSource random, SectorInstance startSector, int length) {
         if (startSector == null) {
             return null;
         }
@@ -199,14 +296,14 @@ public class DungeonLayout {
         SectorInstance lastSector = startSector;
 
         for (int i = 0; i < length && lastSector != null; i++) {
-            String nextType = this.dungeonInstance.schematic.getNextConnectingSector(lastSector.dungeonSector.type, random);
+            String nextType = this.getNextConnectingSector(lastSector.getSectorType(), random);
             if (i == length - 2) {
                 nextType = "bossRoom";
             } else if (i == length - 1) {
                 nextType = "stairs";
             }
 
-            DungeonSector dungeonSector = this.dungeonInstance.schematic.getRandomSector(nextType, random);
+            DungeonSector dungeonSector = this.getRandomSector(nextType, random);
             SectorInstance sectorInstance = new SectorInstance(this, dungeonSector, random);
 
             SectorConnector sectorConnector = lastSector.getRandomConnector(random, sectorInstance);
@@ -228,7 +325,7 @@ public class DungeonLayout {
 
             if ("stairs".equals(nextType) && sectorInstance.getOccupiedBoundsMin().getY() <= 1) {
                 nextType = "finish";
-                dungeonSector = this.dungeonInstance.schematic.getRandomSector(nextType, random);
+                dungeonSector = this.getRandomSector(nextType, random);
                 sectorInstance = new SectorInstance(this, dungeonSector, random);
                 sectorInstance.connect(sectorConnector);
 
@@ -251,24 +348,14 @@ public class DungeonLayout {
         return lastSector;
     }
 
-
-    /**
-     * Third Phase - Generates sectors on any open connectors.
-     *
-     * @param random     The instance of Random to use.
-     * @param maxSectors The maximum amount of sectors to stem.
-     * @return A list of generated sectors.
-     */
-    public List<SectorInstance> stem(RandomSource random, int maxSectors) {
+    private List<SectorInstance> stem(RandomSource random, int maxSectors) {
         List<SectorInstance> generatedSectors = new ArrayList<>();
         int stemmedSectors = 0;
-        for (SectorConnector connector : this.openConnectors.toArray(new SectorConnector[this.openConnectors.size()])) {
-            // Get New Sector:
-            String nextType = this.dungeonInstance.schematic.getNextConnectingSector(connector.parentSector.dungeonSector.type, random);
-            DungeonSector dungeonSector = this.dungeonInstance.schematic.getRandomSector(nextType, random);
+        for (SectorConnector connector : this.getOpenConnectorSnapshot()) {
+            String nextType = this.getNextConnectingSector(connector.getParentSectorType(), random);
+            DungeonSector dungeonSector = this.getRandomSector(nextType, random);
             SectorInstance sectorInstance = new SectorInstance(this, dungeonSector, random);
 
-            // Try To Connect New Sector:
             if (!connector.canConnect(this, sectorInstance)) {
                 continue;
             }
@@ -283,10 +370,7 @@ public class DungeonLayout {
             sectorInstance.init(random);
             this.addSectorInstance(sectorInstance);
             generatedSectors.add(sectorInstance);
-            if (this.openConnectors.contains(connector)) {
-                this.openConnectors.remove(connector);
-            }
-            connector.closed = true;
+            this.closeOpenConnector(connector);
             if (++stemmedSectors >= maxSectors) {
                 break;
             }
@@ -295,16 +379,8 @@ public class DungeonLayout {
         return generatedSectors;
     }
 
-
-    /**
-     * First Tower Phase - Creates a tower sector with stairs.
-     *
-     * @param random      The instance of Random to use.
-     * @param startSector The sector to build on top of.
-     * @return The generated tower sector.
-     */
-    public SectorInstance tower(RandomSource random, SectorInstance startSector) {
-        DungeonSector dungeonSector = this.dungeonInstance.schematic.getRandomSector("tower", random);
+    private SectorInstance tower(RandomSource random, SectorInstance startSector) {
+        DungeonSector dungeonSector = this.getRandomSector("tower", random);
         SectorInstance sectorInstance = new SectorInstance(this, dungeonSector, random);
         SectorConnector sectorConnector = startSector.getRandomConnector(random, sectorInstance);
         if (sectorConnector == null) {
@@ -326,23 +402,14 @@ public class DungeonLayout {
         return sectorInstance;
     }
 
-
-    /**
-     * Second Tower Phase - Creates ledges out from a tower sector consisting of a corridor and room sector.
-     *
-     * @param random      The instance of Random to use.
-     * @param startSector The sector to build out of.
-     * @param ledgeCount  How many ledges to make, there must be enough open connectors to finish.
-     * @return The generated tower sector.
-     */
-    public SectorInstance ledge(RandomSource random, SectorInstance startSector, int ledgeCount) {
+    private SectorInstance ledge(RandomSource random, SectorInstance startSector, int ledgeCount) {
         SectorInstance lastSectorInstance = null;
         int bossIndex = 0;
         if (ledgeCount > 0) {
             bossIndex = random.nextInt(ledgeCount);
         }
         for (int i = 0; i < ledgeCount; i++) {
-            DungeonSector corridorSector = this.dungeonInstance.schematic.getRandomSector("corridor", random);
+            DungeonSector corridorSector = this.getRandomSector("corridor", random);
             SectorInstance corridorInstance = new SectorInstance(this, corridorSector, random);
             SectorConnector corridorConnector = startSector.getRandomConnector(random, corridorInstance);
             if (corridorConnector == null) {
@@ -356,13 +423,12 @@ public class DungeonLayout {
             }
 
             corridorInstance.init(random);
-            this.addSectorInstance(corridorInstance);
 
             String roomType = "room";
             if (bossIndex == i) {
                 roomType = "bossRoom";
             }
-            DungeonSector roomSector = this.dungeonInstance.schematic.getRandomSector(roomType, random);
+            DungeonSector roomSector = this.getRandomSector(roomType, random);
             SectorInstance roomInstance = new SectorInstance(this, roomSector, random);
             SectorConnector roomConnector = corridorInstance.getRandomConnector(random, roomInstance);
             if (roomConnector == null) {
@@ -371,63 +437,17 @@ public class DungeonLayout {
             roomInstance.connect(roomConnector);
 
             if (!this.isWithinBounds(roomInstance)) {
-                LMHelperClass.logDebug("Dungeon", "ledge: " + roomType + " exceeds max radius, skipping");
+                LMHelperClass.logDebug("Dungeon", "ledge: " + roomType + " exceeds max radius, skipping entire ledge");
                 continue;
             }
 
             roomInstance.init(random);
+            this.addSectorInstance(corridorInstance);
             this.addSectorInstance(roomInstance);
 
             lastSectorInstance = roomInstance;
         }
 
         return lastSectorInstance;
-    }
-
-
-    /**
-     * Adds a Sector Instance to this Dungeon Layout for reference. Also adds all open Sector Connectors that it has.
-     *
-     * @param sectorInstance The Sector Instance to add.
-     */
-    public void addSectorInstance(SectorInstance sectorInstance) {
-        this.sectors.add(sectorInstance);
-
-        // Update Dungeon Bounds:
-        ChunkPos minChunkPos = new ChunkPos(sectorInstance.getOccupiedBoundsMin());
-        if (this.dungeonInstance.chunkMin == null) {
-            this.dungeonInstance.chunkMin = minChunkPos;
-        } else {
-            if (minChunkPos.x < this.dungeonInstance.chunkMin.x) {
-                this.dungeonInstance.chunkMin = new ChunkPos(minChunkPos.x, this.dungeonInstance.chunkMin.z);
-            }
-            if (minChunkPos.z < this.dungeonInstance.chunkMin.z) {
-                this.dungeonInstance.chunkMin = new ChunkPos(this.dungeonInstance.chunkMin.x, minChunkPos.z);
-            }
-        }
-        ChunkPos maxChunkPos = new ChunkPos(sectorInstance.getOccupiedBoundsMax());
-        if (this.dungeonInstance.chunkMax == null) {
-            this.dungeonInstance.chunkMax = maxChunkPos;
-        } else {
-            if (maxChunkPos.x > this.dungeonInstance.chunkMax.x) {
-                this.dungeonInstance.chunkMax = new ChunkPos(maxChunkPos.x, this.dungeonInstance.chunkMax.z);
-            }
-            if (maxChunkPos.z > this.dungeonInstance.chunkMax.z) {
-                this.dungeonInstance.chunkMax = new ChunkPos(this.dungeonInstance.chunkMax.x, maxChunkPos.z);
-            }
-        }
-
-        // Add To Chunk Map:
-        for (ChunkPos chunkPos : sectorInstance.getChunkPositions()) {
-            if (!this.sectorChunkMap.containsKey(chunkPos)) {
-                this.sectorChunkMap.put(chunkPos, new ArrayList<>());
-            }
-            this.sectorChunkMap.get(chunkPos).add(sectorInstance);
-        }
-
-        // Add Connectors:
-        if (!"stairs".equalsIgnoreCase(sectorInstance.dungeonSector.type)) {
-            this.openConnectors.addAll(sectorInstance.getOpenConnectors(null));
-        }
     }
 }

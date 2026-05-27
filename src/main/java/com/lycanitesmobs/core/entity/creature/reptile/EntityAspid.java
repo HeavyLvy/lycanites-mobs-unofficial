@@ -38,8 +38,8 @@ public class EntityAspid extends AgeableCreatureEntity {
     @Override
     protected void registerGoals() {
 		super.registerGoals();
-		this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new TemptGoal(this).setIncludeDiet(true));
-		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+		this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new TemptGoal(this).setIncludeDiet(true));
+		this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
     }
 	
 	
@@ -52,7 +52,7 @@ public class EntityAspid extends AgeableCreatureEntity {
         super.aiStep();
 
         if(!this.getCommandSenderWorld().isClientSide && this.hasCustomName()) {
-			//LycanitesMobs.logDebug("", "Distractions: " + this.nextDistractionGoalIndex);
+			// LMHelperClass.logDebug("Entity", "Distraction goals registered.");
 		}
         
         // Trail:
@@ -90,7 +90,7 @@ public class EntityAspid extends AgeableCreatureEntity {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
 	// ========== Can leash ==========
     @Override
     public boolean canBeLeashed(Player player) {

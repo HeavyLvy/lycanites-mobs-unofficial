@@ -15,17 +15,18 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Vector3d;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ExtendedEntity {
-    public static Map<Entity, ExtendedEntity> clientExtendedEntities = new HashMap<>();
-    public static List<? extends String> FORCE_REMOVE_ENTITY_IDS;
-    public static int FORCE_REMOVE_ENTITY_TICKS = 40;
+    protected static Map<Entity, ExtendedEntity> clientExtendedEntities = new HashMap<>();
+    protected static List<? extends String> forceRemoveEntityIds;
+    protected static final int FORCE_REMOVE_ENTITY_TICKS = 40;
 
     // Entity Instance:
-    public LivingEntity entity;
+    protected LivingEntity entity;
 
     // Projectiles:
     protected Map<String, Integer> projectileCooldownsPrimary = new HashMap<>();
@@ -40,15 +41,15 @@ public class ExtendedEntity {
     private boolean playerIsFlyingSnapshot;
 
     // Last Attacked:
-    public LivingEntity lastAttackedEntity;
-    public int lastAttackedTime = 0;
+    protected LivingEntity lastAttackedEntity;
+    protected int lastAttackedTime = 0;
 
     // Picked Up:
-    public Entity pickedUpByEntity;
+    protected Entity pickedUpByEntity;
 
     // Percher
-    public Entity perchedByEntity;
-    public boolean perchedEntityNoclip = false;
+    protected Entity perchedByEntity;
+    protected boolean perchedEntityNoclip = false;
 
     // Force Remove:
     boolean forceRemoveChecked = false;
@@ -60,7 +61,7 @@ public class ExtendedEntity {
     // ==================================================
     public static ExtendedEntity getForEntity(LivingEntity entity) {
         if (entity == null) {
-            //LycanitesMobs.logWarning("", "Tried to access an ExtendedEntity from a null Entity.");
+            // LMHelperClass.logWarningMessage("Tried to access an ExtendedEntity from a null Entity.");
             return null;
         }
 
@@ -114,6 +115,22 @@ public class ExtendedEntity {
         this.lastAttackedTime = this.entity.tickCount;
     }
 
+    public static List<? extends String> getForceRemoveEntityIds() {
+        return forceRemoveEntityIds != null ? Collections.unmodifiableList(forceRemoveEntityIds) : Collections.emptyList();
+    }
+
+    public LivingEntity getLastAttackedEntity() {
+        return this.lastAttackedEntity;
+    }
+
+    public int getLastAttackedTime() {
+        return this.lastAttackedTime;
+    }
+
+    public boolean hasLastAttackedEntity() {
+        return this.lastAttackedEntity != null;
+    }
+
 
     // ==================================================
     //                      Update
@@ -137,11 +154,10 @@ public class ExtendedEntity {
         }
 
         // Force Remove Entity:
-        ExtendedEntity.FORCE_REMOVE_ENTITY_IDS = ConfigAdmin.INSTANCE.forceRemoveEntityIds.get();
-        ExtendedEntity.FORCE_REMOVE_ENTITY_TICKS = 40;
-        if (!this.entity.getCommandSenderWorld().isClientSide && FORCE_REMOVE_ENTITY_IDS != null && FORCE_REMOVE_ENTITY_IDS.size() > 0 && !this.forceRemoveChecked) {
+        ExtendedEntity.forceRemoveEntityIds = ConfigAdmin.INSTANCE.forceRemoveEntityIds.get();
+        if (!this.entity.getCommandSenderWorld().isClientSide && !ExtendedEntity.getForceRemoveEntityIds().isEmpty() && !this.forceRemoveChecked) {
             LMHelperClass.logDebug("ForceRemoveEntity", "Forced entity removal, checking: " + this.entity.getName());
-            for (String forceRemoveID : FORCE_REMOVE_ENTITY_IDS) {
+            for (String forceRemoveID : ExtendedEntity.getForceRemoveEntityIds()) {
                 if (forceRemoveID.equalsIgnoreCase(LMHelperClass.convertToResourceLocation(this.entity.getType(), this.entity.level().registryAccess()).toString())) {
                     this.forceRemove = true;
                     break;
@@ -275,7 +291,7 @@ public class ExtendedEntity {
         if (this.pickedUpByEntity instanceof BaseCreatureEntity) {
             pickupOffset = ((BaseCreatureEntity) this.pickedUpByEntity).getPickupOffset(this.entity);
         }
-        if (CreatureManager.getInstance().config.disablePickupOffsets && this.entity instanceof Player) {
+        if (CreatureManager.getInstance().getConfig().disablePickupOffsets() && this.entity instanceof Player) {
             return new double[]{0, 0, 0};
         }
         return pickupOffset;
@@ -283,6 +299,10 @@ public class ExtendedEntity {
 
     public boolean isPickedUp() {
         return this.pickedUpByEntity != null;
+    }
+
+    public Entity getPickedUpByEntity() {
+        return this.pickedUpByEntity;
     }
 
     public boolean isFeared() {

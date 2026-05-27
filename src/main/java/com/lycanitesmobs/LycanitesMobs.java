@@ -4,6 +4,7 @@ import com.lycanitesmobs.client.gui.screen.block.EquipmentForgeScreen;
 import com.lycanitesmobs.client.gui.screen.block.EquipmentInfuserScreen;
 import com.lycanitesmobs.client.gui.screen.block.EquipmentStationScreen;
 import com.lycanitesmobs.client.gui.screen.block.SummoningPedestalScreen;
+import com.lycanitesmobs.client.network.proxy.ClientProxy;
 import com.lycanitesmobs.client.gui.screen.creature.CreatureInventoryScreen;
 import com.lycanitesmobs.client.manager.ClientManager;
 import com.lycanitesmobs.core.data.info.ModInfo;
@@ -14,11 +15,10 @@ import com.lycanitesmobs.core.data.info.altar.AltarInfo;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.event.RegistryEvents;
 import com.lycanitesmobs.core.manager.*;
-import com.lycanitesmobs.core.network.proxy.ClientProxy;
 import com.lycanitesmobs.client.manager.ModelManager;
 import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.manager.CommandManager;
-import com.lycanitesmobs.core.compatibility.OculusCompat;
+import com.lycanitesmobs.client.compatibility.OculusCompat;
 import com.lycanitesmobs.core.data.config.CoreConfig;
 import com.lycanitesmobs.core.container.block.EquipmentForgeContainer;
 import com.lycanitesmobs.core.container.block.EquipmentInfuserContainer;
@@ -26,7 +26,6 @@ import com.lycanitesmobs.core.container.block.EquipmentStationContainer;
 import com.lycanitesmobs.core.container.block.SummoningPedestalContainer;
 import com.lycanitesmobs.core.container.creature.CreatureContainer;
 import com.lycanitesmobs.core.manager.DungeonManager;
-import com.lycanitesmobs.core.entity.util.EntityFactory;
 import com.lycanitesmobs.core.block.Material;
 import com.lycanitesmobs.core.data.loaders.FileLoader;
 import com.lycanitesmobs.core.data.loaders.StreamLoader;
@@ -181,17 +180,7 @@ public class LycanitesMobs {
      * do them on common setup
      */
     public static void loadValues() {
-        var creatureManager = CreatureManager.getInstance();
-        for (CreatureInfo creatureInfo : creatureManager.creatures.values()) {
-            ResourceLocation id = new ResourceLocation(LycanitesMobs.MODID, creatureInfo.getName());
-            EntityType<?> t = ForgeRegistries.ENTITY_TYPES.getValue(id);
-            if (t == null || !id.equals(ForgeRegistries.ENTITY_TYPES.getKey(t)))
-                continue;
-            creatureInfo.entityType = (EntityType<? extends LivingEntity>) t;
-            EntityFactory.getInstance().addEntityType(creatureInfo.entityType, creatureInfo.entityConstructor,
-                    creatureInfo.getName());
-            creatureInfo.init();
-        }
+        CreatureManager.getInstance().bindRegisteredValues();
         ProjectileManager.getInstance().bindRegisteredTypes();
     }
 
@@ -199,6 +188,9 @@ public class LycanitesMobs {
     public void loadContent() {
         // Elements:
         ElementManager.getInstance().loadAllFromJson(modInfo);
+
+        // Fluids must exist before Forge asks for fluid types, blocks, and buckets.
+        FluidManager.getInstance().defineFluids();
 
         // Vanilla Item Lists:
         ObjectLists.createVanillaLists();

@@ -9,10 +9,10 @@ import net.minecraft.world.level.Level;
 public class MobEventSpawnTrigger extends SpawnTrigger {
 
 	/** If set, this is the name of the mob event that must be active for this trigger. **/
-	public String eventName = "";
+	protected String eventName = "";
 
 	/** The current time percentage of the active Mob Event. This is a fraction of the Mob Event's duration rounded down. So at 1200 ticks (1 minute) 0.5 would be 30 seconds in. **/
-	public double eventTime = 0;
+	protected double eventTime = 0;
 
 	/** Constructor **/
 	public MobEventSpawnTrigger(Spawner spawner) {
@@ -39,16 +39,16 @@ public class MobEventSpawnTrigger extends SpawnTrigger {
 		}
 
 		// Event Spawner Check:
-		if(!"".equals(this.eventName) && !this.eventName.equals(mobEventPlayerServer.mobEvent.name)) {
+		if(!mobEventPlayerServer.matchesEvent(this.eventName)) {
 			return;
 		}
 
 		// Trigger Tick:
-		int triggerTick = Math.round((float)mobEventPlayerServer.mobEvent.duration * (float)this.eventTime);
-		if(mobEventPlayerServer.ticks != triggerTick) {
+		int triggerTick = mobEventPlayerServer.getTriggerTick(this.eventTime);
+		if(mobEventPlayerServer.getTicks() != triggerTick) {
 			return;
 		}
 
-		this.trigger(world, mobEventPlayerServer.player, mobEventPlayerServer.origin, mobEventPlayerServer.level, 0);
+		this.trigger(world, mobEventPlayerServer.getPlayer(), mobEventPlayerServer.getOrigin(), mobEventPlayerServer.getLevel(), 0);
 	}
 }

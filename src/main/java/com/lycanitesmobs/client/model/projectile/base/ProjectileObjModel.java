@@ -108,7 +108,7 @@ public class ProjectileObjModel extends ProjectileModel {
      */
     public ProjectileObjModel initModel(String name, ModInfo modInfo, String path) {
         ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile(name);
-        if (projectileInfo != null && !projectileInfo.enabled) {
+        if (projectileInfo != null && !projectileInfo.isEnabled()) {
             return this;
         }
 
@@ -188,7 +188,7 @@ public class ProjectileObjModel extends ProjectileModel {
      */
     public void addAnimationPart(AnimationPart animationPart) {
         if (this.animationParts.containsKey(animationPart.name)) {
-            LMHelperClass.logWarning("", "Tried to add an animation part that already exists: " + animationPart.name + ".");
+            LMHelperClass.logWarningMessage("Tried to add an animation part that already exists: " + animationPart.name + ".");
             return;
         }
         if (animationPart.parentName != null) {

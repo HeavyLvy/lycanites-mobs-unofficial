@@ -12,10 +12,10 @@ import net.minecraft.world.level.Level;
 public class ExplosionSpawnTrigger extends EntitySpawnTrigger {
 
 	/** The minimum strength or size of the explosion. Currently not working as there isn';'t a way to get explosion size from an explosion event. **/
-	public int strength = 4;
+	protected int strength = 4;
 
 	/** If true, only players can activate this Trigger, fake players are not counted. Players that prime TNT count. **/
-	public boolean playerOnly = false;
+	protected boolean playerOnly = false;
 
 
 	/** Constructor **/

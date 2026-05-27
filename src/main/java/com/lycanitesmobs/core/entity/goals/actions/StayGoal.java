@@ -87,7 +87,7 @@ public class StayGoal extends Goal {
 	    	if(!host.useDirectNavigator())
 	    		this.host.getNavigation().moveTo(homePos.getX(), homePos.getY(), homePos.getZ(), this.speed);
 	    	else
-	    		host.directNavigator.setTargetPosition(new BlockPos(homePos), speed);
+	    		host.setDirectNavigationTarget(new BlockPos(homePos), speed);
         }
     }
 }

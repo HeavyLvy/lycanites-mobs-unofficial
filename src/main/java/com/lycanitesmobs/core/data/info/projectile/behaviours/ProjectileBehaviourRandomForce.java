@@ -5,7 +5,7 @@ import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 
 public class ProjectileBehaviourRandomForce extends ProjectileBehaviour {
 	/** How much force to apply. **/
-	public double force = 0.5D;
+	protected double force = 0.5D;
 
 	@Override
 	public void loadFromJSON(JsonObject json) {
@@ -19,7 +19,7 @@ public class ProjectileBehaviourRandomForce extends ProjectileBehaviour {
 			return;
 		}
 
-		if(projectile.updateTick % 5 == 0) {
+		if(projectile.getUpdateTick() % 5 == 0) {
 			projectile.push(
 					(0.5D - projectile.getCommandSenderWorld().getRandom().nextDouble()) * this.force,
 					(0.5D - projectile.getCommandSenderWorld().getRandom().nextDouble()) * this.force,

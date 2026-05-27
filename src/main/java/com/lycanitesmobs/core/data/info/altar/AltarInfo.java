@@ -13,25 +13,58 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AltarInfo {
     // ========== Global Settings ==========
-    /** If false, altars wont work. **/
-    public static boolean altarsEnabled = true;
+    /**
+     * If false, altars wont work.
+     **/
+    protected static boolean altarsEnabled = true;
 
-    /** If set to true, Altars will only activate in dimensions that the monster spawned or event started is allowed in. **/
-    public static boolean checkDimensions = false;
+    /**
+     * If set to true, Altars will only activate in dimensions that the monster spawned or event started is allowed in.
+     **/
+    protected static boolean checkDimensions = false;
 
-    /** A list of all Altars, typically cycled through when a Soulkey is used. **/
-    public static Map<String, AltarInfo> altars = new HashMap<String, AltarInfo>();
+    /**
+     * A list of all Altars, typically cycled through when a Soulkey is used.
+     **/
+    protected static Map<String, AltarInfo> altars = new HashMap<String, AltarInfo>();
 
 
     // ========== Properties ==========
-    public String name = "Altar";
+    protected String name = "Altar";
 
-    public AltarMobEventTrigger mobEventTrigger;
+    protected AltarMobEventTrigger mobEventTrigger;
+
+    public static boolean shouldCheckDimensions() {
+        return checkDimensions;
+    }
+
+    public static Map<String, AltarInfo> getAltars() {
+        return Collections.unmodifiableMap(altars);
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public AltarMobEventTrigger getMobEventTrigger() {
+        return this.mobEventTrigger;
+    }
+
+    public void attachMobEventTrigger(AltarMobEventTrigger mobEventTrigger) {
+        this.mobEventTrigger = mobEventTrigger;
+    }
+
+    public void clearMobEventTrigger(AltarMobEventTrigger mobEventTrigger) {
+        if (this.mobEventTrigger == mobEventTrigger) {
+            this.mobEventTrigger = null;
+        }
+    }
 
 
     // ==================================================
@@ -47,7 +80,7 @@ public class AltarInfo {
     //                    Enabled
     // ==================================================
     public static boolean checkAltarsEnabled() {
-        if(altars.size() < 1)
+        if (altars.size() < 1)
             return false;
         return altarsEnabled;
     }
@@ -57,11 +90,11 @@ public class AltarInfo {
     //                    Altar List
     // ==================================================
     public static void addAltar(AltarInfo altarInfo) {
-        altars.put(altarInfo.name.toLowerCase(), altarInfo);
+        altars.put(altarInfo.getName().toLowerCase(), altarInfo);
     }
 
     public static AltarInfo getAltar(String name) {
-        if(altars.containsKey(name.toLowerCase())) {
+        if (altars.containsKey(name.toLowerCase())) {
             return altars.get(name.toLowerCase());
         }
         return null;
@@ -121,17 +154,24 @@ public class AltarInfo {
     // ==================================================
     //                     Checking
     // ==================================================
-    /** Called before all other checks to see if the player has permission to build in the area of this Altar using the BlockPlaceEvent. **/
+
+    /**
+     * Called before all other checks to see if the player has permission to build in the area of this Altar using the BlockPlaceEvent.
+     **/
     public boolean checkBlockEvent(Entity entity, Level world, BlockPos pos) {
         return true;
     }
 
-    /** Called first when checking for a valid altar, this should be fairly lightweight such as just checking if the first block checked is valid, a more in depth check if then done after. **/
+    /**
+     * Called first when checking for a valid altar, this should be fairly lightweight such as just checking if the first block checked is valid, a more in depth check if then done after.
+     **/
     public boolean quickCheck(Entity entity, Level world, BlockPos pos) {
         return false;
     }
 
-    /** Called if the QuickCheck() is passed, this should check the entire altar structure and if true is returned, the altar will activate. **/
+    /**
+     * Called if the QuickCheck() is passed, this should check the entire altar structure and if true is returned, the altar will activate.
+     **/
     public boolean fullCheck(Entity entity, Level world, BlockPos pos) {
         return false;
     }
@@ -140,11 +180,14 @@ public class AltarInfo {
     // ==================================================
     //                     Activate
     // ==================================================
-    /** Called when this Altar should activate. This will typically destroy the Altar and summon a rare mob or activate an event such as a boss event. If false is returned then the activation did not work, this is the place to check for things like dimensions. **/
+
+    /**
+     * Called when this Altar should activate. This will typically destroy the Altar and summon a rare mob or activate an event such as a boss event. If false is returned then the activation did not work, this is the place to check for things like dimensions.
+     **/
     public boolean activate(Entity entity, Level world, BlockPos pos, int variant) {
-    	if(this.mobEventTrigger == null)
-        	return false;
-    	return this.mobEventTrigger.onActivate(entity, world, pos, variant);
+        if (this.mobEventTrigger == null)
+            return false;
+        return this.mobEventTrigger.onActivate(entity, world, pos, variant);
     }
 
 
@@ -155,27 +198,14 @@ public class AltarInfo {
         double xAmount = -Math.sin(Math.toRadians(angle));
         double zAmount = Math.cos(Math.toRadians(angle));
         BlockPos facingPos = new BlockPos(
-            LMHelperClass.convertToInteger(Math.round((double)pos.getX() + (distance * xAmount))),
-            pos.getY(),
+                LMHelperClass.convertToInteger(Math.round((double) pos.getX() + (distance * xAmount))),
+                pos.getY(),
                 LMHelperClass.convertToInteger(Math.round((double) pos.getZ() + (distance * zAmount)))
         );
         return facingPos;
     }
 
     protected boolean spawnDeferred(Level world, BlockPos pos, String key, Entity entity, Runnable afterSpawn) {
-        if (world instanceof ServerLevel serverLevel) {
-            return DeferredLevelActionManager.enqueue(serverLevel, pos, key, level -> {
-                level.addFreshEntity(entity);
-                if (afterSpawn != null) {
-                    afterSpawn.run();
-                }
-            });
-        }
-
-        world.addFreshEntity(entity);
-        if (afterSpawn != null) {
-            afterSpawn.run();
-        }
-        return true;
+        return DeferredLevelActionManager.spawnEntity(world, pos, key, entity, afterSpawn);
     }
 }

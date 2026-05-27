@@ -49,7 +49,7 @@ public class MobEventCommand {
 		String eventName = StringArgumentType.getString(context, "mobevent");
 		int level = Math.max(1, IntegerArgumentType.getInteger(context, "level"));
 
-		if(!MobEventManager.getInstance().mobEvents.containsKey(eventName)) {
+		if(!MobEventManager.getInstance().hasMobEvent(eventName)) {
 			context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start.unknown"), true);
 			return 0;
 		}
@@ -89,7 +89,7 @@ public class MobEventCommand {
 		int level = Math.max(1, IntegerArgumentType.getInteger(context, "level"));
 		int subspecies = Math.max(-1, IntegerArgumentType.getInteger(context, "subspecies"));
 
-		if(!MobEventManager.getInstance().mobEvents.containsKey(eventName)) {
+		if(!MobEventManager.getInstance().hasMobEvent(eventName)) {
 			context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start.unknown"), true);
 			return 0;
 		}
@@ -129,7 +129,7 @@ public class MobEventCommand {
 		int subspecies = Math.max(-1, IntegerArgumentType.getInteger(context, "subspecies"));
 		int worldId = IntegerArgumentType.getInteger(context, "world");
 
-		if(!MobEventManager.getInstance().mobEvents.containsKey(eventName)) {
+		if(!MobEventManager.getInstance().hasMobEvent(eventName)) {
 			context.getSource().sendSuccess(() -> Component.translatable("lyc.command.mobevent.start.unknown"), true);
 			return 0;
 		}

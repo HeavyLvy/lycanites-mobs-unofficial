@@ -114,13 +114,13 @@ public class SummonMinionsGoal extends BaseGoal {
 
 		// Anti Flight Mode:
 		if(this.antiFlight) {
-			for (Player target : this.host.playerTargets) {
+			this.host.forEachPlayerTarget(target -> {
 				if(target.isCreative() || target.isSpectator())
-					continue;
-				if (CreatureManager.getInstance().config.bossAntiFlight > 0 && target.position().y() > this.host.position().y() + CreatureManager.getInstance().config.bossAntiFlight + 1) {
+					return;
+				if (CreatureManager.getInstance().getConfig().bossAntiFlight() > 0 && target.position().y() > this.host.position().y() + CreatureManager.getInstance().getConfig().bossAntiFlight() + 1) {
 					this.summonMinion(target);
 				}
-			}
+			});
 			return;
 		}
 
@@ -133,7 +133,7 @@ public class SummonMinionsGoal extends BaseGoal {
 		if(minion instanceof BaseCreatureEntity) {
 			BaseCreatureEntity minionCreature = (BaseCreatureEntity)minion;
 			minionCreature.setTarget(target);
-			minionCreature.setSizeScale(minionCreature.sizeScale * this.sizeScale);
+			minionCreature.setSizeScale(minionCreature.getSizeScale() * this.sizeScale);
 		}
 	}
 }

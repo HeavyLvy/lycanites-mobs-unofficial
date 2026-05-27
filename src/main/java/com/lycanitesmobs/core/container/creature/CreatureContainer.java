@@ -7,11 +7,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraftforge.common.extensions.IForgeMenuType;
+
+import java.util.List;
 
 public class CreatureContainer extends BaseContainer {
 	public static final MenuType<CreatureContainer> TYPE = (MenuType<CreatureContainer>) IForgeMenuType.create(CreatureContainer::new);
-	public BaseCreatureEntity creature;
+	protected final BaseCreatureEntity creature;
 
 	/**
 	 * Client Constructor
@@ -21,6 +24,21 @@ public class CreatureContainer extends BaseContainer {
 	 */
 	public CreatureContainer(int windowId, Inventory playerInventory, FriendlyByteBuf extraData) {
 		this(windowId, playerInventory, (BaseCreatureEntity)playerInventory.player.getCommandSenderWorld().getEntity(extraData.readInt()));
+	}
+
+	public BaseCreatureEntity getCreature() {
+		return this.creature;
+	}
+
+	public CreatureInventory getCreatureInventory() {
+		return this.creature.getCreatureInventory();
+	}
+
+	public List<Slot> getCreatureSlotView() {
+		if (this.specialStart < 0 || this.inventoryFinish < 0 || this.specialStart >= this.slots.size()) {
+			return List.of();
+		}
+		return this.slots.subList(this.specialStart, Math.min(this.inventoryFinish + 1, this.slots.size()));
 	}
 
 	/**
@@ -43,8 +61,9 @@ public class CreatureContainer extends BaseContainer {
 
 		// Creature Inventory
 		this.inventoryStart = this.slots.size();
-		if(creature.inventory.getItemSlotsSize() > 0)
-			this.addSlotsByColumn(creature.inventory, 8 + (18 * 4), 18, 5, 0, creature.inventory.getActiveItemSlotsSize() - 1);
+		CreatureInventory creatureInventory = creature.getCreatureInventory();
+		if(creatureInventory.getItemSlotsSize() > 0)
+			this.addSlotsByColumn(creatureInventory, 8 + (18 * 4), 18, 5, 0, creatureInventory.getActiveItemSlotsSize() - 1);
 		this.inventoryFinish = this.slots.size() - 1;
 	}
 
@@ -55,13 +74,15 @@ public class CreatureContainer extends BaseContainer {
   	//                    Draw Slots
   	// ==================================================
 	public void drawCreatureEquipment(BaseCreatureEntity creature, int equipX, int equipY) {
+		CreatureInventory creatureInventory = creature.getCreatureInventory();
+
 		// Creature Accessories:
 		if(creature instanceof RideableCreatureEntity) {
-			this.addSlot(creature.inventory, creature.inventory.getSlotFromType("saddle"), equipX, equipY);
+			this.addSlot(creatureInventory, creatureInventory.getSlotFromType("saddle"), equipX, equipY);
 			equipY += 18;
 		}
 		if(creature.getBagSize() > 0) {
-			this.addSlot(creature.inventory, creature.inventory.getSlotFromType("bag"), equipX, equipY);
+			this.addSlot(creatureInventory, creatureInventory.getSlotFromType("bag"), equipX, equipY);
 			equipY += 18;
 		}
 
@@ -70,16 +91,16 @@ public class CreatureContainer extends BaseContainer {
 		// Creature Armor:
 		equipX += 18;
 		equipY = 18;
-		if(creature.inventory.useAdvancedArmor()) {
-			this.addSlot(creature.inventory, creature.inventory.getSlotFromType("head"), equipX, equipY);
+		if(creatureInventory.useAdvancedArmor()) {
+			this.addSlot(creatureInventory, creatureInventory.getSlotFromType("head"), equipX, equipY);
 			equipY += 18;
 		}
-		this.addSlot(creature.inventory, creature.inventory.getSlotFromType("chest"), equipX, equipY);
+		this.addSlot(creatureInventory, creatureInventory.getSlotFromType("chest"), equipX, equipY);
 		equipY += 18;
-		if(creature.inventory.useAdvancedArmor()) {
-			this.addSlot(creature.inventory, creature.inventory.getSlotFromType("legs"), equipX, equipY);
+		if(creatureInventory.useAdvancedArmor()) {
+			this.addSlot(creatureInventory, creatureInventory.getSlotFromType("legs"), equipX, equipY);
 			equipY += 18;
-			this.addSlot(creature.inventory, creature.inventory.getSlotFromType("feet"), equipX, equipY);
+			this.addSlot(creatureInventory, creatureInventory.getSlotFromType("feet"), equipX, equipY);
 			equipY += 18;
 		}
 	}

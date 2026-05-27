@@ -1,10 +1,10 @@
 package com.lycanitesmobs.core.entity.base;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -33,38 +33,38 @@ import net.minecraftforge.network.NetworkHooks;
 import javax.annotation.Nonnull;
 
 public class BaseProjectileEntity extends ThrowableProjectile {
-    public String entityName = "projectile";
-    public ModInfo modInfo;
-    public long updateTick;
+    protected String entityName = "projectile";
+    protected ModInfo modInfo;
+    protected long updateTick;
     protected Entity owner;
 
     // Properties:
-    public boolean movement = true;
+    protected boolean movement = true;
 
     // Stats:
     protected float projectileScale = 1F;
-    public int projectileLife = 200;
-    public int damage = 1;
-    public int pierce = 1;
-    public double weight = 1.0D;
-    public double knockbackChance = 1;
-    public int bonusDamage = 0;
+    protected int projectileLife = 200;
+    protected int damage = 1;
+    protected int pierce = 1;
+    protected double weight = 1.0D;
+    protected double knockbackChance = 1;
+    protected int bonusDamage = 0;
 
     // Flags:
-    public boolean waterProof = false;
-    public boolean lavaProof = false;
-    public boolean cutsGrass = false;
-    public boolean ripper = false;
-    public boolean pierceBlocks = false;
+    protected boolean waterProof = false;
+    protected boolean lavaProof = false;
+    protected boolean cutsGrass = false;
+    protected boolean ripper = false;
+    protected boolean pierceBlocks = false;
 
     // Texture and Animation:
-    public int animationFrame = 0;
-    public int animationFrameMax = 0;
-    public int textureTiling = 1;
-    public float textureScale = 1;
-    public float textureOffsetY = 0;
-    public boolean clientOnly = false;
-    public float rollSpeed = 0;
+    protected int animationFrame = 0;
+    protected int animationFrameMax = 0;
+    protected int textureTiling = 1;
+    protected float textureScale = 1;
+    protected float textureOffsetY = 0;
+    protected boolean clientOnly = false;
+    protected float rollSpeed = 0;
 
     // Data Manager:
     protected static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(BaseProjectileEntity.class, EntityDataSerializers.FLOAT);
@@ -94,10 +94,10 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 
     @Override
     public EntityType getType() {
-        if (ProjectileManager.getInstance().oldProjectileTypes.get(this.getClass()) == null) {
+        if (ProjectileManager.getInstance().getOldProjectileType(this.getClass()) == null) {
             return super.getType();
         }
-        return ProjectileManager.getInstance().oldProjectileTypes.get(this.getClass());
+        return ProjectileManager.getInstance().getOldProjectileType(this.getClass());
     }
 
     @Override
@@ -109,6 +109,58 @@ public class BaseProjectileEntity extends ThrowableProjectile {
     // ========== Setup Projectile ==========
     public void setup() {
 
+    }
+
+    public String getEntityName() {
+        return this.entityName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
+    }
+
+    public long getUpdateTick() {
+        return this.updateTick;
+    }
+
+    public void setMovement(boolean movement) {
+        this.movement = movement;
+    }
+
+    public void stopMovement() {
+        this.setMovement(false);
+    }
+
+    public int getProjectileLife() {
+        return this.projectileLife;
+    }
+
+    public void setProjectileLife(int projectileLife) {
+        this.projectileLife = projectileLife;
+    }
+
+    public double getKnockbackChance() {
+        return this.knockbackChance;
+    }
+
+    public boolean isClientOnly() {
+        return this.clientOnly;
+    }
+
+    public void setClientOnly(boolean clientOnly) {
+        this.clientOnly = clientOnly;
+    }
+
+    public int getAnimationFrame() {
+        return this.animationFrame;
+    }
+
+    public int getAnimationFrameMax() {
+        return this.animationFrameMax;
+    }
+
+    public float getTextureScale() {
+        return this.textureScale;
     }
 
     public String getStringFromDataManager(EntityDataAccessor<String> key) {
@@ -463,7 +515,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
             }
 
             // Friendly Fire:
-            if (owner.isAlliedTo(targetEntity) && CreatureManager.getInstance().config.friendlyFire) {
+            if (owner.isAlliedTo(targetEntity) && CreatureManager.getInstance().getConfig().friendlyFire()) {
                 return false;
             }
         }
@@ -560,7 +612,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
     }
 
     public float getTextureOffsetY() {
-        return 0;
+        return this.textureOffsetY;
     }
 
 
@@ -683,9 +735,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
     }
 
     public ResourceLocation getTexture() {
-        if (TextureManager.getTexture(this.getTextureName()) == null)
-            TextureManager.addTexture(this.getTextureName(), "textures/item/" + subTypeString() + "/" + this.getTextureName() + ".png");
-        return TextureManager.getTexture(this.getTextureName());
+        return AssetHelper.texture("textures/item/" + subTypeString() + "/" + this.getTextureName() + ".png");
     }
 
 

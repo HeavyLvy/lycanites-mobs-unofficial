@@ -1,11 +1,11 @@
 package com.lycanitesmobs.core.entity.creature.reptile;
 
 import com.lycanitesmobs.core.entity.IGroupHeavy;
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.TemptGoal;
 import com.lycanitesmobs.core.block.Material;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -35,8 +35,8 @@ public class EntityArisaur extends AgeableCreatureEntity implements IGroupHeavy 
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new TemptGoal(this).setIncludeDiet(true));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new TemptGoal(this).setIncludeDiet(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class EntityArisaur extends AgeableCreatureEntity implements IGroupHeavy 
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     @Override
@@ -75,8 +75,6 @@ public class EntityArisaur extends AgeableCreatureEntity implements IGroupHeavy 
             return super.getTexture();
 
         String textureName = this.getTextureName() + "_flowersaur";
-        if (TextureManager.getTexture(textureName) == null)
-            TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
-        return TextureManager.getTexture(textureName);
+        return AssetHelper.entityTexture(textureName);
     }
 }

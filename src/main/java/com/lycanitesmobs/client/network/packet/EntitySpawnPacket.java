@@ -1,4 +1,4 @@
-package com.lycanitesmobs.core.network.packet;
+package com.lycanitesmobs.client.network.packet;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
@@ -30,7 +30,7 @@ public class EntitySpawnPacket implements Packet<ClientPacketListener> {
     public EntitySpawnPacket(Entity serverEntity) {
         if (serverEntity != null) {
             if (serverEntity instanceof BaseProjectileEntity) {
-                this.entityTypeName = ((BaseProjectileEntity) serverEntity).entityName;
+                this.entityTypeName = ((BaseProjectileEntity) serverEntity).getEntityName();
             }
             this.entityId = serverEntity.getId();
             this.uuid = serverEntity.getUUID();
@@ -64,14 +64,15 @@ public class EntitySpawnPacket implements Packet<ClientPacketListener> {
 
     @Override
     public void handle(ClientPacketListener handler) {
-        if (!EntityFactory.getInstance().entityTypeNetworkMap.containsKey(this.entityTypeName)) {
-            LMHelperClass.logWarning("", "Unable to find entity type from packet: " + this.entityTypeName);
+        EntityFactory entityFactory = EntityFactory.getInstance();
+        if (!entityFactory.hasEntityTypeNetworkName(this.entityTypeName)) {
+            LMHelperClass.logWarningMessage("Unable to find entity type from packet: " + this.entityTypeName);
             return;
         }
-        EntityType entityType = EntityFactory.getInstance().entityTypeNetworkMap.get(this.entityTypeName);
-        Entity entity = EntityFactory.getInstance().create(entityType, LycanitesMobs.PROXY.getWorld());
+        EntityType entityType = entityFactory.getEntityTypeByNetworkName(this.entityTypeName);
+        Entity entity = entityFactory.create(entityType, LycanitesMobs.PROXY.getWorld());
         if (entity == null) {
-            LMHelperClass.logWarning("", "Unable to create client entity from packet: " + this.entityTypeName);
+            LMHelperClass.logWarningMessage("Unable to create client entity from packet: " + this.entityTypeName);
             return;
         }
         entity.setPos(this.pos.x(), this.pos.y(), this.pos.z());
@@ -82,7 +83,7 @@ public class EntitySpawnPacket implements Packet<ClientPacketListener> {
 
         // Projectiles:
         if (entity instanceof BaseProjectileEntity) {
-            ((BaseProjectileEntity) entity).entityName = this.entityTypeName;
+            ((BaseProjectileEntity) entity).setEntityName(this.entityTypeName);
             if (entity instanceof CustomProjectileEntity) {
                 ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile(this.entityTypeName);
                 if (projectileInfo != null) {

@@ -4,14 +4,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ArenaNode {
     /** A list of all nodes directly connected to this node. **/
-    public List<ArenaNode> adjacentNodes = new ArrayList<ArenaNode>();
+    private final List<ArenaNode> adjacentNodes = new ArrayList<ArenaNode>();
 
-    public Level world;
-    public BlockPos pos;
+    private final Level world;
+    private final BlockPos pos;
 
     // ==================================================
     //                    Constructor
@@ -19,6 +20,14 @@ public class ArenaNode {
     public ArenaNode(Level world, BlockPos pos) {
         this.world = world;
         this.pos = pos;
+    }
+
+    public BlockPos getPos() {
+        return this.pos;
+    }
+
+    public List<ArenaNode> getAdjacentNodes() {
+        return Collections.unmodifiableList(this.adjacentNodes);
     }
 
 
@@ -49,7 +58,7 @@ public class ArenaNode {
         double smallestDistance = this.pos.distSqr(targetPos);
         ArenaNode closestNode = this;
         for(ArenaNode adjacentNode : this.adjacentNodes) {
-            double distance = adjacentNode.pos.distSqr(targetPos);
+            double distance = adjacentNode.getPos().distSqr(targetPos);
             if(distance < smallestDistance) {
                 smallestDistance = distance;
                 closestNode = adjacentNode;

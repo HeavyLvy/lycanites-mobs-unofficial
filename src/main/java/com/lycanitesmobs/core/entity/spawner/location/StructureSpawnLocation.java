@@ -25,12 +25,12 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
     /**
      * The structure ids to use as spawn locations.
      **/
-    public List<ResourceLocation> structureIds = new ArrayList<>();
+    protected List<ResourceLocation> structureIds = new ArrayList<>();
 
     /**
      * How close to the player (in blocks) Structures must be. Default: 100.
      **/
-    public int structureRange = 100;
+    protected int structureRange = 100;
 
 
     @Override

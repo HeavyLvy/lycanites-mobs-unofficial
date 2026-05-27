@@ -3,10 +3,7 @@ package com.lycanitesmobs.core.worldgen.dungeon.instance;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.*;
@@ -28,6 +25,10 @@ public class DungeonBuildPlan {
         return this.blocksByChunk.keySet();
     }
 
+    public int getPlannedChunkCount() {
+        return this.blocksByChunk.size();
+    }
+
     public boolean isReady() {
         return this.ready;
     }
@@ -36,23 +37,13 @@ public class DungeonBuildPlan {
         this.ready = true;
     }
 
-    public static class PlannedBlock {
-        public final BlockPos pos;
-        public final BlockState state;
-        public final Direction facing;
-
-        public PlannedBlock(BlockPos pos, BlockState state, Direction facing) {
-            this.pos = pos;
-            this.state = state;
-            this.facing = facing;
-        }
-
-        public void apply(LevelAccessor worldWriter, Level world, ChunkPos chunkPos, RandomSource random, SectorInstance sector) {
+    public record PlannedBlock(BlockPos pos, BlockState state, Direction facing) {
+        public void apply(DungeonChunkBuildContext context, SectorInstance sector) {
             LMHelperClass.logDebug(
                     "Dungeon",
-                    "PlannedBlock.apply: " + state.getBlock() + " at " + pos + " in chunk " + chunkPos
+                    "PlannedBlock.apply: " + this.state.getBlock() + " at " + this.pos + " in chunk " + context.chunkPos()
             );
-            sector.placeBlock(worldWriter, chunkPos, this.pos, this.state, this.facing, random);
+            sector.placeBlock(context.worldWriter(), context.chunkPos(), this.pos, this.state, this.facing, context.random());
         }
     }
 

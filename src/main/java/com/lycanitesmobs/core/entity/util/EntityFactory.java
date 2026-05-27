@@ -1,23 +1,20 @@
 package com.lycanitesmobs.core.entity.util;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.network.PlayMessages;
 
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
 public class EntityFactory implements EntityType.EntityFactory<Entity> {
-    public static EntityFactory INSTANCE;
-    public Map<EntityType, Constructor<? extends Entity>> entityTypeConstructorMap = new HashMap<>();
-    public Map<Constructor<? extends Entity>, EntityType> entityConstructorTypeMap = new HashMap<>();
-    public Map<String, EntityType> entityTypeNetworkMap = new HashMap<>();
-    public BiFunction<PlayMessages.SpawnEntity, Level, Entity> createOnClientFunction = this::createOnClient;
+    private static EntityFactory INSTANCE;
+    private final Map<EntityType, EntityType.EntityFactory<? extends Entity>> entityTypeFactoryMap = new HashMap<>();
+    private final Map<String, EntityType> entityTypeNetworkMap = new HashMap<>();
+    private final BiFunction<PlayMessages.SpawnEntity, Level, Entity> createOnClientFunction = this::createOnClient;
 
     /**
      * Returns the main Entity Factory instance or creates it and returns it.
@@ -29,17 +26,28 @@ public class EntityFactory implements EntityType.EntityFactory<Entity> {
         return INSTANCE;
     }
 
+    public EntityType getEntityTypeByNetworkName(String networkName) {
+        return this.entityTypeNetworkMap.get(networkName);
+    }
+
+    public boolean hasEntityTypeNetworkName(String networkName) {
+        return this.entityTypeNetworkMap.containsKey(networkName);
+    }
+
+    public BiFunction<PlayMessages.SpawnEntity, Level, Entity> getCreateOnClientFunction() {
+        return this.createOnClientFunction;
+    }
+
     /**
-     * Adds a new Entity Type and Entity Class mapping for this Factory to create.
+     * Adds a new Entity Type and factory mapping for this Factory to create.
      *
      * @param entityType  The Entity Type to create from.
-     * @param entityClass The Entity Class to instantiate for the type.
+     * @param factory     The factory to instantiate the entity.
      */
-    public void addEntityType(EntityType entityType, Constructor<? extends Entity> entityClass, String networkName) {
-        LMHelperClass.logDebug("Entity", "Adding entity: " + entityClass + " Type: " + entityType.getDescription() + " Classification: " + entityType.getCategory());
+    public void addEntityType(EntityType entityType, EntityType.EntityFactory<? extends Entity> factory, String networkName) {
+        LMHelperClass.logDebug("Entity", "Adding entity factory: " + factory + " Type: " + entityType.getDescription() + " Classification: " + entityType.getCategory());
 
-        this.entityTypeConstructorMap.put(entityType, entityClass);
-        this.entityConstructorTypeMap.put(entityClass, entityType);
+        this.entityTypeFactoryMap.put(entityType, factory);
         this.entityTypeNetworkMap.put(networkName, entityType);
     }
 
@@ -52,21 +60,16 @@ public class EntityFactory implements EntityType.EntityFactory<Entity> {
      */
     @Override
     public Entity create(EntityType entityType, Level world) {
-        try {
-            if (!this.entityTypeConstructorMap.containsKey(entityType)) {
-                LMHelperClass.logWarning("", "Unable to find constructor for Entity Type: " + entityType);
-                for (EntityType<?> type : this.entityTypeConstructorMap.keySet()) {
-                    LMHelperClass.logWarning("", "Values: " + type);
-                }
-                return null;
+        if (!this.entityTypeFactoryMap.containsKey(entityType)) {
+            LMHelperClass.logWarningMessage("Unable to find factory for Entity Type: " + entityType);
+            for (EntityType<?> type : this.entityTypeFactoryMap.keySet()) {
+                LMHelperClass.logWarningMessage("Values: " + type);
             }
-            LMHelperClass.logDebug("Entity", "Spawning entity: " + this.entityTypeConstructorMap.get(entityType) + " - " + entityType.getCategory());
-            Constructor<? extends Entity> constructor = this.entityTypeConstructorMap.get(entityType);
-            return constructor.newInstance(entityType, world);
-        } catch (Exception e) {
-            LycanitesMobs.LOGGER.info("[LycanitesMobs]: Error in EntityFactory.");
-            throw new RuntimeException(e);
+            return null;
         }
+        LMHelperClass.logDebug("Entity", "Spawning entity: " + this.entityTypeFactoryMap.get(entityType) + " - " + entityType.getCategory());
+        EntityType.EntityFactory<? extends Entity> factory = this.entityTypeFactoryMap.get(entityType);
+        return factory.create(entityType, world);
     }
 
     /**
@@ -76,7 +79,7 @@ public class EntityFactory implements EntityType.EntityFactory<Entity> {
      * @param world       The world to spawn in.
      */
     public Entity createOnClient(PlayMessages.SpawnEntity spawnPacket, Level world) {
-        LMHelperClass.logDebug("", "Client factory called!");
+        LMHelperClass.logDebug("Entity", "Client factory called!");
         return null;
     }
 }

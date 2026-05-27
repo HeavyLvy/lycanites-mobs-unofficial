@@ -11,22 +11,24 @@ import net.minecraft.world.item.Item;
 import net.minecraftforge.common.util.Lazy;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.lycanitesmobs.core.tabs.LMEquipmentPartsGroup.equipmentNames;
 
 public class EquipmentPartManager extends JSONLoader {
 
-    public static EquipmentPartManager INSTANCE;
+    protected static EquipmentPartManager INSTANCE;
 
-    public Map<String, Lazy<ItemEquipmentPart>> equipmentParts = new HashMap<>();
+    protected final Map<String, Lazy<ItemEquipmentPart>> equipmentParts = new HashMap<>();
 
     /**
      * A list of mod groups that have loaded with this Equipment Part Manager.
      **/
-    public List<ModInfo> loadedGroups = new ArrayList<>();
+    protected final List<ModInfo> loadedGroups = new ArrayList<>();
 
     /**
      * Returns the main EquipmentPartManager INSTANCE or creates it and returns it.
@@ -38,15 +40,27 @@ public class EquipmentPartManager extends JSONLoader {
         return INSTANCE;
     }
 
+    public Set<String> getEquipmentPartNames() {
+        return Collections.unmodifiableSet(this.equipmentParts.keySet());
+    }
+
+    public Set<Map.Entry<String, Lazy<ItemEquipmentPart>>> getEquipmentPartEntries() {
+        return Collections.unmodifiableMap(this.equipmentParts).entrySet();
+    }
+
     /**
      * Loads all JSON Equipment Parts.
      **/
     public void loadAllFromJson(ModInfo modInfo) {
-        if (!loadedGroups.contains(modInfo)) {
-            loadedGroups.add(modInfo);
-        }
-        loadAllJson(modInfo, "Equipment", "equipment", "itemName", false, null, FileLoader.COMMON, StreamLoader.COMMON);
+        this.rememberLoadedGroup(modInfo);
+        loadAllJson(modInfo, "Equipment", "equipment", "itemName", false, null, FileLoader.common(), StreamLoader.common());
         LMHelperClass.logDebug("Equipment", "Complete! " + equipmentParts.size() + " JSON Equipment Parts Loaded In Total.");
+    }
+
+    protected void rememberLoadedGroup(ModInfo modInfo) {
+        if (!this.loadedGroups.contains(modInfo)) {
+            this.loadedGroups.add(modInfo);
+        }
     }
 
     @Override
@@ -55,7 +69,7 @@ public class EquipmentPartManager extends JSONLoader {
         Lazy<ItemEquipmentPart> equipmentPart = Lazy.of(() -> new ItemEquipmentPart(properties, json));
         String name = ItemEquipmentPart.getPartName(json);
         if (this.equipmentParts.containsKey(name)) {
-            LMHelperClass.logWarning("", "[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
+            LMHelperClass.logWarningMessage("[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
             throw new RuntimeException("[Equipment] Tried to add a Equipment Part with a name that is already in use: " + name);
         }
         this.equipmentParts.put(name, equipmentPart);

@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.entity.goals.actions.FollowParentGoal;
 import com.lycanitesmobs.core.entity.goals.actions.MateGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindParentGoal;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.item.ItemDrop;
 import com.lycanitesmobs.core.data.info.Variant;
@@ -16,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
@@ -35,16 +37,16 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
     private AgeableCreatureEntity breedingTarget;
 
     // Growth:
-    public int growthTime = -24000;
-    public boolean canGrow = true;
-    public double babySpawnChance = 0D;
+    protected int growthTime = -24000;
+    protected boolean canGrow = true;
+    protected double babySpawnChance = 0D;
 
     // Breeding:
-    public int loveTime;
+    protected int loveTime;
     private int loveTimeMax = 600;
-    public int breedingCooldown = 6000;
+    protected int breedingCooldown = 6000;
 
-    public boolean hasBeenFarmed = false;
+    protected boolean hasBeenFarmed = false;
 
     // Datawatcher:
     protected static final EntityDataAccessor<Integer> AGE = SynchedEntityData.defineId(AgeableCreatureEntity.class, EntityDataSerializers.INT);
@@ -69,15 +71,15 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
     @Override
     protected void registerGoals() {
         // Greater Actions:
-        this.goalSelector.addGoal(this.nextTravelGoalIndex++, new MateGoal(this).setMateDistance(5.0D));
+        this.goalSelector.addGoal(this.claimTravelGoalIndex(), new MateGoal(this).setMateDistance(5.0D));
 
         super.registerGoals();
 
         // Lesser Targeting:
-        this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindParentGoal(this).setSightCheck(false).setDistance(32.0D));
+        this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindParentGoal(this).setSightCheck(false).setDistance(32.0D));
 
         // Lesser Actions:
-        this.goalSelector.addGoal(this.nextTravelGoalIndex++, new FollowParentGoal(this).setSpeed(1.0D).setStrayDistance(3.0D));
+        this.goalSelector.addGoal(this.claimTravelGoalIndex(), new FollowParentGoal(this).setSpeed(1.0D).setStrayDistance(3.0D));
     }
 
     // ========== Setup ==========
@@ -186,7 +188,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
 
     @Override
     public boolean canDropItem(ItemDrop itemDrop) {
-        if (itemDrop.adultOnly && this.isBaby()) {
+        if (itemDrop.isAdultOnly() && this.isBaby()) {
             return false;
         }
         return super.canDropItem(itemDrop);
@@ -222,24 +224,25 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
 
     // ========== Perform Command ==========
     @Override
-    public boolean performCommand(String command, Player player, ItemStack itemStack) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack, InteractionHand hand) {
 
         // Spawn Baby:
         if (command.equals("Spawn Baby") && !this.getCommandSenderWorld().isClientSide && itemStack.getItem() instanceof ItemCustomSpawnEgg) {
             ItemCustomSpawnEgg itemCustomSpawnEgg = (ItemCustomSpawnEgg) itemStack.getItem();
             CreatureInfo spawnEggCreatureInfo = itemCustomSpawnEgg.getCreatureInfo(itemStack);
             if (spawnEggCreatureInfo != null) {
-                if (spawnEggCreatureInfo.entityClass != null && spawnEggCreatureInfo.entityClass.isAssignableFrom(this.getClass())) {
+                if (spawnEggCreatureInfo.matchesEntityClass(this.getClass())) {
                     AgeableCreatureEntity baby = this.createChild(this);
                     if (baby != null) {
-                        baby.setGrowingAge(baby.growthTime);
+                        baby.setGrowingAge(baby.getInitialGrowthTime());
                         baby.moveTo(this.position().x(), this.position().y(), this.position().z(), 0.0F, 0.0F);
                         baby.setFarmed();
-                        this.getCommandSenderWorld().addFreshEntity(baby);
-                        if (itemStack.hasCustomHoverName()) {
-                            baby.setCustomName(itemStack.getHoverName());
-                        }
-                        this.consumePlayersItem(player, itemStack);
+                        DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, baby, () -> {
+                            if (itemStack.hasCustomHoverName()) {
+                                baby.setCustomName(itemStack.getHoverName());
+                            }
+                            this.consumePlayersItem(player, itemStack);
+                        });
                     }
                 }
             }
@@ -254,7 +257,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
             }
         }
 
-        return super.performCommand(command, player, itemStack);
+        return super.performCommand(command, player, itemStack, hand);
     }
 
 
@@ -381,10 +384,10 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
         if (baby != null) {
             this.finishBreeding();
             partner.finishBreeding();
-            baby.setGrowingAge(baby.growthTime);
+            baby.setGrowingAge(baby.getInitialGrowthTime());
             baby.setSubspecies(this.getSubspeciesIndex());
             Variant babyVariant = this.getSubspecies().getChildVariant(this, this.getVariant(), partner.getVariant());
-            baby.applyVariant(babyVariant != null ? babyVariant.index : 0);
+            baby.applyVariant(babyVariant != null ? babyVariant.getIndex() : 0);
             baby.moveTo(this.position().x(), this.position().y(), this.position().z(), this.yRotO, this.xRotO);
 
             for (int i = 0; i < 7; ++i) {
@@ -396,16 +399,16 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
 
             this.onCreateBaby(partner, baby);
 
-            this.getCommandSenderWorld().addFreshEntity(baby);
-
-            for (Player player : this.getCommandSenderWorld().players()) {
-                if (this.distanceTo(player) <= 10) {
-                    ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(player);
-                    if (extendedPlayer != null) {
-                        extendedPlayer.studyCreature(this, CreatureManager.getInstance().config.creatureBreedKnowledge, false, true);
+            DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, baby, () -> {
+                for (Player player : this.getCommandSenderWorld().players()) {
+                    if (this.distanceTo(player) <= 10) {
+                        ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(player);
+                        if (extendedPlayer != null) {
+                            extendedPlayer.studyCreature(this, CreatureManager.getInstance().getConfig().creatureBreedKnowledge(), false, true);
+                        }
                     }
                 }
-            }
+            });
         }
     }
 
@@ -417,6 +420,14 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
         this.setGrowingAge(this.breedingCooldown);
         this.setBreedingTarget(null);
         this.loveTime = 0;
+    }
+
+    public int getInitialGrowthTime() {
+        return this.growthTime;
+    }
+
+    public boolean hasBeenFarmed() {
+        return this.hasBeenFarmed;
     }
 
 

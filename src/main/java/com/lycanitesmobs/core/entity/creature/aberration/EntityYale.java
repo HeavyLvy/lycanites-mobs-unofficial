@@ -85,10 +85,10 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 
     @Override
     protected void registerGoals() {
-		this.goalSelector.addGoal(this.nextIdleGoalIndex++, new EatBlockGoal(this).setBlocks(Blocks.GRASS_BLOCK).setReplaceBlock(Blocks.DIRT));
+		this.goalSelector.addGoal(this.claimIdleGoalIndex(), new EatBlockGoal(this).setBlocks(Blocks.GRASS_BLOCK).setReplaceBlock(Blocks.DIRT));
 		super.registerGoals();
-		this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new TemptGoal(this).setIncludeDiet(true));
-		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+		this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new TemptGoal(this).setIncludeDiet(true));
+		this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
     }
 
     @Override
@@ -237,7 +237,7 @@ public class EntityYale extends AgeableCreatureEntity implements IForgeShearable
 	public int getNoBagSize() { return 0; }
 
 	@Override
-	public int getBagSize() { return this.creatureInfo.bagSize; }
+	public int getBagSize() { return this.creatureInfo.getBagSize(); }
 
     @Override
     public float getFallResistance() {

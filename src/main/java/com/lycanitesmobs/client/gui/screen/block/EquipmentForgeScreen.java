@@ -20,20 +20,20 @@ import org.lwjgl.opengl.GL11;
 import java.util.List;
 
 public class EquipmentForgeScreen extends BaseContainerScreen<EquipmentForgeContainer> {
-    public TileEntityEquipmentForge equipmentForge;
-    public String currentMode = "empty";
-    public boolean confirmation = false;
+    protected TileEntityEquipmentForge equipmentForge;
+    protected String currentMode = "empty";
+    protected boolean confirmation = false;
 
     public EquipmentForgeScreen(EquipmentForgeContainer container, Inventory playerInventory, Component name) {
         super(container, playerInventory, name);
-        this.equipmentForge = container.equipmentForge;
+        this.equipmentForge = container.getEquipmentForge();
     }
 
     @Override
     public void init() {
-        super.init();
         this.imageWidth = 176;
         this.imageHeight = 166;
+        super.init();
     }
 
     @Override
@@ -89,7 +89,7 @@ public class EquipmentForgeScreen extends BaseContainerScreen<EquipmentForgeCont
         RenderSystem.setShaderTexture(0, texture);
 
         BaseContainer container = this.getMenu();
-        List<Slot> forgeSlots = container.slots.subList(container.inventoryStart, container.inventoryFinish);
+        List<Slot> forgeSlots = container.getInventorySlotView();
         int slotWidth = 18;
         int slotHeight = 18;
         int slotU = 238;
@@ -101,21 +101,21 @@ public class EquipmentForgeScreen extends BaseContainerScreen<EquipmentForgeCont
             int slotV = slotVBase;
 
             if (forgeSlot instanceof EquipmentForgeSlot equipmentSlot) {
-                if ("base".equals(equipmentSlot.type)) {
+                if ("base".equals(equipmentSlot.getType())) {
                     slotV += slotHeight;
-                } else if ("head".equals(equipmentSlot.type)) {
+                } else if ("head".equals(equipmentSlot.getType())) {
                     slotV += slotHeight * 2;
-                } else if ("blade".equals(equipmentSlot.type)) {
+                } else if ("blade".equals(equipmentSlot.getType())) {
                     slotV += slotHeight * 3;
-                } else if ("axe".equals(equipmentSlot.type)) {
+                } else if ("axe".equals(equipmentSlot.getType())) {
                     slotV += slotHeight * 4;
-                } else if ("pike".equals(equipmentSlot.type)) {
+                } else if ("pike".equals(equipmentSlot.getType())) {
                     slotV += slotHeight * 5;
-                } else if ("pommel".equals(equipmentSlot.type)) {
+                } else if ("pommel".equals(equipmentSlot.getType())) {
                     slotV += slotHeight * 6;
-                } else if ("jewel".equals(equipmentSlot.type)) {
+                } else if ("jewel".equals(equipmentSlot.getType())) {
                     slotV += slotHeight * 7;
-                } else if ("aura".equals(equipmentSlot.type)) {
+                } else if ("aura".equals(equipmentSlot.getType())) {
                     slotV += slotHeight * 8;
                 }
             }

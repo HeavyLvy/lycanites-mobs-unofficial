@@ -62,15 +62,15 @@ public class StayByWaterGoal extends Goal {
         // Set home when in water or lava (for lava creatures).
         if (inWater) {
             BlockState blockState = this.host.getCommandSenderWorld().getBlockState(this.host.blockPosition());
-            if ((!this.host.isLavaCreature && blockState.getBlock() == Blocks.WATER) ||
-                    (this.host.isLavaCreature && blockState.getBlock() == Blocks.LAVA)) {
+            if ((!this.host.isLavaCreature() && blockState.getBlock() == Blocks.WATER) ||
+                    (this.host.isLavaCreature() && blockState.getBlock() == Blocks.LAVA)) {
                 this.waterPos = this.host.blockPosition();
                 this.hasWaterPos = true;
                 return false;
             }
             FluidState fluidState = this.host.getCommandSenderWorld().getFluidState(this.host.blockPosition());
-            if ((!this.host.isLavaCreature && fluidState.is(FluidTags.WATER)) ||
-                    (this.host.isLavaCreature && fluidState.is(FluidTags.LAVA))) {
+            if ((!this.host.isLavaCreature() && fluidState.is(FluidTags.WATER)) ||
+                    (this.host.isLavaCreature() && fluidState.is(FluidTags.LAVA))) {
                 this.waterPos = this.host.blockPosition();
                 this.hasWaterPos = true;
                 return false;
@@ -141,7 +141,7 @@ public class StayByWaterGoal extends Goal {
         }
 
         // If it's raining and the host isn't a lava creature, then there's no need to return to the water position, this shouldn't be set as a new water position though.
-        if (!this.host.isLavaCreature && this.host.waterContact() && this.getDistanceFromWater() <= this.strayDistance)
+        if (!this.host.isLavaCreature() && this.host.waterContact() && this.getDistanceFromWater() <= this.strayDistance)
             return false;
 
         // If the host has an attack target and plenty of air, then it is allowed to stray from the water position within the limit.
@@ -159,7 +159,7 @@ public class StayByWaterGoal extends Goal {
             if (this.host.getCommandSenderWorld().getBlockState(pos).getBlock() == Blocks.WATER)
                 return true;
         }
-        if (this.host.isInvulnerableTo(this.host.level().damageSources().onFire()) || this.host.isLavaCreature) {
+        if (this.host.isInvulnerableTo(this.host.level().damageSources().onFire()) || this.host.isLavaCreature()) {
             if (this.host.getCommandSenderWorld().getBlockState(pos).getBlock() == Blocks.LAVA)
                 return true;
         }
@@ -186,7 +186,7 @@ public class StayByWaterGoal extends Goal {
             if (!host.useDirectNavigator()) {
                 this.host.getNavigation().moveTo(this.waterPos.getX() + 0.5D, this.waterPos.getY(), this.waterPos.getZ() + 0.5D, this.speed);
             } else
-                host.directNavigator.setTargetPosition(this.waterPos, this.speed);
+                host.setDirectNavigationTarget(this.waterPos, this.speed);
         }
     }
 

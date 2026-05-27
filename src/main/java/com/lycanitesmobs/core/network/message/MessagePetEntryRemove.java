@@ -1,6 +1,6 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.pets.PetEntry;
 import com.lycanitesmobs.core.manager.PetManager;
@@ -24,7 +24,7 @@ public class MessagePetEntryRemove {
     }
 
     public MessagePetEntryRemove(ExtendedPlayer playerExt, PetEntry petEntry) {
-        this.petEntryID = petEntry.petEntryID;
+        this.petEntryID = petEntry.getPetEntryID();
     }
 
     /**
@@ -38,10 +38,10 @@ public class MessagePetEntryRemove {
                 Player player = ctx.get().getSender();
                 ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
 
-                PetManager petManager = playerExt.petManager;
+                PetManager petManager = playerExt.getPetManager();
                 PetEntry petEntry = petManager.getEntry(message.petEntryID);
                 if (petEntry == null) {
-                    LMHelperClass.logWarning("", "Tried to remove a null PetEntry from server!");
+                    LMHelperClass.logWarningMessage("Tried to remove a null PetEntry from server!");
                     return; // Nothing to remove!
                 }
                 petEntry.remove();
@@ -50,18 +50,7 @@ public class MessagePetEntryRemove {
         }
 
         // Client Side:
-        Player player = ClientManager.getInstance().getClientPlayer();
-        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
-        if (playerExt == null)
-            return;
-
-        PetManager petManager = playerExt.petManager;
-        PetEntry petEntry = petManager.getEntry(message.petEntryID);
-        if (petEntry == null) {
-            LMHelperClass.logWarning("", "Tried to remove a null PetEntry from client!");
-            return; // Nothing to remove!
-        }
-        petEntry.remove();
+        ctx.get().enqueueWork(() -> LycanitesMobs.PROXY.removePetEntry(message.petEntryID));
     }
 
     /**
@@ -72,7 +61,7 @@ public class MessagePetEntryRemove {
         try {
             message.petEntryID = packet.readUUID();
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "There was a problem decoding the packet: " + packet + ".");
+            LMHelperClass.logWarningMessage("There was a problem decoding the packet: " + packet + ".");
             e.printStackTrace();
         }
         return message;
@@ -85,7 +74,7 @@ public class MessagePetEntryRemove {
         try {
             packet.writeUUID(message.petEntryID);
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "There was a problem encoding the packet: " + packet + ".");
+            LMHelperClass.logWarningMessage("There was a problem encoding the packet: " + packet + ".");
             e.printStackTrace();
         }
     }

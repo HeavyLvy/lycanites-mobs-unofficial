@@ -14,7 +14,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 
 public class EntityEttin extends TameableCreatureEntity implements Enemy {
-	public boolean griefing = true;
+	protected boolean griefing = true;
     
     // ==================================================
  	//                    Constructor
@@ -37,8 +37,8 @@ public class EntityEttin extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
 		super.registerGoals();
-		this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new BreakDoorGoal(this));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+		this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new BreakDoorGoal(this));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
 
 		if(this.getNavigation() instanceof GroundPathNavigation) {
             GroundPathNavigation pathNavigateGround = (GroundPathNavigation)this.getNavigation();
@@ -57,7 +57,7 @@ public class EntityEttin extends TameableCreatureEntity implements Enemy {
     @Override
     public int getNoBagSize() { return 10; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
     // ==================================================
     //                      Updates
     // ==================================================

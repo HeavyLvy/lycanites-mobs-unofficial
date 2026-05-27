@@ -4,6 +4,7 @@ import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.FollowParentGoal;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.block.Material;
 import net.minecraft.core.BlockPos;
@@ -32,7 +33,7 @@ public class EntityConcapedeSegment extends AgeableCreatureEntity {
      **/
     UUID parentUUID = null;
 
-    public BaseCreatureEntity backSegment;
+    private BaseCreatureEntity backSegment;
 
     // ==================================================
     //                    Constructor
@@ -54,7 +55,7 @@ public class EntityConcapedeSegment extends AgeableCreatureEntity {
     // ========== Init AI ==========
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(this.nextTravelGoalIndex++, new FollowParentGoal(this).setSpeed(1.0D).setStrayDistance(0));
+        this.goalSelector.addGoal(this.claimTravelGoalIndex(), new FollowParentGoal(this).setSpeed(1.0D).setStrayDistance(0));
         super.registerGoals();
     }
 
@@ -68,7 +69,7 @@ public class EntityConcapedeSegment extends AgeableCreatureEntity {
      **/
     @Override
     public boolean environmentSpawnCheck(Level world, BlockPos pos) {
-        if (this.getNearbyEntities(EntityConcapedeHead.class, null, CreatureManager.getInstance().spawnConfig.spawnLimitRange).size() <= 0)
+        if (this.getNearbyEntities(EntityConcapedeHead.class, null, CreatureManager.getInstance().getSpawnConfig().spawnLimitRange()).size() <= 0)
             return false;
         return super.environmentSpawnCheck(world, pos);
     }
@@ -184,14 +185,16 @@ public class EntityConcapedeSegment extends AgeableCreatureEntity {
         if (age == 0 && !this.getCommandSenderWorld().isClientSide) {
             EntityConcapedeHead concapedeHead = (EntityConcapedeHead) CreatureManager.getInstance().getCreature("concapede").createEntity(this.getCommandSenderWorld());
             concapedeHead.copyPosition(this);
-            concapedeHead.firstSpawn = false;
+            concapedeHead.markNotFirstSpawn();
             concapedeHead.setGrowingAge(-this.growthTime / 4);
             concapedeHead.setSizeScale(this.sizeScale);
             concapedeHead.applyVariant(this.getVariantIndex());
-            this.getCommandSenderWorld().addFreshEntity(concapedeHead);
-            if (this.backSegment != null)
-                this.backSegment.setParentTarget(concapedeHead);
-            this.remove(RemovalReason.DISCARDED);
+            DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), concapedeHead.blockPosition(), null, concapedeHead, () -> {
+                if (this.backSegment != null) {
+                    this.backSegment.setParentTarget(concapedeHead);
+                }
+                this.remove(RemovalReason.DISCARDED);
+            });
         }
     }
 
@@ -252,11 +255,19 @@ public class EntityConcapedeSegment extends AgeableCreatureEntity {
     public void setParentTarget(LivingEntity setTarget) {
         if (setTarget != this) {
             if (setTarget instanceof EntityConcapedeSegment)
-                ((EntityConcapedeSegment) setTarget).backSegment = this;
+                ((EntityConcapedeSegment) setTarget).setBackSegment(this);
             if (setTarget instanceof EntityConcapedeHead)
-                ((EntityConcapedeHead) setTarget).backSegment = this;
+                ((EntityConcapedeHead) setTarget).setBackSegment(this);
         }
         super.setParentTarget(setTarget);
+    }
+
+    BaseCreatureEntity getBackSegment() {
+        return this.backSegment;
+    }
+
+    void setBackSegment(BaseCreatureEntity backSegment) {
+        this.backSegment = backSegment;
     }
 
 
@@ -292,7 +303,7 @@ public class EntityConcapedeSegment extends AgeableCreatureEntity {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

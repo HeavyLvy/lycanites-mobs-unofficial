@@ -16,9 +16,9 @@ import net.minecraft.world.level.block.Blocks;
 import org.joml.Vector3d;
 
 public class EntityRoc extends RideableCreatureEntity implements Enemy {
-    public AttackMeleeGoal attackAI;
+    private AttackMeleeGoal attackAI;
 
-    public boolean creeperDropping = true;
+    protected boolean creeperDropping = true;
 
     private int creeperDropCooldown = 0;
 	
@@ -41,13 +41,13 @@ public class EntityRoc extends RideableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         if (this.creeperDropping) {
-            this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(EntityType.CREEPER));
+            this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindAttackTargetGoal(this).addTargets(EntityType.CREEPER));
         }
 
         super.registerGoals();
 
         this.attackAI = new AttackMeleeGoal(this).setLongMemory(false);
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, this.attackAI);
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), this.attackAI);
     }
 
     @Override
@@ -185,7 +185,7 @@ public class EntityRoc extends RideableCreatureEntity implements Enemy {
 
         // Ignore Targets Picked Up By Another Mob:
         ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(targetEntity);
-        if(extendedEntity != null && extendedEntity.pickedUpByEntity != null) {
+        if(extendedEntity != null && extendedEntity.isPickedUp()) {
             return false;
         }
 
@@ -209,7 +209,7 @@ public class EntityRoc extends RideableCreatureEntity implements Enemy {
         if(this.isTamed()) {
             return super.isAggressive();
         }
-        if ("".equals(this.spawnEventType) && this.getCommandSenderWorld().isDay() && this.testLightLevel() >= 2) {
+        if (!this.hasSpawnEvent() && this.getCommandSenderWorld().isDay() && this.testLightLevel() >= 2) {
             return false;
         }
         return super.isAggressive();
@@ -266,7 +266,7 @@ public class EntityRoc extends RideableCreatureEntity implements Enemy {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
 
 
     // ==================================================

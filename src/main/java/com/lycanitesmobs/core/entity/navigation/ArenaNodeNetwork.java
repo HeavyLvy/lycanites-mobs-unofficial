@@ -5,22 +5,35 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ArenaNodeNetwork {
-    public Level world;
+    protected final Level world;
 
     /** A list of all nodes in this network. **/
-    public List<ArenaNode> nodes = new ArrayList<ArenaNode>();
+    private final List<ArenaNode> nodes = new ArrayList<ArenaNode>();
 
     /** The central or starting point of the arena. **/
-    public ArenaNode centralNode;
+    private ArenaNode centralNode;
 
     // ==================================================
     //                    Constructor
     // ==================================================
     public ArenaNodeNetwork(Level world) {
         this.world = world;
+    }
+
+    public ArenaNode getCentralNode() {
+        return this.centralNode;
+    }
+
+    public void setCentralNode(ArenaNode centralNode) {
+        this.centralNode = centralNode;
+    }
+
+    public List<ArenaNode> getNodes() {
+        return Collections.unmodifiableList(this.nodes);
     }
 
 
@@ -54,7 +67,7 @@ public class ArenaNodeNetwork {
         double smallestDistance = 0;
         ArenaNode closestNode = null;
         for(ArenaNode node : this.nodes) {
-            double distance = targetPos.distSqr(node.pos);
+            double distance = targetPos.distSqr(node.getPos());
             if(closestNode == null || distance < smallestDistance) {
                 smallestDistance = distance;
                 closestNode = node;

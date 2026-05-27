@@ -27,10 +27,10 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 public class BaseLiquidBlock extends LiquidBlock implements BlockTypeGetter {
-    public String blockName;
+    private String blockName;
     protected ElementInfo element;
     protected boolean destroyItems = true;
-    public ResourceLocation registryName;
+    private ResourceLocation registryName;
 
     private static final String LAVA_ELEMENT = "lava";
 
@@ -48,6 +48,10 @@ public class BaseLiquidBlock extends LiquidBlock implements BlockTypeGetter {
 
     public ResourceLocation getRegistryName() {
         return registryName;
+    }
+
+    public String getBlockName() {
+        return this.blockName;
     }
 
     @Override
@@ -101,7 +105,7 @@ public class BaseLiquidBlock extends LiquidBlock implements BlockTypeGetter {
         BlockState blockState = world.getBlockState(pos);
         if (blockState.getBlock() instanceof BaseLiquidBlock liquidBlock) {
             ElementInfo neighborElement = liquidBlock.getElement();
-            return neighborElement != null && !LAVA_ELEMENT.equals(neighborElement.name);
+            return neighborElement != null && !LAVA_ELEMENT.equals(neighborElement.getName());
         }
         return false;
     }
@@ -112,7 +116,7 @@ public class BaseLiquidBlock extends LiquidBlock implements BlockTypeGetter {
         BlockState blockState = world.getBlockState(pos);
         if (blockState.getBlock() instanceof BaseLiquidBlock liquidBlock) {
             ElementInfo neighborElement = liquidBlock.getElement();
-            return neighborElement != null && LAVA_ELEMENT.equals(neighborElement.name);
+            return neighborElement != null && LAVA_ELEMENT.equals(neighborElement.getName());
         }
         return false;
     }

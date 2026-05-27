@@ -1,12 +1,9 @@
 package com.lycanitesmobs.core.data.info.creature;
 
 import com.google.gson.JsonObject;
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
-import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
 import com.lycanitesmobs.core.entity.EntityTypeGetter;
-import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -17,6 +14,7 @@ import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,46 +22,46 @@ public class CreatureGroup {
     /**
      * A list of all creatures in this group.
      **/
-    public List<CreatureInfo> creatures = new ArrayList<>();
+    protected List<CreatureInfo> creatures = new ArrayList<>();
 
     /**
      * The name of this creature group.
      **/
-    public String name;
+    protected String name;
 
     /**
      * A list of groups that this group will actively hunt.
      **/
-    public List<CreatureGroup> huntGroups = new ArrayList<>();
-    public List<String> huntGroupNames = new ArrayList<>();
+    protected List<CreatureGroup> huntGroups = new ArrayList<>();
+    protected List<String> huntGroupNames = new ArrayList<>();
 
     /**
      * A list of groups that this group will actively hunt if in a pack.
      **/
-    public List<CreatureGroup> packGroups = new ArrayList<>();
-    public List<String> packGroupNames = new ArrayList<>();
+    protected List<CreatureGroup> packGroups = new ArrayList<>();
+    protected List<String> packGroupNames = new ArrayList<>();
 
     /**
      * A list of groups that this group will ignore but run from if hit by.
      **/
     public List<CreatureGroup> waryGroups = new ArrayList<>();
-    public List<String> waryGroupNames = new ArrayList<>();
+    protected List<String> waryGroupNames = new ArrayList<>();
 
     /**
      * A list of groups that this group will actively flee from.
      **/
     public List<CreatureGroup> fleeGroups = new ArrayList<>();
-    public List<String> fleeGroupNames = new ArrayList<>();
+    protected List<String> fleeGroupNames = new ArrayList<>();
 
     /**
      * A list of groups that this group will ignore completely.
      **/
     public List<CreatureGroup> ignoreGroups = new ArrayList<>();
-    public List<String> ignoreGroupNames = new ArrayList<>();
+    protected List<String> ignoreGroupNames = new ArrayList<>();
 
     enum Interaction {
         HUNT("hunt"), PACKHUNT("pack"), WARY("wary"), FLEE("flee"), IGNORE("ignore"), RETALIATE("retaliate");
-        public final String name;
+        private final String name;
 
         Interaction(String name) {
             this.name = name;
@@ -77,47 +75,47 @@ public class CreatureGroup {
     /**
      * The default interaction towards a group not in any interaction lists.
      **/
-    public Interaction defaultInteraction = Interaction.HUNT;
+    protected Interaction defaultInteraction = Interaction.HUNT;
 
     /**
      * If true, this group includes animals like Sheep, Cows and Pigs.
      **/
-    public boolean animals = false;
+    protected boolean animals = false;
 
     /**
      * If true, this group includes humanoids like Players, Villagers or Pillagers.
      **/
-    public boolean humanoids = false;
+    protected boolean humanoids = false;
 
     /**
      * If true, this group includes Players.
      **/
-    public boolean players = false;
+    protected boolean players = false;
 
     /**
      * If true, this group includes humanoids Villagers but not Pillagers.
      **/
-    public boolean villagers = false;
+    protected boolean villagers = false;
 
     /**
      * If true, this group includes raiders like Pillagers and Ravagers.
      **/
-    public boolean raiders = false;
+    protected boolean raiders = false;
 
     /**
      * If true, this group includes Snow Golems.
      **/
-    public boolean frozen = false;
+    protected boolean frozen = false;
 
     /**
      * If true, this group includes Blazes and Magma Cubes.
      **/
-    public boolean inferno = false;
+    protected boolean inferno = false;
 
     /**
      * A list of additional entity ids in this group.
      **/
-    public List<String> entityIds = new ArrayList<>();
+    protected List<String> entityIds = new ArrayList<>();
 
     /**
      * Loads this creature group from json.
@@ -175,59 +173,72 @@ public class CreatureGroup {
     }
 
     /**
-     * Initialises this creature group (should only be called during startup, after all groups are loaded), generates interactions with other groups, etc.
-     */
-    public void init() {
-        for (String groupName : this.huntGroupNames) {
-            CreatureGroup group = CreatureManager.getInstance().getCreatureGroup(groupName);
-            if (groupName.equals(this.name))
-                group = this;
-            if (group != null)
-                this.huntGroups.add(group);
-        }
-
-        for (String groupName : this.packGroupNames) {
-            CreatureGroup group = CreatureManager.getInstance().getCreatureGroup(groupName);
-            if (groupName.equals(this.name))
-                group = this;
-            if (group != null)
-                this.packGroups.add(group);
-        }
-
-        for (String groupName : this.waryGroupNames) {
-            CreatureGroup group = CreatureManager.getInstance().getCreatureGroup(groupName);
-            if (groupName.equals(this.name))
-                group = this;
-            if (group != null)
-                this.waryGroups.add(group);
-        }
-
-        for (String groupName : this.fleeGroupNames) {
-            CreatureGroup group = CreatureManager.getInstance().getCreatureGroup(groupName);
-            if (groupName.equals(this.name))
-                group = this;
-            if (group != null)
-                this.fleeGroups.add(group);
-        }
-
-        for (String groupName : this.ignoreGroupNames) {
-            CreatureGroup group = CreatureManager.getInstance().getCreatureGroup(groupName);
-            if (groupName.equals(this.name))
-                group = this;
-            if (group != null)
-                this.ignoreGroups.add(group);
-        }
-
-        LMHelperClass.logDebug("Creature Group", "Loaded Creature Group: " + this.getName());
-    }
-
-    /**
      * Gets the name of this group.
      *
      * @return The group name.
      */
     public String getName() {
         return this.name;
+    }
+
+    public List<CreatureGroup> getHuntGroups() {
+        return Collections.unmodifiableList(this.huntGroups);
+    }
+
+    public List<CreatureGroup> getPackGroups() {
+        return Collections.unmodifiableList(this.packGroups);
+    }
+
+    public List<String> getHuntGroupNames() {
+        return Collections.unmodifiableList(this.huntGroupNames);
+    }
+
+    public List<String> getPackGroupNames() {
+        return Collections.unmodifiableList(this.packGroupNames);
+    }
+
+    public List<String> getWaryGroupNames() {
+        return Collections.unmodifiableList(this.waryGroupNames);
+    }
+
+    public List<String> getFleeGroupNames() {
+        return Collections.unmodifiableList(this.fleeGroupNames);
+    }
+
+    public List<String> getIgnoreGroupNames() {
+        return Collections.unmodifiableList(this.ignoreGroupNames);
+    }
+
+    public void clearLinkedInteractionGroups() {
+        this.huntGroups.clear();
+        this.packGroups.clear();
+        this.waryGroups.clear();
+        this.fleeGroups.clear();
+        this.ignoreGroups.clear();
+    }
+
+    public void addHuntGroup(CreatureGroup group) {
+        this.huntGroups.add(group);
+    }
+
+    public void addPackGroup(CreatureGroup group) {
+        this.packGroups.add(group);
+    }
+
+    public void addWaryGroup(CreatureGroup group) {
+        this.waryGroups.add(group);
+    }
+
+    public void addFleeGroup(CreatureGroup group) {
+        this.fleeGroups.add(group);
+    }
+
+    public void addIgnoreGroup(CreatureGroup group) {
+        this.ignoreGroups.add(group);
+    }
+
+    public boolean includesHumanoids() {
+        return this.humanoids;
     }
 
     /**
@@ -242,6 +253,15 @@ public class CreatureGroup {
     }
 
     /**
+     * Removes a creature from this group, used before re-linking reloaded creature definitions.
+     *
+     * @param creature The creature to remove.
+     */
+    public void removeCreature(CreatureInfo creature) {
+        this.creatures.remove(creature);
+    }
+
+    /**
      * Returns if this group has the provided entity in it.
      *
      * @param entity The entity to check for.
@@ -249,7 +269,7 @@ public class CreatureGroup {
      */
     public boolean hasEntity(@Nonnull Entity entity) {
         if (entity instanceof BaseCreatureEntity) {
-            return ((BaseCreatureEntity) entity).creatureInfo.groups.contains(this);
+            return ((BaseCreatureEntity) entity).getCreatureInfo().isInGroup(this);
         }
         if (!(entity instanceof LivingEntity)) {
             return false;

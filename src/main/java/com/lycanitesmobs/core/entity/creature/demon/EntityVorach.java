@@ -23,7 +23,7 @@ public class EntityVorach extends TameableCreatureEntity implements Enemy {
 	@Override
 	protected void registerGoals() {
 		super.registerGoals();
-		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setSpeed(1.5D));
+		this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setSpeed(1.5D));
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class EntityVorach extends TameableCreatureEntity implements Enemy {
 	@Override
 	public int getNoBagSize() { return 0; }
 	@Override
-	public int getBagSize() { return this.creatureInfo.bagSize; }
+	public int getBagSize() { return this.creatureInfo.getBagSize(); }
 
 	@Override
 	public float getFallResistance() {

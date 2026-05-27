@@ -1,7 +1,6 @@
 package com.lycanitesmobs.core.entity.special;
 
-import com.lycanitesmobs.client.manager.ClientManager;
-import com.lycanitesmobs.client.manager.TextureManager;
+import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
@@ -11,6 +10,7 @@ import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.item.summoningstaff.ItemStaffSummoning;
 import com.lycanitesmobs.core.entity.pets.SummonSet;
 import com.lycanitesmobs.core.block.blockentity.TileEntitySummoningPedestal;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -34,19 +34,19 @@ public class PortalEntity extends BaseProjectileEntity {
     private double targetX;
     private double targetY;
     private double targetZ;
-    public int summonAmount = 0;
-    public int summonTick = 0;
-    public int summonTime = 5 * 20;
-    public double portalRange = 32.0D;
-    public int summonDuration = 60 * 20;
+    protected int summonAmount = 0;
+    protected int summonTick = 0;
+    protected int summonTime = 5 * 20;
+    protected double portalRange = 32.0D;
+    protected int summonDuration = 60 * 20;
 
     // Properties:
-    public Player shootingEntity;
-    public EntityType summonType;
-    public CreatureInfo creatureInfo;
-    public ItemStaffSummoning portalItem;
-    public UUID ownerUUID;
-    public TileEntitySummoningPedestal summoningPedestal;
+    protected Player shootingEntity;
+    protected EntityType summonType;
+    protected CreatureInfo creatureInfo;
+    protected ItemStaffSummoning portalItem;
+    protected UUID ownerUUID;
+    protected TileEntitySummoningPedestal summoningPedestal;
 
     // Datawatcher:
     protected static final EntityDataAccessor<Optional<UUID>> OWNER_UUID = SynchedEntityData.defineId(PortalEntity.class, EntityDataSerializers.OPTIONAL_UUID);
@@ -103,6 +103,9 @@ public class PortalEntity extends BaseProjectileEntity {
         this.entityData.define(OWNER_UUID, Optional.empty());
     }
 
+    public int getSummonAmount() {
+        return this.summonAmount;
+    }
 
     // ==================================================
     //                     Updates
@@ -147,14 +150,14 @@ public class PortalEntity extends BaseProjectileEntity {
                                 this.shootingEntity.getOffhandItem().getItem() instanceof ItemStaffSummoning;
 
                 if (!holdingStaff || !this.shootingEntity.isUsingItem()) {
-                    if (playerExt != null && playerExt.staffPortal == this) {
-                        playerExt.staffPortal = null;
+                    if (playerExt != null) {
+                        playerExt.clearStaffPortalIf(this);
                     }
                     this.remove(RemovalReason.DISCARDED);
                     return;
                 }
 
-                if (playerExt != null && playerExt.staffPortal != this) {
+                if (playerExt != null && !playerExt.isStaffPortal(this)) {
                     this.remove(RemovalReason.DISCARDED);
                     return;
                 }
@@ -183,23 +186,7 @@ public class PortalEntity extends BaseProjectileEntity {
             ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(this.shootingEntity);
             if (playerExt != null && this.portalItem != null) {
                 if (++this.summonTick >= this.portalItem.getRapidTime(null)) {
-                    this.summonDuration = this.portalItem.getSummonDuration();
-                    if (this.shootingEntity.getAbilities().instabuild) {
-                        this.summonAmount += this.portalItem.getSummonAmount();
-                    } else {
-                        int creatureSummonCost = 4;
-                        if (this.creatureInfo != null) {
-                            creatureSummonCost = this.creatureInfo.summonCost;
-                        }
-                        float summonMultiplier = (float) (creatureSummonCost + this.portalItem.getSummonCostBoost()) * this.portalItem.getSummonCostMod();
-                        int summonCost = Math.round((float) playerExt.summonFocusCharge * summonMultiplier);
-                        if (playerExt.summonFocus >= summonCost) {
-                            if (this.portalItem.getAdditionalCosts(this.shootingEntity)) {
-                                playerExt.summonFocus -= summonCost;
-                                this.summonAmount += this.portalItem.getSummonAmount();
-                            }
-                        }
-                    }
+                    this.grantStaffSummonAmount();
                     this.summonTick = 0;
                 }
             }
@@ -208,7 +195,7 @@ public class PortalEntity extends BaseProjectileEntity {
         // Summoning Pedestal:
         else if (this.summonType != null) {
             if (++this.summonTick >= this.summonTime) {
-                this.summonAmount = this.summoningPedestal.summonAmount;
+                this.summonAmount = this.summoningPedestal.getSummonAmount();
                 this.summonTick = 0;
             }
         }
@@ -230,6 +217,33 @@ public class PortalEntity extends BaseProjectileEntity {
         }
     }
 
+    private void grantStaffSummonAmount() {
+        if (this.portalItem == null || this.shootingEntity == null) {
+            return;
+        }
+        this.summonDuration = this.portalItem.getSummonDuration();
+        if (this.shootingEntity.getAbilities().instabuild) {
+            this.summonAmount += this.portalItem.getSummonAmount();
+            return;
+        }
+
+        ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(this.shootingEntity);
+        if (playerExt == null) {
+            return;
+        }
+        int creatureSummonCost = 4;
+        if (this.creatureInfo != null) {
+            creatureSummonCost = this.creatureInfo.getSummonCost();
+        }
+        float summonMultiplier = (float) (creatureSummonCost + this.portalItem.getSummonCostBoost()) * this.portalItem.getSummonCostMod();
+        int summonCost = Math.round((float) playerExt.getSummonFocusCharge() * summonMultiplier);
+        if (playerExt.hasSummonFocus(summonCost)
+                && this.portalItem.getAdditionalCosts(this.shootingEntity)) {
+            playerExt.consumeSummonFocus(summonCost);
+            this.summonAmount += this.portalItem.getSummonAmount();
+        }
+    }
+
 
     // ==================================================
     //                 Summon Creatures
@@ -242,7 +256,8 @@ public class PortalEntity extends BaseProjectileEntity {
             return 0;
         }
 
-        for (int i = 0; i < this.summonAmount; i++) {
+        int totalSummonAmount = this.summonAmount;
+        for (int i = 0; i < totalSummonAmount; i++) {
             Entity entity = this.summonType.create(this.getCommandSenderWorld());
             if (entity == null) {
                 return 0;
@@ -267,7 +282,7 @@ public class PortalEntity extends BaseProjectileEntity {
                 // Summoning Pedestal:
                 else if (this.summoningPedestal != null && this.summoningPedestal.getOwnerUUID() != null) {
                     entityCreature.setMinion(true);
-                    entityCreature.summoningPedestal = this.summoningPedestal;
+                    entityCreature.bindSummoningPedestal(this.summoningPedestal);
                     if (entityCreature instanceof TameableCreatureEntity) {
                         ((TameableCreatureEntity) entityCreature).setOwnerId(this.summoningPedestal.getOwnerUUID());
                         this.summoningPedestal.applyMinionBehaviour((TameableCreatureEntity) entityCreature);
@@ -281,18 +296,11 @@ public class PortalEntity extends BaseProjectileEntity {
                     //this.shootingEntity.addStat(ObjectManager.getStat(entityCreature.creatureInfo.getName() + ".summon"), 1); TODO Player Stats
                 }
             }
-            if (this.getCommandSenderWorld() instanceof ServerLevel serverLevel) {
-                DeferredLevelActionManager.enqueue(serverLevel, this.blockPosition(), "portal_summon:" + entity.getUUID(), level -> {
-                    if (!this.isAlive()) {
-                        return;
-                    }
-                    level.addFreshEntity(entity);
-                });
-            } else {
-                this.getCommandSenderWorld().addFreshEntity(entity);
+            if (this.isAlive()) {
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), "portal_summon:" + entity.getUUID(), entity);
             }
         }
-        int amount = this.summonAmount;
+        int amount = totalSummonAmount;
         this.summonAmount = 0;
         return amount;
     }
@@ -371,24 +379,18 @@ public class PortalEntity extends BaseProjectileEntity {
     // ==================================================
     @Override
     public ResourceLocation getTexture() {
-        if (TextureManager.getTexture(this.entityName) == null) {
-            TextureManager.addTexture(this.entityName, "textures/particles/" + this.entityName.toLowerCase() + ".png");
-        }
-        if (TextureManager.getTexture(this.entityName + "_client") == null) {
-            TextureManager.addTexture(this.entityName + "_client", "textures/particles/" + this.entityName.toLowerCase() + "_client.png");
-        }
-        if (TextureManager.getTexture(this.entityName + "_player") == null) {
-            TextureManager.addTexture(this.entityName + "_player", "textures/particles/" + this.entityName.toLowerCase() + "_player.png");
-        }
+        ResourceLocation baseTexture = AssetHelper.texture("textures/particles/" + this.entityName.toLowerCase() + ".png");
+        ResourceLocation clientTexture = AssetHelper.texture("textures/particles/" + this.entityName.toLowerCase() + "_client.png");
+        ResourceLocation playerTexture = AssetHelper.texture("textures/particles/" + this.entityName.toLowerCase() + "_player.png");
 
         if (this.ownerUUID != null) {
-            if (this.ownerUUID.equals(ClientManager.getInstance().getClientPlayer().getUUID())) {
-                return TextureManager.getTexture(this.entityName + "_client");
-            } else {
-                return TextureManager.getTexture(this.entityName + "_player");
+            Player clientPlayer = LycanitesMobs.PROXY.getClientPlayer();
+            if (clientPlayer != null && this.ownerUUID.equals(clientPlayer.getUUID())) {
+                return clientTexture;
             }
+            return playerTexture;
         }
-        return TextureManager.getTexture(this.entityName);
+        return baseTexture;
     }
 
     @Override

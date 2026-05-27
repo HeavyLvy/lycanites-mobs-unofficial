@@ -9,6 +9,8 @@ import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,12 +18,12 @@ import java.util.Map;
  * Loads and manages all Element definitions.
  **/
 public class ElementManager extends JSONLoader {
-    public static ElementManager INSTANCE;
+    protected static ElementManager INSTANCE;
 
     /**
      * A list of all elements.
      **/
-    public Map<String, ElementInfo> elements = new HashMap<>();
+    protected final Map<String, ElementInfo> elements = new HashMap<>();
 
 
     /**
@@ -34,6 +36,10 @@ public class ElementManager extends JSONLoader {
         return INSTANCE;
     }
 
+    public Collection<ElementInfo> getElements() {
+        return Collections.unmodifiableCollection(this.elements.values());
+    }
+
 
     /**
      * Loads all JSON Elements. Should only be done on pre-init and before Creature Info is loaded.
@@ -42,7 +48,7 @@ public class ElementManager extends JSONLoader {
      */
     public void loadAllFromJson(ModInfo modInfo) {
         this.elements.clear();
-        this.loadAllJson(modInfo, "Element", "elements", "name", false, null, FileLoader.COMMON, StreamLoader.COMMON);
+        this.loadAllJson(modInfo, "Element", "elements", "name", false, null, FileLoader.common(), StreamLoader.common());
         for (ElementInfo elementInfo : this.elements.values()) {
             elementInfo.init();
         }
@@ -54,11 +60,11 @@ public class ElementManager extends JSONLoader {
     public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
         ElementInfo elementInfo = new ElementInfo();
         elementInfo.loadFromJSON(json);
-        if (elementInfo.name == null) {
-            LMHelperClass.logWarning("", "Unable to load " + loadGroup + " json due to missing name.");
+        if (elementInfo.getName() == null) {
+            LMHelperClass.logWarningMessage("Unable to load " + loadGroup + " json due to missing name.");
             return;
         }
-        this.elements.put(elementInfo.name, elementInfo);
+        this.elements.put(elementInfo.getName(), elementInfo);
     }
 
 
@@ -69,8 +75,6 @@ public class ElementManager extends JSONLoader {
      * @return The Element Info.
      */
     public ElementInfo getElement(String elementName) {
-        if (!this.elements.containsKey(elementName))
-            return null;
         return this.elements.get(elementName);
     }
 }

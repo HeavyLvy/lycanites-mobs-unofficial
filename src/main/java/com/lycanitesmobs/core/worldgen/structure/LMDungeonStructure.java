@@ -43,7 +43,7 @@ public class LMDungeonStructure extends Structure {
     @Override
     protected Optional<GenerationStub> findGenerationPoint(GenerationContext context) {
         DungeonSchematic schematic = DungeonManager.getInstance().getSchematic(this.schematicName);
-        if (schematic == null || !schematic.enabled) {
+        if (schematic == null || !schematic.isEnabled()) {
             return Optional.empty();
         }
 
@@ -59,12 +59,12 @@ public class LMDungeonStructure extends Structure {
 
         int y = computeYPosition(schematic, context.random(), groundHeight);
 
-        // -- Check biome blacklist from schematic conditions --
+        // Check biome exclusions that cannot be expressed in the generated positive biome tag.
         WorldSpawnCondition condition = schematic.getWorldSpawnCondition();
-        if (condition != null && !condition.biomeTagBlacklist.isEmpty()) {
+        if (condition != null && !condition.getBiomeTagBlacklist().isEmpty()) {
             Holder<Biome> biomeHolder = context.chunkGenerator().getBiomeSource()
                     .getNoiseBiome(centerX >> 2, y >> 2, centerZ >> 2, context.randomState().sampler());
-            for (String blacklistTag : condition.biomeTagBlacklist) {
+            for (String blacklistTag : condition.getBiomeTagBlacklist()) {
                 TagKey<Biome> tagKey = TagKey.create(Registries.BIOME, new ResourceLocation(blacklistTag));
                 if (biomeHolder.is(tagKey)) {
                     return Optional.empty();
@@ -76,16 +76,25 @@ public class LMDungeonStructure extends Structure {
 
         return Optional.of(new GenerationStub(center, builder -> {
             try {
+                if (condition != null && condition.hasDimensionFilter()) {
+                    long layoutSeed = context.random().nextLong();
+                    BoundingBox boundingBox = computeDeferredBoundingBox(center, context);
+                    builder.addPiece(new LMDungeonPiece(boundingBox, schematic.getName(), center, layoutSeed));
+                    LMHelperClass.logDebug("Dungeon",
+                            "Structure scheduled with deferred layout: " + schematic.getName() + " at " + center);
+                    return;
+                }
+
                 DungeonLayout layout = generateLayout(schematic, center, context.random());
                 if (layout == null) {
                     return;
                 }
 
                 BoundingBox boundingBox = computeBoundingBox(layout, center, context);
-                builder.addPiece(new LMDungeonPiece(boundingBox, schematic.name, layout));
+                builder.addPiece(new LMDungeonPiece(boundingBox, schematic.getName(), layout));
 
                 LMHelperClass.logDebug("Dungeon",
-                        "Structure scheduled: " + schematic.name + " at " + center);
+                        "Structure scheduled: " + schematic.getName() + " at " + center);
 
             } catch (Exception e) {
                 LMHelperClass.logErrorMessageOnceCatchable(
@@ -112,30 +121,41 @@ public class LMDungeonStructure extends Structure {
 
     private DungeonLayout generateLayout(DungeonSchematic schematic, BlockPos origin, RandomSource random) {
         DungeonInstance tempInstance = new DungeonInstance();
-        tempInstance.schematic = schematic;
+        tempInstance.setSchematic(schematic);
         tempInstance.setOrigin(origin);
-
         long layoutSeed = random.nextLong();
-        tempInstance.seed = layoutSeed;
+        tempInstance.setSeed(layoutSeed);
 
         RandomSource layoutRandom = RandomSource.create(layoutSeed);
         DungeonLayout layout = new DungeonLayout(tempInstance);
         layout.generate(layoutRandom);
 
-        if (layout.sectors.isEmpty()) {
+        if (!layout.hasSectors()) {
             LMHelperClass.logDebug("Dungeon",
-                    "Layout generation produced no sectors for " + schematic.name);
+                    "Layout generation produced no sectors for " + schematic.getName());
             return null;
         }
 
         return layout;
     }
 
+    private BoundingBox computeDeferredBoundingBox(BlockPos center, GenerationContext context) {
+        int radius = DungeonLayout.getMaximumReferenceRadius();
+        return new BoundingBox(
+                center.getX() - radius,
+                context.heightAccessor().getMinBuildHeight(),
+                center.getZ() - radius,
+                center.getX() + radius,
+                context.heightAccessor().getMaxBuildHeight() - 1,
+                center.getZ() + radius
+        );
+    }
+
     private BoundingBox computeBoundingBox(DungeonLayout layout, BlockPos center, GenerationContext context) {
         int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
         int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
 
-        for (SectorInstance sector : layout.sectors) {
+        for (SectorInstance sector : layout.getSectors()) {
             BlockPos sMin = sector.getOccupiedBoundsMin();
             BlockPos sMax = sector.getOccupiedBoundsMax();
             if (sMin != null && sMax != null) {

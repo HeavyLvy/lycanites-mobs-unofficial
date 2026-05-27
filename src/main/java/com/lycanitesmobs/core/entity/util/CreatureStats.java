@@ -3,17 +3,20 @@ package com.lycanitesmobs.core.entity.util;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.Variant;
+import com.lycanitesmobs.core.data.info.creature.ExtraMobBehaviour;
 import net.minecraft.world.Difficulty;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.function.ToDoubleFunction;
 
 /** Manages the stats of an EntityCreature. This applies difficulty multipliers, subspecies, levels, etc also. **/
 public class CreatureStats {
 	/** The base amount of experience needed to level up, this is increased by the creature's level scaled. **/
-	public static int BASE_LEVELUP_EXPERIENCE = 100;
+	public static final int BASE_LEVELUP_EXPERIENCE = 100;
 
 	/** A static array of all stat names used by configs, etc. **/
-	public static String[] STAT_NAMES = new String[] {"health", "defense", "armor", "speed", "damage", "attackSpeed", "ranged_speed", "effect", "amplifier", "pierce", "sight"};
+	public static final List<String> STAT_NAMES = List.of("health", "defense", "armor", "speed", "damage", "attackSpeed", "ranged_speed", "effect", "amplifier", "pierce", "sight");
 
 	/** The entity using these stats. **/
 	public BaseCreatureEntity entity;
@@ -34,16 +37,13 @@ public class CreatureStats {
 	 */
 	public double getHealth() {
 		String statName = "health";
-		double statValue = this.entity.creatureInfo.health;
+		double statValue = this.entity.getCreatureInfo().getHealth();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
 			statValue *= this.getDifficultyMultiplier(statName);
 			statValue *= this.getVariantMultiplier(statName);
-			if(entity.extraMobBehaviour != null) {
-				statValue *= entity.extraMobBehaviour.multiplierHealth;
-				statValue += entity.extraMobBehaviour.boostHealth;
-			}
+			statValue = this.applyExtraBehaviour(statValue, ExtraMobBehaviour::multiplierHealth, ExtraMobBehaviour::boostHealth);
 		}
 
 		statValue *= this.getLevelMultiplier(statName);
@@ -57,16 +57,13 @@ public class CreatureStats {
 	 */
 	public double getDefense() {
 		String statName = "defense";
-		double statValue = this.entity.creatureInfo.defense;
+		double statValue = this.entity.getCreatureInfo().getDefense();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
 			statValue *= this.getDifficultyMultiplier(statName);
 			statValue *= this.getVariantMultiplier(statName);
-			if(entity.extraMobBehaviour != null) {
-				statValue *= entity.extraMobBehaviour.multiplierDefense;
-				statValue += entity.extraMobBehaviour.boostDefense;
-			}
+			statValue = this.applyExtraBehaviour(statValue, ExtraMobBehaviour::multiplierDefense, ExtraMobBehaviour::boostDefense);
 		}
 
 		statValue *= this.getLevelMultiplier(statName);
@@ -80,16 +77,13 @@ public class CreatureStats {
 	 */
 	public double getArmor() {
 		String statName = "armor";
-		double statValue = this.entity.creatureInfo.armor;
+		double statValue = this.entity.getCreatureInfo().getArmor();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
 			statValue *= this.getDifficultyMultiplier(statName);
 			statValue *= this.getVariantMultiplier(statName);
-			if(entity.extraMobBehaviour != null) {
-				statValue *= entity.extraMobBehaviour.multiplierArmor;
-				statValue += entity.extraMobBehaviour.boostArmor;
-			}
+			statValue = this.applyExtraBehaviour(statValue, ExtraMobBehaviour::multiplierArmor, ExtraMobBehaviour::boostArmor);
 		}
 
 		statValue *= this.getLevelMultiplier(statName);
@@ -103,16 +97,13 @@ public class CreatureStats {
 	 */
 	public double getSpeed() {
 		String statName = "speed";
-		double statValue = this.entity.creatureInfo.speed / 100;
+		double statValue = this.entity.getCreatureInfo().getMovementSpeed();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
 			statValue *= this.getDifficultyMultiplier(statName);
 			statValue *= this.getVariantMultiplier(statName);
-			if(entity.extraMobBehaviour != null) {
-				statValue *= entity.extraMobBehaviour.multiplierSpeed;
-				statValue += entity.extraMobBehaviour.boostSpeed;
-			}
+			statValue = this.applyExtraBehaviour(statValue, ExtraMobBehaviour::multiplierSpeed, ExtraMobBehaviour::boostSpeed);
 		}
 
 		statValue *= this.getLevelMultiplier(statName);
@@ -126,16 +117,13 @@ public class CreatureStats {
 	 */
 	public double getDamage() {
 		String statName = "damage";
-		double statValue = this.entity.creatureInfo.damage;
+		double statValue = this.entity.getCreatureInfo().getDamage();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
 			statValue *= this.getDifficultyMultiplier(statName);
 			statValue *= this.getVariantMultiplier(statName);
-			if(entity.extraMobBehaviour != null) {
-				statValue *= entity.extraMobBehaviour.multiplierDamage;
-				statValue += entity.extraMobBehaviour.boostDamage;
-			}
+			statValue = this.applyExtraBehaviour(statValue, ExtraMobBehaviour::multiplierDamage, ExtraMobBehaviour::boostDamage);
 		}
 
 		statValue *= this.getLevelMultiplier(statName);
@@ -149,16 +137,13 @@ public class CreatureStats {
 	 */
 	public double getAttackSpeed() {
 		String statName = "attackSpeed";
-		double statValue = this.entity.creatureInfo.attackSpeed;
+		double statValue = this.entity.getCreatureInfo().getAttackSpeed();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
 			statValue *= this.getDifficultyMultiplier(statName);
 			statValue *= this.getVariantMultiplier(statName);
-			if(entity.extraMobBehaviour != null) {
-				statValue *= entity.extraMobBehaviour.multiplierHaste;
-				statValue += entity.extraMobBehaviour.boostHaste;
-			}
+			statValue = this.applyExtraBehaviour(statValue, ExtraMobBehaviour::multiplierHaste, ExtraMobBehaviour::boostHaste);
 		}
 
 		statValue *= this.getLevelMultiplier(statName);
@@ -172,16 +157,13 @@ public class CreatureStats {
 	 */
 	public double getRangedSpeed() {
 		String statName = "ranged_speed";
-		double statValue = this.entity.creatureInfo.rangedSpeed;
+		double statValue = this.entity.getCreatureInfo().getRangedSpeed();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
 			statValue *= this.getDifficultyMultiplier(statName);
 			statValue *= this.getVariantMultiplier(statName);
-			if(entity.extraMobBehaviour != null) {
-				statValue *= entity.extraMobBehaviour.multiplierHaste;
-				statValue += entity.extraMobBehaviour.boostHaste;
-			}
+			statValue = this.applyExtraBehaviour(statValue, ExtraMobBehaviour::multiplierHaste, ExtraMobBehaviour::boostHaste);
 		}
 
 		statValue *= this.getLevelMultiplier(statName);
@@ -195,16 +177,13 @@ public class CreatureStats {
 	 */
 	public double getEffect() {
 		String statName = "effect";
-		double statValue = this.entity.creatureInfo.effectDuration;
+		double statValue = this.entity.getCreatureInfo().getEffectDuration();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
 			statValue *= this.getDifficultyMultiplier(statName);
 			statValue *= this.getVariantMultiplier(statName);
-			if(entity.extraMobBehaviour != null) {
-				statValue *= entity.extraMobBehaviour.multiplierEffect;
-				statValue += entity.extraMobBehaviour.boostEffect;
-			}
+			statValue = this.applyExtraBehaviour(statValue, ExtraMobBehaviour::multiplierEffect, ExtraMobBehaviour::boostEffect);
 		}
 
 		statValue *= this.getLevelMultiplier(statName);
@@ -218,7 +197,7 @@ public class CreatureStats {
 	 */
 	public double getAmplifier() {
 		String statName = "amplifier";
-		double statValue = this.entity.creatureInfo.effectAmplifier;
+		double statValue = this.entity.getCreatureInfo().getEffectAmplifier();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
@@ -237,16 +216,13 @@ public class CreatureStats {
 	 */
 	public double getPierce() {
 		String statName = "pierce";
-		double statValue = this.entity.creatureInfo.pierce;
+		double statValue = this.entity.getCreatureInfo().getPierce();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
 			statValue *= this.getDifficultyMultiplier(statName);
 			statValue *= this.getVariantMultiplier(statName);
-			if(entity.extraMobBehaviour != null) {
-				statValue *= entity.extraMobBehaviour.multiplierPierce;
-				statValue += entity.extraMobBehaviour.boostPierce;
-			}
+			statValue = this.applyExtraBehaviour(statValue, ExtraMobBehaviour::multiplierPierce, ExtraMobBehaviour::boostPierce);
 		}
 
 		statValue *= this.getLevelMultiplier(statName);
@@ -260,7 +236,7 @@ public class CreatureStats {
 	 */
 	public double getSight() {
 		String statName = "sight";
-		double statValue = this.entity.creatureInfo.sight;
+		double statValue = this.entity.getCreatureInfo().getSight();
 
 		// Wild:
 		if(!this.entity.isTamed()) {
@@ -278,13 +254,21 @@ public class CreatureStats {
 	 * @return Base knockback resistance.
 	 */
 	public double getKnockbackResistance() {
-		return this.entity.creatureInfo.knockbackResistance;
+		return this.entity.getCreatureInfo().getKnockbackResistance();
 	}
 	/**
 	 * Returns the Bag Size this entity should use.
 	 * @return Base Bag Size.
 	 */
 
+
+	private double applyExtraBehaviour(double statValue, ToDoubleFunction<ExtraMobBehaviour> multiplier, ToDoubleFunction<ExtraMobBehaviour> boost) {
+		ExtraMobBehaviour extraBehaviour = this.entity.getExtraMobBehaviour();
+		if (extraBehaviour == null) {
+			return statValue;
+		}
+		return (statValue * multiplier.applyAsDouble(extraBehaviour)) + boost.applyAsDouble(extraBehaviour);
+	}
 
 	/**
 	 * Returns a difficulty stat multiplier for the provided stat name and the world that the entity is in.
@@ -308,8 +292,8 @@ public class CreatureStats {
 	 * @return The stat multiplier.
 	 */
 	protected double getVariantMultiplier(String stat) {
-		if(this.entity.getVariant() != null && Variant.STAT_MULTIPLIERS.containsKey(this.entity.getVariant().rarity.toUpperCase(Locale.ENGLISH) + "-" + stat.toUpperCase(Locale.ENGLISH))) {
-			return Variant.STAT_MULTIPLIERS.get(this.entity.getVariant().rarity.toUpperCase(Locale.ENGLISH) + "-" + stat.toUpperCase(Locale.ENGLISH));
+		if(this.entity.getVariant() != null) {
+			return Variant.getStatMultiplier(this.entity.getVariant().getRarity(), stat);
 		}
 		return 1;
 	}

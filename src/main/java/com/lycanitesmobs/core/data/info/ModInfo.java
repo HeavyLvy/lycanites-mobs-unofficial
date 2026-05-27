@@ -6,12 +6,14 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.common.BiomeManager;
 
 import java.util.HashMap;
+import java.util.Collections;
+import java.util.Collection;
 import java.util.Map;
 
 
 public class ModInfo {
 	/** A map containing all groups by their name. **/
-	public static Map<String, ModInfo> modInfos = new HashMap<>();
+	private static final Map<String, ModInfo> modInfos = new HashMap<>();
 
     // ========== Group General ==========
 	/** The mod this info belongs to. **/
@@ -58,6 +60,14 @@ public class ModInfo {
 
         modInfos.put(this.name, this);
     }
+
+	public static ModInfo get(String name) {
+		return modInfos.get(name);
+	}
+
+	public static Collection<ModInfo> all() {
+		return Collections.unmodifiableCollection(modInfos.values());
+	}
 
 
 	/**

@@ -15,16 +15,16 @@ import java.util.List;
 
 public abstract class EntitySpawnTrigger extends SpawnTrigger {
 	/** A list of creature attributes that match this trigger. **/
-	public List<MobType> creatureAttributes = new ArrayList<>();
+	protected List<MobType> creatureAttributes = new ArrayList<>();
 
 	/** Determines if the entity types list is a blacklist or whitelist. **/
-	public String entityTypesListType = "whitelist";
+	protected String entityTypesListType = "whitelist";
 
 	/** A list of entity ids that match this trigger. **/
-	public List<String> entityIds = new ArrayList<>();
+	protected List<String> entityIds = new ArrayList<>();
 
 	/** Determines if the entity ids list is a blacklist or whitelist. **/
-	public String entityIdsListType = "blacklist";
+	protected String entityIdsListType = "blacklist";
 
 
 	/** Constructor **/

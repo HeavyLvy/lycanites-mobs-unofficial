@@ -13,7 +13,7 @@ import net.minecraftforge.common.extensions.IForgeMenuType;
 
 public class SummoningPedestalContainer extends BaseContainer {
     public static final MenuType<SummoningPedestalContainer> TYPE = (MenuType<SummoningPedestalContainer>) IForgeMenuType.create(SummoningPedestalContainer::new);
-    public TileEntitySummoningPedestal summoningPedestal;
+    protected final TileEntitySummoningPedestal summoningPedestal;
 
     /**
      * Client Constructor
@@ -23,7 +23,7 @@ public class SummoningPedestalContainer extends BaseContainer {
      * @param extraData       A packet sent from the server to create the Container from.
      */
     public SummoningPedestalContainer(int windowId, Inventory playerInventory, FriendlyByteBuf extraData) {
-        this(windowId, playerInventory, (TileEntitySummoningPedestal) playerInventory.player.getCommandSenderWorld().getBlockEntity(BlockPos.of(extraData.readLong())));
+        this(windowId, playerInventory, (TileEntitySummoningPedestal) playerInventory.player.getCommandSenderWorld().getBlockEntity(extraData.readBlockPos()));
     }
 
     /**
@@ -48,6 +48,10 @@ public class SummoningPedestalContainer extends BaseContainer {
             this.addSlot(new BaseSlot(summoningPedestal, slots++, 93, 43));
         }
         this.inventoryFinish = this.inventoryStart + slots;
+    }
+
+    public TileEntitySummoningPedestal getSummoningPedestal() {
+        return this.summoningPedestal;
     }
 
     @Override

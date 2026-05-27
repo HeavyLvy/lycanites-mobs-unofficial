@@ -62,7 +62,7 @@ public class ObjModel {
                 map.get(objPart).toMesh(mesh);
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "Unable to load model: " + resourceLocation);
+            LMHelperClass.logWarningMessage("Unable to load model: " + resourceLocation);
             e.printStackTrace();
         }
     }

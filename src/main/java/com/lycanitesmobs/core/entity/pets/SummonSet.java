@@ -11,25 +11,25 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 
 public class SummonSet {
-	public ExtendedPlayer playerExt;
+	protected ExtendedPlayer playerExt;
 	
 	// Summoning Details:
-	public String summonType = "";
-	public int subspecies = 0;
-	public int variant = 0;
-    public boolean summonableOnly = true;
-	public boolean sitting = false;
-	public boolean following = true;
-	public boolean passive = false;
-	public boolean assist = true;
-	public boolean aggressive = false;
-	public boolean pvp = false;
+	protected String summonType = "";
+	protected int subspecies = 0;
+	protected int variant = 0;
+    protected boolean summonableOnly = true;
+	protected boolean sitting = false;
+	protected boolean following = true;
+	protected boolean passive = false;
+	protected boolean assist = true;
+	protected boolean aggressive = false;
+	protected boolean pvp = false;
 	
 	// Behaviour Bits:
 	/** A list bytes for each behaviour, used when syncing network packets. **/
 	public enum BEHAVIOUR_ID {
 		SITTING((byte)1), FOLLOWING((byte)2), PASSIVE((byte)4), ASSIST((byte)8), AGGRESSIVE((byte)16), PVP((byte)32);
-		public byte id;
+		private final byte id;
 		BEHAVIOUR_ID(byte i) { id = i; }
 	}
 	
@@ -40,7 +40,7 @@ public class SummonSet {
 		CreatureInfo creatureInfo = CreatureManager.getInstance().getCreature(creatureName);
 		if(creatureInfo == null)
 			return false;
-		if(creatureInfo.dummy)
+		if(creatureInfo.isDummy())
 			return false;
 		return creatureInfo.isSummonable();
 	}
@@ -67,6 +67,22 @@ public class SummonSet {
 		else {
 			this.summonType = null;
 		}
+	}
+
+	public String getSummonType() {
+		return this.summonType;
+	}
+
+	public ExtendedPlayer getPlayerExt() {
+		return this.playerExt;
+	}
+
+	public void setPlayerExt(ExtendedPlayer playerExt) {
+		this.playerExt = playerExt;
+	}
+
+	public void setSummonableOnly(boolean summonableOnly) {
+		this.summonableOnly = summonableOnly;
 	}
 
 	public void setSubspecies(int subspecies) {
@@ -107,6 +123,73 @@ public class SummonSet {
 
 	public boolean getPVP() {
 		return this.pvp;
+	}
+
+	public void setPVP(boolean pvp) {
+		this.pvp = pvp;
+	}
+
+	public void togglePVP() {
+		this.setPVP(!this.getPVP());
+	}
+
+	public void setStance(boolean passive, boolean assist, boolean aggressive) {
+		this.passive = passive;
+		this.assist = assist;
+		this.aggressive = aggressive;
+	}
+
+	public void setPassiveStance() {
+		this.setStance(true, false, false);
+	}
+
+	public void setDefensiveStance() {
+		this.setStance(false, false, false);
+	}
+
+	public void setAssistStance() {
+		this.setStance(false, true, false);
+	}
+
+	public void setAggressiveStance() {
+		this.setStance(false, true, true);
+	}
+
+	public void setMovement(boolean sitting, boolean following) {
+		this.sitting = sitting;
+		this.following = following;
+	}
+
+	public void setFollowMovement() {
+		this.setMovement(false, true);
+	}
+
+	public void setWanderMovement() {
+		this.setMovement(false, false);
+	}
+
+	public void setSitMovement() {
+		this.setMovement(true, false);
+	}
+
+	public void setFollowing(boolean following) {
+		this.following = following;
+	}
+
+	public void toggleSitting() {
+		this.sitting = !this.sitting;
+	}
+
+	public void toggleFollowing() {
+		this.following = !this.following;
+	}
+
+	public void togglePassive() {
+		this.passive = !this.passive;
+	}
+
+	public void toggleAggressive() {
+		this.aggressive = !this.aggressive;
 	}
 
 	/**

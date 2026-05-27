@@ -1,9 +1,8 @@
 package com.lycanitesmobs.core.worldgen.structure;
 
-import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 
 public class ModStructurePieceTypes {
@@ -17,7 +16,7 @@ public class ModStructurePieceTypes {
     private static StructurePieceType register(String name, StructurePieceType.ContextlessType type) {
         return Registry.register(
                 BuiltInRegistries.STRUCTURE_PIECE,
-                new ResourceLocation(LycanitesMobs.MODID, name),
+                AssetHelper.modResource(name),
                 type);
     }
 }

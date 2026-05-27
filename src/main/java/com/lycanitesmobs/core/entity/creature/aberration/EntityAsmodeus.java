@@ -15,6 +15,7 @@ import com.lycanitesmobs.core.entity.navigation.ArenaNodeNetwork;
 import com.lycanitesmobs.core.entity.navigation.ArenaNodeNetworkGrid;
 import com.lycanitesmobs.core.entity.projectile.misc.EntityDevilGatling;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -60,33 +61,33 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
     }
 
     // AI:
-    public AttackRangedGoal aiRangedAttack;
+    private AttackRangedGoal aiRangedAttack;
 
-    public boolean firstPlayerTargetCheck = false;
-    public List<EntityAstaroth> astarothMinions = new ArrayList<>();
-    public List<EntityGrell> grellMinions = new ArrayList<>();
+    private boolean firstPlayerTargetCheck = false;
+    protected List<EntityAstaroth> astarothMinions = new ArrayList<>();
+    protected List<EntityGrell> grellMinions = new ArrayList<>();
 
     // First Phase:
-    public int devilstarStreamTime = 0;
-    public int devilstarStreamTimeMax = 5 * 20;
-    public int devilstarStreamCharge = 20 * 20;
-    public int devilstarStreamChargeMax = 20 * 20;
+    protected int devilstarStreamTime = 0;
+    protected int devilstarStreamTimeMax = 5 * 20;
+    protected int devilstarStreamCharge = 20 * 20;
+    protected int devilstarStreamChargeMax = 20 * 20;
 
     // Second Phase:
-    public int hellshieldAstarothRespawnTime = 0;
-    public int hellshieldAstarothRespawnTimeMax = 30;
+    protected int hellshieldAstarothRespawnTime = 0;
+    protected int hellshieldAstarothRespawnTimeMax = 30;
 
     // Third Phase:
-    public int rebuildAstarothRespawnTime = 0;
-    public int rebuildAstarothRespawnTimeMax = 40;
+    protected int rebuildAstarothRespawnTime = 0;
+    protected int rebuildAstarothRespawnTimeMax = 40;
 
     // Arena Movement:
-    public ArenaNodeNetwork arenaNodeNetwork;
-    public ArenaNode currentArenaNode;
-    public int arenaNodeChangeCooldown = 0;
-    public int arenaNodeChangeCooldownMax = 200;
-    public int arenaJumpingTime = 0;
-    public int arenaJumpingTimeMax = 60;
+    protected ArenaNodeNetwork arenaNodeNetwork;
+    protected ArenaNode currentArenaNode;
+    protected int arenaNodeChangeCooldown = 0;
+    protected int arenaNodeChangeCooldownMax = 200;
+    protected int arenaJumpingTime = 0;
+    protected int arenaJumpingTimeMax = 60;
     protected double jumpHeight = 6D;
 
     // ==================================================
@@ -106,25 +107,25 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
         this.hitAreaWidthScale = 2F;
 
         // Boss:
-        this.damageMax = BaseCreatureEntity.BOSS_DAMAGE_LIMIT;
-        this.damageLimit = BaseCreatureEntity.BOSS_DAMAGE_LIMIT;
+        this.damageMax = BaseCreatureEntity.getBossDamageLimit();
+        this.damageLimit = BaseCreatureEntity.getBossDamageLimit();
     }
 
     // ========== Init AI ==========
     @Override
     protected void registerGoals() {
-        this.targetSelector.addGoal(this.nextFindTargetIndex, new FindNearbyPlayersGoal(this));
+        this.targetSelector.addGoal(this.currentFindTargetGoalIndex(), new FindNearbyPlayersGoal(this));
 
         // All Phases:
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new FaceTargetGoal(this));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new HealWhenNoPlayersGoal(this));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new SummonMinionsGoal(this).setMinionInfo("grigori").setAntiFlight(true));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new FaceTargetGoal(this));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new HealWhenNoPlayersGoal(this));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new SummonMinionsGoal(this).setMinionInfo("grigori").setAntiFlight(true));
 
         this.aiRangedAttack = new AttackRangedGoal(this).setSpeed(1.0D).setStaminaTime(200).setStaminaDrainRate(3).setRange(90.0F).setChaseTime(0).setCheckSight(false);
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, this.aiRangedAttack);
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), this.aiRangedAttack);
 
         // Phase 1:
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new SummonMinionsGoal(this).setMinionInfo("trite").setSummonRate(20 * 3).setSummonCap(3).setPerPlayer(true)
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new SummonMinionsGoal(this).setMinionInfo("trite").setSummonRate(20 * 3).setSummonCap(3).setPerPlayer(true)
                 .setConditions(new GoalConditions().setBattlePhase(0)));
 
         super.registerGoals();
@@ -218,7 +219,7 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
         // Update Animation States:
         if (!this.getCommandSenderWorld().isClientSide) {
             byte animationState = 0;
-            if (this.aiRangedAttack != null && this.aiRangedAttack.attackOnCooldown)
+            if (this.isRangedAttackGoalCoolingDown())
                 animationState += ANIMATION_STATES_ID.COOLDOWN.id;
             this.entityData.set(ANIMATION_STATES, animationState);
         }
@@ -259,7 +260,7 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
 
         // Return to center with no target.
         if (this.getTarget() == null || !this.getTarget().isAlive()) {
-            this.setCurrentArenaNode(this.arenaNodeNetwork.centralNode);
+            this.setCurrentArenaNode(this.arenaNodeNetwork.getCentralNode());
             return;
         }
 
@@ -277,9 +278,10 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
         this.currentArenaNode = arenaNode;
 
         // Update home position jumping time on node change to new node.
-        if (this.currentArenaNode != null && this.currentArenaNode.pos != null) {
+        BlockPos arenaNodePos = this.currentArenaNode != null ? this.currentArenaNode.getPos() : null;
+        if (arenaNodePos != null) {
             this.arenaJumpingTime = this.arenaJumpingTimeMax;
-            this.leap(200, this.jumpHeight, this.currentArenaNode.pos); // First leap for jump height.
+            this.leap(200, this.jumpHeight, arenaNodePos); // First leap for jump height.
             if (this.hasJumpSound)
                 this.playJumpSound();
         }
@@ -288,7 +290,8 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
     // ========== Arena Movement Update ==========
     public void updateArenaMovement() {
         this.noPhysics = false;
-        if (this.currentArenaNode == null || this.currentArenaNode.pos == null) {
+        BlockPos currentArenaPos = this.currentArenaNode != null ? this.currentArenaNode.getPos() : null;
+        if (currentArenaPos == null) {
             return;
         }
 
@@ -297,20 +300,20 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
             this.arenaJumpingTime--;
             if (this.updateTick % 4 == 0) {
                 double dropForce = -0.5D;
-                this.noPhysics = this.position().y() > this.currentArenaNode.pos.getY() + 8;
-                if (this.position().y() < this.currentArenaNode.pos.getY()) {
-                    this.setPos(this.position().x(), this.currentArenaNode.pos.getY(), this.position().z());
+                this.noPhysics = this.position().y() > currentArenaPos.getY() + 8;
+                if (this.position().y() < currentArenaPos.getY()) {
+                    this.setPos(this.position().x(), currentArenaPos.getY(), this.position().z());
                     dropForce = 0;
                 }
-                this.leap(200, dropForce, this.currentArenaNode.pos); // Leap for XZ movement and negative height for increased weight on update.
+                this.leap(200, dropForce, currentArenaPos); // Leap for XZ movement and negative height for increased weight on update.
             }
             if (this.arenaJumpingTime == 0)
-                this.playStepSound(this.currentArenaNode.pos.below(), this.getCommandSenderWorld().getBlockState(this.currentArenaNode.pos.below()));
+                this.playStepSound(currentArenaPos.below(), this.getCommandSenderWorld().getBlockState(currentArenaPos.below()));
             return;
         }
 
         // Snap To Node:
-        BlockPos arenaPos = this.currentArenaNode.pos;
+        BlockPos arenaPos = currentArenaPos;
         double arenaY = this.position().y();
         if (this.getCommandSenderWorld().isEmptyBlock(arenaPos))
             arenaY = arenaPos.getY();
@@ -324,7 +327,7 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
 
     // ========== Phases Update ==========
     public void updatePhases() {
-        int playerCount = Math.max(this.playerTargets.size(), 1);
+        int playerCount = Math.max(this.getPlayerTargetCount(), 1);
 
         // ===== First Phase - Devilstar Stream =====
         if (this.getBattlePhase() == 0) {
@@ -471,7 +474,15 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
 
         // Launch:
         this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-        this.getCommandSenderWorld().addFreshEntity(projectile);
+        DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), projectile.blockPosition(), null, projectile);
+    }
+
+    public boolean hasRangedAttackGoal() {
+        return this.aiRangedAttack != null;
+    }
+
+    public boolean isRangedAttackGoalCoolingDown() {
+        return this.aiRangedAttack != null && this.aiRangedAttack.isAttackOnCooldown();
     }
 
 
@@ -480,7 +491,7 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
     // ==================================================
     @Override
     public void die(DamageSource damageSource) {
-        if (!this.getCommandSenderWorld().isClientSide && CreatureManager.getInstance().getCreature("trite").enabled) {
+        if (!this.getCommandSenderWorld().isClientSide && CreatureManager.getInstance().getCreature("trite").isEnabled()) {
             int j = 6 + this.random.nextInt(20) + (getCommandSenderWorld().getDifficulty().getId() * 4);
             for (int k = 0; k < j; ++k) {
                 float f = ((float) (k % 2) - 0.5F) * this.getDimensions(Pose.STANDING).width / 4.0F;
@@ -489,9 +500,12 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
                 trite.moveTo(this.position().x() + (double) f, this.position().y() + 0.5D, this.position().z() + (double) f1, this.random.nextFloat() * 360.0F, 0.0F);
                 trite.setMinion(true);
                 trite.applyVariant(this.getVariantIndex());
-                this.getCommandSenderWorld().addFreshEntity(trite);
-                if (this.getTarget() != null)
-                    trite.setLastHurtByMob(this.getTarget());
+                LivingEntity target = this.getTarget();
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), trite.blockPosition(), null, trite, () -> {
+                    if (target != null) {
+                        trite.setLastHurtByMob(target);
+                    }
+                });
             }
         }
         super.die(damageSource);
@@ -529,7 +543,7 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
         }
         if (entity instanceof Player) {
             Player player = (Player) entity;
-            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
+            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().getConfig().bossAntiFlight()) {
                 return true;
             }
         }

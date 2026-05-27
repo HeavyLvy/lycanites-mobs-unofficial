@@ -17,17 +17,17 @@ public class ProjectileBehaviourRandomEffect extends ProjectileBehaviour {
     /**
      * A list of beneficial potion effects that this element can grant.
      **/
-    public List<String> effects = new ArrayList<>();
+    protected List<String> effects = new ArrayList<>();
 
     /**
      * The duration (in ticks) of the random effect.
      **/
-    public int duration = 100;
+    protected int duration = 100;
 
     /**
      * The random effect amplifier.
      **/
-    public int amplifier = 0;
+    protected int amplifier = 0;
 
     @Override
     public void loadFromJSON(JsonObject json) {

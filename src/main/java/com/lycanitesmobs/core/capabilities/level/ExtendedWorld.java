@@ -1,14 +1,11 @@
 package com.lycanitesmobs.core.capabilities.level;
 
 import com.lycanitesmobs.LycanitesMobs;
-import com.lycanitesmobs.client.manager.ClientManager;
-import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonBuildPlan;
 import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
 import com.lycanitesmobs.core.capabilities.util.BossEntry;
 import com.lycanitesmobs.core.event.mobevent.MobEvent;
-import com.lycanitesmobs.core.manager.MobEventManager;
-import com.lycanitesmobs.client.event.mobevent.MobEventPlayerClient;
 import com.lycanitesmobs.core.event.mobevent.MobEventPlayerServer;
+import com.lycanitesmobs.core.manager.MobEventManager;
 import com.lycanitesmobs.core.network.message.MessageMobEvent;
 import com.lycanitesmobs.core.network.message.MessageWorldEvent;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -29,36 +26,35 @@ import net.minecraftforge.common.util.INBTSerializable;
 import java.util.*;
 
 public class ExtendedWorld extends SavedData implements INBTSerializable<CompoundTag> {
-    public static String EXT_PROP_NAME = "LycanitesMobs";
-    public static Map<Level, ExtendedWorld> loadedExtWorlds = new HashMap<>();
+    protected static final String EXT_PROP_NAME = "LycanitesMobs";
+    protected static final Map<Level, ExtendedWorld> loadedExtWorlds = new HashMap<>();
+    private final MobEventManager mobEventManager = MobEventManager.getInstance();
 
     /**
      * The world INSTANCE to work with.
      **/
-    public Level world;
-    public boolean initialized = false;
-    public long lastSpawnerTime = 0;
-    public long lastEventScheduleTime = 0;
-    public long lastEventUpdateTime = 0;
+    protected Level world;
+    protected boolean initialized = false;
+    protected long lastSpawnerTime = 0;
+    protected long lastEventScheduleTime = 0;
+    protected long lastEventUpdateTime = 0;
 
     // Mob Events World Config:
-    public boolean useTotalWorldTime = true;
+    protected boolean useTotalWorldTime = true;
 
     // Mob Events:
-    public Map<String, MobEventPlayerServer> serverMobEventPlayers = new HashMap<>();
-    public Map<String, MobEventPlayerClient> clientMobEventPlayers = new HashMap<>();
-    public MobEventPlayerServer serverWorldEventPlayer = null;
-    public MobEventPlayerClient clientWorldEventPlayer = null;
-    private long worldEventStartTargetTime = 0;
-    private long worldEventLastStartedTime = 0;
-    private String worldEventName = "";
-    private int worldEventCount = -1;
+    protected Map<String, MobEventPlayerServer> serverMobEventPlayers = new HashMap<>();
+    protected MobEventPlayerServer serverWorldEventPlayer = null;
+    long worldEventStartTargetTime = 0;
+    long worldEventLastStartedTime = 0;
+    String worldEventName = "";
+    int worldEventCount = -1;
 
     // Entities:
-    public Map<UUID, BossEntry> bosses = new HashMap<>();
+    protected Map<UUID, BossEntry> bosses = new HashMap<>();
 
     // Dungeons:
-    public Map<UUID, DungeonInstance> dungeons = new HashMap<>();
+    protected Map<UUID, DungeonInstance> dungeons = new HashMap<>();
 
 
     // ==================================================
@@ -66,7 +62,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
     // ==================================================
     public static ExtendedWorld getForWorld(Level world) {
         if (world == null) {
-            //LycanitesMobs.logWarning("", "Tried to access an ExtendedWorld from a null World.");
+            // LMHelperClass.logWarningMessage("Tried to access an ExtendedWorld from a null World.");
             return null;
         }
 
@@ -103,6 +99,12 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
         return worldExt;
     }
 
+    public static void unloadWorld(LevelAccessor world) {
+        if (world instanceof Level level) {
+            loadedExtWorlds.remove(level);
+        }
+    }
+
 
     // ==================================================
     //                     Constructor
@@ -114,6 +116,10 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
     public ExtendedWorld(Level world) {
         super();
         this.world = world;
+    }
+
+    public Level getWorld() {
+        return this.world;
     }
 
 
@@ -131,13 +137,19 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
         this.lastEventScheduleTime = this.world.getGameTime() - 1;
         this.lastEventUpdateTime = this.world.getGameTime() - 1;
 
-        // Start Saved Events:
-        if (!this.world.isClientSide && !"".equals(this.getWorldEventName()) && this.serverWorldEventPlayer == null) {
-            long savedLastStartedTime = this.getWorldEventLastStartedTime();
-            this.startMobEvent(this.getWorldEventName(), null, new BlockPos(0, 0, 0), 1, -1); // TODO Swap to read/write from NBT on Server Players.
-            if (this.serverWorldEventPlayer != null) {
-                this.serverWorldEventPlayer.changeStartedWorldTime(savedLastStartedTime);
-            }
+        this.restoreSavedWorldEvent();
+    }
+
+    private void restoreSavedWorldEvent() {
+        if (this.world.isClientSide || "".equals(this.worldEventName) || this.hasServerWorldEventPlayer()) {
+            return;
+        }
+
+        long savedLastStartedTime = this.worldEventLastStartedTime;
+        this.startMobEvent(this.worldEventName, null, new BlockPos(0, 0, 0), 1, -1); // TODO Swap to read/write from NBT on Server Players.
+        MobEventPlayerServer worldEventPlayer = this.getServerWorldEventPlayer();
+        if (worldEventPlayer != null) {
+            worldEventPlayer.changeStartedWorldTime(savedLastStartedTime);
         }
     }
 
@@ -161,11 +173,107 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
         if (this.getWorldEventName() == null || "".equals(this.getWorldEventName())) {
             return null;
         }
-        return MobEventManager.getInstance().getMobEvent(this.getWorldEventName());
+        return this.mobEventManager.getMobEvent(this.getWorldEventName());
     }
 
     public int getWorldEventCount() {
         return this.worldEventCount;
+    }
+
+    public long getConfiguredDayBaseTime(Level world) {
+        return this.useTotalWorldTime ? world.getGameTime() : world.getDayTime();
+    }
+
+    public boolean hasServerWorldEventPlayer() {
+        return this.serverWorldEventPlayer != null;
+    }
+
+    public MobEventPlayerServer getServerWorldEventPlayer() {
+        return this.serverWorldEventPlayer;
+    }
+
+    void setServerWorldEventPlayer(MobEventPlayerServer mobEventPlayerServer) {
+        this.serverWorldEventPlayer = mobEventPlayerServer;
+    }
+
+    MobEventPlayerServer putServerMobEventPlayer(String mobEventName, MobEventPlayerServer mobEventPlayerServer) {
+        return this.serverMobEventPlayers.put(mobEventName, mobEventPlayerServer);
+    }
+
+    MobEventPlayerServer removeServerMobEventPlayer(String mobEventName) {
+        return this.serverMobEventPlayers.remove(mobEventName);
+    }
+
+    MobEventPlayerServer getActiveServerMobEventPlayer(String mobEventName) {
+        return this.serverMobEventPlayers.get(mobEventName);
+    }
+
+    Collection<MobEventPlayerServer> getServerMobEventPlayers() {
+        return this.serverMobEventPlayers.values();
+    }
+
+    public MobEventPlayerServer[] getServerMobEventPlayerSnapshot() {
+        return this.serverMobEventPlayers.values().toArray(new MobEventPlayerServer[this.serverMobEventPlayers.size()]);
+    }
+
+    public boolean markSpawnerTickIfFresh(long gameTime) {
+        if (this.lastSpawnerTime == gameTime) {
+            return false;
+        }
+        this.lastSpawnerTime = gameTime;
+        return true;
+    }
+
+    public long getLastSpawnerTime() {
+        return this.lastSpawnerTime;
+    }
+
+    public boolean markEventScheduleTickIfFresh(long gameTime) {
+        if (this.lastEventScheduleTime == gameTime) {
+            return false;
+        }
+        this.lastEventScheduleTime = gameTime;
+        return true;
+    }
+
+    public long getLastEventScheduleTime() {
+        return this.lastEventScheduleTime;
+    }
+
+    public boolean markEventUpdateTickIfFresh(long gameTime) {
+        if (this.lastEventUpdateTime == gameTime) {
+            return false;
+        }
+        this.lastEventUpdateTime = gameTime;
+        return true;
+    }
+
+    BossEntry getOrCreateBossEntry(UUID uuid) {
+        return this.bosses.computeIfAbsent(uuid, ignored -> new BossEntry());
+    }
+
+    BossEntry getBossEntry(UUID uuid) {
+        return this.bosses.get(uuid);
+    }
+
+    void removeBossEntry(UUID uuid) {
+        this.bosses.remove(uuid);
+    }
+
+    Collection<BossEntry> getBossEntries() {
+        return this.bosses.values();
+    }
+
+    void putDungeonInstance(DungeonInstance dungeonInstance) {
+        this.dungeons.put(dungeonInstance.getUuid(), dungeonInstance);
+    }
+
+    boolean hasDungeonInstance(UUID uuid) {
+        return this.dungeons.containsKey(uuid);
+    }
+
+    Collection<DungeonInstance> getDungeonInstances() {
+        return this.dungeons.values();
     }
 
 
@@ -205,10 +313,11 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      * Gets a random time until the next random event will start.
      **/
     public int getRandomEventDelay(RandomSource random) {
-        int min = Math.max(200, MobEventManager.getInstance().minTicksUntilEvent);
-        int max = Math.max(200, MobEventManager.getInstance().maxTicksUntilEvent);
-        if (max <= min)
+        int min = Math.max(200, this.mobEventManager.getMinTicksUntilEvent());
+        int max = Math.max(200, this.mobEventManager.getMaxTicksUntilEvent());
+        if (max <= min) {
             return min;
+        }
 
         return min + random.nextInt(max - min);
     }
@@ -224,63 +333,40 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      **/
     public void startWorldEvent(MobEvent mobEvent) {
         if (mobEvent == null) {
-            LMHelperClass.logWarning("", "Tried to start a null world event, stopping any event instead.");
+            LMHelperClass.logWarningMessage("Tried to start a null world event, stopping any event instead.");
             this.stopWorldEvent();
             return;
         }
 
-        // Server Side:
-        if (!this.world.isClientSide) {
-            boolean extended = false;
-            if (this.serverWorldEventPlayer != null) {
-                extended = this.serverWorldEventPlayer.mobEvent == mobEvent;
-            }
-            if (!extended) {
-                this.serverWorldEventPlayer = mobEvent.getServerEventPlayer(this.world);
-            }
-            this.serverWorldEventPlayer.extended = extended;
-
-            this.setWorldEventName(mobEvent.name);
-            this.increaseMobEventCount();
-            this.setWorldEventStartTargetTime(0);
-            this.setWorldEventLastStartedTime(this.world.getGameTime());
-            this.serverWorldEventPlayer.onStart();
-            this.updateAllClientsEvents();
+        boolean extended = false;
+        MobEventPlayerServer worldEventPlayer = this.getServerWorldEventPlayer();
+        if (worldEventPlayer != null) {
+            extended = worldEventPlayer.getMobEvent() == mobEvent;
         }
-
-        // Client Side:
-        if (this.world.isClientSide) {
-            boolean extended = false;
-            if (this.clientWorldEventPlayer != null) {
-                extended = this.clientWorldEventPlayer.mobEvent == mobEvent;
-            }
-            if (!extended) {
-                this.clientWorldEventPlayer = mobEvent.getClientEventPlayer(this.world);
-            }
-            this.clientWorldEventPlayer.extended = extended;
-            if (ClientManager.getInstance().getClientPlayer() != null) {
-                this.clientWorldEventPlayer.onStart(ClientManager.getInstance().getClientPlayer());
-            }
+        if (!extended) {
+            worldEventPlayer = mobEvent.getServerEventPlayer(this.world);
+            this.setServerWorldEventPlayer(worldEventPlayer);
         }
+        worldEventPlayer.setExtended(extended);
+
+        this.setWorldEventName(mobEvent.getName());
+        this.increaseMobEventCount();
+        this.setWorldEventStartTargetTime(0);
+        this.setWorldEventLastStartedTime(this.world.getGameTime());
+        worldEventPlayer.onStart();
+        this.updateAllClientsEvents();
     }
 
     /**
      * Stops the World Event.
      **/
     public void stopWorldEvent() {
-        // Server Side:
-        if (this.serverWorldEventPlayer != null) {
-            this.serverWorldEventPlayer.onFinish();
+        MobEventPlayerServer worldEventPlayer = this.getServerWorldEventPlayer();
+        if (worldEventPlayer != null) {
+            worldEventPlayer.onFinish();
             this.setWorldEventName("");
-            this.serverWorldEventPlayer = null;
+            this.setServerWorldEventPlayer(null);
             this.updateAllClientsEvents();
-        }
-
-        // Client Side:
-        if (this.clientWorldEventPlayer != null) {
-            if (ClientManager.getInstance().getClientPlayer() != null)
-                this.clientWorldEventPlayer.onFinish(ClientManager.getInstance().getClientPlayer());
-            this.clientWorldEventPlayer = null;
         }
     }
 
@@ -295,35 +381,15 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      **/
     public void startMobEvent(MobEvent mobEvent, Player player, BlockPos pos, int level, int variant) {
         if (mobEvent == null) {
-            LMHelperClass.logWarning("", "Tried to start a null mob event.");
+            LMHelperClass.logWarningMessage("Tried to start a null mob event.");
             return;
         }
 
-        // Server Side:
-        if (!this.world.isClientSide) {
-            MobEventPlayerServer mobEventPlayerServer = mobEvent.getServerEventPlayer(this.world);
-            this.serverMobEventPlayers.put(mobEvent.name, mobEventPlayerServer);
-            mobEventPlayerServer.player = player;
-            mobEventPlayerServer.origin = pos;
-            mobEventPlayerServer.level = level;
-            mobEventPlayerServer.variant = variant;
-            mobEventPlayerServer.onStart();
-            this.updateAllClientsEvents();
-        }
-
-        // Client Side:
-        if (this.world.isClientSide) {
-            MobEventPlayerClient mobEventPlayerClient;
-            if (this.clientMobEventPlayers.containsKey(mobEvent.name)) {
-                mobEventPlayerClient = this.clientMobEventPlayers.get(mobEvent.name);
-            } else {
-                mobEventPlayerClient = mobEvent.getClientEventPlayer(this.world);
-                this.clientMobEventPlayers.put(mobEvent.name, mobEventPlayerClient);
-            }
-            if (ClientManager.getInstance().getClientPlayer() != null) {
-                mobEventPlayerClient.onStart(ClientManager.getInstance().getClientPlayer());
-            }
-        }
+        MobEventPlayerServer mobEventPlayerServer = mobEvent.getServerEventPlayer(this.world);
+        this.putServerMobEventPlayer(mobEvent.getName(), mobEventPlayerServer);
+        mobEventPlayerServer.configure(player, pos, level, variant);
+        mobEventPlayerServer.onStart();
+        this.updateAllClientsEvents();
     }
 
     /**
@@ -331,18 +397,19 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      **/
     public MobEvent startMobEvent(String mobEventName, Player player, BlockPos pos, int level, int variant) {
         MobEvent mobEvent;
-        if (MobEventManager.getInstance().mobEvents.containsKey(mobEventName)) {
-            mobEvent = MobEventManager.getInstance().mobEvents.get(mobEventName);
+        if (this.mobEventManager.hasMobEvent(mobEventName)) {
+            mobEvent = this.mobEventManager.getMobEvent(mobEventName);
             if (!mobEvent.isEnabled()) {
-                LMHelperClass.logWarning("", "Tried to start a mob event that was disabled with the name: '" + mobEventName + "' on " + (this.world.isClientSide ? "Client" : "Server"));
+                LMHelperClass.logWarningMessage("Tried to start a mob event that was disabled with the name: '" + mobEventName + "' on " + (this.world.isClientSide ? "Client" : "Server"));
                 return null;
             }
-        } else {
-            LMHelperClass.logWarning("", "Tried to start a mob event with the invalid name: '" + mobEventName + "' on " + (this.world.isClientSide ? "Client" : "Server"));
+        }
+        else {
+            LMHelperClass.logWarningMessage("Tried to start a mob event with the invalid name: '" + mobEventName + "' on " + (this.world.isClientSide ? "Client" : "Server"));
             return null;
         }
 
-        mobEvent.trigger(world, player, pos, level, variant);
+        mobEvent.trigger(this.world, player, pos, level, variant);
         return mobEvent;
     }
 
@@ -351,23 +418,10 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      *
      **/
     public void stopMobEvent(String mobEventName) {
-        // Server Side:
-        if (!this.world.isClientSide) {
-            if (this.serverMobEventPlayers.containsKey(mobEventName)) {
-                this.serverMobEventPlayers.get(mobEventName).onFinish();
-                this.serverMobEventPlayers.remove(mobEventName);
-                this.updateAllClientsEvents();
-            }
-        }
-
-        // Client Side:
-        if (this.world.isClientSide) {
-            if (this.clientMobEventPlayers.containsKey(mobEventName)) {
-                if (ClientManager.getInstance().getClientPlayer() != null) {
-                    this.clientMobEventPlayers.get(mobEventName).onFinish(ClientManager.getInstance().getClientPlayer());
-                }
-                this.clientMobEventPlayers.remove(mobEventName);
-            }
+        MobEventPlayerServer mobEventPlayerServer = this.removeServerMobEventPlayer(mobEventName);
+        if (mobEventPlayerServer != null) {
+            mobEventPlayerServer.onFinish();
+            this.updateAllClientsEvents();
         }
     }
 
@@ -385,35 +439,11 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
         }
 
         if (mobEventName.equals(this.getWorldEventName())) {
-            return this.serverWorldEventPlayer;
+            return this.getServerWorldEventPlayer();
         }
 
-        if (this.serverMobEventPlayers.containsKey(mobEventName)) {
-            return this.serverMobEventPlayers.get(mobEventName);
-        }
-
-        return null;
+        return this.getActiveServerMobEventPlayer(mobEventName);
     }
-
-    /**
-     * Returns a Mob Event Client Player if an event by the provided event name is currently active, otherwise null.
-     **/
-    public MobEventPlayerClient getMobEventPlayerClient(String mobEventName) {
-        if (mobEventName == null || "".equals(mobEventName)) {
-            return null;
-        }
-
-        if (mobEventName.equals(this.worldEventName)) {
-            return this.clientWorldEventPlayer;
-        }
-
-        if (this.clientMobEventPlayers.containsKey(mobEventName)) {
-            return this.clientMobEventPlayers.get(mobEventName);
-        }
-
-        return null;
-    }
-
 
     // ==================================================
     //                     Entities
@@ -424,10 +454,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      **/
     public void bossUpdate(Entity entity) {
         if (entity.isAlive()) {
-            if (!this.bosses.containsKey(entity.getUUID())) {
-                this.bosses.put(entity.getUUID(), new BossEntry());
-            }
-            this.bosses.get(entity.getUUID()).update(entity);
+            this.getOrCreateBossEntry(entity.getUUID()).update(entity);
         }
     }
 
@@ -435,8 +462,9 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      * Overrides the boss nearby range for the provided entity.
      **/
     public void overrideBossRange(Entity entity, int rangeOverride) {
-        if (this.bosses.containsKey(entity.getUUID())) {
-            this.bosses.get(entity.getUUID()).nearbyRange = rangeOverride;
+        BossEntry bossEntry = this.getBossEntry(entity.getUUID());
+        if (bossEntry != null) {
+            bossEntry.overrideNearbyRange(rangeOverride);
         }
     }
 
@@ -444,7 +472,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      * Called by bosses to let this world know that they are being removed.
      **/
     public void bossRemoved(Entity entity) {
-        this.bosses.remove(entity.getUUID());
+        this.removeBossEntry(entity.getUUID());
     }
 
     /**
@@ -454,11 +482,8 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      * @return True if a boss is present.
      */
     public boolean isBossNearby(Vec3 pos) {
-        for (BossEntry bossEntry : this.bosses.values()) {
-            if (bossEntry == null || bossEntry.entity == null || !bossEntry.entity.isAlive()) {
-                continue;
-            }
-            if (bossEntry.entity.distanceToSqr(pos) <= bossEntry.nearbyRange * bossEntry.nearbyRange) {
+        for (BossEntry bossEntry : this.getBossEntries()) {
+            if (bossEntry != null && bossEntry.isNear(pos)) {
                 return true;
             }
         }
@@ -474,13 +499,19 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      * Sends a packet to all clients updating their events for the provided world.
      **/
     public void updateAllClientsEvents() {
-        BlockPos pos = this.serverWorldEventPlayer != null ? this.serverWorldEventPlayer.origin : new BlockPos(0, 0, 0);
-        int level = this.serverWorldEventPlayer != null ? this.serverWorldEventPlayer.level : 0;
-        int subspecies = this.serverWorldEventPlayer != null ? this.serverWorldEventPlayer.variant : -1;
+        MobEventPlayerServer worldEventPlayer = this.getServerWorldEventPlayer();
+        BlockPos pos = worldEventPlayer != null ? worldEventPlayer.getOrigin() : new BlockPos(0, 0, 0);
+        int level = worldEventPlayer != null ? worldEventPlayer.getLevel() : 0;
+        int subspecies = worldEventPlayer != null ? worldEventPlayer.getVariant() : -1;
         MessageWorldEvent message = new MessageWorldEvent(this.getWorldEventName(), pos, level, subspecies);
         LycanitesMobs.PACKET_MANAGER.sendToWorld(message, this.world);
-        for (MobEventPlayerServer mobEventPlayerServer : this.serverMobEventPlayers.values()) {
-            MessageMobEvent messageMobEvent = new MessageMobEvent(mobEventPlayerServer.mobEvent != null ? mobEventPlayerServer.mobEvent.name : "", mobEventPlayerServer.origin, mobEventPlayerServer.level, mobEventPlayerServer.variant);
+        for (MobEventPlayerServer mobEventPlayerServer : this.getServerMobEventPlayers()) {
+            MessageMobEvent messageMobEvent = new MessageMobEvent(
+                    mobEventPlayerServer.getMobEventName(),
+                    mobEventPlayerServer.getOrigin(),
+                    mobEventPlayerServer.getLevel(),
+                    mobEventPlayerServer.getVariant()
+            );
             LycanitesMobs.PACKET_MANAGER.sendToWorld(messageMobEvent, this.world);
         }
     }
@@ -497,8 +528,8 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      * @param uuid            The UUID to give to the new Dungeon Instance.
      */
     public void addDungeonInstance(DungeonInstance dungeonInstance, UUID uuid) {
-        dungeonInstance.uuid = uuid;
-        this.dungeons.put(dungeonInstance.uuid, dungeonInstance);
+        dungeonInstance.setUuid(uuid);
+        this.putDungeonInstance(dungeonInstance);
         this.setDirty();
     }
 
@@ -512,8 +543,8 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
      */
     public List<DungeonInstance> getNearbyDungeonInstances(ChunkPos chunkPos, int range) {
         List<DungeonInstance> nearbyDungeons = new ArrayList<>();
-        for (DungeonInstance dungeonInstance : this.dungeons.values()) {
-            if (dungeonInstance.world == null) {
+        for (DungeonInstance dungeonInstance : this.getDungeonInstances()) {
+            if (dungeonInstance.getWorld() == null) {
                 dungeonInstance.init(this.world);
             }
             if (dungeonInstance.isChunkPosWithin(chunkPos, range)) {
@@ -528,7 +559,11 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
     //                    Read From NBT
     // ==================================================
     public void load(CompoundTag nbtTagCompound) {
-        // Events:
+        this.loadMobEventState(nbtTagCompound);
+        this.loadDungeonState(nbtTagCompound);
+    }
+
+    private void loadMobEventState(CompoundTag nbtTagCompound) {
         if (nbtTagCompound.contains("WorldEventStartTargetTime")) {
             this.worldEventStartTargetTime = nbtTagCompound.getInt("WorldEventStartTargetTime");
         }
@@ -542,21 +577,25 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
             this.worldEventCount = nbtTagCompound.getInt("WorldEventCount");
         }
         // TODO Load all active mob events, not just the world event.
+    }
 
-        // Dungeons:
-        if (nbtTagCompound.contains("Dungeons")) {
-            ListTag nbtDungeonList = nbtTagCompound.getList("Dungeons", 10);
-            for (int i = 0; i < nbtDungeonList.size(); i++) {
-                try {
-                    CompoundTag dungeonNBT = nbtDungeonList.getCompound(i);
-                    DungeonInstance dungeonInstance = new DungeonInstance();
-                    dungeonInstance.readFromNBT(dungeonNBT);
-                    if (dungeonInstance.uuid != null && !this.dungeons.containsKey(dungeonInstance.uuid)) {
-                        this.dungeons.put(dungeonInstance.uuid, dungeonInstance);
-                    }
-                } catch (Exception e) {
-                    LMHelperClass.logWarning("Dungeon", "An exception occurred when loading a dungeon from NBT.");
+    private void loadDungeonState(CompoundTag nbtTagCompound) {
+        if (!nbtTagCompound.contains("Dungeons")) {
+            return;
+        }
+
+        ListTag nbtDungeonList = nbtTagCompound.getList("Dungeons", 10);
+        for (int i = 0; i < nbtDungeonList.size(); i++) {
+            try {
+                CompoundTag dungeonNBT = nbtDungeonList.getCompound(i);
+                DungeonInstance dungeonInstance = new DungeonInstance();
+                dungeonInstance.readFromNBT(dungeonNBT);
+                if (dungeonInstance.getUuid() != null && !this.hasDungeonInstance(dungeonInstance.getUuid())) {
+                    this.putDungeonInstance(dungeonInstance);
                 }
+            }
+            catch (Exception e) {
+                LMHelperClass.logWarning("Dungeon", "An exception occurred when loading a dungeon from NBT.");
             }
         }
     }
@@ -567,16 +606,22 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
     // ==================================================
     @Override
     public CompoundTag save(CompoundTag nbtTagCompound) {
-        // Events:
+        this.saveMobEventState(nbtTagCompound);
+        this.saveDungeonState(nbtTagCompound);
+        return nbtTagCompound;
+    }
+
+    private void saveMobEventState(CompoundTag nbtTagCompound) {
         nbtTagCompound.putLong("WorldEventStartTargetTime", this.worldEventStartTargetTime);
         nbtTagCompound.putLong("WorldEventLastStartedTime", this.worldEventLastStartedTime);
         nbtTagCompound.putString("WorldEventName", this.worldEventName);
         nbtTagCompound.putInt("WorldEventCount", this.worldEventCount);
         // TODO Save all active mob events, not just the world event.
+    }
 
-        // Dungeons:
+    private void saveDungeonState(CompoundTag nbtTagCompound) {
         ListTag nbtDungeonList = new ListTag();
-        for (DungeonInstance dungeonInstance : this.dungeons.values()) {
+        for (DungeonInstance dungeonInstance : this.getDungeonInstances()) {
             CompoundTag dungeonNBT = new CompoundTag();
             dungeonNBT = dungeonInstance.writeToNBT(dungeonNBT);
             if (dungeonNBT != null) {
@@ -584,8 +629,6 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
             }
         }
         nbtTagCompound.put("Dungeons", nbtDungeonList);
-
-        return nbtTagCompound;
     }
 
     @Override
@@ -603,28 +646,34 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
     }
 
     public void buildDungeonInLoadedChunks(DungeonInstance instance) {
-        if (!(this.world instanceof ServerLevel serverLevel)) return;
-        if (instance.chunkMin == null || instance.chunkMax == null) return;
+        if (!(this.world instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        if (!instance.hasChunkBounds()) {
+            return;
+        }
 
         LMHelperClass.logDebug(
                 "DungeonDebug",
-                "buildDungeonInLoadedChunks: instance=" + instance.uuid
-                        + " chunkMin=" + instance.chunkMin
-                        + " chunkMax=" + instance.chunkMax
+                "buildDungeonInLoadedChunks: instance=" + instance.getUuid()
+                        + " chunkMin=" + instance.getChunkMin()
+                        + " chunkMax=" + instance.getChunkMax()
         );
 
         int total = 0;
-        for (int cx = instance.chunkMin.x; cx <= instance.chunkMax.x; cx++) {
-            for (int cz = instance.chunkMin.z; cz <= instance.chunkMax.z; cz++) {
+        for (int cx = instance.getChunkMin().x; cx <= instance.getChunkMax().x; cx++) {
+            for (int cz = instance.getChunkMin().z; cz <= instance.getChunkMax().z; cz++) {
                 total++;
             }
         }
         LMHelperClass.logDebug("DungeonDebug", "buildDungeonInLoadedChunks: totalChunksInRect=" + total);
 
         int processed = 0;
-        for (int cx = instance.chunkMin.x; cx <= instance.chunkMax.x; cx++) {
-            for (int cz = instance.chunkMin.z; cz <= instance.chunkMax.z; cz++) {
-                if (!serverLevel.getChunkSource().hasChunk(cx, cz)) continue;
+        for (int cx = instance.getChunkMin().x; cx <= instance.getChunkMax().x; cx++) {
+            for (int cz = instance.getChunkMin().z; cz <= instance.getChunkMax().z; cz++) {
+                if (!serverLevel.getChunkSource().hasChunk(cx, cz)) {
+                    continue;
+                }
 
                 ChunkPos chunkPos = new ChunkPos(cx, cz);
                 RandomSource random = RandomSource.create(chunkPos.toLong() ^ this.getWorldSeed());
@@ -640,28 +689,32 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
 
 
     public void debugDryRunDungeonPlacement(DungeonInstance instance) {
-        if (!(this.world instanceof ServerLevel serverLevel)) return;
-        if (instance.chunkMin == null || instance.chunkMax == null) {
-            LMHelperClass.logDebug("DungeonDebug", "debugDryRunDungeonPlacement: no chunk bounds for instance " + instance.uuid + " " + instance);
+        if (!(this.world instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        if (!instance.hasChunkBounds()) {
+            LMHelperClass.logDebug("DungeonDebug", "debugDryRunDungeonPlacement: no chunk bounds for instance " + instance.getUuid() + " " + instance);
             return;
         }
 
         LMHelperClass.logDebug(
                 "DungeonDebug",
-                "debugDryRunDungeonPlacement: instance=" + instance.uuid +
-                        " chunkMin=[" + instance.chunkMin.x + "," + instance.chunkMin.z + "]" +
-                        " chunkMax=[" + instance.chunkMax.x + "," + instance.chunkMax.z + "]"
+                "debugDryRunDungeonPlacement: instance=" + instance.getUuid() +
+                        " chunkMin=[" + instance.getChunkMin().x + "," + instance.getChunkMin().z + "]" +
+                        " chunkMax=[" + instance.getChunkMax().x + "," + instance.getChunkMax().z + "]"
         );
 
-        for (int cx = instance.chunkMin.x; cx <= instance.chunkMax.x; cx++) {
-            for (int cz = instance.chunkMin.z; cz <= instance.chunkMax.z; cz++) {
+        for (int cx = instance.getChunkMin().x; cx <= instance.getChunkMax().x; cx++) {
+            for (int cz = instance.getChunkMin().z; cz <= instance.getChunkMax().z; cz++) {
                 boolean loaded = serverLevel.getChunkSource().hasChunk(cx, cz);
                 LMHelperClass.logDebug(
                         "DungeonDebug",
-                        "debugDryRunDungeonPlacement: instance=" + instance.uuid +
+                        "debugDryRunDungeonPlacement: instance=" + instance.getUuid() +
                                 " chunk=[" + cx + "," + cz + "] loaded=" + loaded
                 );
-                if (!loaded) continue;
+                if (!loaded) {
+                    continue;
+                }
 
                 ChunkPos chunkPos = new ChunkPos(cx, cz);
                 RandomSource random = RandomSource.create(chunkPos.toLong() ^ this.getWorldSeed());
@@ -671,21 +724,25 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
     }
 
     public void debugDungeonInLoadedChunks(DungeonInstance instance) {
-        if (!(this.world instanceof ServerLevel serverLevel)) return;
-        if (instance.chunkMin == null || instance.chunkMax == null) {
-            LMHelperClass.logDebug("DungeonDebug", "debugDungeonInLoadedChunks: no chunk bounds for instance " + instance.uuid + " " + instance);
+        if (!(this.world instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        if (!instance.hasChunkBounds()) {
+            LMHelperClass.logDebug("DungeonDebug", "debugDungeonInLoadedChunks: no chunk bounds for instance " + instance.getUuid() + " " + instance);
             return;
         }
 
-        for (int cx = instance.chunkMin.x; cx <= instance.chunkMax.x; cx++) {
-            for (int cz = instance.chunkMin.z; cz <= instance.chunkMax.z; cz++) {
+        for (int cx = instance.getChunkMin().x; cx <= instance.getChunkMax().x; cx++) {
+            for (int cz = instance.getChunkMin().z; cz <= instance.getChunkMax().z; cz++) {
                 boolean hasChunk = serverLevel.getChunkSource().hasChunk(cx, cz);
                 LMHelperClass.logDebug(
                         "DungeonDebug",
-                        "debugDungeonInLoadedChunks: instance=" + instance.uuid +
+                        "debugDungeonInLoadedChunks: instance=" + instance.getUuid() +
                                 " chunk=[" + cx + "," + cz + "] loaded=" + hasChunk
                 );
-                if (!hasChunk) continue;
+                if (!hasChunk) {
+                    continue;
+                }
 
                 ChunkPos chunkPos = new ChunkPos(cx, cz);
                 RandomSource random = RandomSource.create(chunkPos.toLong() ^ this.getWorldSeed());

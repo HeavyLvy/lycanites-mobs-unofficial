@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class EquipmentForgeContainerProvider implements Nameable, MenuProvider {
-    public TileEntityEquipmentForge equipmentForge;
+    protected final TileEntityEquipmentForge equipmentForge;
 
     public EquipmentForgeContainerProvider(@Nonnull TileEntityEquipmentForge equipmentForge) {
         this.equipmentForge = equipmentForge;

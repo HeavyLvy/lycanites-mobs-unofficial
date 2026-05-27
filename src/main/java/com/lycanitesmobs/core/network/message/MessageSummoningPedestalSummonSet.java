@@ -24,9 +24,9 @@ public class MessageSummoningPedestalSummonSet {
     }
 
     public MessageSummoningPedestalSummonSet(SummonSet summonSet, int x, int y, int z) {
-        this.summonType = summonSet.summonType;
-        this.subpsecies = summonSet.subspecies;
-        this.variant = summonSet.variant;
+        this.summonType = summonSet.getSummonType();
+        this.subpsecies = summonSet.getSubspecies();
+        this.variant = summonSet.getVariant();
         this.behaviour = summonSet.getBehaviourByte();
         this.x = x;
         this.y = y;
@@ -49,9 +49,7 @@ public class MessageSummoningPedestalSummonSet {
                 summoningPedestal = (TileEntitySummoningPedestal) tileEntity;
             if (summoningPedestal == null)
                 return;
-            if (summoningPedestal.summonSet == null)
-                summoningPedestal.summonSet = new SummonSet(null);
-            summoningPedestal.summonSet.readFromPacket(message.summonType, message.subpsecies, message.variant, message.behaviour);
+            summoningPedestal.applySummonSetPacket(message.summonType, message.subpsecies, message.variant, message.behaviour);
         });
     }
 

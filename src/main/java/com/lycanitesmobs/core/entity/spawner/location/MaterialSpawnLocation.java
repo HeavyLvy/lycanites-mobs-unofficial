@@ -15,7 +15,7 @@ public class MaterialSpawnLocation extends BlockSpawnLocation {
     /**
      * A list of block materials to either spawn in or not spawn in depending on if it is a blacklist or whitelist.
      **/
-    public List<Block> materials = new ArrayList<>();
+    protected List<Block> materials = new ArrayList<>();
 
 
     @Override
@@ -30,6 +30,9 @@ public class MaterialSpawnLocation extends BlockSpawnLocation {
      **/
     @Override
     public boolean isValidBlock(Level world, BlockPos blockPos) {
+        if (!this.isBlockLoaded(world, blockPos)) {
+            return false;
+        }
         BlockState blockState = world.getBlockState(blockPos);
 
         if (!this.surface || !this.underground) {

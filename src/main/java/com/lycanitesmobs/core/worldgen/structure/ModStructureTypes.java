@@ -1,9 +1,8 @@
 package com.lycanitesmobs.core.worldgen.structure;
 
-import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 
 public class ModStructureTypes {
@@ -14,7 +13,7 @@ public class ModStructureTypes {
     public static void init() {
         LM_DUNGEON = Registry.register(
                 BuiltInRegistries.STRUCTURE_TYPE,
-                new ResourceLocation(LycanitesMobs.MODID, "lm_dungeon"),
+                AssetHelper.modResource("lm_dungeon"),
                 (StructureType<LMDungeonStructure>) () -> LMDungeonStructure.CODEC);
     }
 }

@@ -22,18 +22,18 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 
 public class EquipmentStationScreen extends BaseContainerScreen<EquipmentStationContainer> {
-    public EquipmentStationTileEntity equipmentStation;
+    protected EquipmentStationTileEntity equipmentStation;
 
     public EquipmentStationScreen(EquipmentStationContainer container, Inventory playerInventory, Component name) {
         super(container, playerInventory, name);
-        this.equipmentStation = container.equipmentStation;
+        this.equipmentStation = container.getEquipmentStation();
     }
 
     @Override
     public void init() {
-        super.init();
         this.imageWidth = 176;
         this.imageHeight = 166;
+        super.init();
     }
 
     @Override
@@ -73,7 +73,7 @@ public class EquipmentStationScreen extends BaseContainerScreen<EquipmentStation
         RenderSystem.setShaderTexture(0, texture);
 
         BaseContainer container = this.getMenu();
-        List<Slot> forgeSlots = container.slots.subList(container.inventoryStart, container.inventoryFinish);
+        List<Slot> forgeSlots = container.getInventorySlotView();
         int slotWidth = 18;
         int slotHeight = 18;
         int slotU = 238;

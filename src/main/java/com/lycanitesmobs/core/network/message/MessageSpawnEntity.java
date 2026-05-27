@@ -33,7 +33,7 @@ public class MessageSpawnEntity {
     public MessageSpawnEntity(Entity serverEntity) {
         if (serverEntity != null) {
             if (serverEntity instanceof BaseProjectileEntity) {
-                this.entityTypeName = ((BaseProjectileEntity) serverEntity).entityName;
+                this.entityTypeName = ((BaseProjectileEntity) serverEntity).getEntityName();
             }
             this.entityId = serverEntity.getId();
             this.uuid = serverEntity.getUUID();
@@ -54,14 +54,15 @@ public class MessageSpawnEntity {
             return;
 
         ctx.get().enqueueWork(() -> {
-            if (!EntityFactory.getInstance().entityTypeNetworkMap.containsKey(message.entityTypeName)) {
-                LMHelperClass.logWarning("", "Unable to find entity type from packet: " + message.entityTypeName);
+            EntityFactory entityFactory = EntityFactory.getInstance();
+            if (!entityFactory.hasEntityTypeNetworkName(message.entityTypeName)) {
+                LMHelperClass.logWarningMessage("Unable to find entity type from packet: " + message.entityTypeName);
                 return;
             }
-            EntityType entityType = EntityFactory.getInstance().entityTypeNetworkMap.get(message.entityTypeName);
-            Entity entity = EntityFactory.getInstance().create(entityType, LycanitesMobs.PROXY.getWorld());
+            EntityType entityType = entityFactory.getEntityTypeByNetworkName(message.entityTypeName);
+            Entity entity = entityFactory.create(entityType, LycanitesMobs.PROXY.getWorld());
             if (entity == null) {
-                LMHelperClass.logWarning("", "Unable to create client entity from packet: " + message.entityTypeName);
+                LMHelperClass.logWarningMessage("Unable to create client entity from packet: " + message.entityTypeName);
                 return;
             }
             entity.setPos(message.x, message.y, message.z);
@@ -73,7 +74,7 @@ public class MessageSpawnEntity {
             // Projectiles:
             if (entity instanceof BaseProjectileEntity) {
                 BaseProjectileEntity projectileEntity = (BaseProjectileEntity) entity;
-                projectileEntity.entityName = message.entityTypeName;
+                projectileEntity.setEntityName(message.entityTypeName);
                 if (entity instanceof CustomProjectileEntity) {
                     ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile(message.entityTypeName);
                     if (projectileInfo != null) {

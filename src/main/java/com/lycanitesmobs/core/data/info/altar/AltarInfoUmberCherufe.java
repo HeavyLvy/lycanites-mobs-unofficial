@@ -178,8 +178,8 @@ public class AltarInfoUmberCherufe extends AltarInfo {
         }
 
         // Spawn Mini Boss:
-        entityLobber.altarSummoned = true;
-        entityLobber.forceBossHealthBar = true;
+        entityLobber.markAltarSummoned();
+        entityLobber.forceBossHealthBar();
         entityLobber.applyVariant(3);
         entityLobber.moveTo(x, y - 2, z, 0, 0);
         this.spawnDeferred(world, pos, "altar_spawn:" + this.name + ":" + pos.asLong(), entityLobber,

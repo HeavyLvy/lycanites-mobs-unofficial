@@ -2,10 +2,11 @@ package com.lycanitesmobs.core.entity.projectile.hellfire;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.creature.demon.EntityRahovart;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
@@ -17,14 +18,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class EntityHellfireWave extends BaseProjectileEntity {
 
     // Properties:
-    public EntityHellfireWall[][] hellfireWalls;
+    protected EntityHellfireWall[][] hellfireWalls;
     protected int hellfireWidth = 5;
     protected int hellfireHeight = 3;
     protected int hellfireSize = 10;
-    public int time = 0;
-    public int timeMax = 10 * 20;
-    public float angle = 90;
-    public double rotation = 0;
+    protected int time = 0;
+    protected int timeMax = 10 * 20;
+    protected float angle = 90;
+    protected double rotation = 0;
 
     // ==================================================
     //                   Constructors
@@ -62,6 +63,10 @@ public class EntityHellfireWave extends BaseProjectileEntity {
         return false;
     }
 
+    public void setRotation(double rotation) {
+        this.rotation = rotation;
+    }
+
 
     // ==================================================
     //                      Update
@@ -81,16 +86,16 @@ public class EntityHellfireWave extends BaseProjectileEntity {
             for (int row = 0; row < this.hellfireHeight; row++) {
                 for (int col = 0; col < this.hellfireWidth; col++) {
                     if (this.getOwner() != null)
-                        this.hellfireWalls[row][col] = new EntityHellfireWavePart(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireWavePart.class), this.getCommandSenderWorld(), (LivingEntity) this.getShooter());
+                        this.hellfireWalls[row][col] = new EntityHellfireWavePart(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireWavePart.class), this.getCommandSenderWorld(), (LivingEntity) this.getShooter());
                     else
-                        this.hellfireWalls[row][col] = new EntityHellfireWavePart(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireWavePart.class), this.getCommandSenderWorld(), this.position().x(), this.position().y() + 5 + (this.hellfireSize * row), this.position().z());
+                        this.hellfireWalls[row][col] = new EntityHellfireWavePart(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireWavePart.class), this.getCommandSenderWorld(), this.position().x(), this.position().y() + 5 + (this.hellfireSize * row), this.position().z());
                     this.hellfireWalls[row][col].setPos(
                             this.hellfireWalls[row][col].position().x(),
                             this.position().y() + (this.hellfireSize * row),
                             this.hellfireWalls[row][col].position().z()
                     );
-                    this.getCommandSenderWorld().addFreshEntity(hellfireWalls[row][col]);
                     this.hellfireWalls[row][col].setProjectileScale(this.hellfireSize * 2);
+                    DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.hellfireWalls[row][col].blockPosition(), null, this.hellfireWalls[row][col]);
                 }
             }
         }
@@ -106,7 +111,7 @@ public class EntityHellfireWave extends BaseProjectileEntity {
                         this.position().y() + (this.hellfireSize * row),
                         this.position().z() + z
                 );
-                this.hellfireWalls[row][col].projectileLife = 2 * 20;
+                this.hellfireWalls[row][col].setProjectileLife(2 * 20);
                 if (!this.isAlive())
                     this.hellfireWalls[row][col].remove(RemovalReason.DISCARDED);
             }
@@ -167,8 +172,6 @@ public class EntityHellfireWave extends BaseProjectileEntity {
     }
 
     public ResourceLocation getTexture() {
-        if (TextureManager.getTexture(this.entityName) == null)
-            TextureManager.addTexture(this.entityName, "textures/item/" + subTypeString() + "/" + this.entityName + ".png");
-        return TextureManager.getTexture(this.entityName);
+        return AssetHelper.texture("textures/item/" + subTypeString() + "/" + this.entityName + ".png");
     }
 }

@@ -9,6 +9,7 @@ public class CoreConfig {
 
 	public static void buildSpec() {
 		ConfigGeneral.INSTANCE = new ConfigGeneral(BUILDER);
+		ConfigPlayer.INSTANCE = new ConfigPlayer(BUILDER);
 		ConfigExtra.INSTANCE = new ConfigExtra(BUILDER);
 		ConfigDebug.INSTANCE = new ConfigDebug(BUILDER);
 		ConfigAdmin.INSTANCE = new ConfigAdmin(BUILDER);

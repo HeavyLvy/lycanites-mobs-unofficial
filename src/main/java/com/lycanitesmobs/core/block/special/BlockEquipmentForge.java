@@ -33,7 +33,7 @@ import static com.lycanitesmobs.core.tabs.LMBlocksGroup.blockNames;
 
 public class BlockEquipmentForge extends BlockBase implements EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public int level;
+    private final int level;
 
     // ==================================================
     //                   Constructor

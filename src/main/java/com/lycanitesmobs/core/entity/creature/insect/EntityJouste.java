@@ -7,6 +7,7 @@ import com.lycanitesmobs.core.entity.goals.targeting.CopyMasterAttackTargetGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindMasterGoal;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.block.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
@@ -33,11 +34,11 @@ public class EntityJouste extends AgeableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new TemptGoal(this).setIncludeDiet(true));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new TemptGoal(this).setIncludeDiet(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
 
-        this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindMasterGoal(this).setTargetClass(EntityJousteAlpha.class).setSightCheck(false));
-        this.targetSelector.addGoal(this.nextFindTargetIndex++, new CopyMasterAttackTargetGoal(this));
+        this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindMasterGoal(this).setTargetClass(EntityJousteAlpha.class).setSightCheck(false));
+        this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new CopyMasterAttackTargetGoal(this));
     }
 
     @Override
@@ -45,11 +46,11 @@ public class EntityJouste extends AgeableCreatureEntity {
         // Random Alpha:
         CreatureInfo alphaInfo = CreatureManager.getInstance().getCreature("joustealpha");
         if (alphaInfo != null) {
-            float alphaChance = (float) alphaInfo.creatureSpawn.spawnWeight / Math.max(this.creatureInfo.creatureSpawn.spawnWeight, 1);
+            float alphaChance = (float) alphaInfo.getCreatureSpawn().getSpawnWeight() / Math.max(this.creatureInfo.getCreatureSpawn().getSpawnWeight(), 1);
             if (this.getRandom().nextFloat() <= alphaChance) {
                 EntityJousteAlpha alpha = (EntityJousteAlpha) CreatureManager.getInstance().getCreature("joustealpha").createEntity(this.getCommandSenderWorld());
                 alpha.copyPosition(this);
-                this.getCommandSenderWorld().addFreshEntity(alpha);
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, alpha);
                 this.remove(RemovalReason.DISCARDED);
             }
         }
@@ -105,7 +106,7 @@ public class EntityJouste extends AgeableCreatureEntity {
             if (alphaInfo != null && this.getRandom().nextFloat() >= 0.9F) {
                 EntityJousteAlpha alpha = (EntityJousteAlpha) CreatureManager.getInstance().getCreature("joustealpha").createEntity(this.getCommandSenderWorld());
                 alpha.copyPosition(this);
-                this.getCommandSenderWorld().addFreshEntity(alpha);
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, alpha);
                 this.remove(RemovalReason.DISCARDED);
             }
         }

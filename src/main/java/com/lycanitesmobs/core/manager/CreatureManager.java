@@ -8,76 +8,92 @@ import com.lycanitesmobs.core.data.loaders.JSONLoader;
 import com.lycanitesmobs.core.data.loaders.StreamLoader;
 import com.lycanitesmobs.core.data.config.ConfigCreatures;
 import com.lycanitesmobs.core.entity.util.CreatureStats;
-import com.lycanitesmobs.core.entity.util.EntityFactory;
 import com.lycanitesmobs.core.entity.spawner.SpawnerMobRegistry;
+import com.lycanitesmobs.core.item.consumable.entity.CreatureTreatItem;
+import com.lycanitesmobs.core.item.consumable.entity.ItemCustomSpawnEgg;
+import com.lycanitesmobs.core.item.consumable.utility.ItemSoulstone;
+import com.lycanitesmobs.core.item.consumable.utility.ItemSoulstoneFilled;
+import com.lycanitesmobs.core.item.equipment.CreatureSaddleItem;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobCategory;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.common.util.Lazy;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Consumer;
+
+import static com.lycanitesmobs.core.tabs.LMCreaturesGroup.creatureNames;
 
 public class CreatureManager extends JSONLoader {
-    public static CreatureManager INSTANCE;
-    public static String[] DIFFICULTY_NAMES = new String[]{"easy", "normal", "hard"};
-    public static double[] DIFFICULTY_DEFAULTS = new double[]{0.8D, 1.0D, 1.1D};
+    private static CreatureManager INSTANCE;
+    private static final List<String> DIFFICULTY_NAMES = List.of("easy", "normal", "hard");
+    private static final Map<String, Double> DIFFICULTY_DEFAULTS = Map.of(
+            "easy", 0.8D,
+            "normal", 1.0D,
+            "hard", 1.1D
+    );
 
     /**
      * Handles all global creature general config settings.
      **/
-    public CreatureConfig config;
+    protected CreatureConfig config;
 
     /**
      * Handles all global creature spawning config settings.
      **/
-    public CreatureSpawnConfig spawnConfig;
+    protected CreatureSpawnConfig spawnConfig;
 
     /**
      * A map of all creatures types by name.
      **/
-    public Map<String, CreatureType> creatureTypes = new HashMap<>();
+    protected Map<String, CreatureType> creatureTypes = new HashMap<>();
 
     /**
      * A map of all creatures groups by name.
      **/
-    public Map<String, CreatureGroup> creatureGroups = new HashMap<>();
+    protected Map<String, CreatureGroup> creatureGroups = new HashMap<>();
 
     /**
      * A map of all creatures by name.
      **/
-    public Map<String, CreatureInfo> creatures = new HashMap<>();
+    protected Map<String, CreatureInfo> creatures = new HashMap<>();
 
     /**
      * A map of all creatures by class.
      **/
-    public Map<Class, CreatureInfo> creatureClassMap = new HashMap<>();
+    protected Map<Class, CreatureInfo> creatureClassMap = new HashMap<>();
 
     /**
      * A list of mods that have loaded with this Creature Manager.
      **/
-    public List<ModInfo> loadedMods = new ArrayList<>();
+    protected List<ModInfo> loadedMods = new ArrayList<>();
 
     /**
      * A map containing all the global multipliers for each stat for each difficulty.
      **/
-    public Map<String, Double> difficultyMultipliers = new HashMap<>();
+    protected Map<String, Double> difficultyMultipliers = new HashMap<>();
 
     /**
      * A map containing all the global multipliers for each stat for mob level scaling.
      **/
-    public Map<String, Double> levelMultipliers = new HashMap<>();
+    protected Map<String, Double> levelMultipliers = new HashMap<>();
+
+    /**
+     * Element registry dependency used while validating and linking creature definitions.
+     **/
+    protected final ElementManager elementManager;
 
     /**
      * The global multiplier to use for the health of tamed creatures.
      **/
-    public double tamedHealthMultiplier = 3;
+    protected double tamedHealthMultiplier = 3;
 
     /**
      * Set to true if Doomlike Dungeons is loaded allowing mobs to register their Dungeon themes.
      **/
-    public boolean dlDungeonsLoaded = false;
+    protected boolean dlDungeonsLoaded = false;
 
     /**
      * Constructor
@@ -85,6 +101,7 @@ public class CreatureManager extends JSONLoader {
     public CreatureManager() {
         this.config = new CreatureConfig();
         this.spawnConfig = new CreatureSpawnConfig();
+        this.elementManager = ElementManager.getInstance();
     }
 
     /**
@@ -97,15 +114,31 @@ public class CreatureManager extends JSONLoader {
         return INSTANCE;
     }
 
-    @NotNull
-    private static EntityType.Builder<?> getBuilder(CreatureInfo creatureInfo) {
-        EntityType.Builder<?> entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), creatureInfo.peaceful ? MobCategory.CREATURE : MobCategory.MONSTER);
-        //entityTypeBuilder.setCustomClientFactory(EntityFactory.getInstance().createOnClientFunction); // Was created when experimenting with custom spawn packets, not in use currently but may be needed in the future.
-        entityTypeBuilder.setTrackingRange(creatureInfo.isBoss() ? 32 : 10);
-        entityTypeBuilder.setUpdateInterval(3);
-        entityTypeBuilder.setShouldReceiveVelocityUpdates(false);
-        entityTypeBuilder.sized((float) creatureInfo.width, (float) creatureInfo.height);
-        return entityTypeBuilder;
+    public static List<String> getDifficultyNames() {
+        return DIFFICULTY_NAMES;
+    }
+
+    public static double getDifficultyDefault(String difficultyName, String statName) {
+        double defaultValue = DIFFICULTY_DEFAULTS.getOrDefault(difficultyName, 1.0D);
+        if ("easy".equalsIgnoreCase(difficultyName) && "speed".equalsIgnoreCase(statName)) {
+            return 1.0D;
+        }
+        if ("hard".equalsIgnoreCase(difficultyName)
+                && ("attackSpeed".equalsIgnoreCase(statName) || "rangedSpeed".equalsIgnoreCase(statName))) {
+            return 1.5D;
+        }
+        if ("armor".equalsIgnoreCase(statName) || "sight".equalsIgnoreCase(statName)) {
+            return 1.0D;
+        }
+        return defaultValue;
+    }
+
+    public CreatureConfig getConfig() {
+        return this.config;
+    }
+
+    public CreatureSpawnConfig getSpawnConfig() {
+        return this.spawnConfig;
     }
 
     /**
@@ -120,23 +153,47 @@ public class CreatureManager extends JSONLoader {
         this.loadCreaturesFromJSON(modInfo);
 
         // Initialise:
-        for (CreatureType creatureType : this.creatureTypes.values()) {
-            creatureType.init();
-        }
+        registerItems();
         for (CreatureGroup creatureGroup : this.creatureGroups.values()) {
-            creatureGroup.init();
+            link(creatureGroup, this);
         }
-        for (CreatureInfo creatureInfo : this.creatures.values()) {
-            final var entityTypeBuilder = getBuilder(creatureInfo);
-            ObjectManager.entityTypes.put(creatureInfo.getName(), () -> entityTypeBuilder.build(creatureInfo.getName()));
+        CreatureBootstrapHelper.registerEntityTypeSuppliers(this.creatures.values());
+    }
+
+    public void registerItems() {
+        for (CreatureType creatureType : this.creatureTypes.values()) {
+
+            Item.Properties standardItemProperties = new Item.Properties();
+            Item.Properties smallStackItemProperties = new Item.Properties();
+            smallStackItemProperties.stacksTo(16);
+            Item.Properties spawnEggProperties = new Item.Properties();
+
+            Lazy<Item> treat = Lazy.of(() -> new CreatureTreatItem(smallStackItemProperties, creatureType));
+            creatureType.setTreatItem(treat);
+            ObjectManager.addItem(creatureType.getTreatName(), treat);
+
+            Lazy<Item> saddle = Lazy.of(() -> new CreatureSaddleItem(smallStackItemProperties, creatureType));
+            creatureType.setSaddleItem(saddle);
+            ObjectManager.addItem(creatureType.getSaddleName(), saddle);
+
+            Lazy<Item> spawnEgg = Lazy.of(() -> new ItemCustomSpawnEgg(spawnEggProperties, creatureType));
+            creatureType.setSpawnEggItem(spawnEgg);
+            ObjectManager.addItem(creatureType.getSpawnEggName(), spawnEgg);
+            creatureNames.add(creatureType.getSpawnEggName());
+
+            Lazy<ItemSoulstone> soulstone = Lazy.of(() -> new ItemSoulstoneFilled(standardItemProperties, creatureType));
+            creatureType.setSoulstoneItem(soulstone);
+            ObjectManager.addItem(creatureType.getSoulstoneName(), soulstone);
+
+            LMHelperClass.logDebug("Creature Type", "Loaded Creature Type: " + creatureType.getName());
         }
     }
 
     /**
-     * Loads all JSON Creature Types. Should be done before creatures are loaded so that they can find their type on load.
+     * Loads all JSON Crieature Types. Should be done before creatures are loaded so that they can find their type on load.
      **/
     public void loadCreatureTypesFromJSON(ModInfo modInfo) {
-        this.loadAllJson(modInfo, "Creature Type", "creaturetypes", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
+        this.loadAllJson(modInfo, "Creature Type", "creaturetypes", "name", true, null, FileLoader.common(), StreamLoader.common());
         LMHelperClass.logDebug("Creature", "Complete! " + this.creatureTypes.size() + " JSON Creature Types Loaded In Total.");
     }
 
@@ -144,7 +201,8 @@ public class CreatureManager extends JSONLoader {
      * Loads all JSON Creature Groups. Should be done before creatures are loaded so that they can find their groups on load.
      **/
     public void loadCreatureGroupsFromJSON(ModInfo modInfo) {
-        this.loadAllJson(modInfo, "Creature Group", "creaturegroups", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
+        this.loadAllJson(modInfo, "Creature Group", "creaturegroups", "name", true, null, FileLoader.common(), StreamLoader.common());
+        CreatureDefinitionValidationHelper.validateCreatureGroups(this.creatureGroups.values(), this);
         LMHelperClass.logDebug("Creature", "Complete! " + this.creatureGroups.size() + " JSON Creature Groups Loaded In Total.");
     }
 
@@ -156,7 +214,7 @@ public class CreatureManager extends JSONLoader {
             if (!this.loadedMods.contains(modInfo)) {
                 this.loadedMods.add(modInfo);
             }
-            this.loadAllJson(modInfo, "Creature", "creatures", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
+            this.loadAllJson(modInfo, "Creature", "creatures", "name", true, null, FileLoader.common(), StreamLoader.common());
             LMHelperClass.logDebug("Creature", "Complete! " + this.creatures.size() + " JSON Creatures Loaded In Total.");
         } catch (Exception e) {
             LMHelperClass.logError("Error loading Creatures for: " + modInfo.name);
@@ -168,51 +226,19 @@ public class CreatureManager extends JSONLoader {
     public void parseJson(ModInfo modInfo, String loadGroup, JsonObject json) {
         // Parse Creature Type JSON:
         if ("Creature Type".equals(loadGroup)) {
-            CreatureType creatureType = new CreatureType(modInfo);
-            creatureType.loadFromJson(json);
-
-            // Already Exists:
-            if (this.creatureTypes.containsKey(creatureType.getName())) {
-                creatureType = this.creatureTypes.get(creatureType.getName());
-                creatureType.loadFromJson(json);
-            }
-
-            this.creatureTypes.put(creatureType.getName(), creatureType);
+            CreatureDefinitionRegistryHelper.loadCreatureType(this, modInfo, json);
             return;
         }
 
         // Parse Creature Group JSON:
         if ("Creature Group".equals(loadGroup)) {
-            CreatureGroup creatureGroup = new CreatureGroup();
-            creatureGroup.loadFromJson(json);
-
-            // Already Exists:
-            if (this.creatureGroups.containsKey(creatureGroup.name)) {
-                creatureGroup = this.creatureGroups.get(creatureGroup.name);
-                creatureGroup.loadFromJson(json);
-            }
-
-            this.creatureGroups.put(creatureGroup.name, creatureGroup);
+            CreatureDefinitionRegistryHelper.loadCreatureGroup(this, json);
             return;
         }
 
         // Parse Creature JSON:
         if ("Creature".equals(loadGroup)) {
-            CreatureInfo creatureInfo = new CreatureInfo(modInfo);
-            if (!creatureInfo.loadFromJson(json)) {
-                return;
-            }
-
-            // Already Exists:
-            if (this.creatures.containsKey(creatureInfo.getName())) {
-                creatureInfo = this.creatures.get(creatureInfo.getName());
-                if (!creatureInfo.loadFromJson(json)) {
-                    return;
-                }
-            }
-
-            this.creatures.put(creatureInfo.getName(), creatureInfo);
-            this.creatureClassMap.put(creatureInfo.entityClass, creatureInfo);
+            CreatureDefinitionRegistryHelper.loadCreature(this, this.elementManager, modInfo, json);
         }
     }
 
@@ -225,7 +251,7 @@ public class CreatureManager extends JSONLoader {
 
         // Difficulty:
         this.difficultyMultipliers = new HashMap<>();
-        for (String difficultyName : DIFFICULTY_NAMES) {
+        for (String difficultyName : getDifficultyNames()) {
             for (String statName : CreatureStats.STAT_NAMES) {
                 this.difficultyMultipliers.put((difficultyName + "-" + statName).toUpperCase(Locale.ENGLISH), ConfigCreatures.INSTANCE.difficultyMultipliers.get(difficultyName).get(statName).get());
             }
@@ -243,10 +269,79 @@ public class CreatureManager extends JSONLoader {
      */
     public void reload() {
         this.loadConfig();
-        SpawnerMobRegistry.SPAWNER_MOB_REGISTRIES.clear();
+        SpawnerMobRegistry.clearRegistries();
         for (ModInfo group : this.loadedMods) {
             this.loadCreaturesFromJSON(group);
         }
+    }
+
+    /**
+     * Binds Forge-registered entity types and runs creature startup initialization after registries are available.
+     */
+    public void bindRegisteredValues() {
+        CreatureBootstrapHelper.bindRegisteredValues(this.creatures.values(), this.spawnConfig);
+    }
+
+    /**
+     * Returns loaded creature types for read-only iteration.
+     *
+     * @return The loaded creature types.
+     */
+    public Collection<CreatureType> getCreatureTypes() {
+        return Collections.unmodifiableCollection(this.creatureTypes.values());
+    }
+
+    /**
+     * Returns loaded creatures for read-only iteration.
+     *
+     * @return The loaded creatures.
+     */
+    public Collection<CreatureInfo> getCreatures() {
+        return Collections.unmodifiableCollection(this.creatures.values());
+    }
+
+    /**
+     * Returns mods that have registered creature definitions with this manager.
+     *
+     * @return The loaded creature definition mods.
+     */
+    public List<ModInfo> getLoadedMods() {
+        return Collections.unmodifiableList(this.loadedMods);
+    }
+
+    /**
+     * Returns configured difficulty stat multipliers for read-only inspection.
+     *
+     * @return The difficulty multiplier index.
+     */
+    public Map<String, Double> getDifficultyMultipliers() {
+        return Collections.unmodifiableMap(this.difficultyMultipliers);
+    }
+
+    /**
+     * Returns configured level stat multipliers for read-only inspection.
+     *
+     * @return The level multiplier index.
+     */
+    public Map<String, Double> getLevelMultipliers() {
+        return Collections.unmodifiableMap(this.levelMultipliers);
+    }
+
+    public double getTamedHealthMultiplier() {
+        return this.tamedHealthMultiplier;
+    }
+
+    public boolean isDLDungeonsLoaded() {
+        return this.dlDungeonsLoaded;
+    }
+
+    /**
+     * Returns how many creature definitions are loaded.
+     *
+     * @return The loaded creature count.
+     */
+    public int getCreatureCount() {
+        return this.creatures.size();
     }
 
     /**
@@ -350,5 +445,29 @@ public class CreatureManager extends JSONLoader {
             return 1;
         }
         return this.levelMultipliers.get(statName.toUpperCase(Locale.ENGLISH));
+    }
+
+    public static void link(CreatureGroup creatureGroup, CreatureManager creatureManager) {
+        creatureGroup.clearLinkedInteractionGroups();
+
+        linkGroups(creatureGroup, creatureManager, creatureGroup.getHuntGroupNames(), creatureGroup::addHuntGroup);
+        linkGroups(creatureGroup, creatureManager, creatureGroup.getPackGroupNames(), creatureGroup::addPackGroup);
+        linkGroups(creatureGroup, creatureManager, creatureGroup.getWaryGroupNames(), creatureGroup::addWaryGroup);
+        linkGroups(creatureGroup, creatureManager, creatureGroup.getFleeGroupNames(), creatureGroup::addFleeGroup);
+        linkGroups(creatureGroup, creatureManager, creatureGroup.getIgnoreGroupNames(), creatureGroup::addIgnoreGroup);
+
+        LMHelperClass.logDebug("Creature Group", "Loaded Creature Group: " + creatureGroup.getName());
+    }
+
+    private static void linkGroups(CreatureGroup owner, CreatureManager creatureManager, Iterable<String> groupNames, Consumer<CreatureGroup> targetGroups) {
+        for (String groupName : groupNames) {
+            CreatureGroup group = creatureManager.getCreatureGroup(groupName);
+            if (groupName.equals(owner.getName())) {
+                group = owner;
+            }
+            if (group != null) {
+                targetGroups.accept(group);
+            }
+        }
     }
 }

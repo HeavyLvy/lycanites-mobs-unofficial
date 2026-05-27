@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.entity.goals.actions.fear.FearMoveGoal;
 import com.lycanitesmobs.core.entity.goals.actions.fear.HauntPlayerGoal;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
@@ -37,7 +38,7 @@ public class EntityFear extends BaseCreatureEntity {
      * The player this fear entity is haunting.
      */
     @Nullable
-    public Player hauntTarget;
+    private Player hauntTarget;
 
     private static final Map<UUID, Long> spawnCooldowns = new HashMap<>();
 
@@ -63,18 +64,19 @@ public class EntityFear extends BaseCreatureEntity {
         if (lastSpawn != null && world.getGameTime() - lastSpawn < 20L) return;
 
         List<EntityFear> existing = world.getEntitiesOfClass(EntityFear.class,
-                player.getBoundingBox().inflate(40), e -> player.equals(e.hauntTarget));
+                player.getBoundingBox().inflate(40), e -> player.equals(e.getHauntTarget()));
         if (existing.size() >= expectedCount) return;
 
-        CreatureInfo fearInfo = CreatureManager.getInstance().creatures.get("fear");
-        if (fearInfo == null || fearInfo.entityType == null) return;
+        CreatureInfo fearInfo = CreatureManager.getInstance().getCreature("fear");
+        if (fearInfo == null || fearInfo.getEntityType() == null) return;
 
-        EntityFear fearEntity = (EntityFear) fearInfo.entityType.create(world);
+        EntityFear fearEntity = (EntityFear) fearInfo.getEntityType().create(world);
         if (fearEntity == null) return;
 
         fearEntity.setHauntTarget(player);
-        world.addFreshEntity(fearEntity);
-        spawnCooldowns.put(playerUUID, world.getGameTime());
+        if (DeferredLevelActionManager.spawnEntity(world, player.blockPosition(), "fear_spawn:" + fearEntity.getUUID(), fearEntity)) {
+            spawnCooldowns.put(playerUUID, world.getGameTime());
+        }
     }
 
 

@@ -7,6 +7,7 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.particles.ParticleTypes;
@@ -24,7 +25,7 @@ import java.util.List;
 
 public class EntityCinder extends TameableCreatureEntity implements Enemy, IFusable {
 
-    public float inWallDamageAbsorbed = 0;
+    protected float inWallDamageAbsorbed = 0;
 
     // ==================================================
     //                    Constructor
@@ -45,7 +46,7 @@ public class EntityCinder extends TameableCreatureEntity implements Enemy, IFusa
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setStaminaTime(100).setRange(5.0F).setMinChaseDistance(2.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setStaminaTime(100).setRange(5.0F).setMinChaseDistance(2.0F));
     }
 
 
@@ -84,31 +85,31 @@ public class EntityCinder extends TameableCreatureEntity implements Enemy, IFusa
         List<RapidFireProjectileEntity> projectiles = new ArrayList<>();
         ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile("ember");
 
-        RapidFireProjectileEntity projectileEntry = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+        RapidFireProjectileEntity projectileEntry = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
         projectiles.add(projectileEntry);
 
-        RapidFireProjectileEntity projectileEntry2 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-        projectileEntry2.offsetX += 1.0D;
+        RapidFireProjectileEntity projectileEntry2 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+        projectileEntry2.addOffset(1.0D, 0, 0);
         projectiles.add(projectileEntry2);
 
-        RapidFireProjectileEntity projectileEntry3 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-        projectileEntry3.offsetX -= 1.0D;
+        RapidFireProjectileEntity projectileEntry3 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+        projectileEntry3.addOffset(-1.0D, 0, 0);
         projectiles.add(projectileEntry3);
 
-        RapidFireProjectileEntity projectileEntry4 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-        projectileEntry4.offsetZ += 1.0D;
+        RapidFireProjectileEntity projectileEntry4 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+        projectileEntry4.addOffset(0, 0, 1.0D);
         projectiles.add(projectileEntry4);
 
-        RapidFireProjectileEntity projectileEntry5 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-        projectileEntry5.offsetZ -= 1.0D;
+        RapidFireProjectileEntity projectileEntry5 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+        projectileEntry5.addOffset(0, 0, -1.0D);
         projectiles.add(projectileEntry5);
 
-        RapidFireProjectileEntity projectileEntry6 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-        projectileEntry6.offsetY += 1.0D;
+        RapidFireProjectileEntity projectileEntry6 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+        projectileEntry6.addOffset(0, 1.0D, 0);
         projectiles.add(projectileEntry6);
 
-        RapidFireProjectileEntity projectileEntry7 = new RapidFireProjectileEntity(ProjectileManager.getInstance().oldProjectileTypes.get(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
-        projectileEntry7.offsetY -= 1.0D;
+        RapidFireProjectileEntity projectileEntry7 = new RapidFireProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(RapidFireProjectileEntity.class), projectileInfo, this.getCommandSenderWorld(), this, 15, 3);
+        projectileEntry7.addOffset(0, -1.0D, 0);
         projectiles.add(projectileEntry7);
 
         for (RapidFireProjectileEntity projectile : projectiles) {
@@ -134,7 +135,7 @@ public class EntityCinder extends TameableCreatureEntity implements Enemy, IFusa
 
             // Launch:
             this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-            this.getCommandSenderWorld().addFreshEntity(projectile);
+            DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
         }
 
         super.attackRanged(target, range);
@@ -168,7 +169,7 @@ public class EntityCinder extends TameableCreatureEntity implements Enemy, IFusa
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

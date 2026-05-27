@@ -19,12 +19,12 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class BlockFenceCustom extends FenceBlock implements BlockTypeGetter {
-    public String blockName = "BlockBase";
-    public ResourceLocation registryName;
+    private String blockName = "BlockBase";
+    private ResourceLocation registryName;
 
     public BlockFenceCustom(Block.Properties properties, BlockBase block) {
         super(properties);
-        this.setRegistryName(LycanitesMobs.MODID, block.blockName + "_fence");
+        this.setRegistryName(LycanitesMobs.MODID, block.getBlockName() + "_fence");
     }
 
     public ResourceLocation getRegistryName() {

@@ -15,6 +15,7 @@ import com.lycanitesmobs.core.entity.projectile.hellfire.EntityHellfireBarrier;
 import com.lycanitesmobs.core.entity.projectile.hellfire.EntityHellfireOrb;
 import com.lycanitesmobs.core.entity.projectile.hellfire.EntityHellfireWave;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -44,26 +45,26 @@ import com.lycanitesmobs.core.entity.creature.elemental.EntityWraith;
 
 public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupHeavy, IGroupBoss {
 
-    public int hellfireEnergy = 0;
-    public List<EntityHellfireOrb> hellfireOrbs = new ArrayList<>();
+    protected int hellfireEnergy = 0;
+    protected List<EntityHellfireOrb> hellfireOrbs = new ArrayList<>();
 
     // Data Manager:
     protected static final EntityDataAccessor<Integer> HELLFIRE_ENERGY = SynchedEntityData.defineId(EntityRahovart.class, EntityDataSerializers.INT);
 
     // First Phase:
-    public List<EntityBelphegor> hellfireBelphegorMinions = new ArrayList<>();
+    protected List<EntityBelphegor> hellfireBelphegorMinions = new ArrayList<>();
 
     // Second Phase:
-    public List<EntityBehemophet> hellfireBehemophetMinions = new ArrayList<>();
-    public int hellfireWallTime = 0;
-    public int hellfireWallTimeMax = 20 * 20;
-    public boolean hellfireWallClockwise = false;
-    public EntityHellfireBarrier hellfireWallLeft;
-    public EntityHellfireBarrier hellfireWallRight;
+    protected List<EntityBehemophet> hellfireBehemophetMinions = new ArrayList<>();
+    protected int hellfireWallTime = 0;
+    protected int hellfireWallTimeMax = 20 * 20;
+    protected boolean hellfireWallClockwise = false;
+    protected EntityHellfireBarrier hellfireWallLeft;
+    protected EntityHellfireBarrier hellfireWallRight;
 
     // Third Phase:
-    public List<EntityHellfireBarrier> hellfireBarriers = new ArrayList<>();
-    public int hellfireBarrierHealth = 100;
+    protected List<EntityHellfireBarrier> hellfireBarriers = new ArrayList<>();
+    protected int hellfireBarrierHealth = 100;
 
 
     // ==================================================
@@ -82,24 +83,24 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
         this.hitAreaWidthScale = 2F;
 
         // Boss:
-        this.damageMax = BaseCreatureEntity.BOSS_DAMAGE_LIMIT;
-        this.damageLimit = BaseCreatureEntity.BOSS_DAMAGE_LIMIT;
+        this.damageMax = BaseCreatureEntity.getBossDamageLimit();
+        this.damageLimit = BaseCreatureEntity.getBossDamageLimit();
     }
 
     // ========== Init AI ==========
     @Override
     protected void registerGoals() {
-        this.targetSelector.addGoal(this.nextFindTargetIndex, new FindNearbyPlayersGoal(this));
+        this.targetSelector.addGoal(this.currentFindTargetGoalIndex(), new FindNearbyPlayersGoal(this));
 
         // All Phases:
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new FaceTargetGoal(this));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new HealWhenNoPlayersGoal(this));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new SummonMinionsGoal(this).setMinionInfo("wraith").setAntiFlight(true));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new FireProjectilesGoal(this).setProjectile("hellfireball").setFireRate(40).setVelocity(1.6F).setScale(8F).setAllPlayers(true));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new FireProjectilesGoal(this).setProjectile("hellfireball").setFireRate(60).setVelocity(1.6F).setScale(8F));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new FaceTargetGoal(this));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new HealWhenNoPlayersGoal(this));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new SummonMinionsGoal(this).setMinionInfo("wraith").setAntiFlight(true));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new FireProjectilesGoal(this).setProjectile("hellfireball").setFireRate(40).setVelocity(1.6F).setScale(8F).setAllPlayers(true));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new FireProjectilesGoal(this).setProjectile("hellfireball").setFireRate(60).setVelocity(1.6F).setScale(8F));
 
         // Phase 3:
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new SummonMinionsGoal(this).setMinionInfo("apollyon").setSummonRate(20 * 10).setSummonCap(1).setPerPlayer(true).setSizeScale(2)
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new SummonMinionsGoal(this).setMinionInfo("apollyon").setSummonRate(20 * 10).setSummonCap(1).setPerPlayer(true).setSizeScale(2)
                 .setConditions(new GoalConditions().setBattlePhase(2)));
 
         super.registerGoals();
@@ -203,7 +204,7 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
             // Clean Up:
             if (!this.hellfireBehemophetMinions.isEmpty()) {
                 for (EntityBehemophet minion : this.hellfireBehemophetMinions.toArray(new EntityBehemophet[this.hellfireBehemophetMinions.size()])) {
-                    minion.hellfireEnergy = 0;
+                    minion.resetHellfireEnergy();
                 }
                 this.hellfireBehemophetMinions = new ArrayList<>();
             }
@@ -217,12 +218,12 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
                         this.onMinionDeath(minion, null);
                         continue;
                     }
-                    minion.hellfireEnergy += 5; // Charged after 20 secs.
-                    if (minion.hellfireEnergy >= 100) {
+                    minion.addHellfireEnergy(5); // Charged after 20 secs.
+                    if (minion.hasFullHellfireEnergy()) {
                         this.hellfireEnergy += 20;
                         this.onMinionDeath(minion, null);
                         this.getCommandSenderWorld().explode(minion, minion.position().x(), minion.position().y(), minion.position().z(), 1, Level.ExplosionInteraction.NONE);
-                        minion.hellfireEnergy = 0;
+                        minion.resetHellfireEnergy();
                         minion.remove(RemovalReason.DISCARDED);
                         continue;
                     }
@@ -244,7 +245,7 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
             // Every 5 Secs:
             if (this.updateTick % 100 == 0) {
                 int summonAmount = this.getRandom().nextInt(4); // 0-3 Hellfire Belphegors
-                summonAmount *= this.playerTargets.size();
+                summonAmount *= this.getPlayerTargetCount();
                 if (summonAmount > 0)
                     for (int summonCount = 0; summonCount <= summonAmount; summonCount++) {
                         EntityBelphegor minion = (EntityBelphegor) CreatureManager.getInstance().getCreature("belphegor").createEntity(this.getCommandSenderWorld());
@@ -259,7 +260,7 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
             // Clean Up:
             if (!this.hellfireBelphegorMinions.isEmpty()) {
                 for (EntityBelphegor minion : this.hellfireBelphegorMinions.toArray(new EntityBelphegor[this.hellfireBelphegorMinions.size()])) {
-                    minion.hellfireEnergy = 0;
+                    minion.resetHellfireEnergy();
                 }
                 this.hellfireBelphegorMinions = new ArrayList<>();
             }
@@ -272,12 +273,12 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
                         this.onMinionDeath(minion, null);
                         continue;
                     }
-                    minion.hellfireEnergy += 5; // Charged after 20 secs.
-                    if (minion.hellfireEnergy >= 100) {
+                    minion.addHellfireEnergy(5); // Charged after 20 secs.
+                    if (minion.hasFullHellfireEnergy()) {
                         this.hellfireEnergy += 20;
                         this.onMinionDeath(minion, null);
                         this.getCommandSenderWorld().explode(minion, minion.position().x(), minion.position().y(), minion.position().z(), 1, Level.ExplosionInteraction.NONE);
-                        minion.hellfireEnergy = 0;
+                        minion.resetHellfireEnergy();
                         minion.remove(RemovalReason.DISCARDED);
                         continue;
                     }
@@ -299,7 +300,7 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
             // Every 20 Secs:
             if (this.updateTick % 400 == 0) {
                 int summonAmount = 2; // 2 Hellfire Behemophet
-                summonAmount *= this.playerTargets.size();
+                summonAmount *= this.getPlayerTargetCount();
                 if (summonAmount > 0)
                     for (int summonCount = 0; summonCount <= summonAmount; summonCount++) {
                         EntityBehemophet minion = (EntityBehemophet) CreatureManager.getInstance().getCreature("behemophet").createEntity(this.getCommandSenderWorld());
@@ -323,13 +324,13 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
             // Clean Up:
             if (!this.hellfireBelphegorMinions.isEmpty()) {
                 for (EntityBelphegor minion : this.hellfireBelphegorMinions.toArray(new EntityBelphegor[this.hellfireBelphegorMinions.size()])) {
-                    minion.hellfireEnergy = 0;
+                    minion.resetHellfireEnergy();
                 }
                 this.hellfireBelphegorMinions = new ArrayList<>();
             }
             if (!this.hellfireBehemophetMinions.isEmpty()) {
                 for (EntityBehemophet minion : this.hellfireBehemophetMinions.toArray(new EntityBehemophet[this.hellfireBehemophetMinions.size()])) {
-                    minion.hellfireEnergy = 0;
+                    minion.resetHellfireEnergy();
                 }
                 this.hellfireBehemophetMinions = new ArrayList<>();
             }
@@ -354,7 +355,7 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
             // Every 10 Secs:
             if (this.updateTick % 200 == 0) {
                 int summonAmount = this.getRandom().nextInt(2); // 0-1 Hellfire Behemophet
-                summonAmount *= this.playerTargets.size();
+                summonAmount *= this.getPlayerTargetCount();
                 if (summonAmount > 0)
                     for (int summonCount = 0; summonCount <= summonAmount; summonCount++) {
                         EntityBehemophet minion = (EntityBehemophet) CreatureManager.getInstance().getCreature("behemophet").createEntity(this.getCommandSenderWorld());
@@ -366,14 +367,14 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
             // Every 20 Secs:
             if (this.updateTick % 400 == 0) {
                 int summonAmount = this.getRandom().nextInt(4); // 0-3 Belphegors
-                summonAmount *= this.playerTargets.size();
+                summonAmount *= this.getPlayerTargetCount();
                 if (summonAmount > 0)
                     for (int summonCount = 0; summonCount <= summonAmount; summonCount++) {
                         EntityBelphegor minion = (EntityBelphegor) CreatureManager.getInstance().getCreature("belphegor").createEntity(this.getCommandSenderWorld());
                         this.summonMinion(minion, this.getRandom().nextDouble() * 360, 5);
                     }
                 summonAmount = this.getRandom().nextInt(3); // 0-2 Wraiths
-                summonAmount *= this.playerTargets.size();
+                summonAmount *= this.getPlayerTargetCount();
                 if (summonAmount > 0)
                     for (int summonCount = 0; summonCount <= summonAmount; summonCount++) {
                         EntityWraith minion = (EntityWraith) CreatureManager.getInstance().getCreature("wraith").createEntity(this.getCommandSenderWorld());
@@ -439,10 +440,10 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
 
         // Add Required Orbs:
         while (hellfireOrbs.size() < hellfireChargeCount) {
-            EntityHellfireOrb hellfireOrb = new EntityHellfireOrb(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireOrb.class), entity.getCommandSenderWorld(), entity);
-            hellfireOrb.clientOnly = true;
+            EntityHellfireOrb hellfireOrb = new EntityHellfireOrb(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireOrb.class), entity.getCommandSenderWorld(), entity);
+            hellfireOrb.setClientOnly(true);
             hellfireOrbs.add(hellfireOrb);
-            entity.getCommandSenderWorld().addFreshEntity(hellfireOrb);
+            DeferredLevelActionManager.spawnEntityNow(entity.getCommandSenderWorld(), hellfireOrb);
             hellfireOrb.setProjectileScale(orbSize);
         }
 
@@ -464,7 +465,7 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
                     entity.position().z() - z
             );
             hellfireOrb.setPos(entity.position().x() - x, entity.position().y() + (entity.getDimensions(Pose.STANDING).height * 0.75F), entity.position().z() - z);
-            hellfireOrb.projectileLife = 5;
+            hellfireOrb.setProjectileLife(5);
         }
     }
 
@@ -493,14 +494,14 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
     public void hellfireWaveAttack(double angle) {
         this.triggerAttackCooldown();
         this.playAttackSound();
-        EntityHellfireWave hellfireWave = new EntityHellfireWave(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireWave.class), this.getCommandSenderWorld(), this);
+        EntityHellfireWave hellfireWave = new EntityHellfireWave(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireWave.class), this.getCommandSenderWorld(), this);
         hellfireWave.setPos(
                 hellfireWave.position().x(),
                 this.position().y(),
                 hellfireWave.position().z()
         );
-        hellfireWave.rotation = angle;
-        this.getCommandSenderWorld().addFreshEntity(hellfireWave);
+        hellfireWave.setRotation(angle);
+        DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), hellfireWave.blockPosition(), null, hellfireWave);
     }
 
     // ========== Hellfire Wall ==========
@@ -522,31 +523,31 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
 
         // Left (Positive) Wall:
         if (this.hellfireWallLeft == null) {
-            this.hellfireWallLeft = new EntityHellfireBarrier(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireBarrier.class), this.getCommandSenderWorld(), this);
-            this.hellfireWallLeft.wall = true;
-            this.getCommandSenderWorld().addFreshEntity(this.hellfireWallLeft);
+            this.hellfireWallLeft = new EntityHellfireBarrier(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireBarrier.class), this.getCommandSenderWorld(), this);
+            this.hellfireWallLeft.setWallMode(true);
+            DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, this.hellfireWallLeft);
         }
-        this.hellfireWallLeft.time = 0;
+        this.hellfireWallLeft.resetTime();
         this.hellfireWallLeft.setPos(
                 this.position().x(),
                 this.position().y(),
                 this.position().z()
         );
-        this.hellfireWallLeft.rotation = hellfireWallNormal * hellfireWallAngle;
+        this.hellfireWallLeft.setRotation(hellfireWallNormal * hellfireWallAngle);
 
         // Right (Negative) Wall:
         if (this.hellfireWallRight == null) {
-            this.hellfireWallRight = new EntityHellfireBarrier(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireBarrier.class), this.getCommandSenderWorld(), this);
-            this.hellfireWallRight.wall = true;
-            this.getCommandSenderWorld().addFreshEntity(this.hellfireWallRight);
+            this.hellfireWallRight = new EntityHellfireBarrier(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireBarrier.class), this.getCommandSenderWorld(), this);
+            this.hellfireWallRight.setWallMode(true);
+            DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, this.hellfireWallRight);
         }
-        this.hellfireWallRight.time = 0;
+        this.hellfireWallRight.resetTime();
         this.hellfireWallRight.setPos(
                 this.position().x(),
                 this.position().y(),
                 this.position().z()
         );
-        this.hellfireWallRight.rotation = 180 + (hellfireWallNormal * hellfireWallAngle);
+        this.hellfireWallRight.setRotation(180 + (hellfireWallNormal * hellfireWallAngle));
     }
 
     public void hellfireWallCleanup() {
@@ -568,16 +569,16 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
         this.triggerAttackCooldown();
         this.playAttackSound();
 
-        EntityHellfireBarrier hellfireBarrier = new EntityHellfireBarrier(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellfireBarrier.class), this.getCommandSenderWorld(), this);
-        this.getCommandSenderWorld().addFreshEntity(hellfireBarrier);
-        hellfireBarrier.time = 0;
+        EntityHellfireBarrier hellfireBarrier = new EntityHellfireBarrier(ProjectileManager.getInstance().getOldProjectileType(EntityHellfireBarrier.class), this.getCommandSenderWorld(), this);
+        hellfireBarrier.resetTime();
         hellfireBarrier.setPos(
                 this.position().x(),
                 this.position().y(),
                 this.position().z()
         );
-        hellfireBarrier.rotation = angle;
+        hellfireBarrier.setRotation(angle);
         this.hellfireBarriers.add(hellfireBarrier);
+        DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), hellfireBarrier.blockPosition(), null, hellfireBarrier);
     }
 
     public void hellfireBarrierUpdate() {
@@ -590,7 +591,7 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
             }
         }
         for (EntityHellfireBarrier hellfireBarrier : this.hellfireBarriers) {
-            hellfireBarrier.time = 0;
+            hellfireBarrier.resetTime();
             hellfireBarrier.setPos(
                     this.position().x(),
                     this.position().y(),
@@ -651,7 +652,7 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
         }
         if (entity instanceof Player) {
             Player player = (Player) entity;
-            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().config.bossAntiFlight) {
+            if (!player.getAbilities().invulnerable && player.position().y() > this.position().y() + CreatureManager.getInstance().getConfig().bossAntiFlight()) {
                 return true;
             }
         }

@@ -34,7 +34,7 @@ public class TabManager {
                 addTabsToList(buttonList);
                 field.set(gui, buttonList);
             } catch (Exception e) {
-                LMHelperClass.logWarning("", "A problem occured when adding custom inventory tabs:");
+                LMHelperClass.logWarningMessage("A problem occured when adding custom inventory tabs:");
                 e.printStackTrace();
             }
         }

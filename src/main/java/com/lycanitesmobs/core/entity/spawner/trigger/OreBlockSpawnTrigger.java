@@ -20,10 +20,10 @@ import java.util.List;
 public class OreBlockSpawnTrigger extends BlockSpawnTrigger {
 
 	/** If true, ores (ore blocks that drop as blocks as well as coal, nether gold ore and monster egg) will trigger. **/
-	public boolean ores = true;
+	protected boolean ores = true;
 
 	/** If true, gems (ore blocks that drop as items excluding coal, nether gold ore and monster egg) will trigger. **/
-	public boolean gems = false;
+	protected boolean gems = false;
 
 	/** Constructor **/
 	public OreBlockSpawnTrigger(Spawner spawner) {

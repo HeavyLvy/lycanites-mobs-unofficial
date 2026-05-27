@@ -1,8 +1,8 @@
 package com.lycanitesmobs.core.block.building;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.BlockTypeGetter;
 import com.lycanitesmobs.core.block.base.BlockBase;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Random;
 
 public class BlockSlabCustom extends SlabBlock implements BlockTypeGetter {
-    public String blockName = "BlockBase";
-    public ResourceLocation registryName;
+    private String blockName = "BlockBase";
+    private ResourceLocation registryName;
 
     // ==================================================
     //                   Constructor
@@ -33,7 +33,7 @@ public class BlockSlabCustom extends SlabBlock implements BlockTypeGetter {
     public BlockSlabCustom(Block.Properties properties, BlockBase block) {
         super(properties);
         String slabName = "_slab";
-        this.registryName = new ResourceLocation(LycanitesMobs.MODID, block.blockName + slabName);
+        this.registryName = AssetHelper.modResource(block.getBlockName() + slabName);
     }
 
     @Override

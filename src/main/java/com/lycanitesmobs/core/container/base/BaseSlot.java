@@ -27,7 +27,7 @@ public class BaseSlot extends Slot {
 	
 	public int getMaxStackSize() {
 		if(this.container instanceof CreatureInventory)
-			if(((CreatureInventory)this.container).getTypeFromSlot(this.getSlotIndex()) != null)
+			if(((CreatureInventory)this.container).isEquipmentSlot(this.getSlotIndex()))
 				return 1;
         return this.container.getMaxStackSize();
     }

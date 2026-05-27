@@ -1,7 +1,9 @@
 package com.lycanitesmobs.core.network.message;
 
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
@@ -28,8 +30,17 @@ public class MessagePlayerControl {
 
         ctx.get().enqueueWork(() -> {
             Player player = ctx.get().getSender();
+            if (player == null) {
+                return;
+            }
             ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
             playerExt.updateControlStates(message.controlStates);
+            Entity vehicle = player.getVehicle();
+            if (vehicle instanceof RideableCreatureEntity rideableCreature
+                    && rideableCreature.getControllingPassenger() == player
+                    && rideableCreature.riderControl()) {
+                rideableCreature.handleRiderControls(player, playerExt);
+            }
         });
     }
 

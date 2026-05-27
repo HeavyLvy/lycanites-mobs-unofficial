@@ -29,107 +29,159 @@ public class DungeonSchematic {
     /**
      * The unique name of this dungeon. Required.
      **/
-    public String name = "";
+    protected String name = "";
 
     /**
      * Whether this Schematic is enabled or not.
      **/
-    public boolean enabled = true;
+    protected boolean enabled = true;
 
     /**
      * If true, air spaces and waterloggable blocks below sea level will be filled/waterlogged during placement.
      * Used for underwater dungeons such as the streamshrine.
      **/
-    public boolean waterlogged = false;
+    protected boolean waterlogged = false;
 
     /**
      * The minimum amount of sectors this dungeon should have in total.
      **/
-    public int sectorCountMin = 10;
+    protected int sectorCountMin = 10;
 
     /**
      * The maximum amount of sectors this dungeon should have in total.
      **/
-    public int sectorCountMax = 20;
+    protected int sectorCountMax = 20;
 
     /**
      * The chance of a corridor connecting to another corridor.
      **/
-    public double corridorToCorridorChance = 0.1D;
+    protected double corridorToCorridorChance = 0.1D;
 
     /**
      * The chance of a room connecting to another room.
      **/
-    public double roomToRoomChance = 0.1D;
+    protected double roomToRoomChance = 0.1D;
 
     /**
      * A list of SpawnConditions to use. Optional.
      **/
-    public List<SpawnCondition> conditions = new ArrayList<>();
+    protected List<SpawnCondition> conditions = new ArrayList<>();
 
     /**
      * The list of biome ids that this dungeon spawns in.
      **/
-    public Set<String> biomeIds = new HashSet<>();
+    protected Set<String> biomeIds = new HashSet<>();
 
     /**
      * A list of themes to use. Required.
      **/
-    public List<String> themes = new ArrayList<>();
+    protected List<String> themes = new ArrayList<>();
 
     /**
      * A list of entrance sectors to use. Required.
      **/
-    public List<String> entrances = new ArrayList<>();
+    protected List<String> entrances = new ArrayList<>();
 
     /**
      * A list of room sectors to use. Required.
      **/
-    public List<String> rooms = new ArrayList<>();
+    protected List<String> rooms = new ArrayList<>();
 
     /**
      * A list of corridor sectors to use. Required.
      **/
-    public List<String> corridors = new ArrayList<>();
+    protected List<String> corridors = new ArrayList<>();
 
     /**
      * A list of stairs sectors to use. Required.
      **/
-    public List<String> stairs = new ArrayList<>();
+    protected List<String> stairs = new ArrayList<>();
 
     /**
      * A list of tower sectors to use. Required.
      **/
-    public List<String> towers = new ArrayList<>();
+    protected List<String> towers = new ArrayList<>();
 
     /**
      * A list of stairs sectors to use. Required.
      **/
-    public List<String> bossRooms = new ArrayList<>();
+    protected List<String> bossRooms = new ArrayList<>();
 
     /**
      * A list of finish sectors to use. Required.
      **/
-    public List<String> finishes = new ArrayList<>();
+    protected List<String> finishes = new ArrayList<>();
 
     /**
      * A list of MobSpawns to use. Optional.
      **/
-    public List<MobSpawn> mobSpawns = new ArrayList<>();
+    protected List<MobSpawn> mobSpawns = new ArrayList<>();
 
     /**
      * The loot tables to random use for each level in addition to the specific loot
      * added to this dungeon. If blank, only the specific loot is used. Ex:
      * "minecraft:chests/simple_dungeon". Default: Empty.
      **/
-    public Map<Integer, List<String>> lootTables = new HashMap<>();
+    protected Map<Integer, List<String>> lootTables = new HashMap<>();
 
     /**
      * A list of item drops to add to loot chests.
      **/
-    public List<ItemDrop> loot = new ArrayList<>();
+    protected List<ItemDrop> loot = new ArrayList<>();
 
-    public List<String> biomeTags = new ArrayList<>();
+    protected List<String> biomeTags = new ArrayList<>();
+
+    public String getName() {
+        return this.name;
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public boolean isWaterlogged() {
+        return this.waterlogged;
+    }
+
+    public List<SpawnCondition> getConditions() {
+        return Collections.unmodifiableList(this.conditions);
+    }
+
+    public Set<String> getBiomeIds() {
+        return Collections.unmodifiableSet(this.biomeIds);
+    }
+
+    public List<String> getThemes() {
+        return Collections.unmodifiableList(this.themes);
+    }
+
+    public List<String> getEntrances() {
+        return Collections.unmodifiableList(this.entrances);
+    }
+
+    public List<String> getRooms() {
+        return Collections.unmodifiableList(this.rooms);
+    }
+
+    public List<String> getCorridors() {
+        return Collections.unmodifiableList(this.corridors);
+    }
+
+    public List<String> getStairs() {
+        return Collections.unmodifiableList(this.stairs);
+    }
+
+    public List<MobSpawn> getMobSpawns() {
+        return Collections.unmodifiableList(this.mobSpawns);
+    }
+
+    public List<ItemDrop> getLoot() {
+        return Collections.unmodifiableList(this.loot);
+    }
+
+    public List<String> getBiomeTags() {
+        return Collections.unmodifiableList(this.biomeTags);
+    }
 
     /**
      * Loads this Dungeon Theme from the provided JSON data.
@@ -411,9 +463,9 @@ public class DungeonSchematic {
             if (sector == null) {
                 continue;
             }
-            if (sector.weight > 0) {
+            if (sector.getWeight() > 0) {
                 sectors.add(sector);
-                totalWeights += sector.weight;
+                totalWeights += sector.getWeight();
             }
         }
         if (sectors.isEmpty()) {
@@ -429,10 +481,10 @@ public class DungeonSchematic {
         int randomWeight = random.nextInt(totalWeights) + 1;
         int searchedWeight = 0;
         for (DungeonSector sector : sectors) {
-            if (randomWeight <= sector.weight + searchedWeight) {
+            if (randomWeight <= sector.getWeight() + searchedWeight) {
                 return sector;
             }
-            searchedWeight += sector.weight;
+            searchedWeight += sector.getWeight();
         }
         return sectors.get(sectors.size() - 1);
     }
@@ -504,13 +556,13 @@ public class DungeonSchematic {
         int totalWeights = 0;
         List<MobSpawn> mobSpawns = new ArrayList<>();
         for (MobSpawn mobSpawn : this.mobSpawns) {
-            if (mobSpawn.dungeonBoss != boss) {
+            if (mobSpawn.isDungeonBossEntry() != boss) {
                 continue;
             }
-            if (mobSpawn.dungeonLevelMin >= 0 && mobSpawn.dungeonLevelMin > levelMax) {
+            if (mobSpawn.isAboveDungeonLevel(levelMax)) {
                 continue;
             }
-            if (mobSpawn.dungeonLevelMax >= 0 && mobSpawn.dungeonLevelMax < levelMin) {
+            if (mobSpawn.isBelowDungeonLevel(levelMin)) {
                 continue;
             }
             if (mobSpawn.getWeight() > 0) {
@@ -584,13 +636,13 @@ public class DungeonSchematic {
     public List<ItemStack> getRandomLoot(RandomSource random) {
         List<ItemStack> loot = new ArrayList<>();
         for (ItemDrop itemDrop : this.loot) {
-            if (itemDrop.chance <= 0) {
+            if (itemDrop.getChance() <= 0) {
                 continue;
             }
 
-            boolean addLoot = itemDrop.chance >= 1;
+            boolean addLoot = itemDrop.getChance() >= 1;
             if (!addLoot) {
-                addLoot = random.nextDouble() <= itemDrop.chance;
+                addLoot = random.nextDouble() <= itemDrop.getChance();
             }
 
             if (addLoot) {

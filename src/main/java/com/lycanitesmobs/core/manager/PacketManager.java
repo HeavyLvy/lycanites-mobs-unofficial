@@ -1,9 +1,8 @@
 package com.lycanitesmobs.core.manager;
 
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.network.message.*;
 import com.lycanitesmobs.core.network.packet.MessageScreenRequest;
-import net.minecraft.resources.ResourceLocation;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -15,7 +14,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 public class PacketManager {
     private static final String PROTOCOL_VERSION = "1";
     private static final SimpleChannel HANDLER = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(LycanitesMobs.MODID, "main"),
+            AssetHelper.modResource("main"),
             () -> PROTOCOL_VERSION,
             PROTOCOL_VERSION::equals,
             PROTOCOL_VERSION::equals

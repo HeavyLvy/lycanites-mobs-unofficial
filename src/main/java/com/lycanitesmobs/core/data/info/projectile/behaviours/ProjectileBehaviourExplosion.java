@@ -9,10 +9,10 @@ import net.minecraft.world.level.Level;
 
 public class ProjectileBehaviourExplosion extends ProjectileBehaviour {
 	/** The explosion radius. **/
-	public int radius = 2;
+	protected int radius = 2;
 
 	/** The explosion mode can be: none, break or destroy. **/
-	public String mode = "none";
+	protected String mode = "none";
 
 	@Override
 	public void loadFromJSON(JsonObject json) {

@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nullable;
 
 public abstract class TileEntityBase extends BlockEntity implements WorldlyContainer {
-    public ResourceLocation registryName = null;
+    protected ResourceLocation registryName = null;
 
     /**
      * Constructor
@@ -39,7 +39,7 @@ public abstract class TileEntityBase extends BlockEntity implements WorldlyConta
 
     @Override
     public BlockEntityType<?> getType() {
-        BlockEntityType<?> type = ObjectManager.tileEntityTypes.get(this.getClass());
+        BlockEntityType<?> type = ObjectManager.getTileEntityType(this.getClass());
         return type != null ? type : super.getType();
     }
 

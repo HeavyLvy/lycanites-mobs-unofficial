@@ -94,7 +94,7 @@ public class MateGoal extends Goal {
         if(!this.host.useDirectNavigator())
         	this.host.getNavigation().moveTo(this.partner, this.speed);
         else
-        	this.host.directNavigator.setTargetPosition(new BlockPos((int)this.partner.position().x(), (int)this.partner.position().y(), (int)this.partner.position().z()), speed);
+        	this.host.setDirectNavigationTarget(new BlockPos((int)this.partner.position().x(), (int)this.partner.position().y(), (int)this.partner.position().z()), speed);
         if(this.host.distanceToSqr(this.partner) < this.mateDistance + this.host.getPhysicalRange()) {
 			++this.mateTime;
 			if(this.mateTime >= mateTimeMax) {

@@ -7,10 +7,10 @@ import net.minecraft.world.level.Level;
 
 public class TickMobEventTrigger extends MobEventTrigger {
 	/** The chance of this Trigger successfully firing every trigger tick. **/
-	public double chance = 1;
+	protected double chance = 1;
 
 	/** How many ticks between trigger attempts. **/
-	public double tickRate = 400;
+	protected double tickRate = 400;
 
 
 	/** Constructor **/
@@ -48,6 +48,6 @@ public class TickMobEventTrigger extends MobEventTrigger {
 			return;
 		}
 
-		this.trigger(world, null, new BlockPos(0, 0, 0), 0, this.subspecies);
+		this.trigger(world, null, new BlockPos(0, 0, 0), 0, this.getSubspecies());
 	}
 }

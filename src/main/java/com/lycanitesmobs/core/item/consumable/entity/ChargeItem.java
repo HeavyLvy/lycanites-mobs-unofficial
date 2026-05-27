@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.item.base.BaseItem;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -48,8 +49,8 @@ public class ChargeItem extends BaseItem {
         super(properties);
         this.projectileInfo = projectileInfo;
         if (this.projectileInfo != null) {
-            this.itemName = projectileInfo.chargeItemName;
-            LMHelperClass.logDebug("Projectile", "Created Charge Item: " + projectileInfo.chargeItemName);
+            this.itemName = projectileInfo.getChargeItemName();
+            LMHelperClass.logDebug("Projectile", "Created Charge Item: " + projectileInfo.getChargeItemName());
         }
         // Dispenser:
         var dispenserBehaviour = new BaseProjectileDispenseBehaviour(projectileInfo);
@@ -98,10 +99,10 @@ public class ChargeItem extends BaseItem {
         if (!world.isClientSide && player.isShiftKeyDown()) { // isSneaking()
             BaseProjectileEntity projectile = this.createProjectile(itemStack, world, player);
             if (projectile == null) {
-                LMHelperClass.logWarning("", "Failed to create projectile from Charge Item: " + this.itemName);
+                LMHelperClass.logWarningMessage("Failed to create projectile from Charge Item: " + this.itemName);
                 return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
             }
-            world.addFreshEntity(projectile);
+            DeferredLevelActionManager.spawnEntity(world, player.blockPosition(), null, projectile);
             if (!player.getAbilities().instabuild) {
                 itemStack.setCount(Math.max(0, itemStack.getCount() - 1));
             }
@@ -143,7 +144,7 @@ public class ChargeItem extends BaseItem {
         if (this.projectileInfo == null) {
             return new ArrayList<>();
         }
-        return this.projectileInfo.elements;
+        return this.projectileInfo.getElements();
     }
 
     /**

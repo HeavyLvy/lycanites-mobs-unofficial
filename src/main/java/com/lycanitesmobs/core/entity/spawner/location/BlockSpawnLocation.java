@@ -24,37 +24,37 @@ public class BlockSpawnLocation extends SpawnLocation {
      * A set of blocks to either spawn in or not spawn in depending on if it is a blacklist or whitelist.
      * HashSet for O(1) lookup in isValidBlock, which is called for every Y position in every spawn candidate.
      **/
-    public Set<String> blockIds = new HashSet<>();
+    protected Set<String> blockIds = new HashSet<>();
 
     /**
      * Determines if the block list is a blacklist or whitelist.
      **/
-    public String listType = "whitelist";
+    protected String listType = "whitelist";
 
     /**
      * If true, positions that can see the sky are allowed.
      **/
-    public boolean surface = true;
+    protected boolean surface = true;
 
     /**
      * If true positions that can't see the sky are allowed.
      **/
-    public boolean underground = true;
+    protected boolean underground = true;
 
     /**
      * The minimum amount of blocks that must be found in an area for the location to return any positions. Default -1 (ignore).
      **/
-    public int blockCost = -1;
+    protected int blockCost = -1;
 
     /**
      * If set (above 0), the amount of each block in the blocks list must be found. Default: 0 (disabled)
      **/
-    public int requiredBlockTypes = 0;
+    protected int requiredBlockTypes = 0;
 
     /**
      * An offset relative to the spawn block to apply.
      **/
-    public Vec3i offset = new Vec3i(0, 0, 0);
+    protected Vec3i offset = new Vec3i(0, 0, 0);
 
     /**
      * Cache for Block → registry ID string lookups. Avoids repeated registry lookups per block
@@ -113,6 +113,9 @@ public class BlockSpawnLocation extends SpawnLocation {
             for (int x = triggerPos.getX() - this.rangeMax.getX(); x <= triggerPos.getX() + this.rangeMax.getX(); x++) {
                 for (int z = triggerPos.getZ() - this.rangeMax.getZ(); z <= triggerPos.getZ() + this.rangeMax.getZ(); z++) {
                     mutablePos.set(x, y, z);
+                    if (!this.isBlockLoaded(world, mutablePos)) {
+                        continue;
+                    }
                     BlockState blockState = world.getBlockState(mutablePos);
 
                     // Ignore Flowing Liquids:
@@ -126,7 +129,11 @@ public class BlockSpawnLocation extends SpawnLocation {
                     // Check Block:
                     if (this.isValidBlock(world, mutablePos, blockState)) {
                         BlockPos immutablePos = mutablePos.immutable();
-                        spawnPositions.add(immutablePos.offset(this.offset));
+                        BlockPos spawnPos = immutablePos.offset(this.offset);
+                        if (!this.isBlockLoaded(world, spawnPos)) {
+                            continue;
+                        }
+                        spawnPositions.add(spawnPos);
 
                         // Require All:
                         if (this.requiredBlockTypes > 0) {
@@ -163,6 +170,9 @@ public class BlockSpawnLocation extends SpawnLocation {
      * Returns if the provided block position is valid.
      **/
     public boolean isValidBlock(Level world, BlockPos blockPos) {
+        if (!this.isBlockLoaded(world, blockPos)) {
+            return false;
+        }
         return this.isValidBlock(world, blockPos, world.getBlockState(blockPos));
     }
 
@@ -171,6 +181,9 @@ public class BlockSpawnLocation extends SpawnLocation {
      * This avoids a redundant world.getBlockState() call when the caller already has the state.
      **/
     public boolean isValidBlock(Level world, BlockPos blockPos, BlockState blockState) {
+        if (!this.isBlockLoaded(world, blockPos)) {
+            return false;
+        }
         if (!this.surface || !this.underground) {
             int surfaceY = world.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX(), blockPos.getZ());
             boolean isSurface = blockPos.getY() >= surfaceY;

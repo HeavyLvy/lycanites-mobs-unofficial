@@ -1,7 +1,10 @@
 package com.lycanitesmobs.core.entity.base;
 
-import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
+import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
+import com.lycanitesmobs.core.manager.ObjectManager;
+import com.lycanitesmobs.core.data.info.creature.CreatureType;
+import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import com.lycanitesmobs.core.entity.damagesources.MinionEntityDamageSource;
 import com.lycanitesmobs.core.entity.goals.actions.BegGoal;
 import com.lycanitesmobs.core.entity.goals.actions.FollowOwnerGoal;
@@ -10,12 +13,10 @@ import com.lycanitesmobs.core.entity.goals.targeting.CopyOwnerAttackTargetGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.DefendOwnerGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.RevengeOwnerGoal;
 import com.lycanitesmobs.core.entity.util.CreatureRelationshipEntry;
-import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
-import com.lycanitesmobs.core.manager.CreatureManager;
-import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import com.lycanitesmobs.core.item.consumable.entity.ChargeItem;
 import com.lycanitesmobs.core.item.consumable.entity.CreatureTreatItem;
 import com.lycanitesmobs.core.item.consumable.utility.ItemSoulstone;
+import com.lycanitesmobs.core.manager.CreatureManager;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -29,6 +30,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.player.Player;
@@ -46,13 +48,13 @@ import java.util.UUID;
 
 public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     // Stats:
-    public float hunger = this.getCreatureHungerMax();
-    public float stamina = this.getStaminaMax();
-    public float staminaRecovery = 0.5F;
-    public float sittingGuardRange = 16F;
+    protected float hunger = this.getCreatureHungerMax();
+    protected float stamina = this.getStaminaMax();
+    protected float staminaRecovery = 0.5F;
+    protected float sittingGuardRange = 16F;
 
     // Owner:
-    public UUID ownerUUID;
+    protected UUID ownerUUID;
 
     // Datawatcher:
     protected static final EntityDataAccessor<Byte> TAMED = SynchedEntityData.defineId(TameableCreatureEntity.class, EntityDataSerializers.BYTE); // TODO Tame Type IDs.
@@ -103,26 +105,26 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     @Override
     protected void registerGoals() {
         // Greater Targeting:
-        this.targetSelector.addGoal(this.nextReactTargetIndex++, new RevengeOwnerGoal(this));
-        this.targetSelector.addGoal(this.nextReactTargetIndex++, new CopyOwnerAttackTargetGoal(this));
+        this.targetSelector.addGoal(this.claimReactTargetGoalIndex(), new RevengeOwnerGoal(this));
+        this.targetSelector.addGoal(this.claimReactTargetGoalIndex(), new CopyOwnerAttackTargetGoal(this));
 
         // Greater Actions:
-        this.goalSelector.addGoal(this.nextTravelGoalIndex++, new StayGoal(this));
+        this.goalSelector.addGoal(this.claimTravelGoalIndex(), new StayGoal(this));
 
         super.registerGoals();
 
         // Lesster Targeting:
-        this.targetSelector.addGoal(this.nextSpecialTargetIndex++, new DefendOwnerGoal(this));
+        this.targetSelector.addGoal(this.claimSpecialTargetGoalIndex(), new DefendOwnerGoal(this));
 
         // Lesser Actions:
-        this.goalSelector.addGoal(this.nextTravelGoalIndex++, new FollowOwnerGoal(this).setStrayDistance(CreatureManager.getInstance().config.petFollowDistance).setLostDistance(32).setSpeed(1D));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex++, new BegGoal(this));
+        this.goalSelector.addGoal(this.claimTravelGoalIndex(), new FollowOwnerGoal(this).setStrayDistance(CreatureManager.getInstance().getConfig().petFollowDistance()).setLostDistance(32).setSpeed(1D));
+        this.goalSelector.addGoal(this.claimIdleGoalIndex(), new BegGoal(this));
     }
 
     // ========== Name ==========
     @Override
     public MutableComponent getName() {
-        if (!this.isTamed() || !CreatureManager.getInstance().config.ownerTags) {
+        if (!this.isTamed() || !CreatureManager.getInstance().getConfig().ownerTags()) {
             return super.getName().copy();
         }
 
@@ -167,15 +169,15 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 
         // Bound Pet:
         if (this.getPetEntry() != null) {
-            if (this.getPetEntry().entity != this && this.getPetEntry().entity != null)
+            if (this.getPetEntry().getEntity() != this && this.getPetEntry().getEntity() != null)
                 return true;
-            if (this.getPetEntry().host == null || !this.getPetEntry().host.isAlive()) {
+            if (this.getPetEntry().getOwner() == null || !this.getPetEntry().getOwner().isAlive()) {
                 this.getPetEntry().saveEntityNBT();
                 return true;
             }
         }
 
-        if (this.isTamed() && !this.isTemporary)
+        if (this.isTamed() && !this.isTemporary())
             return false;
         return super.despawnCheck();
     }
@@ -192,8 +194,9 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     // ========== Can leash ==========
     @Override
     public boolean canBeLeashed(Player player) {
-        if (this.isTamed() && player == this.getPlayerOwner())
+        if (this.isTamed() && player == this.getPlayerOwner()) {
             return true;
+        }
         return super.canBeLeashed(player);
     }
 
@@ -216,9 +219,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
         this.staminaUpdate();
 
         // Owner Buffs:
-        if (!this.getCommandSenderWorld().isClientSide() && this.isPet() && this.distanceToSqr(this.getPlayerOwner()) <= 64) {
-            this.ownerEffects();
-        }
+        this.updateOwnerEffects();
     }
 
     public void staminaUpdate() {
@@ -234,15 +235,39 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
      * Grants constant effects to the owner if the owner is nearby.
      */
     public void ownerEffects() {
-        // Protect Owner from Effects:
-        if (!this.canBurn()) {
-            this.getPlayerOwner().addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, (5 * 20) + 5, 1));
+        Player owner = this.getPlayerOwner();
+        if (owner == null) {
+            return;
         }
-        for (Object possibleEffect : this.getPlayerOwner().getActiveEffects().toArray(new Object[0])) {
-            if (possibleEffect instanceof MobEffectInstance) {
-                MobEffectInstance effectInstance = (MobEffectInstance) possibleEffect;
-                if (!this.canBeAffected(effectInstance))
-                    this.getPlayerOwner().removeEffect(effectInstance.getEffect());
+        this.ownerEffects(owner);
+    }
+
+    private void updateOwnerEffects() {
+        if (this.getCommandSenderWorld().isClientSide) {
+            return;
+        }
+        if (!this.isPet()) {
+            return;
+        }
+
+        Player owner = this.getPlayerOwner();
+        if (owner == null) {
+            return;
+        }
+        if (this.distanceToSqr(owner) > 64) {
+            return;
+        }
+
+        this.ownerEffects(owner);
+    }
+
+    private void ownerEffects(Player owner) {
+        if (!this.canBurn()) {
+            owner.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, (5 * 20) + 5, 1));
+        }
+        for (Object possibleEffect : owner.getActiveEffects().toArray(new Object[0])) {
+            if (possibleEffect instanceof MobEffectInstance effectInstance && !this.canBeAffected(effectInstance)) {
+                owner.removeEffect(effectInstance.getEffect());
             }
         }
     }
@@ -259,7 +284,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
         if (this.creatureInfo.isMountable()) {
             return false;
         }
-        if (this.isTemporary) {
+        if (this.isTemporary()) {
             return false;
         }
         return this.getPetEntry() == null || this.isPetType("pet");
@@ -300,158 +325,179 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     public HashMap<Integer, String> getInteractCommands(Player player, @Nonnull ItemStack itemStack) {
         HashMap<Integer, String> commands = new HashMap<>();
         commands.putAll(super.getInteractCommands(player, itemStack));
-
-        // Perch:
-        if (this.canPerch(player) && !player.isShiftKeyDown() && !this.getCommandSenderWorld().isClientSide)
-            commands.put(COMMAND_PIORITIES.MAIN.id, "Perch");
-
-            // Open GUI:
-        else if (!this.getCommandSenderWorld().isClientSide && player.isShiftKeyDown() && this.isTamed() && (itemStack.isEmpty() || player.isShiftKeyDown()) && player == this.getPlayerOwner()) {
-            commands.put(COMMAND_PIORITIES.MAIN.id, "GUI");
-        }
-
-        // Server Item Commands:
-        if (!this.getCommandSenderWorld().isClientSide && !itemStack.isEmpty() && !player.isShiftKeyDown()) {
-
-            // Taming:
-            if (!this.isTamed() && isTamingItem(itemStack) && CreatureManager.getInstance().config.tamingEnabled) {
-                commands.put(COMMAND_PIORITIES.IMPORTANT.id, "Tame");
-            }
-
-            // Feeding:
-            if (this.isTamed() && this.isHealingItem(itemStack) && this.getHealth() < this.getMaxHealth()) {
-                commands.put(COMMAND_PIORITIES.ITEM_USE.id, "Feed");
-            }
-
-            // Charges:
-            if (this.isTamed() && !this.isTemporary && !this.isPetType("minion") && itemStack.getItem() instanceof ChargeItem) {
-                if (this.isLevelingChargeItem(itemStack)) {
-                    commands.put(COMMAND_PIORITIES.ITEM_USE.id, "Charge");
-                } else {
-                    player.displayClientMessage(Component.translatable("item.lycanitesmobs.charge.creature.invalid"), false);
-                }
-            }
-
-            // Equipment:
-            if (this.isTamed() && !this.isBaby() && this.canEquip() && player == this.getPlayerOwner()) {
-                String equipSlot = this.inventory.getSlotForEquipment(itemStack);
-                if (equipSlot != null && (this.inventory.getEquipmentStack(equipSlot) == null || this.inventory.getEquipmentStack(equipSlot).getItem() != itemStack.getItem()))
-                    commands.put(COMMAND_PIORITIES.EQUIPPING.id, "Equip Item");
-            }
-
-            // Soulstone:
-            if (itemStack.getItem() instanceof ItemSoulstone && this.isTamed()) {
-                commands.put(COMMAND_PIORITIES.ITEM_USE.id, "Soulstone");
-            }
-        }
-
-        // Sit:
-        //if(this.isTamed() && this.canSit() && player == this.getPlayerOwner() && !this.getEntityWorld().isRemote)
-        //commands.put(CMD_PRIOR.MAIN.id, "Sit");
-
+        this.addTameableInteractCommands(commands, player, itemStack);
         return commands;
     }
 
     // ========== Perform Command ==========
     @Override
-    public boolean performCommand(String command, Player player, ItemStack itemStack) {
-        // Open GUI:
-        if (command.equals("GUI")) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack, InteractionHand hand) {
+        Boolean result = this.performTameableCommand(command, player, itemStack);
+        if (result != null) {
+            return result;
+        }
+
+        return super.performCommand(command, player, itemStack, hand);
+    }
+
+    private void addTameableInteractCommands(HashMap<Integer, String> commands, Player player, ItemStack itemStack) {
+        if (this.canPerch(player) && !player.isShiftKeyDown() && !this.getCommandSenderWorld().isClientSide) {
+            commands.put(BaseCreatureEntity.COMMAND_PIORITIES.MAIN.id, "Perch");
+        }
+        else if (!this.getCommandSenderWorld().isClientSide && player.isShiftKeyDown() && this.isTamed() && (itemStack.isEmpty() || player.isShiftKeyDown()) && player == this.getPlayerOwner()) {
+            commands.put(BaseCreatureEntity.COMMAND_PIORITIES.MAIN.id, "GUI");
+        }
+
+        if (this.getCommandSenderWorld().isClientSide || itemStack.isEmpty() || player.isShiftKeyDown()) {
+            return;
+        }
+
+        if (!this.isTamed() && this.isTamingItem(itemStack) && CreatureManager.getInstance().getConfig().tamingEnabled()) {
+            commands.put(BaseCreatureEntity.COMMAND_PIORITIES.IMPORTANT.id, "Tame");
+        }
+
+        if (this.isTamed() && this.isHealingItem(itemStack) && this.getHealth() < this.getMaxHealth()) {
+            commands.put(BaseCreatureEntity.COMMAND_PIORITIES.ITEM_USE.id, "Feed");
+        }
+
+        if (this.isTamed() && !this.isTemporary() && !this.isPetType("minion") && itemStack.getItem() instanceof ChargeItem) {
+            if (this.isLevelingChargeItem(itemStack)) {
+                commands.put(BaseCreatureEntity.COMMAND_PIORITIES.ITEM_USE.id, "Charge");
+            }
+            else {
+                player.displayClientMessage(Component.translatable("item.lycanitesmobs.charge.creature.invalid"), false);
+            }
+        }
+
+        if (this.isTamed() && !this.isBaby() && this.canEquip() && player == this.getPlayerOwner()) {
+            String equipSlot = this.inventory.getSlotForEquipment(itemStack);
+            if (equipSlot != null && (this.inventory.getEquipmentStack(equipSlot) == null || this.inventory.getEquipmentStack(equipSlot).getItem() != itemStack.getItem())) {
+                commands.put(BaseCreatureEntity.COMMAND_PIORITIES.EQUIPPING.id, "Equip Item");
+            }
+        }
+
+        if (itemStack.getItem() instanceof ItemSoulstone && this.isTamed()) {
+            commands.put(BaseCreatureEntity.COMMAND_PIORITIES.ITEM_USE.id, "Soulstone");
+        }
+    }
+
+    private Boolean performTameableCommand(String command, Player player, ItemStack itemStack) {
+        if ("GUI".equals(command)) {
             this.playTameSound();
             this.openGUI(player);
             return true;
         }
 
-        // Tame:
-        if (command.equals("Tame")) {
+        if ("Tame".equals(command)) {
             this.tame(player);
             this.consumePlayersItem(player, itemStack);
             return true;
         }
 
-        // Feed:
-        if (command.equals("Feed")) {
-            int healAmount = 4;
-            if (itemStack.getItem().isEdible()) {
-                healAmount = itemStack.getItem().getFoodProperties().getNutrition();
-            }
-            this.heal((float) healAmount);
+        if ("Feed".equals(command)) {
+            this.heal((float) this.getHealAmount(itemStack));
             this.playEatSound();
-            if (this.getCommandSenderWorld().isClientSide) {
-                ParticleOptions particle = ParticleTypes.HEART;
-                double d0 = this.random.nextGaussian() * 0.02D;
-                double d1 = this.random.nextGaussian() * 0.02D;
-                double d2 = this.random.nextGaussian() * 0.02D;
-                for (int i = 0; i < 25; i++)
-                    this.getCommandSenderWorld().addParticle(particle, this.position().x() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width, this.position().y() + 0.5D + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).height), this.position().z() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width, d0, d1, d2);
-            }
+            this.spawnFeedParticles();
             this.consumePlayersItem(player, itemStack);
             return true;
         }
 
-        // Charge Experience:
-        if (command.equals("Charge")) {
+        if ("Charge".equals(command)) {
             this.addExperience(this.getExperienceFromChargeItem(itemStack));
             this.consumePlayersItem(player, itemStack);
             return true;
         }
 
-        // Equip Armor:
-        if (command.equals("Equip Item")) {
-            ItemStack equippedItem = this.inventory.getEquipmentStack(this.inventory.getSlotForEquipment(itemStack));
-            if (equippedItem != null)
-                this.dropItem(equippedItem);
-            ItemStack equipStack = itemStack.copy();
-            equipStack.setCount(1);
-            this.inventory.setEquipmentStack(equipStack.copy());
+        if ("Equip Item".equals(command)) {
+            this.equipHeldItem(itemStack);
             this.consumePlayersItem(player, itemStack);
             return true;
         }
 
-        // Soulstone:
-        if (command.equals("Soulstone")) {
-            return false; // Allow the soulstone item to activate.
+        if ("Soulstone".equals(command)) {
+            return false;
         }
 
-        // Sit:
-        if (command.equals("Sit")) {
+        if ("Sit".equals(command)) {
             this.playTameSound();
             this.setTarget(null);
             this.clearMovement();
             this.setSitting(!this.isSitting());
-            this.jumping = false;
+            this.clearJumpingState();
             return true;
         }
 
-        // Perch:
-        if (command.equals("Perch")) {
+        if ("Perch".equals(command)) {
             this.playTameSound();
             this.perchOnEntity(player);
             return true;
         }
 
-        return super.performCommand(command, player, itemStack);
+        return null;
+    }
+
+    private int getHealAmount(ItemStack itemStack) {
+        if (itemStack.getItem().isEdible()) {
+            return itemStack.getItem().getFoodProperties().getNutrition();
+        }
+        return 4;
+    }
+
+    private void spawnFeedParticles() {
+        if (!this.getCommandSenderWorld().isClientSide) {
+            return;
+        }
+
+        ParticleOptions particle = ParticleTypes.HEART;
+        double d0 = this.getRandom().nextGaussian() * 0.02D;
+        double d1 = this.getRandom().nextGaussian() * 0.02D;
+        double d2 = this.getRandom().nextGaussian() * 0.02D;
+        for (int i = 0; i < 25; i++) {
+            this.getCommandSenderWorld().addParticle(
+                    particle,
+                    this.position().x() + (double) (this.getRandom().nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width,
+                    this.position().y() + 0.5D + (double) (this.getRandom().nextFloat() * this.getDimensions(Pose.STANDING).height),
+                    this.position().z() + (double) (this.getRandom().nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width,
+                    d0,
+                    d1,
+                    d2
+            );
+        }
+    }
+
+    private void equipHeldItem(ItemStack itemStack) {
+        String equipSlot = this.inventory.getSlotForEquipment(itemStack);
+        ItemStack equippedItem = this.inventory.getEquipmentStack(equipSlot);
+        if (equippedItem != null) {
+            this.dropItem(equippedItem);
+        }
+        ItemStack equipStack = itemStack.copy();
+        equipStack.setCount(1);
+        this.inventory.setEquipmentStack(equipStack.copy());
     }
 
     // ========== Can Name Tag ==========
     @Override
     public boolean canNameTag(Player player) {
-        if (!this.isTamed())
+        if (!this.isTamed()) {
             return super.canNameTag(player);
-        else if (player == this.getPlayerOwner())
+        }
+        if (player == this.getPlayerOwner()) {
             return super.canNameTag(player);
+        }
         return false;
     }
 
     // ========== Perform GUI Command ==========
     @Override
     public void performGUICommand(Player player, int guiCommandID) {
-        if (!this.petControlsEnabled())
+        if (!this.petControlsEnabled()) {
             return;
-        if (player != this.getOwner())
+        }
+        if (player != this.getOwner()) {
             return;
+        }
 
-        // Pet Commands:
         if (guiCommandID == PET_COMMAND_ID.PVP.id) {
             this.setPVP(!this.isPVP());
         } else if (guiCommandID == PET_COMMAND_ID.PASSIVE.id) {
@@ -479,11 +525,8 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
             this.setFollowing(false);
         }
 
-        // this.playTameSound();
-
-        // Update Pet Entry Summon Set:
-        if (this.petEntry != null && this.petEntry.summonSet != null) {
-            this.petEntry.summonSet.updateBehaviour(this);
+        if (this.petEntry != null && this.petEntry.getSummonSet() != null) {
+            this.petEntry.getSummonSet().updateBehaviour(this);
         }
 
         super.performGUICommand(player, guiCommandID);
@@ -498,8 +541,9 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     public Team getTeam() {
         if (this.isTamed()) {
             Entity owner = this.getOwner();
-            if (owner != null)
+            if (owner != null) {
                 return owner.getTeam();
+            }
         }
         return super.getTeam();
     }
@@ -512,53 +556,37 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
      */
     @Override
     public boolean isAlliedTo(Entity target) {
-        if (this.getCommandSenderWorld().isClientSide) {
+        if (this.getCommandSenderWorld().isClientSide || !this.isTamed()) {
             return super.isAlliedTo(target);
         }
 
-        if (this.isTamed()) {
-            // Check If Owner:
-            if (target == this.getPlayerOwner() || target == this.getOwner())
+        if (target == this.getPlayerOwner() || target == this.getOwner()) {
+            return true;
+        }
+
+        if (target instanceof Player && (!this.isServerPvpAllowed() || !this.isPVP())) {
+            return true;
+        }
+
+        if (target instanceof TameableCreatureEntity tamedTarget) {
+            if (tamedTarget.isTamed() && (!this.isServerPvpAllowed() || !this.isPVP() || tamedTarget.getPlayerOwner() == this.getPlayerOwner())) {
                 return true;
-
-            // Check Player PvP:
-            if (target instanceof Player && (!this.getCommandSenderWorld().getServer().isPvpAllowed() || !this.isPVP())) {
+            }
+        }
+        else if (target instanceof OwnableEntity tamedTarget) {
+            if (tamedTarget.getOwner() != null && (!this.isServerPvpAllowed() || !this.isPVP() || tamedTarget.getOwner() == this.getOwner())) {
                 return true;
             }
+        }
 
-            // Check If Tameable:
-            if (target instanceof TameableCreatureEntity) {
-                TameableCreatureEntity tamedTarget = (TameableCreatureEntity) target;
-                if (tamedTarget.isTamed()) {
-                    if (!this.getCommandSenderWorld().getServer().isPvpAllowed() || !this.isPVP() || tamedTarget.getPlayerOwner() == this.getPlayerOwner()) {
-                        return true;
-                    }
-                }
-            } else if (target instanceof OwnableEntity) {
-                OwnableEntity tamedTarget = (OwnableEntity) target;
-                if (tamedTarget.getOwner() != null) {
-                    if (!this.getCommandSenderWorld().getServer().isPvpAllowed() || !this.isPVP() || tamedTarget.getOwner() == this.getOwner()) {
-                        return true;
-                    }
-                }
-            }
-
-            // Check Owner Teams:
-            if (this.getPlayerOwner() != null) {
-                if (this.getPlayerOwner().getVehicle() == target) {
-                    return true;
-                }
-                return this.getPlayerOwner().isAlliedTo(target);
-            } else if (this.getOwner() != null) {
-                if (this.getOwner().getVehicle() == target) {
-                    return true;
-                }
-                return this.getOwner().isAlliedTo(target);
-            }
-
+        Entity owner = this.getPlayerOwner() != null ? this.getPlayerOwner() : this.getOwner();
+        if (owner == null) {
             return false;
         }
-        return super.isAlliedTo(target);
+        if (owner.getVehicle() == target) {
+            return true;
+        }
+        return owner.isAlliedTo(target);
     }
 
 
@@ -568,14 +596,9 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     @Override
     public boolean doRangedDamage(Entity target, ThrowableProjectile projectile, float damage, boolean noPierce) {
         float totalDamage = damage * ((float) this.creatureStats.getDamage() / 2);
-
-        // Owner Credit:
-        if (target instanceof Mob) {
-            Mob mobTarget = (Mob) target;
-            if (this.getOwner() instanceof Player && mobTarget.getHealth() > 0 && mobTarget.getHealth() - totalDamage <= 0) {
-                DamageSource creditSource = new MinionEntityDamageSource(this.getDamageSource(null).typeHolder(), this.getOwner());
-                return target.hurt(creditSource, totalDamage);
-            }
+        Boolean ownerCredit = this.tryRangedOwnerKillCredit(target, totalDamage);
+        if (ownerCredit != null) {
+            return ownerCredit;
         }
 
         return super.doRangedDamage(target, projectile, damage, noPierce);
@@ -583,62 +606,95 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 
     @Override
     public boolean attackEntityAsMob(Entity target, double damageScale) {
-        if (!this.isAlive())
+        if (!this.isAlive()) {
             return false;
-        if (target == null)
+        }
+        if (target == null) {
             return false;
-        if (!this.hasLineOfSight(target))
+        }
+        if (!this.hasLineOfSight(target)) {
             return false;
+        }
 
         float totalDamage = this.getAttackDamage(damageScale);
-
-        // Owner Credit:
-        if (target instanceof Mob) {
-            Mob mobTarget = (Mob) target;
-            if (this.getOwner() instanceof Player && mobTarget.getHealth() > 0 && mobTarget.getHealth() - totalDamage <= 0) {
-                DamageSource creditSource = new MinionEntityDamageSource(this.getDamageSource(null).typeHolder(), this.getOwner());
-                creditSource.is(DamageTypes.MAGIC);
-                return target.hurt(creditSource, totalDamage);
-            }
+        Boolean ownerCredit = this.tryMeleeOwnerKillCredit(target, totalDamage);
+        if (ownerCredit != null) {
+            return ownerCredit;
         }
 
         return super.attackEntityAsMob(target, damageScale);
     }
 
+    private Boolean tryRangedOwnerKillCredit(Entity target, float totalDamage) {
+        if (!(target instanceof Mob mobTarget)) {
+            return null;
+        }
+        if (!(this.getOwner() instanceof Player)) {
+            return null;
+        }
+        if (mobTarget.getHealth() <= 0 || mobTarget.getHealth() - totalDamage > 0) {
+            return null;
+        }
+
+        DamageSource creditSource = new MinionEntityDamageSource(this.getDamageSource(null).typeHolder(), this.getOwner());
+        return target.hurt(creditSource, totalDamage);
+    }
+
+    private Boolean tryMeleeOwnerKillCredit(Entity target, float totalDamage) {
+        if (!(target instanceof Mob mobTarget)) {
+            return null;
+        }
+        if (!(this.getOwner() instanceof Player)) {
+            return null;
+        }
+        if (mobTarget.getHealth() <= 0 || mobTarget.getHealth() - totalDamage > 0) {
+            return null;
+        }
+
+        DamageSource creditSource = new MinionEntityDamageSource(this.getDamageSource(null).typeHolder(), this.getOwner());
+        creditSource.is(DamageTypes.MAGIC);
+        return target.hurt(creditSource, totalDamage);
+    }
+
     // ========== Can Attack ==========
     @Override
     public boolean canAttackType(EntityType targetType) {
-        if (this.isPassive())
+        if (this.isPassive()) {
             return false;
-        if (this.isTamed())
+        }
+        if (this.isTamed()) {
             return true;
+        }
         return super.canAttackType(targetType);
     }
 
     @Override
     public boolean canAttack(LivingEntity targetEntity) {
-        if (this.isPassive())
+        if (this.isPassive()) {
             return false;
-        if (this.isTamed()) {
-            if (this.getOwner() == targetEntity || this.getPlayerOwner() == targetEntity)
+        }
+        if (!this.isTamed()) {
+            return super.canAttack(targetEntity);
+        }
+
+        if (this.getOwner() == targetEntity || this.getPlayerOwner() == targetEntity) {
+            return false;
+        }
+        if (!this.getCommandSenderWorld().isClientSide) {
+            boolean canPVP = this.isServerPvpAllowed() && this.isPVP();
+            if (targetEntity instanceof Player && !canPVP) {
                 return false;
-            if (!this.getCommandSenderWorld().isClientSide) {
-                boolean canPVP = this.getCommandSenderWorld().getServer().isPvpAllowed() && this.isPVP();
-                if (targetEntity instanceof Player && !canPVP)
+            }
+            if (targetEntity instanceof TameableCreatureEntity targetTameable && targetTameable.isTamed()) {
+                if (!canPVP) {
                     return false;
-                if (targetEntity instanceof TameableCreatureEntity) {
-                    TameableCreatureEntity targetTameable = (TameableCreatureEntity) targetEntity;
-                    if (targetTameable.isTamed()) {
-                        if (!canPVP)
-                            return false;
-                        if (targetTameable.getPlayerOwner() == this.getPlayerOwner())
-                            return false;
-                    }
+                }
+                if (targetTameable.getPlayerOwner() == this.getPlayerOwner()) {
+                    return false;
                 }
             }
-            return true;
         }
-        return super.canAttack(targetEntity);
+        return true;
     }
 
     // ========= Get Damage Source ==========
@@ -662,21 +718,24 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     // ========== Attacked From ==========
     @Override
     public boolean hurt(DamageSource damageSrc, float damageAmount) {
-        if (this.isInvulnerableTo(damageSrc))
+        if (this.isInvulnerableTo(damageSrc)) {
             return false;
-        else {
-            if (!this.isPassive())
-                this.setSitting(false);
-
-            Entity entity = damageSrc.getDirectEntity();
-            if (entity instanceof ThrowableProjectile)
-                entity = ((ThrowableProjectile) entity).getOwner();
-
-            if (this.isTamed() && this.getOwner() == entity)
-                return false;
-
-            return super.hurt(damageSrc, damageAmount);
         }
+
+        if (!this.isPassive()) {
+            this.setSitting(false);
+        }
+
+        Entity entity = damageSrc.getDirectEntity();
+        if (entity instanceof ThrowableProjectile projectile) {
+            entity = projectile.getOwner();
+        }
+
+        if (this.isTamed() && this.getOwner() == entity) {
+            return false;
+        }
+
+        return super.hurt(damageSrc, damageAmount);
     }
 
 
@@ -687,30 +746,31 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
-        var entity = source.getEntity();
+        Entity entity = source.getEntity();
 
-        if (this.isTamed()) {
-            if (entity instanceof Player && this.getCommandSenderWorld().getServer() != null && !this.getCommandSenderWorld().getServer().isPvpAllowed()) {
-                return true;
-            }
-            if (entity == this.getPlayerOwner()) {
-                return true;
-            }
-        }
-
-        if (this.isTamed()) {
-            if (entity instanceof Player && this.getCommandSenderWorld().getServer() != null && !this.getCommandSenderWorld().getServer().isPvpAllowed()) {
-                return true;
-            }
-            if (entity == this.getPlayerOwner()) {
-                return true;
-            }
-        }
-
-        if (source.is(DamageTypes.IN_WALL) && this.isTamed())
+        if (this.blocksOwnerOrPlayerDamage(entity)) {
             return true;
+        }
+
+        if (source.is(DamageTypes.IN_WALL) && this.isTamed()) {
+            return true;
+        }
 
         return super.isInvulnerableTo(source);
+    }
+
+    private boolean isServerPvpAllowed() {
+        return this.getCommandSenderWorld().getServer() != null && this.getCommandSenderWorld().getServer().isPvpAllowed();
+    }
+
+    private boolean blocksOwnerOrPlayerDamage(Entity entity) {
+        if (!this.isTamed()) {
+            return false;
+        }
+        if (entity instanceof Player && !this.isServerPvpAllowed()) {
+            return true;
+        }
+        return entity == this.getPlayerOwner();
     }
 
 
@@ -725,7 +785,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
      */
     public void setOwnerId(UUID ownerUUID) {
         this.ownerUUID = ownerUUID;
-        this.entityData.set(OWNER_ID, Optional.ofNullable(ownerUUID));
+        this.getEntityData().set(OWNER_ID, Optional.ofNullable(ownerUUID));
         this.setTamed(ownerUUID != null);
     }
 
@@ -733,7 +793,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     public Entity getOwner() {
         UUID uuid = this.getOwnerId();
         if (uuid == null) {
-            return super.getOwner();
+            return this.superGetOwner();
         }
         return this.getCommandSenderWorld().getPlayerByUUID(uuid);
     }
@@ -751,8 +811,9 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     public UUID getOwnerId() {
         if (this.getCommandSenderWorld().isClientSide) {
             try {
-                return this.getUUIDFromDataManager(OWNER_ID).orElse(null);
-            } catch (Exception ignored) {
+                return this.getEntityData().get(OWNER_ID).orElse(null);
+            }
+            catch (Exception ignored) {
             }
         }
         return this.ownerUUID;
@@ -766,8 +827,8 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     public Player getPlayerOwner() {
         if (this.getCommandSenderWorld().isClientSide) {
             Entity owner = this.getOwner();
-            if (owner instanceof Player) {
-                return (Player) owner;
+            if (owner instanceof Player player) {
+                return player;
             }
             return null;
         }
@@ -797,33 +858,33 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     @Override
     public boolean isTamed() {
         try {
-            return (this.getByteFromDataManager(TAMED) & TAMED_ID.IS_TAMED.id) != 0;
-        } catch (Exception e) {
+            return (this.getEntityData().get(TAMED) & TAMED_ID.IS_TAMED.id) != 0;
+        }
+        catch (Exception e) {
             return false;
         }
     }
 
     public void setTamed(boolean isTamed) {
-        byte tamed = this.getByteFromDataManager(TAMED);
+        byte tamed = this.behaviourBitMask();
         if (isTamed) {
-            this.entityData.set(TAMED, (byte) (tamed | TAMED_ID.IS_TAMED.id));
-            this.spawnEventType = "";
-        } else {
-            this.entityData.set(TAMED, (byte) (tamed - (tamed & TAMED_ID.IS_TAMED.id)));
+            this.getEntityData().set(TAMED, (byte) (tamed | TAMED_ID.IS_TAMED.id));
+            this.clearSpawnEventTracking();
+        }
+        else {
+            this.getEntityData().set(TAMED, (byte) (tamed - (tamed & TAMED_ID.IS_TAMED.id)));
         }
         this.setCustomNameVisible(isTamed);
     }
 
     public boolean isTamingItem(ItemStack itemstack) {
-        if (itemstack.isEmpty() || this.creatureInfo.creatureType == null || this.isBoss()) {
+        CreatureType creatureType = this.creatureInfo.getCreatureType();
+        if (itemstack.isEmpty() || creatureType == null || this.isBoss()) {
             return false;
         }
 
-        if (itemstack.getItem() instanceof CreatureTreatItem) {
-            CreatureTreatItem itemTreat = (CreatureTreatItem) itemstack.getItem();
-            if (itemTreat.getCreatureType() == this.creatureInfo.creatureType) {
-                return this.creatureInfo.isTameable();
-            }
+        if (itemstack.getItem() instanceof CreatureTreatItem itemTreat && itemTreat.getCreatureType() == creatureType) {
+            return this.creatureInfo.isTameable();
         }
 
         return false;
@@ -847,31 +908,21 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
             return this.isTamed();
         }
 
-        extendedPlayer.studyCreature(this, CreatureManager.getInstance().config.creatureTreatKnowledge, true, true);
+        extendedPlayer.studyCreature(this, CreatureManager.getInstance().getConfig().creatureTreatKnowledge(), true, true);
 
-        // Already Tamed:
         if (this.isTamed()) {
             return true;
         }
 
-        // Require Knowledge Rank 2:
         CreatureKnowledge creatureKnowledge = extendedPlayer.getBeastiary().getCreatureKnowledge(this.creatureInfo.getName());
-        if (creatureKnowledge == null || creatureKnowledge.rank < 2) {
-//			ITextComponent tameMessage = Component.translatable("message.pet.tamefail.knowledge.prefix")
-//					.append(" ")
-//					.append(this.getSpeciesName())
-//					.append(" ")
-//					.append(Component.translatable("message.pet.tamefail.knowledge.suffix"));
-//			player.displayClientMessage(tameMessage, false);
+        if (creatureKnowledge == null || creatureKnowledge.getRank() < 2) {
             return this.isTamed();
         }
 
-        // Increase Reputation:
         CreatureRelationshipEntry relationshipEntry = this.relationships.getOrCreateEntry(player);
         int reputationAmount = 50 + this.getRandom().nextInt(50);
         relationshipEntry.increaseReputation(reputationAmount);
 
-        // Apply Tame:
         if (this.creatureInfo.isTameable() && relationshipEntry.getReputation() >= this.creatureInfo.getTamingReputation()) {
             this.setPlayerOwner(player);
             this.onTamedByPlayer();
@@ -883,10 +934,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
                     .append(Component.translatable("message.pet.tamed.suffix"));
             player.displayClientMessage(tameMessage, false);
             this.playTameEffect(this.isTamed());
-            //player.addStat(ObjectManager.getStat(this.creatureInfo.getName() + ".tame"), 1); TODO Player Stats
-            if (this.portalTime > this.getDimensionChangingDelay()) {
-                this.portalTime = this.getDimensionChangingDelay();
-            }
+            this.clampPortalTimeAfterTame();
         }
 
         this.playTameEffect(this.isTamed());
@@ -906,7 +954,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
         this.setAggressive(false);
         this.setPVP(true);
         this.playTameSound();
-        this.spawnEventType = "";
+        this.clearSpawnEventTracking();
     }
 
     @Override
@@ -949,8 +997,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
      * @return True if this entity should eat the itemstack and gain experience.
      */
     public boolean isLevelingChargeItem(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ChargeItem) {
-            ChargeItem chargeItem = (ChargeItem) itemStack.getItem();
+        if (itemStack.getItem() instanceof ChargeItem chargeItem) {
             for (ElementInfo elementInfo : this.getElements()) {
                 if (chargeItem.getElements().contains(elementInfo)) {
                     return true;
@@ -968,8 +1015,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
      */
     public int getExperienceFromChargeItem(ItemStack itemStack) {
         int experience = 0;
-        if (itemStack.getItem() instanceof ChargeItem) {
-            ChargeItem chargeItem = (ChargeItem) itemStack.getItem();
+        if (itemStack.getItem() instanceof ChargeItem chargeItem) {
             for (ElementInfo elementInfo : this.getElements()) {
                 if (chargeItem.getElements().contains(elementInfo)) {
                     experience += ChargeItem.CHARGE_EXPERIENCE;
@@ -1015,84 +1061,145 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     }
 
     public byte behaviourBitMask() {
-        return this.getByteFromDataManager(TAMED);
+        return this.getEntityData().get(TAMED);
     }
 
     // ========== Sitting ==========
     public boolean isSitting() {
-        if (!this.isTamed())
+        if (!this.isTamed()) {
             return false;
-        return (this.getByteFromDataManager(TAMED) & TAMED_ID.MOVE_SIT.id) != 0;
+        }
+        return this.hasBehaviourBit(TAMED_ID.MOVE_SIT.id);
     }
 
     public void setSitting(boolean set) {
-        if (!this.petControlsEnabled())
+        if (!this.petControlsEnabled()) {
             set = false;
-        byte tamedStatus = this.getByteFromDataManager(TAMED);
+        }
         if (set) {
-            this.entityData.set(TAMED, (byte) (tamedStatus | TAMED_ID.MOVE_SIT.id));
+            this.enableBehaviourBit(TAMED_ID.MOVE_SIT.id);
             this.setHome((int) this.position().x(), (int) this.position().y(), (int) this.position().z(), this.sittingGuardRange);
         } else {
-            this.entityData.set(TAMED, (byte) (tamedStatus - (tamedStatus & TAMED_ID.MOVE_SIT.id)));
+            this.disableBehaviourBit(TAMED_ID.MOVE_SIT.id);
             this.hasRestriction();
         }
     }
 
     // ========== Following ==========
     public boolean isFollowing() {
-        if (!this.isTamed())
+        if (!this.isTamed()) {
             return false;
-        if (this.getLeashHolder() instanceof LeashFenceKnotEntity)
+        }
+        if (this.getLeashHolder() instanceof LeashFenceKnotEntity) {
             return false;
-        return (this.getByteFromDataManager(TAMED) & TAMED_ID.MOVE_FOLLOW.id) != 0;
+        }
+        return this.hasBehaviourBit(TAMED_ID.MOVE_FOLLOW.id);
     }
 
     public void setFollowing(boolean set) {
-        if (!this.petControlsEnabled())
+        if (!this.petControlsEnabled()) {
             set = false;
-        byte tamedStatus = this.getByteFromDataManager(TAMED);
-        if (set)
-            this.entityData.set(TAMED, (byte) (tamedStatus | TAMED_ID.MOVE_FOLLOW.id));
-        else
-            this.entityData.set(TAMED, (byte) (tamedStatus - (tamedStatus & TAMED_ID.MOVE_FOLLOW.id)));
+        }
+        if (set) {
+            this.enableBehaviourBit(TAMED_ID.MOVE_FOLLOW.id);
+        } else {
+            this.disableBehaviourBit(TAMED_ID.MOVE_FOLLOW.id);
+        }
     }
 
     // ========== Passiveness ==========
     public boolean isPassive() {
-        if (!this.isTamed())
+        if (!this.isTamed()) {
             return false;
-        return (this.getByteFromDataManager(TAMED) & TAMED_ID.STANCE_PASSIVE.id) != 0;
+        }
+        return this.hasBehaviourBit(TAMED_ID.STANCE_PASSIVE.id);
     }
 
     public void setPassive(boolean set) {
-        if (!this.petControlsEnabled())
+        if (!this.petControlsEnabled()) {
             set = false;
-        byte tamedStatus = this.getByteFromDataManager(TAMED);
+        }
         if (set) {
-            this.entityData.set(TAMED, (byte) (tamedStatus | TAMED_ID.STANCE_PASSIVE.id));
+            this.enableBehaviourBit(TAMED_ID.STANCE_PASSIVE.id);
             this.setTarget(null);
             this.setStealth(0);
-        } else
-            this.entityData.set(TAMED, (byte) (tamedStatus - (tamedStatus & TAMED_ID.STANCE_PASSIVE.id)));
+        } else {
+            this.disableBehaviourBit(TAMED_ID.STANCE_PASSIVE.id);
+        }
     }
 
     // ========== Agressiveness ==========
     @Override
     public boolean isAggressive() {
-        if (!this.isTamed())
+        if (!this.isTamed()) {
             return super.isAggressive();
-        return (this.getByteFromDataManager(TAMED) & TAMED_ID.STANCE_AGGRESSIVE.id) != 0;
+        }
+        return this.hasBehaviourBit(TAMED_ID.STANCE_AGGRESSIVE.id);
+    }
+
+    boolean superIsAggressive() {
+        return super.isAggressive();
+    }
+
+    boolean superIsTamedBase() {
+        return super.isTamed();
+    }
+
+    boolean superCanBeLeashed(Player player) {
+        return super.canBeLeashed(player);
+    }
+
+    boolean superCanNameTag(Player player) {
+        return super.canNameTag(player);
+    }
+
+    Entity superGetOwner() {
+        return super.getOwner();
+    }
+
+    Team superGetTeam() {
+        return super.getTeam();
+    }
+
+    boolean superIsAlliedTo(Entity target) {
+        return super.isAlliedTo(target);
+    }
+
+    boolean superCanAttackType(EntityType targetType) {
+        return super.canAttackType(targetType);
+    }
+
+    boolean superCanAttack(LivingEntity targetEntity) {
+        return super.canAttack(targetEntity);
+    }
+
+    boolean superHurt(DamageSource damageSrc, float damageAmount) {
+        return super.hurt(damageSrc, damageAmount);
+    }
+
+    boolean superIsInvulnerableTo(DamageSource source) {
+        return super.isInvulnerableTo(source);
+    }
+
+    void clearJumpingState() {
+        this.jumping = false;
+    }
+
+    void clampPortalTimeAfterTame() {
+        if (this.portalTime > this.getDimensionChangingDelay()) {
+            this.portalTime = this.getDimensionChangingDelay();
+        }
     }
 
     public void setAggressive(boolean set) {
         if (!this.petControlsEnabled()) {
             set = false;
         }
-        byte tamedStatus = this.getByteFromDataManager(TAMED);
-        if (set)
-            this.entityData.set(TAMED, (byte) (tamedStatus | TAMED_ID.STANCE_AGGRESSIVE.id));
-        else
-            this.entityData.set(TAMED, (byte) (tamedStatus - (tamedStatus & TAMED_ID.STANCE_AGGRESSIVE.id)));
+        if (set) {
+            this.enableBehaviourBit(TAMED_ID.STANCE_AGGRESSIVE.id);
+        } else {
+            this.disableBehaviourBit(TAMED_ID.STANCE_AGGRESSIVE.id);
+        }
     }
 
     // ========== Assist ==========
@@ -1100,35 +1207,49 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
         if (!this.isTamed()) {
             return false;
         }
-        return (this.getByteFromDataManager(TAMED) & TAMED_ID.STANCE_ASSIST.id) != 0;
+        return this.hasBehaviourBit(TAMED_ID.STANCE_ASSIST.id);
     }
 
     public void setAssist(boolean set) {
         if (!this.petControlsEnabled()) {
             set = true;
         }
-        byte tamedStatus = this.getByteFromDataManager(TAMED);
-        if (set)
-            this.entityData.set(TAMED, (byte) (tamedStatus | TAMED_ID.STANCE_ASSIST.id));
-        else
-            this.entityData.set(TAMED, (byte) (tamedStatus - (tamedStatus & TAMED_ID.STANCE_ASSIST.id)));
+        if (set) {
+            this.enableBehaviourBit(TAMED_ID.STANCE_ASSIST.id);
+        } else {
+            this.disableBehaviourBit(TAMED_ID.STANCE_ASSIST.id);
+        }
     }
 
     // ========== PvP ==========
     public boolean isPVP() {
-        return (this.getByteFromDataManager(TAMED) & TAMED_ID.PVP.id) != 0;
+        return this.hasBehaviourBit(TAMED_ID.PVP.id);
     }
 
     public void setPVP(boolean set) {
-        if (!this.petControlsEnabled())
+        if (!this.petControlsEnabled()) {
             set = false;
-        byte tamedStatus = this.getByteFromDataManager(TAMED);
+        }
         if (set) {
-            this.entityData.set(TAMED, (byte) (tamedStatus | TAMED_ID.PVP.id));
+            this.enableBehaviourBit(TAMED_ID.PVP.id);
         } else {
             this.setTarget(null);
-            this.entityData.set(TAMED, (byte) (tamedStatus - (tamedStatus & TAMED_ID.PVP.id)));
+            this.disableBehaviourBit(TAMED_ID.PVP.id);
         }
+    }
+
+    private boolean hasBehaviourBit(byte bit) {
+        return (this.behaviourBitMask() & bit) != 0;
+    }
+
+    private void enableBehaviourBit(byte bit) {
+        byte tamedStatus = this.behaviourBitMask();
+        this.getEntityData().set(TAMED, (byte) (tamedStatus | bit));
+    }
+
+    private void disableBehaviourBit(byte bit) {
+        byte tamedStatus = this.behaviourBitMask();
+        this.getEntityData().set(TAMED, (byte) (tamedStatus - (tamedStatus & bit)));
     }
 
 
@@ -1220,10 +1341,8 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     @Override
     public AgeableCreatureEntity createChild(AgeableCreatureEntity partner) {
         AgeableCreatureEntity spawnedBaby = super.createChild(partner);
-        UUID ownerId = this.getOwnerId();
-        if (ownerId != null && spawnedBaby != null && spawnedBaby instanceof TameableCreatureEntity) {
-            TameableCreatureEntity tamedBaby = (TameableCreatureEntity) spawnedBaby;
-            tamedBaby.setOwnerId(ownerId);
+        if (this.getOwnerId() != null && spawnedBaby instanceof TameableCreatureEntity) {
+            ((TameableCreatureEntity) spawnedBaby).setOwnerId(this.getOwnerId());
         }
         return spawnedBaby;
     }
@@ -1300,35 +1419,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
             this.setOwnerId(null);
         }
 
-        if (nbt.contains("Sitting")) {
-            this.setSitting(nbt.getBoolean("Sitting"));
-        } else {
-            this.setSitting(false);
-        }
-
-        if (nbt.contains("Following")) {
-            this.setFollowing(nbt.getBoolean("Following"));
-        } else {
-            this.setFollowing(true);
-        }
-
-        if (nbt.contains("Passive")) {
-            this.setPassive(nbt.getBoolean("Passive"));
-        } else {
-            this.setPassive(false);
-        }
-
-        if (nbt.contains("Aggressive")) {
-            this.setAggressive(nbt.getBoolean("Aggressive"));
-        } else {
-            this.setAggressive(false);
-        }
-
-        if (nbt.contains("PVP")) {
-            this.setPVP(nbt.getBoolean("PVP"));
-        } else {
-            this.setPVP(true);
-        }
+        this.readPetControlFlags(nbt);
 
         if (nbt.contains("Hunger")) {
             this.setCreatureHunger(nbt.getFloat("Hunger"));
@@ -1348,13 +1439,29 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
         if (this.getOwnerId() != null) {
             nbt.putUUID("OwnerId", this.getOwnerId());
         }
+        this.writePetControlFlags(nbt);
+        nbt.putFloat("Hunger", this.getCreatureHunger());
+        nbt.putFloat("Stamina", this.getStamina());
+    }
+
+    private void readPetControlFlags(CompoundTag nbt) {
+        this.setSitting(this.readPetControlFlag(nbt, "Sitting", false));
+        this.setFollowing(this.readPetControlFlag(nbt, "Following", true));
+        this.setPassive(this.readPetControlFlag(nbt, "Passive", false));
+        this.setAggressive(this.readPetControlFlag(nbt, "Aggressive", false));
+        this.setPVP(this.readPetControlFlag(nbt, "PVP", true));
+    }
+
+    private boolean readPetControlFlag(CompoundTag nbt, String key, boolean fallback) {
+        return nbt.contains(key) ? nbt.getBoolean(key) : fallback;
+    }
+
+    private void writePetControlFlags(CompoundTag nbt) {
         nbt.putBoolean("Sitting", this.isSitting());
         nbt.putBoolean("Following", this.isFollowing());
         nbt.putBoolean("Passive", this.isPassive());
         nbt.putBoolean("Aggressive", this.isAggressive());
         nbt.putBoolean("PVP", this.isPVP());
-        nbt.putFloat("Hunger", this.getCreatureHunger());
-        nbt.putFloat("Stamina", this.getStamina());
     }
 
 

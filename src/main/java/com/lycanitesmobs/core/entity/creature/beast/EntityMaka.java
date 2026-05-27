@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.goals.actions.TemptGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindMasterGoal;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.block.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
@@ -40,10 +41,10 @@ public class EntityMaka extends AgeableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-		this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new TemptGoal(this).setIncludeDiet(true));
-		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+		this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new TemptGoal(this).setIncludeDiet(true));
+		this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
 
-		this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindMasterGoal(this).setTargetClass(EntityMakaAlpha.class).setSightCheck(false));
+		this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindMasterGoal(this).setTargetClass(EntityMakaAlpha.class).setSightCheck(false));
     }
 
 
@@ -56,11 +57,11 @@ public class EntityMaka extends AgeableCreatureEntity {
         // Random Alpha:
         CreatureInfo alphaInfo = CreatureManager.getInstance().getCreature("makaalpha");
         if(alphaInfo != null) {
-            float alphaChance = (float)alphaInfo.creatureSpawn.spawnWeight / Math.max(this.creatureInfo.creatureSpawn.spawnWeight, 1);
+            float alphaChance = (float)alphaInfo.getCreatureSpawn().getSpawnWeight() / Math.max(this.creatureInfo.getCreatureSpawn().getSpawnWeight(), 1);
             if (this.getRandom().nextFloat() <= alphaChance) {
 				EntityMakaAlpha alpha = (EntityMakaAlpha)CreatureManager.getInstance().getCreature("makaalpha").createEntity(this.getCommandSenderWorld());
                 alpha.copyPosition(this);
-                this.getCommandSenderWorld().addFreshEntity(alpha);
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, alpha);
                 this.remove(RemovalReason.DISCARDED);
             }
         }
@@ -97,7 +98,7 @@ public class EntityMaka extends AgeableCreatureEntity {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
 	// ==================================================
    	//                      Attacks
    	// ==================================================
@@ -119,7 +120,7 @@ public class EntityMaka extends AgeableCreatureEntity {
             if (this.getRandom().nextFloat() >= 0.9F) {
 				EntityMakaAlpha alpha = (EntityMakaAlpha)CreatureManager.getInstance().getCreature("makaalpha").createEntity(this.getCommandSenderWorld());
                 alpha.copyPosition(this);
-                this.getCommandSenderWorld().addFreshEntity(alpha);
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, alpha);
                 this.remove(RemovalReason.DISCARDED);
             }
         }

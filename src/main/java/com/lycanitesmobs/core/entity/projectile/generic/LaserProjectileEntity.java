@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.entity.projectile.generic;
 import com.lycanitesmobs.core.entity.projectile.misc.LaserEndProjectileEntity;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.nbt.CompoundTag;
@@ -22,48 +23,47 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import java.lang.reflect.Constructor;
 import java.util.HashSet;
 
 public class LaserProjectileEntity extends BaseProjectileEntity {
     // Properties:
-    public LivingEntity shootingEntity;
+    protected LivingEntity shootingEntity;
     /**
      * The entity that this laser should appear from.
      **/
-    public Entity followEntity;
-    public int shootingEntityRef = -1;
-    public int shootingEntityID = 11;
+    protected Entity followEntity;
+    protected int shootingEntityRef = -1;
+    protected int shootingEntityID = 11;
 
-    public float projectileWidth = 0.2f;
-    public float projectileHeight = 0.2f;
+    protected float projectileWidth = 0.2f;
+    protected float projectileHeight = 0.2f;
 
     // Laser:
-    public LaserEndProjectileEntity laserEnd;
-    public int laserEndRef = -1;
-    public int laserEndID = 12;
+    protected LaserEndProjectileEntity laserEnd;
+    protected int laserEndRef = -1;
+    protected int laserEndID = 12;
 
-    public int laserTime = 100;
-    public int laserDelay = 20;
-    public float laserRange;
-    public float laserWidth;
-    public float laserLength = 10;
-    public int laserTimeID = 13;
+    protected int laserTime = 100;
+    protected int laserDelay = 20;
+    protected float laserRange;
+    protected float laserWidth;
+    protected float laserLength = 10;
+    protected int laserTimeID = 13;
 
     // Laser End:
     /**
      * If true, this entity will use the attack target position of the entity that has fired this if possible.
      **/
-    public boolean useEntityAttackTarget = true;
+    protected boolean useEntityAttackTarget = true;
     private double targetX;
     private double targetY;
     private double targetZ;
 
     // Offsets:
-    public double offsetX = 0;
-    public double offsetY = 0;
-    public double offsetZ = 0;
-    public int offsetIDStart = 14;
+    protected double offsetX = 0;
+    protected double offsetY = 0;
+    protected double offsetZ = 0;
+    protected int offsetIDStart = 14;
 
     // Data Parameters:
     protected static final EntityDataAccessor<Integer> SHOOTING_ENTITY_ID = SynchedEntityData.defineId(LaserProjectileEntity.class, EntityDataSerializers.INT);
@@ -142,6 +142,26 @@ public class LaserProjectileEntity extends BaseProjectileEntity {
         this.offsetY = y;
         this.offsetZ = z;
         this.syncOffset();
+    }
+
+    public double getOffsetX() {
+        return this.offsetX;
+    }
+
+    public double getOffsetY() {
+        return this.offsetY;
+    }
+
+    public double getOffsetZ() {
+        return this.offsetZ;
+    }
+
+    public LivingEntity getShootingEntity() {
+        return this.shootingEntity;
+    }
+
+    public void setShootingEntity(LivingEntity shootingEntity) {
+        this.shootingEntity = shootingEntity;
     }
 
 
@@ -338,23 +358,29 @@ public class LaserProjectileEntity extends BaseProjectileEntity {
         if (world.isClientSide)
             return;
 
-        try {
-            if (this.shootingEntity == null) {
-                Constructor laserEndConstructor = this.getLaserEndClass().getConstructor(EntityType.class, Level.class, Double.class, Double.class, Double.class, LaserProjectileEntity.class);
-                this.laserEnd = (LaserEndProjectileEntity) laserEndConstructor.newInstance(ProjectileManager.getInstance().oldProjectileTypes.get(this.getLaserEndClass()), world, this.position().x(), this.position().y(), this.position().z(), this);
-            } else {
-                Constructor laserEndConstructor = this.getLaserEndClass().getConstructor(EntityType.class, Level.class, LivingEntity.class, LaserProjectileEntity.class);
-                this.laserEnd = (LaserEndProjectileEntity) laserEndConstructor.newInstance(ProjectileManager.getInstance().oldProjectileTypes.get(this.getLaserEndClass()), world, this.shootingEntity, this);
-            }
-
-            if (this.getLaunchSound() != null)
-                this.playSound(this.getLaunchSound(), 1.0F, 1.0F / (this.random.nextFloat() * 0.4F + 0.8F));
-
-            world.addFreshEntity(laserEnd);
-        } catch (Exception e) {
-            System.out.println("[WARNING] [LycanitesMobs] EntityLaser was unable to instantiate the EntityLaserEnd.");
-            e.printStackTrace();
+        if (this.shootingEntity == null) {
+            this.laserEnd = this.createLaserEnd(world, this.position().x(), this.position().y(), this.position().z());
+        } else {
+            this.laserEnd = this.createLaserEnd(world, this.shootingEntity);
         }
+
+        if (this.laserEnd == null) {
+            System.out.println("[WARNING] [LycanitesMobs] EntityLaser was unable to instantiate the EntityLaserEnd.");
+            return;
+        }
+
+        if (this.getLaunchSound() != null)
+            this.playSound(this.getLaunchSound(), 1.0F, 1.0F / (this.random.nextFloat() * 0.4F + 0.8F));
+
+        DeferredLevelActionManager.spawnEntity(world, this.blockPosition(), null, laserEnd);
+    }
+
+    protected LaserEndProjectileEntity createLaserEnd(Level world, double x, double y, double z) {
+        return new LaserEndProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(LaserEndProjectileEntity.class), world, x, y, z, this);
+    }
+
+    protected LaserEndProjectileEntity createLaserEnd(Level world, LivingEntity shooter) {
+        return new LaserEndProjectileEntity(ProjectileManager.getInstance().getOldProjectileType(LaserEndProjectileEntity.class), world, shooter, this);
     }
 
 
@@ -398,11 +424,6 @@ public class LaserProjectileEntity extends BaseProjectileEntity {
     public LaserEndProjectileEntity getLaserEnd() {
         return this.laserEnd;
     }
-
-    public Class getLaserEndClass() {
-        return LaserEndProjectileEntity.class;
-    }
-
 
     // ==================================================
     //                    Set Target

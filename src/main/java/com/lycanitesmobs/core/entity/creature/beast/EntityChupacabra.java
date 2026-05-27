@@ -28,8 +28,8 @@ public class EntityChupacabra extends TameableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setSpeed(1.5D));
-        this.goalSelector.addGoal(this.nextIdleGoalIndex, new FireProjectilesGoal(this).setProjectile("chaosorb").setFireRate(40).setVelocity(1.0F).setScale(0.5F)
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setSpeed(1.5D));
+        this.goalSelector.addGoal(this.currentIdleGoalIndex(), new FireProjectilesGoal(this).setProjectile("chaosorb").setFireRate(40).setVelocity(1.0F).setScale(0.5F)
                 .setConditions(new GoalConditions().setRareVariantOnly(true)));
     }
 
@@ -49,7 +49,7 @@ public class EntityChupacabra extends TameableCreatureEntity {
         	return false;
         
     	// Breed:
-        if((target instanceof Animal || (target instanceof BaseCreatureEntity && ((BaseCreatureEntity)target).creatureInfo.isFarmable())) && target.getDimensions(Pose.STANDING).height >= 1F)
+        if((target instanceof Animal || (target instanceof BaseCreatureEntity && ((BaseCreatureEntity)target).isFarmableCreature())) && target.getDimensions(Pose.STANDING).height >= 1F)
     		this.breed();
 
         // Leech:
@@ -80,7 +80,7 @@ public class EntityChupacabra extends TameableCreatureEntity {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
     
     
     // ==================================================

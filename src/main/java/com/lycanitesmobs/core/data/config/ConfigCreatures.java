@@ -205,19 +205,10 @@ public class ConfigCreatures {
 				.translation(CoreConfig.CONFIG_PREFIX + "creatures.randomSizeMax")
 				.define("randomSizeMax", 1.15D);
 
-		int difficultyIndex = 0;
-		for(String difficultyName : CreatureManager.DIFFICULTY_NAMES) {
+		for(String difficultyName : CreatureManager.getDifficultyNames()) {
 			Map<String, ForgeConfigSpec.ConfigValue<Double>> statMultipliers = new HashMap<>();
 			for (String statName : CreatureStats.STAT_NAMES) {
-				double defaultValue = CreatureManager.DIFFICULTY_DEFAULTS[difficultyIndex];
-				if("easy".equalsIgnoreCase(difficultyName) && "speed".equalsIgnoreCase(statName))
-					defaultValue = 1.0D;
-				if("hard".equalsIgnoreCase(difficultyName) && ("attackSpeed".equalsIgnoreCase(statName) || "rangedSpeed".equalsIgnoreCase(statName)))
-					defaultValue = 1.5D;
-				if("armor".equalsIgnoreCase(statName))
-					defaultValue = 1.0D;
-				if("sight".equalsIgnoreCase(statName))
-					defaultValue = 1.0D;
+				double defaultValue = CreatureManager.getDifficultyDefault(difficultyName, statName);
 
 				statMultipliers.put(statName, builder
 						.comment("Stat multiplier for " + statName + " on " + difficultyName + " difficulty.")
@@ -225,7 +216,6 @@ public class ConfigCreatures {
 						.define("difficulty.multipliers." + difficultyName + "." + statName, defaultValue));
 			}
 			this.difficultyMultipliers.put(difficultyName, statMultipliers);
-			difficultyIndex++;
 		}
 
 		for(String statName : CreatureStats.STAT_NAMES) {

@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.entity.goals.actions.abilities;
 
 import com.lycanitesmobs.core.manager.ObjectManager;
+import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.BaseGoal;
@@ -25,8 +26,8 @@ public class EffectAuraGoal extends BaseGoal {
 	protected byte targetTypes = BaseCreatureEntity.TARGET_TYPES.ENEMY.id;
 	protected String targetCreatureType = null;
 
-	public int abilityTime = 0;
-	public int cooldownTime = this.cooldownDuration;
+	private int abilityTime = 0;
+	private int cooldownTime = this.cooldownDuration;
 
 	/**
 	 * Constrcutor
@@ -216,8 +217,9 @@ public class EffectAuraGoal extends BaseGoal {
 			}
 
 			if(this.targetCreatureType != null) {
-				if(entity instanceof BaseCreatureEntity && ((BaseCreatureEntity)entity).creatureInfo.creatureType != null) {
-					return this.targetCreatureType.equals(((BaseCreatureEntity)entity).creatureInfo.creatureType.getName());
+				if(entity instanceof BaseCreatureEntity) {
+                    CreatureType creatureType = ((BaseCreatureEntity)entity).getCreatureType();
+                    return creatureType != null && this.targetCreatureType.equals(creatureType.getName());
 				}
 				return false;
 			}
@@ -241,7 +243,7 @@ public class EffectAuraGoal extends BaseGoal {
 			if(this.damageAmount != 0) {
 				DamageSource damageSource = this.host.level().damageSources().mobAttack(this.host);
 				target.hurt(damageSource, this.damageAmount);
-				if(this.host.minions.contains(target)) {
+				if(this.host.hasMinion(target)) {
 					this.host.onTryToDamageMinion(target, this.damageAmount);
 				}
 			}

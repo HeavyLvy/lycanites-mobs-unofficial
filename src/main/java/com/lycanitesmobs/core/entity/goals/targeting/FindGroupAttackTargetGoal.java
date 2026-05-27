@@ -13,15 +13,15 @@ public class FindGroupAttackTargetGoal extends FindAttackTargetGoal {
     public FindGroupAttackTargetGoal(BaseCreatureEntity setHost) {
         super(setHost);
 
-		for(CreatureGroup group : setHost.creatureInfo.groups) {
-			for(CreatureGroup targetGroup : group.huntGroups) {
-				if (targetGroup.humanoids) {
+		for(CreatureGroup group : setHost.getCreatureInfo().getGroups()) {
+			for(CreatureGroup targetGroup : group.getHuntGroups()) {
+				if (targetGroup.includesHumanoids()) {
 					this.targetPlayers = true;
 					break;
 				}
 			}
-			for(CreatureGroup targetGroup : group.packGroups) {
-				if (targetGroup.humanoids) {
+			for(CreatureGroup targetGroup : group.getPackGroups()) {
+				if (targetGroup.includesHumanoids()) {
 					this.targetPlayers = true;
 					break;
 				}
@@ -94,7 +94,7 @@ public class FindGroupAttackTargetGoal extends FindAttackTargetGoal {
 		}
 
 		// Relationships Check:
-		CreatureRelationshipEntry relationshipEntry = this.host.relationships.getEntry(target);
+		CreatureRelationshipEntry relationshipEntry = this.host.getRelationshipEntry(target);
 		if (relationshipEntry != null && !relationshipEntry.canHunt()) {
 			return false;
 		}

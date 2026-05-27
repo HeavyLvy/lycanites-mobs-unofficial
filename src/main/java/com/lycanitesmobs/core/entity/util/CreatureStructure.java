@@ -317,21 +317,6 @@ public class CreatureStructure {
 		if (targetBlock == Blocks.AIR) {
 			return false;
 		}
-		for (ThemeBlock themeBlock : this.dungeonTheme.ceilingBlocks) {
-			if (targetBlock == themeBlock.getBlock()) {
-				return true;
-			}
-		}
-		for (ThemeBlock themeBlock : this.dungeonTheme.floorBlocks) {
-			if (targetBlock == themeBlock.getBlock()) {
-				return true;
-			}
-		}
-		for (ThemeBlock themeBlock : this.dungeonTheme.wallBlocks) {
-			if (targetBlock == themeBlock.getBlock()) {
-				return true;
-			}
-		}
-		return false;
+		return this.dungeonTheme.containsStructureBlock(targetBlock);
 	}
 }

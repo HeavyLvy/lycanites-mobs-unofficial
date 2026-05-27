@@ -34,7 +34,7 @@ public class BeastiaryCommand {
 		}
 
 		Beastiary beastiary = extendedPlayer.getBeastiary();
-		for(CreatureInfo creatureInfo : CreatureManager.getInstance().creatures.values()) {
+		for(CreatureInfo creatureInfo : CreatureManager.getInstance().getCreatures()) {
 			beastiary.addCreatureKnowledge(new CreatureKnowledge(beastiary, creatureInfo.getName(), rank, 0), true);
 		}
 		beastiary.sendAllToClient();
@@ -54,7 +54,7 @@ public class BeastiaryCommand {
 		}
 
 		Beastiary beastiary = extendedPlayer.getBeastiary();
-		beastiary.creatureKnowledgeList.clear();
+		beastiary.clearCreatureKnowledge();
 		beastiary.sendAllToClient();
 
 		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.beastiary.clear"), true);

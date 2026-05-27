@@ -47,7 +47,7 @@ public class EntityRoa extends RideableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
     }
 
     @Override
@@ -79,7 +79,7 @@ public class EntityRoa extends RideableCreatureEntity implements Enemy {
                         LivingEntity entityLivingBase = (LivingEntity) entity;
                         if (entityLivingBase.hasEffect(ObjectManager.getEffect("weight")) || !this.canAttack(entityLivingBase))
                             continue;
-                        if (!entity.isInWater() && !this.spawnEventType.equalsIgnoreCase("sharknado"))
+                        if (!entity.isInWater() && !this.hasSpawnEventType("sharknado"))
                             continue;
                     }
                     ServerPlayer player = null;
@@ -137,7 +137,7 @@ public class EntityRoa extends RideableCreatureEntity implements Enemy {
         }
 
         // Sharknado:
-        if ("sharknado".equals(this.spawnEventType)) {
+        if (this.hasSpawnEventType("sharknado")) {
             return true;
         }
 
@@ -193,7 +193,7 @@ public class EntityRoa extends RideableCreatureEntity implements Enemy {
     // Flying:
     @Override
     public boolean isFlying() {
-        if ("sharknado".equals(this.spawnEventType)) {
+        if (this.hasSpawnEventType("sharknado")) {
             return true;
         }
         return super.isFlying();
@@ -216,7 +216,7 @@ public class EntityRoa extends RideableCreatureEntity implements Enemy {
 
     @Override
     public boolean canBreatheAir() {
-        return "sharknado".equals(this.spawnEventType);
+        return this.hasSpawnEventType("sharknado");
     }
 
 
@@ -271,7 +271,7 @@ public class EntityRoa extends RideableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
 

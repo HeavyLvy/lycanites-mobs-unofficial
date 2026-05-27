@@ -80,7 +80,7 @@ public class StealthGoal extends Goal {
 		if(!this.stealthMove) {
 			if(!this.host.useDirectNavigator() && !this.host.getNavigation().isDone())
 				this.unstealth = true;
-			if(this.host.useDirectNavigator() && !this.host.directNavigator.atTargetPosition())
+			if(this.host.useDirectNavigator() && !this.host.isDirectNavigationAtTarget())
 				this.unstealth = true;
 		}
 		

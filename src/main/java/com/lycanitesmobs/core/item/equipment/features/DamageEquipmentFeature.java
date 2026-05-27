@@ -7,19 +7,19 @@ import net.minecraft.world.item.ItemStack;
 
 public class DamageEquipmentFeature extends EquipmentFeature {
 	/** How much damage this part adds to the weapon attack. **/
-	public int damageAmount = 1;
+	protected int damageAmount = 1;
 
 	/** The attack cooldown modifier (based on vanilla sword cooldown). All modifiers are averaged together. **/
-	public double damageCooldown = 1;
+	protected double damageCooldown = 1;
 
 	/** How much knockback this part adds to the weapon attack. **/
-	public double damageKnockback = 0;
+	protected double damageKnockback = 0;
 
 	/** The range (in blocks) that this feature adds to the weapon attack. **/
-	public double damageRange = 0;
+	protected double damageRange = 0;
 
 	/** The angle (in degrees) that this feature applies to the weapon attack. (The feature with the largest range is used.) **/
-	public double damageSweep = 45;
+	protected double damageSweep = 45;
 
 
 	@Override
@@ -40,6 +40,26 @@ public class DamageEquipmentFeature extends EquipmentFeature {
 
 		if(json.has("damageSweep"))
 			this.damageSweep = json.get("damageSweep").getAsDouble();
+	}
+
+	public int getDamageAmount() {
+		return this.damageAmount;
+	}
+
+	public double getDamageCooldown() {
+		return this.damageCooldown;
+	}
+
+	public double getDamageKnockback() {
+		return this.damageKnockback;
+	}
+
+	public double getDamageRange() {
+		return this.damageRange;
+	}
+
+	public double getDamageSweep() {
+		return this.damageSweep;
 	}
 
 	@Override

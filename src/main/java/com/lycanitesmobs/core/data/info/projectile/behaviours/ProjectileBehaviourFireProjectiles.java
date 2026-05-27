@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -14,27 +15,27 @@ public class ProjectileBehaviourFireProjectiles extends ProjectileBehaviour {
     /**
      * The name of the projectile to fire.
      **/
-    public String projectileName;
+    protected String projectileName;
 
     /**
      * How many ticks per projectile fired on update, if less than 0 no projectiles are fired on update. 20 ticks = 1 second.
      **/
-    public int tickRate = 10;
+    protected int tickRate = 10;
 
     /**
      * If above 0, all spawned projectiles are remembered and additional ones are only spawned if the total spawned amount is too low.
      **/
-    public int persistentCount = 0;
+    protected int persistentCount = 0;
 
     /**
      * How many projectiles fired on impact.
      **/
-    public int impactCount = 5;
+    protected int impactCount = 5;
 
     /**
      * The velocity of the fired projectile.
      **/
-    public float velocity = 1.2F;
+    protected float velocity = 1.2F;
 
     @Override
     public void loadFromJSON(JsonObject json) {
@@ -55,11 +56,11 @@ public class ProjectileBehaviourFireProjectiles extends ProjectileBehaviour {
 
     @Override
     public void onProjectileUpdate(BaseProjectileEntity projectile) {
-        if (this.tickRate < 0 || projectile.updateTick % this.tickRate != 0 || projectile.getCommandSenderWorld().isClientSide) {
+        if (this.tickRate < 0 || projectile.getUpdateTick() % this.tickRate != 0 || projectile.getCommandSenderWorld().isClientSide) {
             return;
         }
 
-        if (this.persistentCount <= 0 || ((CustomProjectileEntity) projectile).spawnedProjectiles.size() < this.persistentCount) {
+        if (this.persistentCount <= 0 || ((CustomProjectileEntity) projectile).getSpawnedProjectileCount() < this.persistentCount) {
             this.createProjectile(projectile);
         }
     }
@@ -74,8 +75,9 @@ public class ProjectileBehaviourFireProjectiles extends ProjectileBehaviour {
             this.createProjectile(projectile);
         }
 
-        for (BaseProjectileEntity spawnedProjectile : ((CustomProjectileEntity) projectile).spawnedProjectiles) {
-            spawnedProjectile.remove(Entity.RemovalReason.DISCARDED);
+        CustomProjectileEntity customProjectile = (CustomProjectileEntity) projectile;
+        for (int i = 0; i < customProjectile.getSpawnedProjectileCount(); i++) {
+            customProjectile.getSpawnedProjectile(i).remove(Entity.RemovalReason.DISCARDED);
         }
     }
 
@@ -118,8 +120,8 @@ public class ProjectileBehaviourFireProjectiles extends ProjectileBehaviour {
             ((CustomProjectileEntity) childProjectile).setParent(projectile);
         }
         if (this.persistentCount > 0 && childProjectile instanceof CustomProjectileEntity) {
-            ((CustomProjectileEntity) childProjectile).laserAngle = (360F / this.persistentCount) * ((CustomProjectileEntity) projectile).spawnedProjectiles.size();
-            ((CustomProjectileEntity) projectile).spawnedProjectiles.add(childProjectile);
+            ((CustomProjectileEntity) childProjectile).setLaserAngle((360F / this.persistentCount) * ((CustomProjectileEntity) projectile).getSpawnedProjectileCount());
+            ((CustomProjectileEntity) projectile).addSpawnedProjectile(childProjectile);
         }
 
         double motionT = projectile.getDeltaMovement().x() + projectile.getDeltaMovement().y() + projectile.getDeltaMovement().z();
@@ -129,16 +131,24 @@ public class ProjectileBehaviourFireProjectiles extends ProjectileBehaviour {
             motionT -= projectile.getDeltaMovement().y() * 2;
         if (projectile.getDeltaMovement().z() < 0)
             motionT -= projectile.getDeltaMovement().z() * 2;
+        double motionX = 0;
+        double motionY = 0;
+        double motionZ = 0;
+        if (motionT > 0.0001D) {
+            motionX = projectile.getDeltaMovement().x() / motionT;
+            motionY = projectile.getDeltaMovement().y() / motionT;
+            motionZ = projectile.getDeltaMovement().z() / motionT;
+        }
         childProjectile.shoot(
-                projectile.getDeltaMovement().x() / motionT + (projectile.getCommandSenderWorld().getRandom().nextGaussian() - 0.5D),
-                projectile.getDeltaMovement().y() / motionT + (projectile.getCommandSenderWorld().getRandom().nextGaussian() - 0.5D),
-                projectile.getDeltaMovement().z() / motionT + (projectile.getCommandSenderWorld().getRandom().nextGaussian() - 0.5D),
+                motionX + (projectile.getCommandSenderWorld().getRandom().nextGaussian() - 0.5D),
+                motionY + (projectile.getCommandSenderWorld().getRandom().nextGaussian() - 0.5D),
+                motionZ + (projectile.getCommandSenderWorld().getRandom().nextGaussian() - 0.5D),
                 this.velocity,
                 0
         );
 
         projectile.playSound(childProjectile.getLaunchSound(), 1.0F, 1.0F / (projectile.getCommandSenderWorld().getRandom().nextFloat() * 0.4F + 0.8F));
-        projectile.getCommandSenderWorld().addFreshEntity(childProjectile);
+        DeferredLevelActionManager.spawnEntity(projectile.getCommandSenderWorld(), projectile.blockPosition(), null, childProjectile);
 
         return childProjectile;
     }

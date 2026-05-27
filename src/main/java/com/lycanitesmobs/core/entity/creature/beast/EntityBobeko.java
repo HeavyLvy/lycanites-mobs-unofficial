@@ -11,6 +11,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
@@ -39,8 +40,8 @@ public class EntityBobeko extends AgeableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new TemptGoal(this).setIncludeDiet(true));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new TemptGoal(this).setIncludeDiet(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
     }
 
     @Override
@@ -91,7 +92,7 @@ public class EntityBobeko extends AgeableCreatureEntity {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     @Override
@@ -122,14 +123,14 @@ public class EntityBobeko extends AgeableCreatureEntity {
     }
 
     @Override
-    public boolean performCommand(String command, Player player, ItemStack itemStack) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack, InteractionHand hand) {
 
         // Milk:
         if (command.equals("Milk")) {
-            this.replacePlayersItem(player, itemStack, new ItemStack(Items.MILK_BUCKET));
+            this.replacePlayersItem(player, hand, itemStack, new ItemStack(Items.MILK_BUCKET));
             return true;
         }
 
-        return super.performCommand(command, player, itemStack);
+        return super.performCommand(command, player, itemStack, hand);
     }
 }

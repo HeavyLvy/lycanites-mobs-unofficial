@@ -67,7 +67,7 @@ public class StayByHomeGoal extends Goal {
 		if(!host.useDirectNavigator())
 			this.host.getNavigation().moveTo(homePos.getX(), homePos.getY(), homePos.getZ(), this.speed);
 		else
-			host.directNavigator.setTargetPosition(new BlockPos(homePos.getX(), homePos.getY(), homePos.getZ()), speed);
+			host.setDirectNavigationTarget(new BlockPos(homePos.getX(), homePos.getY(), homePos.getZ()), speed);
     }
 
 	@Override
@@ -75,6 +75,6 @@ public class StayByHomeGoal extends Goal {
 		if(!this.host.useDirectNavigator())
 			this.host.getNavigation().stop();
 		else
-			this.host.directNavigator.clearTargetPosition(this.speed);
+			this.host.clearDirectNavigationTarget(this.speed);
 	}
 }

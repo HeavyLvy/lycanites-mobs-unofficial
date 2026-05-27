@@ -12,8 +12,8 @@ public class HealWhenNoPlayersGoal extends Goal {
 	BaseCreatureEntity host;
 
 	// Targets:
-	public List<Player> playerTargets = new ArrayList<>();
-	public boolean firstPlayerTargetCheck = false;
+	private List<Player> playerTargets = new ArrayList<>();
+	private boolean firstPlayerTargetCheck = false;
 
     // Properties:
     private float healAmount = 50;
@@ -57,12 +57,12 @@ public class HealWhenNoPlayersGoal extends Goal {
 
 	@Override
     public void tick() {
-		if(this.host.updateTick % 200 != 0 || !this.firstPlayerTargetCheck) {
+		if(!this.host.isUpdateTickMultiple(200) || !this.firstPlayerTargetCheck) {
 			return;
 		}
 		this.firstPlayerTargetCheck = true;
 		this.playerTargets = this.host.getNearbyEntities(Player.class, null, 64);
-		if (this.host.updateTick % 20 == 0 && this.playerTargets.isEmpty()) {
+		if (this.host.isUpdateTickMultiple(20) && this.playerTargets.isEmpty()) {
 			this.host.heal(this.healAmount);
 		}
     }

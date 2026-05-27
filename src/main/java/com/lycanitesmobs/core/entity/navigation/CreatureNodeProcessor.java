@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
 
 public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatureNodeProcessor {
 
-    public BaseCreatureEntity entityCreature;
+    private BaseCreatureEntity entityCreature;
 
     public static double getGroundY(BlockGetter blockReader, BlockPos pos) {
         BlockPos blockpos = pos.below();

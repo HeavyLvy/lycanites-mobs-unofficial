@@ -75,7 +75,7 @@ public class LMHelperClass {
     /**
      * Prints an info message into the console.
      *
-     * @param key     The debug config key to use, if empty, the message is always printed.
+     * @param key     The debug config key to use. Use {@link #logInfoMessage(String)} for unconditional output.
      * @param message The message to print.
      */
     public static void logInfo(String key, String message) {
@@ -87,7 +87,7 @@ public class LMHelperClass {
     /**
      * Prints an info debug into the console.
      *
-     * @param key     The debug config key to use, if empty, the message is always printed.
+     * @param key     The debug config key to use. Operational notices should use {@link #logInfoMessage(String)}.
      * @param message The message to print.
      */
     public static void logDebug(String key, String message) {
@@ -99,7 +99,7 @@ public class LMHelperClass {
     /**
      * Prints an info warning into the console.
      *
-     * @param key     The debug config key to use, if empty, the message is always printed.
+     * @param key     The debug config key to use. Use {@link #logWarningMessage(String)} for unconditional output.
      * @param message The message to print.
      */
     public static void logWarning(String key, String message) {
@@ -299,6 +299,7 @@ public class LMHelperClass {
 
         return null;
     }
+
     public static ResourceLocation convertToResourceLocation(Object input, RegistryAccess access) {
         if (input == null) {
             return null;
@@ -388,9 +389,7 @@ public class LMHelperClass {
 
 
     public static Integer convertToInteger(Object input) {
-        if (input instanceof Integer) {
-            return (Integer) input;
-        } else if (input instanceof Double || input instanceof Float) {
+        if (input instanceof Number) {
             return ((Number) input).intValue();
         } else {
             return null;
@@ -398,9 +397,7 @@ public class LMHelperClass {
     }
 
     public static Double convertToDouble(Object input) {
-        if (input instanceof Double) {
-            return (Double) input;
-        } else if (input instanceof Integer || input instanceof Float) {
+        if (input instanceof Number) {
             return ((Number) input).doubleValue();
         } else {
             return null;
@@ -408,9 +405,7 @@ public class LMHelperClass {
     }
 
     public static Float convertToFloat(Object input) {
-        if (input instanceof Float) {
-            return (Float) input;
-        } else if (input instanceof Integer || input instanceof Double) {
+        if (input instanceof Number) {
             return ((Number) input).floatValue();
         } else {
             return null;

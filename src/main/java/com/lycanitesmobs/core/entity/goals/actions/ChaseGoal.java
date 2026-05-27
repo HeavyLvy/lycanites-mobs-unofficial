@@ -73,7 +73,7 @@ public class ChaseGoal extends Goal {
 		if(!this.host.useDirectNavigator())
 			this.host.getNavigation().moveTo(this.movePos.getX(), this.movePos.getY(), this.movePos.getZ(), this.speed);
 		else
-			this.host.directNavigator.setTargetPosition(this.movePos, this.speed);
+			this.host.setDirectNavigationTarget(this.movePos, this.speed);
 	}
 
 	@Override
@@ -82,6 +82,6 @@ public class ChaseGoal extends Goal {
 		if(!this.host.useDirectNavigator())
 			this.host.getNavigation().stop();
 		else
-			this.host.directNavigator.clearTargetPosition(this.speed);
+			this.host.clearDirectNavigationTarget(this.speed);
 	}
 }

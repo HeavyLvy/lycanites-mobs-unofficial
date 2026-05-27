@@ -38,10 +38,9 @@ public class ItemSoulstone extends CreatureTypeItem {
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity entity, InteractionHand hand) {
         if (this.applySoulstoneToEntity(player, entity)) {
             // Consume Soulstone:
-            if (!player.getAbilities().instabuild)
-                stack.setCount(Math.max(0, stack.getCount() - 1));
-            if (stack.getCount() <= 0)
-                player.getInventory().setItem(player.getInventory().selected, ItemStack.EMPTY);
+            if (!player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
 
             return InteractionResult.SUCCESS;
         }
@@ -67,7 +66,7 @@ public class ItemSoulstone extends CreatureTypeItem {
         }
 
         TameableCreatureEntity entityTameable = (TameableCreatureEntity) entity;
-        CreatureInfo creatureInfo = entityTameable.creatureInfo;
+        CreatureInfo creatureInfo = entityTameable.getCreatureInfo();
         if (!creatureInfo.isTameable() || entityTameable.getOwner() != player) {
             if (!player.getCommandSenderWorld().isClientSide)
                 player.displayClientMessage(Component.translatable("message.soulstone.untamed"), false);
@@ -93,7 +92,7 @@ public class ItemSoulstone extends CreatureTypeItem {
         // Store Pet:
         if (!player.getCommandSenderWorld().isClientSide) {
             String petType = "pet";
-            if (entityTameable.creatureInfo.isMountable()) {
+            if (entityTameable.getCreatureInfo().isMountable()) {
                 petType = "mount";
             }
 
@@ -107,7 +106,7 @@ public class ItemSoulstone extends CreatureTypeItem {
 
             // Add Pet Entry:
             PetEntry petEntry = PetEntry.createFromEntity(player, entityTameable, petType);
-            playerExt.petManager.addEntry(petEntry);
+            playerExt.getPetManager().addEntry(petEntry);
             playerExt.sendPetEntriesToPlayer(petType);
             petEntry.assignEntity(entity);
             entityTameable.setPetEntry(petEntry);

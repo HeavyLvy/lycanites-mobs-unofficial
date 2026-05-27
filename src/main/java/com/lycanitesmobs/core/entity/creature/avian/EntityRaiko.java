@@ -37,7 +37,7 @@ public class EntityRaiko extends RideableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false));
     }
 	
 	
@@ -187,7 +187,7 @@ public class EntityRaiko extends RideableCreatureEntity implements Enemy {
 
         // Ignore Targets Picked Up By Another Mob:
         ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(targetEntity);
-        if(extendedEntity != null && extendedEntity.pickedUpByEntity != null) {
+        if(extendedEntity != null && extendedEntity.isPickedUp()) {
             return false;
         }
 
@@ -199,7 +199,7 @@ public class EntityRaiko extends RideableCreatureEntity implements Enemy {
         if(this.isTamed()) {
             return super.isAggressive();
         }
-        if ("".equals(this.spawnEventType) && this.getCommandSenderWorld().isDay() && this.testLightLevel() >= 2) {
+        if (!this.hasSpawnEvent() && this.getCommandSenderWorld().isDay() && this.testLightLevel() >= 2) {
             return false;
         }
         return super.isAggressive();
@@ -264,7 +264,7 @@ public class EntityRaiko extends RideableCreatureEntity implements Enemy {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
 
     // ==================================================
     //                      Movement

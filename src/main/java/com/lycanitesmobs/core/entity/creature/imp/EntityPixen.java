@@ -25,16 +25,16 @@ public class EntityPixen extends TameableCreatureEntity implements Enemy {
     protected boolean wantsToLand;
     protected boolean  isLanded;
 
-    public int auraRate = 60;
+    protected int auraRate = 60;
 
     /** A list of beneficial potion effects that this element can grant. **/
-    public List<String> auraEffects = new ArrayList<>();
+    protected List<String> auraEffects = new ArrayList<>();
 
     /** The duration (in ticks) of the random effect. **/
-    public int auraDuration = 100;
+    protected int auraDuration = 100;
 
     /** The random effect amplifier. **/
-    public int auraAmplifier = 0;
+    protected int auraAmplifier = 0;
 
     // ==================================================
  	//                    Constructor
@@ -62,8 +62,8 @@ public class EntityPixen extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new TemptGoal(this).setAlwaysTempted(true));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(1D).setRange(14.0F).setMinChaseDistance(5.0F).setCheckSight(false));
+        this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new TemptGoal(this).setAlwaysTempted(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(1D).setRange(14.0F).setMinChaseDistance(5.0F).setCheckSight(false));
     }
 	
 	
@@ -192,7 +192,7 @@ public class EntityPixen extends TameableCreatureEntity implements Enemy {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
     
     
     // ==================================================

@@ -34,7 +34,7 @@ public class BlockScorchfire extends BlockFireBase {
         this.removeOnTick = false;
         this.removeOnNoFireTick = false;
 
-        ItemManager.getInstance().cutoutBlocks.add(this);
+        ItemManager.getInstance().registerCutoutBlock(this);
     }
 
 

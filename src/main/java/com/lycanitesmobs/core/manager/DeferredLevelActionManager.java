@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
@@ -60,6 +61,30 @@ public class DeferredLevelActionManager {
         READY.computeIfAbsent(dimension, dim -> new ConcurrentLinkedDeque<>())
                 .offer(new QueuedAction(dimension, chunkPos, key, action));
         return true;
+    }
+
+    public static boolean spawnEntity(Level level, BlockPos pos, @Nullable String key, Entity entity) {
+        return spawnEntity(level, pos, key, entity, null);
+    }
+
+    public static boolean spawnEntity(Level level, BlockPos pos, @Nullable String key, Entity entity, @Nullable Runnable afterSpawn) {
+        if (level instanceof ServerLevel serverLevel) {
+            return enqueue(serverLevel, pos, key, executingLevel -> spawnEntityNow(executingLevel, entity, afterSpawn));
+        }
+
+        spawnEntityNow(level, entity, afterSpawn);
+        return true;
+    }
+
+    public static void spawnEntityNow(Level level, Entity entity) {
+        spawnEntityNow(level, entity, null);
+    }
+
+    public static void spawnEntityNow(Level level, Entity entity, @Nullable Runnable afterSpawn) {
+        level.addFreshEntity(entity);
+        if (afterSpawn != null) {
+            afterSpawn.run();
+        }
     }
 
     @SubscribeEvent

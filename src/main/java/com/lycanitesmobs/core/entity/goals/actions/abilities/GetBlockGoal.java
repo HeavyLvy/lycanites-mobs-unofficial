@@ -29,9 +29,9 @@ public class GetBlockGoal extends Goal {
     private int cantSeeTime = 0;
     protected int cantSeeTimeMax = 60;
     private int updateRate = 0;
-    public Block targetBlock = Blocks.TORCH;
-    public String targetBlockName = "";
-    public boolean tamedLooting = true;
+    private Block targetBlock = Blocks.TORCH;
+    private String targetBlockName = "";
+    private boolean tamedLooting = true;
     
     // ==================================================
   	//                    Constructor
@@ -191,7 +191,7 @@ public class GetBlockGoal extends Goal {
         	if(!this.host.useDirectNavigator())
         		this.host.getNavigation().moveTo(this.target.getX(), this.target.getY(), this.target.getZ(), this.speed);
         	else
-        		this.host.directNavigator.setTargetPosition(this.target, this.speed);
+        		this.host.setDirectNavigationTarget(this.target, this.speed);
         }
     }
 }

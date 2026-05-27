@@ -146,7 +146,7 @@ public class FindAttackTargetGoal extends TargetingGoal {
         }
 
         // Relationships Check:
-        CreatureRelationshipEntry relationshipEntry = this.host.relationships.getEntry(target);
+        CreatureRelationshipEntry relationshipEntry = this.host.getRelationshipEntry(target);
         if (relationshipEntry != null && !relationshipEntry.canHunt()) {
             return false;
         }
@@ -169,11 +169,11 @@ public class FindAttackTargetGoal extends TargetingGoal {
         }
 
         if (this.targetPlayers) {
-            if (this.host.updateTick % 10 != 0) {
+            if (!this.host.isUpdateTickMultiple(10)) {
                 return false;
             }
         } else {
-            if (this.host.updateTick % 40 != 0) {
+            if (!this.host.isUpdateTickMultiple(40)) {
                 return false;
             }
         }
@@ -224,7 +224,7 @@ public class FindAttackTargetGoal extends TargetingGoal {
                     }
                 }
             } catch (Exception e) {
-                LMHelperClass.logWarning("", "An exception occurred when player target selecting, this has been skipped to prevent a crash.");
+                LMHelperClass.logWarningMessage("An exception occurred when player target selecting, this has been skipped to prevent a crash.");
                 e.printStackTrace();
             }
 
@@ -234,7 +234,7 @@ public class FindAttackTargetGoal extends TargetingGoal {
             }
         }
 
-        if (this.host.updateTick % 40 == 0) {
+        if (this.host.isUpdateTickMultiple(40)) {
             return super.getNewTarget(rangeX, rangeY, rangeZ);
         }
 

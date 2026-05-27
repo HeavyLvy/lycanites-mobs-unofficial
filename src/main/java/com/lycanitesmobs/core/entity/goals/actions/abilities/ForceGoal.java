@@ -1,10 +1,9 @@
 package com.lycanitesmobs.core.entity.goals.actions.abilities;
 
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
-import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+import com.lycanitesmobs.core.util.math.SchismMath;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -22,10 +21,10 @@ public class ForceGoal extends Goal {
 	protected float force = 1F;
 	protected int phase = -1;
 
-	public int abilityTime = 0;
-	public int cooldownTime = this.cooldownDuration;
-	public boolean windUpForce = false;
-	public boolean dismountTargets = false;
+	private int abilityTime = 0;
+	private int cooldownTime = this.cooldownDuration;
+	private boolean windUpForce = false;
+	private boolean dismountTargets = false;
 
 
 	/**
@@ -117,6 +116,10 @@ public class ForceGoal extends Goal {
 		return this;
 	}
 
+	public boolean isCooledDown() {
+		return this.cooldownTime <= 0;
+	}
+
 	@Override
     public boolean canUse() {
 		if(!this.host.isAlive()) {
@@ -166,7 +169,7 @@ public class ForceGoal extends Goal {
 			double xDist = this.host.position().x() - entity.position().x();
 			double yDist = this.host.position().y() - entity.position().y();
 			double zDist = this.host.position().z() - entity.position().z();
-			double xzDist = Math.max(Mth.sqrt(LMHelperClass.convertToFloat(xDist * xDist + zDist * zDist)), 0.01D);
+			double xzDist = SchismMath.horizontalDistanceAtLeast(xDist, zDist, 0.01D);
 			ServerPlayer player = null;
 			if (entity instanceof ServerPlayer) {
 				player = (ServerPlayer) entity;

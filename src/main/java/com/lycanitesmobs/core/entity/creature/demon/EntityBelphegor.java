@@ -21,8 +21,8 @@ public class EntityBelphegor extends TameableCreatureEntity implements Enemy {
     // Data Manager:
     protected static final EntityDataAccessor<Integer> HELLFIRE_ENERGY = SynchedEntityData.defineId(EntityBelphegor.class, EntityDataSerializers.INT);
 
-    public int hellfireEnergy = 0;
-    public List<EntityHellfireOrb> hellfireOrbs = new ArrayList<>();
+    protected int hellfireEnergy = 0;
+    protected List<EntityHellfireOrb> hellfireOrbs = new ArrayList<>();
     
     // ==================================================
  	//                    Constructor
@@ -39,12 +39,12 @@ public class EntityBelphegor extends TameableCreatureEntity implements Enemy {
     // ========== Init AI ==========
     @Override
     protected void registerGoals() {
-        //this.goalSelector.addGoal(this.nextTravelGoalIndex++, new MoveRestrictionGoal(this));
+        //this.goalSelector.addGoal(this.claimTravelGoalIndex(), new MoveRestrictionGoal(this));
 
         super.registerGoals();
 
-        this.goalSelector.addGoal(this.nextDistractionGoalIndex++, new BreakDoorGoal(this));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(1.0D).setRange(16.0F).setMinChaseDistance(8.0F).setChaseTime(-1));
+        this.goalSelector.addGoal(this.claimDistractionGoalIndex(), new BreakDoorGoal(this));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(1.0D).setRange(16.0F).setMinChaseDistance(8.0F).setChaseTime(-1));
 
         if(this.getNavigation() instanceof GroundPathNavigation) {
             GroundPathNavigation pathNavigateGround = (GroundPathNavigation)this.getNavigation();
@@ -84,6 +84,18 @@ public class EntityBelphegor extends TameableCreatureEntity implements Enemy {
         if(this.getCommandSenderWorld().isClientSide && this.hellfireEnergy > 0)
             EntityRahovart.updateHellfireOrbs(this, this.updateTick, 3, this.hellfireEnergy, 0.5F, this.hellfireOrbs);
     }
+
+    public void resetHellfireEnergy() {
+        this.hellfireEnergy = 0;
+    }
+
+    public void addHellfireEnergy(int amount) {
+        this.hellfireEnergy += amount;
+    }
+
+    public boolean hasFullHellfireEnergy() {
+        return this.hellfireEnergy >= 100;
+    }
     
     
     // ==================================================
@@ -118,7 +130,7 @@ public class EntityBelphegor extends TameableCreatureEntity implements Enemy {
     @Override
     public int getNoBagSize() { return 0; }
     @Override
-    public int getBagSize() { return this.creatureInfo.bagSize; }
+    public int getBagSize() { return this.creatureInfo.getBagSize(); }
     // ==================================================
     //                     Immunities
     // ==================================================

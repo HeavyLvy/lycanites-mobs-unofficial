@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -20,7 +21,7 @@ import com.lycanitesmobs.core.entity.creature.aberration.EntityTrite;
 import com.lycanitesmobs.core.entity.creature.elemental.EntityWraith;
 
 public class EntityMalwrath extends RideableCreatureEntity {
-    public boolean griefing = true;
+    protected boolean griefing = true;
 
     // ==================================================
     //                    Constructor
@@ -41,8 +42,8 @@ public class EntityMalwrath extends RideableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.25D).setRange(40.0F).setMinChaseDistance(10.0F).setLongMemory(false));
-        this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(EntityType.GHAST));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.25D).setRange(40.0F).setMinChaseDistance(10.0F).setLongMemory(false));
+        this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindAttackTargetGoal(this).addTargets(EntityType.GHAST));
     }
 
     @Override
@@ -78,7 +79,7 @@ public class EntityMalwrath extends RideableCreatureEntity {
             return;
 
         // Spawn Minions:
-        if (CreatureManager.getInstance().getCreature("wraith").enabled) {
+        if (CreatureManager.getInstance().getCreature("wraith").isEnabled()) {
             if (this.nearbyCreatureCount(CreatureManager.getInstance().getCreature("wraith").getEntityType(), 64D) < 10) {
                 float random = this.random.nextFloat();
                 if (random <= 0.1F) {
@@ -93,7 +94,7 @@ public class EntityMalwrath extends RideableCreatureEntity {
         minion.moveTo(x, y, z, this.yRot, this.xRot);
         minion.setMinion(true);
         minion.setMasterTarget(this);
-        this.getCommandSenderWorld().addFreshEntity(minion);
+        DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, minion);
         if (this.getTarget() != null) {
             minion.setLastHurtByMob(this.getTarget());
         }
@@ -128,7 +129,7 @@ public class EntityMalwrath extends RideableCreatureEntity {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
 
@@ -202,7 +203,7 @@ public class EntityMalwrath extends RideableCreatureEntity {
             ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile("demonicblast");
             if (projectileInfo != null) {
                 BaseProjectileEntity projectile = projectileInfo.createProjectile(this.getCommandSenderWorld(), player);
-                this.getCommandSenderWorld().addFreshEntity(projectile);
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
                 this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
                 this.triggerAttackCooldown();
             }

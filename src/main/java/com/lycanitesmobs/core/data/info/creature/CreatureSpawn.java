@@ -12,6 +12,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.common.DungeonHooks;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,124 +26,218 @@ public class CreatureSpawn {
     /**
      * If false, spawning of this creature is disabled, but this wont despawn existing creatures.
      **/
-    public boolean enabled = true;
+    protected boolean enabled = true;
 
     /**
      * If true, this mob wont naturally spawn as a subspecies.
      **/
-    public boolean disableVariants = false;
+    protected boolean disableVariants = false;
 
 
     // Spawners:
     /**
      * A list of Spawners that this creature should use.
      **/
-    public List<String> spawners = new ArrayList<>();
+    protected List<String> spawners = new ArrayList<>();
 
     /**
      * A list of Vanilla Creature Types to use.
      **/
-    public List<MobCategory> vanillaSpawnerTypes = new ArrayList<>();
+    protected List<MobCategory> vanillaSpawnerTypes = new ArrayList<>();
 
 
     // Dimensions:
     /**
      * How the dimension ID list works. Can be whitelist or blacklist.
      **/
-    public String dimensionListType = "whitelist";
+    protected String dimensionListType = "whitelist";
 
     /**
      * The dimension IDs that the world must or must not match depending on the list type.
      **/
-    public List<String> dimensionIds = new ArrayList<>();
+    protected List<String> dimensionIds = new ArrayList<>();
 
     /**
      * The dimensions that the world must or must not match depending on the list type.
      **/
-    public List<DimensionType> dimensions = null;
+    protected List<DimensionType> dimensions = null;
 
 
     // Biomes:
     /**
      * The list of biome tags that this creature spawns in. Converts to a list of biomes on demand.
      **/
-    public List<String> biomeTags = new ArrayList<>();
+    protected List<String> biomeTags = new ArrayList<>();
 
     /**
      * The set of biomes generated from the list of biome tags. HashSet for O(1) lookup at spawn time.
      **/
-    public Set<String> biomesFromTags = null;
+    protected Set<String> biomesFromTags = null;
 
-    public List<String> biomeTagBlacklist = new ArrayList<>();
-    public Set<String> biomesFromTagBlacklist = null;
+    protected List<String> biomeTagBlacklist = new ArrayList<>();
+    protected Set<String> biomesFromTagBlacklist = null;
 
     /**
      * The list of specific biome ids that this creature spawns in.
      **/
-    public List<String> biomeIds = new ArrayList<>();
+    protected List<String> biomeIds = new ArrayList<>();
 
     /**
      * If true, the biome check will be ignored completely by this creature.
      **/
-    public boolean ignoreBiome = false;
+    protected boolean ignoreBiome = false;
 
 
     // Weights:
     /**
      * The chance of this mob spawning over others.
      **/
-    public int spawnWeight = 8;
+    protected int spawnWeight = 8;
 
     /**
      * The chance of dungeons using this mob over others.
      **/
-    public int dungeonWeight = 200;
+    protected int dungeonWeight = 200;
 
 
     // Limits:
     /**
      * The maximum arount of this mob allowed within the Spawn Area Search Limit.
      **/
-    public int spawnAreaLimit = 5;
+    protected int spawnAreaLimit = 5;
 
     /**
      * The minimum number of this mob to group spawn at once.
      **/
-    public int spawnGroupMin = 1;
+    protected int spawnGroupMin = 1;
 
     /**
      * The maximum number of this mob to group spawn at once.
      **/
-    public int spawnGroupMax = 3;
+    protected int spawnGroupMax = 3;
 
 
     // Area Conditions:
     /**
      * Whether or not this mob can spawn in high light levels.
      **/
-    public boolean spawnsInLight = false;
+    protected boolean spawnsInLight = false;
 
     /**
      * Whether or not this mob can spawn in low light levels.
      **/
-    public boolean spawnsInDark = true;
+    protected boolean spawnsInDark = true;
 
     /**
      * The minimum world days that must have gone by, can accept fractions such as 5.25 for 5 and a quarter days.
      **/
-    public double worldDayMin = -1;
+    protected double worldDayMin = -1;
 
 
     // Despawning:
     /**
      * Whether this mob should despawn or not by default (some mobs can override persistence, such as once farmed).
      **/
-    public boolean despawnNatural = true;
+    protected boolean despawnNatural = true;
 
     /**
      * Whether this mob should always despawn no matter what.
      **/
-    public boolean despawnForced = false;
+    protected boolean despawnForced = false;
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public boolean disablesVariants() {
+        return this.disableVariants;
+    }
+
+    public List<String> getSpawners() {
+        return Collections.unmodifiableList(this.spawners);
+    }
+
+    public List<MobCategory> getVanillaSpawnerTypes() {
+        return Collections.unmodifiableList(this.vanillaSpawnerTypes);
+    }
+
+    public String getDimensionListType() {
+        return this.dimensionListType;
+    }
+
+    public List<String> getDimensionIds() {
+        return Collections.unmodifiableList(this.dimensionIds);
+    }
+
+    public List<String> getBiomeTags() {
+        return Collections.unmodifiableList(this.biomeTags);
+    }
+
+    public Set<String> getResolvedBiomeTags() {
+        if (this.biomesFromTags == null) {
+            return Collections.emptySet();
+        }
+        return Collections.unmodifiableSet(this.biomesFromTags);
+    }
+
+    public List<String> getBiomeTagBlacklist() {
+        return Collections.unmodifiableList(this.biomeTagBlacklist);
+    }
+
+    public Set<String> getResolvedBiomeTagBlacklist() {
+        if (this.biomesFromTagBlacklist == null) {
+            return Collections.emptySet();
+        }
+        return Collections.unmodifiableSet(this.biomesFromTagBlacklist);
+    }
+
+    public List<String> getBiomeIds() {
+        return Collections.unmodifiableList(this.biomeIds);
+    }
+
+    public boolean ignoresBiome() {
+        return this.ignoreBiome;
+    }
+
+    public int getSpawnWeight() {
+        return this.spawnWeight;
+    }
+
+    public int getDungeonWeight() {
+        return this.dungeonWeight;
+    }
+
+    public int getSpawnAreaLimit() {
+        return this.spawnAreaLimit;
+    }
+
+    public int getSpawnGroupMin() {
+        return this.spawnGroupMin;
+    }
+
+    public int getSpawnGroupMax() {
+        return this.spawnGroupMax;
+    }
+
+    public boolean spawnsInLight() {
+        return this.spawnsInLight;
+    }
+
+    public boolean spawnsInDark() {
+        return this.spawnsInDark;
+    }
+
+    public double getWorldDayMin() {
+        return this.worldDayMin;
+    }
+
+    public boolean despawnsNaturally() {
+        return this.despawnNatural;
+    }
+
+    public boolean forcesDespawn() {
+        return this.despawnForced;
+    }
 
 
     /**
@@ -254,9 +349,9 @@ public class CreatureSpawn {
     /**
      * Registers this mob to vanilla spawners and dungeons. Can only be done during startup.
      */
-    public void registerVanillaSpawns(CreatureInfo creatureInfo) {
+    public void registerVanillaSpawns(CreatureInfo creatureInfo, CreatureSpawnConfig spawnConfig) {
         // Dungeon Spawn:
-        if (!CreatureManager.getInstance().spawnConfig.disableDungeonSpawners) {
+        if (!spawnConfig.disableDungeonSpawners()) {
             if (this.dungeonWeight > 0) {
                 DungeonHooks.addDungeonMob(creatureInfo.getEntityType(), this.dungeonWeight);
                 LMHelperClass.logDebug("MobSetup", "Dungeon Spawn Added - Weight: " + this.dungeonWeight);
@@ -278,7 +373,7 @@ public class CreatureSpawn {
         }
 
         // Global Check:
-        if (!CreatureManager.getInstance().spawnConfig.isAllowedGlobal(world)) {
+        if (!CreatureManager.getInstance().getSpawnConfig().isAllowedGlobal(world)) {
             return false;
         }
 

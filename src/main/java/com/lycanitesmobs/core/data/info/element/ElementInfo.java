@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ public class ElementInfo {
     /**
      * The name of this element.
      **/
-    public String name = "default";
+    protected String name = "default";
 
     /**
      * The names of elements that make up this elements, used by compound elements.
@@ -31,47 +32,75 @@ public class ElementInfo {
     /**
      * The elements that make up this elements, used by compound elements. This is populated from the component names list once all elements are loaded.
      **/
-    public List<ElementInfo> components = new ArrayList<>();
+    protected List<ElementInfo> components = new ArrayList<>();
 
     /**
      * The type of this element, can be primal or compound. Default: Automatic (primal if no components, compound if there are components.)
      **/
-    public String type;
+    protected String type;
 
     /**
      * A list of beneficial potion effects that this element can grant.
      **/
-    public List<String> buffs = new ArrayList<>();
+    protected List<String> buffs = new ArrayList<>();
 
     /**
      * A list of detrimental potion effects that this element can inflict as well as grant immunity to.
      **/
-    public List<String> debuffs = new ArrayList<>();
+    protected List<String> debuffs = new ArrayList<>();
 
     /**
      * A list of potion effects that this element has immunity to.
      **/
-    public List<String> immunities = new ArrayList<>();
+    protected List<String> immunities = new ArrayList<>();
 
     /**
      * A multiplier applied to any buffs caused by this element.
      **/
-    public double buffDurationMultiplier = 1;
+    protected double buffDurationMultiplier = 1;
 
     /**
      * A multiplier applied to any debuffs caused by this element.
      **/
-    public double debuffDurationMultiplier = 1;
+    protected double debuffDurationMultiplier = 1;
 
     /**
      * Whether creatures of this element are able to burn by default. Some creatures will override this with their own settings.
      **/
-    public boolean canBurn = true;
+    protected boolean canBurn = true;
 
     /**
      * Whether creatures of this element are able to freeze by default. Some creatures will override this with their own settings.
      **/
-    public boolean canFreeze = true;
+    protected boolean canFreeze = true;
+
+    public List<ElementInfo> getComponents() {
+        return Collections.unmodifiableList(this.components);
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public List<String> getBuffs() {
+        return Collections.unmodifiableList(this.buffs);
+    }
+
+    public List<String> getDebuffs() {
+        return Collections.unmodifiableList(this.debuffs);
+    }
+
+    public List<String> getImmunities() {
+        return Collections.unmodifiableList(this.immunities);
+    }
+
+    public double getBuffDurationMultiplier() {
+        return this.buffDurationMultiplier;
+    }
+
+    public double getDebuffDurationMultiplier() {
+        return this.debuffDurationMultiplier;
+    }
 
 
     /**
@@ -118,10 +147,12 @@ public class ElementInfo {
      **/
     public void init() {
         // Compound components:
+        this.components.clear();
         if (this.type.equalsIgnoreCase("compound")) {
             for (String componentName : this.componentNames) {
-                if (ElementManager.getInstance().elements.containsKey(componentName)) {
-                    this.components.add(ElementManager.getInstance().elements.get(componentName));
+                ElementInfo component = ElementManager.getInstance().getElement(componentName);
+                if (component != null) {
+                    this.components.add(component);
                 }
             }
         }

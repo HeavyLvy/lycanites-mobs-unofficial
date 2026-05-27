@@ -23,29 +23,29 @@ public class ItemDrop {
     protected String burningItemId;
     protected Map<Integer, String> effectItemIds = new HashMap<>();
 
-    public int minAmount = 1;
-    public int maxAmount = 1;
-    public boolean bonusAmount = true;
+    protected int minAmount = 1;
+    protected int maxAmount = 1;
+    protected boolean bonusAmount = true;
 
     /* Set to false to prevent this drop from using drop multipliers. */
-    public boolean amountMultiplier = true;
+    protected boolean amountMultiplier = true;
 
-    public float chance = 0;
+    protected float chance = 0;
 
     /**
      * The ID of the subspecies that this drop is restricted to. An ID below 0 will have this drop ignore the subspecies.
      **/
-    public int subspeciesIndex = -1;
+    protected int subspeciesIndex = -1;
 
     /**
      * The ID of the variant that this drop is restricted to. An ID below 0 will have this drop ignore the variant.
      **/
-    public int variantIndex = -1;
+    protected int variantIndex = -1;
 
     /**
      * If true, items will only drop for adults and not babies. True by default.
      **/
-    public boolean adultOnly = true;
+    protected boolean adultOnly = true;
 
 
     // ==================================================
@@ -62,7 +62,7 @@ public class ItemDrop {
             itemDrop = new ItemDrop(itemId, 1);
             itemDrop.loadFromJSON(json);
         } else {
-            LMHelperClass.logWarning("", "[JSON] Unable to load item drop from json as it has no item id!");
+            LMHelperClass.logWarningMessage("[JSON] Unable to load item drop from json as it has no item id!");
         }
 
         return itemDrop;
@@ -185,6 +185,16 @@ public class ItemDrop {
         return this;
     }
 
+    public ItemDrop setBonusAmount(boolean bonusAmount) {
+        this.bonusAmount = bonusAmount;
+        return this;
+    }
+
+    public ItemDrop setAmountMultiplier(boolean amountMultiplier) {
+        this.amountMultiplier = amountMultiplier;
+        return this;
+    }
+
     public ItemDrop setChance(float chance) {
         this.chance = chance;
         return this;
@@ -198,6 +208,38 @@ public class ItemDrop {
     public ItemDrop setVariant(int variantIndex) {
         this.variantIndex = variantIndex;
         return this;
+    }
+
+    public int getMinAmount() {
+        return this.minAmount;
+    }
+
+    public int getMaxAmount() {
+        return this.maxAmount;
+    }
+
+    public boolean isBonusAmount() {
+        return this.bonusAmount;
+    }
+
+    public boolean usesAmountMultiplier() {
+        return this.amountMultiplier;
+    }
+
+    public float getChance() {
+        return this.chance;
+    }
+
+    public int getSubspeciesIndex() {
+        return this.subspeciesIndex;
+    }
+
+    public int getVariantIndex() {
+        return this.variantIndex;
+    }
+
+    public boolean isAdultOnly() {
+        return this.adultOnly;
     }
 
 

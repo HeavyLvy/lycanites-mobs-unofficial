@@ -17,7 +17,7 @@ public class BlockIcefire extends BlockFrostfire {
     // ==================================================
     public BlockIcefire(Block.Properties properties) {
         super(properties, "icefire");
-        ItemManager.getInstance().cutoutBlocks.add(this);
+        ItemManager.getInstance().registerCutoutBlock(this);
     }
 
 

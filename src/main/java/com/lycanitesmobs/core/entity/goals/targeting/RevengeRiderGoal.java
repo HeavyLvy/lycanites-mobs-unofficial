@@ -91,7 +91,7 @@ public class RevengeRiderGoal extends FindAttackTargetGoal {
                 }
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "An exception occurred when selecting help targets in rider revenge, this has been skipped to prevent a crash.");
+            LMHelperClass.logWarningMessage("An exception occurred when selecting help targets in rider revenge, this has been skipped to prevent a crash.");
             e.printStackTrace();
         }
 
@@ -114,7 +114,7 @@ public class RevengeRiderGoal extends FindAttackTargetGoal {
     public LivingEntity getRiderRevengeTarget() {
         ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(this.host.getRider());
         if (extendedEntity != null) {
-            return extendedEntity.lastAttackedEntity;
+            return extendedEntity.getLastAttackedEntity();
         }
         return null;
     }
@@ -122,7 +122,7 @@ public class RevengeRiderGoal extends FindAttackTargetGoal {
     public int getRiderRevengeTime() {
         ExtendedEntity extendedEntity = ExtendedEntity.getForEntity(this.host.getRider());
         if (extendedEntity != null) {
-            return extendedEntity.lastAttackedTime;
+            return extendedEntity.getLastAttackedTime();
         }
         return 0;
     }

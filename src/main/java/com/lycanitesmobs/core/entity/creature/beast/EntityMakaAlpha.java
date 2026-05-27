@@ -39,11 +39,11 @@ public class EntityMakaAlpha extends AgeableCreatureEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-		this.targetSelector.addGoal(this.nextFindTargetIndex++, new FindAttackTargetGoal(this).addTargets(this.getClass()));
-		this.targetSelector.addGoal(this.nextSpecialTargetIndex++, new DefendEntitiesGoal(this, EntityMaka.class));
+		this.targetSelector.addGoal(this.claimFindTargetGoalIndex(), new FindAttackTargetGoal(this).addTargets(this.getClass()));
+		this.targetSelector.addGoal(this.claimSpecialTargetGoalIndex(), new DefendEntitiesGoal(this, EntityMaka.class));
 
-		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
-		this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this));
+		this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setTargetClass(Player.class).setLongMemory(false));
+		this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this));
     }
 	
 	
@@ -100,7 +100,7 @@ public class EntityMakaAlpha extends AgeableCreatureEntity {
 	@Override
 	public int getNoBagSize() { return 0; }
 	@Override
-	public int getBagSize() { return this.creatureInfo.bagSize; }
+	public int getBagSize() { return this.creatureInfo.getBagSize(); }
 	// ==================================================
    	//                      Attacks
    	// ==================================================

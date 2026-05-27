@@ -1,4 +1,4 @@
-package com.lycanitesmobs.core.compatibility;
+package com.lycanitesmobs.client.compatibility;
 
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.renderer.RenderType;
@@ -23,7 +23,7 @@ public class OculusCompat {
     public static void init() {
         oculusLoaded = ModList.get().isLoaded("oculus");
         if (oculusLoaded) {
-            LMHelperClass.logInfo("", "[Lycanites Mobs] Oculus detected – Iris shader compatibility enabled.");
+            LMHelperClass.logInfoMessage("Oculus detected - Iris shader compatibility enabled.");
         }
     }
 

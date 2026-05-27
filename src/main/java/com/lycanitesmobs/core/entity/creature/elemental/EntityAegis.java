@@ -32,10 +32,10 @@ public class EntityAegis extends TameableCreatureEntity implements IFusable {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(true));
 
-        this.targetSelector.addGoal(this.nextSpecialTargetIndex++, new DefendVillageGoal(this));
-        this.targetSelector.addGoal(this.nextSpecialTargetIndex++, new DefendEntitiesGoal(this, Villager.class));
+        this.targetSelector.addGoal(this.claimSpecialTargetGoalIndex(), new DefendVillageGoal(this));
+        this.targetSelector.addGoal(this.claimSpecialTargetGoalIndex(), new DefendEntitiesGoal(this, Villager.class));
     }
 
     @Override
@@ -86,7 +86,7 @@ public class EntityAegis extends TameableCreatureEntity implements IFusable {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     @Override

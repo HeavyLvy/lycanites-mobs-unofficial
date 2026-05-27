@@ -40,7 +40,7 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
     protected void registerGoals() {
         super.registerGoals();
         this.attackAI = new AttackMeleeGoal(this).setLongMemory(false);
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, this.attackAI);
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), this.attackAI);
     }
 
 
@@ -249,7 +249,7 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
 

@@ -32,7 +32,7 @@ public class ProjectileRenderFactory<T extends BaseProjectileEntity> {
             try {
                 return new ProjectileModelRenderer(manager, this.oldProjectileName);
             } catch (Exception e) {
-                LMHelperClass.logWarning("", "An exception occurred when creating an old projectile renderer:");
+                LMHelperClass.logWarningMessage("An exception occurred when creating an old projectile renderer:");
                 e.printStackTrace();
             }
         }
@@ -43,11 +43,11 @@ public class ProjectileRenderFactory<T extends BaseProjectileEntity> {
         }
 
         // New JSON Projectile:
-        if (this.projectileInfo != null && this.projectileInfo.modelClassName != null) {
+        if (this.projectileInfo != null && this.projectileInfo.hasModel()) {
             try {
                 return new ProjectileModelRenderer(manager, this.projectileInfo);
             } catch (Exception e) {
-                LMHelperClass.logWarning("", "An exception occurred when creating a projectile renderer:");
+                LMHelperClass.logWarningMessage("An exception occurred when creating a projectile renderer:");
                 e.printStackTrace();
             }
         }

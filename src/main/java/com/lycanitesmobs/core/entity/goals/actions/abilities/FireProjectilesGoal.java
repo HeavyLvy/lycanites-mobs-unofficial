@@ -4,6 +4,7 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.goals.BaseGoal;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -208,11 +209,11 @@ public class FireProjectilesGoal extends BaseGoal {
 
         // All Players Mode:
         if (this.allPlayers) {
-            for (Player target : this.host.playerTargets) {
+            this.host.forEachPlayerTarget(target -> {
                 if (target.getAbilities().invulnerable || target.isSpectator())
-                    continue;
+                    return;
                 this.fireProjectile(target);
-            }
+            });
             return;
         }
 
@@ -271,6 +272,6 @@ public class FireProjectilesGoal extends BaseGoal {
         Entity target = this.attackTarget != null ? this.attackTarget : this.host;
         projectile.setPos(target.position().x, target.position().y + this.offset.y + this.host.getRandom().nextDouble() * 3, target.position().z);
         projectile.shoot(0, -1, 0, 0.5F, this.inaccuracy);
-        this.host.getCommandSenderWorld().addFreshEntity(projectile);
+        DeferredLevelActionManager.spawnEntity(this.host.getCommandSenderWorld(), target.blockPosition(), null, projectile);
     }
 }

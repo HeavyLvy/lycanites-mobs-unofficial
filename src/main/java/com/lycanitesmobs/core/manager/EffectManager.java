@@ -13,7 +13,7 @@ import java.util.List;
 public class EffectManager {
 
     // Global Settings:
-    public boolean disableNausea = false;
+    private boolean disableNausea = false;
 
     // ==================================================
     //                    Initialize
@@ -55,7 +55,7 @@ public class EffectManager {
         ObjectManager.addSound("effect_heartbeat", "effect.heartbeat");
     }
 
-    public static EffectManager INSTANCE = new EffectManager();
+    private static final EffectManager INSTANCE = new EffectManager();
 
     public static EffectManager getInstance() {
         return INSTANCE;
@@ -65,6 +65,14 @@ public class EffectManager {
     // ==================================================
     //                     Utility
     // ==================================================
+
+    public void setNauseaDisabled(boolean disableNausea) {
+        this.disableNausea = disableNausea;
+    }
+
+    public boolean isNauseaDisabled() {
+        return this.disableNausea;
+    }
 
     /**
      * Get entities that are near the provided entity.

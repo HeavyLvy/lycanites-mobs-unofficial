@@ -89,7 +89,7 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
 
     // TODO: Create creative tabs
     public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
-        for (CreatureInfo creatureInfo : this.creatureType.creatures.values()) {
+        for (CreatureInfo creatureInfo : this.creatureType.getCreatures()) {
             ItemStack itemstack = new ItemStack(this, 1);
             this.applyCreatureInfoToItemStack(itemstack, creatureInfo);
             items.add(itemstack);
@@ -252,11 +252,7 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
                 mobEntity.playAmbientSound();
             }
 
-            if (world instanceof ServerLevel serverLevel) {
-                DeferredLevelActionManager.enqueue(serverLevel, BlockPos.containing(x, y, z), "spawn_egg:" + entity.getUUID(), level -> level.addFreshEntity(entity));
-            } else {
-                world.addFreshEntity(entity);
-            }
+            DeferredLevelActionManager.spawnEntity(world, BlockPos.containing(x, y, z), "spawn_egg:" + entity.getUUID(), entity);
         }
         return entity;
     }

@@ -12,16 +12,16 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class EffectEquipmentFeature extends EquipmentFeature {
 	/** The type of effect to apply. Can be fire or a potion effect name. **/
-	public String effectType;
+	protected String effectType;
 
 	/** Controls what this effect targets, Can be: self or target. **/
-	public String effectTarget;
+	protected String effectTarget;
 
 	/** The time (in ticks) that this feature adds to the weapon attack cooldown on use. **/
-	public int effectDuration = 0;
+	protected int effectDuration = 0;
 
 	/** The strength of the effect, 1 = amplifier 0, 2 = amplifier 1, etc. **/
-	public int effectStrength = 0;
+	protected int effectStrength = 0;
 
 
 	@Override

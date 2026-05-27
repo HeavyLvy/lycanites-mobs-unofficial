@@ -7,7 +7,7 @@ import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
 import com.lycanitesmobs.client.renderer.util.RecolorTextureCache;
 import com.lycanitesmobs.client.renderer.util.VBOBatcher;
 import com.lycanitesmobs.client.renderer.util.VBOBatcher.VBODrawCommand;
-import com.lycanitesmobs.core.compatibility.OculusCompat;
+import com.lycanitesmobs.client.compatibility.OculusCompat;
 import com.lycanitesmobs.core.util.math.Vector3o;
 
 import com.mojang.blaze3d.systems.RenderSystem;

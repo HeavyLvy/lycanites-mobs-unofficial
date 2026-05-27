@@ -1,10 +1,9 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.client.manager.ClientManager;
+import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.core.util.math.SchismMath;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -23,29 +22,9 @@ public class MessageEntityVelocity {
     public MessageEntityVelocity(Entity entity, double motionX, double motionY, double motionZ) {
         this.entityID = entity.getId();
 
-        if (motionX < -3.9D) {
-            motionX = -3.9D;
-        }
-
-        if (motionY < -3.9D) {
-            motionY = -3.9D;
-        }
-
-        if (motionZ < -3.9D) {
-            motionZ = -3.9D;
-        }
-
-        if (motionX > 3.9D) {
-            motionX = 3.9D;
-        }
-
-        if (motionY > 3.9D) {
-            motionY = 3.9D;
-        }
-
-        if (motionZ > 3.9D) {
-            motionZ = 3.9D;
-        }
+        motionX = SchismMath.clamp(motionX, -3.9D, 3.9D);
+        motionY = SchismMath.clamp(motionY, -3.9D, 3.9D);
+        motionZ = SchismMath.clamp(motionZ, -3.9D, 3.9D);
 
         this.motionX = (int) (motionX * 8000.0D);
         this.motionY = (int) (motionY * 8000.0D);
@@ -60,10 +39,12 @@ public class MessageEntityVelocity {
         if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
             return;
 
-        Player player = ClientManager.getInstance().getClientPlayer();
-        Level world = player.getCommandSenderWorld();
-        Entity entity = world.getEntity(message.entityID);
-        entity.setDeltaMovement(entity.getDeltaMovement().add((double) message.motionX / 8000.0D, (double) message.motionY / 8000.0D, (double) message.motionZ / 8000.0D));
+        ctx.get().enqueueWork(() ->
+                LycanitesMobs.PROXY.applyEntityVelocity(
+                        message.entityID,
+                        message.motionX,
+                        message.motionY,
+                        message.motionZ));
     }
 
     /**

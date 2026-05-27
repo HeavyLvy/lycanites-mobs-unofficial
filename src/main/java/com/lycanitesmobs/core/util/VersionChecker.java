@@ -19,14 +19,14 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
 public class VersionChecker {
-	public static VersionChecker INSTANCE = new VersionChecker();
-	public boolean enabled = true;
+	private static final VersionChecker INSTANCE = new VersionChecker();
+	private boolean enabled = true;
 
 	protected VersionInfo currentVersion = new VersionInfo(LycanitesMobs.versionNumber, LycanitesMobs.versionMC);
 	protected VersionInfo latestVersion = null;
 	protected long lastChecked = -1;
 
-	public SSLContext sslContext;
+	private SSLContext sslContext;
 
 	public VersionChecker() {
 		// Trust Self Signed SSL Certificates:
@@ -49,6 +49,18 @@ public class VersionChecker {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static VersionChecker getInstance() {
+		return INSTANCE;
+	}
+
+	public boolean isEnabled() {
+		return this.enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 	public static class VersionInfo {
@@ -143,12 +155,13 @@ public class VersionChecker {
 	public static class VersionLoader implements Runnable {
 		@Override
 		public void run() {
-			VersionChecker.INSTANCE.lastChecked = System.currentTimeMillis() / 1000;
+			VersionChecker versionChecker = VersionChecker.getInstance();
+			versionChecker.lastChecked = System.currentTimeMillis() / 1000;
 
 			try {
 				URL url = new URL(LycanitesMobs.serviceAPI + "/versions?limit=1&sort_by=created_at:desc&mcversion=" + LycanitesMobs.versionMC);
 				HttpsURLConnection urlConnection = (HttpsURLConnection)url.openConnection();
-				urlConnection.setSSLSocketFactory(VersionChecker.INSTANCE.sslContext.getSocketFactory());
+				urlConnection.setSSLSocketFactory(versionChecker.sslContext.getSocketFactory());
 				urlConnection.setRequestProperty("Authorization", "Bearer 7ed1f44cbc1aff693e604075f23d56402983a4a0"); // This is a public api so the key is safe to be exposed like this. :)
 				String osName = System.getProperty("os.name");
 				urlConnection.setRequestProperty("User-Agent", "Minecraft " + LycanitesMobs.versionMC + " (" + osName + ") LycanitesMobs " + LycanitesMobs.versionNumber);
@@ -171,9 +184,9 @@ public class VersionChecker {
 
 				String versionNumber = versionJson.get("version").getAsString();
 				String mcVersion = versionJson.get("mcversion").getAsString();
-				VersionChecker.INSTANCE.latestVersion = new VersionInfo(versionNumber, mcVersion);
-				VersionChecker.INSTANCE.latestVersion.loadFromJSON(versionJson);
-				VersionChecker.INSTANCE.latestVersion.checkIfNewer(VersionChecker.INSTANCE.currentVersion);
+				versionChecker.latestVersion = new VersionInfo(versionNumber, mcVersion);
+				versionChecker.latestVersion.loadFromJSON(versionJson);
+				versionChecker.latestVersion.checkIfNewer(versionChecker.currentVersion);
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}

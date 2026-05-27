@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class EquipmentInfuserContainerProvider implements Nameable, MenuProvider {
-    public EquipmentInfuserTileEntity equipmentInfuser;
+    protected final EquipmentInfuserTileEntity equipmentInfuser;
 
     public EquipmentInfuserContainerProvider(@Nonnull EquipmentInfuserTileEntity equipmentInfuser) {
         this.equipmentInfuser = equipmentInfuser;

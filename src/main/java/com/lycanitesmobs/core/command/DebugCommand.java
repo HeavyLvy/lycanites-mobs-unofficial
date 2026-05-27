@@ -37,10 +37,10 @@ public class DebugCommand {
 
         if (enabledLogs.contains(category)) {
             enabledLogs.remove(category);
-            LMHelperClass.logDebug("", category + " Debug Logging Disabled");
+            LMHelperClass.logInfoMessage(category + " debug logging disabled.");
         } else {
             enabledLogs.add(category);
-            LMHelperClass.logDebug("", category + " Debug Logging Enabled");
+            LMHelperClass.logInfoMessage(category + " debug logging enabled.");
         }
         ConfigDebug.INSTANCE.enabled.set(enabledLogs);
         ConfigDebug.INSTANCE.enabled.save();
@@ -70,7 +70,7 @@ public class DebugCommand {
         try {
             biomeType = BiomeManager.BiomeType.valueOf(biomeTag);
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "Unknown biome tag: " + biomeTag + ".");
+            LMHelperClass.logWarningMessage("Unknown biome tag: " + biomeTag + ".");
         }
         if (biomeType == null) {
             return 0;

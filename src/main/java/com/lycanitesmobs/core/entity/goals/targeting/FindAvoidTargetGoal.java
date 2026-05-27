@@ -98,7 +98,7 @@ public class FindAvoidTargetGoal extends TargetingGoal {
         if (!this.tameTargeting && this.host.isTamed()) {
             return false;
         }
-		if (this.host.updateTick % 60 != 0) {
+		if (!this.host.isUpdateTickMultiple(60)) {
 			return false;
 		}
 		if(this.targetChance > 0 && this.host.getRandom().nextInt(this.targetChance) != 0) {

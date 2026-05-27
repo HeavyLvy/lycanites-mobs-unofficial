@@ -108,7 +108,7 @@ public class FindMasterGoal extends TargetingGoal {
   	// ==================================================
     @Override
     public boolean canUse() {
-		if (this.host.updateTick % 20 != 0) {
+		if (!this.host.isUpdateTickMultiple(20)) {
 			return false;
 		}
 		if(this.targetChance > 0 && this.host.getRandom().nextInt(this.targetChance) != 0) {

@@ -105,7 +105,7 @@ public class FindParentGoal extends TargetingGoal {
   	// ==================================================
     @Override
     public boolean canUse() {
-		if (this.host.updateTick % 20 != 0 || !this.host.shouldFindParent()) {
+		if (!this.host.isUpdateTickMultiple(20) || !this.host.shouldFindParent()) {
 			return false;
 		}
 
@@ -119,7 +119,7 @@ public class FindParentGoal extends TargetingGoal {
 			return false;
 		}
     	
-        if(this.host.updateTick % 20 != 0 && this.targetChance > 0 && this.host.getRandom().nextInt(this.targetChance) != 0)
+        if(!this.host.isUpdateTickMultiple(20) && this.targetChance > 0 && this.host.getRandom().nextInt(this.targetChance) != 0)
             return false;
         
         double distance = this.getTargetDistance();

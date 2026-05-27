@@ -16,9 +16,6 @@ import net.minecraft.world.item.Item;
 import net.minecraftforge.common.util.Lazy;
 
 import java.util.Iterator;
-import java.util.function.Supplier;
-
-import static com.lycanitesmobs.core.manager.ObjectManager.items;
 
 public class ItemInfo {
     /** The Item based on this Item Info. **/
@@ -33,7 +30,7 @@ public class ItemInfo {
     /**
      * The group that this item belongs to.
      **/
-    public ModInfo group;
+    protected ModInfo group;
 
     /**
      * Constructor
@@ -55,16 +52,6 @@ public class ItemInfo {
         if (json.has("model")) {
             modelName = json.get("model").getAsString();
         }
-
-        // Group:
-		/*CreativeModeTab.Builder group = ItemManager.getInstance().itemsGroup;
-		if(json.has("group")) {
-			String groupName = json.get("group").getAsString();
-			if("blocks".equalsIgnoreCase(groupName))
-				group = ItemManager.getInstance().blocksGroup;
-			if("creatures".equalsIgnoreCase(groupName))
-				group = ItemManager.getInstance().creaturesGroups;
-		}*/
 
         // Stack Size:
         int maxStackSize = 64;
@@ -97,11 +84,11 @@ public class ItemInfo {
                     String[] effectIds = effectId.split(":"); // Can't get effects from registry yet, this means no effects from other mods. :(
                     MobEffect effect;
                     if ("minecraft".equals(effectIds[0]))
-                        effect = ObjectLists.allEffects.get(effectIds[1]);
+                        effect = ObjectLists.getVanillaEffect(effectIds[1]);
                     else
                         effect = ObjectManager.getEffect(effectIds[1]);
                     if (effect == null) {
-                        LMHelperClass.logWarning("", "Unable to add food effect: " + effectId);
+                        LMHelperClass.logWarningMessage("Unable to add food effect: " + effectId);
                         continue;
                     }
                     MobEffectInstance effectInstance = new MobEffectInstance(effect, foodEffectJson.get("duration").getAsInt() * 20, foodEffectJson.get("amplifier").getAsInt());
@@ -130,13 +117,6 @@ public class ItemInfo {
         String finalModelName = modelName;
         Lazy<Item> item = Lazy.of(() -> new GenericItem(properties, this.name, finalModelName));
         ObjectManager.addItem(name, item);
-        //this.getItem().modelName = modelName;
-        /*
-         * Creative Mode Tab
-         */
-        /*group.displayItems((enabledFeatures, entries) -> {
-            entries.accept(this.getItem());
-        });*/
     }
 
     /**
@@ -145,7 +125,7 @@ public class ItemInfo {
      * @return The item.
      */
     public GenericItem getItem() {
-        return (GenericItem) items.get(name).get();
+        return (GenericItem) ObjectManager.getItem(name);
     }
 
     /**
@@ -155,5 +135,9 @@ public class ItemInfo {
      */
     public String getName() {
         return this.name;
+    }
+
+    public ModInfo getGroup() {
+        return this.group;
     }
 }

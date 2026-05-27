@@ -33,7 +33,7 @@ public class LayerCreatureEquipment extends LayerCreatureBase {
 
     @Override
     public Vector4f getPartColor(String partName, BaseCreatureEntity entity, boolean trophy) {
-        ItemStack equipmentStack = entity.inventory.getEquipmentStack("chest");
+        ItemStack equipmentStack = entity.getCreatureInventory().getEquipmentStack("chest");
         if (equipmentStack != null && equipmentStack.getItem() instanceof DyeableHorseArmorItem) {
             DyeableHorseArmorItem dyeableEquipment = (DyeableHorseArmorItem) equipmentStack.getItem();
             int color = dyeableEquipment.getColor(equipmentStack);

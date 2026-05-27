@@ -25,8 +25,8 @@ import org.lwjgl.opengl.GL11;
 public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedestalContainer> {
     public Player player;
     public ExtendedPlayer playerExt;
-    public TileEntitySummoningPedestal summoningPedestal;
-    public SummonSet summonSet;
+    protected TileEntitySummoningPedestal summoningPedestal;
+    protected SummonSet summonSet;
 
     public AbstractSelectionList list;
 
@@ -43,10 +43,10 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
 
     public SummoningPedestalScreen(SummoningPedestalContainer container, Inventory playerInventory, Component name) {
         super(container, playerInventory, name);
-        this.summoningPedestal = container.summoningPedestal;
+        this.summoningPedestal = container.getSummoningPedestal();
         this.player = playerInventory.player;
         this.playerExt = ExtendedPlayer.getForPlayer(this.player);
-        this.summonSet = this.summoningPedestal.summonSet;
+        this.summonSet = this.summoningPedestal.getSummonSet();
     }
 
     @Override
@@ -56,9 +56,6 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
 
     @Override
     public void init() {
-        super.init();
-
-        this.renderables.clear();
         this.windowWidth = 256;
         this.windowHeight = 166;
         this.halfX = this.windowWidth / 2;
@@ -67,6 +64,8 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
         this.windowY = (this.height / 2) - (this.windowHeight / 2);
         this.centerX = this.windowX + (this.windowWidth / 2);
         this.centerY = this.windowY + (this.windowHeight / 2);
+
+        super.init();
     }
 
     @Override
@@ -91,8 +90,8 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
         buttonY += buttonHeight + (buttonSpacing * 2);
         this.addRenderableWidget(new ButtonBase(BaseCreatureEntity.GUI_COMMAND.PVP.id, buttonX, buttonY, buttonWidth * 2, buttonHeight, Component.translatable("..."), this));
 
-        if (this.hasPets() && this.summoningPedestal.summonSet != null) {
-            this.selectMinion(this.summoningPedestal.summonSet.summonType);
+        if (this.hasPets() && this.summoningPedestal.hasSummonSet()) {
+            this.selectMinion(this.summoningPedestal.getSummonSet().getSummonType());
         }
         int listWidth = (this.windowWidth / 2) - (buttonSpacing * 4);
         int listHeight = this.windowHeight - (39 + buttonSpacing) - 16;
@@ -179,6 +178,10 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
         this.drawHelper.drawString(guiGraphics, this.getEnergyTitle().getString(), this.windowX + 16, this.windowY + 20, 0xFFFFFF);
     }
 
+    @Override
+    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    }
+
 
     @Override
     public void actionPerformed(int buttonId) {
@@ -189,15 +192,15 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
 
         // Behaviour Button:
         if (buttonId == BaseCreatureEntity.GUI_COMMAND.SITTING.id)
-            this.summonSet.sitting = !this.summonSet.sitting;
+            this.summonSet.toggleSitting();
         if (buttonId == BaseCreatureEntity.GUI_COMMAND.FOLLOWING.id)
-            this.summonSet.following = !this.summonSet.following;
+            this.summonSet.toggleFollowing();
         if (buttonId == BaseCreatureEntity.GUI_COMMAND.PASSIVE.id)
-            this.summonSet.passive = !this.summonSet.passive;
+            this.summonSet.togglePassive();
         if (buttonId == BaseCreatureEntity.GUI_COMMAND.STANCE.id)
-            this.summonSet.aggressive = !this.summonSet.aggressive;
+            this.summonSet.toggleAggressive();
         if (buttonId == BaseCreatureEntity.GUI_COMMAND.PVP.id)
-            this.summonSet.pvp = !this.summonSet.pvp;
+            this.summonSet.togglePVP();
 
         if (buttonId < 100) {
             this.sendCommandsToServer();
@@ -232,7 +235,7 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
         int barV = 225;
         this.drawHelper.drawTexturedModalRect(matrixStack, barX, barY, barU, barV + barHeight, barWidth, barHeight);
 
-        barWidth = Math.round((float) barWidth * ((float) this.summoningPedestal.summoningFuel / this.summoningPedestal.summoningFuelMax));
+        barWidth = Math.round((float) barWidth * this.summoningPedestal.getFuelFillRatio());
         this.drawHelper.drawTexturedModalRect(matrixStack, barX, barY, barU, barV, barWidth, barHeight);
     }
 
@@ -242,7 +245,7 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
         int energyBarX = this.windowX + 16;
         int energyBarY = this.windowY + 40 - energyBarHeight;
         this.drawHelper.drawBar(guiGraphics, TextureManager.getTexture("GUIPetSpiritEmpty"), energyBarX, energyBarY, 0, energyBarWidth, energyBarHeight, 10, 10);
-        this.drawHelper.drawBar(guiGraphics, TextureManager.getTexture("GUIPetSpirit"), energyBarX, energyBarY, 0, energyBarWidth, energyBarHeight, this.summoningPedestal.capacity / this.summoningPedestal.capacityCharge, 10);
+        this.drawHelper.drawBar(guiGraphics, TextureManager.getTexture("GUIPetSpirit"), energyBarX, energyBarY, 0, energyBarWidth, energyBarHeight, this.summoningPedestal.getCapacityUnits(), 10);
     }
 
     public void drawProgressBar(GuiGraphics guiGraphics) {
@@ -252,7 +255,7 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
         int barY = this.windowY + 26;
         this.drawHelper.drawTexture(guiGraphics, TextureManager.getTexture("GUIPetBarEmpty"), barX, barY, 0, 1, 1, barWidth, barHeight);
 
-        float respawnNormal = ((float) this.summoningPedestal.summonProgress / this.summoningPedestal.summonProgressMax);
+        float respawnNormal = this.summoningPedestal.getSummonProgressRatio();
         this.drawHelper.drawTexture(guiGraphics, TextureManager.getTexture("GUIPetBarRespawn"), barX, barY, 0, respawnNormal, 1, barWidth * respawnNormal, barHeight);
     }
 
@@ -262,20 +265,16 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
 
     public void selectMinion(String minionName) {
         if (this.summonSet == null) {
-            if (this.summoningPedestal.summonSet == null) {
-                this.summoningPedestal.summonSet = new SummonSet(this.playerExt);
-                this.summoningPedestal.sendSummonSetToServer(this.summoningPedestal.summonSet);
-            }
-            this.summonSet = this.summoningPedestal.summonSet;
+            this.summonSet = this.summoningPedestal.getOrCreateSummonSet(this.playerExt);
         }
-        this.summonSet.setSummonType(minionName);
+        this.summoningPedestal.selectSummonType(this.playerExt, minionName);
         this.sendCommandsToServer();
     }
 
     public String getSelectedMinionName() {
         if (this.summonSet == null)
             return null;
-        return this.summonSet.summonType;
+        return this.summonSet.getSummonType();
     }
 
     public boolean hasPets() {
@@ -283,7 +282,7 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
     }
 
     public boolean hasSelectedPet() {
-        return this.hasPets() && this.summonSet != null && !this.summonSet.summonType.equals("");
+        return this.hasPets() && this.summonSet != null && !this.summonSet.getSummonType().equals("");
     }
 
     protected ResourceLocation getTexture() {

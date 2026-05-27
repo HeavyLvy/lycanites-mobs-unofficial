@@ -22,9 +22,9 @@ import org.joml.Vector3d;
 
 public class EntityVapula extends TameableCreatureEntity implements Enemy {
 
-    public int blockBreakRadius = 0;
+    private int blockBreakRadius = 0;
 
-    public float fireDamageAbsorbed = 0;
+    private float fireDamageAbsorbed = 0;
 
     // ==================================================
     //                    Constructor
@@ -46,8 +46,8 @@ public class EntityVapula extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false).setMaxChaseDistanceSq(3.0F));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setRange(18.0F).setMinChaseDistance(10.0F).setCheckSight(false));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false).setMaxChaseDistanceSq(3.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setRange(18.0F).setMinChaseDistance(10.0F).setCheckSight(false));
     }
 
     @Override
@@ -82,7 +82,7 @@ public class EntityVapula extends TameableCreatureEntity implements Enemy {
         }
 
         // Particles:
-        if (this.getCommandSenderWorld().isClientSide && !CreatureManager.getInstance().config.disableBlockParticles) {
+        if (this.getCommandSenderWorld().isClientSide && !CreatureManager.getInstance().getConfig().disableBlockParticles()) {
             for (int i = 0; i < 2; ++i) {
                 this.getCommandSenderWorld().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DIAMOND_BLOCK.defaultBlockState()),
                         this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width,
@@ -165,7 +165,7 @@ public class EntityVapula extends TameableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

@@ -8,7 +8,7 @@ import net.minecraft.world.level.Level;
 
 public class CommandMobEventEffect extends MobEventEffect {
 	/** The command to run. **/
-	public String command = "";
+	protected String command = "";
 
 
 	@Override

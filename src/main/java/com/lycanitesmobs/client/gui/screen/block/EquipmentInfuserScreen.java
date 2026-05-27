@@ -21,18 +21,18 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 
 public class EquipmentInfuserScreen extends BaseContainerScreen<EquipmentInfuserContainer> {
-    public EquipmentInfuserTileEntity equipmentInfuser;
+    protected EquipmentInfuserTileEntity equipmentInfuser;
 
     public EquipmentInfuserScreen(EquipmentInfuserContainer container, Inventory playerInventory, Component name) {
         super(container, playerInventory, name);
-        this.equipmentInfuser = container.equipmentInfuser;
+        this.equipmentInfuser = container.getEquipmentInfuser();
     }
 
     @Override
     public void init() {
-        super.init();
         this.imageWidth = 176;
         this.imageHeight = 166;
+        super.init();
     }
 
     @Override
@@ -73,7 +73,7 @@ public class EquipmentInfuserScreen extends BaseContainerScreen<EquipmentInfuser
         RenderSystem.setShaderTexture(0, texture);
 
         BaseContainer container = this.getMenu();
-        List<Slot> forgeSlots = container.slots.subList(container.inventoryStart, container.inventoryFinish);
+        List<Slot> forgeSlots = container.getInventorySlotView();
         int slotWidth = 18;
         int slotHeight = 18;
         int slotU = 238;
@@ -113,7 +113,7 @@ public class EquipmentInfuserScreen extends BaseContainerScreen<EquipmentInfuser
             return;
         }
         ItemEquipmentPart partItem = (ItemEquipmentPart) partStack.getItem();
-        if (partItem.getPartLevel(partStack) >= partItem.levelMax) {
+        if (partItem.isAtMaxLevel(partStack)) {
             return;
         }
         int experience = partItem.getExperience(partStack);

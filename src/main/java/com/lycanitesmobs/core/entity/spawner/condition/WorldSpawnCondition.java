@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,97 +22,101 @@ public class WorldSpawnCondition extends SpawnCondition {
     /**
      * How the dimension ID list works. Can be whitelist or blacklist.
      **/
-    public String dimensionListType = "whitelist";
+    protected String dimensionListType = "whitelist";
 
     /**
      * The dimension IDs that the world must or must not match depending on the list type.
      **/
-    public List<String> dimensionIds = new ArrayList<>();
+    protected List<String> dimensionIds = new ArrayList<>();
 
     /**
      * The dimensions that the world must or must not match depending on the list type.
      **/
-    public List<DimensionType> dimensions = null;
+    protected List<DimensionType> dimensions = null;
 
     /**
      * How the biomes from the biome tags list works. Can be whitelist or blacklist.
      **/
-    public String biomeTagListType = "whitelist";
+    protected String biomeTagListType = "whitelist";
 
     /**
      * The list of biome tags to filter this condition by.
      **/
-    public List<String> biomeTags = new ArrayList<>();
+    protected List<String> biomeTags = new ArrayList<>();
     /**
      * The list of biomes generated from the list of biome tags.
      **/
-    public Set<String> biomesFromTags = null;
-    public List<String> biomeTagBlacklist = new ArrayList<>();
+    protected Set<String> biomesFromTags = null;
+    protected List<String> biomeTagBlacklist = new ArrayList<>();
 
-    public Set<String> biomesFromTagBlacklist = null;
+    protected Set<String> biomesFromTagBlacklist = null;
 
     /**
      * How the biomes from the biome ids list works. Can be whitelist or blacklist.
      **/
-    public String biomeIdListType = "whitelist";
+    protected String biomeIdListType = "whitelist";
 
     /**
      * The list of specific biome ids that this creature spawns in.
      **/
-    public List<String> biomeIds = new ArrayList<>();
+    protected List<String> biomeIds = new ArrayList<>();
 
     /**
      * The minimum world days that must have gone by, can accept fractions such as 5.25 for 5 and a quarter days.
      **/
-    public double worldDayMin = -1;
+    protected double worldDayMin = -1;
 
     /**
      * The maximum world days that this condition is true up to.
      **/
-    public double worldDayMax = -1;
+    protected double worldDayMax = -1;
 
     /**
      * The interval of days this condition is true such as every 7 days.
      **/
-    public double worldDayN = -1;
+    protected double worldDayN = -1;
 
     /**
      * The minimum time of the current world day.
      **/
-    public int dayTimeMin = -1;
+    protected int dayTimeMin = -1;
 
     /**
      * The maximum time of the current world day.
      **/
-    public int dayTimeMax = -1;
+    protected int dayTimeMax = -1;
 
     /**
      * The weather, can be: any, clear, rain, storm, rainstorm (raining and thundering) or notclear (raining or thundering).
      **/
-    public String weather = "any";
+    protected String weather = "any";
 
     /**
      * The minimum difficulty level.
      **/
-    public short difficultyMin = -1;
+    protected short difficultyMin = -1;
 
     /**
      * The maximum difficulty level.
      **/
-    public short difficultyMax = -1;
+    protected short difficultyMax = -1;
 
     /**
      * The required moon phase. 0 is a full moon.
      **/
-    public float moonPhase = -1;
+    protected float moonPhase = -1;
 
-    public long salt = 0L;
-    public int spacing = 32;
-    public int separation = 8;
-    public int minY = 4;
-    public int maxY = 64;
-    public int maxDistanceFromCenter = 48;
-    public int estimatedHeight = 32;
+    protected long salt = 0L;
+    protected int spacing = 32;
+    protected int separation = 8;
+    protected int minY = 4;
+    protected int maxY = 64;
+    protected int maxDistanceFromCenter = 48;
+    protected int estimatedHeight = 32;
+
+    public List<String> getBiomeTagBlacklist() {
+        return Collections.unmodifiableList(this.biomeTagBlacklist);
+    }
 
     @Override
     public void loadFromJSON(JsonObject json) {
@@ -255,9 +260,7 @@ public class WorldSpawnCondition extends SpawnCondition {
     public boolean isMet(Level world, Player player, BlockPos position) {
         ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
 
-        long baseTime = worldExt != null && worldExt.useTotalWorldTime
-                ? world.getGameTime()
-                : world.getDayTime();
+        long baseTime = worldExt != null ? worldExt.getConfiguredDayBaseTime(world) : world.getDayTime();
 
         int time = (int) (world.getDayTime() % 24000L);
         int day = (int) (baseTime / 24000L);
@@ -321,8 +324,10 @@ public class WorldSpawnCondition extends SpawnCondition {
      * @return True if the biome is allowed, false if not.
      */
     public boolean isAllowedDimension(Level world) {
-        String dimension = world.dimension().location().toString();
+        return this.isAllowedDimensionId(world.dimension().location().toString());
+    }
 
+    public boolean isAllowedDimensionId(String dimension) {
         if (this.dimensionIds.isEmpty()) {
             return true;
         }
@@ -338,6 +343,9 @@ public class WorldSpawnCondition extends SpawnCondition {
         return allowed;
     }
 
+    public boolean hasDimensionFilter() {
+        return !this.dimensionIds.isEmpty();
+    }
 
     /**
      * Returns if the biome of the provided position passes this condition.
@@ -401,9 +409,7 @@ public class WorldSpawnCondition extends SpawnCondition {
     public void collectDebugFailures(Level world, Player player, BlockPos position, List<String> reasons) {
         ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
 
-        long baseTime = worldExt != null && worldExt.useTotalWorldTime
-                ? world.getGameTime()
-                : world.getDayTime();
+        long baseTime = worldExt != null ? worldExt.getConfiguredDayBaseTime(world) : world.getDayTime();
 
         int time = (int) (world.getDayTime() % 24000L);
         int day = (int) (baseTime / 24000L);

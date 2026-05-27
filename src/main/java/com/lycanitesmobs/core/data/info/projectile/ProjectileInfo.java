@@ -3,9 +3,7 @@ package com.lycanitesmobs.core.data.info.projectile;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
-import com.lycanitesmobs.client.manager.ModelManager;
 import com.lycanitesmobs.core.entity.dispenser.BaseProjectileDispenseBehaviour;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.CustomProjectileEntity;
@@ -16,6 +14,7 @@ import com.lycanitesmobs.core.manager.ElementManager;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.data.info.projectile.behaviours.ProjectileBehaviour;
 import com.lycanitesmobs.core.item.consumable.entity.ChargeItem;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -33,6 +32,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
@@ -48,176 +48,176 @@ public class ProjectileInfo {
     /**
      * Whether this projectile is enabled or not.
      **/
-    public boolean enabled = true;
+    protected boolean enabled = true;
 
     /**
      * The entity class used by this projectile. Defaults to EntityProjectileCustom but can be changed to special classes for unique behaviour, etc.
      **/
     @Nonnull
-    public Class<? extends BaseProjectileEntity> entityClass = CustomProjectileEntity.class;
+    protected Class<? extends BaseProjectileEntity> entityClass = CustomProjectileEntity.class;
 
     /**
      * The constructor used by this projectile to create entity instances.
      **/
-    public Constructor<? extends BaseProjectileEntity> entityConstructor;
+    protected Constructor<? extends BaseProjectileEntity> entityConstructor;
 
     /**
-     * The class of the model this subspecies should use, loaded client side only.
+     * The class of the model this projectile should use, loaded client side only.
      **/
-    public String modelClassName;
+    protected String modelClassName;
 
     /**
      * The group that this projectile belongs to.
      **/
-    public ModInfo modInfo;
+    protected ModInfo modInfo;
 
     /**
      * The entity type used to store base attributes of this projectile.
      **/
-    public EntityType<? extends BaseProjectileEntity> entityType;
+    protected EntityType<? extends BaseProjectileEntity> entityType;
 
     // Item:
     /**
      * The item used to fire this projectile from a dispenser and on use.
      **/
-    public Lazy<Item> chargeItem;
+    protected Lazy<Item> chargeItem;
     /**
      * The name of the charge item for this projectile. Can be automatically generated using the name of this projectile or overridden.
      **/
-    public String chargeItemName;
+    protected String chargeItemName;
     /**
      * If true, no charge item is generated for this projectile.
      **/
-    public boolean noChargeItem = false;
+    protected boolean noChargeItem = false;
     /**
      * The dispenser behaviour used by this projectile. If null, this item cannot be fired from a dispenser.
      **/
-    public BaseProjectileDispenseBehaviour dispenserBehaviour;
+    protected BaseProjectileDispenseBehaviour dispenserBehaviour;
 
     // Stats:
     /**
      * The width of the projectile.
      **/
-    public float width = 0.75F;
+    protected float width = 0.75F;
     /**
      * The height of the projectile.
      **/
-    public float height = 0.75F;
+    protected float height = 0.75F;
     /**
      * The scale of the projectile.
      **/
-    public float scale = 0.5F;
+    protected float scale = 0.5F;
     /**
      * How many ticks the projectile is active for.
      **/
-    public int lifetime = 200;
+    protected int lifetime = 200;
     /**
      * The base amount of damage that this projectile deals.
      **/
-    public int damage = 1;
+    protected int damage = 1;
     /**
      * The base amount of damage caused by this projectile that can ignore armor and similar defenses.
      **/
-    public int pierce = 1;
+    protected int pierce = 1;
     /**
      * The chance of this projectile knocking back an entity hit by it.
      **/
-    public double knockbackChance = 0;
+    protected double knockbackChance = 0;
     /**
      * How long (in seconds) any element debuffs applied by this projectile last for.
      **/
-    public int effectDuration = 1;
+    protected int effectDuration = 1;
     /**
      * How strong any element debuffs applied by this projectile are.
      **/
-    public int effectAmplifier = 1;
+    protected int effectAmplifier = 1;
     /**
      * The default velocity that this projectile is launched at.
      **/
-    public double velocity = 1.1D;
+    protected double velocity = 1.1D;
     /**
      * How much gravity affects this projectile.
      **/
-    public double weight = 1.0D;
+    protected double weight = 1.0D;
     /**
      * How fast the projectile sprite spins.
      **/
-    public float rollSpeed = 0;
+    protected float rollSpeed = 0;
 
     // Elements:
     /**
      * The Elements of this projectile, affects buffs and debuffs amongst other things.
      **/
-    public List<ElementInfo> elements = new ArrayList<>();
+    protected List<ElementInfo> elements = new ArrayList<>();
     /**
      * When non-null, overrides element-derived debuffs on impact. An empty list means no debuffs are applied.
      **/
-    public List<String> debuffsOverride = null;
+    protected List<String> debuffsOverride = null;
 
     // Behaviours:
     /**
      * A list of behaviours that this projectile has.
      **/
-    public List<ProjectileBehaviour> behaviours = new ArrayList<>();
+    protected List<ProjectileBehaviour> behaviours = new ArrayList<>();
 
     // Flags:
     /**
      * If true, this projectile wont be destroyed when hitting the water or underwater.
      **/
-    public boolean waterproof = false;
+    protected boolean waterproof = false;
     /**
      * If true, this projectile wont be destroyed when hitting the lava or submerged in lava.
      **/
-    public boolean lavaproof = false;
+    protected boolean lavaproof = false;
     /**
      * If true, this projectile will destroy long grass and similar blocks.
      **/
-    public boolean cutGrass = false;
+    protected boolean cutGrass = false;
     /**
      * If true, this projectile will cut through entities hit.
      **/
-    public boolean ripper = false;
+    protected boolean ripper = false;
     /**
      * If true, this projectile will cut through blocks hit.
      **/
-    public boolean pierceBlocks = false;
+    protected boolean pierceBlocks = false;
     /**
      * If true, this projectile will play a sound on impact.
      **/
-    public boolean impactSound = false;
+    protected boolean impactSound = false;
 
     /**
      * How many vertical animation frames the sprite has, set to 1 for no animation.
      **/
-    public int animationFrames = 1;
+    protected int animationFrames = 1;
     /**
      * If true, this projectile glow in the dark.
      **/
-    public boolean glow = false;
+    protected boolean glow = false;
     /**
      * If true, this projectile will have a burning effect on it.
      **/
-    public boolean burningEffect = false;
+    protected boolean burningEffect = false;
     /**
      * How many particles to create per tick.
      **/
-    public int particleCount = 0;
+    protected int particleCount = 0;
     /**
      * The vanilla particle to play from this projectile.
      **/
-    public String particleId = null;
+    protected String particleId = null;
     /**
      * The vanilla particle to play from this projectile when in water.
      **/
-    public String waterParticleId = null;
+    protected String waterParticleId = null;
     /**
      * The vanilla particle to play from this projectile.
      **/
-    public SimpleParticleType particleType = null;
+    protected SimpleParticleType particleType = null;
     /**
      * The vanilla particle to play from this projectile when in water.
      **/
-    public SimpleParticleType waterParticleType = null;
+    protected SimpleParticleType waterParticleType = null;
 
 
     /**
@@ -227,6 +227,180 @@ public class ProjectileInfo {
      */
     public ProjectileInfo(ModInfo modInfo) {
         this.modInfo = modInfo;
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    @Nonnull
+    public Class<? extends BaseProjectileEntity> getEntityClass() {
+        return this.entityClass;
+    }
+
+    public String getModelClassName() {
+        return this.modelClassName;
+    }
+
+    public boolean hasModelClass() {
+        return this.modelClassName != null;
+    }
+
+    public boolean hasModel() {
+        return this.modelClassName != null;
+    }
+
+    public ModInfo getModInfo() {
+        return this.modInfo;
+    }
+
+    public void bindEntityType(EntityType<? extends BaseProjectileEntity> entityType) {
+        this.entityType = entityType;
+    }
+
+    public Lazy<Item> getChargeItem() {
+        return this.chargeItem;
+    }
+
+    public String getChargeItemName() {
+        return this.chargeItemName;
+    }
+
+    public float getWidth() {
+        return this.width;
+    }
+
+    public float getHeight() {
+        return this.height;
+    }
+
+    public float getScale() {
+        return this.scale;
+    }
+
+    public int getDamage() {
+        return this.damage;
+    }
+
+    public int getPierce() {
+        return this.pierce;
+    }
+
+    public double getKnockbackChance() {
+        return this.knockbackChance;
+    }
+
+    public int getEffectDuration() {
+        return this.effectDuration;
+    }
+
+    public int getEffectAmplifier() {
+        return this.effectAmplifier;
+    }
+
+    public double getVelocity() {
+        return this.velocity;
+    }
+
+    public double getWeight() {
+        return this.weight;
+    }
+
+    public float getRollSpeed() {
+        return this.rollSpeed;
+    }
+
+    public int getLifetime() {
+        return this.lifetime;
+    }
+
+    public List<ElementInfo> getElements() {
+        return Collections.unmodifiableList(this.elements);
+    }
+
+    public List<String> getDebuffsOverride() {
+        return this.debuffsOverride;
+    }
+
+    public boolean isWaterproof() {
+        return this.waterproof;
+    }
+
+    public boolean isLavaproof() {
+        return this.lavaproof;
+    }
+
+    public boolean cutsGrass() {
+        return this.cutGrass;
+    }
+
+    public int getParticleCount() {
+        return this.particleCount;
+    }
+
+    public String getParticleId() {
+        return this.particleId;
+    }
+
+    public String getWaterParticleId() {
+        return this.waterParticleId;
+    }
+
+    public boolean isRipper() {
+        return this.ripper;
+    }
+
+    public boolean piercesBlocks() {
+        return this.pierceBlocks;
+    }
+
+    public int getAnimationFrames() {
+        return this.animationFrames;
+    }
+
+    public boolean hasBurningEffect() {
+        return this.burningEffect;
+    }
+
+    public boolean glows() {
+        return this.glow;
+    }
+
+    public void onProjectileUpdate(BaseProjectileEntity projectile) {
+        for (ProjectileBehaviour behaviour : this.behaviours) {
+            behaviour.onProjectileUpdate(projectile);
+        }
+    }
+
+    public boolean canDamage(BaseProjectileEntity projectile, Level world, LivingEntity target, boolean canDamage) {
+        boolean result = canDamage;
+        for (ProjectileBehaviour behaviour : this.behaviours) {
+            if (!behaviour.canDamage(projectile, world, target, result)) {
+                result = false;
+            }
+        }
+        return result;
+    }
+
+    public void onProjectileDamage(BaseProjectileEntity projectile, Level world, LivingEntity target, float damage) {
+        for (ProjectileBehaviour behaviour : this.behaviours) {
+            behaviour.onProjectileDamage(projectile, world, target, damage);
+        }
+    }
+
+    public void onProjectileImpact(BaseProjectileEntity projectile, Level world, net.minecraft.core.BlockPos impactPos) {
+        for (ProjectileBehaviour behaviour : this.behaviours) {
+            behaviour.onProjectileImpact(projectile, world, impactPos);
+        }
+    }
+
+    public boolean hasBehaviour(Class<? extends ProjectileBehaviour> behaviourClass) {
+        for (ProjectileBehaviour behaviour : this.behaviours) {
+            if (behaviourClass.isInstance(behaviour)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -254,7 +428,8 @@ public class ProjectileInfo {
             }
             this.entityConstructor = this.entityClass.getConstructor(EntityType.class, Level.class);
         } catch (Exception e) {
-            LMHelperClass.logWarningMessage("[Projectile] Skipping projectile '" + this.getName() + "': unable to find entity class '" + json.get("entityClass").getAsString() + "'. If you have updated the mod, clear your projectile configs at: config/lycanitesmobs/projectiles/" + this.getName() + ".json");
+            String entityClassName = json.has("entityClass") ? json.get("entityClass").getAsString() : this.entityClass.getName();
+            LMHelperClass.logWarningMessage("[Projectile] Skipping projectile '" + this.getName() + "': unable to find entity class '" + entityClassName + "'. If you have updated the mod, clear your projectile configs at: config/lycanitesmobs/projectiles/" + this.getName() + ".json");
             return false;
         }
 
@@ -314,6 +489,7 @@ public class ProjectileInfo {
         }
 
         // Behaviours:
+        this.behaviours.clear();
         if (json.has("behaviours")) {
             JsonArray jsonArray = json.get("behaviours").getAsJsonArray();
             Iterator<JsonElement> jsonIterator = jsonArray.iterator();
@@ -323,7 +499,7 @@ public class ProjectileInfo {
                 if (projectileBehaviour != null) {
                     this.behaviours.add(projectileBehaviour);
                 } else {
-                    LMHelperClass.logWarning("", "Unable to load Projectile Behaviour: " + behaviorJson.get("type").getAsString());
+                    LMHelperClass.logWarningMessage("Unable to load Projectile Behaviour: " + behaviorJson.get("type").getAsString());
                 }
             }
         }
@@ -439,32 +615,16 @@ public class ProjectileInfo {
      * @return Projectiles's entity type.
      */
     public EntityType getEntityType() {
-        this.entityType = (EntityType) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(LycanitesMobs.MODID, this.getName()));
+        this.entityType = (EntityType) ForgeRegistries.ENTITY_TYPES.getValue(AssetHelper.modResource(this.getName()));
         return this.entityType;
     }
-	/*@Nonnull
-	public EntityType<? extends BaseProjectileEntity> getEntityType() {
-		if(this.entityType == null) {
-			EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
-			//entityTypeBuilder.setCustomClientFactory(EntityFactory.getInstance().createOnClientFunction);
-			entityTypeBuilder.setTrackingRange(40);
-			entityTypeBuilder.setUpdateInterval(3);
-			entityTypeBuilder.setShouldReceiveVelocityUpdates(true);
-			entityTypeBuilder.sized(this.width, this.height);
-			this.entityType = entityTypeBuilder.build(this.getName());
-			//this.entityType.setRegistryName(this.modInfo.modid, this.getName());
-			EntityFactory.getInstance().addEntityType(this.entityType, this.entityConstructor, this.getName());
-		}
-		return this.entityType;
-	}*/
-
     /**
      * Returns the resource location for this projectile.
      *
      * @return Projectile resource location.
      */
     public ResourceLocation getResourceLocation() {
-        return new ResourceLocation(this.modInfo.modid, this.getName());
+        return AssetHelper.resource(this.modInfo.modid, this.getName());
     }
 
     /**
@@ -492,7 +652,7 @@ public class ProjectileInfo {
      * @param entityLivingBase The entity that created the projectile.
      */
     public BaseProjectileEntity createProjectile(Level world, LivingEntity entityLivingBase) {
-        if (this.modelClassName != null && ModelManager.getInstance().getProjectileModel(this) != null) {
+        if (this.modelClassName != null) {
             return new CustomProjectileModelEntity(this.getEntityType(), world, entityLivingBase, this);
         }
         return new CustomProjectileEntity(this.getEntityType(), world, entityLivingBase, this);
@@ -507,7 +667,19 @@ public class ProjectileInfo {
      * @param z     The z position of the projectile.
      */
     public BaseProjectileEntity createProjectile(Level world, double x, double y, double z) {
+        if (this.modelClassName != null) {
+            return new CustomProjectileModelEntity(this.getEntityType(), world, x, y, z, this);
+        }
         return new CustomProjectileEntity(this.getEntityType(), world, x, y, z, this);
+    }
+
+    public BaseProjectileEntity createEntity(EntityType<?> entityType, Level world) {
+        try {
+            return this.entityConstructor.newInstance(entityType, world);
+        } catch (Exception e) {
+            LMHelperClass.logWarningMessage("[Projectile] Failed to create entity for " + this.getName() + ": " + e.getMessage());
+            return null;
+        }
     }
 
     public SoundEvent getLaunchSound() {

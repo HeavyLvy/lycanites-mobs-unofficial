@@ -16,6 +16,7 @@ import com.lycanitesmobs.core.data.loaders.StreamLoader;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.util.EntityFactory;
 import com.lycanitesmobs.core.data.info.ModInfo;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -29,37 +30,44 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ProjectileManager extends JSONLoader {
-    public static ProjectileManager INSTANCE;
+    protected static ProjectileManager INSTANCE;
 
     /**
      * A map of all projectiles by name.
      **/
-    public Map<String, ProjectileInfo> projectiles = new HashMap<>();
+    protected final Map<String, ProjectileInfo> projectiles = new HashMap<>();
 
     /**
      * A map of old projectile classes that are hardcoded instead of using json definitions that use the default item sprite renderer.
      **/
-    public Map<String, Class<? extends Entity>> oldSpriteProjectiles = new HashMap<>();
+    protected final Map<String, Class<? extends Entity>> oldSpriteProjectiles = new HashMap<>();
 
     /**
      * A map of old projectiles that use the obj model renderer. Newer json based projectiles provide their model class in their ProjectileInfo definition instead.
      **/
-    public Map<String, Class<? extends Entity>> oldModelProjectiles = new HashMap<>();
+    protected final Map<String, Class<? extends Entity>> oldModelProjectiles = new HashMap<>();
 
     /**
      * A map of old projectile classes to types for creating new instances.
      **/
-    public Map<Class<? extends Entity>, EntityType<? extends BaseProjectileEntity>> oldProjectileTypes = new HashMap<>();
+    protected final Map<Class<? extends Entity>, EntityType<? extends BaseProjectileEntity>> oldProjectileTypes = new HashMap<>();
 
     /**
      * A map of old projectile classes to simple names for translation, etc.
      **/
-    public Map<Class<? extends Entity>, String> oldProjectileNames = new HashMap<>();
+    protected final Map<Class<? extends Entity>, String> oldProjectileNames = new HashMap<>();
+
+    /**
+     * A map of old projectile classes to typed factories for creating instances without reflection.
+     **/
+    protected final Map<Class<? extends BaseProjectileEntity>, OldProjectileRegistration> oldProjectileRegistrations = new HashMap<>();
 
     /**
      * Returns the main Projectile Manager instance or creates it and returns it.
@@ -69,6 +77,22 @@ public class ProjectileManager extends JSONLoader {
             INSTANCE = new ProjectileManager();
         }
         return INSTANCE;
+    }
+
+    public Collection<ProjectileInfo> getProjectiles() {
+        return Collections.unmodifiableCollection(this.projectiles.values());
+    }
+
+    public Set<Map.Entry<String, Class<? extends Entity>>> getOldSpriteProjectileEntries() {
+        return Collections.unmodifiableMap(this.oldSpriteProjectiles).entrySet();
+    }
+
+    public Set<Map.Entry<String, Class<? extends Entity>>> getOldModelProjectileEntries() {
+        return Collections.unmodifiableMap(this.oldModelProjectiles).entrySet();
+    }
+
+    public EntityType<? extends BaseProjectileEntity> getOldProjectileType(Class<? extends Entity> projectileClass) {
+        return this.oldProjectileTypes.get(projectileClass);
     }
 
     /**
@@ -83,9 +107,9 @@ public class ProjectileManager extends JSONLoader {
         }
         this.loadOldProjectiles();
         for (ProjectileInfo projectileInfo : this.projectiles.values()) {
-            EntityType.Builder<?> b = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC)
+            EntityType.Builder<?> b = EntityType.Builder.of((entityType, level) -> projectileInfo.createEntity(entityType, level), MobCategory.MISC)
                     .setTrackingRange(40).setUpdateInterval(3).setShouldReceiveVelocityUpdates(true)
-                    .sized(projectileInfo.width, projectileInfo.height);
+                    .sized(projectileInfo.getWidth(), projectileInfo.getHeight());
             LycanitesMobs.ENTITY_TYPES.register(projectileInfo.getName(), () -> (EntityType<?>) b.build(projectileInfo.getName()));
         }
         for (String projectileInfo : this.oldSpriteProjectiles.keySet()) {
@@ -101,7 +125,7 @@ public class ProjectileManager extends JSONLoader {
      * Loads all JSON Creature Types. Should be done before creatures are loaded so that they can find their type on load.
      **/
     public void loadAllFromJSON(ModInfo groupInfo) {
-        this.loadAllJson(groupInfo, "Projectile", "projectiles", "name", true, null, FileLoader.COMMON, StreamLoader.COMMON);
+        this.loadAllJson(groupInfo, "Projectile", "projectiles", "name", true, null, FileLoader.common(), StreamLoader.common());
         LMHelperClass.logDebug("Projectile", "Complete! " + this.projectiles.size() + " JSON Projectile Info Loaded In Total.");
     }
 
@@ -112,7 +136,7 @@ public class ProjectileManager extends JSONLoader {
             return;
         }
         if (projectileInfo.getName() == null) {
-            LMHelperClass.logWarning("", "[Projectile] Unable to load " + loadGroup + " json due to missing name.");
+            LMHelperClass.logWarningMessage("[Projectile] Unable to load " + loadGroup + " json due to missing name.");
             return;
         }
 
@@ -130,11 +154,12 @@ public class ProjectileManager extends JSONLoader {
 
     public void bindRegisteredTypes() {
         for (ProjectileInfo projectileInfo : this.projectiles.values()) {
-            ResourceLocation id = new ResourceLocation(LycanitesMobs.MODID, projectileInfo.getName());
+            ResourceLocation id = AssetHelper.modResource(projectileInfo.getName());
             EntityType<?> t = ForgeRegistries.ENTITY_TYPES.getValue(id);
             if (t == null || !id.equals(ForgeRegistries.ENTITY_TYPES.getKey(t))) continue;
-            projectileInfo.entityType = (EntityType<? extends BaseProjectileEntity>) t;
-            EntityFactory.getInstance().addEntityType(projectileInfo.entityType, projectileInfo.entityConstructor, projectileInfo.getName());
+            EntityType<? extends BaseProjectileEntity> entityType = (EntityType<? extends BaseProjectileEntity>) t;
+            projectileInfo.bindEntityType(entityType);
+            EntityFactory.getInstance().addEntityType(entityType, (type, level) -> projectileInfo.createEntity(type, level), projectileInfo.getName());
             projectileInfo.initAfterRegistry();
         }
     }
@@ -148,19 +173,18 @@ public class ProjectileManager extends JSONLoader {
      * @return The projectile's Entity Type.
      */
     public EntityType createEntityType(String entityName, Class<? extends Entity> entityClass) {
-        // LMHelperClass.logInfo("", "EntityClass: " + entityClass + ", EntityName: " + entityName);
-        EntityType.Builder entityTypeBuilder = EntityType.Builder.of(EntityFactory.getInstance(), MobCategory.MISC);
+        // LMHelperClass.logInfoMessage("EntityClass: " + entityClass + ", EntityName: " + entityName);
+        OldProjectileRegistration registration = this.oldProjectileRegistrations.get(entityClass);
+        if (registration == null) {
+            throw new IllegalStateException("Missing old projectile registration for " + entityClass.getName());
+        }
+
+        EntityType.Builder<BaseProjectileEntity> entityTypeBuilder = EntityType.Builder.of(registration::create, MobCategory.MISC);
         entityTypeBuilder.setTrackingRange(40);
         entityTypeBuilder.setUpdateInterval(3);
         entityTypeBuilder.setShouldReceiveVelocityUpdates(true);
         entityTypeBuilder.sized(0.25F, 0.25F);
         EntityType entityType = entityTypeBuilder.build(entityName);
-        try {
-            EntityFactory.getInstance().addEntityType(entityType, entityClass.getConstructor(EntityType.class, Level.class), entityName.toLowerCase());
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
 
         LMHelperClass.logDebug("Projectile", "Added (Projectile) Entity Type: " + entityName + " Type: " + entityType);
         this.oldProjectileTypes.put(entityClass, entityType);
@@ -199,25 +223,35 @@ public class ProjectileManager extends JSONLoader {
      * Called during early start up, loads all items.
      **/
     public void loadOldProjectiles() {
-        this.addOldProjectile("summoningportal", PortalEntity.class);
-        this.addOldProjectile("rapidfire", RapidFireProjectileEntity.class);
-        this.addOldProjectile("laserend", LaserEndProjectileEntity.class);
+        this.addOldProjectile("summoningportal", PortalEntity.class,
+                (type, world) -> new PortalEntity((EntityType<? extends PortalEntity>) type, world),
+                null,
+                null);
+        this.addOldProjectile("rapidfire", RapidFireProjectileEntity.class,
+                RapidFireProjectileEntity::new,
+                null,
+                null);
+        this.addOldProjectile("laserend", LaserEndProjectileEntity.class,
+                LaserEndProjectileEntity::new,
+                null,
+                null);
 
-        this.addOldProjectile("shadowfirebarrier", EntityShadowfireBarrier.class, false);
-        this.addOldProjectile("hellfirewall", EntityHellfireWall.class, false);
-        this.addOldProjectile("hellfireorb", EntityHellfireOrb.class, false);
-        this.addOldProjectile("hellfirewave", EntityHellfireWave.class, false);
-        this.addOldProjectile("hellfirewavepart", EntityHellfireWavePart.class, false);
-        this.addOldProjectile("hellfirebarrier", EntityHellfireBarrier.class, false);
-        this.addOldProjectile("hellfirebarrierpart", EntityHellfireBarrierPart.class, false);
-        this.addOldProjectile("devilgatling", EntityDevilGatling.class, false);
-        this.addOldProjectile("hellshield", EntityHellShield.class, false);
-        this.addOldProjectile("helllaser", EntityHellLaser.class, false);
-        this.addOldProjectile("helllaserend", EntityHellLaserEnd.class, false);
+        this.addOldProjectile("shadowfirebarrier", EntityShadowfireBarrier.class, EntityShadowfireBarrier::new, EntityShadowfireBarrier::new, EntityShadowfireBarrier::new, false);
+        this.addOldProjectile("hellfirewall", EntityHellfireWall.class, EntityHellfireWall::new, EntityHellfireWall::new, EntityHellfireWall::new, false);
+        this.addOldProjectile("hellfireorb", EntityHellfireOrb.class, EntityHellfireOrb::new, EntityHellfireOrb::new, EntityHellfireOrb::new, false);
+        this.addOldProjectile("hellfirewave", EntityHellfireWave.class, EntityHellfireWave::new, EntityHellfireWave::new, EntityHellfireWave::new, false);
+        this.addOldProjectile("hellfirewavepart", EntityHellfireWavePart.class, EntityHellfireWavePart::new, EntityHellfireWavePart::new, EntityHellfireWavePart::new, false);
+        this.addOldProjectile("hellfirebarrier", EntityHellfireBarrier.class, EntityHellfireBarrier::new, EntityHellfireBarrier::new, EntityHellfireBarrier::new, false);
+        this.addOldProjectile("hellfirebarrierpart", EntityHellfireBarrierPart.class, EntityHellfireBarrierPart::new, EntityHellfireBarrierPart::new, EntityHellfireBarrierPart::new, false);
+        this.addOldProjectile("devilgatling", EntityDevilGatling.class, EntityDevilGatling::new, EntityDevilGatling::new, EntityDevilGatling::new, false);
+        this.addOldProjectile("hellshield", EntityHellShield.class, EntityHellShield::new, EntityHellShield::new, EntityHellShield::new, false);
+        this.addOldProjectile("helllaser", EntityHellLaser.class, EntityHellLaser::new, EntityHellLaser::new, EntityHellLaser::new, false);
+        this.addOldProjectile("helllaserend", EntityHellLaserEnd.class, EntityHellLaserEnd::new, null, null, false);
     }
 
-    public void addOldProjectile(String name, Class<? extends BaseProjectileEntity> entityClass) {
+    public void addOldProjectile(String name, Class<? extends BaseProjectileEntity> entityClass, OldProjectileBaseFactory baseFactory, OldProjectileOwnerFactory ownerFactory, OldProjectilePositionFactory positionFactory) {
         this.oldProjectileNames.put(entityClass, name);
+        this.oldProjectileRegistrations.put(entityClass, new OldProjectileRegistration(entityClass, baseFactory, ownerFactory, positionFactory));
         if (ModelProjectileEntity.class.isAssignableFrom(entityClass)) {
             this.oldModelProjectiles.put(name, entityClass);
             return;
@@ -225,34 +259,71 @@ public class ProjectileManager extends JSONLoader {
         this.oldSpriteProjectiles.put(name, entityClass);
     }
 
-    public void addOldProjectile(String name, Class<? extends BaseProjectileEntity> entityClass, boolean impactSound) {
+    public void addOldProjectile(String name, Class<? extends BaseProjectileEntity> entityClass, OldProjectileBaseFactory baseFactory, OldProjectileOwnerFactory ownerFactory, OldProjectilePositionFactory positionFactory, boolean impactSound) {
         ModInfo modInfo = LycanitesMobs.modInfo;
         ObjectManager.addSound(name, "projectile." + name);
         if (impactSound) {
             ObjectManager.addSound(name + "_impact", "projectile." + name + ".impact");
         }
-        this.addOldProjectile(name, entityClass);
+        this.addOldProjectile(name, entityClass, baseFactory, ownerFactory, positionFactory);
     }
 
     public BaseProjectileEntity createOldProjectile(Class<? extends BaseProjectileEntity> projectileClass, Level world, LivingEntity entity) {
-        try {
-            return projectileClass.getConstructor(EntityType.class, Level.class, LivingEntity.class).newInstance(this.oldProjectileTypes.get(projectileClass), world, entity);
-        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException |
-                 IllegalAccessException e) {
-            e.printStackTrace();
-            //throw new RuntimeException(e);
+        OldProjectileRegistration registration = this.oldProjectileRegistrations.get(projectileClass);
+        if (registration == null || registration.ownerFactory == null) {
+            LMHelperClass.logWarning("Projectile", "Unable to create old projectile from owner: " + projectileClass.getName());
             return null;
         }
+        return registration.create(world, entity);
     }
 
     public BaseProjectileEntity createOldProjectile(Class<? extends BaseProjectileEntity> projectileClass, Level world, double x, double y, double z) {
-        try {
-            return projectileClass.getConstructor(EntityType.class, Level.class, double.class, double.class, double.class).newInstance(this.oldProjectileTypes.get(projectileClass), world, x, y, z);
-        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException |
-                 IllegalAccessException e) {
-            e.printStackTrace();
-            //throw new RuntimeException(e);
+        OldProjectileRegistration registration = this.oldProjectileRegistrations.get(projectileClass);
+        if (registration == null || registration.positionFactory == null) {
+            LMHelperClass.logWarning("Projectile", "Unable to create old projectile from position: " + projectileClass.getName());
             return null;
+        }
+        return registration.create(world, x, y, z);
+    }
+
+    @FunctionalInterface
+    public interface OldProjectileBaseFactory {
+        BaseProjectileEntity create(EntityType<? extends BaseProjectileEntity> entityType, Level world);
+    }
+
+    @FunctionalInterface
+    public interface OldProjectileOwnerFactory {
+        BaseProjectileEntity create(EntityType<? extends BaseProjectileEntity> entityType, Level world, LivingEntity owner);
+    }
+
+    @FunctionalInterface
+    public interface OldProjectilePositionFactory {
+        BaseProjectileEntity create(EntityType<? extends BaseProjectileEntity> entityType, Level world, double x, double y, double z);
+    }
+
+    protected class OldProjectileRegistration {
+        private final Class<? extends BaseProjectileEntity> entityClass;
+        private final OldProjectileBaseFactory baseFactory;
+        private final OldProjectileOwnerFactory ownerFactory;
+        private final OldProjectilePositionFactory positionFactory;
+
+        protected OldProjectileRegistration(Class<? extends BaseProjectileEntity> entityClass, OldProjectileBaseFactory baseFactory, OldProjectileOwnerFactory ownerFactory, OldProjectilePositionFactory positionFactory) {
+            this.entityClass = entityClass;
+            this.baseFactory = baseFactory;
+            this.ownerFactory = ownerFactory;
+            this.positionFactory = positionFactory;
+        }
+
+        protected BaseProjectileEntity create(EntityType<BaseProjectileEntity> entityType, Level world) {
+            return this.baseFactory.create(entityType, world);
+        }
+
+        protected BaseProjectileEntity create(Level world, LivingEntity owner) {
+            return this.ownerFactory.create(getOldProjectileType(this.entityClass), world, owner);
+        }
+
+        protected BaseProjectileEntity create(Level world, double x, double y, double z) {
+            return this.positionFactory.create(getOldProjectileType(this.entityClass), world, x, y, z);
         }
     }
 }

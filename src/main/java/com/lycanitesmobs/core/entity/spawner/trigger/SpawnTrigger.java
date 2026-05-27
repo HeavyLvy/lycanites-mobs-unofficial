@@ -20,32 +20,32 @@ public abstract class SpawnTrigger {
     /**
      * The Spawner using this Trigger.
      **/
-    public Spawner spawner;
+    protected Spawner spawner;
 
     /**
      * How much this influences the Spawner's trigger count by, usually just 1. If 0 this Trigger will instead completely reset the count, if negative it will reduce the count.
      **/
-    public int count = 1;
+    protected int count = 1;
 
     /**
      * The Chance of triggering.
      **/
-    public double chance = 1;
+    protected double chance = 1;
 
     /**
      * A list of Trigger specific Conditions that this Trigger will check.
      **/
-    public List<SpawnCondition> conditions = new ArrayList<>();
+    protected List<SpawnCondition> conditions = new ArrayList<>();
 
     /**
      * Determines how many Trigger specific Conditions must be met. If 0 or less all are required.
      **/
-    public int conditionsRequired = 0;
+    protected int conditionsRequired = 0;
 
     /**
      * How long (in ticks) until this trigger can be started again, this is done per player.
      **/
-    public int cooldown = 0;
+    protected int cooldown = 0;
 
     /**
      * Stores the age tick of each player when they last attempted to sleep.
@@ -102,6 +102,10 @@ public abstract class SpawnTrigger {
         this.spawner = spawner;
     }
 
+    public Spawner getSpawner() {
+        return this.spawner;
+    }
+
     /**
      * Loads this Spawn Trigger from the provided JSON data.
      **/
@@ -144,7 +148,7 @@ public abstract class SpawnTrigger {
             } else {
                 lastUsedTicks = this.playerUsedTicks.get(player);
             }
-            if (playerExt.timePlayed < lastUsedTicks + this.cooldown) {
+            if (playerExt.getTimePlayed() < lastUsedTicks + this.cooldown) {
                 return false;
             }
         }

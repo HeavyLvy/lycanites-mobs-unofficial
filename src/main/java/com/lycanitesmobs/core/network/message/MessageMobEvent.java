@@ -1,11 +1,8 @@
 package com.lycanitesmobs.core.network.message;
 
-import com.lycanitesmobs.client.manager.ClientManager;
-import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
+import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -35,17 +32,12 @@ public class MessageMobEvent {
         if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
             return;
 
-        ctx.get().enqueueWork(() -> {
-            Player player = ClientManager.getInstance().getClientPlayer();
-            Level world = player.getCommandSenderWorld();
-            ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);
-
-            if ("".equals(message.mobEventName))
-                worldExt.stopMobEvent(message.mobEventName);
-            else {
-                worldExt.startMobEvent(message.mobEventName, null, message.pos, message.level, message.subspecies);
-            }
-        });
+        ctx.get().enqueueWork(() ->
+                LycanitesMobs.PROXY.applyMobEvent(
+                        message.mobEventName,
+                        message.pos,
+                        message.level,
+                        message.subspecies));
     }
 
     /**

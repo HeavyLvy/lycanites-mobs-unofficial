@@ -32,7 +32,7 @@ public class SpawnersCommand {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
-		SpawnerEventListener.testOnCreative = true;
+		SpawnerEventListener.setTestOnCreative(true);
 		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.spawners.creative.enable"), true);
 		return 0;
 	}
@@ -41,7 +41,7 @@ public class SpawnersCommand {
 		if (!context.getSource().hasPermission(2)) {
 			return 0;
 		}
-		SpawnerEventListener.testOnCreative = false;
+		SpawnerEventListener.setTestOnCreative(false);
 		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.spawners.creative.disable"), true);
 		return 0;
 	}
@@ -51,11 +51,11 @@ public class SpawnersCommand {
 			return 0;
 		}
 		context.getSource().sendSuccess(() -> Component.translatable("lyc.command.spawners.list"), true);
-		for(Spawner spawner : SpawnerManager.getInstance().spawners.values()) {
-			if(!"".equals(spawner.eventName)) {
+		for(Spawner spawner : SpawnerManager.getInstance().getSpawners()) {
+			if(spawner.hasEventName()) {
 				continue;
 			}
-			String spawnerName = spawner.name;
+			String spawnerName = spawner.getName();
 			context.getSource().sendSuccess(() -> Component.literal(spawnerName), true);
 		}
 		return 0;

@@ -11,12 +11,12 @@ import net.minecraft.world.phys.Vec3;
 public class DirectNavigator {
 	// Targets:
 	BaseCreatureEntity host;
-	public BlockPos targetPosition;
+	private BlockPos targetPosition;
 	
 	// Properties:
-	public double flyingSpeed = 1.0D;
-	public boolean faceMovement = true;
-	public double speedModifier = 1.0D;
+	private double flyingSpeed = 1.0D;
+	private boolean faceMovement = true;
+	private double speedModifier = 1.0D;
 	
 	// ==================================================
  	//                    Constructor
@@ -35,6 +35,18 @@ public class DirectNavigator {
 	public DirectNavigator setFacing(boolean facing) {
 		this.faceMovement = facing;
 		return this;
+	}
+
+	public void setSpeedModifier(double speedModifier) {
+		this.speedModifier = speedModifier;
+	}
+
+	public boolean hasTargetPosition() {
+		return this.targetPosition != null;
+	}
+
+	public int getTargetPositionY() {
+		return this.targetPosition.getY();
 	}
 	
 	

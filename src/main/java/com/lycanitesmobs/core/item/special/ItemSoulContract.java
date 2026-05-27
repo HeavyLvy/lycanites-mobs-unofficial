@@ -71,7 +71,7 @@ public class ItemSoulContract extends BaseItem {
                 tooltip.add(Component.translatable("item.lycanitesmobs.soul_contract.offline"));
                 return;
             }
-            PetEntry petEntry = extendedOwner.petManager.getEntry(petEntryUUID);
+            PetEntry petEntry = extendedOwner.getPetManager().getEntry(petEntryUUID);
             if (petEntry == null) {
                 tooltip.add(Component.translatable("item.lycanitesmobs.soul_contract.released").withStyle(ChatFormatting.DARK_RED));
                 tooltip.add(Component.translatable("item.lycanitesmobs.soul_contract.owner").append(" ").append(owner.getDisplayName()).withStyle(ChatFormatting.DARK_PURPLE));
@@ -97,10 +97,10 @@ public class ItemSoulContract extends BaseItem {
         UUID petEntryUUID = this.getPetEntryUUID(itemStack);
 
         if (ownerUUID == null || petEntryUUID == null) {
-            return this.bindSoul(itemStack, player, creatureEntity);
+            return this.bindSoul(itemStack, player, creatureEntity, hand);
         }
 
-        return this.transferSoul(itemStack, player, creatureEntity, ownerUUID, petEntryUUID);
+        return this.transferSoul(itemStack, player, creatureEntity, ownerUUID, petEntryUUID, hand);
     }
 
     /**
@@ -111,7 +111,7 @@ public class ItemSoulContract extends BaseItem {
      * @param creatureEntity The entity targeted by the Soul Contract.
      * @return Pass on failure otherwise success.
      */
-    public InteractionResult bindSoul(ItemStack itemStack, Player player, BaseCreatureEntity creatureEntity) {
+    public InteractionResult bindSoul(ItemStack itemStack, Player player, BaseCreatureEntity creatureEntity, InteractionHand hand) {
 
         // Check Ownership:
         if (creatureEntity.getOwner() != player || "familiar".equalsIgnoreCase(creatureEntity.getPetEntry().getType())) {
@@ -125,9 +125,9 @@ public class ItemSoulContract extends BaseItem {
         if (!player.getCommandSenderWorld().isClientSide) {
             CompoundTag nbt = this.getTagCompound(itemStack);
             nbt.putUUID("ownerUUID", player.getUUID());
-            nbt.putUUID("petEntryUUID", creatureEntity.getPetEntry().petEntryID);
+            nbt.putUUID("petEntryUUID", creatureEntity.getPetEntry().getPetEntryID());
             itemStack.setTag(nbt);
-            player.getInventory().setItem(player.getInventory().selected, itemStack);
+            player.setItemInHand(hand, itemStack);
             player.displayClientMessage(Component.translatable("message.soul_contract.bound").withStyle(ChatFormatting.GREEN), false);
         }
 
@@ -144,28 +144,28 @@ public class ItemSoulContract extends BaseItem {
      * @param petEntryUUID   The unique id of the pet entry to transfer.
      * @return Pass on failure otherwise success.
      */
-    public InteractionResult transferSoul(ItemStack itemStack, Player player, BaseCreatureEntity creatureEntity, UUID ownerUUID, UUID petEntryUUID) {
+    public InteractionResult transferSoul(ItemStack itemStack, Player player, BaseCreatureEntity creatureEntity, UUID ownerUUID, UUID petEntryUUID, InteractionHand hand) {
         // Transferring to Self:
         if (player.getUUID().equals(ownerUUID)) {
             // Unbind from Contract:
-            if (petEntryUUID.equals(creatureEntity.getPetEntry().petEntryID)) {
+            if (petEntryUUID.equals(creatureEntity.getPetEntry().getPetEntryID())) {
                 if (!player.getCommandSenderWorld().isClientSide) {
                     CompoundTag nbt = this.getTagCompound(itemStack);
                     nbt.remove("ownerUUID");
                     nbt.remove("petEntryUUID");
                     itemStack.setTag(nbt);
-                    player.getInventory().setItem(player.getInventory().selected, itemStack);
+                    player.setItemInHand(hand, itemStack);
                     player.displayClientMessage(Component.translatable("message.soul_contract.unbound").withStyle(ChatFormatting.LIGHT_PURPLE), false);
                 }
                 return InteractionResult.SUCCESS;
             }
 
             // Bind a different Creature to the Contract instead:
-            return this.bindSoul(itemStack, player, creatureEntity);
+            return this.bindSoul(itemStack, player, creatureEntity, hand);
         }
 
         // Transfer on Wrong Pet:
-        if (!petEntryUUID.equals(creatureEntity.getPetEntry().petEntryID)) {
+        if (!petEntryUUID.equals(creatureEntity.getPetEntry().getPetEntryID())) {
             if (!player.getCommandSenderWorld().isClientSide) {
                 player.displayClientMessage(Component.translatable("message.soul_contract.wrong_target").withStyle(ChatFormatting.RED), false);
             }
@@ -190,8 +190,8 @@ public class ItemSoulContract extends BaseItem {
 
         // Transfer to New Owner:
         if (!player.getCommandSenderWorld().isClientSide) {
-            extendedOwner.petManager.removeEntry(creatureEntity.getPetEntry());
-            extendedPlayer.petManager.addEntry(creatureEntity.getPetEntry());
+            extendedOwner.getPetManager().removeEntry(creatureEntity.getPetEntry());
+            extendedPlayer.getPetManager().addEntry(creatureEntity.getPetEntry());
             extendedOwner.sendPetEntriesToPlayer(creatureEntity.getPetEntry().getType());
             extendedOwner.sendPetEntryRemoveToPlayer(creatureEntity.getPetEntry());
             extendedPlayer.sendPetEntriesToPlayer(creatureEntity.getPetEntry().getType());
@@ -201,7 +201,7 @@ public class ItemSoulContract extends BaseItem {
         if (creatureEntity instanceof TameableCreatureEntity) {
             ((TameableCreatureEntity) creatureEntity).setPlayerOwner(player);
         }
-        player.getInventory().setItem(player.getInventory().selected, ItemStack.EMPTY);
+        player.setItemInHand(hand, ItemStack.EMPTY);
 
         return InteractionResult.SUCCESS;
     }

@@ -23,7 +23,7 @@ public class ArenaNodeNetworkGrid extends ArenaNodeNetwork {
                     int posZ = z - ((arenaNodeZ % 2 == 0 ? arenaNodeZ : arenaNodeZ - 1) / 2);
                     arenaNodes[x][y][z] = new ArenaNode(this.world, centerPos.offset(posX * nodeDistance, posY * nodeDistance, posZ * nodeDistance));
                     if (posX == 0 && posY == 0 && posZ == 0) {
-                        this.centralNode = arenaNodes[x][y][z];
+                        this.setCentralNode(arenaNodes[x][y][z]);
                     }
                 }
             }
@@ -35,10 +35,10 @@ public class ArenaNodeNetworkGrid extends ArenaNodeNetwork {
                 for (int z = 0; z < arenaNodeZ; z++) {
                     ArenaNode node = arenaNodes[x][y][z];
                     if (node == null) {
-                        LMHelperClass.logWarning("", "A null arena node was encountered when adding grid nodes.");
+                        LMHelperClass.logWarningMessage("A null arena node was encountered when adding grid nodes.");
                         continue;
                     }
-                    this.nodes.add(node);
+                    this.addNode(node);
 
                     // Assign Adjacent Nodes:
                     for (int adjX = -1; adjX <= 1; adjX++) {

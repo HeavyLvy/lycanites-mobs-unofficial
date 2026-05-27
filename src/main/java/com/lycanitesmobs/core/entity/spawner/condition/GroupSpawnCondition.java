@@ -14,10 +14,10 @@ import java.util.List;
 public class GroupSpawnCondition extends SpawnCondition {
 
     /** A list of child Conditions that this Condition will check. **/
-    public List<SpawnCondition> conditions = new ArrayList<>();
+    protected List<SpawnCondition> conditions = new ArrayList<>();
 
 	/** Determines how many child Conditions must be met. If 0 or less all are required. **/
-    public int conditionsRequired = 0;
+    protected int conditionsRequired = 0;
 
 
 	@Override

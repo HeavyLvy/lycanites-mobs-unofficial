@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.StealthGoal;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.block.Material;
@@ -48,8 +49,8 @@ public class EntityUmibas extends TameableCreatureEntity implements IGroupHeavy 
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextPriorityGoalIndex++, new StealthGoal(this).setStealthTime(60).setStealthMove(true).setStealthAttack(true));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(1.0D).setRange(16.0F).setMinChaseDistance(8.0F));
+        this.goalSelector.addGoal(this.claimPriorityGoalIndex(), new StealthGoal(this).setStealthTime(60).setStealthMove(true).setStealthAttack(true));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(1.0D).setRange(16.0F).setMinChaseDistance(8.0F));
     }
 
     @Override
@@ -110,7 +111,7 @@ public class EntityUmibas extends TameableCreatureEntity implements IGroupHeavy 
 
         // Launch:
         this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-        this.getCommandSenderWorld().addFreshEntity(projectile);
+        DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
 
         // Random Projectiles:
         for (int i = 0; i < 10; i++) {
@@ -118,7 +119,7 @@ public class EntityUmibas extends TameableCreatureEntity implements IGroupHeavy 
             projectile.setProjectileScale(2f);
             projectile.shoot((this.getRandom().nextFloat()) - 0.5F, this.getRandom().nextFloat(), (this.getRandom().nextFloat()) - 0.5F, 0.5F, 3.0F);
             this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-            this.getCommandSenderWorld().addFreshEntity(projectile);
+            DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
         }
 
         super.attackRanged(target, range);
@@ -174,7 +175,7 @@ public class EntityUmibas extends TameableCreatureEntity implements IGroupHeavy 
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================

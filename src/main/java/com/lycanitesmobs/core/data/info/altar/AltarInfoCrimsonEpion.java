@@ -150,8 +150,8 @@ public class AltarInfoCrimsonEpion extends AltarInfo {
         }
 
         // Spawn Mini Boss:
-        entityCreature.altarSummoned = true;
-        entityCreature.forceBossHealthBar = true;
+        entityCreature.markAltarSummoned();
+        entityCreature.forceBossHealthBar();
         entityCreature.applyVariant(3);
         entityCreature.moveTo(x, y - 2, z, 0, 0);
         this.spawnDeferred(world, pos, "altar_spawn:" + this.name + ":" + pos.asLong(), entityCreature,

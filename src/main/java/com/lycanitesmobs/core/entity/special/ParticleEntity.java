@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.entity.special;
 
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.data.info.ModInfo;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -11,11 +11,11 @@ import net.minecraft.world.phys.HitResult;
 
 public class ParticleEntity extends ThrowableProjectile {
 	// Particle:
-	public int particleAge = 0;
-	public int particleAgeMax = 20;
-	public double particleGravity = 0D;
-	public String texture;
-	public ModInfo group;
+	protected int particleAge = 0;
+	protected int particleAgeMax = 20;
+	protected double particleGravity = 0D;
+	protected String texture;
+	protected ModInfo group;
 	
     // ==================================================
     //                      Constructor
@@ -91,8 +91,6 @@ public class ParticleEntity extends ThrowableProjectile {
     //                      Visuals
     // ==================================================
     public ResourceLocation getTexture() {
-    	if(TextureManager.getTexture(this.texture) == null)
-    		TextureManager.addTexture(this.texture, "textures/particles/" + this.texture.toLowerCase() + ".png");
-    	return TextureManager.getTexture(this.texture);
+    	return AssetHelper.texture("textures/particles/" + this.texture.toLowerCase() + ".png");
     }
 }

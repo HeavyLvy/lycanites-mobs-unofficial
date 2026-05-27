@@ -180,8 +180,8 @@ public class AltarInfoCelestialGeonach extends AltarInfo {
         }
 
         // Spawn Mini Boss:
-        entityGeonach.altarSummoned = true;
-        entityGeonach.forceBossHealthBar = true;
+        entityGeonach.markAltarSummoned();
+        entityGeonach.forceBossHealthBar();
         entityGeonach.applyVariant(3);
         entityGeonach.moveTo(x, y - 2, z, 0, 0);
         this.spawnDeferred(world, pos, "altar_spawn:" + this.name + ":" + pos.asLong(), entityGeonach,

@@ -8,7 +8,7 @@ import net.minecraft.world.level.Level;
 
 /** Projectile Effects add new behaviour and other effects to projectiles such as placing blocks on impact, firing additional projectiles, etc. **/
 public abstract class ProjectileBehaviour {
-	public String type;
+	protected String type;
 
 	/** Creates a Projectile Effect from the provided JSON data. **/
 	public static ProjectileBehaviour createFromJSON(JsonObject json) {

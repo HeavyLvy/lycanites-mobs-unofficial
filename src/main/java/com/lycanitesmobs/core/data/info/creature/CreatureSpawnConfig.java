@@ -4,23 +4,71 @@ import com.lycanitesmobs.core.data.config.ConfigCreatureSpawning;
 import net.minecraft.world.level.Level;
 
 public class CreatureSpawnConfig {
-	public int typeSpawnLimit = 64;
-	public double spawnLimitRange = 16D;
-	public boolean disableAllSpawning = false;
-	public boolean disableDungeonSpawners = false;
-	public boolean enforceBlockCost = true;
-	public boolean useSurfaceLightLevel = true;
-	public double spawnWeightScale = 1.0D;
-	public double dungeonSpawnerWeightScale = 1.0D;
-	public boolean ignoreWorldGenSpawning = false;
-	public boolean controlVanillaSpawns = false;
+	protected int typeSpawnLimit = 64;
+	protected double spawnLimitRange = 16D;
+	protected boolean disableAllSpawning = false;
+	protected boolean disableDungeonSpawners = false;
+	protected boolean enforceBlockCost = true;
+	protected boolean useSurfaceLightLevel = true;
+	protected double spawnWeightScale = 1.0D;
+	protected double dungeonSpawnerWeightScale = 1.0D;
+	protected boolean ignoreWorldGenSpawning = false;
+	protected boolean controlVanillaSpawns = false;
 
 	/** A global list of dimension ids that overrides every other spawn setting in both the configs and json spawners. **/
-	public String[] dimensionList;
+	protected String[] dimensionList;
 
 	/** If set to true the dimension list acts as a whitelist, otherwise it is a blacklist. **/
-	public boolean dimensionListWhitelist = false;
+	protected boolean dimensionListWhitelist = false;
 	
+
+	public int typeSpawnLimit() {
+		return this.typeSpawnLimit;
+	}
+
+	public double spawnLimitRange() {
+		return this.spawnLimitRange;
+	}
+
+	public boolean disableAllSpawning() {
+		return this.disableAllSpawning;
+	}
+
+	public boolean disableDungeonSpawners() {
+		return this.disableDungeonSpawners;
+	}
+
+	public boolean enforceBlockCost() {
+		return this.enforceBlockCost;
+	}
+
+	public boolean useSurfaceLightLevel() {
+		return this.useSurfaceLightLevel;
+	}
+
+	public double spawnWeightScale() {
+		return this.spawnWeightScale;
+	}
+
+	public double dungeonSpawnerWeightScale() {
+		return this.dungeonSpawnerWeightScale;
+	}
+
+	public boolean ignoreWorldGenSpawning() {
+		return this.ignoreWorldGenSpawning;
+	}
+
+	public boolean controlVanillaSpawns() {
+		return this.controlVanillaSpawns;
+	}
+
+	public String[] dimensionList() {
+		return this.dimensionList;
+	}
+
+	public boolean dimensionListWhitelist() {
+		return this.dimensionListWhitelist;
+	}
 
 	/**
 	 * Loads global spawning settings from the configs.

@@ -25,7 +25,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class BlockShadowfire extends BlockFireBase {
-    public boolean blindness;
+    private boolean blindness;
 
     public BlockShadowfire(Block.Properties properties) {
         super(properties, "shadowfire");
@@ -40,7 +40,7 @@ public class BlockShadowfire extends BlockFireBase {
         this.removeOnNoFireTick = false;
         this.blindness = true;
 
-        ItemManager.getInstance().cutoutBlocks.add(this);
+        ItemManager.getInstance().registerCutoutBlock(this);
     }
 
     protected boolean canNeighborCatchFire(Level worldIn, BlockPos pos) {

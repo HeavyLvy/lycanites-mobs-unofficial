@@ -19,10 +19,10 @@ public class SpawnerManager extends JSONLoader {
      * This manages all Spawners, it load them and can also destroy them. Spawners are then ran by Spawn Triggers which are called from the SpawnerEventListener.
      **/
 
-    public static SpawnerManager INSTANCE;
+    private static SpawnerManager INSTANCE;
 
-    public Map<String, Spawner> spawners = new HashMap<>();
-    public List<SpawnCondition> globalSpawnConditions = new ArrayList<>();
+    protected Map<String, Spawner> spawners = new HashMap<>();
+    protected List<SpawnCondition> globalSpawnConditions = new ArrayList<>();
 
 
     /**
@@ -35,17 +35,33 @@ public class SpawnerManager extends JSONLoader {
         return INSTANCE;
     }
 
+    public Collection<Spawner> getSpawners() {
+        return Collections.unmodifiableCollection(this.spawners.values());
+    }
+
+    public Spawner getSpawner(String name) {
+        return this.spawners.get(name);
+    }
+
+    public boolean hasSpawner(String name) {
+        return this.spawners.containsKey(name);
+    }
+
+    public List<SpawnCondition> getGlobalSpawnConditions() {
+        return Collections.unmodifiableList(this.globalSpawnConditions);
+    }
+
 
     /**
      * Loads all JSON Spawners.
      **/
     public void loadAllFromJson(ModInfo modInfo) {
         // Spawners:
-        this.loadAllJson(modInfo, "Spawner", "spawners", "name", true, "spawner", FileLoader.COMMON, StreamLoader.COMMON);
+        this.loadAllJson(modInfo, "Spawner", "spawners", "name", true, "spawner", FileLoader.common(), StreamLoader.common());
         LMHelperClass.logDebug("Spawner", "Complete! " + this.spawners.size() + " JSON Spawners Loaded In Total.");
 
         // Mob Event Spawners:
-        this.loadAllJson(modInfo, "Spawner", "mobevents", "name", true, "spawner", FileLoader.COMMON, StreamLoader.COMMON);
+        this.loadAllJson(modInfo, "Spawner", "mobevents", "name", true, "spawner", FileLoader.common(), StreamLoader.common());
         LMHelperClass.logDebug("Spawner", "Complete! " + this.spawners.size() + " JSON Spawners Loaded In Total.");
 
         // Load Global Spawn Conditions:
@@ -54,14 +70,14 @@ public class SpawnerManager extends JSONLoader {
         this.globalSpawnConditions.clear();
 
         JsonObject defaultGlobalJson;
-        if (FileLoader.COMMON.ready) {
-            Path defaultGlobalPath = FileLoader.COMMON.getPath("globalspawner.json");
+        if (FileLoader.common().isReady()) {
+            Path defaultGlobalPath = FileLoader.common().getPath("globalspawner.json");
             defaultGlobalJson = this.loadJsonObject(gson, defaultGlobalPath);
         } else {
-            defaultGlobalJson = this.loadJsonObject(gson, StreamLoader.COMMON.getStream("globalspawner.json"));
+            defaultGlobalJson = this.loadJsonObject(gson, StreamLoader.common().getStream("globalspawner.json"));
         }
         if (defaultGlobalJson == null) {
-            LMHelperClass.logWarning("", "Could not find Global Spawning JSON.");
+            LMHelperClass.logWarningMessage("Could not find Global Spawning JSON.");
         }
 
         File customGlobalFile = new File(configPath + "globalspawner.json");
@@ -107,15 +123,15 @@ public class SpawnerManager extends JSONLoader {
      * Adds a new Spawner to this Manager.
      **/
     public void addSpawner(Spawner spawner) {
-        if (this.spawners.containsKey(spawner.name)) {
-            LMHelperClass.logWarning("", "[Spawner Manager] Tried to add a Spawner with a name that is already in use: " + spawner.name);
+        if (this.spawners.containsKey(spawner.getName())) {
+            LMHelperClass.logWarningMessage("[Spawner Manager] Tried to add a Spawner with a name that is already in use: " + spawner.getName());
             return;
         }
         if (this.spawners.values().contains(spawner)) {
-            LMHelperClass.logWarning("", "[Spawner Manager] Tried to add a Spawner that is already added: " + spawner.name);
+            LMHelperClass.logWarningMessage("[Spawner Manager] Tried to add a Spawner that is already added: " + spawner.getName());
             return;
         }
-        this.spawners.put(spawner.name, spawner);
+        this.spawners.put(spawner.getName(), spawner);
     }
 
 
@@ -123,10 +139,10 @@ public class SpawnerManager extends JSONLoader {
      * Removes a Spawner from this Manager.
      **/
     public void removeSpawner(Spawner spawner) {
-        if (!this.spawners.containsKey(spawner.name)) {
-            LMHelperClass.logWarning("", "[Spawner Manager] Tried to remove a Spawner that hasn't been added: " + spawner.name);
+        if (!this.spawners.containsKey(spawner.getName())) {
+            LMHelperClass.logWarningMessage("[Spawner Manager] Tried to remove a Spawner that hasn't been added: " + spawner.getName());
             return;
         }
-        this.spawners.remove(spawner.name);
+        this.spawners.remove(spawner.getName());
     }
 }

@@ -63,9 +63,10 @@ public class CreaturesBeastiaryScreen extends BeastiaryScreen {
         super.renderBackground(matrixStack, mouseX, mouseY, partialTicks);
 
         // Selected Creature Model:
-        if (this.playerExt.selectedCreature != null) {
+        CreatureInfo selectedCreature = this.playerExt.getSelectedCreature();
+        if (selectedCreature != null) {
             int marginX = this.getScaledX(240F / 1920F) + 8;
-            this.renderCreature(matrixStack, this.playerExt.selectedCreature, this.colRightX + (marginX / 2) + (this.colRightWidth / 2), this.colRightY + (this.colRightHeight / 2), mouseX, mouseY, partialTicks);
+            this.renderCreature(matrixStack, selectedCreature, this.colRightX + (marginX / 2) + (this.colRightWidth / 2), this.colRightY + (this.colRightHeight / 2), mouseX, mouseY, partialTicks);
         }
     }
 
@@ -73,12 +74,12 @@ public class CreaturesBeastiaryScreen extends BeastiaryScreen {
     protected void renderWidgets(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         super.renderWidgets(guiGraphics, mouseX, mouseY, partialTicks);
 
-        if (!this.playerExt.getBeastiary().creatureKnowledgeList.isEmpty()
-                && this.playerExt.selectedCreature != null
+        if (this.playerExt.getBeastiary().hasCreatureKnowledge()
+                && this.playerExt.hasSelectedCreature()
                 && this.descriptionList != null) {
             this.descriptionList.setCreatureKnowledge(
-                    this.playerExt.beastiary.getCreatureKnowledge(
-                            this.playerExt.selectedCreature.getName()
+                    this.playerExt.getBeastiary().getCreatureKnowledge(
+                            this.playerExt.getSelectedCreature().getName()
                     )
             );
         }
@@ -94,7 +95,7 @@ public class CreaturesBeastiaryScreen extends BeastiaryScreen {
         int width = this.colRightWidth - marginX;
 
         // No Creatures:
-        if (this.playerExt.getBeastiary().creatureKnowledgeList.isEmpty()) {
+        if (!this.playerExt.getBeastiary().hasCreatureKnowledge()) {
             nextY += this.drawHelper.getWordWrappedHeight("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA", this.colRightWidth) + 2;
             String text = Component.translatable("gui.beastiary.creatures.empty.info").getString();
             this.drawHelper.drawStringWrapped(matrixStack, text, this.colRightX, nextY, this.colRightWidth, 0xFFFFFF, true);
@@ -102,16 +103,17 @@ public class CreaturesBeastiaryScreen extends BeastiaryScreen {
         }
 
         // Creature Display:
-        if (this.playerExt.selectedCreature != null) {
-            Subspecies subspecies = this.playerExt.selectedCreature.getSubspecies(this.playerExt.selectedSubspecies);
+        CreatureInfo selectedCreature = this.playerExt.getSelectedCreature();
+        if (selectedCreature != null) {
+            Subspecies subspecies = selectedCreature.getSubspecies(this.playerExt.getSelectedSubspecies());
 
             // Model:
-            CreatureInfo creatureInfo = this.playerExt.selectedCreature;
-            CreatureKnowledge creatureKnowledge = this.playerExt.beastiary.getCreatureKnowledge(this.playerExt.selectedCreature.getName());
+            CreatureInfo creatureInfo = selectedCreature;
+            CreatureKnowledge creatureKnowledge = this.playerExt.getBeastiary().getCreatureKnowledge(selectedCreature.getName());
 
             // Element:
             String text = "\u00A7l" + Component.translatable("creature.stat.element").getString() + ": " + "\u00A7r";
-            text += creatureInfo.elements != null ? creatureInfo.getElementNames(subspecies).getString() : "None";
+            text += creatureInfo.getElementNames(subspecies).getString();
             this.drawHelper.drawStringWrapped(matrixStack, text, nextX, nextY, width, 0xFFFFFF, true);
 
             // Level:
@@ -134,32 +136,33 @@ public class CreaturesBeastiaryScreen extends BeastiaryScreen {
             this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIPetBarEmpty"), barX, nextY, 0, 1, 1, barWidth, barHeight);
 
             if (creatureKnowledge != null) {
-                this.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetSpiritUsed"), rankX, nextY, 0, 9, 9, creatureKnowledge.rank, 10);
+                this.drawHelper.drawBar(matrixStack, TextureManager.getTexture("GUIPetSpiritUsed"), rankX, nextY, 0, 9, 9, creatureKnowledge.getRank(), 10);
                 float experienceNormal = 1;
                 if (creatureKnowledge.getMaxExperience() > 0) {
-                    experienceNormal = (float) creatureKnowledge.experience / creatureKnowledge.getMaxExperience();
+                    experienceNormal = (float) creatureKnowledge.getExperience() / creatureKnowledge.getMaxExperience();
                 }
                 this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIBarExperience"), barX, nextY, 0, experienceNormal, 1, barWidth * experienceNormal, barHeight);
                 String experienceText = "100%";
                 if (creatureKnowledge.getMaxExperience() > 0) {
-                    experienceText = creatureKnowledge.experience + "/" + creatureKnowledge.getMaxExperience();
+                    experienceText = creatureKnowledge.getExperience() + "/" + creatureKnowledge.getMaxExperience();
                 }
                 this.drawHelper.draw(matrixStack, experienceText, barCenter - ((float) this.drawHelper.getStringWidth(experienceText) / 2), nextY + 2, 0xFFFFFF);
             }
         }
 
         // Creature Type Display:
-        else if (this.playerExt.selectedCreatureType != null) {
+        else if (this.playerExt.hasSelectedCreatureType()) {
+            var selectedCreatureType = this.playerExt.getSelectedCreatureType();
             // Description:
             nextY += this.drawHelper.getWordWrappedHeight("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA", this.colRightWidth) + 2;
-            String text = this.playerExt.selectedCreatureType.getTitle().getString();
+            String text = selectedCreatureType.getTitle().getString();
             this.drawHelper.drawStringWrapped(matrixStack, text, nextX, nextY, width, 0xFFFFFF, true);
 
             // Discovered:
             nextY += 12 + this.drawHelper.getFontRenderer().wordWrapHeight(text, colRightWidth);
             text = Component.translatable("gui.beastiary.creatures.discovered").getString() + ": ";
-            text += this.playerExt.getBeastiary().getCreaturesDiscovered(this.playerExt.selectedCreatureType);
-            text += "/" + this.playerExt.selectedCreatureType.creatures.size();
+            text += this.playerExt.getBeastiary().getCreaturesDiscovered(selectedCreatureType);
+            text += "/" + selectedCreatureType.getCreatureCount();
             this.drawHelper.drawString(matrixStack, text, nextX, nextY, 0xFFFFFF, true);
         }
 
@@ -173,14 +176,13 @@ public class CreaturesBeastiaryScreen extends BeastiaryScreen {
 
     @Override
     public MutableComponent getTitle() {
-        if (this.creatureList != null && this.playerExt.selectedCreature != null) {
+        if (this.creatureList != null && this.playerExt.hasSelectedCreature()) {
             return Component.literal("");
-            //return this.playerExt.selectedCreature.getTitle();
         }
-        if (this.creatureTypeList != null && this.playerExt.selectedCreatureType != null) {
-            return this.playerExt.selectedCreatureType.getTitle();
+        if (this.creatureTypeList != null && this.playerExt.hasSelectedCreatureType()) {
+            return this.playerExt.getSelectedCreatureType().getTitle();
         }
-        if (this.playerExt.getBeastiary().creatureKnowledgeList.isEmpty()) {
+        if (!this.playerExt.getBeastiary().hasCreatureKnowledge()) {
             return Component.translatable("gui.beastiary.creatures.empty.title");
         }
         return Component.translatable("gui.beastiary.creatures");

@@ -28,7 +28,7 @@ public class GetItemGoal extends Goal {
     protected int cantSeeTimeMax = 60;
     private int updateRate = 0;
     private int recheckTime = 0;
-    public boolean tamedLooting = true;
+    private boolean tamedLooting = true;
     
     // ==================================================
   	//                    Constructor
@@ -152,7 +152,7 @@ public class GetItemGoal extends Goal {
         	if(!this.host.useDirectNavigator())
         		this.host.getNavigation().moveTo(this.target, this.speed);
         	else
-        		this.host.directNavigator.setTargetPosition(new BlockPos((int)this.target.position().x(), (int)this.target.position().y(), (int)this.target.position().z()), this.speed);
+        		this.host.setDirectNavigationTarget(new BlockPos((int)this.target.position().x(), (int)this.target.position().y(), (int)this.target.position().z()), this.speed);
         }
     }
 }

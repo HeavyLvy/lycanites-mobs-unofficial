@@ -45,7 +45,7 @@ public class EquipmentNameGenerator {
             String rawName = part.itemName.replace("equipmentpart_", "");
             hashSeed = hashSeed * 31 + rawName.hashCode();
 
-            switch (part.slotType) {
+            switch (part.getSlotType()) {
                 case "base" -> weaponPart = part;
                 case "head" -> headPart = part;
                 case "blade", "axe", "pike" -> creaturePart = part;
@@ -66,21 +66,21 @@ public class EquipmentNameGenerator {
         Random rng = new Random(hashSeed);
 
         if (prefixPart != null) {
-            String prefix = pickFragment(prefixPart.equipmentNames, rng);
+            String prefix = pickFragment(prefixPart.getEquipmentNames(), rng);
             if (prefix != null) {
                 name.append(prefix).append(" ");
             }
         }
 
         if (creaturePart != null) {
-            String creature = pickFragment(creaturePart.equipmentNames, rng);
+            String creature = pickFragment(creaturePart.getEquipmentNames(), rng);
             if (creature != null) {
                 name.append(creature).append(" ");
             }
         }
 
         if (weaponPart != null) {
-            String weapon = pickFragment(weaponPart.equipmentNames, rng);
+            String weapon = pickFragment(weaponPart.getEquipmentNames(), rng);
             if (weapon != null) {
                 name.append(weapon);
             }

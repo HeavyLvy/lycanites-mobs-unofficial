@@ -5,6 +5,7 @@ import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -36,7 +37,7 @@ public class EntityJengu extends TameableCreatureEntity implements Enemy, IFusab
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setRange(14.0F).setMinChaseDistance(5.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setRange(14.0F).setMinChaseDistance(5.0F));
     }
 
 
@@ -107,7 +108,7 @@ public class EntityJengu extends TameableCreatureEntity implements Enemy, IFusab
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 
     // ==================================================
@@ -152,15 +153,15 @@ public class EntityJengu extends TameableCreatureEntity implements Enemy, IFusab
 
     // ========== Perform Command ==========
     @Override
-    public boolean performCommand(String command, Player player, ItemStack itemStack) {
+    public boolean performCommand(String command, Player player, ItemStack itemStack, InteractionHand hand) {
 
         // Water:
         if (command.equals("Water")) {
-            this.replacePlayersItem(player, itemStack, new ItemStack(Items.WATER_BUCKET));
+            this.replacePlayersItem(player, hand, itemStack, new ItemStack(Items.WATER_BUCKET));
             return true;
         }
 
-        return super.performCommand(command, player, itemStack);
+        return super.performCommand(command, player, itemStack, hand);
     }
 
 

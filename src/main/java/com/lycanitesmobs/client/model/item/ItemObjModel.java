@@ -111,7 +111,7 @@ public abstract class ItemObjModel implements IAnimationModel {
         this.objModel = new VBOObjModel(new ResourceLocation(LycanitesMobs.MODID, "modelparts/" + path + ".obj"), resourceManager);
         this.objParts = this.objModel.objParts;
         if (this.objParts.isEmpty())
-            LMHelperClass.logWarning("", "Unable to load any parts for the " + name + " model!");
+            LMHelperClass.logWarningMessage("Unable to load any parts for the " + name + " model!");
 
         this.animator = new Animator(this);
 
@@ -134,7 +134,7 @@ public abstract class ItemObjModel implements IAnimationModel {
                 IOUtils.closeQuietly(reader);
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "There was a problem loading animation parts for " + name + ":");
+            LMHelperClass.logWarningMessage("There was a problem loading animation parts for " + name + ":");
             e.toString();
         }
 
@@ -190,7 +190,7 @@ public abstract class ItemObjModel implements IAnimationModel {
      */
     public void addAnimationPart(AnimationPart animationPart) {
         if (this.animationParts.containsKey(animationPart.name)) {
-            LMHelperClass.logWarning("", "Tried to add an animation part that already exists: " + animationPart.name + ".");
+            LMHelperClass.logWarningMessage("Tried to add an animation part that already exists: " + animationPart.name + ".");
             return;
         }
         if (animationPart.parentName != null) {

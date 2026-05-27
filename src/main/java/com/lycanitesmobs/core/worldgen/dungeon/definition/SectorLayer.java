@@ -11,25 +11,33 @@ public class SectorLayer {
 	/** Sector Layers make up Sector Segments. **/
 
 	/** A 2D array list of block characters that make up this layer. **/
-	public List<List<Character>> rows = new ArrayList<>();
+	protected List<List<Character>> rows = new ArrayList<>();
+
+	protected List<List<Character>> getRows() {
+		List<List<Character>> readOnlyRows = new ArrayList<>();
+		for (List<Character> row : this.rows) {
+			readOnlyRows.add(Collections.unmodifiableList(row));
+		}
+		return Collections.unmodifiableList(readOnlyRows);
+	}
 
 	/** If false, this layer will not tile horizontally. The last block of the pattern will be repeated to take up the remaining space. **/
-	public boolean tileHorizontal = true;
+	protected boolean tileHorizontal = true;
 
 	/** If false, this layer will not tile vertically. The last block of the pattern will be repeated to take up the remaining space. **/
-	public boolean tileVertical = true;
+	protected boolean tileVertical = true;
 
 	/** If true, the pattern of this layer will be centered horizontally. **/
-	public boolean centerHorizontal = false;
+	protected boolean centerHorizontal = false;
 
 	/** If true, the pattern of this layer will be centered vertically. **/
-	public boolean centerVertical = false;
+	protected boolean centerVertical = false;
 
 	/** If false, any spawner blocks will not tile and will be replaced with air. **/
-	public boolean tileSpawners = false;
+	protected boolean tileSpawners = false;
 
 	/** If false, any chest blocks will not tile and will be replaced with air. **/
-	public boolean tileChests = false;
+	protected boolean tileChests = false;
 
 
     /** Loads this Dungeon Sector Segment Layer from the provided JSON data. **/

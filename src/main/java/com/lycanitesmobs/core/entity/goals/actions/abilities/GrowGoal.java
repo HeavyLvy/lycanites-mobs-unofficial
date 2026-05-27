@@ -11,7 +11,7 @@ public class GrowGoal extends Goal {
 	protected float growthAmount = 0.1F;
 	protected int phase = -1;
 
-	public int abilityTime = 0;
+	private int abilityTime = 0;
 
 	/**
 	 * Constrcutor
@@ -70,6 +70,6 @@ public class GrowGoal extends Goal {
 			return;
 		}
 
-		this.host.setSizeScale(this.host.sizeScale + this.growthAmount);
+		this.host.setSizeScale(this.host.getSizeScale() + this.growthAmount);
     }
 }

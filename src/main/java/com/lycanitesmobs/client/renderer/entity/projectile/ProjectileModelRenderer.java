@@ -77,7 +77,7 @@ public class ProjectileModelRenderer extends EntityRenderer<BaseProjectileEntity
             matrixStack.mulPose(new Quaternionf(new AxisAngle4f((float) Math.toRadians(entity.yRotO), 0.0F, 1.0F, 0.0F))); // rotate
 
             if (this.getModel() == null) {
-                LMHelperClass.logWarning("", "Missing Projectile Model: " + entity);
+                LMHelperClass.logWarningMessage("Missing Projectile Model: " + entity);
             } else if (!(this.getModel() instanceof ProjectileObjModel)) {
                 ResourceLocation texture = this.getTextureLocation(entity);
                 if (texture == null) {

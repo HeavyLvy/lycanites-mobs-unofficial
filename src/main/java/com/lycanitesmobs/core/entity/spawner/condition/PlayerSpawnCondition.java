@@ -18,107 +18,107 @@ public class PlayerSpawnCondition extends SpawnCondition {
     /**
      * The username of the player.
      **/
-    public String username = "";
+    protected String username = "";
 
     /**
      * The uuid of the player (with hyphens).
      **/
-    public String uuid = "";
+    protected String uuid = "";
 
     /**
      * The minimum local area difficulty level.
      **/
-    public float difficultyMin = -1;
+    protected float difficultyMin = -1;
 
     /**
      * The maximum local area difficulty level.
      **/
-    public float difficultyMax = -1;
+    protected float difficultyMax = -1;
 
     /**
      * The minimum distance from world spawn.
      **/
-    public float spawnDistanceMin = -1;
+    protected float spawnDistanceMin = -1;
 
     /**
      * The maximum distance from world spawn.
      **/
-    public float spawnDistanceMax = -1;
+    protected float spawnDistanceMax = -1;
 
     /**
      * A specific position to base distance from.
      **/
-    public BlockPos position = null;
+    protected BlockPos position = null;
 
     /**
      * The minimum distance from a specific position.
      **/
-    public float positionDistanceMin = -1;
+    protected float positionDistanceMin = -1;
 
     /**
      * The maximum distance from a specific position.
      **/
-    public float positionDistanceMax = -1;
+    protected float positionDistanceMax = -1;
 
     /**
      * The minimum level of the player.
      **/
-    public int levelMin = -1;
+    protected int levelMin = -1;
 
     /**
      * The maximum level of the player.
      **/
-    public int levelMax = -1;
+    protected int levelMax = -1;
 
     /**
      * The minimum time that the player has been playing.
      **/
-    public int timeMin = -1;
+    protected int timeMin = -1;
 
     /**
      * The maximum time that the player has been playing.
      **/
-    public int timeMax = -1;
+    protected int timeMax = -1;
 
     /**
      * The minimum light level that the player must be in.
      **/
-    public int lightLevelMin = -1;
+    protected int lightLevelMin = -1;
 
     /**
      * The maximum light level that the player must be in.
      **/
-    public int lightLevelMax = -1;
+    protected int lightLevelMax = -1;
 
     /**
      * If true, the player must be on the ground.
      **/
-    public boolean grounded = false;
+    protected boolean grounded = false;
 
     /**
      * If true, the player must not be on the ground.
      **/
-    public boolean notGrounded = false;
+    protected boolean notGrounded = false;
 
     /**
      * If true, the player must be in the water.
      **/
-    public boolean inWater = false;
+    protected boolean inWater = false;
 
     /**
      * If true, the player must not be in the water.
      **/
-    public boolean notInWater = false;
+    protected boolean notInWater = false;
 
     /**
      * A list of Blocks that match this Trigger.
      **/
-    public List<Item> heldItems = new ArrayList<>();
+    protected List<Item> heldItems = new ArrayList<>();
 
     /**
      * Determines if the blocks list is a blacklist or whitelist.
      **/
-    public String heldItemsListType = "blacklist";
+    protected String heldItemsListType = "blacklist";
 
 
     @Override
@@ -265,10 +265,10 @@ public class PlayerSpawnCondition extends SpawnCondition {
 
         // Check Time:
         if (playerExt != null) {
-            if (this.timeMin >= 0 && playerExt.timePlayed < this.timeMin) {
+            if (this.timeMin >= 0 && playerExt.getTimePlayed() < this.timeMin) {
                 return false;
             }
-            if (this.timeMax >= 0 && playerExt.timePlayed > this.timeMax) {
+            if (this.timeMax >= 0 && playerExt.getTimePlayed() > this.timeMax) {
                 return false;
             }
         }

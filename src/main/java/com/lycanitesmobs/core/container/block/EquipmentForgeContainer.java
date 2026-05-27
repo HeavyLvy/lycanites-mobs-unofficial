@@ -17,7 +17,7 @@ import net.minecraftforge.common.extensions.IForgeMenuType;
 
 public class EquipmentForgeContainer extends BaseContainer {
     public static final MenuType<EquipmentForgeContainer> TYPE = IForgeMenuType.create(EquipmentForgeContainer::new);
-    public TileEntityEquipmentForge equipmentForge;
+    protected final TileEntityEquipmentForge equipmentForge;
 
     /**
      * Client Constructor
@@ -85,6 +85,14 @@ public class EquipmentForgeContainer extends BaseContainer {
         this.inventoryFinish = this.inventoryStart + slots;
     }
 
+    public TileEntityEquipmentForge getEquipmentForge() {
+        return this.equipmentForge;
+    }
+
+    public int getForgeLevel() {
+        return this.equipmentForge != null ? this.equipmentForge.getForgeLevel() : 0;
+    }
+
 
     @Override
     public boolean stillValid(Player player) {
@@ -122,19 +130,19 @@ public class EquipmentForgeContainer extends BaseContainer {
                 if (itemEquipmentPart == null) {
                     continue;
                 }
-                if ("base".equals(itemEquipmentPart.slotType)) {
+                if ("base".equals(itemEquipmentPart.getSlotType())) {
                     slotBase.putStackWithoutUpdate(partStack);
-                } else if ("head".equals(itemEquipmentPart.slotType)) {
+                } else if ("head".equals(itemEquipmentPart.getSlotType())) {
                     slotHead.putStackWithoutUpdate(partStack);
-                } else if ("blade".equals(itemEquipmentPart.slotType) || "pike".equals(itemEquipmentPart.slotType) || "jewel".equals(itemEquipmentPart.slotType)) {
+                } else if ("blade".equals(itemEquipmentPart.getSlotType()) || "pike".equals(itemEquipmentPart.getSlotType()) || "jewel".equals(itemEquipmentPart.getSlotType())) {
                     slotTipA.putStackWithoutUpdate(partStack);
-                } else if ("axe".equals(itemEquipmentPart.slotType)) {
+                } else if ("axe".equals(itemEquipmentPart.getSlotType())) {
                     if (axeIndex++ == 0) {
                         slotTipB.putStackWithoutUpdate(partStack);
                     } else {
                         slotTipC.putStackWithoutUpdate(partStack);
                     }
-                } else if ("pommel".equals(itemEquipmentPart.slotType)) {
+                } else if ("pommel".equals(itemEquipmentPart.getSlotType())) {
                     slotPommel.putStackWithoutUpdate(partStack);
                 }
             }

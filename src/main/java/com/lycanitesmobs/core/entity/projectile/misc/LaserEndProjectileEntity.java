@@ -19,8 +19,8 @@ public class LaserEndProjectileEntity extends BaseProjectileEntity {
 	private double targetZ;
 	
 	// Properties:
-	public LivingEntity shootingEntity;
-	public BaseProjectileEntity laserEntity;
+	protected LivingEntity shootingEntity;
+	protected BaseProjectileEntity laserEntity;
 	private double projectileSpeed;
 
     // Datawatcher:

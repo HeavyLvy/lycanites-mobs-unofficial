@@ -6,6 +6,7 @@ import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.projectile.hellfire.EntityHellShield;
 import com.lycanitesmobs.core.manager.CreatureManager;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.util.Mth;
@@ -38,8 +39,8 @@ public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackMeleeGoal(this).setLongMemory(false).setRange(1D).setMaxChaseDistance(8.0F));
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(1.0D).setRange(40.0F).setMinChaseDistance(16.0F).setChaseTime(-1));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackMeleeGoal(this).setLongMemory(false).setRange(1D).setMaxChaseDistance(8.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(1.0D).setRange(40.0F).setMinChaseDistance(16.0F).setChaseTime(-1));
     }
 
 
@@ -54,7 +55,7 @@ public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
         // Asmodeus Master:
         if (this.updateTick % 20 == 0) {
             if (this.getMasterTarget() != null && this.getMasterTarget() instanceof EntityAsmodeus && ((BaseCreatureEntity) this.getMasterTarget()).getBattlePhase() > 0) {
-                EntityHellShield projectile = new EntityHellShield(ProjectileManager.getInstance().oldProjectileTypes.get(EntityHellShield.class), this.getCommandSenderWorld(), this);
+                EntityHellShield projectile = new EntityHellShield(ProjectileManager.getInstance().getOldProjectileType(EntityHellShield.class), this.getCommandSenderWorld(), this);
                 projectile.setProjectileScale(3f);
                 projectile.setPos(
                         projectile.position().x(),
@@ -67,7 +68,7 @@ public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
                 double distance = Mth.sqrt(LMHelperClass.convertToFloat(dX * dX + dZ * dZ)) * 0.1F;
                 float velocity = 0.8F;
                 projectile.shoot(dX, dY + distance, dZ, velocity, 0.0F);
-                this.getCommandSenderWorld().addFreshEntity(projectile);
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
             }
         }
     }
@@ -96,7 +97,7 @@ public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
     // ==================================================
     @Override
     public void die(DamageSource damageSource) {
-        if (!this.getCommandSenderWorld().isClientSide && CreatureManager.getInstance().getCreature("trite").enabled) {
+        if (!this.getCommandSenderWorld().isClientSide && CreatureManager.getInstance().getCreature("trite").isEnabled()) {
             int j = 2 + this.random.nextInt(5) + getCommandSenderWorld().getDifficulty().getId() - 1;
             if (this.isTamed()) {
                 j = 3;
@@ -123,6 +124,6 @@ public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
 }

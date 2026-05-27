@@ -5,8 +5,8 @@ import net.minecraft.core.BlockPos;
 
 import java.util.Comparator;
 
-public class CoordSorterFurthest implements Comparator {
-    public BlockPos coord;
+public class CoordSorterFurthest implements Comparator<BlockPos> {
+    protected final BlockPos coord;
 
     // ==================================================
   	//                    Constructor
@@ -20,9 +20,9 @@ public class CoordSorterFurthest implements Comparator {
   	//                     Compare
   	// ==================================================
 	@Override
-	public int compare(Object targetA, Object targetB) {
-		double distanceA = this.getDistanceSqCoord((BlockPos)targetA);
-        double distanceB = this.getDistanceSqCoord((BlockPos)targetB);
+	public int compare(BlockPos targetA, BlockPos targetB) {
+		double distanceA = this.getDistanceSqCoord(targetA);
+        double distanceB = this.getDistanceSqCoord(targetB);
         return distanceA > distanceB ? -1 : (distanceA < distanceB ? 1 : 0);
 	}
 	

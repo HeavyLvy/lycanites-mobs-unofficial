@@ -13,9 +13,9 @@ import java.util.*;
 import java.util.jar.JarFile;
 
 public class FileLoader {
-    public static FileLoader CLIENT;
-    public static FileLoader SERVER;
-    public static FileLoader COMMON;
+    private static FileLoader CLIENT;
+    private static FileLoader SERVER;
+    private static FileLoader COMMON;
 
     /**
      * Creates and initialises all file loaders for the provided mod domain.
@@ -26,13 +26,25 @@ public class FileLoader {
         CLIENT = new FileLoader("assets", domain);
         SERVER = new FileLoader("data", domain);
         COMMON = new FileLoader("common", domain);
-        LMHelperClass.logDebug("", "All FileLoaders initialised successfully.");
+        LMHelperClass.logInfoMessage("All FileLoaders initialised successfully.");
+    }
+
+    public static FileLoader client() {
+        return CLIENT;
+    }
+
+    public static FileLoader server() {
+        return SERVER;
+    }
+
+    public static FileLoader common() {
+        return COMMON;
     }
 
     private FileSystem fileSystem;
     private String rootPath;
     private String domain;
-    public boolean ready = false;
+    private boolean ready = false;
 
     /**
      * Constrcutor
@@ -70,17 +82,21 @@ public class FileLoader {
 
 		/*/ Validate:
 		Path testPath = this.getPath(".root");
-		LycanitesMobs.logInfo("", "Validating file system: " + this.fileSystem + " Test path: " + testPath);
+		LMHelperClass.logInfoMessage("Validating file system: " + this.fileSystem + " Test path: " + testPath);
 		File testFile = testPath.toFile();
 		if(!testFile.exists()) {
 			throw new RuntimeException("Unable to validate FileLoader for root path: " + this.rootPath);
 		}
-		LycanitesMobs.logInfo("", "File system validated, good to go!");*/
+		LMHelperClass.logInfoMessage("File system validated, good to go!");*/
     }
 
     public File getJarFile() {
-        LMHelperClass.logWarning("", "Test Path: " + LycanitesMobs.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        LMHelperClass.logWarningMessage("Test Path: " + LycanitesMobs.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         return new File(LycanitesMobs.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+    }
+
+    public boolean isReady() {
+        return this.ready;
     }
 
     public Path getModJarPath() throws IOException {
@@ -128,7 +144,7 @@ public class FileLoader {
                 }
             }
         } catch (Exception e) {
-            LMHelperClass.logWarning("", "There was a problem getting ResourceLocations for: " + path + ", " + fileType + ", " + " \n" + e.toString());
+            LMHelperClass.logWarningMessage("There was a problem getting ResourceLocations for: " + path + ", " + fileType + ", " + " \n" + e.toString());
         }
 
         return resourceLocations;

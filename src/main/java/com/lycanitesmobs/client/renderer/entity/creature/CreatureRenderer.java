@@ -6,7 +6,7 @@ import com.lycanitesmobs.client.obj.model.VBOObjModel;
 import com.lycanitesmobs.client.renderer.util.CustomRenderStates;
 import com.lycanitesmobs.client.renderer.util.VBOBatcher;
 import com.lycanitesmobs.client.renderer.layer.creature.LayerCreatureBase;
-import com.lycanitesmobs.core.compatibility.OculusCompat;
+import com.lycanitesmobs.client.compatibility.OculusCompat;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -55,7 +55,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         // Get Model and Layers:
         try {
             this.layers.clear();
-            this.model = ModelManager.getInstance().getCreatureModel(entity.creatureInfo, entity.subspecies);
+            this.model = ModelManager.getInstance().getCreatureModel(entity.getCreatureInfo(), entity.getSubspecies());
             if (this.model == null) {
                 return;
             }
@@ -312,8 +312,8 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
     @Override
     protected float getBob(BaseCreatureEntity creatureEntity, float particalTicks) {
         if (!Minecraft.getInstance().isPaused()) {
-            creatureEntity.renderTick += Minecraft.getInstance().getDeltaFrameTime();
+            creatureEntity.advanceRenderTick(Minecraft.getInstance().getDeltaFrameTime());
         }
-        return creatureEntity.renderTick;
+        return creatureEntity.getRenderTick();
     }
 }

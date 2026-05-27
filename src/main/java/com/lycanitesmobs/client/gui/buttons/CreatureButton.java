@@ -38,7 +38,7 @@ public class CreatureButton extends ButtonBase {
         int stateVOffset = 0;
         if (this.isHovered()) stateVOffset = 64;
         ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(Minecraft.getInstance().player);
-        if (playerExt != null && playerExt.selectedSummonSet == this.summonSetId) stateVOffset = 32;
+        if (playerExt != null && playerExt.isSelectedSummonSet(this.summonSetId)) stateVOffset = 32;
 
         g.blit(bg, buttonX, buttonY, 193, 187 - stateVOffset, this.width, this.height);
 

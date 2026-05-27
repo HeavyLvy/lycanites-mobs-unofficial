@@ -94,7 +94,7 @@ public class MinionSelectionScreen extends BaseScreen {
         for (Renderable buttonObj : this.renderables) {
             if (buttonObj instanceof ButtonBase button) {
                 button.visible = this.playerExt.getSummonSet(button.buttonId).isUseable();
-                button.active = button.buttonId != this.playerExt.selectedSummonSet;
+                button.active = !this.playerExt.isSelectedSummonSet(button.buttonId);
             }
         }
     }

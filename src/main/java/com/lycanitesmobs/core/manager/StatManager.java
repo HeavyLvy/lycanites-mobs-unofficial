@@ -1,6 +1,7 @@
 package com.lycanitesmobs.core.manager;
 
 import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatFormatter;
@@ -12,6 +13,7 @@ import net.minecraftforge.registries.RegisterEvent;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class StatManager {
     private static StatManager INSTANCE;
@@ -23,14 +25,14 @@ public class StatManager {
         return INSTANCE;
     }
 
-    public Map<String, StatType<ResourceLocation>> statTypes = new HashMap<>();
+    private final Map<String, StatType<ResourceLocation>> statTypes = new HashMap<>();
 
     /**
      * Creates all base Stat Types.
      */
     public void createStatTypes() {
-        StatManager.getInstance().addStatType("learn");
-        StatManager.getInstance().addStatType("summon");
+        this.addStatType("learn");
+        this.addStatType("summon");
     }
 
     /**
@@ -45,6 +47,10 @@ public class StatManager {
 //		this.statTypes.put(name, statType);
     }
 
+    public void forEachStatType(BiConsumer<String, StatType<ResourceLocation>> action) {
+        this.statTypes.forEach(action);
+    }
+
     /**
      * Gets a from a stat type.
      *
@@ -57,6 +63,6 @@ public class StatManager {
         if (!this.statTypes.containsKey(typeName)) {
             return null;
         }
-        return this.statTypes.get(typeName).get(new ResourceLocation(LycanitesMobs.modInfo.modid, name), StatFormatter.DEFAULT);
+        return this.statTypes.get(typeName).get(AssetHelper.resource(LycanitesMobs.modInfo.modid, name), StatFormatter.DEFAULT);
     }
 }

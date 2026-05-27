@@ -1,20 +1,22 @@
 package com.lycanitesmobs.core.entity.creature.beast;
 
-import com.lycanitesmobs.client.manager.TextureManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
+import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
+import com.lycanitesmobs.core.util.helpers.AssetHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,7 +25,7 @@ import org.joml.Vector3d;
 
 public class EntityEpion extends RideableCreatureEntity implements Enemy {
 
-    public boolean griefing = true;
+    protected boolean griefing = true;
 
     // ==================================================
     //                    Constructor
@@ -44,7 +46,7 @@ public class EntityEpion extends RideableCreatureEntity implements Enemy {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(this.nextCombatGoalIndex++, new AttackRangedGoal(this).setSpeed(0.75D).setRange(14.0F).setMinChaseDistance(6.0F));
+        this.goalSelector.addGoal(this.claimCombatGoalIndex(), new AttackRangedGoal(this).setSpeed(0.75D).setRange(14.0F).setMinChaseDistance(6.0F));
     }
 
     @Override
@@ -65,26 +67,18 @@ public class EntityEpion extends RideableCreatureEntity implements Enemy {
     public void aiStep() {
         super.aiStep();
 
-        // Sunlight Explosions:
-        if (!this.getCommandSenderWorld().isClientSide && !this.isTamed() && !this.isMinion() && !this.isRareVariant()) {
-            if (!this.isFlying() && (this.onGround() || this.isInWater()) && this.isAlive()) {
-                int explosionRadius = 2;
-                if (this.subspecies != null)
-                    explosionRadius = 3;
-                explosionRadius = Math.max(2, Math.round((float) explosionRadius * (float) this.sizeScale));
-                if (this.getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && this.griefing)
-                    this.getCommandSenderWorld().explode(this, this.position().x(), this.position().y(), this.position().z(), explosionRadius, Level.ExplosionInteraction.NONE);
-                else
-                    this.getCommandSenderWorld().explode(this, this.position().x(), this.position().y(), this.position().z(), explosionRadius, Level.ExplosionInteraction.TNT);
-                this.remove(RemovalReason.DISCARDED);
-            }
-        }
-
         // Particles:
         if (this.getCommandSenderWorld().isClientSide)
             for (int i = 0; i < 2; ++i) {
                 this.getCommandSenderWorld().addParticle(ParticleTypes.WITCH, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
             }
+
+        if (!this.getCommandSenderWorld().isClientSide && this.shouldExplodeInDaylight() && this.isAlive()) {
+            int explosionRadius = this.getSubspeciesIndex() > 0 ? 3 : 2;
+            explosionRadius = Math.max(2, Math.round((float) explosionRadius * (float) this.getSizeScale()));
+            this.getCommandSenderWorld().explode(this, this.position().x(), this.position().y(), this.position().z(), explosionRadius, this.getDaylightExplosionInteraction());
+            this.discard();
+        }
     }
 
     @Override
@@ -113,12 +107,30 @@ public class EntityEpion extends RideableCreatureEntity implements Enemy {
     @Override
     public boolean isFlying() {
         if (this.getCommandSenderWorld().isClientSide) return true;
-        if (this.daylightBurns() && this.getCommandSenderWorld().isDay() && this.getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && this.griefing) {
-            float brightness = this.getBrightness();
-            if (brightness > 0.5F && this.getCommandSenderWorld().canSeeSkyFromBelowWater(this.blockPosition()))
-                return false;
-        }
+        if (this.shouldExplodeInDaylight())
+            return false;
         return true;
+    }
+
+    protected boolean shouldExplodeInDaylight() {
+        if (this.isTamed() || this.isMinion() || this.isRareVariant())
+            return false;
+        if (!this.daylightBurns() || !this.getCommandSenderWorld().isDay())
+            return false;
+
+        BlockPos daylightPos = BlockPos.containing(this.getX(), this.getEyeY(), this.getZ());
+        float brightness = this.getDaylightExplosionBrightness(daylightPos);
+        return brightness > 0.5F && this.getCommandSenderWorld().canSeeSkyFromBelowWater(daylightPos);
+    }
+
+    protected float getDaylightExplosionBrightness(BlockPos daylightPos) {
+        float rawBrightness = (float) this.getCommandSenderWorld().getMaxLocalRawBrightness(daylightPos) / 15.0F;
+        float adjustedBrightness = rawBrightness / (4.0F - 3.0F * rawBrightness);
+        return Mth.lerp(this.getCommandSenderWorld().dimensionType().ambientLight(), adjustedBrightness, 1.0F);
+    }
+
+    protected Level.ExplosionInteraction getDaylightExplosionInteraction() {
+        return this.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
     }
 
 
@@ -139,7 +151,7 @@ public class EntityEpion extends RideableCreatureEntity implements Enemy {
 
     @Override
     public int getBagSize() {
-        return this.creatureInfo.bagSize;
+        return this.creatureInfo.getBagSize();
     }
     // ==================================================
     //                     Immunities
@@ -174,7 +186,7 @@ public class EntityEpion extends RideableCreatureEntity implements Enemy {
             ProjectileInfo projectileInfo = ProjectileManager.getInstance().getProjectile("bloodleech");
             if (projectileInfo != null) {
                 BaseProjectileEntity projectile = projectileInfo.createProjectile(this.getCommandSenderWorld(), player);
-                this.getCommandSenderWorld().addFreshEntity(projectile);
+                DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, projectile);
                 this.playSound(projectile.getLaunchSound(), 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
                 this.triggerAttackCooldown();
             }
@@ -208,9 +220,7 @@ public class EntityEpion extends RideableCreatureEntity implements Enemy {
             return super.getTexture();
 
         String textureName = this.getTextureName() + "_vampirebat";
-        if (TextureManager.getTexture(textureName) == null)
-            TextureManager.addTexture(textureName, "textures/entity/" + textureName.toLowerCase() + ".png");
-        return TextureManager.getTexture(textureName);
+        return AssetHelper.entityTexture(textureName);
     }
 
     // ========== Rendering Distance ==========

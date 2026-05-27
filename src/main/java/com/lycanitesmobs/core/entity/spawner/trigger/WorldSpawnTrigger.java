@@ -9,16 +9,16 @@ public class WorldSpawnTrigger extends SpawnTrigger {
 	/** Has a random chance of triggering after so many world ticks. **/
 
 	/** How many ticks between trigger attempts. **/
-	public double tickRate = 400;
+	protected double tickRate = 400;
 
 	/** The minimum distance the player must be away from the last tick position. **/
-	public double lastTickDistanceMin = -1;
+	protected double lastTickDistanceMin = -1;
 
 	/** The maximum distance the player must be away from the last tick position. **/
-	public double lastTickDistanceMax = -1;
+	protected double lastTickDistanceMax = -1;
 
 	/** If true, the world time is used instead of a generic world tick count. **/
-	public boolean useWorldTime = false;
+	protected boolean useWorldTime = false;
 
 	/** Tracks the first tick to prevent instant firing on world load. **/
 	private long firstTick = -1;
