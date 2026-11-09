@@ -1458,7 +1458,27 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         double radius = this.creatureInfo.getWidth();
         double height = this.creatureInfo.getHeight();
         AABB spawnBoundries = new AABB(pos.getX() - radius, pos.getY(), pos.getZ() - radius, pos.getX() + radius, pos.getY() + height, pos.getZ() + radius);
-        return this.spawnsInBlock || world.noCollision(spawnBoundries);
+        if (this.spawnsInBlock) {
+            return true;
+        }
+        // noCollision reads the blocks in the box plus one block around it. The chunk spawner spawns into chunks as soon
+        // as they generate, so that often reaches into a neighbouring chunk that isn't generated yet, and reading it makes
+        // the server thread generate that chunk on the spot (a lag spike). Treat such a spot as blocked instead;
+        // getChunkNow never loads or generates anything.
+        if (world instanceof ServerLevel serverLevel) {
+            int minChunkX = Mth.floor(spawnBoundries.minX - 1.0) >> 4;
+            int maxChunkX = Mth.floor(spawnBoundries.maxX + 1.0) >> 4;
+            int minChunkZ = Mth.floor(spawnBoundries.minZ - 1.0) >> 4;
+            int maxChunkZ = Mth.floor(spawnBoundries.maxZ + 1.0) >> 4;
+            for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+                for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                    if (serverLevel.getChunkSource().getChunkNow(chunkX, chunkZ) == null) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return world.noCollision(spawnBoundries);
     }
 
     @Override
