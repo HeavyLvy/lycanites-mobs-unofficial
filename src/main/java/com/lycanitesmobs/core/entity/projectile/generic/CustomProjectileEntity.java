@@ -127,13 +127,13 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
     }
 
     @Override
-    public void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(PROJECTILE_NAME, "");
-        this.entityData.define(THROWING_ENTITY_ID, this.throwerId);
-        this.entityData.define(PARENT_PROJECTILE_ID, this.parentId);
-        this.entityData.define(TARGET_ID, this.targetId);
-        this.entityData.define(LASER_ANGLE, this.laserAngle);
+    public void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(PROJECTILE_NAME, "");
+        builder.define(THROWING_ENTITY_ID, this.throwerId);
+        builder.define(PARENT_PROJECTILE_ID, this.parentId);
+        builder.define(TARGET_ID, this.targetId);
+        builder.define(LASER_ANGLE, this.laserAngle);
     }
 
 

@@ -113,9 +113,9 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
      * Initiates the entity setting all the values to be watched by the data manager.
      **/
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(EntityRahovart.HELLFIRE_ENERGY, this.hellfireEnergy);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(EntityRahovart.HELLFIRE_ENERGY, this.hellfireEnergy);
     }
 
     // ========== Rendering Distance ==========

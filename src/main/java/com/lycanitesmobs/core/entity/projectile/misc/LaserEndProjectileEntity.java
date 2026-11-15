@@ -49,6 +49,15 @@ public class LaserEndProjectileEntity extends BaseProjectileEntity {
         this.setStats();
     }
     
+    /** 1.21 locks synced data after construction, so defaults are declared here; setStats() sets the real values. */
+    @Override
+    public void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(POS_X, 0.0F);
+        builder.define(POS_Y, 0.0F);
+        builder.define(POS_Z, 0.0F);
+    }
+
     public void setStats() {
         this.setSpeed(1.0D);
         //this.setSize(projectileWidth, projectileHeight);
@@ -57,9 +66,9 @@ public class LaserEndProjectileEntity extends BaseProjectileEntity {
 	        this.targetY = this.laserEntity.position().y();
 	        this.targetZ = this.laserEntity.position().z();
         }
-        this.entityData.define(POS_X, (float) this.position().x());
-        this.entityData.define(POS_Y, (float) this.position().y());
-        this.entityData.define(POS_Z, (float)this.position().z());
+        this.entityData.set(POS_X, (float) this.position().x());
+        this.entityData.set(POS_Y, (float) this.position().y());
+        this.entityData.set(POS_Z, (float)this.position().z());
         this.noPhysics = true;
     }
     

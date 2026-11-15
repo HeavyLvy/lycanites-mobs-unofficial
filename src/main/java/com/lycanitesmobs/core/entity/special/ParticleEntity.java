@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.special;
 
+import net.minecraft.network.syncher.SynchedEntityData;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.util.helpers.AssetHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -31,7 +32,7 @@ public class ParticleEntity extends ThrowableProjectile {
 	}
 
 	@Override
-	public void defineSynchedData() {}
+	public void defineSynchedData(SynchedEntityData.Builder builder) {}
 	
 	
     // ==================================================

@@ -93,9 +93,9 @@ public class EntityYale extends AgeableCreatureEntity implements IShearable {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(FUR, (byte) 1);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(FUR, (byte) 1);
     }
 
 	@Override

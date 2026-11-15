@@ -108,6 +108,18 @@ public class LaserProjectileEntity extends BaseProjectileEntity {
         this.syncOffset();
     }
 
+    /** 1.21 locks synced data after construction, so defaults are declared here; setStats() sets the real values. */
+    @Override
+    public void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(SHOOTING_ENTITY_ID, 0);
+        builder.define(LASER_END_ID, 0);
+        builder.define(LASER_TIME, 0);
+        builder.define(OFFSET_X, 0.0F);
+        builder.define(OFFSET_Y, 0.0F);
+        builder.define(OFFSET_Z, 0.0F);
+    }
+
     public void setStats() {
         //this.setSize(projectileWidth, projectileHeight);
         this.setRange(16.0F);
@@ -116,12 +128,12 @@ public class LaserProjectileEntity extends BaseProjectileEntity {
         this.targetX = this.position().x();
         this.targetY = this.position().y();
         this.targetZ = this.position().z();
-        this.entityData.define(SHOOTING_ENTITY_ID, this.shootingEntityRef);
-        this.entityData.define(LASER_END_ID, this.laserEndRef);
-        this.entityData.define(LASER_TIME, this.laserTime);
-        this.entityData.define(OFFSET_X, (float) this.offsetX);
-        this.entityData.define(OFFSET_Y, (float) this.offsetY);
-        this.entityData.define(OFFSET_Z, (float) this.offsetZ);
+        this.entityData.set(SHOOTING_ENTITY_ID, this.shootingEntityRef);
+        this.entityData.set(LASER_END_ID, this.laserEndRef);
+        this.entityData.set(LASER_TIME, this.laserTime);
+        this.entityData.set(OFFSET_X, (float) this.offsetX);
+        this.entityData.set(OFFSET_Y, (float) this.offsetY);
+        this.entityData.set(OFFSET_Z, (float) this.offsetZ);
         this.noPhysics = true;
     }
 

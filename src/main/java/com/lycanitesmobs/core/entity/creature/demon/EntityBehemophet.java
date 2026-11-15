@@ -52,9 +52,9 @@ public class EntityBehemophet extends TameableCreatureEntity implements Enemy {
      * Initiates the entity setting all the values to be watched by the datawatcher.
      **/
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(HELLFIRE_ENERGY, this.hellfireEnergy);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(HELLFIRE_ENERGY, this.hellfireEnergy);
     }
 
     @Override

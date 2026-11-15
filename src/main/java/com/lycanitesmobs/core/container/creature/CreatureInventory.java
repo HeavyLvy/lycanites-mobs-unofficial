@@ -73,7 +73,7 @@ public class CreatureInventory implements Container {
     }
 
     /** Registers parameters to the provided datamanager. **/
-    public static void registerData(SynchedEntityData dataManager) {
+    public static void registerData(SynchedEntityData.Builder dataManager) {
         for(String equipmentType : EQUIPMENT_TYPES)
             dataManager.define(getEquipmentDataParameter(equipmentType), ItemStack.EMPTY);
     }

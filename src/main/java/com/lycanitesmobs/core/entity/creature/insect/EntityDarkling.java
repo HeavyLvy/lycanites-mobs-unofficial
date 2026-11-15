@@ -60,11 +60,11 @@ public class EntityDarkling extends TameableCreatureEntity implements Enemy {
      * Initiates the entity setting all the values to be watched by the datawatcher.
      **/
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(LATCH_TARGET, 0);
-        this.entityData.define(LATCH_HEIGHT, (float) this.latchHeight);
-        this.entityData.define(LATCH_ANGLE, (float) this.latchAngle);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(LATCH_TARGET, 0);
+        builder.define(LATCH_HEIGHT, (float) this.latchHeight);
+        builder.define(LATCH_ANGLE, (float) this.latchAngle);
     }
 
 

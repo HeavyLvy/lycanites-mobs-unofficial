@@ -88,6 +88,13 @@ public class PortalEntity extends BaseProjectileEntity {
         );
     }
 
+    /** 1.21 locks synced data after construction, so defaults are declared here; setStats() sets the real values. */
+    @Override
+    public void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(OWNER_UUID, Optional.empty());
+    }
+
     public void setStats() {
         this.entityName = "summoningportal";
         this.setProjectileScale(6);
@@ -100,7 +107,7 @@ public class PortalEntity extends BaseProjectileEntity {
         this.waterProof = true;
         this.lavaProof = true;
 
-        this.entityData.define(OWNER_UUID, Optional.empty());
+        this.entityData.set(OWNER_UUID, Optional.empty());
     }
 
     public int getSummonAmount() {

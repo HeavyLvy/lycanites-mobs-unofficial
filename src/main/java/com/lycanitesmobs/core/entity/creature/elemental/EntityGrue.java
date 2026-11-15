@@ -157,9 +157,9 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
 
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ATTACK_ANIM, ATTACK_NONE);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ATTACK_ANIM, ATTACK_NONE);
     }
 
     public void startAttackAnim(boolean bite) {

@@ -61,10 +61,10 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
 
     // ========== Init ==========
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(AGE, 0);
-        this.entityData.define(LOVE, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(AGE, 0);
+        builder.define(LOVE, 0);
     }
 
     // ========== Init AI ==========

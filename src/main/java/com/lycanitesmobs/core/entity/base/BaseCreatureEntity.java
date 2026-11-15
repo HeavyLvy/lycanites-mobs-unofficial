@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.entity.base;
 
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.minecraft.world.level.Level;
@@ -641,29 +643,29 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * Registers all Data Manager Parameters and Creature Subsystems.
      */
     @Override
-    protected void defineSynchedData() {
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
         this.creatureInfo = CreatureManager.getInstance().getCreature(this.getClass());
-        super.defineSynchedData();
-        this.getEntityData().define(TARGET, (byte) 0);
-        this.getEntityData().define(ATTACK_PHASE, (byte) 0);
-        this.getEntityData().define(ANIMATION_STATE, (byte) 0);
-        this.getEntityData().define(ANIMATION_ATTACK_COOLDOWN_MAX, 0);
+        super.defineSynchedData(builder);
+        builder.define(TARGET, (byte) 0);
+        builder.define(ATTACK_PHASE, (byte) 0);
+        builder.define(ANIMATION_STATE, (byte) 0);
+        builder.define(ANIMATION_ATTACK_COOLDOWN_MAX, 0);
 
-        this.getEntityData().define(CLIMBING, (byte) 0);
-        this.getEntityData().define(STEALTH, 0.0F);
+        builder.define(CLIMBING, (byte) 0);
+        builder.define(STEALTH, 0.0F);
 
-        this.getEntityData().define(COLOR, (byte) 0);
-        this.getEntityData().define(SIZE, (float) 1D);
-        this.getEntityData().define(LEVEL, 1);
-        this.getEntityData().define(EXPERIENCE, 0);
-        this.getEntityData().define(SUBSPECIES, (byte) 0);
-        this.getEntityData().define(VARIANT, (byte) 0);
+        builder.define(COLOR, (byte) 0);
+        builder.define(SIZE, (float) 1D);
+        builder.define(LEVEL, 1);
+        builder.define(EXPERIENCE, 0);
+        builder.define(SUBSPECIES, (byte) 0);
+        builder.define(VARIANT, (byte) 0);
 
-        this.getEntityData().define(ARENA, Optional.empty());
-        CreatureInventory.registerData(this.getEntityData());
+        builder.define(ARENA, Optional.empty());
+        CreatureInventory.registerData(builder);
 
         this.loadCreatureFlags();
-        this.creatureSize = new EntityDimensions((float) this.creatureInfo.getWidth(), (float) this.creatureInfo.getHeight(), false);
+        this.creatureSize = EntityDimensions.scalable((float) this.creatureInfo.getWidth(), (float) this.creatureInfo.getHeight());
 
         this.creatureStats = new CreatureStats(this);
         this.relationships = new CreatureRelationships(this);
@@ -6281,6 +6283,14 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     /**
      * Returns this creature's attribute.
      **/
+    /** Step height became the STEP_HEIGHT attribute in 1.20.5; kept as a helper for creature constructors. */
+    public void setMaxUpStep(float stepHeight) {
+        AttributeInstance stepAttribute = this.getAttribute(Attributes.STEP_HEIGHT);
+        if (stepAttribute != null) {
+            stepAttribute.setBaseValue(stepHeight);
+        }
+    }
+
     public CreatureAttribute getCreatureAttribute() {
         return this.attribute;
     }

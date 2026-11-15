@@ -94,12 +94,12 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
 	*/
     // ========== Init ==========
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(TAMED, (byte) 0);
-        this.entityData.define(OWNER_ID, Optional.empty());
-        this.entityData.define(HUNGER, this.getCreatureHungerMax());
-        this.entityData.define(STAMINA, this.getStaminaMax());
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(TAMED, (byte) 0);
+        builder.define(OWNER_ID, Optional.empty());
+        builder.define(HUNGER, this.getCreatureHungerMax());
+        builder.define(STAMINA, this.getStaminaMax());
     }
 
     // ========== Init AI ==========
