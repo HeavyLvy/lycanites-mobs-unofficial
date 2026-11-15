@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block.blockentity;
 
+import net.minecraft.core.HolderLookup;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -141,8 +142,8 @@ public class EquipmentStationTileEntity extends TileEntityBase {
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
-        super.onDataPacket(net, packet);
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries) {
+        super.onDataPacket(net, packet, registries);
     }
 
     @Override
@@ -151,16 +152,16 @@ public class EquipmentStationTileEntity extends TileEntityBase {
     }
 
     @Override
-    public void load(CompoundTag nbtTagCompound) {
-        super.load(nbtTagCompound);
+    protected void loadAdditional(CompoundTag nbtTagCompound, HolderLookup.Provider registries) {
+        super.loadAdditional(nbtTagCompound, registries);
         if (nbtTagCompound.contains("Items")) {
-            ContainerHelper.loadAllItems(nbtTagCompound, this.itemStacks);
+            ContainerHelper.loadAllItems(nbtTagCompound, this.itemStacks, registries);
         }
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbtTagCompound) {
-        ContainerHelper.saveAllItems(nbtTagCompound, this.itemStacks);
-        super.saveAdditional(nbtTagCompound);
+    protected void saveAdditional(CompoundTag nbtTagCompound, HolderLookup.Provider registries) {
+        ContainerHelper.saveAllItems(nbtTagCompound, this.itemStacks, registries);
+        super.saveAdditional(nbtTagCompound, registries);
     }
 }

@@ -294,7 +294,8 @@ public class ItemEquipmentPart extends BaseItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        Level world = context.level();
         if (!LycanitesMobs.PROXY.isShiftKeyDown()) {
             tooltip.add(Component.translatable("item.lycanitesmobs.equipment.shiftinfo").withStyle(ChatFormatting.GREEN));
             return;

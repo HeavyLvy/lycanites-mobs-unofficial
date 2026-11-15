@@ -164,7 +164,7 @@ public class CreatureList extends BaseList<BeastiaryScreen> {
     }
 
     @Override
-    protected void renderBackground(GuiGraphics stack) {
+    protected void renderListBackground(GuiGraphics stack) {
         // Automatically Refresh:
         if (this.listType == Type.PET || this.listType == Type.MOUNT || this.listType == Type.FAMILIAR) {
             PetEntry selectedPet = this.screen.playerExt.getSelectedPet();

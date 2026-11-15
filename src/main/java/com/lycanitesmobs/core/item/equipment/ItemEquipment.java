@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.item.equipment;
 
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.lycanitesmobs.LycanitesMobs;
@@ -38,7 +40,6 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.common.TierSortingRegistry;
 import net.neoforged.neoforge.common.ItemAbility;
 import net.neoforged.neoforge.common.ItemAbilities;
 
@@ -105,8 +106,9 @@ public class ItemEquipment extends BaseItem {
     //                      Info
     // ==================================================
     @Override
-    public void appendHoverText(ItemStack stack, Level worldIn, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, worldIn, tooltip, flag);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        Level worldIn = context.level();
+        super.appendHoverText(stack, context, tooltip, flag);
         for (MutableComponent description : this.getAdditionalDescriptions(stack, worldIn, flag)) {
             tooltip.add(description);
         }
@@ -518,7 +520,7 @@ public class ItemEquipment extends BaseItem {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return 1800;
     }
 
@@ -748,13 +750,10 @@ public class ItemEquipment extends BaseItem {
             return false;
         }
 
-        return TierSortingRegistry.isCorrectTierForDrops(tier, blockState);
+        // TierSortingRegistry was removed: tiers now name a tag of blocks they can't harvest.
+        return !blockState.is(tier.getIncorrectBlocksForDrops());
     }
 
-    @Override
-    public boolean isCorrectToolForDrops(BlockState blockState) {
-        return this.isCorrectToolForDrops(this.getDefaultInstance(), blockState);
-    }
 
     @Override
     public float getDestroySpeed(ItemStack itemStack, BlockState blockState) {
@@ -936,14 +935,15 @@ public class ItemEquipment extends BaseItem {
      * @return The Attribute Modifier multimap with changes applied to it.
      */
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack itemStack) {
-        Multimap<Attribute, AttributeModifier> multimap = MultimapBuilder.hashKeys().arrayListValues().build(super.getAttributeModifiers(slot, itemStack));
-        if (slot == EquipmentSlot.MAINHAND) {
-            multimap.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", this.getDamageAmount(itemStack), AttributeModifier.Operation.ADD_VALUE));
-            multimap.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", -this.getDamageCooldown(itemStack), AttributeModifier.Operation.ADD_VALUE));
+    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack itemStack) {
+        // 1.21: attribute modifiers are a data component; this NeoForge hook supplies per-stack defaults.
+        ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
+        for (ItemAttributeModifiers.Entry entry : super.getDefaultAttributeModifiers(itemStack).modifiers()) {
+            builder.add(entry.attribute(), entry.modifier(), entry.slot());
         }
-
-        return multimap;
+        builder.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_ID, this.getDamageAmount(itemStack), AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND);
+        builder.add(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_ID, -this.getDamageCooldown(itemStack), AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND);
+        return builder.build();
     }
 
     /**

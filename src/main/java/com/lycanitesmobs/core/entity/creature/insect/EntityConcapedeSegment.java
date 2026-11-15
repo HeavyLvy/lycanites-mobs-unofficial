@@ -223,7 +223,7 @@ public class EntityConcapedeSegment extends AgeableCreatureEntity {
 
     // ========== Can leash ==========
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return !this.hasParent();
     }
 

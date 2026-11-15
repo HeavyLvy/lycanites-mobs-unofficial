@@ -42,7 +42,7 @@ public abstract class BaseContainerScreen<T extends AbstractContainerMenu> exten
      */
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
+        this.renderScreenBackground(guiGraphics, mouseX, mouseY, partialTicks);
         this.renderWidgets(guiGraphics, mouseX, mouseY, partialTicks);
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         this.renderForeground(guiGraphics, mouseX, mouseY, partialTicks);
@@ -56,7 +56,16 @@ public abstract class BaseContainerScreen<T extends AbstractContainerMenu> exten
      * @param mouseY       The y position of the mouse cursor.
      * @param partialTicks Ticks for animation.
      */
-    protected abstract void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks);
+    protected abstract void renderScreenBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks);
+
+    /**
+     * Vanilla's Screen#render now draws a (blurred) background itself. Lycanites screens draw their own
+     * in renderScreenBackground, as on 1.20.1, so the vanilla one is disabled here.
+     */
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    }
+
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {

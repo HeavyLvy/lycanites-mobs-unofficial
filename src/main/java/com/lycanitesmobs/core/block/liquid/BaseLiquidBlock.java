@@ -35,11 +35,11 @@ public class BaseLiquidBlock extends LiquidBlock implements BlockTypeGetter {
     private static final String LAVA_ELEMENT = "lava";
 
     public BaseLiquidBlock(Supplier<? extends FlowingFluid> p_54694_, Properties p_54695_) {
-        super(p_54694_, p_54695_);
+        super(p_54694_.get(), p_54695_);
     }
 
     public BaseLiquidBlock(Supplier<? extends FlowingFluid> fluidSupplier, BlockBehaviour.Properties properties, String name, ElementInfo element, boolean destroyItems) {
-        super(fluidSupplier, properties);
+        super(fluidSupplier.get(), properties);
         this.setRegistryName(LycanitesMobs.MODID, name);
         this.blockName = name;
         this.element = element;
@@ -59,7 +59,6 @@ public class BaseLiquidBlock extends LiquidBlock implements BlockTypeGetter {
         this.registryName = registryName;
     }
 
-    @Override
     public FlowingFluid getFluid() {
         return ObjectManager.getFluid(this.blockName);
     }

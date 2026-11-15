@@ -93,9 +93,9 @@ public class EntityAspid extends AgeableCreatureEntity {
     public int getBagSize() { return this.creatureInfo.getBagSize(); }
 	// ========== Can leash ==========
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
 	    if(!this.hasAttackTarget() && !this.hasMaster())
 	        return true;
-	    return super.canBeLeashed(player);
+	    return super.canBeLeashed();
     }
 }

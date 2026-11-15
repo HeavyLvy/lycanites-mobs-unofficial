@@ -48,7 +48,8 @@ public class BlockSlabCustom extends SlabBlock implements BlockTypeGetter {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        BlockGetter world = context.level();
         tooltip.add(this.getDescription(stack, world));
     }
 

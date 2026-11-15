@@ -97,7 +97,7 @@ public class EntitySilex extends AgeableCreatureEntity {
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

@@ -81,7 +81,7 @@ public class EntityBobeko extends AgeableCreatureEntity {
     }
 
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return true;
     }
 

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block.base;
 
+import net.minecraft.world.item.Item;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.BlockTypeGetter;
 import net.minecraft.ChatFormatting;
@@ -109,7 +110,8 @@ public class BlockBase extends Block implements BlockTypeGetter {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        BlockGetter world = context.level();
         tooltip.add(this.getDescription(stack, world));
     }
 

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.aberration;
 
+import java.util.List;
 import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.google.common.collect.Maps;
 import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
@@ -105,12 +106,13 @@ public class EntityYale extends AgeableCreatureEntity implements IShearable {
 	}
 
 	@Override
-	public boolean isShearable(@Nonnull ItemStack item, Level world, BlockPos pos) {
+	public boolean isShearable(@Nullable Player player, ItemStack item, Level world, BlockPos pos) {
 		return this.hasFur() && !this.isBaby();
 	}
 
 	@Override
-	public ArrayList<ItemStack> onSheared(@Nullable Player player, @Nonnull ItemStack item, Level world, BlockPos pos, int fortune) {
+	public List<ItemStack> onSheared(@Nullable Player player, ItemStack item, Level world, BlockPos pos) {
+		int fortune = 0; // 1.21 shearing no longer passes fortune; enchantment-driven drops come from loot tables
 		ArrayList<ItemStack> dropStacks = new ArrayList<>();
 		if(this.woolDrop == null) {
 			return dropStacks;
@@ -229,7 +231,7 @@ public class EntityYale extends AgeableCreatureEntity implements IShearable {
     }
 
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return true;
     }
 

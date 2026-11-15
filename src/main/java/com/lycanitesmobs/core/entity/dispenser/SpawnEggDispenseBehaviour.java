@@ -1,7 +1,7 @@
 package com.lycanitesmobs.core.entity.dispenser;
 
 import com.lycanitesmobs.core.item.consumable.entity.ItemCustomSpawnEgg;
-import net.minecraft.core.BlockSource;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.Position;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.world.entity.Entity;
@@ -16,7 +16,7 @@ public class SpawnEggDispenseBehaviour extends DefaultDispenseItemBehavior {
 
         ItemCustomSpawnEgg itemCustomSpawnEgg = (ItemCustomSpawnEgg) itemStack.getItem();
         Position position = DispenserBlock.getDispensePosition(blockSource);
-        Entity entity = itemCustomSpawnEgg.spawnCreature(blockSource.getLevel(), itemStack, position.x(), position.y(), position.z());
+        Entity entity = itemCustomSpawnEgg.spawnCreature(blockSource.level(), itemStack, position.x(), position.y(), position.z());
         if (itemStack.hasCustomHoverName())
             entity.setCustomName(itemStack.getHoverName());
 

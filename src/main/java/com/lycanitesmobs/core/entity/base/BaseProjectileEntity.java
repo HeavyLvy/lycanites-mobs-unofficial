@@ -262,7 +262,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
     // ==================================================
     // ========== Gravity ==========
     @Override
-    protected float getGravity() {
+    protected double getDefaultGravity() {
         return (float) this.weight * 0.03F;
     }
 

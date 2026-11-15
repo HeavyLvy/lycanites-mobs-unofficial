@@ -174,7 +174,7 @@ public abstract class BeastiaryScreen extends BaseScreen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void renderScreenBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
         this.drawHelper.drawTexture(matrixStack, TextureManager.getTexture("GUIBeastiaryBackground"), this.windowX, this.windowY, this.zLevel, 1, 1, this.windowWidth, this.windowHeight);
     }
 

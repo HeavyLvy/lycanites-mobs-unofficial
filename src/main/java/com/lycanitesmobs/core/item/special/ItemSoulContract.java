@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.item.special;
 
+import net.minecraft.world.item.Item;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
@@ -59,8 +60,9 @@ public class ItemSoulContract extends BaseItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack itemStack, @Nullable Level world, List<Component> tooltip, TooltipFlag tooltipFlag) {
-        super.appendHoverText(itemStack, world, tooltip, tooltipFlag);
+    public void appendHoverText(ItemStack itemStack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag tooltipFlag) {
+        Level world = context.level();
+        super.appendHoverText(itemStack, context, tooltip, tooltipFlag);
 
         UUID ownerUUID = this.getOwnerUUID(itemStack);
         UUID petEntryUUID = this.getPetEntryUUID(itemStack);

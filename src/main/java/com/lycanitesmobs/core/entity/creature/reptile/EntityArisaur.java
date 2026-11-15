@@ -62,7 +62,7 @@ public class EntityArisaur extends AgeableCreatureEntity implements IGroupHeavy 
     }
 
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return true;
     }
 

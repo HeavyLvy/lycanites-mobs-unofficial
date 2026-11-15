@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block.blockentity;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -96,8 +97,8 @@ public abstract class TileEntityBase extends BlockEntity implements WorldlyConta
      * @param pkt The packet received.
      */
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        super.onDataPacket(net, pkt);
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
+        super.onDataPacket(net, pkt, registries);
     }
 
     /**
@@ -114,8 +115,8 @@ public abstract class TileEntityBase extends BlockEntity implements WorldlyConta
      * @param nbtTagCompound The NBT to read from.
      */
     @Override
-    public void load(CompoundTag nbtTagCompound) {
-        super.load(nbtTagCompound);
+    protected void loadAdditional(CompoundTag nbtTagCompound, HolderLookup.Provider registries) {
+        super.loadAdditional(nbtTagCompound, registries);
     }
 
 
@@ -126,8 +127,8 @@ public abstract class TileEntityBase extends BlockEntity implements WorldlyConta
      * @return The written to NBT data.
      */
     @Override
-    public void saveAdditional(CompoundTag nbtTagCompound) {
-        super.saveAdditional(nbtTagCompound);
+    protected void saveAdditional(CompoundTag nbtTagCompound, HolderLookup.Provider registries) {
+        super.saveAdditional(nbtTagCompound, registries);
     }
 
 

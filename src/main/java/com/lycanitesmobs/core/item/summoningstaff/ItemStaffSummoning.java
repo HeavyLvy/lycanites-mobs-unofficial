@@ -107,7 +107,7 @@ public class ItemStaffSummoning extends BaseItem {
         if (!user.isUsingItem()) {
             return;
         }
-        int useTime = this.getUseDuration(itemStack) - useRemaining;
+        int useTime = this.getUseDuration(itemStack, user) - useRemaining;
         if (useTime >= this.getRapidTime(itemStack)) {
             int rapidRemainder = useTime % this.getRapidTime(itemStack);
             if (rapidRemainder == 0) {
@@ -125,7 +125,7 @@ public class ItemStaffSummoning extends BaseItem {
     // ========== Stop ==========
     @Override
     public void releaseUsing(ItemStack stack, Level worldIn, LivingEntity entityLiving, int timeLeft) {
-        int useTime = this.getUseDuration(stack) - timeLeft;
+        int useTime = this.getUseDuration(stack, entityLiving) - timeLeft;
         float power = (float) useTime / (float) this.getChargeTime(stack);
 
         this.weaponFlash = 0;
@@ -157,7 +157,7 @@ public class ItemStaffSummoning extends BaseItem {
 
     // ========== Max Use Duration ==========
     @Override
-    public int getUseDuration(ItemStack itemStack) {
+    public int getUseDuration(ItemStack itemStack, LivingEntity entity) {
         return 72000;
     }
 

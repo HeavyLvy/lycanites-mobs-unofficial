@@ -223,7 +223,7 @@ public class CreatureInventoryScreen extends BaseContainerScreen<CreatureContain
     }
 
     @Override
-    protected void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    protected void renderScreenBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         this.imageWidth = 176;

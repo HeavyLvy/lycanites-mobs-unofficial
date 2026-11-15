@@ -283,12 +283,12 @@ public class CreatureRecolorScreen extends BaseScreen {
 
 
     @Override
-    protected void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    protected void renderScreenBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        super.renderBackground(guiGraphics);
+        this.renderTransparentBackground(guiGraphics);
 
         RenderSystem.enableBlend();
         guiGraphics.fill(leftGroup.x, leftGroup.y, leftGroup.x + leftGroup.width, leftGroup.y + leftGroup.height, 0xC0000000);
@@ -470,14 +470,14 @@ public class CreatureRecolorScreen extends BaseScreen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double delta) {
         if (insidePreview(mouseX, mouseY)) {
             float zoomStep = 0.1F;
             previewZoom += (float) delta * zoomStep;
             previewZoom = Mth.clamp(previewZoom, 0.3F, 2.5F);
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return super.mouseScrolled(mouseX, mouseY, scrollX, delta);
     }
 
 

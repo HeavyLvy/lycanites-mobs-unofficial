@@ -144,7 +144,7 @@ public class EntityAbaia extends TameableCreatureEntity implements Enemy {
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

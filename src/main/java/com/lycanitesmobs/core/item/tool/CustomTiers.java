@@ -1,5 +1,8 @@
 package com.lycanitesmobs.core.item.tool;
 
+import net.minecraft.world.level.block.Block;
+import net.minecraft.tags.TagKey;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.crafting.Ingredient;
 
@@ -41,9 +44,21 @@ public enum CustomTiers implements Tier {
         return this.attackDamageBonus;
     }
 
-    @Override
+    /** Old numeric harvest level, kept for the mod's own comparisons. */
     public int getLevel() {
         return this.level;
+    }
+
+    /** 1.21 tiers name the blocks they can't harvest; map the old levels onto vanilla's tags. */
+    @Override
+    public TagKey<Block> getIncorrectBlocksForDrops() {
+        return switch (this.level) {
+            case 0 -> BlockTags.INCORRECT_FOR_WOODEN_TOOL;
+            case 1 -> BlockTags.INCORRECT_FOR_STONE_TOOL;
+            case 2 -> BlockTags.INCORRECT_FOR_IRON_TOOL;
+            case 3 -> BlockTags.INCORRECT_FOR_DIAMOND_TOOL;
+            default -> BlockTags.INCORRECT_FOR_NETHERITE_TOOL;
+        };
     }
 
     @Override

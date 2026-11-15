@@ -65,8 +65,9 @@ public class ChargeItem extends BaseItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Level worldIn, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, worldIn, tooltip, flag);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        Level worldIn = context.level();
+        super.appendHoverText(stack, context, tooltip, flag);
         for (MutableComponent description : this.getAdditionalDescriptions(stack, worldIn, flag)) {
             tooltip.add(description);
         }

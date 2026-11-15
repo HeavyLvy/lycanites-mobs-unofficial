@@ -124,7 +124,7 @@ public class EntityJengu extends TameableCreatureEntity implements Enemy, IFusab
     //                     Immunities
     // ==================================================
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

@@ -124,7 +124,7 @@ public class EntityZephyr extends TameableCreatureEntity implements Enemy, IFusa
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

@@ -49,12 +49,13 @@ public class BaseToolItem extends DiggerItem {
 
 
     @Override
-    public void appendHoverText(ItemStack stack, Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        Level worldIn = context.level();
         Component description = this.getDescription(stack, worldIn, tooltip, flag);
         if (!"".equalsIgnoreCase(description.getString())) {
             tooltip.add(description);
         }
-        super.appendHoverText(stack, worldIn, tooltip, flag);
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 
     @Override

@@ -56,11 +56,11 @@ public class EntityKobold extends TameableCreatureEntity implements Enemy {
 	}
 
 	@Override
-	public void onRemovedFromWorld() {
+	public void onRemovedFromLevel() {
 		if(!this.isTamed() && this.inventory.hasBagItems()) {
 			this.inventory.dropInventory();
 		}
-		super.onRemovedFromWorld();
+		super.onRemovedFromLevel();
 	}
 
     private int torchLootingTime = 20;

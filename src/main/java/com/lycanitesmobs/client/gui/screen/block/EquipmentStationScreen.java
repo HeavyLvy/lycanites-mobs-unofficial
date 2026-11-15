@@ -42,7 +42,7 @@ public class EquipmentStationScreen extends BaseContainerScreen<EquipmentStation
     }
 
     @Override
-    protected void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    protected void renderScreenBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         this.imageWidth = 176;
         this.imageHeight = 166;
         int backX = (this.width - this.imageWidth) / 2;

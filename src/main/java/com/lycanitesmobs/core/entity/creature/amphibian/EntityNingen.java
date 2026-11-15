@@ -112,7 +112,7 @@ public class EntityNingen extends TameableCreatureEntity implements Enemy {
    	//                     Immunities
    	// ==================================================
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
     

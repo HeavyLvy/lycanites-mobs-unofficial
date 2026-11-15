@@ -1,5 +1,9 @@
 package com.lycanitesmobs.core.entity.base;
 
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.EntityDimensions;
 import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.google.common.base.Predicate;
 import com.lycanitesmobs.LycanitesMobs;
@@ -595,8 +599,8 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
         if (!this.level().isClientSide) {
             this.applyDynamicAttributes();
         }
@@ -1086,7 +1090,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
         if (this.waterDamage()) {
             this.setPathfindingMalus(PathType.WATER, -1.0F);
-        } else if (this.canBreatheUnderwater()) {
+        } else if (this.isWaterBreather()) {
             this.setPathfindingMalus(PathType.WATER, 1.0F);
             if (!this.canBreatheAir()) {
                 this.setPathfindingMalus(PathType.WATER, 8.0F);
@@ -1099,7 +1103,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     @Override
-    public int getExperienceReward() {
+    protected int getBaseExperienceReward() {
         float scaledExp = this.creatureInfo.getExperience();
         if (this.getVariant() != null) {
             if ("uncommon".equals(this.getVariant().getRarity())) {
@@ -1568,8 +1572,8 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * Called once this mob is initially spawned.
      **/
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficultyInstance, MobSpawnType spawnReason, @Nullable SpawnGroupData livingEntityData, @Nullable CompoundTag compoundNBT) {
-        livingEntityData = super.finalizeSpawn(world, difficultyInstance, spawnReason, livingEntityData, compoundNBT);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficultyInstance, MobSpawnType spawnReason, @Nullable SpawnGroupData livingEntityData) {
+        livingEntityData = super.finalizeSpawn(world, difficultyInstance, spawnReason, livingEntityData);
         return livingEntityData;
     }
 
@@ -1785,8 +1789,14 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     @Override
-    public boolean canChangeDimensions() {
-        return !this.isBoss();
+    public boolean canChangeDimensions(Level oldLevel, Level newLevel) {
+        return !this.isBoss() && super.canChangeDimensions(oldLevel, newLevel);
+    }
+
+    /** Bosses can't use portals (1.21 split portal use out of canChangeDimensions). */
+    @Override
+    public boolean canUsePortal(boolean allowPassengers) {
+        return !this.isBoss() && super.canUsePortal(allowPassengers);
     }
 
     public void createBossInfo(BossEvent.BossBarColor color, boolean darkenSky) {
@@ -2128,14 +2138,12 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      */
     @Override
     @Nonnull
-    public EntityDimensions getDimensions(Pose pose) {
-        if (pose == Pose.SLEEPING) {
-            return SLEEPING_DIMENSIONS;
-        }
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        // LivingEntity#getDimensions (now final) handles the sleeping pose and applies getScale().
         if (this.creatureSize == null) {
             this.creatureSize = this.getType().getDimensions();
         }
-        return this.creatureSize.scale(this.getScale());
+        return this.creatureSize;
     }
 
     /**
@@ -2441,6 +2449,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      **/
     @Override
     public void tick() {
+        this.updateLeashAI();
         super.tick();
         if (this.creatureInfo.isDummy()) {
             return;
@@ -2811,7 +2820,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if (!this.isInWater() && !this.isInLava()) {
             return false;
         }
-        if (this.canWade() && this.canBreatheUnderwater()) {
+        if (this.canWade() && this.isWaterBreather()) {
             boolean targetInWater = true;
             if (this.getTarget() != null) {
                 targetInWater = this.getTarget().isInWater();
@@ -2996,35 +3005,40 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * The leash update that manages all behaviour to do with the entity being leashed or unleashed.
      **/
     @Override
-    protected void tickLeash() {
-        super.tickLeash();
-        if (this.isLeashed() && this.getLeashHolder().getCommandSenderWorld() == this.getCommandSenderWorld()) {
-            Entity entity = this.getLeashHolder();
-            this.setHome((int) entity.position().x(), (int) entity.position().y(), (int) entity.position().z(), 5);
-            float distance = this.distanceTo(entity);
-            this.testLeash(distance);
+    public boolean handleLeashAtDistance(Entity entity, float distance) {
+        this.setHome((int) entity.position().x(), (int) entity.position().y(), (int) entity.position().z(), 5);
+        this.testLeash(distance);
 
-            if (!this.leashAIActive) {
-                this.activateLeashAI();
-            }
+        if (!this.leashAIActive) {
+            this.activateLeashAI();
+        }
 
-            if (distance > 4.0F) {
-                this.getNavigation().moveTo(entity, 1.0D);
-            }
+        if (distance > 4.0F) {
+            this.getNavigation().moveTo(entity, 1.0D);
+        }
 
-            if (distance > 6.0F) {
-                double d0 = (entity.position().x() - this.position().x()) / (double) distance;
-                double d1 = (entity.position().y() - this.position().y()) / (double) distance;
-                double d2 = (entity.position().z() - this.position().z()) / (double) distance;
-                this.setDeltaMovement(this.getDeltaMovement().add(d0 * Math.abs(d0) * 0.4D, d1 * Math.abs(d1) * 0.4D, d2 * Math.abs(d2) * 0.4D));
-            }
+        if (distance > 6.0F) {
+            double d0 = (entity.position().x() - this.position().x()) / (double) distance;
+            double d1 = (entity.position().y() - this.position().y()) / (double) distance;
+            double d2 = (entity.position().z() - this.position().z()) / (double) distance;
+            this.setDeltaMovement(this.getDeltaMovement().add(d0 * Math.abs(d0) * 0.4D, d1 * Math.abs(d1) * 0.4D, d2 * Math.abs(d2) * 0.4D));
+        }
 
-            if (distance > 10.0F) {
-                this.dropLeash(true, true);
-            }
-        } else if (!this.isLeashed() && this.leashAIActive) {
-            this.deactivateLeashAI();
-            this.hasRestriction();
+        if (distance > 10.0F) {
+            this.dropLeash(true, true);
+        }
+
+        if (!this.isLeashed()) {
+            return false;
+        }
+        return super.handleLeashAtDistance(entity, distance);
+    }
+
+    /** Called every tick: turns leash AI off once the leash is gone (was the else-branch of tickLeash). */
+    protected void updateLeashAI() {
+        if (!this.isLeashed() && this.leashAIActive) {
+        this.deactivateLeashAI();
+        this.hasRestriction();
         }
     }
 
@@ -3062,7 +3076,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * Returns whether or not this entity can be leashed to the specified player. Useful for tamed entites.
      **/
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return false;
     }
 
@@ -4937,7 +4951,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * Returns true if this entity should swim to the liquid surface when pathing, by default entities that can't breather underwater will try to surface.
      **/
     public boolean shouldFloat() {
-        return !this.canBreatheUnderwater() && !this.canBreatheUnderlava();
+        return !this.isWaterBreather() && !this.canBreatheUnderlava();
     }
 
 
@@ -4950,7 +4964,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * Returns true if this entity should dive underwater/underlava when pathing, by default entities that can breathe underwater or underlava will try to dive.
      **/
     public boolean shouldDive() {
-        return this.canBreatheUnderwater() || this.canBreatheUnderlava();
+        return this.isWaterBreather() || this.canBreatheUnderlava();
     }
 
     /**
@@ -5365,7 +5379,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * Cycles through all of this entity's DropRates and drops random loot, usually called on death. If this mob is a minion, this method is cancelled.
      **/
     @Override
-    protected void dropAllDeathLoot(DamageSource damageSource) {
+    protected void dropAllDeathLoot(ServerLevel level, DamageSource damageSource) {
         if (this.getCommandSenderWorld().isClientSide || this.isMinion() || this.isBoundPet() || this.dropsRequirePlayerDamage || this.hasDropped) {
             return;
         }
@@ -5631,7 +5645,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         HashMap<Integer, String> commands = new HashMap<>();
 
         if (!itemStack.isEmpty()) {
-            if (itemStack.getItem() == Items.LEAD && this.canBeLeashed(player)) {
+            if (itemStack.getItem() == Items.LEAD && this.canBeLeashed()) {
                 commands.put(COMMAND_PIORITIES.ITEM_USE.id, "Leash");
             }
 
@@ -6012,11 +6026,11 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     @Override
-    public void setSecondsOnFire(int seconds) {
+    public void igniteForTicks(int ticks) {
         if (!this.canBurn()) {
             return;
         }
-        super.igniteForSeconds(seconds);
+        super.igniteForTicks(ticks);
     }
 
     /**
@@ -6099,7 +6113,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      **/
     @Override
     protected int increaseAirSupply(int currentAir) {
-        if (this.canBreatheUnderwater() && this.waterContact()) {
+        if (this.isWaterBreather() && this.waterContact()) {
             return super.increaseAirSupply(currentAir);
         }
         if (this.canBreatheUnderlava() && this.lavaContact()) {
@@ -6129,8 +6143,17 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * If true, this creature will gain air when in contact with water.
      **/
     @Override
-    public boolean canBreatheUnderwater() {
+    /** Whether this creature can breathe in water (vanilla's canBreatheUnderwater is final and tag-based since 1.20.5). */
+    public boolean isWaterBreather() {
         return this.extraMobBehaviour != null && this.extraMobBehaviour.waterBreathingOverride();
+    }
+
+    @Override
+    public boolean canDrownInFluidType(FluidType type) {
+        if (type == NeoForgeMod.WATER_TYPE.value() && this.isWaterBreather()) {
+            return false;
+        }
+        return super.canDrownInFluidType(type);
     }
 
     /**
@@ -6285,6 +6308,11 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * A Y Offset used to position the mob that is riding this mob.
      **/
     @Override
+    protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float partialTick) {
+        return new Vec3(0.0D, this.getPassengersRidingOffset(), 0.0D);
+    }
+
+    /** Height above this creature's feet that riders sit at (vanilla removed this hook in 1.20.5; subclasses override it). */
     public double getPassengersRidingOffset() {
         return (double) this.getDimensions(Pose.STANDING).height() * this.getMountOffset().y();
     }

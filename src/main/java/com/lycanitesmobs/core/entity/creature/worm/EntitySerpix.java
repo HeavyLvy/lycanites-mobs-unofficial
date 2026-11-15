@@ -183,7 +183,7 @@ public class EntitySerpix extends TameableCreatureEntity implements IGroupHeavy 
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

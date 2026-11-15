@@ -177,7 +177,7 @@ public class EntitySpectre extends TameableCreatureEntity implements Enemy, IGro
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 }

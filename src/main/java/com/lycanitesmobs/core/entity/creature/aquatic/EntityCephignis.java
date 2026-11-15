@@ -89,7 +89,7 @@ public class EntityCephignis extends AgeableCreatureEntity {
 
     // ========== Can leash ==========
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return true;
     }
 

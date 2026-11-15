@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.navigation;
 
+import net.minecraft.world.level.pathfinder.PathfindingContext;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import net.minecraft.util.Mth;
@@ -68,12 +69,12 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
 
     /** Returns a PathPoint to the given coordinates. **/
     @Override
-    public Target getGoal(double x, double y, double z) {
+    public Target getTarget(double x, double y, double z) {
         // Flying/Strong Swimming:
         if(this.flying() || this.swimming()) {
             return new Target(this.getNode(Mth.floor(x - this.getWidth(false)), Mth.floor(y + 0.5D), Mth.floor(z - this.getWidth(false))));
         }
-        return super.getGoal(x, y, z);
+        return super.getTarget(x, y, z);
     }
 
     /** Checks points around the provided fromPoint and adds it to path options if it is a valid point to travel to. **/
@@ -103,11 +104,11 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
     }
 
     @Override
-    public PathType getBlockPathType(BlockGetter blockGetter, int x, int y, int z, Mob entity) {
+    public PathType getPathTypeOfMob(PathfindingContext context, int x, int y, int z, Mob entity) {
         if(this.swimming()) {
             return PathType.WATER;
         }
-        return super.getBlockPathType(blockGetter, x, y, z, entity);
+        return super.getPathTypeOfMob(context, x, y, z, entity);
     }
     /** Returns true if the entity should use swimming focused pathing. **/
     public boolean swimming() {

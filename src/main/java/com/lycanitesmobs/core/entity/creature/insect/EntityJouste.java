@@ -73,10 +73,10 @@ public class EntityJouste extends AgeableCreatureEntity {
     }
 
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         if (!this.hasAttackTarget() && !this.hasMaster())
             return true;
-        return super.canBeLeashed(player);
+        return super.canBeLeashed();
     }
 
     @Override

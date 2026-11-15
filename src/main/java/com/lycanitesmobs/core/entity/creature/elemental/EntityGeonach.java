@@ -226,7 +226,7 @@ public class EntityGeonach extends TameableCreatureEntity implements Enemy, IFus
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

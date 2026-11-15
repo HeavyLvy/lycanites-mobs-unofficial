@@ -199,7 +199,7 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
     //                     Immunities
     // ==================================================
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

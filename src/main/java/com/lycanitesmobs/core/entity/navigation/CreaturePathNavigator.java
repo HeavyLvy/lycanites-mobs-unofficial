@@ -220,7 +220,7 @@ public class CreaturePathNavigator extends GroundPathNavigation {
                     safeFluid = false;
                 }
             }
-            if (safeFluid && this.entityCreature.canStandOnFluid(fluidBlock.getFluidState(blockState))) {
+            if (safeFluid && this.entityCreature.canStandOnFluid(blockState.getFluidState())) {
                 if (blockState.is(Blocks.WATER) && !this.entityCreature.waterDamage()) {
                     return true;
                 }

@@ -31,8 +31,8 @@ public class ElementsBeastiaryScreen extends BeastiaryScreen {
 
 
     @Override
-    public void renderBackground(GuiGraphics matrixStack, int x, int y, float partialTicks) {
-        super.renderBackground(matrixStack, x, y, partialTicks);
+    public void renderScreenBackground(GuiGraphics matrixStack, int x, int y, float partialTicks) {
+        super.renderScreenBackground(matrixStack, x, y, partialTicks);
     }
 
     @Override

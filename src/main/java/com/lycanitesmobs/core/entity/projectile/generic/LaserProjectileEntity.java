@@ -440,7 +440,7 @@ public class LaserProjectileEntity extends BaseProjectileEntity {
     // ==================================================
     // ========== Gravity ==========
     @Override
-    protected float getGravity() {
+    protected double getDefaultGravity() {
         return 0.0F;
     }
 

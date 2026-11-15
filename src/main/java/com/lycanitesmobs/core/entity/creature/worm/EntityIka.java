@@ -90,7 +90,7 @@ public class EntityIka extends AgeableCreatureEntity {
 
     // ========== Can leash ==========
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return true;
     }
 
@@ -125,7 +125,7 @@ public class EntityIka extends AgeableCreatureEntity {
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

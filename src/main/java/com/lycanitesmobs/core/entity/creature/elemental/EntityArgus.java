@@ -129,7 +129,7 @@ public class EntityArgus extends TameableCreatureEntity implements Enemy, IFusab
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

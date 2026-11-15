@@ -177,7 +177,7 @@ public class EntityEyewig extends RideableCreatureEntity {
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

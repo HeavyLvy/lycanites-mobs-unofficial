@@ -166,7 +166,7 @@ public class EntityWendigo extends BaseCreatureEntity implements Enemy {
     //                     Abilities
     // ==================================================
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 }

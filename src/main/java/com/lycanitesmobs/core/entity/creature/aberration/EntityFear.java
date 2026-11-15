@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.aberration;
 
+import net.minecraft.world.level.Explosion;
 import net.minecraft.core.Holder;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.fear.FearMoveGoal;
@@ -305,19 +306,19 @@ public class EntityFear extends BaseCreatureEntity {
 
     /** Cannot follow players through portals. */
     @Override
-    public boolean canChangeDimensions() {
+    public boolean canChangeDimensions(Level oldLevel, Level newLevel) {
         return false;
     }
 
     /** Not affected by explosions. */
     @Override
-    public boolean ignoreExplosion() {
+    public boolean ignoreExplosion(Explosion explosion) {
         return true;
     }
 
     /** Prevents leashing. */
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return false;
     }
 }

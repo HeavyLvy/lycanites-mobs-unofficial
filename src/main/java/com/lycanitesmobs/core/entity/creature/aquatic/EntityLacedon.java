@@ -109,7 +109,7 @@ public class EntityLacedon extends TameableCreatureEntity implements Enemy {
    	//                     Immunities
    	// ==================================================
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
     

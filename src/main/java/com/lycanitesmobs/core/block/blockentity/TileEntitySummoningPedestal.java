@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block.blockentity;
 
+import net.minecraft.core.HolderLookup;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.special.BlockSummoningPedestal;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
@@ -481,7 +482,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
 
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries) {
         if (!this.getLevel().isClientSide)
             return;
 
@@ -608,8 +609,8 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
      * Reads from saved NBT data.
      **/
     @Override
-    public void load(CompoundTag nbtTagCompound) {
-        super.load(nbtTagCompound);
+    protected void loadAdditional(CompoundTag nbtTagCompound, HolderLookup.Provider registries) {
+        super.loadAdditional(nbtTagCompound, registries);
 
         if (nbtTagCompound.contains("OwnerUUID")) {
             String uuidString = nbtTagCompound.getString("OwnerUUID");
@@ -650,7 +651,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         }
         if (nbtTagCompound.contains("Items")) {
             NonNullList<ItemStack> itemStacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-            ContainerHelper.loadAllItems(nbtTagCompound, itemStacks); // Reads ItemStack into a List from "Items" tag.
+            ContainerHelper.loadAllItems(nbtTagCompound, itemStacks, registries); // Reads ItemStack into a List from "Items" tag.
 
             for (int i = 0; i < itemStacks.size(); ++i) {
                 if (i < this.getContainerSize()) {
@@ -664,15 +665,15 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
             }
         }
 
-        super.load(nbtTagCompound);
+        super.loadAdditional(nbtTagCompound, registries);
     }
 
     /**
      * Writes to NBT data.
      **/
     @Override
-    public void saveAdditional(CompoundTag nbtTagCompound) {
-        super.saveAdditional(nbtTagCompound);
+    protected void saveAdditional(CompoundTag nbtTagCompound, HolderLookup.Provider registries) {
+        super.saveAdditional(nbtTagCompound, registries);
 
         if (this.ownerUUID == null) {
             nbtTagCompound.putString("OwnerUUID", "");
@@ -699,7 +700,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         // Fuel:
         nbtTagCompound.putInt("Fuel", this.summoningFuel);
         nbtTagCompound.putInt("FuelMax", this.summoningFuelMax);
-        ContainerHelper.saveAllItems(nbtTagCompound, this.itemStacks);
+        ContainerHelper.saveAllItems(nbtTagCompound, this.itemStacks, registries);
     }
 
     public record SummoningPedestalStats(

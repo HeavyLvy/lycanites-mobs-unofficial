@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.base;
 
+import net.minecraft.world.scores.PlayerTeam;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.creature.CreatureType;
@@ -127,7 +128,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
     }
     
     public void riderEffects(LivingEntity rider) {
-        if(!rider.canBreatheUnderwater() && this.canBreatheUnderwater() && rider.isInWater())
+        if(!(rider instanceof BaseCreatureEntity riderCreature ? riderCreature.isWaterBreather() : rider.canBreatheUnderwater()) && this.isWaterBreather() && rider.isInWater())
             rider.setAirSupply(300);
         for(MobEffectInstance effectInstance : rider.getActiveEffects().toArray(new MobEffectInstance[rider.getActiveEffects().size()])) {
         	if(!this.canBeAffected(effectInstance) && ObjectLists.inEffectList("debuffs", effectInstance.getEffect())) {
@@ -186,7 +187,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
         		zOffset = 0.00001D;
 			}
 			Vector3d mountOffset = this.getFacingPositionDouble(0, 0, 0, zOffset, this.yRotO);
-            this.getControllingPassenger().setPos(this.position().x() + mountOffset.x, this.position().y() + this.getPassengersRidingOffset() + passenger.getMyRidingOffset(), this.position().z() + mountOffset.z);
+            this.getControllingPassenger().setPos(this.position().x() + mountOffset.x, this.position().y() + this.getPassengersRidingOffset() - passenger.getVehicleAttachmentPoint(this).y, this.position().z() + mountOffset.z);
         }
     }
 
@@ -292,7 +293,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
                     this.setDeltaMovement(this.getDeltaMovement().multiply(0.8999999761581421D, 0.8999999761581421D, 0.8999999761581421D));
                 }
 				else if(this.isInWater()) {
-					if(!this.canBreatheUnderwater()) {
+					if(!this.isWaterBreather()) {
 						verticalMotion *= 0.25f;
 						strafe *= 0.25f;
 						forward *= 0.25f;
@@ -452,7 +453,7 @@ public abstract class RideableCreatureEntity extends TameableCreatureEntity {
     // ==================================================
     // ========== Teams ==========
     @Override
-    public Team getTeam() {
+    public PlayerTeam getTeam() {
         if(this.hasRiderTarget()) {
             LivingEntity rider = this.getRider();
             if(rider != null)

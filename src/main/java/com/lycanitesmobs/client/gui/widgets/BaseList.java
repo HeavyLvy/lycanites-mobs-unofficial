@@ -63,11 +63,11 @@ public abstract class BaseList<S> extends AbstractSelectionList<BaseListEntry> {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         PoseStack matrixStack = guiGraphics.pose();
 
         try {
-            this.renderBackground(guiGraphics);
+            this.renderListBackground(guiGraphics);
 
             double scaleFactor = Minecraft.getInstance().getWindow().getGuiScale();
             int windowHeight = Minecraft.getInstance().getWindow().getScreenHeight();
@@ -173,6 +173,11 @@ public abstract class BaseList<S> extends AbstractSelectionList<BaseListEntry> {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput p_169152_) {
+    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+    }
+
+    /** The 1.20.1 list background hook was empty by default; vanilla's 1.21 default draws a dark panel. */
+    @Override
+    protected void renderListBackground(GuiGraphics guiGraphics) {
     }
 }

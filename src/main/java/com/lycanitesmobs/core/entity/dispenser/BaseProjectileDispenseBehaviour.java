@@ -5,10 +5,10 @@ import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.data.info.projectile.ProjectileInfo;
 import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.manager.ProjectileManager;
-import net.minecraft.core.BlockSource;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
-import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.DispenserBlock;
 
 import java.util.Random;
 
-public class BaseProjectileDispenseBehaviour extends AbstractProjectileDispenseBehavior {
+public class BaseProjectileDispenseBehaviour extends DefaultDispenseItemBehavior {
     protected ProjectileInfo projectileInfo;
 
     protected String oldProjectileName;
@@ -43,22 +43,21 @@ public class BaseProjectileDispenseBehaviour extends AbstractProjectileDispenseB
     // ==================================================
     @Override
     public ItemStack execute(BlockSource blockSource, ItemStack stack) {
-        Level world = blockSource.getLevel();
+        Level world = blockSource.level();
         Position position = DispenserBlock.getDispensePosition(blockSource);
-        Direction facing = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+        Direction facing = blockSource.state().getValue(DispenserBlock.FACING);
 
         Projectile projectile = this.getProjectile(world, position, stack);
         if (projectile == null)
             return stack;
 
         projectile.shoot((double) facing.getStepX(), (double) facing.getStepY(), (double) facing.getStepZ(), this.getPower(), this.getUncertainty());
-        DeferredLevelActionManager.spawnEntity(world, blockSource.getPos(), null, (net.minecraft.world.entity.Entity) projectile);
+        DeferredLevelActionManager.spawnEntity(world, blockSource.pos(), null, (net.minecraft.world.entity.Entity) projectile);
         stack.split(1);
 
         return stack;
     }
 
-    @Override
     protected Projectile getProjectile(Level world, Position pos, ItemStack stack) {
         if (this.projectileInfo != null) {
             return this.projectileInfo.createProjectile(world, pos.x(), pos.y(), pos.z());
@@ -69,12 +68,10 @@ public class BaseProjectileDispenseBehaviour extends AbstractProjectileDispenseB
         return null;
     }
 
-    @Override
     protected float getUncertainty() {
         return 0F;
     }
 
-    @Override
     protected float getPower() {
         if (this.projectileInfo != null) {
             return (float) this.projectileInfo.getVelocity();
@@ -91,7 +88,7 @@ public class BaseProjectileDispenseBehaviour extends AbstractProjectileDispenseB
         SoundEvent soundEvent = this.getDispenseSound();
         if (soundEvent == null || blockSource == null)
             return;
-        blockSource.getLevel().playSound(null, blockSource.getPos(), soundEvent, SoundSource.AMBIENT, 1.0F, 1.0F / (new Random().nextFloat() * 0.4F + 0.8F));
+        blockSource.level().playSound(null, blockSource.pos(), soundEvent, SoundSource.AMBIENT, 1.0F, 1.0F / (new Random().nextFloat() * 0.4F + 0.8F));
     }
 
     protected SoundEvent getDispenseSound() {

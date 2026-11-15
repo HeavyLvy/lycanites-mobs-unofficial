@@ -133,7 +133,7 @@ public class EntityXaphan extends TameableCreatureEntity implements Enemy {
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

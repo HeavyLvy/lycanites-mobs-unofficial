@@ -108,7 +108,7 @@ public class BlockEquipmentForge extends BlockBase implements EntityBlock {
     }
 
     @Override //onBlockActivated()
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (!world.isClientSide() && player instanceof ServerPlayer) {
             BlockEntity tileEntity = world.getBlockEntity(pos);
             if (tileEntity instanceof TileEntityEquipmentForge) {

@@ -90,10 +90,10 @@ public class EntityKrake extends AgeableCreatureEntity implements Enemy {
 
     // ========== Can leash ==========
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         if(!this.hasAttackTarget())
             return true;
-        return super.canBeLeashed(player);
+        return super.canBeLeashed();
     }
 
     // ==================================================
@@ -115,7 +115,7 @@ public class EntityKrake extends AgeableCreatureEntity implements Enemy {
    	//                     Immunities
    	// ==================================================
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 }

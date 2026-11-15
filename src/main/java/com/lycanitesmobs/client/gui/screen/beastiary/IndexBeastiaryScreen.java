@@ -82,8 +82,8 @@ public class IndexBeastiaryScreen extends BeastiaryScreen {
 
 
     @Override
-    public void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
-        super.renderBackground(matrixStack, mouseX, mouseY, partialTicks);
+    public void renderScreenBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
+        super.renderScreenBackground(matrixStack, mouseX, mouseY, partialTicks);
     }
 
     @Override

@@ -101,7 +101,7 @@ public class MinionSelectionScreen extends BaseScreen {
 
 
     @Override
-    protected void renderBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
+    protected void renderScreenBackground(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
     }
 
 

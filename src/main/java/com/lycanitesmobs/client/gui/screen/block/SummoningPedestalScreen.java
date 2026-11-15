@@ -103,7 +103,7 @@ public class SummoningPedestalScreen extends BaseContainerScreen<SummoningPedest
     }
 
     @Override
-    protected void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    protected void renderScreenBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         ResourceLocation texture = this.getTexture();
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);

@@ -197,7 +197,7 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return true;
     }
 

@@ -1,5 +1,8 @@
 package com.lycanitesmobs.core.event;
 
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Items;
+import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
@@ -255,6 +258,14 @@ public class GameEventListener {
         Entity entity = event.getTarget();
         if (player == null || !(entity instanceof LivingEntity))
             return;
+
+        // Leads: only the owner may leash a tamed creature (was canBeLeashed(Player) before 1.21).
+        if (entity instanceof TameableCreatureEntity tameable && tameable.isTamed() && !tameable.isLeashed()
+                && player.getItemInHand(event.getHand()).is(Items.LEAD) && !tameable.canPlayerLeash(player)) {
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.FAIL);
+            return;
+        }
 
 		/*ItemStack itemStack = player.getHeldItem(event.getHand());
 		Item item = itemStack.getItem();

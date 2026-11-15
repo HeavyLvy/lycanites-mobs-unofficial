@@ -163,7 +163,7 @@ public class EntityPixen extends TameableCreatureEntity implements Enemy {
     public boolean isStrongSwimmer() { return false; }
 
     @Override
-    public boolean canBreatheUnderwater() {
+    public boolean isWaterBreather() {
         return false;
     }
 

@@ -97,7 +97,7 @@ public class SubspeciesList extends BaseList<BeastiaryScreen> {
 	}
 
 	@Override
-	protected void renderBackground(GuiGraphics stack) {
+	protected void renderListBackground(GuiGraphics stack) {
 		if(!this.summoning) {
 			if(this.creature != this.screen.playerExt.getSelectedCreature()) {
 				this.refreshList();

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.base;
 
+import net.minecraft.world.scores.PlayerTeam;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
 import com.lycanitesmobs.core.manager.ObjectManager;
@@ -193,11 +194,17 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     // ==================================================
     // ========== Can leash ==========
     @Override
-    public boolean canBeLeashed(Player player) {
-        if (this.isTamed() && player == this.getPlayerOwner()) {
+    public boolean canBeLeashed() {
+        // 1.21 no longer passes the player here; non-owners are blocked in GameEventListener#onEntityInteract.
+        if (this.isTamed()) {
             return true;
         }
-        return super.canBeLeashed(player);
+        return super.canBeLeashed();
+    }
+
+    /** Only a tamed creature's owner may put a lead on it. */
+    public boolean canPlayerLeash(Player player) {
+        return this.isTamed() && player == this.getPlayerOwner();
     }
 
     // ========== Test Leash ==========
@@ -538,7 +545,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     // ==================================================
     // ========== Teams ==========
     @Override
-    public Team getTeam() {
+    public PlayerTeam getTeam() {
         if (this.isTamed()) {
             Entity owner = this.getOwner();
             if (owner != null) {
@@ -1146,7 +1153,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     }
 
     boolean superCanBeLeashed(Player player) {
-        return super.canBeLeashed(player);
+        return super.canBeLeashed();
     }
 
     boolean superCanNameTag(Player player) {

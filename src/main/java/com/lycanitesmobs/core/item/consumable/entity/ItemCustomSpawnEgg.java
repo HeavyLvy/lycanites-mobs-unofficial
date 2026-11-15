@@ -69,7 +69,8 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        Level worldIn = context.level();
         Component description = this.getDescription(stack, worldIn, tooltip, flag);
         if (!"".equalsIgnoreCase(description.getString()) && !("item." + this.itemName + ".description").equals(description.getContents())) {
             tooltip.add(description);

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block.blockentity;
 
+import net.minecraft.core.HolderLookup;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
@@ -171,7 +172,7 @@ public class TileEntityEquipmentForge extends TileEntityBase {
 
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries) {
         if (!this.getLevel().isClientSide)
             return;
 
@@ -191,21 +192,21 @@ public class TileEntityEquipmentForge extends TileEntityBase {
     // ========================================
 
     @Override
-    public void load(CompoundTag nbtTagCompound) {
-        super.load(nbtTagCompound);
+    protected void loadAdditional(CompoundTag nbtTagCompound, HolderLookup.Provider registries) {
+        super.loadAdditional(nbtTagCompound, registries);
         if (nbtTagCompound.contains("ForgeLevel")) {
             this.forgeLevel = nbtTagCompound.getInt("ForgeLevel");
         }
         if (nbtTagCompound.contains("Items")) {
-            ContainerHelper.loadAllItems(nbtTagCompound, this.itemStacks);
+            ContainerHelper.loadAllItems(nbtTagCompound, this.itemStacks, registries);
         }
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbtTagCompound) {
+    protected void saveAdditional(CompoundTag nbtTagCompound, HolderLookup.Provider registries) {
         nbtTagCompound.putInt("ForgeLevel", this.forgeLevel);
-        ContainerHelper.saveAllItems(nbtTagCompound, this.itemStacks);
-        super.saveAdditional(nbtTagCompound);
+        ContainerHelper.saveAllItems(nbtTagCompound, this.itemStacks, registries);
+        super.saveAdditional(nbtTagCompound, registries);
     }
 
 
