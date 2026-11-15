@@ -1,6 +1,6 @@
 modLoader="javafml"
 loaderVersion="${loader_version_range}"
-license="GNU GPL"
+license="Lycanites Mob Public License"
 issueTrackerURL="https://gitlab.com/Lycanite/LycanitesMobs/issues"
 
 [[mods]]

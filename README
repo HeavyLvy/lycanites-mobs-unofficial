@@ -1,5 +1,19 @@
+Lycanites Mobs - NeoForge 1.21.1 Port
+=====================================
+
+This is an official port of Lycanites Mobs to Minecraft 1.21.1 (NeoForge).
+Lycanites Mobs is created by Lycanite (Richard Nicholson); all credit for the mod goes to the original author.
+
+Original mod source: https://gitlab.com/Lycanite/schism-minecraft
+
+See PORTING_NOTES.md for notes on the port.
+
+-------------------------------------
+
 A popular mod for the Java based game Minecraft which adds many new entities (animated AI creatures) to the game.
 
 This mods makes use of LWJGL using basic GL11 methods to render and animate basic 3D models created in Blender (saved in obj format).
 
 See the mod website: http://lycanitesmobs.com
+
+License: Lycanites Mob Public License (see LICENSE). Copyright belongs to the original author.
