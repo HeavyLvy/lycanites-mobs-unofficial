@@ -95,9 +95,9 @@ public class EntityGeonach extends TameableCreatureEntity implements Enemy, IFus
         if (this.getCommandSenderWorld().isClientSide && !CreatureManager.getInstance().getConfig().disableBlockParticles())
             for (int i = 0; i < 2; ++i) {
                 this.getCommandSenderWorld().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
-                        this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width,
-                        this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height,
-                        this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width,
+                        this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(),
+                        this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height(),
+                        this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(),
                         0.0D, 0.0D, 0.0D);
             }
     }

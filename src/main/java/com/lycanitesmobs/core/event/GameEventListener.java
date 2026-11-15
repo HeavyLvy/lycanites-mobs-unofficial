@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.event;
 
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.block.base.BlockFireBase;
@@ -40,32 +41,32 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.*;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.EntityEvent.EntityConstructing;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityMountEvent;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.cast;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class GameEventListener {
 
     // ==================================================
@@ -112,10 +113,10 @@ public class GameEventListener {
     @SubscribeEvent
     public void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof Player) {
-            event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "player"), new CapabilityProviderPlayer());
+            event.addCapability(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "player"), new CapabilityProviderPlayer());
         }
         if (!event.getObject().getCapability(CapabilityProviderEntity.EXTENDED_ENTITY).isPresent()) {
-            event.addCapability(new ResourceLocation(LycanitesMobs.MODID, "entity"), new CapabilityProviderEntity());
+            event.addCapability(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "entity"), new CapabilityProviderEntity());
         }
     }
 
@@ -173,7 +174,7 @@ public class GameEventListener {
     // ==================================================
     @SubscribeEvent
     public void onLivingDeathEvent(LivingDeathEvent event) {
-        LivingEntity entity = event.getEntity();
+        if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (entity == null) return;
 
         // ========== Extended Entity ==========
@@ -195,8 +196,8 @@ public class GameEventListener {
     //                   Entity Update
     // ==================================================
     @SubscribeEvent
-    public void onEntityUpdate(LivingEvent.LivingTickEvent event) {
-        LivingEntity entity = event.getEntity();
+    public void onEntityUpdate(EntityTickEvent.Pre event) {
+        if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (entity == null) return;
 
         // ========== Extended Entity ==========

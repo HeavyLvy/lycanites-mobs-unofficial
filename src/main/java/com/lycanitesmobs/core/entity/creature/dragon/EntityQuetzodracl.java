@@ -216,7 +216,7 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
     @Override
     public double[] getPickupOffset(Entity entity) {
         if (entity != null) {
-            return new double[]{0, 1 - entity.getDimensions(Pose.STANDING).height, 0};
+            return new double[]{0, 1 - entity.getDimensions(Pose.STANDING).height(), 0};
         }
         return new double[]{0, -1, 0};
     }
@@ -258,7 +258,7 @@ public class EntityQuetzodracl extends RideableCreatureEntity implements Enemy, 
     // ==================================================
     @Override
     public double getPassengersRidingOffset() {
-        return (double) this.getDimensions(Pose.STANDING).height * 0.8D;
+        return (double) this.getDimensions(Pose.STANDING).height() * 0.8D;
     }
 
 

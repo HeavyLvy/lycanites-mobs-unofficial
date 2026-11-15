@@ -59,11 +59,11 @@ public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
                 projectile.setProjectileScale(3f);
                 projectile.setPos(
                         projectile.position().x(),
-                        projectile.position().y() - this.getDimensions(Pose.STANDING).height * 0.35D,
+                        projectile.position().y() - this.getDimensions(Pose.STANDING).height() * 0.35D,
                         projectile.position().z()
                 );
                 double dX = this.getMasterTarget().position().x() - this.position().x();
-                double dY = this.getMasterTarget().position().y() + (this.getMasterTarget().getDimensions(Pose.STANDING).height * 0.75D) - projectile.position().y();
+                double dY = this.getMasterTarget().position().y() + (this.getMasterTarget().getDimensions(Pose.STANDING).height() * 0.75D) - projectile.position().y();
                 double dZ = this.getMasterTarget().position().z() - this.position().z();
                 double distance = Mth.sqrt(LMHelperClass.convertToFloat(dX * dX + dZ * dZ)) * 0.1F;
                 float velocity = 0.8F;

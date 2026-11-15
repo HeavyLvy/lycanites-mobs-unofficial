@@ -3,7 +3,7 @@ package com.lycanitesmobs.client.extensions;
 import com.lycanitesmobs.client.renderer.item.EquipmentPartRenderer;
 import com.lycanitesmobs.client.renderer.item.EquipmentRenderer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 public final class LycanitesClientExtensions {
     private LycanitesClientExtensions() {

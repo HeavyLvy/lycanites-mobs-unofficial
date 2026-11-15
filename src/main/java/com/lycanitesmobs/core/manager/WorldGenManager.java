@@ -25,10 +25,10 @@ import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import net.minecraft.world.level.levelgen.placement.RarityFilter;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,13 +44,13 @@ public class WorldGenManager {
     }
 
     public static final DeferredRegister<Feature<?>> FEATURES =
-            DeferredRegister.create(ForgeRegistries.FEATURES, LycanitesMobs.MODID);
+            DeferredRegister.create(BuiltInRegistries.FEATURE, LycanitesMobs.MODID);
 
-    public static final RegistryObject<ChunkSpawnFeature> CHUNK_SPAWN_FEATURE =
+    public static final DeferredHolder<Feature<?>, ChunkSpawnFeature> CHUNK_SPAWN_FEATURE =
             FEATURES.register("chunkspawn", () -> new ChunkSpawnFeature(NoneFeatureConfiguration.CODEC));
 
 /*
-    public static final RegistryObject<DungeonFeature> DUNGEON_FEATURE =
+    public static final DeferredHolder<Feature<?>, DungeonFeature> DUNGEON_FEATURE =
             FEATURES.register("dungeon", () -> new DungeonFeature(NoneFeatureConfiguration.CODEC));
 */
 

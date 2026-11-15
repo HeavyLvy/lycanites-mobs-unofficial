@@ -10,8 +10,8 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector3d;
 
 import java.util.List;
@@ -82,12 +82,12 @@ public class EntityWisp extends TameableCreatureEntity {
 						this.applyBuffs(target, 1, 1);
 						this.applyDebuffs(target, 1, 1);
 						if(target instanceof Zombie || target instanceof Skeleton) {
-							target.setSecondsOnFire(1);
+							target.igniteForSeconds(1);
 						}
 						if(target instanceof BaseCreatureEntity) {
 							BaseCreatureEntity targetCreature = (BaseCreatureEntity)target;
 							if(targetCreature.daylightBurns()) {
-								targetCreature.setSecondsOnFire(1);
+								targetCreature.igniteForSeconds(1);
 							}
 						}
 					}

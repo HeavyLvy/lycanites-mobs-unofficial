@@ -73,7 +73,7 @@ public class MtlMaterialLib {
     private int loadTexture(String string) {
         try {
             string = string.replace("modelparts/", "textures/"); // Search for textures in textures directory instead of models.
-            ResourceLocation resourceLocation = new ResourceLocation(string);
+            ResourceLocation resourceLocation = ResourceLocation.parse(string);
             InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(resourceLocation).get().open();
             return loadTexture(ImageIO.read(inputStream));
         } catch (IOException e) {

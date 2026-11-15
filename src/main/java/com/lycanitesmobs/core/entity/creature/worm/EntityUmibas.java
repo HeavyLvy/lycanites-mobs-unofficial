@@ -94,7 +94,7 @@ public class EntityUmibas extends TameableCreatureEntity implements IGroupHeavy 
         // Y Offset:
         projectile.setPos(
                 projectile.position().x(),
-                projectile.position().y() - this.getDimensions(Pose.STANDING).height / 4,
+                projectile.position().y() - this.getDimensions(Pose.STANDING).height() / 4,
                 projectile.position().z()
         );
 

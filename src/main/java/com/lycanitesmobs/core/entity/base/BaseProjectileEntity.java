@@ -26,8 +26,8 @@ import net.minecraft.world.level.block.TallGrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.*;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
@@ -489,7 +489,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 
             // Player Damage Event:
             if (owner instanceof Player) {
-                if (MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((Player) owner, targetEntity))) {
+                if (NeoForge.EVENT_BUS.post(new AttackEntityEvent((Player) owner, targetEntity))) {
                     return false;
                 }
                 if (targetEntity instanceof TameableCreatureEntity) {

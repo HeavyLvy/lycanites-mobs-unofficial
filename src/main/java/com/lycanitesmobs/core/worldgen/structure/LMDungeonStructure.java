@@ -65,7 +65,7 @@ public class LMDungeonStructure extends Structure {
             Holder<Biome> biomeHolder = context.chunkGenerator().getBiomeSource()
                     .getNoiseBiome(centerX >> 2, y >> 2, centerZ >> 2, context.randomState().sampler());
             for (String blacklistTag : condition.getBiomeTagBlacklist()) {
-                TagKey<Biome> tagKey = TagKey.create(Registries.BIOME, new ResourceLocation(blacklistTag));
+                TagKey<Biome> tagKey = TagKey.create(Registries.BIOME, ResourceLocation.parse(blacklistTag));
                 if (biomeHolder.is(tagKey)) {
                     return Optional.empty();
                 }

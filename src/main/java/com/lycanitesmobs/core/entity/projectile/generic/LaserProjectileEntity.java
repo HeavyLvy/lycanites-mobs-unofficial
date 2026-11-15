@@ -183,7 +183,7 @@ public class LaserProjectileEntity extends BaseProjectileEntity {
             if (this.followEntity != null)
                 entityToFollow = this.followEntity;
             double xPos = entityToFollow.position().x() + this.offsetX;
-            double yPos = entityToFollow.position().y() + (this.getDimensions(Pose.STANDING).height / 2) + this.offsetY;
+            double yPos = entityToFollow.position().y() + (this.getDimensions(Pose.STANDING).height() / 2) + this.offsetY;
             double zPos = entityToFollow.position().z() + this.offsetZ;
             if (entityToFollow instanceof BaseCreatureEntity) {
                 BaseCreatureEntity creatureToFollow = (BaseCreatureEntity) entityToFollow;
@@ -204,44 +204,44 @@ public class LaserProjectileEntity extends BaseProjectileEntity {
             double maxZ;
 
             if (this.laserEnd != null) {
-                if (this.position().x() - this.getDimensions(Pose.STANDING).width < this.laserEnd.position().x() - this.laserEnd.getDimensions(Pose.STANDING).width)
-                    minX = this.position().x() - this.getDimensions(Pose.STANDING).width;
+                if (this.position().x() - this.getDimensions(Pose.STANDING).width() < this.laserEnd.position().x() - this.laserEnd.getDimensions(Pose.STANDING).width())
+                    minX = this.position().x() - this.getDimensions(Pose.STANDING).width();
                 else
-                    minX = this.laserEnd.position().x() - this.laserEnd.getDimensions(Pose.STANDING).width;
+                    minX = this.laserEnd.position().x() - this.laserEnd.getDimensions(Pose.STANDING).width();
 
-                if (this.position().x() + this.getDimensions(Pose.STANDING).width > this.laserEnd.position().x() + this.laserEnd.getDimensions(Pose.STANDING).width)
-                    maxX = this.position().x() + this.getDimensions(Pose.STANDING).width;
+                if (this.position().x() + this.getDimensions(Pose.STANDING).width() > this.laserEnd.position().x() + this.laserEnd.getDimensions(Pose.STANDING).width())
+                    maxX = this.position().x() + this.getDimensions(Pose.STANDING).width();
                 else
-                    maxX = this.laserEnd.position().x() + this.laserEnd.getDimensions(Pose.STANDING).width;
+                    maxX = this.laserEnd.position().x() + this.laserEnd.getDimensions(Pose.STANDING).width();
 
 
-                if (this.position().y() - this.getDimensions(Pose.STANDING).height < this.laserEnd.position().y() - this.laserEnd.getDimensions(Pose.STANDING).height)
-                    minY = this.position().y() - this.getDimensions(Pose.STANDING).height;
+                if (this.position().y() - this.getDimensions(Pose.STANDING).height() < this.laserEnd.position().y() - this.laserEnd.getDimensions(Pose.STANDING).height())
+                    minY = this.position().y() - this.getDimensions(Pose.STANDING).height();
                 else
-                    minY = this.laserEnd.position().y() - this.laserEnd.getDimensions(Pose.STANDING).height;
+                    minY = this.laserEnd.position().y() - this.laserEnd.getDimensions(Pose.STANDING).height();
 
-                if (this.position().y() + this.getDimensions(Pose.STANDING).width > this.laserEnd.position().y() + this.laserEnd.getDimensions(Pose.STANDING).height)
-                    maxY = this.position().y() + this.getDimensions(Pose.STANDING).height;
+                if (this.position().y() + this.getDimensions(Pose.STANDING).width() > this.laserEnd.position().y() + this.laserEnd.getDimensions(Pose.STANDING).height())
+                    maxY = this.position().y() + this.getDimensions(Pose.STANDING).height();
                 else
-                    maxY = this.laserEnd.position().y() + this.laserEnd.getDimensions(Pose.STANDING).height;
+                    maxY = this.laserEnd.position().y() + this.laserEnd.getDimensions(Pose.STANDING).height();
 
 
-                if (this.position().z() - this.getDimensions(Pose.STANDING).width < this.laserEnd.position().z() - this.laserEnd.getDimensions(Pose.STANDING).width)
-                    minZ = this.position().z() - this.getDimensions(Pose.STANDING).width;
+                if (this.position().z() - this.getDimensions(Pose.STANDING).width() < this.laserEnd.position().z() - this.laserEnd.getDimensions(Pose.STANDING).width())
+                    minZ = this.position().z() - this.getDimensions(Pose.STANDING).width();
                 else
-                    minZ = this.laserEnd.position().z() - this.laserEnd.getDimensions(Pose.STANDING).width;
+                    minZ = this.laserEnd.position().z() - this.laserEnd.getDimensions(Pose.STANDING).width();
 
-                if (this.position().z() + this.getDimensions(Pose.STANDING).width > this.laserEnd.position().z() + this.laserEnd.getDimensions(Pose.STANDING).width)
-                    maxZ = this.position().z() + this.getDimensions(Pose.STANDING).width;
+                if (this.position().z() + this.getDimensions(Pose.STANDING).width() > this.laserEnd.position().z() + this.laserEnd.getDimensions(Pose.STANDING).width())
+                    maxZ = this.position().z() + this.getDimensions(Pose.STANDING).width();
                 else
-                    maxZ = this.laserEnd.position().z() + this.laserEnd.getDimensions(Pose.STANDING).width;
+                    maxZ = this.laserEnd.position().z() + this.laserEnd.getDimensions(Pose.STANDING).width();
             } else {
-                minX = this.position().x() - this.getDimensions(Pose.STANDING).width;
-                maxX = this.position().x() + this.getDimensions(Pose.STANDING).width;
-                minY = this.position().y() - this.getDimensions(Pose.STANDING).height;
-                maxY = this.position().y() + this.getDimensions(Pose.STANDING).height;
-                minZ = this.position().z() - this.getDimensions(Pose.STANDING).width;
-                maxZ = this.position().z() + this.getDimensions(Pose.STANDING).width;
+                minX = this.position().x() - this.getDimensions(Pose.STANDING).width();
+                maxX = this.position().x() + this.getDimensions(Pose.STANDING).width();
+                minY = this.position().y() - this.getDimensions(Pose.STANDING).height();
+                maxY = this.position().y() + this.getDimensions(Pose.STANDING).height();
+                minZ = this.position().z() - this.getDimensions(Pose.STANDING).width();
+                maxZ = this.position().z() + this.getDimensions(Pose.STANDING).width();
             }
 
             this.getBoundingBox().expandTowards(
@@ -287,7 +287,7 @@ public class LaserProjectileEntity extends BaseProjectileEntity {
                 if (this.shootingEntity instanceof BaseCreatureEntity && ((BaseCreatureEntity) this.shootingEntity).getTarget() != null) {
                     LivingEntity attackTarget = ((BaseCreatureEntity) this.shootingEntity).getTarget();
                     this.targetX = attackTarget.position().x();
-                    this.targetY = attackTarget.position().y() + (attackTarget.getDimensions(Pose.STANDING).height / 2);
+                    this.targetY = attackTarget.position().y() + (attackTarget.getDimensions(Pose.STANDING).height() / 2);
                     this.targetZ = attackTarget.position().z();
                     lockedLaser = true;
                 } else {

@@ -12,10 +12,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 
 public class EquipmentStationContainer extends BaseContainer {
-    public static final MenuType<EquipmentStationContainer> TYPE = (MenuType<EquipmentStationContainer>) IForgeMenuType.create(EquipmentStationContainer::new)/*.setRegistryName(LycanitesMobs.MODID, "equipment_station")*/;
+    public static final MenuType<EquipmentStationContainer> TYPE = (MenuType<EquipmentStationContainer>) IMenuTypeExtension.create(EquipmentStationContainer::new)/*.setRegistryName(LycanitesMobs.MODID, "equipment_station")*/;
     protected final EquipmentStationTileEntity equipmentStation;
     protected EquipmentStationEquipmentSlot equipmentSlot;
     protected EquipmentStationRepairSlot repairSlot;

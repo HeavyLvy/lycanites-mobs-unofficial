@@ -123,7 +123,7 @@ public class EntityConba extends TameableCreatureEntity implements Enemy {
             this.vespidInfection = this.extraAnimation01();
             if (this.vespidInfection) {
                 for (int i = 0; i < 2; ++i) {
-                    this.getCommandSenderWorld().addParticle(ParticleTypes.WITCH, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
+                    this.getCommandSenderWorld().addParticle(ParticleTypes.WITCH, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), 0.0D, 0.0D, 0.0D);
                 }
             }
         }
@@ -169,8 +169,8 @@ public class EntityConba extends TameableCreatureEntity implements Enemy {
     public void spawnVespidSwarm() {
         int j = 2 + this.random.nextInt(5) + getCommandSenderWorld().getDifficulty().getId() - 1;
         for (int k = 0; k < j; ++k) {
-            float f = ((float) (k % 2) - 0.5F) * this.getDimensions(Pose.STANDING).width / 4.0F;
-            float f1 = ((float) (k / 2) - 0.5F) * this.getDimensions(Pose.STANDING).width / 4.0F;
+            float f = ((float) (k % 2) - 0.5F) * this.getDimensions(Pose.STANDING).width() / 4.0F;
+            float f1 = ((float) (k / 2) - 0.5F) * this.getDimensions(Pose.STANDING).width() / 4.0F;
             EntityVespid vespid = (EntityVespid) CreatureManager.getInstance().getCreature("vespid").createEntity(this.getCommandSenderWorld());
             vespid.moveTo(this.position().x() + (double) f, this.position().y() + 0.5D, this.position().z() + (double) f1, this.random.nextFloat() * 360.0F, 0.0F);
             vespid.applyVariant(this.getVariantIndex());

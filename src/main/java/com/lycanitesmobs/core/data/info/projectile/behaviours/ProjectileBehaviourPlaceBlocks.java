@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class ProjectileBehaviourPlaceBlocks extends ProjectileBehaviour {
     /**
@@ -59,7 +59,7 @@ public class ProjectileBehaviourPlaceBlocks extends ProjectileBehaviour {
     public void onProjectileImpact(BaseProjectileEntity projectile, Level world, BlockPos pos) {
         if (world.isClientSide) return;
 
-        Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(this.blockName));
+        Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(this.blockName));
         if (block == null) return;
 
         BlockState base = block.defaultBlockState();

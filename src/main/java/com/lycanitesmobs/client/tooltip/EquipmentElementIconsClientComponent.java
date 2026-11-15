@@ -52,7 +52,7 @@ public class EquipmentElementIconsClientComponent implements ClientTooltipCompon
         int top = y + 1 + yOffset;
 
         for (String elementName : data.getElementNames()) {
-            ResourceLocation icon = new ResourceLocation(
+            ResourceLocation icon = ResourceLocation.fromNamespaceAndPath(
                     "lycanitesmobs",
                     "textures/gui/element/" + elementName + ".png"
             );

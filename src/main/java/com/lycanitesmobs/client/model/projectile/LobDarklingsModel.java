@@ -3,8 +3,8 @@ package com.lycanitesmobs.client.model.projectile;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.model.projectile.base.ProjectileObjModel;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class LobDarklingsModel extends ProjectileObjModel {

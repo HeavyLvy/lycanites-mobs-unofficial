@@ -15,7 +15,7 @@ import net.minecraft.world.entity.Entity;
 
 public class WraithBlockyModel<T extends Entity> extends HierarchicalModel<T> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(LycanitesMobs.MODID, "wraith"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "wraith"), "main");
     private final ModelPart All;
     private final ModelPart Skull;
     private final ModelPart Skull2;

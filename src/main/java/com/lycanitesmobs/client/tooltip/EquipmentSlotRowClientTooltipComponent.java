@@ -13,7 +13,7 @@ public class EquipmentSlotRowClientTooltipComponent implements ClientTooltipComp
     private final EquipmentSlotRowTooltipComponent data;
     private int tooltipWidth;
     private static final ResourceLocation GUI_ICONS =
-            new ResourceLocation("minecraft", "textures/gui/icons.png");
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/icons.png");
 
     public EquipmentSlotRowClientTooltipComponent(EquipmentSlotRowTooltipComponent data) {
         this.data = data;

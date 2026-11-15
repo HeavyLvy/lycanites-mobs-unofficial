@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.common.IForgeShearable;
+import net.neoforged.neoforge.common.IShearable;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
@@ -420,7 +420,7 @@ public class HarvestEquipmentFeature extends EquipmentFeature {
             return false;
         }
 
-		/*int hook = net.minecraftforge.event.ForgeEventFactory.onHoeUse(context);
+		/*int hook = net.minecraftforge.event.EventHooks.onHoeUse(context);
 		if (hook != 0) return false;*/
         Level world = context.getLevel();
         BlockPos blockPos = context.getClickedPos();
@@ -451,8 +451,8 @@ public class HarvestEquipmentFeature extends EquipmentFeature {
             return false;
         }
 
-        if (entity instanceof IForgeShearable) {
-            IForgeShearable target = (IForgeShearable) entity;
+        if (entity instanceof IShearable) {
+            IShearable target = (IShearable) entity;
             BlockPos pos = new BlockPos((int) Math.floor(entity.getX()), (int) Math.floor(entity.getY()), (int) Math.floor(entity.getZ()));
             if (target.isShearable(itemStack, entity.level(), pos)) {
                 List<ItemStack> drops = target.onSheared(player, itemStack, entity.level(), pos,

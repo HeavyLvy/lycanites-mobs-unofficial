@@ -15,10 +15,10 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 
 public class EquipmentInfuserContainer extends BaseContainer {
-    public static final MenuType<EquipmentInfuserContainer> TYPE = IForgeMenuType.create(EquipmentInfuserContainer::new);
+    public static final MenuType<EquipmentInfuserContainer> TYPE = IMenuTypeExtension.create(EquipmentInfuserContainer::new);
 
     protected final EquipmentInfuserTileEntity equipmentInfuser;
     protected EquipmentInfuserPartSlot partSlot;

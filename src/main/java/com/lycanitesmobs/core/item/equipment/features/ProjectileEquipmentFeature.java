@@ -272,7 +272,7 @@ public class ProjectileEquipmentFeature extends EquipmentFeature {
 
         Level world = shooter.getCommandSenderWorld();
         BaseProjectileEntity mainProjectile = null;
-        Vec3 firePos = new Vec3(shooter.position().x(), shooter.position().y() + (shooter.getDimensions(Pose.STANDING).height * 0.65), shooter.position().z());
+        Vec3 firePos = new Vec3(shooter.position().x(), shooter.position().y() + (shooter.getDimensions(Pose.STANDING).height() * 0.65), shooter.position().z());
         double offsetX = 0;
 
         // Patterns:

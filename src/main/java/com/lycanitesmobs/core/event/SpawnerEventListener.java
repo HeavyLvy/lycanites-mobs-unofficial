@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.event;
 
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.lycanitesmobs.core.entity.spawner.SpawnerTriggerDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -9,16 +11,15 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.MobSpawnEvent;
-import net.minecraftforge.event.entity.player.ItemFishedEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
+import net.neoforged.neoforge.event.entity.player.ItemFishedEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.ExplosionEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 /**
  * Forge event adapter for the spawner runtime dispatcher.
@@ -43,12 +44,12 @@ public class SpawnerEventListener {
     }
 
     @SubscribeEvent
-    public void onWorldUpdate(TickEvent.LevelTickEvent event) {
-        SpawnerTriggerDispatcher.getInstance().onWorldTick(event.level);
+    public void onWorldUpdate(LevelTickEvent.Post event) {
+        SpawnerTriggerDispatcher.getInstance().onWorldTick(event.getLevel());
     }
 
     @SubscribeEvent
-    public void onEntityUpdate(LivingEvent.LivingTickEvent event) {
+    public void onEntityUpdate(EntityTickEvent.Pre event) {
         if (event.isCanceled() || !(event.getEntity() instanceof Player player)
                 || player.getCommandSenderWorld() == null || player.getCommandSenderWorld().isClientSide) {
             return;

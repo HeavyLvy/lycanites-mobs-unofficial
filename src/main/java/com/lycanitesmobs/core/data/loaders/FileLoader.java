@@ -139,7 +139,7 @@ public class FileLoader {
                 if (fileType == null || fileType.equals(FilenameUtils.getExtension(filePath.toString()))) {
                     Path relativePath = path.relativize(filePath);
                     String resourceLocationPath = FilenameUtils.removeExtension(relativePath.toString()).replaceAll("\\\\", "/");
-                    ResourceLocation resourceLocation = new ResourceLocation(this.domain, resourceLocationPath);
+                    ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(this.domain, resourceLocationPath);
                     resourceLocations.add(resourceLocation);
                 }
             }

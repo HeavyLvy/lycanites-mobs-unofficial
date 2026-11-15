@@ -359,8 +359,8 @@ public class ExtendedEntity {
      * @return The perch position.
      */
     public Vector3d getPerchPosition() {
-        double entityWidth = this.entity.getDimensions(this.entity.getPose()).width;
-        double entityHeight = this.entity.getDimensions(this.entity.getPose()).height;
+        double entityWidth = this.entity.getDimensions(this.entity.getPose()).width();
+        double entityHeight = this.entity.getDimensions(this.entity.getPose()).height();
 
         double angle = Math.toRadians(this.entity.yRot) + 90;
         double xPerchPos = this.entity.position().x();

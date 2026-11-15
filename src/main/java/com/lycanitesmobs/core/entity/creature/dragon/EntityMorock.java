@@ -172,7 +172,7 @@ public class EntityMorock extends RideableCreatureEntity implements Enemy, IGrou
     // ==================================================
     @Override
     public double getPassengersRidingOffset() {
-        return (double) this.getDimensions(Pose.STANDING).height * 0.8D;
+        return (double) this.getDimensions(Pose.STANDING).height() * 0.8D;
     }
 
 

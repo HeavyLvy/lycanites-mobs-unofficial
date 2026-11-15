@@ -108,7 +108,7 @@ public abstract class ItemObjModel implements IAnimationModel {
         this.modelName = name;
         this.modelPath = path;
 
-        this.objModel = new VBOObjModel(new ResourceLocation(LycanitesMobs.MODID, "modelparts/" + path + ".obj"), resourceManager);
+        this.objModel = new VBOObjModel(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "modelparts/" + path + ".obj"), resourceManager);
         this.objParts = this.objModel.objParts;
         if (this.objParts.isEmpty())
             LMHelperClass.logWarningMessage("Unable to load any parts for the " + name + " model!");
@@ -116,7 +116,7 @@ public abstract class ItemObjModel implements IAnimationModel {
         this.animator = new Animator(this);
 
         this.animationParts.clear();
-        ResourceLocation animPartsLoc = new ResourceLocation(LycanitesMobs.MODID, "modelparts/" + path + "_parts.json");
+        ResourceLocation animPartsLoc = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "modelparts/" + path + "_parts.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
             InputStream in = resourceManager.getResource(animPartsLoc).get().open();
@@ -142,7 +142,7 @@ public abstract class ItemObjModel implements IAnimationModel {
             part.addChildren(this.animationParts.values().toArray(new AnimationPart[this.animationParts.size()]));
         }
 
-        ResourceLocation animationLocation = new ResourceLocation(LycanitesMobs.MODID, "modelparts/" + path + "_animation.json");
+        ResourceLocation animationLocation = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "modelparts/" + path + "_animation.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
             InputStream in = resourceManager.getResource(animationLocation).get().open();

@@ -2,18 +2,18 @@ package com.lycanitesmobs.core.data.config;
 
 import com.google.common.collect.Lists;
 import com.lycanitesmobs.LycanitesMobs;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
 public class ConfigDebug {
 	public static ConfigDebug INSTANCE;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> creatureOverlay;
+	public final ModConfigSpec.ConfigValue<Boolean> creatureOverlay;
 
-	public final ForgeConfigSpec.ConfigValue<List<? extends String>> enabled;
+	public final ModConfigSpec.ConfigValue<List<? extends String>> enabled;
 
-	public ConfigDebug(ForgeConfigSpec.Builder builder) {
+	public ConfigDebug(ModConfigSpec.Builder builder) {
 		builder.push("Debug");
 		builder.comment("Set debug options to true to show extra debugging information in the console.");
 

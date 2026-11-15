@@ -24,8 +24,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.TickPriority;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -89,7 +89,7 @@ public class BlockBase extends Block implements BlockTypeGetter {
     }
 
     public ResourceLocation setRegistryName(String modID, String blockName) {
-        return registryName = new ResourceLocation(modID, blockName);
+        return registryName = ResourceLocation.fromNamespaceAndPath(modID, blockName);
     }
 
     public void setup() {

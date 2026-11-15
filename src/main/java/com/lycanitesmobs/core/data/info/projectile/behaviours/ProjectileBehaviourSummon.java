@@ -19,7 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class ProjectileBehaviourSummon extends ProjectileBehaviour {
     /**
@@ -119,10 +119,10 @@ public class ProjectileBehaviourSummon extends ProjectileBehaviour {
             if (creatureInfo != null) {
                 entityType = creatureInfo.getEntityType();
             } else {
-                Object entityTypeObj = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(this.summonMobId));
+                Object entityTypeObj = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(this.summonMobId));
                 if (entityTypeObj instanceof EntityType) {
                     EntityType<?> fetchedType = (EntityType) entityTypeObj;
-                    ResourceLocation entityKey = ForgeRegistries.ENTITY_TYPES.getKey(fetchedType);
+                    ResourceLocation entityKey = BuiltInRegistries.ENTITY_TYPE.getKey(fetchedType);
                     if (entityKey != null && LycanitesMobs.MODID.equals(entityKey.getNamespace())) {
                         entityType = fetchedType;
                     } else {

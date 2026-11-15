@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.worldgen.dungeon;
 
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.spawner.MobSpawn;
@@ -11,10 +12,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.ChunkEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class DeferredBossSpawner {
     private static final int MAX_SPAWNS_PER_TICK = 16;
 
@@ -79,11 +80,8 @@ public class DeferredBossSpawner {
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
-        if (!(event.level instanceof ServerLevel level) || READY.isEmpty()) {
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel level) || READY.isEmpty()) {
             return;
         }
 

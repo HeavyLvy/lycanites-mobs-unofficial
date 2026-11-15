@@ -233,7 +233,7 @@ public class EntityRoc extends RideableCreatureEntity implements Enemy {
     @Override
     public double[] getPickupOffset(Entity entity) {
         if(entity != null) {
-            return new double[]{0, 1 - entity.getDimensions(Pose.STANDING).height, 0};
+            return new double[]{0, 1 - entity.getDimensions(Pose.STANDING).height(), 0};
         }
     	return new double[]{0, -1, 0};
     }

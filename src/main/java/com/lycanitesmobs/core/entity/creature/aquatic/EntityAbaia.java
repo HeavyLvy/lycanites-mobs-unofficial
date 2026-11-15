@@ -70,13 +70,13 @@ public class EntityAbaia extends TameableCreatureEntity implements Enemy {
 
         // Particles:
         if (this.getCommandSenderWorld().isClientSide && this.hasAttackTarget()) {
-            this.getCommandSenderWorld().addParticle(ParticleTypes.CRIT, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
+            this.getCommandSenderWorld().addParticle(ParticleTypes.CRIT, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), 0.0D, 0.0D, 0.0D);
 
             List<LivingEntity> aoeTargets = this.getNearbyEntities(LivingEntity.class, (e) -> true, 4);
             for (Object entityObj : aoeTargets) {
                 LivingEntity target = (LivingEntity) entityObj;
                 if (this.canAttackType(target.getType()) && this.canAttack(target) && this.getSensing().hasLineOfSight(target)) {
-                    this.getCommandSenderWorld().addParticle(ParticleTypes.CRIT, target.position().x() + (this.random.nextDouble() - 0.5D) * (double) target.getDimensions(Pose.STANDING).width, target.position().y() + this.random.nextDouble() * (double) target.getDimensions(Pose.STANDING).height, target.position().z() + (this.random.nextDouble() - 0.5D) * (double) target.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
+                    this.getCommandSenderWorld().addParticle(ParticleTypes.CRIT, target.position().x() + (this.random.nextDouble() - 0.5D) * (double) target.getDimensions(Pose.STANDING).width(), target.position().y() + this.random.nextDouble() * (double) target.getDimensions(Pose.STANDING).height(), target.position().z() + (this.random.nextDouble() - 0.5D) * (double) target.getDimensions(Pose.STANDING).width(), 0.0D, 0.0D, 0.0D);
                 }
             }
         }

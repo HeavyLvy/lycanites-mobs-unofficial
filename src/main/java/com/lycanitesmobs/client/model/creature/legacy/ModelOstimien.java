@@ -6,8 +6,8 @@ import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ModelOstimien extends CreatureObjModelOld {

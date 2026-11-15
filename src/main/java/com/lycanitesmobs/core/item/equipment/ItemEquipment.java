@@ -37,10 +37,10 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.common.TierSortingRegistry;
-import net.minecraftforge.common.ToolAction;
-import net.minecraftforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbility;
+import net.neoforged.neoforge.common.ItemAbilities;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -72,7 +72,7 @@ public class ItemEquipment extends BaseItem {
     }
 
     public ResourceLocation setRegistryName(String modID, String itemName) {
-        return registryName = new ResourceLocation(modID, itemName);
+        return registryName = ResourceLocation.fromNamespaceAndPath(modID, itemName);
     }
 
     public void setup() {
@@ -654,29 +654,29 @@ public class ItemEquipment extends BaseItem {
     }
 
     @Override
-    public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
+    public boolean canPerformAction(ItemStack stack, ItemAbility toolAction) {
         if (this.getSharpness(stack) <= 0) {
             return false;
         }
         for (EquipmentFeature equipmentFeature : this.getFeaturesByType(stack, "harvest")) {
             HarvestEquipmentFeature harvestFeature = (HarvestEquipmentFeature) equipmentFeature;
             String type = harvestFeature.getHarvestType();
-            if ("pickaxe".equalsIgnoreCase(type) && ToolActions.DEFAULT_PICKAXE_ACTIONS.contains(toolAction)) {
+            if ("pickaxe".equalsIgnoreCase(type) && ItemAbilities.DEFAULT_PICKAXE_ACTIONS.contains(toolAction)) {
                 return true;
             }
-            if ("axe".equalsIgnoreCase(type) && ToolActions.DEFAULT_AXE_ACTIONS.contains(toolAction)) {
+            if ("axe".equalsIgnoreCase(type) && ItemAbilities.DEFAULT_AXE_ACTIONS.contains(toolAction)) {
                 return true;
             }
-            if ("shovel".equalsIgnoreCase(type) && ToolActions.DEFAULT_SHOVEL_ACTIONS.contains(toolAction)) {
+            if ("shovel".equalsIgnoreCase(type) && ItemAbilities.DEFAULT_SHOVEL_ACTIONS.contains(toolAction)) {
                 return true;
             }
-            if ("hoe".equalsIgnoreCase(type) && ToolActions.DEFAULT_HOE_ACTIONS.contains(toolAction)) {
+            if ("hoe".equalsIgnoreCase(type) && ItemAbilities.DEFAULT_HOE_ACTIONS.contains(toolAction)) {
                 return true;
             }
-            if ("sword".equalsIgnoreCase(type) && ToolActions.DEFAULT_SWORD_ACTIONS.contains(toolAction)) {
+            if ("sword".equalsIgnoreCase(type) && ItemAbilities.DEFAULT_SWORD_ACTIONS.contains(toolAction)) {
                 return true;
             }
-            if ("shears".equalsIgnoreCase(type) && ToolActions.DEFAULT_SHEARS_ACTIONS.contains(toolAction)) {
+            if ("shears".equalsIgnoreCase(type) && ItemAbilities.DEFAULT_SHEARS_ACTIONS.contains(toolAction)) {
                 return true;
             }
         }
@@ -939,8 +939,8 @@ public class ItemEquipment extends BaseItem {
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack itemStack) {
         Multimap<Attribute, AttributeModifier> multimap = MultimapBuilder.hashKeys().arrayListValues().build(super.getAttributeModifiers(slot, itemStack));
         if (slot == EquipmentSlot.MAINHAND) {
-            multimap.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", this.getDamageAmount(itemStack), AttributeModifier.Operation.ADDITION));
-            multimap.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", -this.getDamageCooldown(itemStack), AttributeModifier.Operation.ADDITION));
+            multimap.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", this.getDamageAmount(itemStack), AttributeModifier.Operation.ADD_VALUE));
+            multimap.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", -this.getDamageCooldown(itemStack), AttributeModifier.Operation.ADD_VALUE));
         }
 
         return multimap;

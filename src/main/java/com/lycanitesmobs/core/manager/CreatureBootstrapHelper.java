@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -33,8 +33,8 @@ public final class CreatureBootstrapHelper {
     public static void bindRegisteredValues(Collection<CreatureInfo> creatures, CreatureSpawnConfig spawnConfig) {
         for (CreatureInfo creatureInfo : creatures) {
             ResourceLocation id = AssetHelper.modResource(creatureInfo.getName());
-            EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(id);
-            if (entityType == null || !id.equals(ForgeRegistries.ENTITY_TYPES.getKey(entityType))) {
+            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(id);
+            if (entityType == null || !id.equals(BuiltInRegistries.ENTITY_TYPE.getKey(entityType))) {
                 continue;
             }
             creatureInfo.bindEntityType((EntityType<? extends LivingEntity>) entityType);

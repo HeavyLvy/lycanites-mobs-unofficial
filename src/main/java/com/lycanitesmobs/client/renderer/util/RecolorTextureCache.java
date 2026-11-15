@@ -176,7 +176,7 @@ public final class RecolorTextureCache {
             String basePath = original.getPath().replace('/', '_').replace('.', '_');
             RecolorKey key = makeKey(original, baseR, baseG, baseB, baseRange, varR, varG, varB, varAmount);
             String uniqueName = "recolor/" + basePath + "_" + Integer.toHexString(key.hashCode());
-            ResourceLocation recoloredLoc = new ResourceLocation(original.getNamespace(), uniqueName);
+            ResourceLocation recoloredLoc = ResourceLocation.fromNamespaceAndPath(original.getNamespace(), uniqueName);
 
             Minecraft.getInstance().getTextureManager().register(recoloredLoc, dynamicTexture);
 

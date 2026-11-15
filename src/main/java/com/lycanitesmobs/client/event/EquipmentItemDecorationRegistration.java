@@ -4,12 +4,13 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.renderer.item.EquipmentItemDecorator;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterItemDecorationsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT)
 public class EquipmentItemDecorationRegistration {
     @SubscribeEvent
     public static void registerItemDecorations(RegisterItemDecorationsEvent event) {

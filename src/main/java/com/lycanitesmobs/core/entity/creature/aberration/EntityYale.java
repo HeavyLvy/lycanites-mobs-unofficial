@@ -29,7 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.IForgeShearable;
+import net.neoforged.neoforge.common.IShearable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,7 +38,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class EntityYale extends AgeableCreatureEntity implements IForgeShearable {
+public class EntityYale extends AgeableCreatureEntity implements IShearable {
 
 	protected static final EntityDataAccessor<Byte> FUR = SynchedEntityData.defineId(EntityYale.class, EntityDataSerializers.BYTE);
 

@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +69,7 @@ public class EntityVolcan extends TameableCreatureEntity implements Enemy {
             for (Object entityObj : aoeTargets) {
                 LivingEntity target = (LivingEntity) entityObj;
                 if (target != this && this.canAttackType(target.getType()) && this.canAttack(target) && this.getSensing().hasLineOfSight(target)) {
-                    target.setSecondsOnFire(2);
+                    target.igniteForSeconds(2);
                 }
             }
         }
@@ -77,9 +77,9 @@ public class EntityVolcan extends TameableCreatureEntity implements Enemy {
         // Melt Blocks:
         if (!this.getCommandSenderWorld().isClientSide && this.updateTick % 40 == 0 && this.blockMeltingRadius > 0 && !this.isTamed() && this.getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
             int range = this.blockMeltingRadius;
-            for (int w = -((int) Math.ceil(this.getDimensions(Pose.STANDING).width) + range); w <= (Math.ceil(this.getDimensions(Pose.STANDING).width) + range); w++) {
-                for (int d = -((int) Math.ceil(this.getDimensions(Pose.STANDING).width) + range); d <= (Math.ceil(this.getDimensions(Pose.STANDING).width) + range); d++) {
-                    for (int h = -((int) Math.ceil(this.getDimensions(Pose.STANDING).height) + range); h <= Math.ceil(this.getDimensions(Pose.STANDING).height); h++) {
+            for (int w = -((int) Math.ceil(this.getDimensions(Pose.STANDING).width()) + range); w <= (Math.ceil(this.getDimensions(Pose.STANDING).width()) + range); w++) {
+                for (int d = -((int) Math.ceil(this.getDimensions(Pose.STANDING).width()) + range); d <= (Math.ceil(this.getDimensions(Pose.STANDING).width()) + range); d++) {
+                    for (int h = -((int) Math.ceil(this.getDimensions(Pose.STANDING).height()) + range); h <= Math.ceil(this.getDimensions(Pose.STANDING).height()); h++) {
                         Block block = this.getCommandSenderWorld().getBlockState(this.blockPosition().offset(w, h, d)).getBlock();
                         if (block == Blocks.COBBLESTONE || block == Blocks.GRAVEL) {
                             BlockState blockState = Blocks.LAVA.defaultBlockState().setValue(BlockStateProperties.LEVEL, 5);
@@ -96,12 +96,12 @@ public class EntityVolcan extends TameableCreatureEntity implements Enemy {
         // Particles:
         if (this.getCommandSenderWorld().isClientSide) {
             for (int i = 0; i < 2; ++i) {
-                this.getCommandSenderWorld().addParticle(ParticleTypes.FLAME, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
-                this.getCommandSenderWorld().addParticle(ParticleTypes.DRIPPING_LAVA, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
+                this.getCommandSenderWorld().addParticle(ParticleTypes.FLAME, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), 0.0D, 0.0D, 0.0D);
+                this.getCommandSenderWorld().addParticle(ParticleTypes.DRIPPING_LAVA, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), 0.0D, 0.0D, 0.0D);
             }
             if (this.tickCount % 10 == 0)
                 for (int i = 0; i < 2; ++i) {
-                    this.getCommandSenderWorld().addParticle(ParticleTypes.FLAME, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
+                    this.getCommandSenderWorld().addParticle(ParticleTypes.FLAME, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), 0.0D, 0.0D, 0.0D);
                 }
         }
     }

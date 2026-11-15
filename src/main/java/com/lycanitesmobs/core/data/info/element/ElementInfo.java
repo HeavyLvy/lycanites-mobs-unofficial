@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -202,7 +202,7 @@ public class ElementInfo {
         }
         duration = Math.round((float) duration * (float) this.buffDurationMultiplier);
         for (String buff : this.buffs) {
-            MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(buff));
+            MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(buff));
             if (effect != null) {
                 targetEntity.addEffect(new MobEffectInstance(effect, duration, amplifier));
             }
@@ -224,10 +224,10 @@ public class ElementInfo {
         duration = Math.round((float) duration * (float) this.debuffDurationMultiplier);
         for (String debuff : this.debuffs) {
             if ("burning".equalsIgnoreCase(debuff)) {
-                targetEntity.setSecondsOnFire(duration / 20);
+                targetEntity.igniteForSeconds(duration / 20);
                 continue;
             }
-            MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(debuff));
+            MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(debuff));
             if (effect != null) {
                 targetEntity.addEffect(new MobEffectInstance(effect, duration, amplifier));
             }
@@ -245,7 +245,7 @@ public class ElementInfo {
         if (effect == null || effect.getEffect() == null) {
             return false;
         }
-        ResourceLocation effectKey = ForgeRegistries.MOB_EFFECTS.getKey(effect.getEffect());
+        ResourceLocation effectKey = BuiltInRegistries.MOB_EFFECT.getKey(effect.getEffect());
         String effectName = effectKey != null ? effectKey.toString() : "";
         if (this.debuffs.contains(effectName)) {
             return false;

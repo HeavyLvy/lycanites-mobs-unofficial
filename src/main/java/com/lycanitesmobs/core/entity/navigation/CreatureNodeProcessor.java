@@ -42,7 +42,7 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
     @Override
     public void updateEntitySize(Entity updateEntity) {
         this.entityWidth = Math.min(Mth.floor(this.getWidth(true, updateEntity) + 1.0F), 3);
-        this.entityHeight = Math.min(Mth.floor(updateEntity.getDimensions(Pose.STANDING).height + 1.0F), 3);
+        this.entityHeight = Math.min(Mth.floor(updateEntity.getDimensions(Pose.STANDING).height() + 1.0F), 3);
         this.entityDepth = Math.min(Mth.floor(this.getWidth(true, updateEntity) + 1.0F), 3);
     }
 
@@ -103,9 +103,9 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
     }
 
     @Override
-    public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int x, int y, int z, Mob entity) {
+    public PathType getBlockPathType(BlockGetter blockGetter, int x, int y, int z, Mob entity) {
         if(this.swimming()) {
-            return BlockPathTypes.WATER;
+            return PathType.WATER;
         }
         return super.getBlockPathType(blockGetter, x, y, z, entity);
     }
@@ -141,20 +141,20 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
      * @return The entity width to path with.
      */
     public double getWidth(boolean blockChecks, Entity entity) {
-		return Math.min(3, (double)entity.getDimensions(Pose.STANDING).width);
+		return Math.min(3, (double)entity.getDimensions(Pose.STANDING).width());
 	}
 
     /** Flight Pathing **/
     protected Node getFlightNode(int x, int y, int z) {
-        BlockPathTypes pathnodetype = this.isFlyablePathNode(x, y, z);
+        PathType pathnodetype = this.isFlyablePathNode(x, y, z);
         if(this.entityCreature != null && this.entityCreature.isStrongSwimmer()) {
-            if(pathnodetype == BlockPathTypes.WATER)
+            if(pathnodetype == PathType.WATER)
                 return this.getNode(x, y, z);
         }
-        return pathnodetype == BlockPathTypes.OPEN ? this.getNode(x, y, z) : null;
+        return pathnodetype == PathType.OPEN ? this.getNode(x, y, z) : null;
     }
 
-    protected BlockPathTypes isFlyablePathNode(int x, int y, int z) {
+    protected PathType isFlyablePathNode(int x, int y, int z) {
         BlockPos centerPos = new BlockPos(x, y, z);
         for (int i = 0; i <= this.entityWidth; ++i) {
             for (int j = 0; j <= Math.min(this.entityHeight, 2); ++j) {
@@ -163,7 +163,7 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
 
                     // Non-Solid:
 					if (!iblockstate.isSolid() && !(iblockstate.getBlock() instanceof LiquidBlock)) {
-						return BlockPathTypes.OPEN;
+						return PathType.OPEN;
 					}
 
                     // Check For Open Air:
@@ -172,31 +172,31 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
                         if(this.entityCreature != null && this.entityCreature.isStrongSwimmer()) {
                             return this.isSwimmablePathNode(x, y, z);
                         }
-                        return BlockPathTypes.BLOCKED;
+                        return PathType.BLOCKED;
                     }
                 }
             }
         }
 
-        return BlockPathTypes.OPEN;
+        return PathType.OPEN;
     }
 
     /** Power Swim Pathing **/
     @Nullable
     protected Node getWaterNode(int x, int y, int z) {
-        BlockPathTypes pathnodetype;
+        PathType pathnodetype;
         if(this.entityCreature != null && this.entityCreature.isFlying()) {
             pathnodetype = this.isFlyablePathNode(x, y, z);
-            if(pathnodetype == BlockPathTypes.OPEN)
+            if(pathnodetype == PathType.OPEN)
                 return this.getNode(x, y, z);
         }
         else {
             pathnodetype = this.isSwimmablePathNode(x, y, z);
         }
-        return pathnodetype == BlockPathTypes.WATER ? this.getNode(x, y, z) : null;
+        return pathnodetype == PathType.WATER ? this.getNode(x, y, z) : null;
     }
 
-    protected BlockPathTypes isSwimmablePathNode(int x, int y, int z) {
+    protected PathType isSwimmablePathNode(int x, int y, int z) {
         BlockPos centerPos = new BlockPos(x, y, z);
         for (int i = 0; i <= this.entityWidth; ++i) {
             for (int j = 0; j <= Math.min(this.entityHeight, 2); ++j) {
@@ -208,26 +208,26 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
 
                     if(this.entityCreature == null || !blockState.isPathfindable(this.level, blockPos, PathComputationType.WATER)) {
                         if(j == y) { // Y must be water.
-                            return BlockPathTypes.BLOCKED;
+                            return PathType.BLOCKED;
                         }
                         if(!blockState.isPathfindable(this.level, blockPos, PathComputationType.AIR) && !blockState.isPathfindable(this.level, blockPos, PathComputationType.WATER)) { // Blocked above water.
-                            return BlockPathTypes.BLOCKED;
+                            return PathType.BLOCKED;
                         }
                     }
 
                     // Water Damages:
                     if (this.entityCreature.waterDamage() && blockState.getBlock() == Blocks.WATER) {
-                        return BlockPathTypes.BLOCKED;
+                        return PathType.BLOCKED;
                     }
 
                     // Lava Damages:
                     if (this.entityCreature.canBurn() && blockState.getBlock() == Blocks.LAVA) {
-                        return BlockPathTypes.BLOCKED;
+                        return PathType.BLOCKED;
                     }
 
                     // Ooze Swimming (With Water Damage):
                     if(!this.entityCreature.canFreeze() && ObjectManager.getBlock("ooze") != null && blockState.getBlock() == ObjectManager.getBlock("ooze")) {
-                        return BlockPathTypes.WATER;
+                        return PathType.WATER;
                     }
 
                     // Custom Fluid State Checks: - Added some direct checks to improve performance.
@@ -236,17 +236,17 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
 
                         // Water Damages:
                         if (this.entityCreature.waterDamage() && fluidState.is(FluidTags.WATER)) {
-                            return BlockPathTypes.BLOCKED;
+                            return PathType.BLOCKED;
                         }
 
                         // Lava Damages:
                         if (this.entityCreature.canBurn() && fluidState.is(FluidTags.LAVA)) {
-                            return BlockPathTypes.BLOCKED;
+                            return PathType.BLOCKED;
                         }
                     }
                 }
             }
         }
-        return BlockPathTypes.WATER;
+        return PathType.WATER;
     }
 }

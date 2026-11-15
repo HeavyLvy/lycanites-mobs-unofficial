@@ -15,9 +15,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 public class EntityKhalk extends TameableCreatureEntity implements Enemy, IGroupHeavy {
 
@@ -42,7 +42,7 @@ public class EntityKhalk extends TameableCreatureEntity implements Enemy, IGroup
         this.solidCollision = true;
         this.setupMob();
 
-        this.setPathfindingMalus(BlockPathTypes.LAVA, 0F);
+        this.setPathfindingMalus(PathType.LAVA, 0F);
     }
 
     @Override
@@ -119,8 +119,8 @@ public class EntityKhalk extends TameableCreatureEntity implements Enemy, IGroup
                 && this.lavaDeath
                 && !this.isTamed()) {
 
-            int lavaWidth = (int) Math.floor(this.getDimensions(Pose.STANDING).width) - 1;
-            int lavaHeight = (int) Math.floor(this.getDimensions(Pose.STANDING).height) - 1;
+            int lavaWidth = (int) Math.floor(this.getDimensions(Pose.STANDING).width()) - 1;
+            int lavaHeight = (int) Math.floor(this.getDimensions(Pose.STANDING).height()) - 1;
 
             BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos();
             for (int x = (int) this.position().x() - lavaWidth; x <= (int) this.position().x() + lavaWidth; x++) {

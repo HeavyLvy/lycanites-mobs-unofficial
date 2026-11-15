@@ -52,8 +52,9 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.minecraftforge.registries.ForgeRegistries; // TODO(port): datapack registries
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -234,67 +235,67 @@ public class LMHelperClass {
         if (input instanceof ResourceLocation) {
             return (ResourceLocation) input;
         } else if (input instanceof String) {
-            return new ResourceLocation((String) input);
+            return ResourceLocation.parse((String) input);
         } else if (input instanceof Item item) {
-            return ForgeRegistries.ITEMS.getKey(item);
+            return BuiltInRegistries.ITEM.getKey(item);
         } else if (input instanceof Block block) {
-            return ForgeRegistries.BLOCKS.getKey(block);
+            return BuiltInRegistries.BLOCK.getKey(block);
         } else if (input instanceof EntityType<?> entityType) {
-            return ForgeRegistries.ENTITY_TYPES.getKey(entityType);
+            return BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
         } else if (input instanceof Biome) {
             throw new IllegalArgumentException("Biome cannot be gotten from ForgeRegistries anymore - please use LMHelperClass.convertBiomeToResourceLocation(level, biome) to get from Level");
         } else if (input instanceof Fluid fluid) {
-            return ForgeRegistries.FLUIDS.getKey(fluid);
+            return BuiltInRegistries.FLUID.getKey(fluid);
         } else if (input instanceof MobEffect mobEffect) {
-            return ForgeRegistries.MOB_EFFECTS.getKey(mobEffect);
+            return BuiltInRegistries.MOB_EFFECT.getKey(mobEffect);
         } else if (input instanceof SoundEvent soundEvent) {
-            return ForgeRegistries.SOUND_EVENTS.getKey(soundEvent);
+            return BuiltInRegistries.SOUND_EVENT.getKey(soundEvent);
         } else if (input instanceof Potion potion) {
-            return ForgeRegistries.POTIONS.getKey(potion);
+            return BuiltInRegistries.POTION.getKey(potion);
         } else if (input instanceof Enchantment enchantment) {
             return ForgeRegistries.ENCHANTMENTS.getKey(enchantment);
         } else if (input instanceof BlockEntityType<?> blockEntityType) {
-            return ForgeRegistries.BLOCK_ENTITY_TYPES.getKey(blockEntityType);
+            return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType);
         } else if (input instanceof ParticleType<?> particleType) {
-            return ForgeRegistries.PARTICLE_TYPES.getKey(particleType);
+            return BuiltInRegistries.PARTICLE_TYPE.getKey(particleType);
         } else if (input instanceof MenuType<?> menuType) {
-            return ForgeRegistries.MENU_TYPES.getKey(menuType);
+            return BuiltInRegistries.MENU.getKey(menuType);
         } else if (input instanceof PaintingVariant paintingVariant) {
             return ForgeRegistries.PAINTING_VARIANTS.getKey(paintingVariant);
         } else if (input instanceof RecipeType<?> recipeType) {
-            return ForgeRegistries.RECIPE_TYPES.getKey(recipeType);
+            return BuiltInRegistries.RECIPE_TYPE.getKey(recipeType);
         } else if (input instanceof RecipeSerializer<?> recipeSerializer) {
-            return ForgeRegistries.RECIPE_SERIALIZERS.getKey(recipeSerializer);
+            return BuiltInRegistries.RECIPE_SERIALIZER.getKey(recipeSerializer);
         } else if (input instanceof Attribute attribute) {
-            return ForgeRegistries.ATTRIBUTES.getKey(attribute);
+            return BuiltInRegistries.ATTRIBUTE.getKey(attribute);
         } else if (input instanceof StatType<?> statType) {
-            return ForgeRegistries.STAT_TYPES.getKey(statType);
+            return BuiltInRegistries.STAT_TYPE.getKey(statType);
         } else if (input instanceof ArgumentTypeInfo<?, ?> argumentTypeInfo) {
-            return ForgeRegistries.COMMAND_ARGUMENT_TYPES.getKey(argumentTypeInfo);
+            return BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getKey(argumentTypeInfo);
         } else if (input instanceof VillagerProfession villagerProfession) {
-            return ForgeRegistries.VILLAGER_PROFESSIONS.getKey(villagerProfession);
+            return BuiltInRegistries.VILLAGER_PROFESSION.getKey(villagerProfession);
         } else if (input instanceof PoiType poiType) {
-            return ForgeRegistries.POI_TYPES.getKey(poiType);
+            return BuiltInRegistries.POINT_OF_INTEREST_TYPE.getKey(poiType);
         } else if (input instanceof MemoryModuleType<?> memoryModuleType) {
-            return ForgeRegistries.MEMORY_MODULE_TYPES.getKey(memoryModuleType);
+            return BuiltInRegistries.MEMORY_MODULE_TYPE.getKey(memoryModuleType);
         } else if (input instanceof SensorType<?> sensorType) {
-            return ForgeRegistries.SENSOR_TYPES.getKey(sensorType);
+            return BuiltInRegistries.SENSOR_TYPE.getKey(sensorType);
         } else if (input instanceof Schedule schedule) {
-            return ForgeRegistries.SCHEDULES.getKey(schedule);
+            return BuiltInRegistries.SCHEDULE.getKey(schedule);
         } else if (input instanceof Activity activity) {
-            return ForgeRegistries.ACTIVITIES.getKey(activity);
+            return BuiltInRegistries.ACTIVITY.getKey(activity);
         } else if (input instanceof WorldCarver<?> worldCarver) {
-            return ForgeRegistries.WORLD_CARVERS.getKey(worldCarver);
+            return BuiltInRegistries.CARVER.getKey(worldCarver);
         } else if (input instanceof Feature<?> feature) {
-            return ForgeRegistries.FEATURES.getKey(feature);
+            return BuiltInRegistries.FEATURE.getKey(feature);
         } else if (input instanceof ChunkStatus chunkStatus) {
-            return ForgeRegistries.CHUNK_STATUS.getKey(chunkStatus);
+            return BuiltInRegistries.CHUNK_STATUS.getKey(chunkStatus);
         } else if (input instanceof BlockStateProviderType<?> blockStateProviderType) {
-            return ForgeRegistries.BLOCK_STATE_PROVIDER_TYPES.getKey(blockStateProviderType);
+            return BuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE.getKey(blockStateProviderType);
         } else if (input instanceof FoliagePlacerType<?> foliagePlacerType) {
-            return ForgeRegistries.FOLIAGE_PLACER_TYPES.getKey(foliagePlacerType);
+            return BuiltInRegistries.FOLIAGE_PLACER_TYPE.getKey(foliagePlacerType);
         } else if (input instanceof TreeDecoratorType<?> treeDecoratorType) {
-            return ForgeRegistries.TREE_DECORATOR_TYPES.getKey(treeDecoratorType);
+            return BuiltInRegistries.TREE_DECORATOR_TYPE.getKey(treeDecoratorType);
         }
 
         return null;
@@ -307,7 +308,7 @@ public class LMHelperClass {
         if (input instanceof ResourceLocation) {
             return (ResourceLocation) input;
         } else if (input instanceof String) {
-            return new ResourceLocation((String) input);
+            return ResourceLocation.parse((String) input);
         } else if (input instanceof Item item) {
             return access.registryOrThrow(Registries.ITEM).getKey(item);
         } else if (input instanceof Block block) {
@@ -413,7 +414,7 @@ public class LMHelperClass {
     }
 
     public static DamageSource damageSourceFromResourceKey(Level level, ResourceKey<DamageType> damageTypeResourceKey) {
-        ResourceKey<Registry<DamageType>> damageTypeRegistryKey = ResourceKey.createRegistryKey(new ResourceLocation("damage_type"));
+        ResourceKey<Registry<DamageType>> damageTypeRegistryKey = ResourceKey.createRegistryKey(ResourceLocation.parse("damage_type"));
         Registry<DamageType> damageTypeRegistry = level.registryAccess().registryOrThrow(damageTypeRegistryKey);
         Holder<DamageType> holder = damageTypeRegistry.getHolderOrThrow(damageTypeResourceKey);
         return new DamageSource(holder);
@@ -443,7 +444,7 @@ public class LMHelperClass {
             if (tag instanceof TagKey<?> tagKey) {
                 return block.getTags().anyMatch(blockTagKey -> blockTagKey == tagKey);
             } else if (tag instanceof String string) {
-                return block.getTags().anyMatch(blockTagKey -> blockTagKey.location().equals(new ResourceLocation(string)));
+                return block.getTags().anyMatch(blockTagKey -> blockTagKey.location().equals(ResourceLocation.parse(string)));
             }
         }
         return false;

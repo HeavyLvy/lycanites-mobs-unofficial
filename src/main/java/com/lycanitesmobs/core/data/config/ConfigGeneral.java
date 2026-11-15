@@ -2,7 +2,7 @@ package com.lycanitesmobs.core.data.config;
 
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -12,9 +12,9 @@ import java.io.IOException;
 public class ConfigGeneral {
     public static ConfigGeneral INSTANCE;
 
-    public final ForgeConfigSpec.ConfigValue<String> configVersion;
+    public final ModConfigSpec.ConfigValue<String> configVersion;
 
-    public ConfigGeneral(ForgeConfigSpec.Builder builder) {
+    public ConfigGeneral(ModConfigSpec.Builder builder) {
         builder.push("General");
 
         this.configVersion = builder

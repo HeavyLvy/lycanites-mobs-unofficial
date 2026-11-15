@@ -8,7 +8,7 @@ import com.lycanitesmobs.core.data.loaders.StreamLoader;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.util.Lazy;
+import net.neoforged.neoforge.common.util.Lazy;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 public class ClientManager {
     public static int GL_TEXTURE0 = 33984;
@@ -42,9 +42,9 @@ public class ClientManager {
      */
     public void registerEvents() {
         // Event Listeners:
-        MinecraftForge.EVENT_BUS.register(KeyManager.getInstance());
-        MinecraftForge.EVENT_BUS.register(new BaseOverlayScreen(Minecraft.getInstance()));
-        MinecraftForge.EVENT_BUS.register(new ClientEventListener());
+        NeoForge.EVENT_BUS.register(KeyManager.getInstance());
+        NeoForge.EVENT_BUS.register(new BaseOverlayScreen(Minecraft.getInstance()));
+        NeoForge.EVENT_BUS.register(new ClientEventListener());
     }
 
 
@@ -74,7 +74,7 @@ public class ClientManager {
     public Font getFontRenderer() {
         return Minecraft.getInstance().font;
 		/*if(this.fontRenderer == null) {
-			ResourceLocation fontResource = new ResourceLocation(LycanitesMobs.MODID, "fonts/diavlo_light.otf");
+			ResourceLocation fontResource = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "fonts/diavlo_light.otf");
 			this.fontRenderer = new FontRenderer(Minecraft.getInstance().getTextureManager(), new Font(Minecraft.getInstance().getTextureManager(), fontResource));
 		}
 		return this.fontRenderer;*/

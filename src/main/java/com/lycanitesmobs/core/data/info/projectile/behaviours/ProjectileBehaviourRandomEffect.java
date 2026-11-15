@@ -8,7 +8,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class ProjectileBehaviourRandomEffect extends ProjectileBehaviour {
         }
 
         int randomIndex = world.random.nextInt(this.effects.size());
-        MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(this.effects.get(randomIndex)));
+        MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(this.effects.get(randomIndex)));
         if (effect != null) {
             target.addEffect(new MobEffectInstance(effect, this.duration, this.amplifier));
         }

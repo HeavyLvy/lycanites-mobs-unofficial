@@ -1,5 +1,7 @@
 package com.lycanitesmobs;
 
+import net.minecraft.core.registries.Registries;
+
 import com.lycanitesmobs.client.gui.screen.block.EquipmentForgeScreen;
 import com.lycanitesmobs.client.gui.screen.block.EquipmentInfuserScreen;
 import com.lycanitesmobs.client.gui.screen.block.EquipmentStationScreen;
@@ -52,29 +54,30 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddPackFindersEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
+import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.fixMaxHealth;
 
 @Mod(LycanitesMobs.MODID)
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID)
+@EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class LycanitesMobs {
     public static final Logger LOGGER = LogManager.getLogger();
 
@@ -92,11 +95,11 @@ public class LycanitesMobs {
 
     public static final PacketManager PACKET_MANAGER = new PacketManager();
 
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Keys.ITEMS, MODID);
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.Keys.BLOCKS, MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, MODID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, MODID);
     // TODO: move projectile registries to RegistryEvents
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister
-            .create(ForgeRegistries.Keys.ENTITY_TYPES, MODID);
+            .create(Registries.ENTITY_TYPE, MODID);
 
     public static EffectManager effectManager;
 
@@ -138,13 +141,13 @@ public class LycanitesMobs {
         PROXY.registerEvents();
         ItemManager.register(modEventBus);
 
-        MinecraftForge.EVENT_BUS.register(SpawnerEventListener.getInstance());
-        MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.register(CommandManager.getInstance());
-        MinecraftForge.EVENT_BUS.register(new GameEventListener());
-        MinecraftForge.EVENT_BUS.register(MobEventManager.getInstance());
-        MinecraftForge.EVENT_BUS.register(MobEventListener.getInstance());
-        MinecraftForge.EVENT_BUS.register(StructureSpawnInjector.getInstance());
+        NeoForge.EVENT_BUS.register(SpawnerEventListener.getInstance());
+        NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(CommandManager.getInstance());
+        NeoForge.EVENT_BUS.register(new GameEventListener());
+        NeoForge.EVENT_BUS.register(MobEventManager.getInstance());
+        NeoForge.EVENT_BUS.register(MobEventListener.getInstance());
+        NeoForge.EVENT_BUS.register(StructureSpawnInjector.getInstance());
 
         PACKET_MANAGER.register();
 

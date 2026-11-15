@@ -9,7 +9,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 
 
 public class EntityAglebemu extends TameableCreatureEntity implements Enemy {
@@ -31,7 +31,7 @@ public class EntityAglebemu extends TameableCreatureEntity implements Enemy {
         this.babySpawnChance = 0.01D;
         this.setupMob();
 
-        this.setPathfindingMalus(BlockPathTypes.WATER, 0F);
+        this.setPathfindingMalus(PathType.WATER, 0F);
     }
 
     // ========== Init AI ==========

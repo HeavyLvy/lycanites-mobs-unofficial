@@ -18,9 +18,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class EntitySalamander extends RideableCreatureEntity implements Enemy {
         // Stats:
         this.setMaxUpStep(1.0F);
 
-        this.setPathfindingMalus(BlockPathTypes.LAVA, 0F);
+        this.setPathfindingMalus(PathType.LAVA, 0F);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class EntitySalamander extends RideableCreatureEntity implements Enemy {
 
     @Override
     public double getPassengersRidingOffset() {
-        return (double)this.getDimensions(Pose.STANDING).height * 0.85D;
+        return (double)this.getDimensions(Pose.STANDING).height() * 0.85D;
     }
 
     public void specialAttack() {
@@ -127,12 +127,12 @@ public class EntitySalamander extends RideableCreatureEntity implements Enemy {
             for(LivingEntity possibleTarget : possibleTargets) {
                 boolean doDamage = true;
                 if(this.getRider() instanceof Player) {
-                    if(MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((Player)this.getRider(), possibleTarget))) {
+                    if(NeoForge.EVENT_BUS.post(new AttackEntityEvent((Player)this.getRider(), possibleTarget))) {
                         doDamage = false;
                     }
                 }
                 if(doDamage) {
-                    possibleTarget.setSecondsOnFire(5);
+                    possibleTarget.igniteForSeconds(5);
                 }
             }
         }

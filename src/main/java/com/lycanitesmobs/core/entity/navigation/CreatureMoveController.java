@@ -12,7 +12,7 @@ import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -102,7 +102,7 @@ public class CreatureMoveController extends MoveControl {
                     Mth.floor(this.mob.position().x() + (double) moveX),
                     Mth.floor(this.mob.position().y()),
                     Mth.floor(this.mob.position().z() + (double) moveZ)
-            ) != BlockPathTypes.WALKABLE) {
+            ) != PathType.WALKABLE) {
                 this.strafeForwards = 1.0F;
                 this.strafeRight = 0.0F;
                 scaledSpeed = moveSpeed;
@@ -136,7 +136,7 @@ public class CreatureMoveController extends MoveControl {
             BlockPos entityPos = this.mob.blockPosition();
             BlockState blockState = this.mob.level().getBlockState(entityPos);
             VoxelShape collisionShape = blockState.getCollisionShape(this.mob.level(), entityPos);
-            double jumpRange = (double) Math.max(1.0F, this.mob.getDimensions(Pose.STANDING).width + 0.25F);
+            double jumpRange = (double) Math.max(1.0F, this.mob.getDimensions(Pose.STANDING).width() + 0.25F);
             if (distanceY > (double) this.mob.maxUpStep() && distanceXZ < jumpRange
                     || !collisionShape.isEmpty()
                     && this.mob.position().y() < collisionShape.max(Direction.Axis.Y) + (double) entityPos.getY()) {

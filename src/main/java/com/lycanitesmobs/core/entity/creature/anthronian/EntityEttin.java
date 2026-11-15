@@ -68,7 +68,7 @@ public class EntityEttin extends TameableCreatureEntity implements Enemy {
 		if(!this.getCommandSenderWorld().isClientSide)
 	        if(this.getTarget() != null && this.getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && this.griefing) {
 		    	float distance = this.getTarget().distanceTo(this);
-		    		if(distance <= this.getDimensions(Pose.STANDING).width + 4.0F)
+		    		if(distance <= this.getDimensions(Pose.STANDING).width() + 4.0F)
 		    			this.destroyArea((int)this.position().x(), (int)this.position().y(), (int)this.position().z(), 0.5F, true);
 	        }
         

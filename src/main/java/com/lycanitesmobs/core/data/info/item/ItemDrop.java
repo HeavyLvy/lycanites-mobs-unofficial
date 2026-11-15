@@ -11,7 +11,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -284,7 +284,7 @@ public class ItemDrop {
             return ItemStack.EMPTY;
         }
 
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.itemId));
+        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(this.itemId));
         if (item != null) {
             return new ItemStack(item, 1);
         }
@@ -303,7 +303,7 @@ public class ItemDrop {
             return this.getItemStack();
         }
 
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.burningItemId));
+        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(this.burningItemId));
         if (item != null) {
             return new ItemStack(item, 1);
         }
@@ -321,7 +321,7 @@ public class ItemDrop {
         if (!this.effectItemIds.containsKey(effectId)) {
             return ItemStack.EMPTY;
         }
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.effectItemIds.get(effectId)));
+        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(this.effectItemIds.get(effectId)));
         if (item != null) {
             return new ItemStack(item, 1);
         }

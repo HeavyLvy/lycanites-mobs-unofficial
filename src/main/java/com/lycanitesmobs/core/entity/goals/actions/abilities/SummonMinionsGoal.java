@@ -129,7 +129,7 @@ public class SummonMinionsGoal extends BaseGoal {
 
 	protected void summonMinion(LivingEntity target) {
 		LivingEntity minion = this.minionInfo.createEntity(this.host.getCommandSenderWorld());
-		this.host.summonMinion(minion, this.host.getRandom().nextDouble() * 360, this.host.getDimensions(this.host.getPose()).width + 1);
+		this.host.summonMinion(minion, this.host.getRandom().nextDouble() * 360, this.host.getDimensions(this.host.getPose()).width() + 1);
 		if(minion instanceof BaseCreatureEntity) {
 			BaseCreatureEntity minionCreature = (BaseCreatureEntity)minion;
 			minionCreature.setTarget(target);

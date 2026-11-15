@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 public class MountTab extends Tab {
 
     public MountTab(int id, OnPress pressable) {
-        super(id, Tab.startX, Tab.startY, new ResourceLocation("textures/items/saddle.png"), Component.translatable("Mounts"), pressable);
+        super(id, Tab.startX, Tab.startY, ResourceLocation.parse("textures/items/saddle.png"), Component.translatable("Mounts"), pressable);
     }
 
     @Override

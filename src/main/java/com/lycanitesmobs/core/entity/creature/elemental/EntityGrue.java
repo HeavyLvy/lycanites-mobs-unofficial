@@ -67,7 +67,7 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
         if (!this.getCommandSenderWorld().isClientSide && this.hasAttackTarget()) {
             if (this.teleportTime-- <= 0) {
                 this.teleportTime = 60 + this.getRandom().nextInt(40);
-                BlockPos teleportPosition = this.getFacingPosition(this.getTarget(), -this.getTarget().getDimensions(Pose.STANDING).width - 1D, 0);
+                BlockPos teleportPosition = this.getFacingPosition(this.getTarget(), -this.getTarget().getDimensions(Pose.STANDING).width() - 1D, 0);
                 if (this.canTeleportTo(teleportPosition)) {
                     this.playJumpSound();
                     this.setPos(teleportPosition.getX(), teleportPosition.getY(), teleportPosition.getZ());
@@ -78,7 +78,7 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
         // Particles:
         if (this.getCommandSenderWorld().isClientSide)
             for (int i = 0; i < 2; ++i) {
-                this.getCommandSenderWorld().addParticle(ParticleTypes.WITCH, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
+                this.getCommandSenderWorld().addParticle(ParticleTypes.WITCH, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), 0.0D, 0.0D, 0.0D);
             }
     }
 
@@ -115,7 +115,7 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
             double d1 = this.random.nextGaussian() * 0.02D;
             double d2 = this.random.nextGaussian() * 0.02D;
             for (int i = 0; i < 100; i++)
-                this.getCommandSenderWorld().addParticle(particle, this.position().x() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width, this.position().y() + 0.5D + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).height), this.position().z() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width, d0, d1, d2);
+                this.getCommandSenderWorld().addParticle(particle, this.position().x() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width() * 2.0F) - (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + 0.5D + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).height()), this.position().z() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width() * 2.0F) - (double) this.getDimensions(Pose.STANDING).width(), d0, d1, d2);
         }
         super.startStealth();
     }

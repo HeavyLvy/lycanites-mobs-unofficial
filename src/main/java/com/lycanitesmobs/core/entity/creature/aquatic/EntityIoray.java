@@ -95,7 +95,7 @@ public class EntityIoray extends RideableCreatureEntity implements Enemy {
     // ========== Mounted Offset ==========
     @Override
     public double getPassengersRidingOffset() {
-        return (double) this.getDimensions(Pose.STANDING).height * 0.6D;
+        return (double) this.getDimensions(Pose.STANDING).height() * 0.6D;
     }
 
 

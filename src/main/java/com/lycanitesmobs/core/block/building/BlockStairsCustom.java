@@ -12,8 +12,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.StairBlock;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -40,7 +40,7 @@ public class BlockStairsCustom extends StairBlock implements BlockTypeGetter {
     }
 
     public ResourceLocation setRegistryName(String modID, String blockName) {
-        return registryName = new ResourceLocation(modID, blockName);
+        return registryName = ResourceLocation.fromNamespaceAndPath(modID, blockName);
     }
 
     public void setup() {

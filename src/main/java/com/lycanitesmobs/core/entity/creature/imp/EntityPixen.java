@@ -14,7 +14,7 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
@@ -106,7 +106,7 @@ public class EntityPixen extends TameableCreatureEntity implements Enemy {
                     LivingEntity target = (LivingEntity) entityObj;
                     if (target != this && !(target instanceof EntityPixen) && target != this.getTarget() && target != this.getAvoidTarget()) {
                         int randomIndex = this.getRandom().nextInt(this.auraEffects.size());
-                        MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(this.auraEffects.get(randomIndex)));
+                        MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(this.auraEffects.get(randomIndex)));
                         if(effect != null) {
                             target.addEffect(new MobEffectInstance(effect, this.auraDuration, this.auraAmplifier));
                         }

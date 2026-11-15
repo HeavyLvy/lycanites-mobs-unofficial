@@ -1,16 +1,16 @@
 package com.lycanitesmobs.core.data.config;
 
 import com.google.common.collect.Lists;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
 public class ConfigAdmin {
 	public static ConfigAdmin INSTANCE;
 
-	public final ForgeConfigSpec.ConfigValue<List<? extends String>> forceRemoveEntityIds;
+	public final ModConfigSpec.ConfigValue<List<? extends String>> forceRemoveEntityIds;
 
-	public ConfigAdmin(ForgeConfigSpec.Builder builder) {
+	public ConfigAdmin(ModConfigSpec.Builder builder) {
 		builder.push("Admin");
 		builder.comment("Special tools for server admins.");
 

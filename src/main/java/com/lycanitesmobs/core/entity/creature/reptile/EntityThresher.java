@@ -190,7 +190,7 @@ public class EntityThresher extends RideableCreatureEntity implements Enemy, IGr
     // ========== Mounted Offset ==========
     @Override
     public double getPassengersRidingOffset() {
-        return (double) this.getDimensions(Pose.STANDING).height * 0.5D;
+        return (double) this.getDimensions(Pose.STANDING).height() * 0.5D;
     }
 
 

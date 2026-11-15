@@ -2,7 +2,7 @@ package com.lycanitesmobs.core.data.config;
 
 import com.lycanitesmobs.core.entity.util.CreatureStats;
 import com.lycanitesmobs.core.manager.CreatureManager;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,63 +10,63 @@ import java.util.Map;
 public class ConfigCreatures {
 	public static ConfigCreatures INSTANCE;
 
-	public Map<String, Map<String, ForgeConfigSpec.ConfigValue<Double>>> difficultyMultipliers = new HashMap<>();
-	public Map<String, ForgeConfigSpec.ConfigValue<Double>> levelMultipliers = new HashMap<>();
+	public Map<String, Map<String, ModConfigSpec.ConfigValue<Double>>> difficultyMultipliers = new HashMap<>();
+	public Map<String, ModConfigSpec.ConfigValue<Double>> levelMultipliers = new HashMap<>();
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> subspeciesTags;
-	public final ForgeConfigSpec.ConfigValue<Integer> idleSoundTicks;
-	public final ForgeConfigSpec.ConfigValue<Boolean> disableModelAlpha;
-	public final ForgeConfigSpec.ConfigValue<Boolean> disableBlockParticles;
+	public final ModConfigSpec.ConfigValue<Boolean> subspeciesTags;
+	public final ModConfigSpec.ConfigValue<Integer> idleSoundTicks;
+	public final ModConfigSpec.ConfigValue<Boolean> disableModelAlpha;
+	public final ModConfigSpec.ConfigValue<Boolean> disableBlockParticles;
 
-	public final ForgeConfigSpec.ConfigValue<Integer> startingLevelMin;
-	public final ForgeConfigSpec.ConfigValue<Integer> startingLevelMax;
-	public final ForgeConfigSpec.ConfigValue<Double> levelPerDay;
-	public final ForgeConfigSpec.ConfigValue<Integer> levelPerDayMax;
-	public final ForgeConfigSpec.ConfigValue<Double> levelPerLocalDifficulty;
-	public final ForgeConfigSpec.ConfigValue<Integer> bossDamageCap;
+	public final ModConfigSpec.ConfigValue<Integer> startingLevelMin;
+	public final ModConfigSpec.ConfigValue<Integer> startingLevelMax;
+	public final ModConfigSpec.ConfigValue<Double> levelPerDay;
+	public final ModConfigSpec.ConfigValue<Integer> levelPerDayMax;
+	public final ModConfigSpec.ConfigValue<Double> levelPerLocalDifficulty;
+	public final ModConfigSpec.ConfigValue<Integer> bossDamageCap;
 	
-	public final ForgeConfigSpec.ConfigValue<Boolean> ownerTags;
-	public final ForgeConfigSpec.ConfigValue<Boolean> tamingEnabled;
-	public final ForgeConfigSpec.ConfigValue<Boolean> mountingEnabled;
-	public final ForgeConfigSpec.ConfigValue<Boolean> mountingFlightEnabled;
-	public final ForgeConfigSpec.ConfigValue<Boolean> friendlyFire;
-	public final ForgeConfigSpec.ConfigValue<Integer> petRespawnTime;
-	public final ForgeConfigSpec.ConfigValue<Integer> petFollowDistance;
+	public final ModConfigSpec.ConfigValue<Boolean> ownerTags;
+	public final ModConfigSpec.ConfigValue<Boolean> tamingEnabled;
+	public final ModConfigSpec.ConfigValue<Boolean> mountingEnabled;
+	public final ModConfigSpec.ConfigValue<Boolean> mountingFlightEnabled;
+	public final ModConfigSpec.ConfigValue<Boolean> friendlyFire;
+	public final ModConfigSpec.ConfigValue<Integer> petRespawnTime;
+	public final ModConfigSpec.ConfigValue<Integer> petFollowDistance;
 
-	public final ForgeConfigSpec.ConfigValue<String> soulboundDimensionList;
-	public final ForgeConfigSpec.ConfigValue<Boolean> soulboundDimensionWhitelist;
+	public final ModConfigSpec.ConfigValue<String> soulboundDimensionList;
+	public final ModConfigSpec.ConfigValue<Boolean> soulboundDimensionWhitelist;
 
-	public final ForgeConfigSpec.ConfigValue<String> summonDimensionList;
-	public final ForgeConfigSpec.ConfigValue<Boolean> summonDimensionWhitelist;
+	public final ModConfigSpec.ConfigValue<String> summonDimensionList;
+	public final ModConfigSpec.ConfigValue<Boolean> summonDimensionWhitelist;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> beastiaryKnowledgeMessages;
-	public final ForgeConfigSpec.ConfigValue<Integer> creatureProximityKnowledge;
-	public final ForgeConfigSpec.ConfigValue<Integer> creatureKillKnowledge;
-	public final ForgeConfigSpec.ConfigValue<Integer> creatureBreedKnowledge;
-	public final ForgeConfigSpec.ConfigValue<Integer> creatureTreatKnowledge;
-	public final ForgeConfigSpec.ConfigValue<Integer> creatureStudyKnowledge;
-	public final ForgeConfigSpec.ConfigValue<Integer> creatureStudyCooldown;
-	public final ForgeConfigSpec.ConfigValue<Double> creatureVariantKnowledgeScale;
-	public final ForgeConfigSpec.ConfigValue<Double> creatureBossKnowledgeScale;
+	public final ModConfigSpec.ConfigValue<Boolean> beastiaryKnowledgeMessages;
+	public final ModConfigSpec.ConfigValue<Integer> creatureProximityKnowledge;
+	public final ModConfigSpec.ConfigValue<Integer> creatureKillKnowledge;
+	public final ModConfigSpec.ConfigValue<Integer> creatureBreedKnowledge;
+	public final ModConfigSpec.ConfigValue<Integer> creatureTreatKnowledge;
+	public final ModConfigSpec.ConfigValue<Integer> creatureStudyKnowledge;
+	public final ModConfigSpec.ConfigValue<Integer> creatureStudyCooldown;
+	public final ModConfigSpec.ConfigValue<Double> creatureVariantKnowledgeScale;
+	public final ModConfigSpec.ConfigValue<Double> creatureBossKnowledgeScale;
 
-	public final ForgeConfigSpec.ConfigValue<Double> bossAntiFlight;
+	public final ModConfigSpec.ConfigValue<Double> bossAntiFlight;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> elementalFusion;
-	public final ForgeConfigSpec.ConfigValue<String> elementalFusionLevelMix;
-	public final ForgeConfigSpec.ConfigValue<Double> elementalFusionLevelMultiplier;
-	public final ForgeConfigSpec.ConfigValue<Boolean> disablePickupOffsets;
-	public final ForgeConfigSpec.ConfigValue<Boolean> suffocationImmunity;
-	public final ForgeConfigSpec.ConfigValue<Boolean> drownImmunity;
-	public final ForgeConfigSpec.ConfigValue<Boolean> packTreatLuring;
+	public final ModConfigSpec.ConfigValue<Boolean> elementalFusion;
+	public final ModConfigSpec.ConfigValue<String> elementalFusionLevelMix;
+	public final ModConfigSpec.ConfigValue<Double> elementalFusionLevelMultiplier;
+	public final ModConfigSpec.ConfigValue<Boolean> disablePickupOffsets;
+	public final ModConfigSpec.ConfigValue<Boolean> suffocationImmunity;
+	public final ModConfigSpec.ConfigValue<Boolean> drownImmunity;
+	public final ModConfigSpec.ConfigValue<Boolean> packTreatLuring;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> variantsSpawn;
-	public final ForgeConfigSpec.ConfigValue<Boolean> randomSizes;
-	public final ForgeConfigSpec.ConfigValue<Double> randomSizeMin;
-	public final ForgeConfigSpec.ConfigValue<Double> randomSizeMax;
+	public final ModConfigSpec.ConfigValue<Boolean> variantsSpawn;
+	public final ModConfigSpec.ConfigValue<Boolean> randomSizes;
+	public final ModConfigSpec.ConfigValue<Double> randomSizeMin;
+	public final ModConfigSpec.ConfigValue<Double> randomSizeMax;
 	
-	//public final ForgeConfigSpec.ConfigValue<String> globalDropsString;
+	//public final ModConfigSpec.ConfigValue<String> globalDropsString;
 
-	public ConfigCreatures(ForgeConfigSpec.Builder builder) {
+	public ConfigCreatures(ModConfigSpec.Builder builder) {
 		builder.push("Creatures");
 		builder.comment("Global creature settings.");
 
@@ -206,7 +206,7 @@ public class ConfigCreatures {
 				.define("randomSizeMax", 1.15D);
 
 		for(String difficultyName : CreatureManager.getDifficultyNames()) {
-			Map<String, ForgeConfigSpec.ConfigValue<Double>> statMultipliers = new HashMap<>();
+			Map<String, ModConfigSpec.ConfigValue<Double>> statMultipliers = new HashMap<>();
 			for (String statName : CreatureStats.STAT_NAMES) {
 				double defaultValue = CreatureManager.getDifficultyDefault(difficultyName, statName);
 

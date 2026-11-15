@@ -68,7 +68,7 @@ public class EntityGrell extends RideableCreatureEntity {
 
     @Override
     public double getPassengersRidingOffset() {
-        return (double) this.getDimensions(Pose.STANDING).height * 1.1D;
+        return (double) this.getDimensions(Pose.STANDING).height() * 1.1D;
     }
 
     @Override

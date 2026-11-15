@@ -24,10 +24,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -155,8 +155,8 @@ public class ProjectileManager extends JSONLoader {
     public void bindRegisteredTypes() {
         for (ProjectileInfo projectileInfo : this.projectiles.values()) {
             ResourceLocation id = AssetHelper.modResource(projectileInfo.getName());
-            EntityType<?> t = ForgeRegistries.ENTITY_TYPES.getValue(id);
-            if (t == null || !id.equals(ForgeRegistries.ENTITY_TYPES.getKey(t))) continue;
+            EntityType<?> t = BuiltInRegistries.ENTITY_TYPE.get(id);
+            if (t == null || !id.equals(BuiltInRegistries.ENTITY_TYPE.getKey(t))) continue;
             EntityType<? extends BaseProjectileEntity> entityType = (EntityType<? extends BaseProjectileEntity>) t;
             projectileInfo.bindEntityType(entityType);
             EntityFactory.getInstance().addEntityType(entityType, (type, level) -> projectileInfo.createEntity(type, level), projectileInfo.getName());

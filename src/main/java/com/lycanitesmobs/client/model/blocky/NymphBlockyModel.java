@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 public class NymphBlockyModel<T extends Entity> extends HierarchicalModel<T> {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("lycanites", "nymph_layer"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("lycanites", "nymph_layer"), "main");
     private final ModelPart All;
     private final ModelPart Body;
     private final ModelPart ArmRight;

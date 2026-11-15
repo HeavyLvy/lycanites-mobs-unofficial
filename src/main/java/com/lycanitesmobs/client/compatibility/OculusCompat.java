@@ -3,7 +3,7 @@ package com.lycanitesmobs.client.compatibility;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 
 /**
  * Optional dependency bridge for Oculus (Iris on Forge).

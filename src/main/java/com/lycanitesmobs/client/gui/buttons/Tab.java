@@ -5,7 +5,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 public abstract class Tab extends ButtonBase {
-	public ResourceLocation texture = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
+	public ResourceLocation texture = ResourceLocation.parse("textures/gui/container/creative_inventory/tabs.png");
     public ResourceLocation icon = null;
     public static int startX = 0;
     public static int startY = 0;

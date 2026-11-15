@@ -16,7 +16,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistries; // TODO(port): datapack registries
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.*;
 
@@ -621,10 +622,10 @@ public class DungeonSchematic {
             return null;
         }
         if (possibleLootTables.size() == 1) {
-            return new ResourceLocation(possibleLootTables.get(0));
+            return ResourceLocation.parse(possibleLootTables.get(0));
         }
 
-        return new ResourceLocation(possibleLootTables.get(random.nextInt(possibleLootTables.size())));
+        return ResourceLocation.parse(possibleLootTables.get(random.nextInt(possibleLootTables.size())));
     }
 
     /**

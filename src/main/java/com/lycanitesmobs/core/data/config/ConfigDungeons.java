@@ -1,15 +1,15 @@
 package com.lycanitesmobs.core.data.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ConfigDungeons {
 	public static ConfigDungeons INSTANCE;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> dungeonsEnabled;
-	public final ForgeConfigSpec.ConfigValue<Integer> dungeonDistance;
-	public final ForgeConfigSpec.ConfigValue<Double> towerChance;
+	public final ModConfigSpec.ConfigValue<Boolean> dungeonsEnabled;
+	public final ModConfigSpec.ConfigValue<Integer> dungeonDistance;
+	public final ModConfigSpec.ConfigValue<Double> towerChance;
 
-	public ConfigDungeons(ForgeConfigSpec.Builder builder) {
+	public ConfigDungeons(ModConfigSpec.Builder builder) {
 		builder.push("Dungeons");
 		builder.comment("Settings for Dungeon generation.");
 

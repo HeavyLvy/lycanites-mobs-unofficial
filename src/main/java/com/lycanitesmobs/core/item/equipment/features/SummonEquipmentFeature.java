@@ -17,7 +17,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class SummonEquipmentFeature extends EquipmentFeature {
 
@@ -127,10 +127,10 @@ public class SummonEquipmentFeature extends EquipmentFeature {
         if (creatureInfo != null) {
             entityType = creatureInfo.getEntityType();
         } else {
-            Object entityTypeObj = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(this.summonMobId));
+            Object entityTypeObj = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(this.summonMobId));
             if (entityTypeObj instanceof EntityType) {
                 EntityType<?> fetchedType = (EntityType) entityTypeObj;
-                ResourceLocation entityKey = ForgeRegistries.ENTITY_TYPES.getKey(fetchedType);
+                ResourceLocation entityKey = BuiltInRegistries.ENTITY_TYPE.getKey(fetchedType);
                 if (entityKey != null && LycanitesMobs.MODID.equals(entityKey.getNamespace())) {
                     entityType = fetchedType;
                 } else {

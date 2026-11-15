@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class ThemeBlock {
     /** Dungeon Theme Blocks define a block to be used in the theme along with other information. **/
@@ -58,7 +58,7 @@ public class ThemeBlock {
 
     public Block getBlock() {
         if (this.block == null) {
-            this.block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(this.blockId));
+            this.block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(this.blockId));
         }
         if (this.block == null) {
             return Blocks.CAVE_AIR;

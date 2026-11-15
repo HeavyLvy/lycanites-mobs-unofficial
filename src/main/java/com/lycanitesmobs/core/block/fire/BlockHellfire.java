@@ -17,8 +17,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 public class BlockHellfire extends BlockFireBase {
 
@@ -63,7 +63,7 @@ public class BlockHellfire extends BlockFireBase {
             return;
 
         entity.hurt(world.damageSources().inFire(), 2);
-        entity.setSecondsOnFire(5);
+        entity.igniteForSeconds(5);
     }
 
     @Override

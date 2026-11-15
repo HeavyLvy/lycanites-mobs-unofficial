@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.phys.HitResult;
@@ -242,13 +242,13 @@ public class CreaturePathNavigator extends GroundPathNavigation {
      * Checks if the given Path Node Type is valid for ground pathing.
      **/
     @Override
-    protected boolean hasValidPathType(BlockPathTypes pathNodeType) {
-        if (pathNodeType == BlockPathTypes.WATER) {
+    protected boolean hasValidPathType(PathType pathNodeType) {
+        if (pathNodeType == PathType.WATER) {
             return this.entityCreature.canWade() || this.entityCreature.isStrongSwimmer();
-        } else if (pathNodeType == BlockPathTypes.LAVA) {
+        } else if (pathNodeType == PathType.LAVA) {
             return this.entityCreature.isLavaCreature();
         } else {
-            return pathNodeType != BlockPathTypes.OPEN;
+            return pathNodeType != PathType.OPEN;
         }
     }
 
@@ -257,7 +257,7 @@ public class CreaturePathNavigator extends GroundPathNavigation {
      **/
     @Override
     protected void followThePath() {
-        float entityWidth = this.mob.getDimensions(Pose.STANDING).width;
+        float entityWidth = this.mob.getDimensions(Pose.STANDING).width();
         Vec3 currentPos = this.getTempMobPos();
         // Flight:
         if (this.entityCreature.isFlying() || this.entityCreature.isUnderWater()) {
@@ -292,7 +292,7 @@ public class CreaturePathNavigator extends GroundPathNavigation {
 
         // Climbing Tick:
         if (this.isDone() && this.entityCreature.canClimb() && this.climbTargetPos != null) {
-            double entitySize = this.mob.getDimensions(Pose.STANDING).width * this.mob.getDimensions(Pose.STANDING).width;
+            double entitySize = this.mob.getDimensions(Pose.STANDING).width() * this.mob.getDimensions(Pose.STANDING).width();
             if (this.mob.distanceToSqr(this.climbTargetPos.getCenter()) >= entitySize && (this.mob.position().y() <= (double) this.climbTargetPos.getY() || this.mob.distanceToSqr(new Vec3(this.climbTargetPos.getX(), Math.floor(this.mob.position().y()), this.climbTargetPos.getZ())) >= entitySize)) {
                 this.mob.getMoveControl().setWantedPosition((double) this.climbTargetPos.getX(), (double) this.climbTargetPos.getY(), (double) this.climbTargetPos.getZ(), this.speedModifier);
             } else {

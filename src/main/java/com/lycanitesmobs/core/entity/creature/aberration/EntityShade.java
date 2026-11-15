@@ -10,8 +10,8 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 
 import java.util.List;
 
@@ -78,12 +78,12 @@ public class EntityShade extends RideableCreatureEntity {
     // Mounted Y Offset:
     @Override
     public double getPassengersRidingOffset() {
-        return (double) this.getDimensions(Pose.STANDING).height * 0.85D;
+        return (double) this.getDimensions(Pose.STANDING).height() * 0.85D;
     }
 
     @Override
     public double getMountedZOffset() {
-        return (double) this.getDimensions(Pose.STANDING).width * 0.25D;
+        return (double) this.getDimensions(Pose.STANDING).width() * 0.25D;
     }
 
 
@@ -124,7 +124,7 @@ public class EntityShade extends RideableCreatureEntity {
             for (LivingEntity possibleTarget : possibleTargets) {
                 boolean doDamage = true;
                 if (this.getRider() instanceof Player) {
-                    if (MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((Player) this.getRider(), possibleTarget))) {
+                    if (NeoForge.EVENT_BUS.post(new AttackEntityEvent((Player) this.getRider(), possibleTarget))) {
                         doDamage = false;
                     }
                 }

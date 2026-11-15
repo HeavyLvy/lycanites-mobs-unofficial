@@ -15,9 +15,9 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 public class EntityCephignis extends AgeableCreatureEntity {
 
@@ -42,7 +42,7 @@ public class EntityCephignis extends AgeableCreatureEntity {
         this.isAggressiveByDefault = false;
         this.setupMob();
 
-        this.setPathfindingMalus(BlockPathTypes.LAVA, 0F);
+        this.setPathfindingMalus(PathType.LAVA, 0F);
     }
 
     // ========== Init AI ==========

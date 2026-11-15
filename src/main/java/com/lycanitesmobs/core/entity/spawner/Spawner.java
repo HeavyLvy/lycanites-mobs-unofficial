@@ -28,9 +28,9 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.living.MobSpawnEvent;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.neoforge.event.EventHooks;
+import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
+import net.neoforged.bus.api.Event;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -951,7 +951,7 @@ public class Spawner {
 
         Runnable afterSpawn = () -> {
             if (callInitialSpawn && entityLiving instanceof Mob mobEntity
-                    && ForgeEventFactory.checkSpawnPlacements(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, spawnPos, world.getRandom(), false)) {
+                    && EventHooks.checkSpawnPlacements(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, spawnPos, world.getRandom(), false)) {
                 mobEntity.finalizeSpawn((ServerLevelAccessor) world, world.getCurrentDifficultyAt(spawnPos), MobSpawnType.NATURAL, null, null);
             }
 

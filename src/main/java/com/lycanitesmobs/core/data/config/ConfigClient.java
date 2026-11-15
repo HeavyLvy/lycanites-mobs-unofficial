@@ -1,20 +1,20 @@
 package com.lycanitesmobs.core.data.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ConfigClient {
     public static ConfigClient INSTANCE;
 
-    public final ForgeConfigSpec.ConfigValue<Boolean> modelMultipass;
-    public final ForgeConfigSpec.ConfigValue<Boolean> inventoryTab;
-    public final ForgeConfigSpec.ConfigValue<Double> fearBlockLightDim;
-    public final ForgeConfigSpec.ConfigValue<Double> fearDimPerLevel;
-    public final ForgeConfigSpec.ConfigValue<Double> fearMuffleFactor;
-    public final ForgeConfigSpec.ConfigValue<Double> fearAudioRange;
-    public final ForgeConfigSpec.ConfigValue<Boolean> fearFlickerInverted;
-    public final ForgeConfigSpec.ConfigValue<Double> fearHeartbeatSpeed;
+    public final ModConfigSpec.ConfigValue<Boolean> modelMultipass;
+    public final ModConfigSpec.ConfigValue<Boolean> inventoryTab;
+    public final ModConfigSpec.ConfigValue<Double> fearBlockLightDim;
+    public final ModConfigSpec.ConfigValue<Double> fearDimPerLevel;
+    public final ModConfigSpec.ConfigValue<Double> fearMuffleFactor;
+    public final ModConfigSpec.ConfigValue<Double> fearAudioRange;
+    public final ModConfigSpec.ConfigValue<Boolean> fearFlickerInverted;
+    public final ModConfigSpec.ConfigValue<Double> fearHeartbeatSpeed;
 
-    public ConfigClient(ForgeConfigSpec.Builder builder) {
+    public ConfigClient(ModConfigSpec.Builder builder) {
         builder.push("Client");
         builder.comment("Client side settings, defaults are recommended except for low end systems or for compatibility with mods that alter rendering.");
 

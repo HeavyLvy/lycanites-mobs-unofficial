@@ -35,8 +35,8 @@ import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
@@ -231,7 +231,7 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
                 for (int i = 0; i < 4; ++i) {
                     this.getCommandSenderWorld().addParticle(ParticleTypes.LARGE_SMOKE,
                             particlePos.getX() + (this.random.nextDouble() - 0.5D) * 2,
-                            particlePos.getY() + (this.getDimensions(Pose.STANDING).height * 0.2D) + this.random.nextDouble() * 2,
+                            particlePos.getY() + (this.getDimensions(Pose.STANDING).height() * 0.2D) + this.random.nextDouble() * 2,
                             particlePos.getZ() + (this.random.nextDouble() - 0.5D) * 2,
                             0.0D, 0.0D, 0.0D);
                 }
@@ -457,7 +457,7 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
         BlockPos offset = this.getFacingPosition(this, 8, angle);
         projectile.setPos(
                 offset.getX(),
-                offset.getY() + (this.getDimensions(Pose.STANDING).height * 0.5D),
+                offset.getY() + (this.getDimensions(Pose.STANDING).height() * 0.5D),
                 offset.getZ()
         );
 
@@ -494,8 +494,8 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
         if (!this.getCommandSenderWorld().isClientSide && CreatureManager.getInstance().getCreature("trite").isEnabled()) {
             int j = 6 + this.random.nextInt(20) + (getCommandSenderWorld().getDifficulty().getId() * 4);
             for (int k = 0; k < j; ++k) {
-                float f = ((float) (k % 2) - 0.5F) * this.getDimensions(Pose.STANDING).width / 4.0F;
-                float f1 = ((float) (k / 2) - 0.5F) * this.getDimensions(Pose.STANDING).width / 4.0F;
+                float f = ((float) (k % 2) - 0.5F) * this.getDimensions(Pose.STANDING).width() / 4.0F;
+                float f1 = ((float) (k / 2) - 0.5F) * this.getDimensions(Pose.STANDING).width() / 4.0F;
                 EntityTrite trite = (EntityTrite) CreatureManager.getInstance().getCreature("trite").createEntity(this.getCommandSenderWorld());
                 trite.moveTo(this.position().x() + (double) f, this.position().y() + 0.5D, this.position().z() + (double) f1, this.random.nextFloat() * 360.0F, 0.0F);
                 trite.setMinion(true);

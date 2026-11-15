@@ -22,7 +22,7 @@ public class ItemBlockBase extends BlockItem {
     }
 
     public ResourceLocation setRegistryName(String modID, String blockName) {
-        return registryName = new ResourceLocation(modID, blockName);
+        return registryName = ResourceLocation.fromNamespaceAndPath(modID, blockName);
     }
 
     @Override

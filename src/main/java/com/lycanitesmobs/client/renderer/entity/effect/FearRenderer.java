@@ -23,7 +23,7 @@ import java.util.UUID;
 public class FearRenderer extends EntityRenderer<EntityFear> {
 
     private static final ResourceLocation WHITE_TEX =
-            new ResourceLocation(LycanitesMobs.MODID, "textures/effect/white.png");
+            ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/effect/white.png");
 
     private static final Map<UUID, FearMesh> meshes = new HashMap<>();
 

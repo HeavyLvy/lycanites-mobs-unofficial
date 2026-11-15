@@ -2,7 +2,7 @@ package com.lycanitesmobs.core.data.config;
 
 import com.lycanitesmobs.core.entity.util.CreatureStats;
 import com.lycanitesmobs.core.data.info.Variant;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,24 +10,24 @@ import java.util.Map;
 public class ConfigCreatureSubspecies {
 	public static ConfigCreatureSubspecies INSTANCE;
 
-	public final ForgeConfigSpec.ConfigValue<Integer> baseWeight;
-	public Map<String,ForgeConfigSpec.ConfigValue<Integer>> commonWeights = new HashMap<>();
-	public Map<String, Map<String, ForgeConfigSpec.ConfigValue<Double>>> variantMultipliers = new HashMap<>();
+	public final ModConfigSpec.ConfigValue<Integer> baseWeight;
+	public Map<String,ModConfigSpec.ConfigValue<Integer>> commonWeights = new HashMap<>();
+	public Map<String, Map<String, ModConfigSpec.ConfigValue<Double>>> variantMultipliers = new HashMap<>();
 
-	public final ForgeConfigSpec.ConfigValue<Integer> uncommonDropScale;
-	public final ForgeConfigSpec.ConfigValue<Integer> rareDropScale;
+	public final ModConfigSpec.ConfigValue<Integer> uncommonDropScale;
+	public final ModConfigSpec.ConfigValue<Integer> rareDropScale;
 
-	public final ForgeConfigSpec.ConfigValue<Double> uncommonExperienceScale;
-	public final ForgeConfigSpec.ConfigValue<Double> rareExperienceScale;
+	public final ModConfigSpec.ConfigValue<Double> uncommonExperienceScale;
+	public final ModConfigSpec.ConfigValue<Double> rareExperienceScale;
 
-	public final ForgeConfigSpec.ConfigValue<Integer> uncommonSpawnDayMin;
-	public final ForgeConfigSpec.ConfigValue<Integer> rareSpawnDayMin;
+	public final ModConfigSpec.ConfigValue<Integer> uncommonSpawnDayMin;
+	public final ModConfigSpec.ConfigValue<Integer> rareSpawnDayMin;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> rareDespawning;
+	public final ModConfigSpec.ConfigValue<Boolean> rareDespawning;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> rareHealthBars;
+	public final ModConfigSpec.ConfigValue<Boolean> rareHealthBars;
 
-	public ConfigCreatureSubspecies(ForgeConfigSpec.Builder builder) {
+	public ConfigCreatureSubspecies(ModConfigSpec.Builder builder) {
 		builder.push("Creature Variants");
 		builder.comment("Global creature variant settings.");
 
@@ -43,7 +43,7 @@ public class ConfigCreatureSubspecies {
 		}
 
 		for(String variantName : Variant.getSubspeciesNames()) {
-			Map<String, ForgeConfigSpec.ConfigValue<Double>> statMultipliers = new HashMap<>();
+			Map<String, ModConfigSpec.ConfigValue<Double>> statMultipliers = new HashMap<>();
 			for (String statName : CreatureStats.STAT_NAMES) {
 				double defaultValue = 1.0;
 				if("uncommon".equals(variantName)) {

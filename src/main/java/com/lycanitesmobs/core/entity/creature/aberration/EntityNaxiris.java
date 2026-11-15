@@ -163,12 +163,12 @@ public class EntityNaxiris extends RideableCreatureEntity {
     // ==================================================
     @Override
     public double getPassengersRidingOffset() {
-        return (double) this.getDimensions(Pose.STANDING).height * 0.9D;
+        return (double) this.getDimensions(Pose.STANDING).height() * 0.9D;
     }
 
     @Override
     public double getMountedZOffset() {
-        return (double) this.getDimensions(Pose.STANDING).width * -0.2D;
+        return (double) this.getDimensions(Pose.STANDING).width() * -0.2D;
     }
 
 

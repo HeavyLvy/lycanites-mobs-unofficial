@@ -23,8 +23,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import org.joml.Vector3f;
 
 import java.util.function.Supplier;
@@ -77,7 +77,7 @@ public class FluidManager {
                 null,
                 fluidColor, fogColor, density, viscosity, temperature, luminosity, multiply
         );
-        ForgeFlowingFluid.Properties fluidProps = builder.fluidProperties(fluidType, tickRate, () -> ObjectManager.getFluidBlock(fluidName));
+        BaseFlowingFluid.Properties fluidProps = builder.fluidProperties(fluidType, tickRate, () -> ObjectManager.getFluidBlock(fluidName));
         this.fluidBuilders.put(fluidName, builder);
         ObjectManager.addSound(fluidName, "block." + fluidName);
 
@@ -85,7 +85,7 @@ public class FluidManager {
         ObjectManager.addItem(fluidName + "_bucket", () -> new BucketItem(builder::getStillFluid, bucketProps));
 
         ObjectManager.addBlock(fluidName, () -> {
-            Supplier<ForgeFlowingFluid> still = builder::getStillFluid;
+            Supplier<BaseFlowingFluid> still = builder::getStillFluid;
             BaseLiquidBlock block = blockFactory.create(still, blockProperties, fluidName, element, destroyItems);
             if (worldgen) registerWorldgenFluidBlock(fluidName, block);
             return block;
@@ -94,7 +94,7 @@ public class FluidManager {
 
     @FunctionalInterface
     public interface LiquidBlockFactory {
-        BaseLiquidBlock create(Supplier<ForgeFlowingFluid> still, BlockBehaviour.Properties blockProperties, String fluidName, ElementInfo element, boolean destroyItems);
+        BaseLiquidBlock create(Supplier<BaseFlowingFluid> still, BlockBehaviour.Properties blockProperties, String fluidName, ElementInfo element, boolean destroyItems);
     }
 
     private void registerWorldgenFluidBlock(String fluidName, BaseLiquidBlock block) {
@@ -113,20 +113,20 @@ public class FluidManager {
         });
     }
 
-    public void registerFluidObjects(BiConsumer<ResourceLocation, ForgeFlowingFluid> action) {
+    public void registerFluidObjects(BiConsumer<ResourceLocation, BaseFlowingFluid> action) {
         this.fluidBuilders.forEach((fluidName, builder) -> {
-            ForgeFlowingFluid still = ObjectManager.getFluid(fluidName);
+            BaseFlowingFluid still = ObjectManager.getFluid(fluidName);
             if (still == null) {
-                still = (ForgeFlowingFluid) ObjectManager.addFluid(fluidName, new CustomFluid.Still(builder.getFluidProperties(), fluidName));
+                still = (BaseFlowingFluid) ObjectManager.addFluid(fluidName, new CustomFluid.Still(builder.getFluidProperties(), fluidName));
             }
             if (still instanceof CustomFluid customFluid) {
                 action.accept(customFluid.getRegistryName(), still);
             }
 
             String flowingName = fluidName + "_flowing";
-            ForgeFlowingFluid flowing = ObjectManager.getFluid(flowingName);
+            BaseFlowingFluid flowing = ObjectManager.getFluid(flowingName);
             if (flowing == null) {
-                flowing = (ForgeFlowingFluid) ObjectManager.addFluid(flowingName, new CustomFluid.Flowing(builder.getFluidProperties(), flowingName));
+                flowing = (BaseFlowingFluid) ObjectManager.addFluid(flowingName, new CustomFluid.Flowing(builder.getFluidProperties(), flowingName));
             }
             if (flowing instanceof CustomFluid customFluid) {
                 action.accept(customFluid.getRegistryName(), flowing);
@@ -138,7 +138,7 @@ public class FluidManager {
         private final String baseName;
         private final ResourceLocation registryName;
         private FluidType fluidType;
-        private ForgeFlowingFluid.Properties fluidProperties;
+        private BaseFlowingFluid.Properties fluidProperties;
 
         public FluidBuilder(String fluidName, ResourceLocation registryLocation) {
             this.baseName = fluidName;
@@ -158,8 +158,8 @@ public class FluidManager {
             return fluidType;
         }
 
-        public ForgeFlowingFluid.Properties fluidProperties(FluidType fT, int fluidTickRate, Supplier<? extends LiquidBlock> blockSupplier) {
-            ForgeFlowingFluid.Properties p = new ForgeFlowingFluid.Properties(() -> fT, this::getStillFluid, this::getFlowingFluid);
+        public BaseFlowingFluid.Properties fluidProperties(FluidType fT, int fluidTickRate, Supplier<? extends LiquidBlock> blockSupplier) {
+            BaseFlowingFluid.Properties p = new BaseFlowingFluid.Properties(() -> fT, this::getStillFluid, this::getFlowingFluid);
             p.tickRate(fluidTickRate);
             p.bucket(this::getBucketItem);
             p.block(blockSupplier);
@@ -167,11 +167,11 @@ public class FluidManager {
             return p;
         }
 
-        public ForgeFlowingFluid getStillFluid() {
+        public BaseFlowingFluid getStillFluid() {
             return ObjectManager.getFluid(baseName);
         }
 
-        public ForgeFlowingFluid getFlowingFluid() {
+        public BaseFlowingFluid getFlowingFluid() {
             return ObjectManager.getFluid(baseName + "_flowing");
         }
 
@@ -179,7 +179,7 @@ public class FluidManager {
             return (BucketItem) ObjectManager.getItem(baseName + "_bucket");
         }
 
-        public ForgeFlowingFluid.Properties getFluidProperties() {
+        public BaseFlowingFluid.Properties getFluidProperties() {
             return fluidProperties;
         }
 

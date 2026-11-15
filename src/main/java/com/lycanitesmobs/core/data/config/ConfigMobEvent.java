@@ -1,21 +1,21 @@
 package com.lycanitesmobs.core.data.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ConfigMobEvent {
 	public static ConfigMobEvent INSTANCE;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> mobEventsEnabled;
-	public final ForgeConfigSpec.ConfigValue<Boolean> mobEventsRandom;
-	public final ForgeConfigSpec.ConfigValue<Integer> defaultMobDuration;
-	public final ForgeConfigSpec.ConfigValue<Integer> minEventsRandomDay;
-	public final ForgeConfigSpec.ConfigValue<Integer> minTicksUntilEvent;
-	public final ForgeConfigSpec.ConfigValue<Integer> maxTicksUntilEvent;
+	public final ModConfigSpec.ConfigValue<Boolean> mobEventsEnabled;
+	public final ModConfigSpec.ConfigValue<Boolean> mobEventsRandom;
+	public final ModConfigSpec.ConfigValue<Integer> defaultMobDuration;
+	public final ModConfigSpec.ConfigValue<Integer> minEventsRandomDay;
+	public final ModConfigSpec.ConfigValue<Integer> minTicksUntilEvent;
+	public final ModConfigSpec.ConfigValue<Integer> maxTicksUntilEvent;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> altarsEnabled;
-	public final ForgeConfigSpec.ConfigValue<Boolean> altarsCheckDimension;
+	public final ModConfigSpec.ConfigValue<Boolean> altarsEnabled;
+	public final ModConfigSpec.ConfigValue<Boolean> altarsCheckDimension;
 
-	public ConfigMobEvent(ForgeConfigSpec.Builder builder) {
+	public ConfigMobEvent(ModConfigSpec.Builder builder) {
 		builder.push("Mob Events");
 		builder.comment("These are various settings that apply to all mob events.");
 

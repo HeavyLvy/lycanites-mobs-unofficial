@@ -95,8 +95,8 @@ public class EntityGeist extends AgeableCreatureEntity implements Enemy {
     @Override
     public void die(DamageSource damageSource) {
         try {
-            int shadowfireWidth = (int) Math.floor(this.getDimensions(this.getPose()).width) + 1;
-            int shadowfireHeight = (int) Math.floor(this.getDimensions(this.getPose()).height) + 1;
+            int shadowfireWidth = (int) Math.floor(this.getDimensions(this.getPose()).width()) + 1;
+            int shadowfireHeight = (int) Math.floor(this.getDimensions(this.getPose()).height()) + 1;
             boolean permanent = false;
             if (damageSource.getEntity() == this) {
                 permanent = true;

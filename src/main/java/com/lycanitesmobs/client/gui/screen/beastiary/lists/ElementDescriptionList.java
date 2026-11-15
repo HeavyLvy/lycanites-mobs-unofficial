@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class ElementDescriptionList extends BaseList {
     protected ElementInfo elementInfo;
@@ -82,12 +82,12 @@ public class ElementDescriptionList extends BaseList {
                 .append(": " + "\u00A7r");
 
         for (String buff : this.elementInfo.getBuffs()) {
-            MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(buff));
+            MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(buff));
             if (effect == null) {
                 continue;
             }
 
-            ResourceLocation effectResource = new ResourceLocation(buff);
+            ResourceLocation effectResource = ResourceLocation.parse(buff);
 
             text.append("\n")
                     .append(effect.getDisplayName())
@@ -109,12 +109,12 @@ public class ElementDescriptionList extends BaseList {
                 continue;
             }
 
-            MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(debuff));
+            MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(debuff));
             if (effect == null) {
                 continue;
             }
 
-            ResourceLocation effectResource = new ResourceLocation(debuff);
+            ResourceLocation effectResource = ResourceLocation.parse(debuff);
 
             text.append("\n")
                     .append(effect.getDisplayName())

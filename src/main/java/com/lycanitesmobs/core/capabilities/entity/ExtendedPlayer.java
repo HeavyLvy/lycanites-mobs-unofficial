@@ -33,7 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
+import net.neoforged.neoforge.common.NeoForgeMod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -289,7 +289,7 @@ public class ExtendedPlayer {
 
     /**
      * Scans the player's crosshair for a large creature and applies a transient reach modifier so that
-     * vanilla's attack-range check (and any mod that reads {@link ForgeMod#ENTITY_REACH}) succeeds on
+     * vanilla's attack-range check (and any mod that reads {@link NeoForgeMod#ENTITY_REACH}) succeeds on
      * oversized mobs whose center is farther than vanilla's base reach even when the model is touching
      * the player. The modifier is cleared every tick and only re-applied while the crosshair is actually
      * on a large entity, so smaller targets in the area are unaffected. Server-side only; Forge syncs
@@ -298,7 +298,7 @@ public class ExtendedPlayer {
     public void updateBigEntityReach() {
         if (this.player == null || this.player.level().isClientSide)
             return;
-        AttributeInstance reachAttr = this.player.getAttribute(ForgeMod.ENTITY_REACH.get());
+        AttributeInstance reachAttr = this.player.getAttribute(NeoForgeMod.ENTITY_REACH.get());
         if (reachAttr == null)
             return;
         reachAttr.removeModifier(BIG_ENTITY_REACH_UUID);
@@ -330,7 +330,7 @@ public class ExtendedPlayer {
                 BIG_ENTITY_REACH_UUID,
                 BIG_ENTITY_REACH_NAME,
                 needed - currentReach,
-                AttributeModifier.Operation.ADDITION
+                AttributeModifier.Operation.ADD_VALUE
         ));
     }
 

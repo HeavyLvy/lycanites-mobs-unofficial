@@ -4,8 +4,8 @@ import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.lwjgl.stb.STBVorbis;
 import org.lwjgl.stb.STBVorbisInfo;
 import org.lwjgl.system.MemoryStack;
@@ -53,7 +53,7 @@ public class HeartbeatAmplitudeMap {
     }
 
     private static void decode() throws Exception {
-        ResourceLocation loc = new ResourceLocation(LycanitesMobs.MODID, "sounds/effect/heartbeat.ogg");
+        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "sounds/effect/heartbeat.ogg");
         Optional<Resource> optResource = Minecraft.getInstance().getResourceManager().getResource(loc);
         if (optResource.isEmpty()) {
             throw new RuntimeException("heartbeat.ogg not found at " + loc);

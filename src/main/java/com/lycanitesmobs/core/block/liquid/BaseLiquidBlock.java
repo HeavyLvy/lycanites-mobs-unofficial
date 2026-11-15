@@ -20,8 +20,8 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.ticks.ScheduledTick;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -65,7 +65,7 @@ public class BaseLiquidBlock extends LiquidBlock implements BlockTypeGetter {
     }
 
     public ResourceLocation setRegistryName(String modID, String blockName) {
-        return registryName = new ResourceLocation(modID, blockName);
+        return registryName = ResourceLocation.fromNamespaceAndPath(modID, blockName);
     }
 
     public void setup() {

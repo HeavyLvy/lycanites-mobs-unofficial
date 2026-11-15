@@ -1,20 +1,20 @@
 package com.lycanitesmobs.core.data.config;
 
 import com.google.common.collect.Lists;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
 public class ConfigExtra {
 	public static ConfigExtra INSTANCE;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> disableSneakDismount;
-	public final ForgeConfigSpec.ConfigValue<Integer> summoningPedestalRedstoneTime;
-	public final ForgeConfigSpec.ConfigValue<Boolean> versionCheckerEnabled;
-	public final ForgeConfigSpec.ConfigValue<Boolean> disableNausea;
-	public final ForgeConfigSpec.ConfigValue<List<? extends String>> familiarBlacklist;
+	public final ModConfigSpec.ConfigValue<Boolean> disableSneakDismount;
+	public final ModConfigSpec.ConfigValue<Integer> summoningPedestalRedstoneTime;
+	public final ModConfigSpec.ConfigValue<Boolean> versionCheckerEnabled;
+	public final ModConfigSpec.ConfigValue<Boolean> disableNausea;
+	public final ModConfigSpec.ConfigValue<List<? extends String>> familiarBlacklist;
 
-	public ConfigExtra(ForgeConfigSpec.Builder builder) {
+	public ConfigExtra(ModConfigSpec.Builder builder) {
 		builder.push("Extra");
 		builder.comment("Other extra config settings, some of the aren't necessarily specific to Lycanites Mobs.");
 

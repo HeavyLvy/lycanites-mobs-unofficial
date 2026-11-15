@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.event;
 
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.data.config.ConfigExtra;
 import com.lycanitesmobs.core.entity.creature.aberration.EntityFear;
@@ -36,16 +38,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ForgeMod;
+import net.neoforged.neoforge.common.NeoForgeMod;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingHealEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 public class MobEventListener {
     private static MobEventListener INSTANCE;
@@ -108,8 +109,8 @@ public class MobEventListener {
      * Called every tick in a world and counts down to the next event then fires it! The countdown is paused during an event.
      **/
     @SubscribeEvent
-    public void onWorldUpdate(TickEvent.LevelTickEvent event) {
-        Level world = event.level;
+    public void onWorldUpdate(LevelTickEvent.Post event) {
+        Level world = event.getLevel();
         if (world.isClientSide) {
             return;
         }
@@ -196,18 +197,18 @@ public class MobEventListener {
 
 
     private static final UUID SWIFTSWIMMING_MOVE_BOOST_UUID = UUID.fromString("6d4fe17f-06eb-4ebc-a573-364b79faed5e");
-    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID, "Swiftswimming Speed Boost", 1D, AttributeModifier.Operation.ADDITION);
+    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID, "Swiftswimming Speed Boost", 1D, AttributeModifier.Operation.ADD_VALUE);
     private static final UUID SWIFTSWIMMING_MOVE_BOOST_UUID_2 = UUID.fromString("6d4fe17f-06eb-4ebc-a573-364b79faed5d");
-    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_2 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_2, "Swiftswimming Speed Boost 2", 2D, AttributeModifier.Operation.ADDITION);
+    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_2 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_2, "Swiftswimming Speed Boost 2", 2D, AttributeModifier.Operation.ADD_VALUE);
     private static final UUID SWIFTSWIMMING_MOVE_BOOST_UUID_3 = UUID.fromString("6d4fe17f-06eb-4ebc-a573-364b79faed5c");
-    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_3 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_3, "Swiftswimming Speed Boost 3", 3D, AttributeModifier.Operation.ADDITION);
+    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_3 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_3, "Swiftswimming Speed Boost 3", 3D, AttributeModifier.Operation.ADD_VALUE);
     private static final UUID SWIFTSWIMMING_MOVE_BOOST_UUID_4 = UUID.fromString("6d4fe17f-06eb-4ebc-a573-364b79faed5b");
-    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_4 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_4, "Swiftswimming Speed Boost 4", 4D, AttributeModifier.Operation.ADDITION);
+    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_4 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_4, "Swiftswimming Speed Boost 4", 4D, AttributeModifier.Operation.ADD_VALUE);
 
 
     @SubscribeEvent
-    public void onEntityUpdate(LivingEvent.LivingTickEvent event) {
-        LivingEntity entity = event.getEntity();
+    public void onEntityUpdate(EntityTickEvent.Pre event) {
+        if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (entity == null) {
             return;
         }
@@ -250,7 +251,7 @@ public class MobEventListener {
 
     @SubscribeEvent
     public void onEntityJump(LivingEvent.LivingJumpEvent event) {
-        LivingEntity entity = event.getEntity();
+        if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (entity == null || this.isInvulnerable(entity)) {
             return;
         }
@@ -313,7 +314,7 @@ public class MobEventListener {
 
     @SubscribeEvent
     public void onEntityHeal(LivingHealEvent event) {
-        LivingEntity entity = event.getEntity();
+        if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (entity == null) {
             return;
         }
@@ -348,7 +349,7 @@ public class MobEventListener {
             return;
         }
 
-        LivingEntity entity = event.getEntity();
+        if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (entity == null) {
             return;
         }
@@ -374,7 +375,7 @@ public class MobEventListener {
         }
     }
 
-    private void removeDisabledNausea(LivingEvent.LivingTickEvent event, LivingEntity entity) {
+    private void removeDisabledNausea(EntityTickEvent.Pre event, LivingEntity entity) {
         EffectManager effectManager = EffectManager.getInstance();
         effectManager.setNauseaDisabled(ConfigExtra.INSTANCE.disableNausea.get());
         if (effectManager.isNauseaDisabled() && event.getEntity() instanceof Player && entity.hasEffect(MobEffects.CONFUSION)) {
@@ -487,12 +488,12 @@ public class MobEventListener {
         if (smited != null && !entity.getCommandSenderWorld().isClientSide && !invulnerable && entity.hasEffect(smited) && entity.getCommandSenderWorld().getGameTime() % 20 == 0) {
             float brightness = LMHelperClass.getBrightness(entity);
             if (brightness > 0.5F && entity.getCommandSenderWorld().canSeeSkyFromBelowWater(entity.blockPosition())) {
-                entity.setSecondsOnFire(4);
+                entity.igniteForSeconds(4);
             }
         }
     }
 
-    private void handleBleed(LivingEvent.LivingTickEvent event, LivingEntity entity, boolean invulnerable) {
+    private void handleBleed(EntityTickEvent.Pre event, LivingEntity entity, boolean invulnerable) {
         EffectBase bleed = ObjectManager.getEffect("bleed");
         if (bleed != null && !entity.getCommandSenderWorld().isClientSide && !invulnerable && entity.hasEffect(bleed) && entity.getCommandSenderWorld().getGameTime() % 20 == 0 && entity.getVehicle() == null) {
             if (entity.walkDistO != entity.walkDist) {
@@ -504,7 +505,7 @@ public class MobEventListener {
     private void handleSmouldering(LivingEntity entity, boolean invulnerable) {
         EffectBase smouldering = ObjectManager.getEffect("smouldering");
         if (smouldering != null && !entity.getCommandSenderWorld().isClientSide && !invulnerable && entity.hasEffect(smouldering) && entity.getCommandSenderWorld().getGameTime() % 20 == 0) {
-            entity.setSecondsOnFire(4 + (4 * entity.getEffect(smouldering).getAmplifier()));
+            entity.igniteForSeconds(4 + (4 * entity.getEffect(smouldering).getAmplifier()));
         }
     }
 
@@ -518,7 +519,7 @@ public class MobEventListener {
             return;
         }
 
-        AttributeInstance movement = entity.getAttribute(ForgeMod.SWIM_SPEED.get());
+        AttributeInstance movement = entity.getAttribute(NeoForgeMod.SWIM_SPEED.get());
         if (movement == null) {
             return;
         }

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.manager;
 
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.core.BlockPos;
@@ -8,10 +9,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import javax.annotation.Nullable;
 import java.util.Deque;
@@ -20,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class DeferredLevelActionManager {
     private static final int MAX_ACTIONS_PER_TICK = 64;
     private static final int MAX_RETRIES = 200;
@@ -88,8 +89,8 @@ public class DeferredLevelActionManager {
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)) {
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
 

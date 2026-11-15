@@ -12,7 +12,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistries; // TODO(port): datapack registries
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraftforge.registries.tags.ITagManager;
 import org.joml.Vector3d;
 
@@ -74,7 +75,7 @@ public class JSONHelper {
         List<Block> blocks = new ArrayList<>();
         Iterator<JsonElement> jsonIterator = jsonArray.iterator();
         while (jsonIterator.hasNext()) {
-            Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(jsonIterator.next().getAsString()));
+            Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(jsonIterator.next().getAsString()));
             if (block != null) {
                 blocks.add(block);
             }
@@ -86,7 +87,7 @@ public class JSONHelper {
         List<Item> items = new ArrayList<>();
         Iterator<JsonElement> jsonIterator = jsonArray.iterator();
         while (jsonIterator.hasNext()) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(jsonIterator.next().getAsString()));
+            Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(jsonIterator.next().getAsString()));
             if (item != null) {
                 items.add(item);
             }
@@ -223,7 +224,7 @@ public class JSONHelper {
                 continue;
             }
 
-            ResourceLocation tagLoc = new ResourceLocation(entry);
+            ResourceLocation tagLoc = ResourceLocation.parse(entry);
             List<String> selectedBiomeIds = new ArrayList<>();
 
             TagKey<Biome> vanillaKey =
@@ -248,7 +249,7 @@ public class JSONHelper {
 
                 TagKey<Biome> forgeKey =
                         TagKey.create(
-                                ForgeRegistries.Keys.BIOMES,
+                                Registries.BIOME,
                                 tagLoc
                         );
 
@@ -321,7 +322,7 @@ public class JSONHelper {
     public static List<Biome> getBiomes(List<String> biomeIds) {
         List<Biome> biomes = new ArrayList<>();
         for (String biomeId : biomeIds) {
-            Biome biome = ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeId));
+            Biome biome = ForgeRegistries.BIOMES.getValue(ResourceLocation.parse(biomeId));
             if (biome != null) {
                 biomes.add(biome);
             }

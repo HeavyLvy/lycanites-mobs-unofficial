@@ -16,7 +16,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
+import net.neoforged.neoforge.common.NeoForgeMod;
 
 import java.util.*;
 
@@ -193,17 +193,17 @@ public class FearMoveGoal extends Goal {
 
     private void applyStepHeightBoost(LivingEntity entity) {
         if (steppedPlayers.contains(entity.getUUID())) return;
-        AttributeInstance attr = entity.getAttribute(ForgeMod.STEP_HEIGHT_ADDITION.get());
+        AttributeInstance attr = entity.getAttribute(NeoForgeMod.STEP_HEIGHT_ADDITION.get());
         if (attr != null && attr.getModifier(STEP_HEIGHT_UUID) == null) {
             attr.addTransientModifier(new AttributeModifier(
-                    STEP_HEIGHT_UUID, "Fear step height boost", STEP_HEIGHT_BOOST, AttributeModifier.Operation.ADDITION
+                    STEP_HEIGHT_UUID, "Fear step height boost", STEP_HEIGHT_BOOST, AttributeModifier.Operation.ADD_VALUE
             ));
         }
         steppedPlayers.add(entity.getUUID());
     }
 
     private static void removeStepHeightBoost(LivingEntity entity) {
-        AttributeInstance attr = entity.getAttribute(ForgeMod.STEP_HEIGHT_ADDITION.get());
+        AttributeInstance attr = entity.getAttribute(NeoForgeMod.STEP_HEIGHT_ADDITION.get());
         if (attr != null) {
             attr.removeModifier(STEP_HEIGHT_UUID);
         }

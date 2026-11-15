@@ -16,8 +16,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 public class BlockSmitefire extends BlockFireBase {
 
@@ -67,7 +67,7 @@ public class BlockSmitefire extends BlockFireBase {
             return;
 
         entity.hurt(world.damageSources().inFire(), 1);
-        entity.setSecondsOnFire(3);
+        entity.igniteForSeconds(3);
     }
 
     @Override

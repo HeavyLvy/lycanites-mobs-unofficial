@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class HermaBlockyModel<T extends EntityHerma> extends HierarchicalModel<T> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("modid", "herma"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("modid", "herma"), "main");
     private final ModelPart All;
     private final ModelPart Head;
     private final ModelPart Head2;

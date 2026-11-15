@@ -18,7 +18,7 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.util.Lazy;
+import net.neoforged.neoforge.common.util.Lazy;
 
 import javax.annotation.Nullable;
 import java.util.*;

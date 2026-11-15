@@ -6,7 +6,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public final class Material {
         synchronized (Material.class) {
             if (INITIALIZED) return;
 
-            for (Block block : ForgeRegistries.BLOCKS.getValues()) {
+            for (Block block : BuiltInRegistries.BLOCK.stream().toList()) {
                 BlockState defaultState = block.defaultBlockState();
                 MapColor color = safeMapColor(defaultState);
 

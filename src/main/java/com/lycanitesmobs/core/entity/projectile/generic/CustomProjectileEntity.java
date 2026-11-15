@@ -25,7 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -324,7 +324,7 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
                 int duration = this.projectileInfo.getEffectDuration() * 20;
                 int amplifier = this.projectileInfo.getEffectAmplifier();
                 for (String debuff : this.projectileInfo.getDebuffsOverride()) {
-                    MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(debuff));
+                    MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(debuff));
                     if (effect != null) {
                         target.addEffect(new MobEffectInstance(effect, duration, amplifier));
                     }

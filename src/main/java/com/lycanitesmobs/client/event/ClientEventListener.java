@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.event;
 
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.effect.FearAudioHandler;
 import com.lycanitesmobs.client.effect.FearHeartbeatSound;
@@ -56,25 +57,24 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.client.event.sound.PlaySoundEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.event.sound.PlaySoundEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
-@Mod.EventBusSubscriber(
+@EventBusSubscriber(
         modid = LycanitesMobs.MODID,
-        value = Dist.CLIENT,
-        bus = Mod.EventBusSubscriber.Bus.MOD
+        value = Dist.CLIENT
 )
 public class ClientEventListener {
     @SubscribeEvent
@@ -87,7 +87,7 @@ public class ClientEventListener {
                 continue;
             }
 
-            ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
+            ResourceLocation key = BuiltInRegistries.ITEM.getKey(item);
             if (key == null) {
                 continue;
             }
@@ -109,7 +109,7 @@ public class ClientEventListener {
     @SubscribeEvent
     public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
         var rp = event.getResourceProvider();
-        var shader = new ShaderInstance(rp, new ResourceLocation(LycanitesMobs.MODID, "pos_tex_normal"), CustomRenderStates.POS_TEX_NORMAL);
+        var shader = new ShaderInstance(rp, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "pos_tex_normal"), CustomRenderStates.POS_TEX_NORMAL);
         event.registerShader(shader, s -> CustomRenderStates.POS_TEX_NORMAL_SHADER = s);
     }
 
@@ -139,19 +139,19 @@ public class ClientEventListener {
             } else if (registerBlocky) {
                 if (Objects.equals(creatureInfo.getName(), "nymph")) {
                     LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
-                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/nymph.png"), new NymphBlockyModel<>(context.bakeLayer(NymphBlockyModel.LAYER_LOCATION))));
+                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/nymph.png"), new NymphBlockyModel<>(context.bakeLayer(NymphBlockyModel.LAYER_LOCATION))));
                     continue;
                 } else if (Objects.equals(creatureInfo.getName(), "grue")) {
                     LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
-                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/grue.png"), new GrueBlockyModel<>(context.bakeLayer(GrueBlockyModel.LAYER_LOCATION))));
+                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/grue.png"), new GrueBlockyModel<>(context.bakeLayer(GrueBlockyModel.LAYER_LOCATION))));
                     continue;
                 } else if (Objects.equals(creatureInfo.getName(), "wraith")) {
                     LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
-                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/wraith.png"), new WraithBlockyModel<>(context.bakeLayer(WraithBlockyModel.LAYER_LOCATION))));
+                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/wraith.png"), new WraithBlockyModel<>(context.bakeLayer(WraithBlockyModel.LAYER_LOCATION))));
                     continue;
                 } else if (Objects.equals(creatureInfo.getName(), "herma")) {
                     LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
-                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, new ResourceLocation(LycanitesMobs.MODID, "textures/entity/blocky/herma_white.png"), new HermaBlockyModel<>(context.bakeLayer(HermaBlockyModel.LAYER_LOCATION))));
+                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/herma_white.png"), new HermaBlockyModel<>(context.bakeLayer(HermaBlockyModel.LAYER_LOCATION))));
                     continue;
                 }
             }
@@ -278,10 +278,7 @@ public class ClientEventListener {
     }
 
     @SubscribeEvent
-    public void onPlayerTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) {
-            return;
-        }
+    public void onPlayerTick(ClientTickEvent.Pre event) {
         FearVisualHandler.tick();
         FearAudioHandler.tick();
         ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(KeyManager.getInstance().mc.player);
@@ -391,7 +388,7 @@ public class ClientEventListener {
         if (mc.player == null || mc.hitResult == null)
             return;
 
-        // Large-entity reach is now handled server-side via a transient ForgeMod.ENTITY_REACH modifier
+        // Large-entity reach is now handled server-side via a transient NeoForgeMod.ENTITY_REACH modifier
         // in ExtendedPlayer.updateBigEntityReach(), so no custom left-click handling is needed here.
         if (event.getButton() == 1 && event.getAction() == GLFW.GLFW_PRESS) {
             if (mc.hitResult.getType() == HitResult.Type.ENTITY) {

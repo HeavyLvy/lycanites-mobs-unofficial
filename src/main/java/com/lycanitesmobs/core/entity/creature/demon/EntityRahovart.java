@@ -34,8 +34,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
@@ -457,14 +457,14 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
         for (int i = 0; i < hellfireOrbs.size(); i++) {
             EntityHellfireOrb hellfireOrb = hellfireOrbs.get(i);
             double rotationRadians = Math.toRadians((hellfireOrbAngle + (hellfireOrbAngleOffset * i)) % 360);
-            double x = (entity.getDimensions(Pose.STANDING).width * 1.25D) * Math.cos(rotationRadians) + Math.sin(rotationRadians);
-            double z = (entity.getDimensions(Pose.STANDING).width * 1.25D) * Math.sin(rotationRadians) - Math.cos(rotationRadians);
+            double x = (entity.getDimensions(Pose.STANDING).width() * 1.25D) * Math.cos(rotationRadians) + Math.sin(rotationRadians);
+            double z = (entity.getDimensions(Pose.STANDING).width() * 1.25D) * Math.sin(rotationRadians) - Math.cos(rotationRadians);
             hellfireOrb.setPos(
                     entity.position().x() - x,
-                    entity.position().y() + (entity.getDimensions(Pose.STANDING).height * 0.75F),
+                    entity.position().y() + (entity.getDimensions(Pose.STANDING).height() * 0.75F),
                     entity.position().z() - z
             );
-            hellfireOrb.setPos(entity.position().x() - x, entity.position().y() + (entity.getDimensions(Pose.STANDING).height * 0.75F), entity.position().z() - z);
+            hellfireOrb.setPos(entity.position().x() - x, entity.position().y() + (entity.getDimensions(Pose.STANDING).height() * 0.75F), entity.position().z() - z);
             hellfireOrb.setProjectileLife(5);
         }
     }

@@ -3,12 +3,13 @@ package com.lycanitesmobs.client.event.tooltip;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.tooltip.*;
 import com.lycanitesmobs.core.item.tooltip.*;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT)
 public class EquipmentTooltipClientRegistration {
     @SubscribeEvent
     public static void registerFactories(RegisterClientTooltipComponentFactoriesEvent event) {

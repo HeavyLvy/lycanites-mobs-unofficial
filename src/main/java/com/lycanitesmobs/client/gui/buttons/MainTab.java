@@ -9,11 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 public class MainTab extends Tab {
 
 	public MainTab(int id, OnPress pressable) {
-        super(id, Tab.startX, Tab.startY, new ResourceLocation(LycanitesMobs.MODID, "textures/items/soulgazer.png"), Component.translatable("Index"), pressable);
+        super(id, Tab.startX, Tab.startY, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/items/soulgazer.png"), Component.translatable("Index"), pressable);
     }
 
     public MainTab(int id, int x, int y, OnPress pressable) {
-        super(id, x, y, new ResourceLocation(LycanitesMobs.MODID, "textures/items/soulgazer.png"), Component.translatable("Index"), pressable);
+        super(id, x, y, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/items/soulgazer.png"), Component.translatable("Index"), pressable);
     }
 
     @Override

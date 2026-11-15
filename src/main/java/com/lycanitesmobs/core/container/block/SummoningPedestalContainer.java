@@ -9,10 +9,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 
 public class SummoningPedestalContainer extends BaseContainer {
-    public static final MenuType<SummoningPedestalContainer> TYPE = (MenuType<SummoningPedestalContainer>) IForgeMenuType.create(SummoningPedestalContainer::new);
+    public static final MenuType<SummoningPedestalContainer> TYPE = (MenuType<SummoningPedestalContainer>) IMenuTypeExtension.create(SummoningPedestalContainer::new);
     protected final TileEntitySummoningPedestal summoningPedestal;
 
     /**

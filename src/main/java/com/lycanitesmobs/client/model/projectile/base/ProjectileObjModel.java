@@ -24,8 +24,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
@@ -126,7 +126,7 @@ public class ProjectileObjModel extends ProjectileModel {
             return;
         }
 
-        this.wavefrontObject = new VBOObjModel(new ResourceLocation(this.modelModInfo.modid, "modelparts/" + this.modelPath + ".obj"));
+        this.wavefrontObject = new VBOObjModel(ResourceLocation.fromNamespaceAndPath(this.modelModInfo.modid, "modelparts/" + this.modelPath + ".obj"));
         this.objParts = this.wavefrontObject.objParts;
         if (this.objParts.isEmpty()) {
             LMHelperClass.logWarning("Resources", "Unable to load any parts for the " + this.modelName + " model!");
@@ -135,7 +135,7 @@ public class ProjectileObjModel extends ProjectileModel {
         this.animationParts.clear();
         this.animator = new Animator(this);
 
-        ResourceLocation modelPartsLocation = new ResourceLocation(this.modelModInfo.modid, "modelparts/" + this.modelPath + "_parts.json");
+        ResourceLocation modelPartsLocation = ResourceLocation.fromNamespaceAndPath(this.modelModInfo.modid, "modelparts/" + this.modelPath + "_parts.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
             InputStream in = resourceManager.getResource(modelPartsLocation).get().open();
@@ -162,7 +162,7 @@ public class ProjectileObjModel extends ProjectileModel {
             part.addChildren(this.animationParts.values().toArray(new AnimationPart[this.animationParts.size()]));
         }
 
-        ResourceLocation animationLocation = new ResourceLocation(this.modelModInfo.modid, "modelparts/" + this.modelPath + "_animation.json");
+        ResourceLocation animationLocation = ResourceLocation.fromNamespaceAndPath(this.modelModInfo.modid, "modelparts/" + this.modelPath + "_animation.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
             InputStream in = resourceManager.getResource(animationLocation).get().open();

@@ -20,7 +20,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -247,10 +247,10 @@ public class MobSpawn {
             return;
         }
 
-        ResourceLocation requestedId = new ResourceLocation(this.mobId);
-        EntityType<?> resolved = ForgeRegistries.ENTITY_TYPES.getValue(requestedId);
+        ResourceLocation requestedId = ResourceLocation.parse(this.mobId);
+        EntityType<?> resolved = BuiltInRegistries.ENTITY_TYPE.get(requestedId);
         if (resolved != null) {
-            ResourceLocation resolvedKey = ForgeRegistries.ENTITY_TYPES.getKey(resolved);
+            ResourceLocation resolvedKey = BuiltInRegistries.ENTITY_TYPE.getKey(resolved);
 
             if (resolvedKey != null && resolvedKey.equals(requestedId)) {
                 this.entityType = (EntityType<? extends LivingEntity>) (EntityType<?>) resolved;

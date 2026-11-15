@@ -5,15 +5,16 @@ import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
 import com.lycanitesmobs.core.item.tooltip.*;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderTooltipEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderTooltipEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(value = Dist.CLIENT)
 public class EquipmentTooltipGatherHandler {
     @SubscribeEvent
     public static void onGather(RenderTooltipEvent.GatherComponents event) {

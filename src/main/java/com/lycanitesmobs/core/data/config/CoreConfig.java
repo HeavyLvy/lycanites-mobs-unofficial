@@ -1,11 +1,11 @@
 package com.lycanitesmobs.core.data.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class CoreConfig {
-	public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+	public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 	public static String CONFIG_PREFIX = "lycanitesmobs.config.";
-	public static ForgeConfigSpec SPEC;
+	public static ModConfigSpec SPEC;
 
 	public static void buildSpec() {
 		ConfigGeneral.INSTANCE = new ConfigGeneral(BUILDER);

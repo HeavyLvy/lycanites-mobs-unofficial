@@ -1,5 +1,8 @@
 package com.lycanitesmobs.core.event;
 
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.BlockTypeGetter;
 import com.lycanitesmobs.core.block.blockentity.EquipmentInfuserTileEntity;
@@ -33,17 +36,18 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.neoforge.common.util.Lazy;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLPaths;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -56,7 +60,7 @@ import java.util.function.Supplier;
 
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.cast;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class RegistryEvents {
     private static RegistryEvents INSTANCE;
 
@@ -72,10 +76,10 @@ public class RegistryEvents {
     // ========== Entities ==========
     @SubscribeEvent
     public void registerEntities(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.ENTITY_TYPES,
+        event.register(Registries.ENTITY_TYPE,
                 helper -> {
                     for (Map.Entry<String, Lazy<? extends EntityType<?>>> entityType : ObjectManager.getEntityTypeEntries()) {
-                        helper.register(new ResourceLocation(LycanitesMobs.MODID, entityType.getKey()), entityType.getValue().get());
+                        helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, entityType.getKey()), entityType.getValue().get());
                     }
                 }
         );
@@ -97,7 +101,7 @@ public class RegistryEvents {
      */
     @SubscribeEvent
     public void registerBlocks(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.BLOCKS, helper -> {
+        event.register(Registries.BLOCK, helper -> {
             for (Supplier<? extends Block> block : ObjectManager.getBlockSuppliers()) {
                 BlockTypeGetter getter = (BlockTypeGetter) block.get();
                 helper.register(getter.getRegistryName(), block.get());
@@ -108,7 +112,7 @@ public class RegistryEvents {
                 helper.register(getter.getRegistryName(), lb);
             }
         });
-        event.register(ForgeRegistries.Keys.ITEMS,
+        event.register(Registries.ITEM,
                 helper -> {
                     for (Map.Entry<String, Lazy<? extends BlockItem>> entry : ObjectManager.getBlockItemEntries()) {
                         String name = entry.getKey();
@@ -118,7 +122,7 @@ public class RegistryEvents {
                             LMHelperClass.logWarningMessage("Block Item: " + name + " has no Registry Name!");
                             continue;
                         }
-                        helper.register(new ResourceLocation(LycanitesMobs.MODID, name), blockItem.get());
+                        helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, name), blockItem.get());
                     }
                 }
         );
@@ -127,7 +131,7 @@ public class RegistryEvents {
     // ========== Items ==========
     @SubscribeEvent
     public void registerItems(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.ITEMS,
+        event.register(Registries.ITEM,
                 helper -> {
                     //General Items
                     for (ItemInfo itemInfo : ItemManager.getItemInfos()) {
@@ -137,7 +141,7 @@ public class RegistryEvents {
                         }
 
                         LMHelperClass.logDebug("Item", "Registering general item: " + itemInfo.getName());
-                        helper.register(new ResourceLocation(LycanitesMobs.MODID, itemInfo.getItem().itemName), itemInfo.getItem());
+                        helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, itemInfo.getItem().itemName), itemInfo.getItem());
                     }
                     //Special Items
                     for (Map.Entry<String, Supplier<? extends Item>> entry : ObjectManager.getItemSupplierEntries()) {
@@ -147,7 +151,7 @@ public class RegistryEvents {
                             return;
                         }
                         LMHelperClass.logDebug("Item", "Registering special item: " + name);
-                        helper.register(new ResourceLocation(LycanitesMobs.MODID, name), entry.getValue().get());
+                        helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, name), entry.getValue().get());
                     }
                 }
         );
@@ -165,7 +169,7 @@ public class RegistryEvents {
      */
     /*@SubscribeEvent
     public void registerSounds(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.SOUND_EVENTS,
+        event.register(Registries.SOUND_EVENT,
                 helper -> {
                     for (Lazy<? extends SoundEvent> soundEvent : sounds.values()) {
                         for (ResourceLocation registryName : soundNames.values()) {
@@ -182,7 +186,7 @@ public class RegistryEvents {
     // ========== Potions ==========
     @SubscribeEvent
     public void registerEffects(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.MOB_EFFECTS,
+        event.register(Registries.MOB_EFFECT,
                 helper -> {
                     for (EffectBase effect : ObjectManager.getEffects()) {
                         helper.register(effect.getRegistryName(), effect);
@@ -194,11 +198,11 @@ public class RegistryEvents {
     // ========== Fluids ==========
     @SubscribeEvent
     public void registerFluids(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.FLUIDS, helper -> {
+        event.register(Registries.FLUID, helper -> {
             FluidManager.getInstance().defineFluids();
             FluidManager.getInstance().registerFluidObjects(helper::register);
         });
-        event.register(ForgeRegistries.Keys.FLUID_TYPES, helper -> {
+        event.register(NeoForgeRegistries.Keys.FLUID_TYPES, helper -> {
             FluidManager.getInstance().defineFluids();
             FluidManager.getInstance().forEachFluidType(helper::register);
         });
@@ -207,12 +211,12 @@ public class RegistryEvents {
     // ========== Tile Entities ==========
     @SubscribeEvent
     public void registerTileEntities(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES,
+        event.register(Registries.BLOCK_ENTITY_TYPE,
                 helper -> {
                     BlockEntityType<TileEntitySummoningPedestal> summoningPedestalType = BlockEntityType.Builder.of(TileEntitySummoningPedestal::new,
                             ObjectManager.getBlock("summoningpedestal")
                     ).build(null);
-                    ResourceLocation summoningpedestalLocation = new ResourceLocation(LycanitesMobs.MODID, "summoningpedestal");
+                    ResourceLocation summoningpedestalLocation = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "summoningpedestal");
                     helper.register(summoningpedestalLocation, summoningPedestalType);
                     ObjectManager.registerTileEntityType(TileEntitySummoningPedestal.class, summoningPedestalType);
 
@@ -221,21 +225,21 @@ public class RegistryEvents {
                             ObjectManager.getBlock("equipmentforge_greater"),
                             ObjectManager.getBlock("equipmentforge_master")
                     ).build(null);
-                    ResourceLocation equipmentforgeLocation = new ResourceLocation(LycanitesMobs.MODID, "equipmentforge");
+                    ResourceLocation equipmentforgeLocation = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "equipmentforge");
                     helper.register(equipmentforgeLocation, equipmentForgeType);
                     ObjectManager.registerTileEntityType(TileEntityEquipmentForge.class, equipmentForgeType);
 
                     BlockEntityType<EquipmentInfuserTileEntity> equipmentInfuserType = BlockEntityType.Builder.of(EquipmentInfuserTileEntity::new,
                             ObjectManager.getBlock("equipment_infuser")
                     ).build(null);
-                    ResourceLocation equipment_infuserLocation = new ResourceLocation(LycanitesMobs.MODID, "equipment_infuser");
+                    ResourceLocation equipment_infuserLocation = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "equipment_infuser");
                     helper.register(equipment_infuserLocation, equipmentInfuserType);
                     ObjectManager.registerTileEntityType(EquipmentInfuserTileEntity.class, equipmentInfuserType);
 
                     BlockEntityType<EquipmentStationTileEntity> equipmentStationType = BlockEntityType.Builder.of(EquipmentStationTileEntity::new,
                             ObjectManager.getBlock("equipment_station")
                     ).build(null);
-                    ResourceLocation equipment_stationLocation = new ResourceLocation(LycanitesMobs.MODID, "equipment_station");
+                    ResourceLocation equipment_stationLocation = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "equipment_station");
                     helper.register(equipment_stationLocation, equipmentStationType);
                     ObjectManager.registerTileEntityType(EquipmentStationTileEntity.class, equipmentStationType);
                 });
@@ -244,10 +248,10 @@ public class RegistryEvents {
 
     @SubscribeEvent
     public void registerAttributes(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.ATTRIBUTES,
+        event.register(Registries.ATTRIBUTE,
                 helper -> {
-                    helper.register(new ResourceLocation(LycanitesMobs.MODID, "defense"), BaseCreatureEntity.DEFENSE);
-                    helper.register(new ResourceLocation(LycanitesMobs.MODID, "ranged_speed"), BaseCreatureEntity.RANGED_SPEED);
+                    helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "defense"), BaseCreatureEntity.DEFENSE);
+                    helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "ranged_speed"), BaseCreatureEntity.RANGED_SPEED);
                 }
         );
     }
@@ -257,9 +261,9 @@ public class RegistryEvents {
     public void registerStats(RegisterEvent event) {
         StatManager.getInstance().createStatTypes();
         StatManager.getInstance().forEachStatType((name, statType) -> {
-            event.register(ForgeRegistries.Keys.STAT_TYPES,
+            event.register(Registries.STAT_TYPE,
                     helper -> {
-                        helper.register(new ResourceLocation(LycanitesMobs.MODID, name), statType);
+                        helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, name), statType);
                     }
             );
         });
@@ -289,7 +293,7 @@ public class RegistryEvents {
     @SubscribeEvent
     public void registerEntityAttributes(EntityAttributeCreationEvent event) {
         CreatureManager cm = CreatureManager.getInstance();
-        for (var entry : ForgeRegistries.ENTITY_TYPES.getEntries()) {
+        for (var entry : BuiltInRegistries.ENTITY_TYPE.entrySet()) {
             ResourceLocation loc = entry.getKey().location();
             if (!loc.getNamespace().equals(LycanitesMobs.MODID)) continue;
             CreatureInfo creatureInfo = cm.getCreature(loc.getPath());
@@ -299,10 +303,10 @@ public class RegistryEvents {
     }
 
     @SubscribeEvent
-    public void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
+    public void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
         CreatureManager cm = CreatureManager.getInstance();
         int count = 0;
-        for (var entry : ForgeRegistries.ENTITY_TYPES.getEntries()) {
+        for (var entry : BuiltInRegistries.ENTITY_TYPE.entrySet()) {
             ResourceLocation loc = entry.getKey().location();
             if (!loc.getNamespace().equals(LycanitesMobs.MODID)) continue;
             CreatureInfo creatureInfo = cm.getCreature(loc.getPath());
@@ -313,7 +317,7 @@ public class RegistryEvents {
                     SpawnPlacements.Type.NO_RESTRICTIONS,
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     (type, level, spawnType, pos, random) -> true,
-                    SpawnPlacementRegisterEvent.Operation.OR
+                    RegisterSpawnPlacementsEvent.Operation.OR
             );
             count++;
         }

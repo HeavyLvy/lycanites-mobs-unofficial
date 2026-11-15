@@ -202,7 +202,7 @@ public class EntityRoa extends RideableCreatureEntity implements Enemy {
     // ========== Mounted Offset ==========
     @Override
     public double getPassengersRidingOffset() {
-        return (double) this.getDimensions(Pose.STANDING).height * 0.25D;
+        return (double) this.getDimensions(Pose.STANDING).height() * 0.25D;
     }
 
 

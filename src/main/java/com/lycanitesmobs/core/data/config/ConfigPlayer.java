@@ -1,13 +1,13 @@
 package com.lycanitesmobs.core.data.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ConfigPlayer {
     public static ConfigPlayer INSTANCE;
 
-    public final ForgeConfigSpec.ConfigValue<Integer> summoningFocusRecharge;
+    public final ModConfigSpec.ConfigValue<Integer> summoningFocusRecharge;
 
-    public ConfigPlayer(ForgeConfigSpec.Builder builder) {
+    public ConfigPlayer(ModConfigSpec.Builder builder) {
         builder.push("Player");
         builder.comment("Player stat and ability settings.");
 

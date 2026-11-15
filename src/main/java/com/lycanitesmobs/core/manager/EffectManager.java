@@ -6,7 +6,7 @@ import com.lycanitesmobs.core.data.info.creature.CreatureGroup;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class EffectManager {
         ObjectManager.addPotionEffect("envenom", false, 0x44DD66, true); // TODO Implement
 
         // Event Listener:
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
 
         // Effect Sounds:
         ObjectManager.addSound("effect_fear", "effect.fear");

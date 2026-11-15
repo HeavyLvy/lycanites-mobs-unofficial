@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 
 public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy {
     protected int pickupCooldown = 100;
@@ -40,7 +40,7 @@ public class EntityStryder extends RideableCreatureEntity implements IGroupHeavy
         this.hitAreaWidthScale = 1.5f;
         this.hitAreaHeightScale = 1;
 
-        this.setPathfindingMalus(BlockPathTypes.WATER, 0F);
+        this.setPathfindingMalus(PathType.WATER, 0F);
         this.setMaxUpStep(4.0F);
     }
 

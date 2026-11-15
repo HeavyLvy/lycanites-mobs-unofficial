@@ -86,12 +86,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeHooks;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.CommonHooks;
 import net.minecraftforge.network.NetworkHooks;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -1075,21 +1075,21 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
     private void initializePathing() {
         if (!this.canBurn()) {
-            this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 0.0F);
+            this.setPathfindingMalus(PathType.DANGER_FIRE, 0.0F);
             if (this.canBreatheUnderlava()) {
-                this.setPathfindingMalus(BlockPathTypes.LAVA, 1.0F);
+                this.setPathfindingMalus(PathType.LAVA, 1.0F);
                 if (!this.canBreatheAir()) {
-                    this.setPathfindingMalus(BlockPathTypes.LAVA, 8.0F);
+                    this.setPathfindingMalus(PathType.LAVA, 8.0F);
                 }
             }
         }
 
         if (this.waterDamage()) {
-            this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
+            this.setPathfindingMalus(PathType.WATER, -1.0F);
         } else if (this.canBreatheUnderwater()) {
-            this.setPathfindingMalus(BlockPathTypes.WATER, 1.0F);
+            this.setPathfindingMalus(PathType.WATER, 1.0F);
             if (!this.canBreatheAir()) {
-                this.setPathfindingMalus(BlockPathTypes.WATER, 8.0F);
+                this.setPathfindingMalus(PathType.WATER, 8.0F);
             }
         }
 
@@ -1839,12 +1839,12 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      */
     public void summonMinion(LivingEntity minion, double angle, double distance) {
         double angleRadians = Math.toRadians(angle);
-        double x = this.position().x() + ((this.getDimensions(this.getPose()).width + distance) * Math.cos(angleRadians) - Math.sin(angleRadians));
+        double x = this.position().x() + ((this.getDimensions(this.getPose()).width() + distance) * Math.cos(angleRadians) - Math.sin(angleRadians));
         double y = this.position().y() + 1;
         if (minion instanceof BaseCreatureEntity creatureMinion && creatureMinion.isFlying()) {
-            y += this.getDimensions(this.getPose()).height / 2;
+            y += this.getDimensions(this.getPose()).height() / 2;
         }
-        double z = this.position().z() + ((this.getDimensions(this.getPose()).width + distance) * Math.sin(angleRadians) + Math.cos(angleRadians));
+        double z = this.position().z() + ((this.getDimensions(this.getPose()).width() + distance) * Math.sin(angleRadians) + Math.cos(angleRadians));
         minion.moveTo(x, y, z, this.getRandom().nextFloat() * 360.0F, 0.0F);
         DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, minion, () -> {
             if (minion instanceof BaseCreatureEntity creatureMinion) {
@@ -2227,9 +2227,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             for (int i = 0; i < 20; ++i) {
                 this.getCommandSenderWorld().addParticle(
                         ParticleTypes.HAPPY_VILLAGER,
-                        this.position().x() + (this.getRandom().nextDouble() - 0.5D) * this.getDimensions(Pose.STANDING).width,
-                        this.position().y() + this.getRandom().nextDouble() * this.getDimensions(Pose.STANDING).height,
-                        this.position().z() + (this.getRandom().nextDouble() - 0.5D) * this.getDimensions(Pose.STANDING).width,
+                        this.position().x() + (this.getRandom().nextDouble() - 0.5D) * this.getDimensions(Pose.STANDING).width(),
+                        this.position().y() + this.getRandom().nextDouble() * this.getDimensions(Pose.STANDING).height(),
+                        this.position().z() + (this.getRandom().nextDouble() - 0.5D) * this.getDimensions(Pose.STANDING).width(),
                         0.0D,
                         0.0D,
                         0.0D
@@ -2607,7 +2607,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             shouldBurn = false;
         }
         if (shouldBurn) {
-            this.setSecondsOnFire(8);
+            this.igniteForSeconds(8);
         }
     }
 
@@ -3140,7 +3140,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
                 yAmount,
                 zAmount * distance + this.getDeltaMovement().z() * 0.2D
         );
-        ForgeHooks.onLivingJump(this);
+        CommonHooks.onLivingJump(this);
         if (!this.getCommandSenderWorld().isClientSide) {
             this.hurtMarked = true;
         }
@@ -3194,7 +3194,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
                     leapHeight,
                     zDist / xzDist * 0.5D * 0.8D + this.getDeltaMovement().z() * 0.2D
             );
-            ForgeHooks.onLivingJump(this);
+            CommonHooks.onLivingJump(this);
             if (!this.getCommandSenderWorld().isClientSide) {
                 this.hurtMarked = true;
             }
@@ -3553,7 +3553,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * @return The attack range.
      */
     public double getPhysicalRange() {
-        double range = this.getDimensions(Pose.STANDING).width + 1.5D;
+        double range = this.getDimensions(Pose.STANDING).width() + 1.5D;
         if (this.isFlying()) {
             range += this.getFlightOffset();
         }
@@ -3573,7 +3573,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         double creatureRange = this.getPhysicalRange();
         double targetSize = 1;
         if (attackTarget != null) {
-            targetSize = (attackTarget.getDimensions(Pose.STANDING).width + 1) * (attackTarget.getDimensions(Pose.STANDING).width + 1);
+            targetSize = (attackTarget.getDimensions(Pose.STANDING).width() + 1) * (attackTarget.getDimensions(Pose.STANDING).width() + 1);
         }
         return creatureRange + targetSize + additionalReach;
     }
@@ -3811,7 +3811,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
         projectile.setPos(
                 projectile.position().x() + offset.x * this.sizeScale,
-                projectile.position().y() + (this.getDimensions(Pose.STANDING).height / 2) + (offset.y * this.sizeScale),
+                projectile.position().y() + (this.getDimensions(Pose.STANDING).height() / 2) + (offset.y * this.sizeScale),
                 projectile.position().z() + offset.z * this.sizeScale
         );
         projectile.setProjectileScale(scale);
@@ -3835,7 +3835,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             return;
         }
         if (includeFireSpread && this.spreadFire && this.isOnFire() && this.getRandom().nextFloat() < this.creatureStats.getEffect()) {
-            target.setSecondsOnFire(this.getEffectDuration(4) / 20);
+            target.igniteForSeconds(this.getEffectDuration(4) / 20);
         }
         if (this.creatureStats.getAmplifier() >= 0) {
             this.applyDebuffs(livingTarget, 1, 1);
@@ -3862,7 +3862,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             targetZ = newY + this.position().z();
 
             distanceX = targetX - this.position().x();
-            distanceY = target.getBoundingBox().minY + (target.getDimensions(Pose.STANDING).height * 0.5D) - projectile.position().y() + offset.y;
+            distanceY = target.getBoundingBox().minY + (target.getDimensions(Pose.STANDING).height() * 0.5D) - projectile.position().y() + offset.y;
             distanceZ = targetZ - this.position().z();
         }
         return new Vector3d(distanceX, distanceY, distanceZ);
@@ -3941,7 +3941,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
             int fireEnchantDuration = EnchantmentHelper.getFireAspect(this);
             if (fireEnchantDuration > 0) {
-                target.setSecondsOnFire(fireEnchantDuration * 4);
+                target.igniteForSeconds(fireEnchantDuration * 4);
             }
 
             if (target instanceof Player targetPlayer && this.canInteruptShields(true)) {
@@ -4029,7 +4029,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if (this.isInvulnerableTo(damageSrc)) {
             return;
         }
-        damageAmount = ForgeHooks.onLivingHurt(this, damageSrc, damageAmount);
+        damageAmount = CommonHooks.onLivingHurt(this, damageSrc, damageAmount);
         if (damageAmount <= 0) {
             return;
         }
@@ -4040,7 +4040,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         this.setAbsorptionAmount(this.getAbsorptionAmount() - (damageBeforeAbsorption - damageAmount));
         this.awardAbsorptionDamageStat(damageSrc, damageBeforeAbsorption - damageAmount);
 
-        damageAmount = ForgeHooks.onLivingDamage(this, damageSrc, damageAmount);
+        damageAmount = CommonHooks.onLivingDamage(this, damageSrc, damageAmount);
         if (damageAmount != 0.0F) {
             float healthBeforeDamage = this.getHealth();
             this.getCombatTracker().recordDamage(damageSrc, damageAmount);
@@ -4291,7 +4291,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     void superSetSecondsOnFireBase(int seconds) {
-        super.setSecondsOnFire(seconds);
+        super.igniteForSeconds(seconds);
     }
 
     void dropExperienceBase() {
@@ -4301,7 +4301,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     private void activateLeashAI() {
         this.goalSelector.addGoal(2, this.leashMoveTowardsRestrictionAI);
         if (!this.isStrongSwimmer()) {
-            this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+            this.setPathfindingMalus(PathType.WATER, 0.0F);
         }
         this.leashAIActive = true;
     }
@@ -4310,7 +4310,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         this.leashAIActive = false;
         this.goalSelector.removeGoal(this.leashMoveTowardsRestrictionAI);
         if (!this.isStrongSwimmer()) {
-            this.setPathfindingMalus(BlockPathTypes.WATER, BlockPathTypes.WATER.getMalus());
+            this.setPathfindingMalus(PathType.WATER, PathType.WATER.getMalus());
         }
     }
 
@@ -5212,7 +5212,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if (bossGroup != null && bossGroup.hasEntity(entity)) {
             return false;
         }
-        boolean heavyTarget = entity instanceof IGroupHeavy || entity.getDimensions(Pose.STANDING).height >= 4 || entity.getDimensions(Pose.STANDING).width >= 4;
+        boolean heavyTarget = entity instanceof IGroupHeavy || entity.getDimensions(Pose.STANDING).height() >= 4 || entity.getDimensions(Pose.STANDING).width() >= 4;
         if (heavyTarget && !(this instanceof IGroupHeavy)) {
             return false;
         }
@@ -5304,10 +5304,10 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     private void forEachDestroyAreaBlock(int x, int y, int z, int range, boolean expandOnly, DestroyAreaBlockConsumer blockConsumer) {
-        int width = (int) Math.ceil(this.getDimensions(Pose.STANDING).width);
+        int width = (int) Math.ceil(this.getDimensions(Pose.STANDING).width());
         int minHorizontal = expandOnly ? -(width + range) : -(width - range);
         int maxHorizontal = width + range;
-        int height = (int) Math.ceil(this.getDimensions(Pose.STANDING).height);
+        int height = (int) Math.ceil(this.getDimensions(Pose.STANDING).height());
         for (int w = minHorizontal; w <= maxHorizontal; w++) {
             for (int d = minHorizontal; d <= maxHorizontal; d++) {
                 for (int h = 0; h <= height; h++) {
@@ -5380,7 +5380,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
 
         int lootingLevel = 0;
         if (damageSource.getEntity() != null) {
-            lootingLevel = ForgeHooks.getLootingLevel(this, damageSource.getEntity(), damageSource);
+            lootingLevel = CommonHooks.getLootingLevel(this, damageSource.getEntity(), damageSource);
         }
 
         for (ItemDrop itemDrop : this.drops) {
@@ -6016,7 +6016,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if (!this.canBurn()) {
             return;
         }
-        super.setSecondsOnFire(seconds);
+        super.igniteForSeconds(seconds);
     }
 
     /**
@@ -6267,7 +6267,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      * An X Offset used to position the mob that is riding this mob.
      **/
     public double getMountedXOffset() {
-        return (double) this.getDimensions(Pose.STANDING).width * this.getMountOffset().x();
+        return (double) this.getDimensions(Pose.STANDING).width() * this.getMountOffset().x();
     }
 
 
@@ -6281,14 +6281,14 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      **/
     @Override
     public double getPassengersRidingOffset() {
-        return (double) this.getDimensions(Pose.STANDING).height * this.getMountOffset().y();
+        return (double) this.getDimensions(Pose.STANDING).height() * this.getMountOffset().y();
     }
 
     /**
      * A Z Offset used to position the mob that is riding this mob.
      **/
     public double getMountedZOffset() {
-        return (double) this.getDimensions(Pose.STANDING).width * this.getMountOffset().z();
+        return (double) this.getDimensions(Pose.STANDING).width() * this.getMountOffset().z();
     }
 
     private Vector3d getMountOffset() {

@@ -49,7 +49,7 @@ public class EntityChupacabra extends TameableCreatureEntity {
         	return false;
         
     	// Breed:
-        if((target instanceof Animal || (target instanceof BaseCreatureEntity && ((BaseCreatureEntity)target).isFarmableCreature())) && target.getDimensions(Pose.STANDING).height >= 1F)
+        if((target instanceof Animal || (target instanceof BaseCreatureEntity && ((BaseCreatureEntity)target).isFarmableCreature())) && target.getDimensions(Pose.STANDING).height() >= 1F)
     		this.breed();
 
         // Leech:

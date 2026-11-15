@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import org.joml.Vector3d;
 
 
@@ -41,7 +41,7 @@ public class EntityAfrit extends TameableCreatureEntity implements Enemy {
 
         this.setMaxUpStep(1.0F);
 
-        this.setPathfindingMalus(BlockPathTypes.LAVA, 0F);
+        this.setPathfindingMalus(PathType.LAVA, 0F);
     }
 
     // ========== Init AI ==========
@@ -86,8 +86,8 @@ public class EntityAfrit extends TameableCreatureEntity implements Enemy {
         // Particles:
         if(this.getCommandSenderWorld().isClientSide && !this.hasPerchTarget())
             for(int i = 0; i < 2; ++i) {
-                this.getCommandSenderWorld().addParticle(ParticleTypes.SMOKE, this.position().x() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double)this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
-                this.getCommandSenderWorld().addParticle(ParticleTypes.FLAME, this.position().x() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double)this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
+                this.getCommandSenderWorld().addParticle(ParticleTypes.SMOKE, this.position().x() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width(), this.position().y() + this.random.nextDouble() * (double)this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width(), 0.0D, 0.0D, 0.0D);
+                this.getCommandSenderWorld().addParticle(ParticleTypes.FLAME, this.position().x() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width(), this.position().y() + this.random.nextDouble() * (double)this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double)this.getDimensions(Pose.STANDING).width(), 0.0D, 0.0D, 0.0D);
             }
     }
 

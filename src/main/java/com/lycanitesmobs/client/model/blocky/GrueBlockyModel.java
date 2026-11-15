@@ -16,7 +16,7 @@ import net.minecraft.util.Mth;
 
 
 public class GrueBlockyModel<T extends Entity> extends HierarchicalModel<T> {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(LycanitesMobs.MODID, "grue"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "grue"), "main");
     private final ModelPart bone7;
     private final ModelPart All;
     private final ModelPart Head;

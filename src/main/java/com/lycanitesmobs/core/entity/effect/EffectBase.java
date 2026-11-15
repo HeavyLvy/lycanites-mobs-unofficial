@@ -23,7 +23,7 @@ public class EffectBase extends MobEffect {
 		return registryName;
 	}
 	public ResourceLocation setRegistryName(String modID, String blockName) {
-		return registryName = new ResourceLocation(modID, blockName);
+		return registryName = ResourceLocation.fromNamespaceAndPath(modID, blockName);
 	}
 
 

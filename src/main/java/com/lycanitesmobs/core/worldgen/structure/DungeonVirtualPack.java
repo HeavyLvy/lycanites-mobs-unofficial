@@ -8,8 +8,8 @@ import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.resources.IoSupplier;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.locating.IModFile;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforgespi.locating.IModFile;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -257,7 +257,7 @@ public class DungeonVirtualPack implements PackResources {
         tag.add("values", values);
 
         resources.put(
-                new ResourceLocation("lycanitesmobs", "tags/worldgen/biome/has_structure/" + name + ".json"),
+                ResourceLocation.fromNamespaceAndPath("lycanitesmobs", "tags/worldgen/biome/has_structure/" + name + ".json"),
                 toBytes(tag)
         );
     }
@@ -276,7 +276,7 @@ public class DungeonVirtualPack implements PackResources {
         structure.add("spawn_overrides", new JsonObject());
 
         resources.put(
-                new ResourceLocation("lycanitesmobs", "worldgen/structure/" + name + ".json"),
+                ResourceLocation.fromNamespaceAndPath("lycanitesmobs", "worldgen/structure/" + name + ".json"),
                 toBytes(structure)
         );
     }
@@ -306,7 +306,7 @@ public class DungeonVirtualPack implements PackResources {
         set.add("placement", placement);
 
         resources.put(
-                new ResourceLocation("lycanitesmobs", "worldgen/structure_set/" + COMBINED_SET_NAME + ".json"),
+                ResourceLocation.fromNamespaceAndPath("lycanitesmobs", "worldgen/structure_set/" + COMBINED_SET_NAME + ".json"),
                 toBytes(set)
         );
     }

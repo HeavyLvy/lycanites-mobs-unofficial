@@ -3,8 +3,8 @@ package com.lycanitesmobs.client.renderer.layer.item;
 import com.lycanitesmobs.client.renderer.item.IItemModelRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 

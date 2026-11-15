@@ -18,8 +18,8 @@ import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.List;
 
@@ -85,7 +85,7 @@ public class EntityHellfireWall extends BaseProjectileEntity {
     @Override
     public boolean onEntityLivingDamage(LivingEntity entityLiving) {
         if (!entityLiving.isInvulnerableTo(entityLiving.level().damageSources().onFire()))
-            entityLiving.setSecondsOnFire(this.getEffectDuration(10) / 20);
+            entityLiving.igniteForSeconds(this.getEffectDuration(10) / 20);
         return true;
     }
 

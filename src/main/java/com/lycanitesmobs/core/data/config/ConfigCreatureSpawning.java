@@ -1,26 +1,26 @@
 package com.lycanitesmobs.core.data.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ConfigCreatureSpawning {
 	public static ConfigCreatureSpawning INSTANCE;
 
-	public final ForgeConfigSpec.ConfigValue<Integer> typeSpawnLimit;
-	public final ForgeConfigSpec.ConfigValue<Double> spawnLimitRange;
-	public final ForgeConfigSpec.ConfigValue<Boolean> disableAllSpawning;
-	public final ForgeConfigSpec.ConfigValue<Boolean> enforceBlockCost;
-	public final ForgeConfigSpec.ConfigValue<Double> spawnWeightScale;
-	public final ForgeConfigSpec.ConfigValue<Boolean> useSurfaceLightLevel;
-	public final ForgeConfigSpec.ConfigValue<Boolean> ignoreWorldGenSpawning;
-	public final ForgeConfigSpec.ConfigValue<Boolean> controlVanillaSpawns;
+	public final ModConfigSpec.ConfigValue<Integer> typeSpawnLimit;
+	public final ModConfigSpec.ConfigValue<Double> spawnLimitRange;
+	public final ModConfigSpec.ConfigValue<Boolean> disableAllSpawning;
+	public final ModConfigSpec.ConfigValue<Boolean> enforceBlockCost;
+	public final ModConfigSpec.ConfigValue<Double> spawnWeightScale;
+	public final ModConfigSpec.ConfigValue<Boolean> useSurfaceLightLevel;
+	public final ModConfigSpec.ConfigValue<Boolean> ignoreWorldGenSpawning;
+	public final ModConfigSpec.ConfigValue<Boolean> controlVanillaSpawns;
 
-	public final ForgeConfigSpec.ConfigValue<String> globalDimensionList;
-	public final ForgeConfigSpec.ConfigValue<Boolean> globalDimensionWhitelist;
+	public final ModConfigSpec.ConfigValue<String> globalDimensionList;
+	public final ModConfigSpec.ConfigValue<Boolean> globalDimensionWhitelist;
 
-	public final ForgeConfigSpec.ConfigValue<Boolean> disableDungeonSpawners;
-	public final ForgeConfigSpec.ConfigValue<Double> dungeonSpawnerWeightScale;
+	public final ModConfigSpec.ConfigValue<Boolean> disableDungeonSpawners;
+	public final ModConfigSpec.ConfigValue<Double> dungeonSpawnerWeightScale;
 
-	public ConfigCreatureSpawning(ForgeConfigSpec.Builder builder) {
+	public ConfigCreatureSpawning(ModConfigSpec.Builder builder) {
 		builder.push("Global Spawning");
 		builder.comment("These settings are used by everything. It is recommended to leave them as they are however low end machines might benefit from a few tweaks here");
 

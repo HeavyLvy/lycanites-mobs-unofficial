@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 public class BalayangBlockyModel<T extends Entity> extends HierarchicalModel<T> {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("lycanites", "balayang_layer"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("lycanites", "balayang_layer"), "main");
     private final ModelPart All;
     private final ModelPart Mouth;
     private final ModelPart Eye;

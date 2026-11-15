@@ -4,8 +4,8 @@ import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.item.consumable.entity.ItemCustomSpawnEgg;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ItemColorCustomSpawnEgg implements ItemColor {

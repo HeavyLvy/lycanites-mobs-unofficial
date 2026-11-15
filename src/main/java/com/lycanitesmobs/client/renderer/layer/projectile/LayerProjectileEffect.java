@@ -3,8 +3,8 @@ package com.lycanitesmobs.client.renderer.layer.projectile;
 import com.lycanitesmobs.client.renderer.entity.projectile.ProjectileModelRenderer;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 

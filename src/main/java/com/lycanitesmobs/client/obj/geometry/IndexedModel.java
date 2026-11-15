@@ -3,8 +3,8 @@ package com.lycanitesmobs.client.obj.geometry;
 
 import com.lycanitesmobs.client.loader.OBJLoader;
 import com.lycanitesmobs.core.util.math.Vector3o;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 

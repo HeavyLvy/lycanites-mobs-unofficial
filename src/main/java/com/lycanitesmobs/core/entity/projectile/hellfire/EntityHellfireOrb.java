@@ -10,8 +10,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 public class EntityHellfireOrb extends BaseProjectileEntity {
 
@@ -66,7 +66,7 @@ public class EntityHellfireOrb extends BaseProjectileEntity {
     @Override
     public boolean onEntityLivingDamage(LivingEntity entityLiving) {
         if (!entityLiving.isInvulnerableTo(entityLiving.level().damageSources().onFire()))
-            entityLiving.setSecondsOnFire(this.getEffectDuration(10) / 20);
+            entityLiving.igniteForSeconds(this.getEffectDuration(10) / 20);
         return true;
     }
 

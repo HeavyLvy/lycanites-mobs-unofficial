@@ -13,10 +13,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 
 public class EquipmentForgeContainer extends BaseContainer {
-    public static final MenuType<EquipmentForgeContainer> TYPE = IForgeMenuType.create(EquipmentForgeContainer::new);
+    public static final MenuType<EquipmentForgeContainer> TYPE = IMenuTypeExtension.create(EquipmentForgeContainer::new);
     protected final TileEntityEquipmentForge equipmentForge;
 
     /**

@@ -5,9 +5,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 
-abstract public class CustomFluid extends ForgeFlowingFluid {
+abstract public class CustomFluid extends BaseFlowingFluid {
 
     public CustomFluid(Properties properties, String name) {
         super(properties);
@@ -21,7 +21,7 @@ abstract public class CustomFluid extends ForgeFlowingFluid {
     }
 
     public ResourceLocation setRegistryName(String modID, String blockName) {
-        return registryName = new ResourceLocation(modID, blockName);
+        return registryName = ResourceLocation.fromNamespaceAndPath(modID, blockName);
     }
 
     public static class Flowing extends CustomFluid {

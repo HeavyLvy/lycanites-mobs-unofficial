@@ -6,9 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatFormatter;
 import net.minecraft.stats.StatType;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

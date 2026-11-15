@@ -41,7 +41,7 @@ public class StructureSpawnLocation extends RandomSpawnLocation {
             List<String> structureIdStrings = JSONHelper.getJsonStrings(json.getAsJsonArray("structureIds"));
             structureIds.clear();
             for (String structureIdName : structureIdStrings) {
-                structureIds.add(new ResourceLocation(structureIdName));
+                structureIds.add(ResourceLocation.parse(structureIdName));
             }
         }
 

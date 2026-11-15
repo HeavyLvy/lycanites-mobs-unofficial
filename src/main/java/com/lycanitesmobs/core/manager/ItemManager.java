@@ -39,10 +39,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.*;
 
@@ -67,12 +67,12 @@ public class ItemManager extends JSONLoader {
     public static final CreativeModeTab.Builder bestEquipmentGroup =
             LMBestEquipmentGroup.getBuilder();
 
-    public static final RegistryObject<CreativeModeTab> itemTab = TABS.register(LycanitesMobs.MODID + ".items", itemsGroup::build);
-    public static final RegistryObject<CreativeModeTab> blockTab = TABS.register(LycanitesMobs.MODID + ".blocks", blocksGroup::build);
-    public static final RegistryObject<CreativeModeTab> creaturesTab = TABS.register(LycanitesMobs.MODID + ".creatures", creaturesGroups::build);
-    public static final RegistryObject<CreativeModeTab> chargesTab = TABS.register(LycanitesMobs.MODID + ".charges", chargesGroup::build);
-    public static final RegistryObject<CreativeModeTab> equipmentPartsTab = TABS.register(LycanitesMobs.MODID + ".equipmentparts", equipmentPartsGroup::build);
-    public static final RegistryObject<CreativeModeTab> bestEquipmentTab = TABS.register(LycanitesMobs.MODID + ".bestequipment", bestEquipmentGroup::build);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> itemTab = TABS.register(LycanitesMobs.MODID + ".items", itemsGroup::build);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> blockTab = TABS.register(LycanitesMobs.MODID + ".blocks", blocksGroup::build);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> creaturesTab = TABS.register(LycanitesMobs.MODID + ".creatures", creaturesGroups::build);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> chargesTab = TABS.register(LycanitesMobs.MODID + ".charges", chargesGroup::build);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> equipmentPartsTab = TABS.register(LycanitesMobs.MODID + ".equipmentparts", equipmentPartsGroup::build);
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> bestEquipmentTab = TABS.register(LycanitesMobs.MODID + ".bestequipment", bestEquipmentGroup::build);
     public static final Map<String, Item.Properties> registryItems = new HashMap<>();
     protected static ItemManager INSTANCE;
     protected static final Map<String, ItemInfo> items = new HashMap<>();
@@ -147,7 +147,7 @@ public class ItemManager extends JSONLoader {
         }
     }
 
-    /*private static final DeferredRegister<Item> ITEM_DEFERRED_REGISTER = DeferredRegister.create(ForgeRegistries.ITEMS, LycanitesMobs.MODID);
+    /*private static final DeferredRegister<Item> ITEM_DEFERRED_REGISTER = DeferredRegister.create(BuiltInRegistries.ITEM, LycanitesMobs.MODID);
 
 
     public static void registerItem(IEventBus event) {
@@ -294,14 +294,14 @@ public class ItemManager extends JSONLoader {
         if (locationObj instanceof ResourceLocation location) {
             if (ItemConfig.getLowEquipmentSharpnessItems() != null) {
                 for (String itemId : ItemConfig.getLowEquipmentSharpnessItems()) {
-                    if (new ResourceLocation(itemId).equals(location)) {
+                    if (ResourceLocation.parse(itemId).equals(location)) {
                         return ItemConfig.getLowEquipmentRepairAmount();
                     }
                 }
             }
             if (ItemConfig.getMediumEquipmentSharpnessItems() != null) {
                 for (String itemId : ItemConfig.getMediumEquipmentSharpnessItems()) {
-                    if (new ResourceLocation(itemId).equals(location)) {
+                    if (ResourceLocation.parse(itemId).equals(location)) {
                         return ItemConfig.getMediumEquipmentRepairAmount();
                     }
                 }
@@ -309,14 +309,14 @@ public class ItemManager extends JSONLoader {
 
             if (ItemConfig.getHighEquipmentSharpnessItems() != null) {
                 for (String itemId : ItemConfig.getHighEquipmentSharpnessItems()) {
-                    if (new ResourceLocation(itemId).equals(location)) {
+                    if (ResourceLocation.parse(itemId).equals(location)) {
                         return ItemConfig.getHighEquipmentRepairAmount();
                     }
                 }
             }
             if (ItemConfig.getMaxEquipmentSharpnessItems() != null) {
                 for (String itemId : ItemConfig.getMaxEquipmentSharpnessItems()) {
-                    if (new ResourceLocation(itemId).equals(location)) {
+                    if (ResourceLocation.parse(itemId).equals(location)) {
                         return ItemEquipment.SHARPNESS_MAX;
                     }
                 }
@@ -345,28 +345,28 @@ public class ItemManager extends JSONLoader {
             }
             if (ItemConfig.getLowEquipmentManaItems() != null) {
                 for (String itemId : ItemConfig.getLowEquipmentManaItems()) {
-                    if (new ResourceLocation(itemId).equals(location)) {
+                    if (ResourceLocation.parse(itemId).equals(location)) {
                         return ItemConfig.getLowEquipmentRepairAmount();
                     }
                 }
             }
             if (ItemConfig.getMediumEquipmentManaItems() != null) {
                 for (String itemId : ItemConfig.getMediumEquipmentManaItems()) {
-                    if (new ResourceLocation(itemId).equals(location)) {
+                    if (ResourceLocation.parse(itemId).equals(location)) {
                         return ItemConfig.getMediumEquipmentRepairAmount();
                     }
                 }
             }
             if (ItemConfig.getHighEquipmentManaItems() != null) {
                 for (String itemId : ItemConfig.getHighEquipmentManaItems()) {
-                    if (new ResourceLocation(itemId).equals(location)) {
+                    if (ResourceLocation.parse(itemId).equals(location)) {
                         return ItemConfig.getHighEquipmentRepairAmount();
                     }
                 }
             }
             if (ItemConfig.getMaxEquipmentManaItems() != null) {
                 for (String itemId : ItemConfig.getMaxEquipmentManaItems()) {
-                    if (new ResourceLocation(itemId).equals(location)) {
+                    if (ResourceLocation.parse(itemId).equals(location)) {
                         return ItemEquipment.MANA_MAX;
                     }
                 }

@@ -4,7 +4,7 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraftforge.common.CreativeModeTabRegistry;
+import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

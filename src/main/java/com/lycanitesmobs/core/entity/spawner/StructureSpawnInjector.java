@@ -11,7 +11,7 @@ import com.lycanitesmobs.core.entity.spawner.location.StructureSpawnLocation;
 import com.lycanitesmobs.core.manager.SpawnerManager;
 import com.lycanitesmobs.core.mixin.ModifiableStructureInfoAccessor;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
-import net.minecraftforge.common.world.ModifiableStructureInfo;
+import net.neoforged.neoforge.common.world.ModifiableStructureInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -28,11 +28,11 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.entity.living.MobSpawnEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.*;
 
@@ -124,7 +124,7 @@ public class StructureSpawnInjector extends JSONLoader {
             List<MobSpawnSettings.SpawnerData> spawnerDataList = config.buildSpawnerData();
             LMHelperClass.logDebug("structurespawners", "Config '" + config.name + "': buildSpawnerData returned " + spawnerDataList.size() + " entries.");
             for (MobSpawnSettings.SpawnerData data : spawnerDataList) {
-                LMHelperClass.logDebug("structurespawners", "  SpawnerData: entityType=" + ForgeRegistries.ENTITY_TYPES.getKey(data.type) + " weight=" + data.getWeight().asInt() + " min=" + data.minCount + " max=" + data.maxCount);
+                LMHelperClass.logDebug("structurespawners", "  SpawnerData: entityType=" + BuiltInRegistries.ENTITY_TYPE.getKey(data.type) + " weight=" + data.getWeight().asInt() + " min=" + data.minCount + " max=" + data.maxCount);
             }
             if (spawnerDataList.isEmpty()) {
                 LMHelperClass.logDebug("structurespawners", "  SKIPPING config '" + config.name + "' â€” no valid spawner data built.");
@@ -260,7 +260,7 @@ public class StructureSpawnInjector extends JSONLoader {
         if (verifyOverride != null) {
             LMHelperClass.logDebug("structurespawners", "    [" + structureId + "]   " + category.getName() + " override: bb=" + verifyOverride.boundingBox() + " entries=" + verifyOverride.spawns().unwrap().size());
             for (MobSpawnSettings.SpawnerData data : verifyOverride.spawns().unwrap()) {
-                LMHelperClass.logDebug("structurespawners", "    [" + structureId + "]     -> " + ForgeRegistries.ENTITY_TYPES.getKey(data.type) + " w=" + data.getWeight().asInt() + " min=" + data.minCount + " max=" + data.maxCount);
+                LMHelperClass.logDebug("structurespawners", "    [" + structureId + "]     -> " + BuiltInRegistries.ENTITY_TYPE.getKey(data.type) + " w=" + data.getWeight().asInt() + " min=" + data.minCount + " max=" + data.maxCount);
             }
         } else {
             LMHelperClass.logDebug("structurespawners", "    [" + structureId + "]   !!! VERIFICATION FAILED â€” no override found for " + category.getName() + " after injection!");
@@ -314,7 +314,7 @@ public class StructureSpawnInjector extends JSONLoader {
             if (json.has("structures")) {
                 this.structures.clear();
                 for (JsonElement el : json.getAsJsonArray("structures")) {
-                    this.structures.add(new ResourceLocation(el.getAsString()));
+                    this.structures.add(ResourceLocation.parse(el.getAsString()));
                 }
             }
             if (json.has("mobs")) {
@@ -333,13 +333,13 @@ public class StructureSpawnInjector extends JSONLoader {
             LMHelperClass.logDebug("structurespawners", "  buildSpawnerData for '" + this.name + "': " + this.mobs.size() + " mob entries to resolve.");
             for (MobEntryConfig mob : this.mobs) {
                 LMHelperClass.logDebug("structurespawners", "    Resolving mobId: " + mob.mobId);
-                EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(mob.mobId);
+                EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(mob.mobId);
                 if (entityType == null) {
                     LMHelperClass.logWarning("structurespawners",
                             "    !!! Entity type NOT FOUND in ForgeRegistries, skipping: " + mob.mobId);
                     continue;
                 }
-                ResourceLocation resolvedId = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
+                ResourceLocation resolvedId = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
                 LMHelperClass.logDebug("structurespawners", "    Resolved to: " + resolvedId + " (entityType=" + entityType + ")");
                 list.add(new MobSpawnSettings.SpawnerData(
                         entityType, mob.weight, mob.minCount, mob.maxCount));
@@ -358,7 +358,7 @@ public class StructureSpawnInjector extends JSONLoader {
 
         void loadFromJSON(JsonObject json) {
             if (json.has("mobId"))
-                this.mobId = new ResourceLocation(json.get("mobId").getAsString());
+                this.mobId = ResourceLocation.parse(json.get("mobId").getAsString());
             if (json.has("weight"))
                 this.weight = json.get("weight").getAsInt();
             if (json.has("minCount"))

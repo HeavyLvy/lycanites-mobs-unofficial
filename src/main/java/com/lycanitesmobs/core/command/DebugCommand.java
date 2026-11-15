@@ -12,7 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.common.BiomeManager;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistries; // TODO(port): datapack registries
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +97,7 @@ public class DebugCommand {
             return 0;
         }
         String biomeId = StringArgumentType.getString(context, "biome");
-        ResourceLocation biomeResourceLocation = new ResourceLocation(biomeId);
+        ResourceLocation biomeResourceLocation = ResourceLocation.parse(biomeId);
         Biome biome = ForgeRegistries.BIOMES.getValue(biomeResourceLocation);
         if (biome == null) {
             context.getSource().sendSuccess(() -> Component.literal("Cannot find a biome with that id."), true);

@@ -62,7 +62,7 @@ public class ProjectileBehaviourLaser extends ProjectileBehaviour {
             double xPos = entityToFollow.position().x();
             double yPos = entityToFollow.position().y();
             if (!(entityToFollow instanceof BaseProjectileEntity)) {
-                yPos += entityToFollow.getDimensions(entityToFollow.getPose()).height * 0.5D;
+                yPos += entityToFollow.getDimensions(entityToFollow.getPose()).height() * 0.5D;
             }
             double zPos = entityToFollow.position().z();
 			/*if(entityToFollow instanceof BaseCreatureEntity) {
@@ -105,7 +105,7 @@ public class ProjectileBehaviourLaser extends ProjectileBehaviour {
             Entity attackTarget = customProjectile.getTarget();
             if (attackTarget != null) {
                 targetX = attackTarget.position().x();
-                targetY = attackTarget.position().y() + (attackTarget.getDimensions(attackTarget.getPose()).height / 2);
+                targetY = attackTarget.position().y() + (attackTarget.getDimensions(attackTarget.getPose()).height() / 2);
                 targetZ = attackTarget.position().z();
                 lockedLaser = true;
             } else {
@@ -135,7 +135,7 @@ public class ProjectileBehaviourLaser extends ProjectileBehaviour {
             if (rayTraceResult instanceof EntityHitResult) {
                 Entity entityHit = ((EntityHitResult) rayTraceResult).getEntity();
                 if (entityHit != null) {
-                    targetY += entityHit.getDimensions(entityHit.getPose()).height / 2;
+                    targetY += entityHit.getDimensions(entityHit.getPose()).height() / 2;
                 }
             }
         }

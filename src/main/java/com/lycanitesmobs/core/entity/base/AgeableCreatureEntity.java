@@ -172,7 +172,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
                     double d0 = this.random.nextGaussian() * 0.02D;
                     double d1 = this.random.nextGaussian() * 0.02D;
                     double d2 = this.random.nextGaussian() * 0.02D;
-                    this.getCommandSenderWorld().addParticle(particle, this.position().x() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width, this.position().y() + 0.5D + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).height), this.position().z() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width, d0, d1, d2);
+                    this.getCommandSenderWorld().addParticle(particle, this.position().x() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width() * 2.0F) - (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + 0.5D + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).height()), this.position().z() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width() * 2.0F) - (double) this.getDimensions(Pose.STANDING).width(), d0, d1, d2);
                 }
             }
         }
@@ -394,7 +394,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
                 double d0 = this.random.nextGaussian() * 0.02D;
                 double d1 = this.random.nextGaussian() * 0.02D;
                 double d2 = this.random.nextGaussian() * 0.02D;
-                this.getCommandSenderWorld().addParticle(ParticleTypes.HEART, this.position().x() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width, this.position().y() + 0.5D + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).height), this.position().z() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width, d0, d1, d2);
+                this.getCommandSenderWorld().addParticle(ParticleTypes.HEART, this.position().x() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width() * 2.0F) - (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + 0.5D + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).height()), this.position().z() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width() * 2.0F) - (double) this.getDimensions(Pose.STANDING).width(), d0, d1, d2);
             }
 
             this.onCreateBaby(partner, baby);

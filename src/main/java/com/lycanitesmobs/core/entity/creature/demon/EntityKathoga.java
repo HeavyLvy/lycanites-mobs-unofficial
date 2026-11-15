@@ -16,8 +16,8 @@ import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 
 import java.util.List;
 
@@ -75,7 +75,7 @@ public class EntityKathoga extends RideableCreatureEntity {
     	if(rider.hasEffect(MobEffects.WITHER))
     		rider.removeEffect(MobEffects.WITHER);
         if(rider.isOnFire())
-            rider.setSecondsOnFire(0);
+            rider.igniteForSeconds(0);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class EntityKathoga extends RideableCreatureEntity {
         	return false;
         
     	// Breed:
-        if((target instanceof Animal || (target instanceof BaseCreatureEntity && ((BaseCreatureEntity)target).isFarmableCreature())) && target.getDimensions(Pose.STANDING).height >= 1F)
+        if((target instanceof Animal || (target instanceof BaseCreatureEntity && ((BaseCreatureEntity)target).isFarmableCreature())) && target.getDimensions(Pose.STANDING).height() >= 1F)
     		this.breed();
     	
         return true;
@@ -132,7 +132,7 @@ public class EntityKathoga extends RideableCreatureEntity {
             for(LivingEntity possibleTarget : possibleTargets) {
                 boolean doDamage = true;
                 if(this.getRider() instanceof Player) {
-                    if(MinecraftForge.EVENT_BUS.post(new AttackEntityEvent((Player)this.getRider(), possibleTarget))) {
+                    if(NeoForge.EVENT_BUS.post(new AttackEntityEvent((Player)this.getRider(), possibleTarget))) {
                         doDamage = false;
                     }
                 }

@@ -76,9 +76,9 @@ public class EntityEechetik extends TameableCreatureEntity implements Enemy {
         // Grow Mycelium:
         if (!this.getCommandSenderWorld().isClientSide && this.updateTick % 100 == 0 && this.myceliumRadius > 0 && !this.isTamed() && this.getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
             int range = this.myceliumRadius;
-            for (int w = -((int) Math.ceil(this.getDimensions(Pose.STANDING).width) + range); w <= (Math.ceil(this.getDimensions(Pose.STANDING).width) + range); w++) {
-                for (int d = -((int) Math.ceil(this.getDimensions(Pose.STANDING).width) + range); d <= (Math.ceil(this.getDimensions(Pose.STANDING).width) + range); d++) {
-                    for (int h = -((int) Math.ceil(this.getDimensions(Pose.STANDING).height) + range); h <= Math.ceil(this.getDimensions(Pose.STANDING).height); h++) {
+            for (int w = -((int) Math.ceil(this.getDimensions(Pose.STANDING).width()) + range); w <= (Math.ceil(this.getDimensions(Pose.STANDING).width()) + range); w++) {
+                for (int d = -((int) Math.ceil(this.getDimensions(Pose.STANDING).width()) + range); d <= (Math.ceil(this.getDimensions(Pose.STANDING).width()) + range); d++) {
+                    for (int h = -((int) Math.ceil(this.getDimensions(Pose.STANDING).height()) + range); h <= Math.ceil(this.getDimensions(Pose.STANDING).height()); h++) {
                         BlockPos blockPos = this.blockPosition().offset(w, h, d);
                         BlockState blockState = this.getCommandSenderWorld().getBlockState(blockPos);
                         BlockState upperBlockState = this.getCommandSenderWorld().getBlockState(blockPos.above());
@@ -93,8 +93,8 @@ public class EntityEechetik extends TameableCreatureEntity implements Enemy {
         // Particles:
         if (this.getCommandSenderWorld().isClientSide) {
             for (int i = 0; i < 2; ++i) {
-                this.getCommandSenderWorld().addParticle(ParticleTypes.PORTAL, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width * 2, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width * 2, 0.0D, 0.0D, 0.0D);
-                this.getCommandSenderWorld().addParticle(ParticleTypes.MYCELIUM, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width * 2, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width * 2, 0.0D, 0.0D, 0.0D);
+                this.getCommandSenderWorld().addParticle(ParticleTypes.PORTAL, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width() * 2, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width() * 2, 0.0D, 0.0D, 0.0D);
+                this.getCommandSenderWorld().addParticle(ParticleTypes.MYCELIUM, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width() * 2, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width() * 2, 0.0D, 0.0D, 0.0D);
             }
         }
     }

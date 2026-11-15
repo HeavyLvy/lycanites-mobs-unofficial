@@ -100,7 +100,7 @@ public class DirectNavigator {
 	public boolean atTargetPosition(){
 		if(targetPosition != null) {
 			double speed = this.host.getAttribute(Attributes.MOVEMENT_SPEED).getValue() * 2;
-			return this.distanceToTargetPosition() <= (this.host.getDimensions(Pose.STANDING).width + speed);
+			return this.distanceToTargetPosition() <= (this.host.getDimensions(Pose.STANDING).width() + speed);
 		}
 		return true;
 	}

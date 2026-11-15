@@ -28,12 +28,12 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.util.Lazy;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,12 +57,12 @@ public class ObjectManager {
     // ========== Entities ==========
     private static final Map<String, Lazy<? extends EntityType<?>>> entityTypes = new HashMap<>();
     // ========== Containers ==========
-    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, LycanitesMobs.MODID);
+    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(BuiltInRegistries.MENU, LycanitesMobs.MODID);
     private static ObjectManager INSTANCE;
     private static ModInfo currentModInfo;
     private static final Map<String, Class> tileEntities = new HashMap<>();
     private static final Map<Class<? extends BlockEntity>, BlockEntityType<? extends BlockEntity>> tileEntityTypes = new HashMap<>();
-    private static final Map<String, ForgeFlowingFluid> fluids = new HashMap<>();
+    private static final Map<String, BaseFlowingFluid> fluids = new HashMap<>();
     private static final Map<Block, Item> buckets = new HashMap<>();
     // ========== Creative Mode Tabs ==========
     private static final Map<Item, ModInfo> itemGroups = new HashMap<>();
@@ -119,15 +119,15 @@ public class ObjectManager {
     }
 
     // ========== Fluid ==========
-    public static Fluid addFluid(String name, ForgeFlowingFluid fluid) {
+    public static Fluid addFluid(String name, BaseFlowingFluid fluid) {
         fluids.put(name, fluid);
         return fluid;
     }
 
     // ========== Item ==========
-    public static void addItem(String name, Lazy<? extends Item> itemSupplier) {
+    public static void addItem(String name, Supplier<? extends Item> itemSupplier) {
         if (!items.containsKey(name)) {
-            RegistryObject<Item> item = LycanitesMobs.ITEMS.register(name, itemSupplier);
+            DeferredHolder<Item, Item> item = LycanitesMobs.ITEMS.register(name, itemSupplier);
             //LycanitesMobs.ITEMS.register(name,item);
             items.put(name, item);
             itemNames.add(name);
@@ -156,7 +156,7 @@ public class ObjectManager {
     }
 
     public static void addEntityType(String name, EntityType.Builder<?> builder) {
-        entityTypes.put(name, () -> builder.build(name));
+        entityTypes.put(name, Lazy.of(() -> builder.build(name)));
     }
 
     public static void registerTileEntityType(Class<? extends BlockEntity> tileEntityClass, BlockEntityType<? extends BlockEntity> tileEntityType) {
@@ -208,7 +208,7 @@ public class ObjectManager {
     }
 
     // ========== Fluid ==========
-    public static ForgeFlowingFluid getFluid(String name) {
+    public static BaseFlowingFluid getFluid(String name) {
         name = name.toLowerCase();
         if (!fluids.containsKey(name))
             return null;
@@ -298,7 +298,7 @@ public class ObjectManager {
         return Collections.unmodifiableCollection(effects.values());
     }
 
-    public static Collection<ForgeFlowingFluid> getFluids() {
+    public static Collection<BaseFlowingFluid> getFluids() {
         return Collections.unmodifiableCollection(fluids.values());
     }
 

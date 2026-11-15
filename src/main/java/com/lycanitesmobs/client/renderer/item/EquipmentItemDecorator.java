@@ -4,7 +4,7 @@ import com.lycanitesmobs.core.item.equipment.ItemEquipment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.IItemDecorator;
+import net.neoforged.neoforge.client.IItemDecorator;
 
 public class EquipmentItemDecorator implements IItemDecorator {
 

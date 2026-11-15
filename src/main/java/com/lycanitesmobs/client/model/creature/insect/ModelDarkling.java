@@ -5,8 +5,8 @@ import com.lycanitesmobs.client.model.template.ModelTemplateInsect;
 import com.lycanitesmobs.core.entity.creature.insect.EntityDarkling;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ModelDarkling extends ModelTemplateInsect {

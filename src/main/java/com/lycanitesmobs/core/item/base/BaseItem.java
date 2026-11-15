@@ -42,7 +42,7 @@ public class BaseItem extends Item {
     }
 
     public ResourceLocation setRegistryName(String modID, String itemName) {
-        return registryName = new ResourceLocation(modID, itemName);
+        return registryName = ResourceLocation.fromNamespaceAndPath(modID, itemName);
     }
 
     public void setup() {

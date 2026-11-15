@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.manager;
 
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.google.gson.*;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.LycanitesMobs;
@@ -14,8 +15,7 @@ import com.lycanitesmobs.core.event.mobevent.MobEventSchedule;
 import com.lycanitesmobs.core.entity.spawner.condition.SpawnCondition;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -264,8 +264,8 @@ public class MobEventManager extends JSONLoader {
      * Called every tick in a world and updates any active Server Side Mob Event players.
      **/
     @SubscribeEvent
-    public void onWorldUpdate(TickEvent.LevelTickEvent event) {
-        Level world = event.level;
+    public void onWorldUpdate(LevelTickEvent.Post event) {
+        Level world = event.getLevel();
         if (world.isClientSide)
             return;
         ExtendedWorld worldExt = ExtendedWorld.getForWorld(world);

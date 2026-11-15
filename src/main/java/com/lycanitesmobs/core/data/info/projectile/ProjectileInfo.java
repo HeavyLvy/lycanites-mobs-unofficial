@@ -26,8 +26,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.util.Lazy;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
@@ -541,7 +541,7 @@ public class ProjectileInfo {
     public void load() {
         // Charge Item:
         if (!this.noChargeItem) {
-            this.chargeItem = () -> ObjectManager.getItem(this.chargeItemName);
+            this.chargeItem = Lazy.of(() -> ObjectManager.getItem(this.chargeItemName));
             if (this.chargeItem.get() == null) {
                 Item.Properties properties = new Item.Properties();
                 //properties.tab(ItemManager.getInstance().chargesGroup);
@@ -587,7 +587,7 @@ public class ProjectileInfo {
             return null;
         }
         if (this.particleType == null) {
-            ParticleType<?> particleType = ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(this.particleId));
+            ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.get(ResourceLocation.parse(this.particleId));
             if (particleType instanceof SimpleParticleType) {
                 this.particleType = (SimpleParticleType) particleType;
             }
@@ -600,7 +600,7 @@ public class ProjectileInfo {
             return null;
         }
         if (this.waterParticleType == null) {
-            ParticleType<?> particleType = ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(this.waterParticleId));
+            ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.get(ResourceLocation.parse(this.waterParticleId));
             if (particleType instanceof SimpleParticleType) {
                 this.waterParticleType = (SimpleParticleType) particleType;
             }
@@ -615,7 +615,7 @@ public class ProjectileInfo {
      * @return Projectiles's entity type.
      */
     public EntityType getEntityType() {
-        this.entityType = (EntityType) ForgeRegistries.ENTITY_TYPES.getValue(AssetHelper.modResource(this.getName()));
+        this.entityType = (EntityType) BuiltInRegistries.ENTITY_TYPE.get(AssetHelper.modResource(this.getName()));
         return this.entityType;
     }
     /**

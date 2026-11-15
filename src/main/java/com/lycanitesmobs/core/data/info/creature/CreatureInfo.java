@@ -21,7 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
@@ -638,8 +638,8 @@ public class CreatureInfo {
             return this.entityType;
         }
         ResourceLocation id = AssetHelper.modResource(this.getName());
-        EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(id);
-        if (entityType != null && id.equals(ForgeRegistries.ENTITY_TYPES.getKey(entityType))) {
+        EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(id);
+        if (entityType != null && id.equals(BuiltInRegistries.ENTITY_TYPE.getKey(entityType))) {
             return (EntityType<? extends LivingEntity>) entityType;
         }
         LMHelperClass.logWarningMessage("[Creature] getEntityType() registry lookup failed for: " + id + " (returned " + entityType + "). Entity type may not be registered yet.");

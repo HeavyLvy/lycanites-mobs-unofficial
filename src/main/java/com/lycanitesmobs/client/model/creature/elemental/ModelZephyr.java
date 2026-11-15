@@ -7,8 +7,8 @@ import com.lycanitesmobs.client.renderer.layer.creature.LayerCreatureBase;
 import com.lycanitesmobs.client.renderer.layer.creature.specific.LayerZephyr;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector2f;
 
 @OnlyIn(Dist.CLIENT)

@@ -90,7 +90,7 @@ public class EntityUvaraptor extends RideableCreatureEntity {
     
     @Override
     public double getPassengersRidingOffset() {
-        return (double)this.getDimensions(Pose.STANDING).height * 0.9D;
+        return (double)this.getDimensions(Pose.STANDING).height() * 0.9D;
     }
     
     

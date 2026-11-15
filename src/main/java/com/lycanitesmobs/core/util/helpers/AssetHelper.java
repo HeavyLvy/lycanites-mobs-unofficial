@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class AssetHelper {
     public static ResourceLocation resource(String namespace, String path) {
-        return new ResourceLocation(namespace, path);
+        return ResourceLocation.fromNamespaceAndPath(namespace, path);
     }
 
     public static ResourceLocation modResource(String path) {

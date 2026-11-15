@@ -112,10 +112,10 @@ public class StayByWaterGoal extends Goal {
                                 if (this.isValidWaterPosition(searchPos)) {
 
                                     // If the host has a rounded width larger than 1 then check if it can fit in the target block...
-                                    boolean enoughSpace = Math.round(this.host.getDimensions(Pose.STANDING).width) <= 1;
+                                    boolean enoughSpace = Math.round(this.host.getDimensions(Pose.STANDING).width()) <= 1;
                                     if (!enoughSpace) {
                                         enoughSpace = true;
-                                        int neededSpace = Math.round(this.host.getDimensions(Pose.STANDING).width + 0.5F);
+                                        int neededSpace = Math.round(this.host.getDimensions(Pose.STANDING).width() + 0.5F);
                                         for (int adjX = searchX - neededSpace; adjX <= searchX + neededSpace; ++adjX) {
                                             for (int adjZ = searchZ - neededSpace; adjZ <= searchZ + neededSpace; ++adjZ) {
                                                 if (this.host.getCommandSenderWorld().getBlockState(new BlockPos(adjX, searchY, adjZ)).isSolid()) {

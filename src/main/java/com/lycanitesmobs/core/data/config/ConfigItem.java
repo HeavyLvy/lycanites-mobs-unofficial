@@ -1,35 +1,35 @@
 package com.lycanitesmobs.core.data.config;
 
 import com.google.common.collect.Lists;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
 public class ConfigItem {
     public static ConfigItem INSTANCE;
 
-    public final ForgeConfigSpec.ConfigValue<Double> seasonalDropChance;
-    public final ForgeConfigSpec.ConfigValue<Boolean> removeOnNoFireTick;
+    public final ModConfigSpec.ConfigValue<Double> seasonalDropChance;
+    public final ModConfigSpec.ConfigValue<Boolean> removeOnNoFireTick;
 
-    public final ForgeConfigSpec.ConfigValue<Boolean> chargesToXPBottles;
+    public final ModConfigSpec.ConfigValue<Boolean> chargesToXPBottles;
 
-    public final ForgeConfigSpec.ConfigValue<Integer> lowEquipmentRepairAmount;
-    public final ForgeConfigSpec.ConfigValue<Integer> mediumEquipmentRepairAmount;
-    public final ForgeConfigSpec.ConfigValue<Integer> highEquipmentRepairAmount;
+    public final ModConfigSpec.ConfigValue<Integer> lowEquipmentRepairAmount;
+    public final ModConfigSpec.ConfigValue<Integer> mediumEquipmentRepairAmount;
+    public final ModConfigSpec.ConfigValue<Integer> highEquipmentRepairAmount;
 
-    public final ForgeConfigSpec.ConfigValue<List<? extends String>> lowEquipmentSharpnessItems;
-    public final ForgeConfigSpec.ConfigValue<List<? extends String>> mediumEquipmentSharpnessItems;
-    public final ForgeConfigSpec.ConfigValue<List<? extends String>> highEquipmentSharpnessItems;
-    public final ForgeConfigSpec.ConfigValue<List<? extends String>> maxEquipmentSharpnessItems;
+    public final ModConfigSpec.ConfigValue<List<? extends String>> lowEquipmentSharpnessItems;
+    public final ModConfigSpec.ConfigValue<List<? extends String>> mediumEquipmentSharpnessItems;
+    public final ModConfigSpec.ConfigValue<List<? extends String>> highEquipmentSharpnessItems;
+    public final ModConfigSpec.ConfigValue<List<? extends String>> maxEquipmentSharpnessItems;
 
-    public final ForgeConfigSpec.ConfigValue<Boolean> equipmentSpecialNames;
+    public final ModConfigSpec.ConfigValue<Boolean> equipmentSpecialNames;
 
-    public final ForgeConfigSpec.ConfigValue<List<? extends String>> lowEquipmentManaItems;
-    public final ForgeConfigSpec.ConfigValue<List<? extends String>> mediumEquipmentManaItems;
-    public final ForgeConfigSpec.ConfigValue<List<? extends String>> highEquipmentManaItems;
-    public final ForgeConfigSpec.ConfigValue<List<? extends String>> maxEquipmentManaItems;
+    public final ModConfigSpec.ConfigValue<List<? extends String>> lowEquipmentManaItems;
+    public final ModConfigSpec.ConfigValue<List<? extends String>> mediumEquipmentManaItems;
+    public final ModConfigSpec.ConfigValue<List<? extends String>> highEquipmentManaItems;
+    public final ModConfigSpec.ConfigValue<List<? extends String>> maxEquipmentManaItems;
 
-    public ConfigItem(ForgeConfigSpec.Builder builder) {
+    public ConfigItem(ModConfigSpec.Builder builder) {
         builder.push("Items");
         builder.comment("Global settings for blocks and items.");
 

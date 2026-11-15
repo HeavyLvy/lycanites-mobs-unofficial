@@ -20,12 +20,12 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderNameTagEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.RenderNameTagEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.Event;
 
 @OnlyIn(Dist.CLIENT)
 public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<T, CreatureModel<T>> {
@@ -48,7 +48,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      */
     @Override
     public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
-        if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<>(entity, this, partialTicks, matrixStack, renderTypeBuffer, brightness))) {
+        if (NeoForge.EVENT_BUS.post(new RenderLivingEvent.Pre<>(entity, this, partialTicks, matrixStack, renderTypeBuffer, brightness))) {
             return;
         }
 
@@ -151,7 +151,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         // Render Name Tag
         if (!invisible) {
             RenderNameTagEvent renderNameplateEvent = new RenderNameTagEvent(entity, entity.getDisplayName(), this, matrixStack, renderTypeBuffer, fade, time);
-            MinecraftForge.EVENT_BUS.post(renderNameplateEvent);
+            NeoForge.EVENT_BUS.post(renderNameplateEvent);
             if (renderNameplateEvent.getResult() != Event.Result.DENY && (renderNameplateEvent.getResult() == Event.Result.ALLOW || this.shouldShowName(entity))) {
                 MutableComponent entityName = entity.getName().copy();
                 if (entityName != null) {
@@ -160,7 +160,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
             }
         }
 
-        MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Post<>(entity, this, partialTicks, matrixStack, renderTypeBuffer, brightness));
+        NeoForge.EVENT_BUS.post(new RenderLivingEvent.Post<>(entity, this, partialTicks, matrixStack, renderTypeBuffer, brightness));
     }
 
 

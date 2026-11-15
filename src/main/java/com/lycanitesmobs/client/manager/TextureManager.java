@@ -44,7 +44,7 @@ public class TextureManager {
 
 	public static void addTexture(String name, String path) {
 		name = name.toLowerCase();
-		textures.put(name, new ResourceLocation(LycanitesMobs.MODID, path));
+		textures.put(name, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, path));
 	}
 
 	public static ResourceLocation getTexture(String name) {

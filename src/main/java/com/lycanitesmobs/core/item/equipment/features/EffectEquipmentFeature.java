@@ -8,7 +8,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class EffectEquipmentFeature extends EquipmentFeature {
 	/** The type of effect to apply. Can be fire or a potion effect name. **/
@@ -81,7 +81,7 @@ public class EffectEquipmentFeature extends EquipmentFeature {
 		if("burning".equals(this.effectType)) {
 			return Component.translatable("effect.burning");
 		}
-		MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(this.effectType));
+		MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(this.effectType));
 		if(effect == null) {
 			return Component.literal(this.effectType);
 		}
@@ -106,12 +106,12 @@ public class EffectEquipmentFeature extends EquipmentFeature {
 
 		// Burning:
 		if("burning".equalsIgnoreCase(this.effectType)) {
-			effectTarget.setSecondsOnFire(Math.round(((float)this.effectDuration) / 20));
+			effectTarget.igniteForSeconds(Math.round(((float)this.effectDuration) / 20));
 			return;
 		}
 
 		// Potion Effects:
-		MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(this.effectType));
+		MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(this.effectType));
 		if(effect != null && this.effectStrength > 0) {
 			effectTarget.addEffect(new MobEffectInstance(effect, this.effectDuration, this.effectStrength - 1));
 		}

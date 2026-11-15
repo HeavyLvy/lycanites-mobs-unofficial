@@ -7,8 +7,8 @@ import com.lycanitesmobs.core.manager.FluidManager;
 import com.lycanitesmobs.core.manager.WorldGenManager;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonSchematic;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -146,7 +146,7 @@ public class WorldgenJsonDumper {
 
     private static JsonObject biomeAddFeatureTag(String placedFeatureTag, String biomesTag, String step) {
         JsonObject root = new JsonObject();
-        root.addProperty("type", "forge:add_features");
+        root.addProperty("type", "neoforge:add_features");
         root.addProperty("biomes", "#" + biomesTag);
         root.addProperty("features", "#" + placedFeatureTag);
         root.addProperty("step", step);
@@ -182,7 +182,7 @@ public class WorldgenJsonDumper {
 
     private static JsonObject biomeAddFeatureUsingBiomeTag(List<String> placedFeatures, String biomeTagId, String step) {
         JsonObject root = new JsonObject();
-        root.addProperty("type", "forge:add_features");
+        root.addProperty("type", "neoforge:add_features");
         root.addProperty("biomes", "#" + biomeTagId);
 
         JsonArray features = new JsonArray();
@@ -336,7 +336,7 @@ public class WorldgenJsonDumper {
 
     private static JsonObject biomeAddFeature(String placedFeature, String biomesTag, String step) {
         JsonObject root = new JsonObject();
-        root.addProperty("type", "forge:add_features");
+        root.addProperty("type", "neoforge:add_features");
         root.addProperty("biomes", biomesTag);
         root.addProperty("features", placedFeature);
         root.addProperty("step", step);
@@ -345,7 +345,7 @@ public class WorldgenJsonDumper {
 
     private static JsonObject biomeAddFeatureMulti(List<String> placedFeatures, List<String> biomesList, String step) {
         JsonObject root = new JsonObject();
-        root.addProperty("type", "forge:add_features");
+        root.addProperty("type", "neoforge:add_features");
 
         JsonArray biomes = new JsonArray();
         for (String b : biomesList) {
@@ -471,8 +471,8 @@ public class WorldgenJsonDumper {
     private static void dumpFluidFeatures(Path root) throws IOException {
         FluidManager.getInstance().forEachWorldgenFluidBlock((fluidName, block) -> {
 
-            ResourceLocation blockId = ForgeRegistries.BLOCKS.getKey(block);
-            ResourceLocation fluidId = ForgeRegistries.FLUIDS.getKey(block.getFluid());
+            ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(block);
+            ResourceLocation fluidId = BuiltInRegistries.FLUID.getKey(block.getFluid());
             if (blockId == null || fluidId == null) {
                 return;
             }

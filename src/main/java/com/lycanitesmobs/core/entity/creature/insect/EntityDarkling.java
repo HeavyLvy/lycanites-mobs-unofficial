@@ -84,7 +84,7 @@ public class EntityDarkling extends TameableCreatureEntity implements Enemy {
             this.noPhysics = true;
 
             // Movement:
-            Vector3d latchPos = this.getFacingPositionDouble(this.getLatchTarget().position().x(), this.getLatchTarget().position().y() + (this.getLatchTarget().getDimensions(Pose.STANDING).height * this.latchHeight), this.getLatchTarget().position().z(), this.getLatchTarget().getDimensions(Pose.STANDING).width * 0.5D, this.latchAngle);
+            Vector3d latchPos = this.getFacingPositionDouble(this.getLatchTarget().position().x(), this.getLatchTarget().position().y() + (this.getLatchTarget().getDimensions(Pose.STANDING).height() * this.latchHeight), this.getLatchTarget().position().z(), this.getLatchTarget().getDimensions(Pose.STANDING).width() * 0.5D, this.latchAngle);
             this.setPos(latchPos.x, latchPos.y, latchPos.z);
             double distanceX = this.getLatchTarget().position().x() - this.position().x();
             double distanceZ = this.getLatchTarget().position().z() - this.position().z();
@@ -109,7 +109,7 @@ public class EntityDarkling extends TameableCreatureEntity implements Enemy {
             // Client:
             else {
                 for (int i = 0; i < 2; ++i) {
-                    this.getCommandSenderWorld().addParticle(DustParticleOptions.REDSTONE, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height, this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width, 0.0D, 0.0D, 0.0D);
+                    this.getCommandSenderWorld().addParticle(DustParticleOptions.REDSTONE, this.position().x() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + this.random.nextDouble() * (double) this.getDimensions(Pose.STANDING).height(), this.position().z() + (this.random.nextDouble() - 0.5D) * (double) this.getDimensions(Pose.STANDING).width(), 0.0D, 0.0D, 0.0D);
                 }
             }
         } else
@@ -253,7 +253,7 @@ public class EntityDarkling extends TameableCreatureEntity implements Enemy {
             double d1 = this.random.nextGaussian() * 0.02D;
             double d2 = this.random.nextGaussian() * 0.02D;
             for (int i = 0; i < 100; i++)
-                this.getCommandSenderWorld().addParticle(particle, this.position().x() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width, this.position().y() + 0.5D + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).height), this.position().z() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width * 2.0F) - (double) this.getDimensions(Pose.STANDING).width, d0, d1, d2);
+                this.getCommandSenderWorld().addParticle(particle, this.position().x() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width() * 2.0F) - (double) this.getDimensions(Pose.STANDING).width(), this.position().y() + 0.5D + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).height()), this.position().z() + (double) (this.random.nextFloat() * this.getDimensions(Pose.STANDING).width() * 2.0F) - (double) this.getDimensions(Pose.STANDING).width(), d0, d1, d2);
         }
         super.startStealth();
     }

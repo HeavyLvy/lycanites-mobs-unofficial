@@ -23,8 +23,8 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
@@ -207,7 +207,7 @@ public class CreatureObjModel extends CreatureModel {
         this.modelPath = path;
 
         this.objModel = new VBOObjModel(
-                new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"),
+                ResourceLocation.fromNamespaceAndPath(modInfo.modid, "modelparts/" + path + ".obj"),
                 resourceManager
         );
         this.objParts = this.objModel.objParts;
@@ -216,7 +216,7 @@ public class CreatureObjModel extends CreatureModel {
 
         this.animator = new Animator(this);
 
-        ResourceLocation modelPartsLocation = new ResourceLocation(modInfo.modid, "modelparts/" + path + "_parts.json");
+        ResourceLocation modelPartsLocation = ResourceLocation.fromNamespaceAndPath(modInfo.modid, "modelparts/" + path + "_parts.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
             InputStream in = resourceManager.getResource(modelPartsLocation).get().open();
@@ -241,7 +241,7 @@ public class CreatureObjModel extends CreatureModel {
             part.addChildren(this.animationParts.values().toArray(new AnimationPart[this.animationParts.size()]));
         }
 
-        ResourceLocation animationLocation = new ResourceLocation(modInfo.modid, "modelparts/" + path + "_animation.json");
+        ResourceLocation animationLocation = ResourceLocation.fromNamespaceAndPath(modInfo.modid, "modelparts/" + path + "_animation.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
             InputStream in = resourceManager.getResource(animationLocation).get().open();

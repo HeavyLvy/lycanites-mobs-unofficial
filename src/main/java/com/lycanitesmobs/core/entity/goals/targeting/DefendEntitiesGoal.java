@@ -102,10 +102,10 @@ public class DefendEntitiesGoal extends TargetingGoal {
     	if(this.host.getOwner() != null)
     		return false;
         
-        double distance = this.getTargetDistance() - this.host.getDimensions(Pose.STANDING).width;
-        double heightDistance = 4.0D - this.host.getDimensions(Pose.STANDING).height;
+        double distance = this.getTargetDistance() - this.host.getDimensions(Pose.STANDING).width();
+        double heightDistance = 4.0D - this.host.getDimensions(Pose.STANDING).height();
         if(this.host.useDirectNavigator())
-            heightDistance = this.getTargetDistance() - this.host.getDimensions(Pose.STANDING).height;
+            heightDistance = this.getTargetDistance() - this.host.getDimensions(Pose.STANDING).height();
         if(this.host.useDirectNavigator())
             heightDistance = distance;
         this.target = this.getNewTarget(distance, heightDistance, distance);

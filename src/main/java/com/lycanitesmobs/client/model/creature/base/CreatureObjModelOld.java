@@ -18,8 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
@@ -139,7 +139,7 @@ public class CreatureObjModelOld extends CreatureModel {
         this.modelModInfo = modInfo;
         this.modelPath = path;
 
-        this.objModel = new VBOObjModel(new ResourceLocation(modInfo.modid, "modelparts/" + path + ".obj"), resourceManager);
+        this.objModel = new VBOObjModel(ResourceLocation.fromNamespaceAndPath(modInfo.modid, "modelparts/" + path + ".obj"), resourceManager);
         this.wavefrontParts = this.objModel.objParts;
         if (this.wavefrontParts.isEmpty())
             LMHelperClass.logWarningMessage("Unable to load (old format) model obj for: " + name + "");
@@ -159,7 +159,7 @@ public class CreatureObjModelOld extends CreatureModel {
         if (this.modelModInfo == null || this.modelPath == null) return;
 
         this.jsonPartCenters.clear();
-        ResourceLocation partsLocation = new ResourceLocation(this.modelModInfo.modid, "modelparts/" + this.modelPath + "_parts.json");
+        ResourceLocation partsLocation = ResourceLocation.fromNamespaceAndPath(this.modelModInfo.modid, "modelparts/" + this.modelPath + "_parts.json");
         try {
             Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
             InputStream in = resourceManager.getResource(partsLocation).get().open();

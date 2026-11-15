@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.event.mobevent;
 
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.gui.screen.base.BaseOverlayScreen;
 import com.lycanitesmobs.client.manager.ClientManager;
@@ -9,16 +10,16 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-@Mod.EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT)
 public class ClientMobEventEvents {
     private static class ClientWorldState {
         final Map<String, MobEventPlayerClient> mobEventPlayers = new HashMap<>();
@@ -28,7 +29,7 @@ public class ClientMobEventEvents {
     private static final Map<Level, ClientWorldState> WORLD_STATES = new WeakHashMap<>();
 
     @SubscribeEvent
-    public static void onClientUpdate(TickEvent.ClientTickEvent event) {
+    public static void onClientUpdate(ClientTickEvent.Post event) {
         if (ClientManager.getInstance().getClientPlayer() == null)
             return;
 

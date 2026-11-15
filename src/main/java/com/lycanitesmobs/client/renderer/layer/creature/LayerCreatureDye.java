@@ -6,8 +6,8 @@ import com.lycanitesmobs.core.entity.creature.aberration.EntityYale;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)

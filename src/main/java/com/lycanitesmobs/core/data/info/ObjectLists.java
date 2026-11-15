@@ -10,7 +10,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -279,7 +279,7 @@ public class ObjectLists {
 		if(itemStack.getItem() instanceof PickaxeItem) {
 			return true;
 		}
-		if(itemStack.canPerformAction(ToolActions.PICKAXE_DIG)) {
+		if(itemStack.canPerformAction(ItemAbilities.PICKAXE_DIG)) {
 			return true;
 		}
 		return false;
@@ -293,7 +293,7 @@ public class ObjectLists {
 		if(itemStack.getItem() instanceof AxeItem) {
 			return true;
 		}
-		if(itemStack.canPerformAction(ToolActions.AXE_DIG)) {
+		if(itemStack.canPerformAction(ItemAbilities.AXE_DIG)) {
 			return true;
 		}
         return false;
@@ -307,7 +307,7 @@ public class ObjectLists {
 		if(itemStack.getItem() instanceof ShovelItem) {
 			return true;
 		}
-		if(itemStack.canPerformAction(ToolActions.SHOVEL_DIG)) {
+		if(itemStack.canPerformAction(ItemAbilities.SHOVEL_DIG)) {
 			return true;
 		}
 		return false;

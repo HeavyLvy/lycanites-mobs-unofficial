@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayer;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
