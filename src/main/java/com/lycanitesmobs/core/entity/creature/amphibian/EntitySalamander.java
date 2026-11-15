@@ -128,7 +128,7 @@ public class EntitySalamander extends RideableCreatureEntity implements Enemy {
             for(LivingEntity possibleTarget : possibleTargets) {
                 boolean doDamage = true;
                 if(this.getRider() instanceof Player) {
-                    if(NeoForge.EVENT_BUS.post(new AttackEntityEvent((Player)this.getRider(), possibleTarget))) {
+                    if (NeoForge.EVENT_BUS.post(new AttackEntityEvent((Player)this.getRider(), possibleTarget)).isCanceled()) {
                         doDamage = false;
                     }
                 }

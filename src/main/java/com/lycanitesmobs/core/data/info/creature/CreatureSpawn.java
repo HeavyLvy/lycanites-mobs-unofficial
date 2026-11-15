@@ -9,7 +9,6 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraftforge.common.DungeonHooks;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -353,8 +352,8 @@ public class CreatureSpawn {
         // Dungeon Spawn:
         if (!spawnConfig.disableDungeonSpawners()) {
             if (this.dungeonWeight > 0) {
-                DungeonHooks.addDungeonMob(creatureInfo.getEntityType(), this.dungeonWeight);
-                LMHelperClass.logDebug("MobSetup", "Dungeon Spawn Added - Weight: " + this.dungeonWeight);
+                // TODO(port): NeoForge removed DungeonHooks; vanilla dungeon spawners can no longer be extended from code.
+                LMHelperClass.logDebug("MobSetup", "Dungeon spawner weight " + this.dungeonWeight + " ignored (no NeoForge dungeon hook)");
             }
         }
     }

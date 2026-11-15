@@ -22,7 +22,7 @@ public class BlockyRenderer extends MobRenderer<Mob, HierarchicalModel<Mob>> {
 
     @Override
     protected void setupRotations(Mob entity, PoseStack pPoseStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks, float scale) {
-        super.setupRotations(entity, pPoseStack, pAgeInTicks, pRotationYaw, pPartialTicks);
+        super.setupRotations(entity, pPoseStack, pAgeInTicks, pRotationYaw, pPartialTicks, scale);
        /* float bodyYaw = entity.yBodyRot;
         float headYaw = entity.getYHeadRot();
         float deltaYaw = *//*headYaw - *//*bodyYaw;

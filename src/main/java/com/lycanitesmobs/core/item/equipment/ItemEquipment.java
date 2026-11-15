@@ -1,5 +1,8 @@
 package com.lycanitesmobs.core.item.equipment;
 
+import com.lycanitesmobs.core.util.helpers.RegistryHelper;
+import net.minecraft.core.component.DataComponents;
+import com.lycanitesmobs.core.util.helpers.ItemNbt;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import com.google.common.collect.Multimap;
@@ -82,7 +85,7 @@ public class ItemEquipment extends BaseItem {
 
     @Override
     public Component getName(ItemStack itemStack) {
-        if (itemStack.hasCustomHoverName()) {
+        if (itemStack.has(DataComponents.CUSTOM_NAME)) {
             return itemStack.getHoverName();
         }
         if (ItemConfig.usesEquipmentSpecialNames()) {
@@ -229,7 +232,7 @@ public class ItemEquipment extends BaseItem {
         NonNullList<ItemStack> itemStacks = NonNullList.withSize(PART_LIMIT, ItemStack.EMPTY);
         CompoundTag nbt = this.getTagCompound(itemStack);
         if (nbt.contains("Items")) {
-            ContainerHelper.loadAllItems(nbt, itemStacks); // Reads ItemStacks into a List from "Items" tag.
+            ContainerHelper.loadAllItems(nbt, itemStacks, RegistryHelper.access()); // Reads ItemStacks into a List from "Items" tag.
         }
         return itemStacks;
     }
@@ -280,8 +283,8 @@ public class ItemEquipment extends BaseItem {
         NonNullList<ItemStack> itemStacks = this.getEquipmentPartStacks(equipmentStack);
         itemStacks.set(slotIndex, equipmentPartStack);
         CompoundTag nbt = this.getTagCompound(equipmentStack);
-        ContainerHelper.saveAllItems(nbt, itemStacks);
-        equipmentStack.setTag(nbt);
+        ContainerHelper.saveAllItems(nbt, itemStacks, RegistryHelper.access());
+        ItemNbt.setTag(equipmentStack, nbt);
     }
 
     /**
@@ -415,8 +418,8 @@ public class ItemEquipment extends BaseItem {
         }
 
         CompoundTag nbt = this.getTagCompound(equipmentStack);
-        ContainerHelper.saveAllItems(nbt, itemStacks);
-        equipmentStack.setTag(nbt);
+        ContainerHelper.saveAllItems(nbt, itemStacks, RegistryHelper.access());
+        ItemNbt.setTag(equipmentStack, nbt);
         return sharpnessIncreased;
     }
 
@@ -438,8 +441,8 @@ public class ItemEquipment extends BaseItem {
         }
 
         CompoundTag nbt = this.getTagCompound(equipmentStack);
-        ContainerHelper.saveAllItems(nbt, itemStacks);
-        equipmentStack.setTag(nbt);
+        ContainerHelper.saveAllItems(nbt, itemStacks, RegistryHelper.access());
+        ItemNbt.setTag(equipmentStack, nbt);
         return sharpnessDecreased;
     }
 
@@ -482,8 +485,8 @@ public class ItemEquipment extends BaseItem {
         }
 
         CompoundTag nbt = this.getTagCompound(equipmentStack);
-        ContainerHelper.saveAllItems(nbt, itemStacks);
-        equipmentStack.setTag(nbt);
+        ContainerHelper.saveAllItems(nbt, itemStacks, RegistryHelper.access());
+        ItemNbt.setTag(equipmentStack, nbt);
         return manaIncreased;
     }
 
@@ -505,8 +508,8 @@ public class ItemEquipment extends BaseItem {
         }
 
         CompoundTag nbt = this.getTagCompound(equipmentStack);
-        ContainerHelper.saveAllItems(nbt, itemStacks);
-        equipmentStack.setTag(nbt);
+        ContainerHelper.saveAllItems(nbt, itemStacks, RegistryHelper.access());
+        ItemNbt.setTag(equipmentStack, nbt);
         return manaDecreased;
     }
 

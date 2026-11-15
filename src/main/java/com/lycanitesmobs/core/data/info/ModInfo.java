@@ -3,7 +3,6 @@ package com.lycanitesmobs.core.data.info;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.common.BiomeManager;
 
 import java.util.HashMap;
 import java.util.Collections;
@@ -43,10 +42,8 @@ public class ModInfo {
 	public Biome[] biomes = new Biome[0];
 
     /** The list of biome types that mobs in this mod can spawn in. **/
-    public BiomeManager.BiomeType[] biomeTypesAllowed;
 
     /** The list of biome types that mobs in this mod cannot spawn in. **/
-    public BiomeManager.BiomeType[] biomeTypesDenied;
 
 
     // ==================================================

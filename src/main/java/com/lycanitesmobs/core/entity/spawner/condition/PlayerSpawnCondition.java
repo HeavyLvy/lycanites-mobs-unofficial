@@ -222,7 +222,7 @@ public class PlayerSpawnCondition extends SpawnCondition {
         }
 
         // Check Spawn Distance:
-        double spawnDistance = player.position().distanceTo(new Vec3(world.getLevelData().getXSpawn(), world.getLevelData().getYSpawn(), world.getLevelData().getZSpawn()));
+        double spawnDistance = player.position().distanceTo(Vec3.atLowerCornerOf(world.getLevelData().getSpawnPos()));
         if (this.spawnDistanceMin >= 0 && spawnDistance < this.spawnDistanceMin) {
             return false;
         }

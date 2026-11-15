@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.util.helpers;
 
+import net.minecraft.core.RegistryAccess;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -12,9 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries; // TODO(port): datapack registries
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraftforge.registries.tags.ITagManager;
 import org.joml.Vector3d;
 
 import java.util.*;
@@ -243,31 +242,12 @@ public class JSONHelper {
                             }
                         })
                 );
-            } else {
-                ITagManager<Biome> forgeTagManager =
-                        ForgeRegistries.BIOMES.tags();
-
-                TagKey<Biome> forgeKey =
-                        TagKey.create(
-                                Registries.BIOME,
-                                tagLoc
-                        );
-
-                var forgeTag = forgeTagManager.getTag(forgeKey);
-                if (!forgeTag.isEmpty()) {
-                    forgeTag.forEach(biome -> {
-                        ResourceLocation id = ForgeRegistries.BIOMES.getKey(biome);
-                        if (id != null) {
-                            selectedBiomeIds.add(id.toString());
-                        }
-                    });
-                }
             }
 
             if (selectedBiomeIds.isEmpty()) {
                 LMHelperClass.logWarning(
                         "Dungeon",
-                        "Biome tag '" + entry + "' is empty or missing (vanilla and Forge)"
+                        "Biome tag '" + entry + "' is empty or missing"
                 );
             } else {
                 if (additive) {
@@ -319,10 +299,11 @@ public class JSONHelper {
         return biomeTagCache.size();
     }
 
-    public static List<Biome> getBiomes(List<String> biomeIds) {
+    public static List<Biome> getBiomes(RegistryAccess registryAccess, List<String> biomeIds) {
         List<Biome> biomes = new ArrayList<>();
+        var biomeRegistry = registryAccess.registryOrThrow(Registries.BIOME);
         for (String biomeId : biomeIds) {
-            Biome biome = ForgeRegistries.BIOMES.getValue(ResourceLocation.parse(biomeId));
+            Biome biome = biomeRegistry.get(ResourceLocation.parse(biomeId));
             if (biome != null) {
                 biomes.add(biome);
             }

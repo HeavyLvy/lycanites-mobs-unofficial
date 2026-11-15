@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.effect;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.core.Holder;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
@@ -34,7 +36,7 @@ import java.util.UUID;
  */
 public class FearHandler {
     private static final double STEP_HEIGHT_BOOST = 0.5;
-    private static final UUID STEP_HEIGHT_UUID = UUID.fromString("a5f6a820-97d3-4be8-a05e-7c3e6e3d8f1a");
+    private static final ResourceLocation STEP_HEIGHT_ID = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "fear_step_height");
 
     // --- Amplifier scaling ---
     /** Amplifier at which all values reach their maximum (Fear V = amplifier 4). */
@@ -202,10 +204,10 @@ public class FearHandler {
         if (this.stepHeightApplied) {
             return;
         }
-        AttributeInstance attr = entity.getAttribute(NeoForgeMod.STEP_HEIGHT_ADDITION.get());
-        if (attr != null && attr.getModifier(STEP_HEIGHT_UUID) == null) {
+        AttributeInstance attr = entity.getAttribute(Attributes.STEP_HEIGHT);
+        if (attr != null && attr.getModifier(STEP_HEIGHT_ID) == null) {
             attr.addTransientModifier(new AttributeModifier(
-                    STEP_HEIGHT_UUID, "Fear step height boost", STEP_HEIGHT_BOOST, AttributeModifier.Operation.ADD_VALUE
+                    STEP_HEIGHT_ID, STEP_HEIGHT_BOOST, AttributeModifier.Operation.ADD_VALUE
             ));
         }
         this.stepHeightApplied = true;
@@ -215,9 +217,9 @@ public class FearHandler {
         if (!this.stepHeightApplied) {
             return;
         }
-        AttributeInstance attr = entity.getAttribute(NeoForgeMod.STEP_HEIGHT_ADDITION.get());
+        AttributeInstance attr = entity.getAttribute(Attributes.STEP_HEIGHT);
         if (attr != null) {
-            attr.removeModifier(STEP_HEIGHT_UUID);
+            attr.removeModifier(STEP_HEIGHT_ID);
         }
         this.stepHeightApplied = false;
     }

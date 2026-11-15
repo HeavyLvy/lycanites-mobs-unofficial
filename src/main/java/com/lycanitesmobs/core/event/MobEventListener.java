@@ -1,5 +1,8 @@
 package com.lycanitesmobs.core.event;
 
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.core.Holder;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -41,13 +44,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForgeMod;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 
 public class MobEventListener {
@@ -198,14 +198,14 @@ public class MobEventListener {
     }
 
 
-    private static final UUID SWIFTSWIMMING_MOVE_BOOST_UUID = UUID.fromString("6d4fe17f-06eb-4ebc-a573-364b79faed5e");
-    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID, "Swiftswimming Speed Boost", 1D, AttributeModifier.Operation.ADD_VALUE);
-    private static final UUID SWIFTSWIMMING_MOVE_BOOST_UUID_2 = UUID.fromString("6d4fe17f-06eb-4ebc-a573-364b79faed5d");
-    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_2 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_2, "Swiftswimming Speed Boost 2", 2D, AttributeModifier.Operation.ADD_VALUE);
-    private static final UUID SWIFTSWIMMING_MOVE_BOOST_UUID_3 = UUID.fromString("6d4fe17f-06eb-4ebc-a573-364b79faed5c");
-    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_3 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_3, "Swiftswimming Speed Boost 3", 3D, AttributeModifier.Operation.ADD_VALUE);
-    private static final UUID SWIFTSWIMMING_MOVE_BOOST_UUID_4 = UUID.fromString("6d4fe17f-06eb-4ebc-a573-364b79faed5b");
-    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_4 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_4, "Swiftswimming Speed Boost 4", 4D, AttributeModifier.Operation.ADD_VALUE);
+    private static final ResourceLocation SWIFTSWIMMING_MOVE_BOOST_UUID = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "swiftswimming_move_boost");
+    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID, 1D, AttributeModifier.Operation.ADD_VALUE);
+    private static final ResourceLocation SWIFTSWIMMING_MOVE_BOOST_UUID_2 = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "swiftswimming_move_boost_2");
+    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_2 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_2, 2D, AttributeModifier.Operation.ADD_VALUE);
+    private static final ResourceLocation SWIFTSWIMMING_MOVE_BOOST_UUID_3 = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "swiftswimming_move_boost_3");
+    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_3 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_3, 3D, AttributeModifier.Operation.ADD_VALUE);
+    private static final ResourceLocation SWIFTSWIMMING_MOVE_BOOST_UUID_4 = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "swiftswimming_move_boost_4");
+    private static final AttributeModifier SWIFTSWIMMING_MOVE_BOOST_4 = new AttributeModifier(SWIFTSWIMMING_MOVE_BOOST_UUID_4, 4D, AttributeModifier.Operation.ADD_VALUE);
 
 
     @SubscribeEvent
@@ -258,20 +258,12 @@ public class MobEventListener {
             return;
         }
 
-        Holder<MobEffect> paralysis = ObjectManager.getEffect("paralysis");
-        if (paralysis != null && entity.hasEffect(paralysis) && event.isCancelable()) {
-            event.setCanceled(true);
-        }
-
-        Holder<MobEffect> weight = ObjectManager.getEffect("weight");
-        if (weight != null && entity.hasEffect(weight) && event.isCancelable()) {
-            event.setCanceled(true);
-        }
+        // NOTE: paralysis/weight jump cancelling was here, but LivingJumpEvent is not cancellable (it never ran on Forge either).
     }
 
     @SubscribeEvent
-    public void onLivingAttack(LivingAttackEvent event) {
-        if (event.isCancelable() && event.isCanceled()) {
+    public void onLivingAttack(LivingIncomingDamageEvent event) {
+        if (event.isCanceled()) {
             return;
         }
 
@@ -287,7 +279,7 @@ public class MobEventListener {
 
         Holder<MobEffect> lifeleak = ObjectManager.getEffect("lifeleak");
         if (lifeleak != null && !target.getCommandSenderWorld().isClientSide && attacker.hasEffect(lifeleak)) {
-            if (event.isCancelable()) {
+            {
                 event.setCanceled(true);
             }
             target.heal(event.getAmount());
@@ -295,8 +287,8 @@ public class MobEventListener {
     }
 
     @SubscribeEvent
-    public void onLivingHurt(LivingHurtEvent event) {
-        if (event.isCancelable() && event.isCanceled()) {
+    public void onLivingHurt(LivingIncomingDamageEvent event) {
+        if (event.isCanceled()) {
             return;
         }
 
@@ -333,21 +325,21 @@ public class MobEventListener {
     }
 
     @SubscribeEvent
-    public void onSleep(PlayerSleepInBedEvent event) {
+    public void onSleep(CanPlayerSleepEvent event) {
         Player player = event.getEntity();
-        if (player == null || player.getCommandSenderWorld().isClientSide || event.isCanceled()) {
+        if (player == null || player.getCommandSenderWorld().isClientSide || event.getProblem() != null) {
             return;
         }
 
         Holder<MobEffect> insomnia = ObjectManager.getEffect("insomnia");
         if (insomnia != null && player.hasEffect(insomnia)) {
-            event.setResult(Player.BedSleepingProblem.NOT_SAFE);
+            event.setProblem(Player.BedSleepingProblem.NOT_SAFE);
         }
     }
 
     @SubscribeEvent
     public void onLivingUseItem(LivingEntityUseItemEvent event) {
-        if (event.isCancelable() && event.isCanceled()) {
+        if (event instanceof ICancellableEvent cancellable && cancellable.isCanceled()) {
             return;
         }
 
@@ -357,8 +349,8 @@ public class MobEventListener {
         }
 
         Holder<MobEffect> aphagia = ObjectManager.getEffect("aphagia");
-        if (aphagia != null && !entity.getCommandSenderWorld().isClientSide && entity.hasEffect(aphagia) && event.isCancelable()) {
-            event.setCanceled(true);
+        if (aphagia != null && !entity.getCommandSenderWorld().isClientSide && entity.hasEffect(aphagia) && event instanceof ICancellableEvent cancellable) {
+            cancellable.setCanceled(true);
         }
     }
 
@@ -521,7 +513,7 @@ public class MobEventListener {
             return;
         }
 
-        AttributeInstance movement = entity.getAttribute(NeoForgeMod.SWIM_SPEED.get());
+        AttributeInstance movement = entity.getAttribute(NeoForgeMod.SWIM_SPEED);
         if (movement == null) {
             return;
         }
@@ -537,7 +529,7 @@ public class MobEventListener {
         this.syncSwiftswimmingModifier(movement, amplifier >= 3, SWIFTSWIMMING_MOVE_BOOST_UUID_4, SWIFTSWIMMING_MOVE_BOOST_4);
     }
 
-    private void syncSwiftswimmingModifier(AttributeInstance movement, boolean shouldApply, UUID modifierId, AttributeModifier modifier) {
+    private void syncSwiftswimmingModifier(AttributeInstance movement, boolean shouldApply, ResourceLocation modifierId, AttributeModifier modifier) {
         if (shouldApply && movement.getModifier(modifierId) == null) {
             movement.addPermanentModifier(modifier);
         } else if (!shouldApply && movement.getModifier(modifierId) != null) {
@@ -594,7 +586,7 @@ public class MobEventListener {
         }
     }
 
-    private void handleFallResistance(LivingHurtEvent event, LivingEntity target) {
+    private void handleFallResistance(LivingIncomingDamageEvent event, LivingEntity target) {
         Holder<MobEffect> fallresist = ObjectManager.getEffect("fallresist");
         if (fallresist != null && target.hasEffect(fallresist) && "fall".equals(event.getSource().getMsgId())) {
             event.setAmount(0);
@@ -602,7 +594,7 @@ public class MobEventListener {
         }
     }
 
-    private void handlePenetration(LivingHurtEvent event, LivingEntity target) {
+    private void handlePenetration(LivingIncomingDamageEvent event, LivingEntity target) {
         Holder<MobEffect> penetration = ObjectManager.getEffect("penetration");
         if (penetration != null && target.hasEffect(penetration)) {
             float damage = event.getAmount();
@@ -611,7 +603,7 @@ public class MobEventListener {
         }
     }
 
-    private void handleFearWallCollision(LivingHurtEvent event, LivingEntity target) {
+    private void handleFearWallCollision(LivingIncomingDamageEvent event, LivingEntity target) {
         Holder<MobEffect> fear = ObjectManager.getEffect("fear");
         if (fear != null && target.hasEffect(fear) && "inWall".equals(event.getSource().getMsgId())) {
             event.setAmount(0);
@@ -619,7 +611,7 @@ public class MobEventListener {
         }
     }
 
-    private void handleLeech(LivingHurtEvent event) {
+    private void handleLeech(LivingIncomingDamageEvent event) {
         Holder<MobEffect> leech = ObjectManager.getEffect("leech");
         if (leech == null || event.getSource().getEntity() == null) {
             return;

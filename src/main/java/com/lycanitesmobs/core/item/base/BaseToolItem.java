@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.item.base;
 
+import com.lycanitesmobs.core.util.helpers.ItemNbt;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.info.ModInfo;
 import net.minecraft.ChatFormatting;
@@ -32,7 +33,8 @@ public class BaseToolItem extends DiggerItem {
     public ModInfo modInfo = LycanitesMobs.modInfo;
 
     public BaseToolItem(float attackDamage, float attackSpeed, Tier tier, TagKey<Block> blockTagKey, Properties properties) {
-        super(attackDamage, attackSpeed, tier, blockTagKey, properties);
+        // 1.20.5: digger attack stats are item attribute components set on the properties.
+        super(tier, blockTagKey, properties.attributes(DiggerItem.createAttributes(tier, attackDamage, attackSpeed)));
     }
 
 
@@ -121,8 +123,8 @@ public class BaseToolItem extends DiggerItem {
      * Gets or creates an NBT Compound for the provided itemstack.
      **/
     public CompoundTag getTagCompound(ItemStack itemStack) {
-        if (itemStack.hasTag()) {
-            return itemStack.getTag();
+        if (ItemNbt.hasTag(itemStack)) {
+            return ItemNbt.getTag(itemStack);
         }
         return new CompoundTag();
     }

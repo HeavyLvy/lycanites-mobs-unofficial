@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.util;
 
+import net.minecraft.world.level.block.LiquidBlock;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.DungeonTheme;
 import com.lycanitesmobs.core.worldgen.dungeon.definition.ThemeBlock;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
@@ -11,7 +12,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fluids.IFluidBlock;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -97,7 +97,7 @@ public class CreatureStructure {
 							continue;
 						}
 						BlockState targetState = this.owner.getCommandSenderWorld().getBlockState(blockPos);
-						if (targetState.getBlock() != Blocks.AIR && !(targetState.getBlock() instanceof IFluidBlock)) {
+						if (targetState.getBlock() != Blocks.AIR && !(targetState.getBlock() instanceof LiquidBlock)) {
 							blockState = Blocks.AIR.defaultBlockState();
 						}
 					}

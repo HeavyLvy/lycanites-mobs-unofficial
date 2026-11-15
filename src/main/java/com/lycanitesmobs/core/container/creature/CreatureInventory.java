@@ -543,7 +543,7 @@ public class CreatureInventory implements Container {
 	public void load(CompoundTag nbt) {
     	// Read Items:
         NonNullList<ItemStack> itemStacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-		ContainerHelper.loadAllItems(nbt, itemStacks); // Reads ItemStack into a List from "Items" tag.
+		ContainerHelper.loadAllItems(nbt, itemStacks, this.creature.registryAccess()); // Reads ItemStack into a List from "Items" tag.
 
     	for(int i = 0; i < itemStacks.size(); ++i) {
     		if(i < this.getContainerSize()) {
@@ -570,7 +570,7 @@ public class CreatureInventory implements Container {
 				itemStacks.set(i, this.getItem(i));
 			}
         }
-		ContainerHelper.saveAllItems(nbt, itemStacks); // Adds ItemStack NBT into the NBT Tag Compound.
+		ContainerHelper.saveAllItems(nbt, itemStacks, this.creature.registryAccess()); // Adds ItemStack NBT into the NBT Tag Compound.
     	
     }
 

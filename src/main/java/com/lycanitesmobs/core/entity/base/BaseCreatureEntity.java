@@ -1,5 +1,10 @@
 package com.lycanitesmobs.core.entity.base;
 
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.neoforged.neoforge.common.NeoForgeMod;
@@ -108,8 +113,11 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class BaseCreatureEntity extends PathfinderMob {
-    public static final Attribute DEFENSE = (new RangedAttribute(LycanitesMobs.MODID + ":generic.defense", 4.0D, 0.0D, 1024.0D)).setSyncable(true);
-    public static final Attribute RANGED_SPEED = (new RangedAttribute(LycanitesMobs.MODID + ":generic.ranged_speed", 4.0D, 0.0D, 1024.0D)).setSyncable(true);
+    public static final Attribute DEFENSE_ATTRIBUTE = (new RangedAttribute(LycanitesMobs.MODID + ":generic.defense", 4.0D, 0.0D, 1024.0D)).setSyncable(true);
+    public static final Attribute RANGED_SPEED_ATTRIBUTE = (new RangedAttribute(LycanitesMobs.MODID + ":generic.ranged_speed", 4.0D, 0.0D, 1024.0D)).setSyncable(true);
+    /** 1.21 attribute APIs take holders; these bind to the attributes registered in RegistryEvents#registerAttributes. */
+    public static final DeferredHolder<Attribute, Attribute> DEFENSE = DeferredHolder.create(Registries.ATTRIBUTE, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "defense"));
+    public static final DeferredHolder<Attribute, Attribute> RANGED_SPEED = DeferredHolder.create(Registries.ATTRIBUTE, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "ranged_speed"));
 
     // Core:
     /**
@@ -2387,7 +2395,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     public void setVariant(int variantIndex) {
         this.variant = this.getSubspecies().getVariant(variantIndex);
         if (this.variant != null) {
-            this.getExperienceReward();
+            this.getBaseExperienceReward();
             if ("rare".equals(this.variant.getRarity())) {
                 this.damageLimit = BOSS_DAMAGE_LIMIT;
                 this.damageMax = BOSS_DAMAGE_LIMIT;
@@ -3955,7 +3963,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.6D, 1, 0.6D));
             }
 
-            int fireEnchantDuration = EnchantmentHelper.getFireAspect(this);
+            int fireEnchantDuration = LMHelperClass.getEnchantmentLevel(this.level(), Enchantments.FIRE_ASPECT, this);
             if (fireEnchantDuration > 0) {
                 target.igniteForSeconds(fireEnchantDuration * 4);
             }
@@ -4045,23 +4053,38 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         if (this.isInvulnerableTo(damageSrc)) {
             return;
         }
-        damageAmount = CommonHooks.onLivingHurt(this, damageSrc, damageAmount);
-        if (damageAmount <= 0) {
-            return;
+        // NeoForge 21.1 tracks damage in a DamageContainer (pushed by LivingEntity#hurt, which already fired
+        // LivingIncomingDamageEvent - the old LivingHurtEvent). Lycanites defense replaces vanilla armor/magic
+        // absorption here and is recorded as the ARMOR reduction so events see the right numbers.
+        boolean ownContainer = this.damageContainers.isEmpty();
+        if (ownContainer) {
+            this.damageContainers.push(new DamageContainer(damageSrc, damageAmount));
         }
+        try {
+            DamageContainer container = this.damageContainers.peek();
+            float incoming = container.getNewDamage();
+            float resolved = this.resolveIncomingDamage(damageSrc, incoming);
+            container.setReduction(DamageContainer.Reduction.ARMOR, incoming - resolved);
 
-        damageAmount = this.resolveIncomingDamage(damageSrc, damageAmount);
-        float damageBeforeAbsorption = damageAmount;
-        damageAmount = Math.max(damageAmount - this.getAbsorptionAmount(), 0.0F);
-        this.setAbsorptionAmount(this.getAbsorptionAmount() - (damageBeforeAbsorption - damageAmount));
-        this.awardAbsorptionDamageStat(damageSrc, damageBeforeAbsorption - damageAmount);
+            float damage = CommonHooks.onLivingDamagePre(this, container);
+            container.setReduction(DamageContainer.Reduction.ABSORPTION, Math.min(this.getAbsorptionAmount(), damage));
+            float absorbed = Math.min(damage, container.getReduction(DamageContainer.Reduction.ABSORPTION));
+            this.setAbsorptionAmount(Math.max(0, this.getAbsorptionAmount() - absorbed));
+            this.awardAbsorptionDamageStat(damageSrc, absorbed);
 
-        damageAmount = CommonHooks.onLivingDamage(this, damageSrc, damageAmount);
-        if (damageAmount != 0.0F) {
-            float healthBeforeDamage = this.getHealth();
-            this.getCombatTracker().recordDamage(damageSrc, damageAmount);
-            this.setHealth(healthBeforeDamage - damageAmount);
-            this.setAbsorptionAmount(this.getAbsorptionAmount() - damageAmount);
+            float finalDamage = container.getNewDamage();
+            if (finalDamage != 0.0F) {
+                float healthBeforeDamage = this.getHealth();
+                this.getCombatTracker().recordDamage(damageSrc, finalDamage);
+                this.setHealth(healthBeforeDamage - finalDamage);
+                this.gameEvent(GameEvent.ENTITY_DAMAGE);
+                this.onDamageTaken(container);
+            }
+            CommonHooks.onLivingDamagePost(this, container);
+        } finally {
+            if (ownContainer) {
+                this.damageContainers.pop();
+            }
         }
     }
 
@@ -4311,7 +4334,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     }
 
     void dropExperienceBase() {
-        this.dropExperience();
+        this.dropExperience(this.getLastHurtByMob());
     }
 
     private void activateLeashAI() {
@@ -5395,8 +5418,9 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         }
 
         int lootingLevel = 0;
-        if (damageSource.getEntity() != null) {
-            lootingLevel = CommonHooks.getLootingLevel(this, damageSource.getEntity(), damageSource);
+        if (damageSource.getEntity() instanceof LivingEntity attacker) {
+            // NeoForge 21.1 removed the looting event; looting is the attacker's enchantment level.
+            lootingLevel = LMHelperClass.getEnchantmentLevel(level, Enchantments.LOOTING, attacker);
         }
 
         for (ItemDrop itemDrop : this.drops) {
@@ -5417,7 +5441,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
             this.dropItem(itemDrop.getEntityDropItemStack(this, quantity));
         }
 
-        this.dropExperience();
+        this.dropExperience(this.getLastHurtByMob());
     }
 
     public boolean canDropItem(ItemDrop itemDrop) {
@@ -6144,7 +6168,6 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     /**
      * If true, this creature will gain air when in contact with water.
      **/
-    @Override
     /** Whether this creature can breathe in water (vanilla's canBreatheUnderwater is final and tag-based since 1.20.5). */
     public boolean isWaterBreather() {
         return this.extraMobBehaviour != null && this.extraMobBehaviour.waterBreathingOverride();

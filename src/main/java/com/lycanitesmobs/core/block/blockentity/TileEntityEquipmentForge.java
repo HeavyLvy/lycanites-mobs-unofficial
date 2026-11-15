@@ -167,7 +167,7 @@ public class TileEntityEquipmentForge extends TileEntityBase {
             syncData.putInt("ForgeLevel", this.forgeLevel);
         }
 
-        return ClientboundBlockEntityDataPacket.create(this, be -> syncData);
+        return ClientboundBlockEntityDataPacket.create(this, (be, registries) -> syncData);
     }
 
 

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.event;
 
+import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
@@ -250,8 +251,8 @@ public class RegistryEvents {
     public void registerAttributes(RegisterEvent event) {
         event.register(Registries.ATTRIBUTE,
                 helper -> {
-                    helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "defense"), BaseCreatureEntity.DEFENSE);
-                    helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "ranged_speed"), BaseCreatureEntity.RANGED_SPEED);
+                    helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "defense"), BaseCreatureEntity.DEFENSE_ATTRIBUTE);
+                    helper.register(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "ranged_speed"), BaseCreatureEntity.RANGED_SPEED_ATTRIBUTE);
                 }
         );
     }
@@ -314,7 +315,7 @@ public class RegistryEvents {
 
             event.register(
                     cast(entry.getValue()),
-                    SpawnPlacements.Type.NO_RESTRICTIONS,
+                    SpawnPlacementTypes.NO_RESTRICTIONS,
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     (type, level, spawnType, pos, random) -> true,
                     RegisterSpawnPlacementsEvent.Operation.OR
@@ -336,7 +337,7 @@ public class RegistryEvents {
     public static void onRightClickTurtleScute(PlayerInteractEvent.RightClickItem event) {
         if (FMLEnvironment.production) return;
         if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
-        if (event.getItemStack().getItem() != Items.SCUTE) return;
+        if (event.getItemStack().getItem() != Items.TURTLE_SCUTE) return;
 
         if (event.getHand() == InteractionHand.OFF_HAND) {
             spawnCreatureGallery(serverLevel, event.getEntity());

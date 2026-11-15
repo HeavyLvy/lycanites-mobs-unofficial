@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.tabs;
 
+import net.minecraft.core.component.DataComponents;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.item.consumable.entity.ChargeItem;
 import com.lycanitesmobs.core.item.consumable.entity.ItemCustomSpawnEgg;
@@ -55,7 +56,7 @@ public class LMItemsGroup {
                     for (String name : filtered) {
                         Item item = ObjectManager.getItem(name);
 
-                        boolean isFood = item != null && item.getFoodProperties() != null;
+                        boolean isFood = item != null && item.components().has(DataComponents.FOOD);
 
                         if (isFood) {
                             List<String> list = groups.get(FOOD_KEY);

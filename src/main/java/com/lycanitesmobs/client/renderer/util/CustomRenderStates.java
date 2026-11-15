@@ -170,14 +170,14 @@ public class CustomRenderStates extends RenderStateShard {
 
     @OnlyIn(Dist.CLIENT)
     public static void setupOutline() {
-        RenderSystem.assertOnGameThread();
+        RenderSystem.assertOnRenderThread();
         _texEnv(8960, 8704, 34160);
         color1arg(7681, 34168);
     }
 
     @OnlyIn(Dist.CLIENT)
     public static void _texEnv(int p_227643_0_, int p_227643_1_, int p_227643_2_) {
-        RenderSystem.assertOnGameThread();
+        RenderSystem.assertOnRenderThread();
         GL11.glTexEnvi(p_227643_0_, p_227643_1_, p_227643_2_);
     }
 
@@ -190,7 +190,7 @@ public class CustomRenderStates extends RenderStateShard {
 
     @OnlyIn(Dist.CLIENT)
     public static void teardownOutline() {
-        RenderSystem.assertOnGameThread();
+        RenderSystem.assertOnRenderThread();
         _texEnv(8960, 8704, 8448);
         color3arg(8448, 5890, 34168, 34166);
     }
@@ -208,7 +208,7 @@ public class CustomRenderStates extends RenderStateShard {
 
     @OnlyIn(Dist.CLIENT)
     public static final TexturingStateShard OUTLINE_TEXTURING = new TexturingStateShard("outline_texturing", () -> {
-        assertThread(RenderSystem::isOnGameThread);
+        assertThread(RenderSystem::isOnRenderThread);
         setupOutline();
     }, CustomRenderStates::teardownOutline);
 

@@ -197,7 +197,7 @@ public class StructureSpawnInjector extends JSONLoader {
                 if (count >= config.maxInStructure) {
                     LMHelperClass.logDebug("MobSpawns", "Structure spawn cap reached for '" + config.name
                             + "' in " + id + " (count=" + count + ", max=" + config.maxInStructure + "). Denying spawn of " + type + ".");
-                    event.setResult(Event.Result.DENY);
+                    event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
                     return;
                 }
             }

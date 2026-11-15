@@ -241,7 +241,7 @@ public class BlockFireBase extends BlockBase {
 
         if (this.spreadChance <= 0 || permanent) return;
 
-        boolean highHumidity = world.getBiome(pos).get().getModifiedClimateSettings().downfall() > 0.85F;
+        boolean highHumidity = world.getBiome(pos).value().getModifiedClimateSettings().downfall() > 0.85F;
         int humidity = highHumidity ? -50 : 0;
         this.tryCatchFire(world, pos.east(), 300 + humidity, rand, age, Direction.WEST);
         this.tryCatchFire(world, pos.west(), 300 + humidity, rand, age, Direction.EAST);

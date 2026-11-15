@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.container.block;
 
+import net.minecraft.util.FastColor;
 import com.lycanitesmobs.core.container.base.BaseContainer;
 import com.lycanitesmobs.core.container.slot.EquipmentInfuserChargeSlot;
 import com.lycanitesmobs.core.container.slot.EquipmentInfuserPartSlot;
@@ -102,7 +103,8 @@ public class EquipmentInfuserContainer extends BaseContainer {
             if (this.chargeSlot.getItem().getItem() instanceof DyeItem) {
                 DyeItem dyeItem = (DyeItem) this.chargeSlot.getItem().getItem();
                 DyeColor dyeColor = dyeItem.getDyeColor();
-                equipmentPart.setColor(this.partSlot.getItem(), dyeColor.getTextureDiffuseColors()[0], dyeColor.getTextureDiffuseColors()[1], dyeColor.getTextureDiffuseColors()[2]);
+                int diffuse = dyeColor.getTextureDiffuseColor(); // packed ARGB in 1.21
+            equipmentPart.setColor(this.partSlot.getItem(), FastColor.ARGB32.red(diffuse) / 255.0F, FastColor.ARGB32.green(diffuse) / 255.0F, FastColor.ARGB32.blue(diffuse) / 255.0F);
                 this.chargeSlot.remove(1);
                 return;
             }

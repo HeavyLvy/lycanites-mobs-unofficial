@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.worldgen.config;
 
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -13,9 +14,7 @@ public class NoPlacementConfig extends PlacementModifier {
     PlacementModifierType<NoPlacementConfig> NO_PLACEMENT_CONFIG = PlacementModifierType.register("alwaysPlacement", NoPlacementConfig.CODEC);
 
     public static final NoPlacementConfig INSTANCE = new NoPlacementConfig();
-    public static final Codec<NoPlacementConfig> CODEC = Codec.unit(() -> {
-        return INSTANCE;
-    });
+    public static final MapCodec<NoPlacementConfig> CODEC = MapCodec.unit(() -> INSTANCE);
 
     public NoPlacementConfig() {
     }

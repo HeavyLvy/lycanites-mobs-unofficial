@@ -1,5 +1,11 @@
 package com.lycanitesmobs.core.util.helpers;
 
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.block.SugarCaneBlock;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.BushBlock;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.config.ConfigDebug;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
@@ -40,7 +46,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
@@ -51,9 +57,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.IPlantable;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.minecraftforge.registries.ForgeRegistries; // TODO(port): datapack registries
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector3d;
@@ -228,6 +232,25 @@ public class LMHelperClass {
         return null;
     }
 
+    /** Enchantments are a datapack registry in 1.21: resolve the holder from the level, then read the entity's level. */
+    public static int getEnchantmentLevel(Level level, ResourceKey<Enchantment> enchantment, LivingEntity entity) {
+        if (level == null || entity == null) {
+            return 0;
+        }
+        return level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(enchantment)
+                .map(holder -> EnchantmentHelper.getEnchantmentLevel(holder, entity))
+                .orElse(0);
+    }
+
+    public static int getItemEnchantmentLevel(Level level, ResourceKey<Enchantment> enchantment, ItemStack stack) {
+        if (level == null || stack == null) {
+            return 0;
+        }
+        return level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(enchantment)
+                .map(holder -> EnchantmentHelper.getItemEnchantmentLevel(holder, stack))
+                .orElse(0);
+    }
+
     public static ResourceLocation convertToResourceLocation(Object input) {
         if (input == null) {
             return null;
@@ -253,7 +276,7 @@ public class LMHelperClass {
         } else if (input instanceof Potion potion) {
             return BuiltInRegistries.POTION.getKey(potion);
         } else if (input instanceof Enchantment enchantment) {
-            return ForgeRegistries.ENCHANTMENTS.getKey(enchantment);
+            throw new IllegalArgumentException("Enchantments are a datapack registry in 1.21 - use convertToResourceLocation(enchantment, registryAccess)");
         } else if (input instanceof BlockEntityType<?> blockEntityType) {
             return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType);
         } else if (input instanceof ParticleType<?> particleType) {
@@ -261,7 +284,7 @@ public class LMHelperClass {
         } else if (input instanceof MenuType<?> menuType) {
             return BuiltInRegistries.MENU.getKey(menuType);
         } else if (input instanceof PaintingVariant paintingVariant) {
-            return ForgeRegistries.PAINTING_VARIANTS.getKey(paintingVariant);
+            throw new IllegalArgumentException("Painting variants are a datapack registry in 1.21 - use convertToResourceLocation(paintingVariant, registryAccess)");
         } else if (input instanceof RecipeType<?> recipeType) {
             return BuiltInRegistries.RECIPE_TYPE.getKey(recipeType);
         } else if (input instanceof RecipeSerializer<?> recipeSerializer) {
@@ -496,7 +519,8 @@ public class LMHelperClass {
         }
 
         public static boolean isPlant(Block block) {
-            return block instanceof IPlantable;
+            // IPlantable was removed in NeoForge 1.21; these are the vanilla blocks that implemented it.
+            return block instanceof BushBlock || block instanceof CactusBlock || block instanceof SugarCaneBlock;
         }
 
         public static boolean isReplaceablePlant(Block block) {

@@ -10,7 +10,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.fluids.IFluidBlock;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,11 +118,9 @@ public class BlockSpawnLocation extends SpawnLocation {
                     BlockState blockState = world.getBlockState(mutablePos);
 
                     // Ignore Flowing Liquids:
-                    if (blockState.getBlock() instanceof IFluidBlock) {
-                        float filled = ((IFluidBlock) blockState.getBlock()).getFilledPercentage(world, mutablePos);
-                        if (filled != 1 && filled != -1) {
-                            continue;
-                        }
+                    // (Forge's IFluidBlock is gone; check the fluid state directly.)
+                    if (!blockState.getFluidState().isEmpty() && !blockState.getFluidState().isSource()) {
+                        continue;
                     }
 
                     // Check Block:

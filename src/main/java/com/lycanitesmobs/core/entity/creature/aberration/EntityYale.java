@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.aberration;
 
+import net.minecraft.util.FastColor;
+import net.minecraft.world.item.crafting.CraftingInput;
 import java.util.List;
 import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.google.common.collect.Maps;
@@ -186,8 +188,9 @@ public class EntityYale extends AgeableCreatureEntity implements IShearable {
 		DyeColor dyeA = father.getColor();
 		DyeColor dyeB = mother.getColor();
 		TransientCraftingContainer craftinginventory = mixColors(dyeA, dyeB);
-		return this.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftinginventory, this.level()).map((craftingRecipe) ->
-				craftingRecipe.assemble(craftinginventory,level().registryAccess())).map(ItemStack::getItem).filter(DyeItem.class::isInstance).map(DyeItem.class::cast).map(DyeItem::getDyeColor).orElseGet(() ->
+		CraftingInput craftingInput = craftinginventory.asCraftInput();
+		return this.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInput, this.level()).map((craftingRecipe) ->
+				craftingRecipe.value().assemble(craftingInput, level().registryAccess())).map(ItemStack::getItem).filter(DyeItem.class::isInstance).map(DyeItem.class::cast).map(DyeItem::getDyeColor).orElseGet(() ->
 				this.level().random.nextBoolean() ? dyeA : dyeB);
 	}
 
@@ -211,7 +214,8 @@ public class EntityYale extends AgeableCreatureEntity implements IShearable {
 		if (p_192020_0_ == DyeColor.WHITE) {
 			return new float[]{0.9019608F, 0.9019608F, 0.9019608F};
 		} else {
-			float[] afloat = p_192020_0_.getTextureDiffuseColors();
+			int diffuse = p_192020_0_.getTextureDiffuseColor();
+			float[] afloat = new float[]{FastColor.ARGB32.red(diffuse) / 255.0F, FastColor.ARGB32.green(diffuse) / 255.0F, FastColor.ARGB32.blue(diffuse) / 255.0F};
 			float f = 0.75F;
 			return new float[]{afloat[0] * 0.75F, afloat[1] * 0.75F, afloat[2] * 0.75F};
 		}

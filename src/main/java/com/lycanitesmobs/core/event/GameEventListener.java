@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.event;
 
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Items;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
@@ -52,7 +54,6 @@ import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import net.neoforged.neoforge.event.entity.living.*;
-import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -246,8 +247,7 @@ public class GameEventListener {
 		Item item = itemStack.getItem();
 		if (item instanceof ItemBase) {
 			if (item.itemInteractionForEntity(itemStack, player, (LivingEntity)entity, event.getHand())) {
-				if (event.isCancelable())
-					event.setCanceled(true);
+				event.setCanceled(true);
 			}
 		}*/
     }
@@ -258,7 +258,7 @@ public class GameEventListener {
     // ==================================================
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onAttackTarget(LivingChangeTargetEvent event) {
-        Entity targetEntity = event.getNewTarget();
+        Entity targetEntity = event.getNewAboutToBeSetTarget();
         if (event.getEntity() == null || targetEntity == null) {
             return;
         }
@@ -266,8 +266,7 @@ public class GameEventListener {
         // Better Invisibility:
         if (!event.getEntity().hasEffect(MobEffects.INVISIBILITY)) {
             if (targetEntity.isInvisible()) {
-                if (event.isCancelable())
-                    event.setCanceled(true);
+                event.setCanceled(true);
                 //event.getEntity().setRevengeTarget(null);
                 return;
             }
@@ -277,8 +276,7 @@ public class GameEventListener {
         if (event.getEntity() instanceof Mob && targetEntity instanceof BaseCreatureEntity) {
             if (!((BaseCreatureEntity) targetEntity).canBeTargetedBy(event.getEntity())) {
                 //event.getEntity().setRevengeTarget(null);
-                if (event.isCancelable())
-                    event.setCanceled(true);
+                event.setCanceled(true);
                 //((MobEntity)event.getEntity()).setAttackTarget(null);
             }
         }
@@ -289,7 +287,7 @@ public class GameEventListener {
     //                 Living Hurt Event
     // ==================================================
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onLivingHurt(LivingHurtEvent event) {
+    public void onLivingHurt(LivingIncomingDamageEvent event) {
         if (event.isCanceled())
             return;
         DamageSource damageSource = event.getSource();
@@ -397,28 +395,6 @@ public class GameEventListener {
     }
 
 
-    // ==================================================
-    //                 Bucket Fill Event
-    // ==================================================
-    @SubscribeEvent
-    public void onBucketFill(FillBucketEvent event) {
-        Level world = event.getLevel();
-        HitResult target = event.getTarget();
-        if (target == null || !(target instanceof BlockHitResult))
-            return;
-        BlockPos pos = ((BlockHitResult) target).getBlockPos();
-        Block block = world.getBlockState(pos).getBlock();
-        Item bucket = ObjectManager.getBucket(block);
-        if (bucket != null && world.getFluidState(pos).getAmount() == 0) {
-            world.removeBlock(pos, true);
-        }
-
-        if (bucket == null)
-            return;
-
-        event.setFilledBucket(new ItemStack(bucket));
-        event.setResult(Event.Result.ALLOW);
-    }
 
 
     // ==================================================
@@ -435,7 +411,6 @@ public class GameEventListener {
                 ExtendedWorld extendedWorld = ExtendedWorld.getForWorld((Level) event.getLevel());
                 if (!(event.getState().getBlock() instanceof BlockFireBase) && extendedWorld.isBossNearby(Vec3.atLowerCornerOf(event.getPos()))) {
                     event.setCanceled(true);
-                    event.setResult(Event.Result.DENY);
                     event.getPlayer().displayClientMessage(Component.translatable("boss.block.protection.break"), true);
                     return;
                 }
@@ -470,7 +445,6 @@ public class GameEventListener {
                 ExtendedWorld extendedWorld = ExtendedWorld.getForWorld((Level) event.getLevel());
                 if (extendedWorld.isBossNearby(Vec3.atLowerCornerOf(event.getPos()))) {
                     event.setCanceled(true);
-                    event.setResult(Event.Result.DENY);
                     ((Player) event.getEntity()).displayClientMessage(Component.translatable("boss.block.protection.place"), true);
                     return;
                 }
@@ -502,18 +476,14 @@ public class GameEventListener {
 
         if (spawner != null) {
             BlockPos pos = null;
-            if (spawner.getSpawnerBlockEntity() != null) {
-                pos = spawner.getSpawnerBlockEntity().getBlockPos();
-            } else if (spawner.getSpawnerEntity() != null) {
-                pos = spawner.getSpawnerEntity().blockPosition();
-            }
+            // 1.21: a spawner's owner is either its block entity or an entity (e.g. spawner minecart).
+            pos = spawner.getOwner().map(BlockEntity::getBlockPos, Entity::blockPosition);
             originPos = pos != null ? pos : mob.blockPosition();
         } else {
             originPos = mob.blockPosition();
         }
 
         if (!baseCreatureEntity.checkSpawnGroupLimit(level, originPos, 16)) {
-            event.setResult(Event.Result.DENY);
         }
     }
 
@@ -564,7 +534,7 @@ public class GameEventListener {
         }
 
         if (shooter instanceof LivingEntity living && targetCreature.isInvulnerableTo(targetCreature.level().damageSources().mobAttack(living))) {
-            event.setImpactResult(ProjectileImpactEvent.ImpactResult.STOP_AT_CURRENT_NO_DAMAGE);
+            event.setCanceled(true); // NeoForge: cancelling the impact stops the projectile hitting (was STOP_AT_CURRENT_NO_DAMAGE)
         }
     }
 }

@@ -51,12 +51,12 @@ public class ExplosionSpawnTrigger extends EntitySpawnTrigger {
 		}
 
 		// Entity Check:
-		if(!this.playerOnly && explosion.getExploder() != null && explosion.getExploder() instanceof LivingEntity exploder) {
+		if(!this.playerOnly && explosion.getDirectSourceEntity() instanceof LivingEntity exploder) {
 			if(!this.isMatchingEntity(exploder)) {
 				return false;
 			}
 		}
 
-		return this.trigger(world, player, new BlockPos(LMHelperClass.convertToVec3i(explosion.getPosition())), 0, 0);
+		return this.trigger(world, player, new BlockPos(LMHelperClass.convertToVec3i(explosion.center())), 0, 0);
 	}
 }

@@ -180,7 +180,7 @@ public class HarvestEquipmentFeature extends EquipmentFeature {
         }
 
         // Dirt:
-        if (LMHelperClass.Materials.isDirt(block) || block == Blocks.CLAY || block == Blocks.SAND || block == Blocks.GRASS || block == Blocks.SNOW_BLOCK || block == Blocks.SNOW || SPADE_HARVEST.contains(block)) {
+        if (LMHelperClass.Materials.isDirt(block) || block == Blocks.CLAY || block == Blocks.SAND || block == Blocks.SHORT_GRASS || block == Blocks.SNOW_BLOCK || block == Blocks.SNOW || SPADE_HARVEST.contains(block)) {
             return this.harvestType.equalsIgnoreCase("shovel");
         }
 
@@ -454,9 +454,9 @@ public class HarvestEquipmentFeature extends EquipmentFeature {
         if (entity instanceof IShearable) {
             IShearable target = (IShearable) entity;
             BlockPos pos = new BlockPos((int) Math.floor(entity.getX()), (int) Math.floor(entity.getY()), (int) Math.floor(entity.getZ()));
-            if (target.isShearable(itemStack, entity.level(), pos)) {
-                List<ItemStack> drops = target.onSheared(player, itemStack, entity.level(), pos,
-                        EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, itemStack));
+            if (target.isShearable(player, itemStack, entity.level(), pos)) {
+                // 1.21 shearing no longer passes a fortune level (drops come from the entity's shearing loot).
+                List<ItemStack> drops = target.onSheared(player, itemStack, entity.level(), pos);
                 Random rand = new Random();
                 drops.forEach(d -> {
                     ItemEntity ent = entity.spawnAtLocation(d, 1.0F);

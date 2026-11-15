@@ -138,7 +138,7 @@ public class EquipmentStationTileEntity extends TileEntityBase {
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         CompoundTag syncData = new CompoundTag();
-        return ClientboundBlockEntityDataPacket.create(this, be -> syncData);
+        return ClientboundBlockEntityDataPacket.create(this, (be, registries) -> syncData);
     }
 
     @Override

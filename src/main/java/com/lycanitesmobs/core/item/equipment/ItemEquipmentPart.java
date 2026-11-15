@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.item.equipment;
 
+import com.lycanitesmobs.core.util.helpers.ItemNbt;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -413,7 +414,7 @@ public class ItemEquipmentPart extends BaseItem {
     public void setLevel(ItemStack itemStack, int level) {
         CompoundTag nbt = this.getTagCompound(itemStack);
         nbt.putInt("equipmentLevel", level);
-        itemStack.setTag(nbt);
+        ItemNbt.setTag(itemStack, nbt);
     }
 
     /**
@@ -434,7 +435,7 @@ public class ItemEquipmentPart extends BaseItem {
     public void setExperience(ItemStack itemStack, int experience) {
         CompoundTag nbt = this.getTagCompound(itemStack);
         nbt.putInt("equipmentExperience", experience);
-        itemStack.setTag(nbt);
+        ItemNbt.setTag(itemStack, nbt);
     }
 
     /**
@@ -530,7 +531,7 @@ public class ItemEquipmentPart extends BaseItem {
     public void setSharpness(ItemStack itemStack, int sharpness) {
         CompoundTag nbt = this.getTagCompound(itemStack);
         nbt.putInt("equipmentSharpness", Math.max(Math.min(sharpness, ItemEquipment.SHARPNESS_MAX), 0));
-        itemStack.setTag(nbt);
+        ItemNbt.setTag(itemStack, nbt);
     }
 
     /**
@@ -575,7 +576,7 @@ public class ItemEquipmentPart extends BaseItem {
     public void setMana(ItemStack itemStack, int mana) {
         CompoundTag nbt = this.getTagCompound(itemStack);
         nbt.putInt("equipmentMana", Math.max(Math.min(mana, ItemEquipment.MANA_MAX), 0));
-        itemStack.setTag(nbt);
+        ItemNbt.setTag(itemStack, nbt);
     }
 
     /**
@@ -630,7 +631,7 @@ public class ItemEquipmentPart extends BaseItem {
         nbt.putFloat("equipmentColorR", red);
         nbt.putFloat("equipmentColorG", green);
         nbt.putFloat("equipmentColorB", blue);
-        itemStack.setTag(nbt);
+        ItemNbt.setTag(itemStack, nbt);
     }
 
    /* @Override

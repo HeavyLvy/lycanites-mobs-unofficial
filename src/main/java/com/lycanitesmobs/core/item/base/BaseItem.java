@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.item.base;
 
+import com.lycanitesmobs.core.util.helpers.ItemNbt;
 import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -142,8 +143,8 @@ public class BaseItem extends Item {
      * Gets or creates an NBT Compound for the provided itemstack.
      **/
     public CompoundTag getTagCompound(ItemStack itemStack) {
-        if (itemStack.hasTag()) {
-            return itemStack.getTag();
+        if (ItemNbt.hasTag(itemStack)) {
+            return ItemNbt.getTag(itemStack);
         }
         return new CompoundTag();
     }

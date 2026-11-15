@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.worldgen.structure;
 
+import com.mojang.serialization.MapCodec;
 import com.lycanitesmobs.core.entity.spawner.condition.WorldSpawnCondition;
 import com.lycanitesmobs.core.manager.DungeonManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -26,12 +27,11 @@ import java.util.Optional;
 
 public class LMDungeonStructure extends Structure {
 
-    public static final Codec<LMDungeonStructure> CODEC = RecordCodecBuilder
+    public static final MapCodec<LMDungeonStructure> CODEC = RecordCodecBuilder
             .<LMDungeonStructure>mapCodec(instance -> instance.group(
                             settingsCodec(instance),
                             Codec.STRING.fieldOf("schematic_name").forGetter(s -> s.schematicName))
-                    .apply(instance, LMDungeonStructure::new))
-            .codec();
+                    .apply(instance, LMDungeonStructure::new));
 
     private final String schematicName;
 

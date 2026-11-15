@@ -160,7 +160,7 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
         for (int i = 0; i <= this.entityWidth; ++i) {
             for (int j = 0; j <= Math.min(this.entityHeight, 2); ++j) {
                 for (int k = 0; k <= this.entityDepth; ++k) {
-                    BlockState iblockstate = this.level.getBlockState(centerPos.offset(i, k, j));
+                    BlockState iblockstate = this.currentContext.getBlockState(centerPos.offset(i, k, j));
 
                     // Non-Solid:
 					if (!iblockstate.isSolid() && !(iblockstate.getBlock() instanceof LiquidBlock)) {
@@ -205,13 +205,13 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
                     BlockPos blockPos = centerPos.offset(i, k, j);
 
                     // Block State Checks:
-                    BlockState blockState = this.level.getBlockState(blockPos);
+                    BlockState blockState = this.currentContext.getBlockState(blockPos);
 
-                    if(this.entityCreature == null || !blockState.isPathfindable(this.level, blockPos, PathComputationType.WATER)) {
+                    if(this.entityCreature == null || !blockState.isPathfindable(PathComputationType.WATER)) {
                         if(j == y) { // Y must be water.
                             return PathType.BLOCKED;
                         }
-                        if(!blockState.isPathfindable(this.level, blockPos, PathComputationType.AIR) && !blockState.isPathfindable(this.level, blockPos, PathComputationType.WATER)) { // Blocked above water.
+                        if(!blockState.isPathfindable(PathComputationType.AIR) && !blockState.isPathfindable(PathComputationType.WATER)) { // Blocked above water.
                             return PathType.BLOCKED;
                         }
                     }
@@ -233,7 +233,7 @@ public class CreatureNodeProcessor extends WalkNodeEvaluator implements ICreatur
 
                     // Custom Fluid State Checks: - Added some direct checks to improve performance.
                     if (!blockState.getFluidState().isSource()) {
-                        FluidState fluidState = this.level.getFluidState(blockPos);
+                        FluidState fluidState = this.currentContext.level().getFluidState(blockPos);
 
                         // Water Damages:
                         if (this.entityCreature.waterDamage() && fluidState.is(FluidTags.WATER)) {

@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.capabilities.entity;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import com.lycanitesmobs.core.capabilities.ModAttachments;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
@@ -87,7 +89,7 @@ public class ExtendedPlayer {
     }
 
     // Big-entity reach modifier (applied transiently when the crosshair lands on an oversized creature).
-    private static final UUID BIG_ENTITY_REACH_UUID = UUID.fromString("7c83f3c0-5e2f-4a2a-9d4e-1a6e3f5b2c10");
+    private static final ResourceLocation BIG_ENTITY_REACH_ID = ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "big_entity_reach");
     private static final String BIG_ENTITY_REACH_NAME = "LycanitesBigEntityReach";
     private static final double BIG_ENTITY_SIZE_THRESHOLD = 4.0;
     private static final double BIG_ENTITY_REACH_MAX_SCAN = 4.0;
@@ -299,10 +301,10 @@ public class ExtendedPlayer {
     public void updateBigEntityReach() {
         if (this.player == null || this.player.level().isClientSide)
             return;
-        AttributeInstance reachAttr = this.player.getAttribute(NeoForgeMod.ENTITY_REACH.get());
+        AttributeInstance reachAttr = this.player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
         if (reachAttr == null)
             return;
-        reachAttr.removeModifier(BIG_ENTITY_REACH_UUID);
+        reachAttr.removeModifier(BIG_ENTITY_REACH_ID);
         if (this.player.isSpectator())
             return;
 
@@ -328,8 +330,7 @@ public class ExtendedPlayer {
             return;
 
         reachAttr.addTransientModifier(new AttributeModifier(
-                BIG_ENTITY_REACH_UUID,
-                BIG_ENTITY_REACH_NAME,
+                BIG_ENTITY_REACH_ID,
                 needed - currentReach,
                 AttributeModifier.Operation.ADD_VALUE
         ));

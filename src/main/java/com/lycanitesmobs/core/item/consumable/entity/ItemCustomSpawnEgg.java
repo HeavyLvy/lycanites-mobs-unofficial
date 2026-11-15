@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.item.consumable.entity;
 
+import net.minecraft.core.component.DataComponents;
+import com.lycanitesmobs.core.util.helpers.ItemNbt;
 import com.lycanitesmobs.core.manager.DeferredLevelActionManager;
 import com.lycanitesmobs.core.entity.dispenser.SpawnEggDispenseBehaviour;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
@@ -104,11 +106,11 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
      * @param creatureInfo The creature info to apply.
      */
     public void applyCreatureInfoToItemStack(ItemStack itemStack, CreatureInfo creatureInfo) {
-        CompoundTag itemStackNBT = itemStack.hasTag() ? itemStack.getTag() : new CompoundTag();
+        CompoundTag itemStackNBT = ItemNbt.hasTag(itemStack) ? ItemNbt.getTag(itemStack) : new CompoundTag();
         CompoundTag spawnEggNBT = new CompoundTag();
         spawnEggNBT.putString("creaturename", creatureInfo.getName());
         itemStackNBT.put("CreatureInfoSpawnEgg", spawnEggNBT);
-        itemStack.setTag(itemStackNBT);
+        ItemNbt.setTag(itemStack, itemStackNBT);
     }
 
     @Override
@@ -152,7 +154,7 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
 
         LivingEntity entity = this.spawnCreature(world, itemStack, (double) pos.getX() + 0.5D, (double) pos.getY() + d0, (double) pos.getZ() + 0.5D);
         if (entity != null) {
-            if (itemStack.hasCustomHoverName()) {
+            if (itemStack.has(DataComponents.CUSTOM_NAME)) {
                 entity.setCustomName(itemStack.getHoverName());
             }
             if (!player.getAbilities().instabuild) {
@@ -188,7 +190,7 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
             if (world.getBlockState(pos).getBlock() == Blocks.WATER) {
                 LivingEntity entity = spawnCreature(world, itemStack, (double) pos.getX(), (double) pos.getY(), (double) pos.getZ());
                 if (entity != null)
-                    if (itemStack.hasCustomHoverName()) {
+                    if (itemStack.has(DataComponents.CUSTOM_NAME)) {
                         entity.setCustomName(itemStack.getHoverName());
                     }
                 if (!player.getAbilities().instabuild) {
@@ -218,7 +220,7 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
      * @return The name of the creature that the spawn egg item stack should spawn.
      */
     public String getCreatureName(ItemStack itemStack) {
-        CompoundTag itemStackNBT = itemStack.getTag();
+        CompoundTag itemStackNBT = ItemNbt.getTag(itemStack);
         if (itemStackNBT == null || !itemStackNBT.contains("CreatureInfoSpawnEgg", 10)) {
             return null;
         }
@@ -243,13 +245,13 @@ public class ItemCustomSpawnEgg extends CreatureTypeItem {
             entity.yHeadRot = entity.yRotO;
             entity.yBodyRot = entity.yRotO;
 
-            if (itemStack.hasCustomHoverName()) {
+            if (itemStack.has(DataComponents.CUSTOM_NAME)) {
                 entity.setCustomName(itemStack.getHoverName());
             }
 
             if (entity instanceof Mob) {
                 Mob mobEntity = (Mob) entity;
-                mobEntity.finalizeSpawn((ServerLevelAccessor) world, world.getCurrentDifficultyAt(mobEntity.blockPosition()), MobSpawnType.SPAWN_EGG, null, null);
+                mobEntity.finalizeSpawn((ServerLevelAccessor) world, world.getCurrentDifficultyAt(mobEntity.blockPosition()), MobSpawnType.SPAWN_EGG, null);
                 mobEntity.playAmbientSound();
             }
 

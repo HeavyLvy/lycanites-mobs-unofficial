@@ -444,8 +444,8 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     }
 
     private int getHealAmount(ItemStack itemStack) {
-        if (itemStack.getItem().isEdible()) {
-            return itemStack.getItem().getFoodProperties().getNutrition();
+        if (itemStack.getFoodProperties(this) != null) {
+            return itemStack.getFoodProperties(this).nutrition();
         }
         return 4;
     }
@@ -1193,8 +1193,8 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
     }
 
     void clampPortalTimeAfterTame() {
-        if (this.portalTime > this.getDimensionChangingDelay()) {
-            this.portalTime = this.getDimensionChangingDelay();
+        if (this.portalProcess != null) {
+            this.setPortalCooldown(); // was a portalTime clamp; 1.21 tracks portal time in PortalProcessor
         }
     }
 

@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.event;
 
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.lycanitesmobs.core.entity.spawner.SpawnerTriggerDispatcher;
@@ -16,7 +18,6 @@ import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 import net.neoforged.neoforge.event.entity.player.ItemFishedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -72,7 +73,7 @@ public class SpawnerEventListener {
     }
 
     @SubscribeEvent
-    public void onEntitySpawn(MobSpawnEvent event) {
+    public void onEntitySpawn(FinalizeSpawnEvent event) {
         LivingEntity spawnedEntity = event.getEntity();
         if (spawnedEntity == null || spawnedEntity.getCommandSenderWorld().isClientSide || event.isCanceled()) {
             return;
@@ -120,9 +121,9 @@ public class SpawnerEventListener {
     }
 
     @SubscribeEvent
-    public void onSleep(PlayerSleepInBedEvent event) {
+    public void onSleep(CanPlayerSleepEvent event) {
         Player player = event.getEntity();
-        if (player == null || player.getCommandSenderWorld().isClientSide || event.isCanceled()) {
+        if (player == null || player.getCommandSenderWorld().isClientSide || event.getProblem() != null) {
             return;
         }
 
@@ -133,7 +134,7 @@ public class SpawnerEventListener {
 
         BlockPos spawnPos = player.blockPosition().offset(0, 0, 1);
         if (SpawnerTriggerDispatcher.getInstance().onSleep(world, player, spawnPos)) {
-            event.setResult(Player.BedSleepingProblem.NOT_SAFE);
+            event.setProblem(Player.BedSleepingProblem.NOT_SAFE);
         }
     }
 
@@ -154,7 +155,7 @@ public class SpawnerEventListener {
         }
 
         Player player = null;
-        if (explosion.getExploder() instanceof Player owner) {
+        if (explosion.getDirectSourceEntity() instanceof Player owner) {
             player = owner;
         }
 

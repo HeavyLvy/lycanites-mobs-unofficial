@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.entity.pets;
 
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.portal.DimensionTransition;
 
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.info.Variant;
@@ -733,7 +735,10 @@ public class PetEntry {
 
     private void teleportEntityToHost() {
         if (this.entity.getCommandSenderWorld() != this.host.getCommandSenderWorld()) {
-            Entity moved = this.entity.changeDimension(this.host.getServer().getLevel(this.host.getCommandSenderWorld().dimension()));
+            // 1.21: dimension changes take a DimensionTransition; send the pet straight to its owner.
+            Entity moved = this.entity.changeDimension(new DimensionTransition(
+                    this.host.getServer().getLevel(this.host.getCommandSenderWorld().dimension()),
+                    this.host.position(), Vec3.ZERO, this.entity.getYRot(), this.entity.getXRot(), DimensionTransition.DO_NOTHING));
             if (moved != null) {
                 this.entity = moved;
                 if (this.entity instanceof BaseCreatureEntity baseCreatureEntity) {

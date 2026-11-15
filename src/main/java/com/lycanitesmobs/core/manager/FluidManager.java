@@ -82,7 +82,7 @@ public class FluidManager {
         ObjectManager.addSound(fluidName, "block." + fluidName);
 
         Item.Properties bucketProps = new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1);
-        ObjectManager.addItem(fluidName + "_bucket", () -> new BucketItem(builder::getStillFluid, bucketProps));
+        ObjectManager.addItem(fluidName + "_bucket", () -> new BucketItem(builder.getStillFluid(), bucketProps) /* fluids register before items */);
 
         ObjectManager.addBlock(fluidName, () -> {
             Supplier<BaseFlowingFluid> still = builder::getStillFluid;

@@ -217,7 +217,7 @@ public class ItemStaffSummoning extends BaseItem {
     }
 
     protected void damageStaff(ItemStack itemStack, int amountToDamage, ServerPlayer entity, InteractionHand hand) {
-        itemStack.hurt(amountToDamage, entity.getRandom(), entity);
+        itemStack.hurtAndBreak(amountToDamage, entity.serverLevel(), entity, item -> {});
         if (itemStack.getCount() == 0) {
             entity.setItemInHand(hand, ItemStack.EMPTY);
         }

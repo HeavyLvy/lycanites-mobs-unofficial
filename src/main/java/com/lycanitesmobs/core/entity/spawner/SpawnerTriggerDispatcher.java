@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.spawner;
 
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
 import com.lycanitesmobs.core.data.info.block.BlockReference;
 import com.lycanitesmobs.core.entity.spawner.trigger.BlockSpawnTrigger;
@@ -254,8 +255,8 @@ public class SpawnerTriggerDispatcher {
         int bonusLevel = 0;
         int silkLevel = 0;
         if (player != null) {
-            bonusLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, player.getMainHandItem());
-            silkLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, player.getMainHandItem());
+            bonusLevel = LMHelperClass.getItemEnchantmentLevel(player.level(), Enchantments.FORTUNE, player.getMainHandItem());
+            silkLevel = LMHelperClass.getItemEnchantmentLevel(player.level(), Enchantments.SILK_TOUCH, player.getMainHandItem());
         }
 
         for (BlockSpawnTrigger spawnTrigger : this.blockSpawnTriggers) {

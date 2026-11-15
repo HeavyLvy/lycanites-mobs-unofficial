@@ -48,7 +48,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
      */
     @Override
     public void render(T entity, float partialTicks, float yaw, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int brightness) {
-        if (NeoForge.EVENT_BUS.post(new RenderLivingEvent.Pre<>(entity, this, partialTicks, matrixStack, renderTypeBuffer, brightness))) {
+        if (NeoForge.EVENT_BUS.post(new RenderLivingEvent.Pre<>(entity, this, partialTicks, matrixStack, renderTypeBuffer, brightness)).isCanceled()) {
             return;
         }
 
@@ -107,7 +107,7 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
 
             // Animation Ticks:
             float loop = this.getBob(entity, partialTicks % 1.0F);
-            this.setupRotations(entity, matrixStack, loop, renderYaw, yaw);
+            this.setupRotations(entity, matrixStack, loop, renderYaw, yaw, entity.getScale());
             matrixStack.scale(-1.0F, -1.0F, 1.0F);
             this.scale(entity, matrixStack, yaw);
             matrixStack.translate(0.0D, (double) -1.501F, 0.0D);
@@ -152,10 +152,10 @@ public class CreatureRenderer<T extends BaseCreatureEntity> extends MobRenderer<
         if (!invisible) {
             RenderNameTagEvent renderNameplateEvent = new RenderNameTagEvent(entity, entity.getDisplayName(), this, matrixStack, renderTypeBuffer, fade, time);
             NeoForge.EVENT_BUS.post(renderNameplateEvent);
-            if (renderNameplateEvent.getResult() != Event.Result.DENY && (renderNameplateEvent.getResult() == Event.Result.ALLOW || this.shouldShowName(entity))) {
+            if (!renderNameplateEvent.canRender().isFalse() && (renderNameplateEvent.canRender().isTrue() || this.shouldShowName(entity))) {
                 MutableComponent entityName = entity.getName().copy();
                 if (entityName != null) {
-                    this.renderNameTag(entity, entityName, matrixStack, renderTypeBuffer, brightness);
+                    this.renderNameTag(entity, entityName, matrixStack, renderTypeBuffer, brightness, partialTicks);
                 }
             }
         }

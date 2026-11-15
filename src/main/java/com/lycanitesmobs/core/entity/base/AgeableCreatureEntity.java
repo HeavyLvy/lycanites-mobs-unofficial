@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.base;
 
+import net.minecraft.core.component.DataComponents;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.goals.actions.FollowParentGoal;
 import com.lycanitesmobs.core.entity.goals.actions.MateGoal;
@@ -112,8 +113,8 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
 
     public void setFarmed() {
         this.hasBeenFarmed = true;
-        if (this.portalTime > this.getDimensionChangingDelay())
-            this.portalTime = this.getDimensionChangingDelay();
+        if (this.portalProcess != null)
+            this.setPortalCooldown(); // was a portalTime clamp; 1.21 tracks portal time in PortalProcessor
     }
 
     // ========== Get Random Subspecies ==========
@@ -238,7 +239,7 @@ public abstract class AgeableCreatureEntity extends BaseCreatureEntity {
                         baby.moveTo(this.position().x(), this.position().y(), this.position().z(), 0.0F, 0.0F);
                         baby.setFarmed();
                         DeferredLevelActionManager.spawnEntity(this.getCommandSenderWorld(), this.blockPosition(), null, baby, () -> {
-                            if (itemStack.hasCustomHoverName()) {
+                            if (itemStack.has(DataComponents.CUSTOM_NAME)) {
                                 baby.setCustomName(itemStack.getHoverName());
                             }
                             this.consumePlayersItem(player, itemStack);

@@ -24,7 +24,6 @@ public class CreatureDescriptionList extends BaseList {
      */
     public CreatureDescriptionList(BeastiaryScreen parentGui, int width, int height, int top, int bottom, int x) {
         super(parentGui, width, height, top, bottom, x, 500);
-        this.setRenderSelection(false);
     }
 
 
@@ -224,5 +223,11 @@ public class CreatureDescriptionList extends BaseList {
         }
 
         return text.getString();
+    }
+
+    /** Replaces setRenderSelection(false), removed in 1.20.2: never draw the selection highlight. */
+    @Override
+    protected boolean isSelectedItem(int index) {
+        return false;
     }
 }

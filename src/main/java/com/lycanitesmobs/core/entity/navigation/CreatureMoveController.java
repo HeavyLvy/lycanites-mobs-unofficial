@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.navigation;
 
+import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import net.minecraft.util.Mth;
 import net.minecraft.core.BlockPos;
@@ -96,12 +97,10 @@ public class CreatureMoveController extends MoveControl {
             float moveX = moveForward * yawCos - moveStrafe * yawSin;
             moveZ = moveStrafe * yawCos + moveForward * yawSin;
             PathNavigation pathNavigator = this.mob.getNavigation();
-            NodeEvaluator nodeProcessor = pathNavigator.getNodeEvaluator();
-            if (nodeProcessor.getBlockPathType(
-                    this.mob.level(),
-                    Mth.floor(this.mob.position().x() + (double) moveX),
-                    Mth.floor(this.mob.position().y()),
-                    Mth.floor(this.mob.position().z() + (double) moveZ)
+            if (WalkNodeEvaluator.getPathTypeStatic(this.mob, BlockPos.containing(
+                    this.mob.position().x() + (double) moveX,
+                    this.mob.position().y(),
+                    this.mob.position().z() + (double) moveZ)
             ) != PathType.WALKABLE) {
                 this.strafeForwards = 1.0F;
                 this.strafeRight = 0.0F;

@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.worldgen.dungeon.definition;
 
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.Holder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -16,7 +18,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.registries.ForgeRegistries; // TODO(port): datapack registries
 import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.*;
@@ -383,8 +384,9 @@ public class DungeonSchematic {
 
         this.resolveBiomeIds(world);
 
-        Biome biome = world.getBiome(pos).value();
-        if (!this.isValidBiome(biome)) {
+        Holder<Biome> biomeHolder = world.getBiome(pos);
+        Biome biome = biomeHolder.value();
+        if (!this.isValidBiome(biomeHolder)) {
             LMHelperClass.logDebug("Dungeon",
                     "Schematic " + this.name + " wrong biome at " + pos + " biome=" + biome.toString());
             return false;
@@ -399,12 +401,12 @@ public class DungeonSchematic {
      * @param biome The biome to check.
      * @return True if at least one biome in the provided list is a valid biome.
      */
-    public boolean isValidBiome(Biome biome) {
+    public boolean isValidBiome(Holder<Biome> biome) {
         if (this.biomeIds.isEmpty()) {
             return true;
         }
 
-        ResourceLocation biomeId = ForgeRegistries.BIOMES.getKey(biome);
+        ResourceLocation biomeId = biome.unwrapKey().map(ResourceKey::location).orElse(null);
         if (biomeId == null) {
             LMHelperClass.logDebug("Dungeon", "Schematic " + this.name + " has biome restriction but biome id is null");
             return false;

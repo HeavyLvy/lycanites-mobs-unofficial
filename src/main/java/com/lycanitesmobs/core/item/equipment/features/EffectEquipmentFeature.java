@@ -86,7 +86,7 @@ public class EffectEquipmentFeature extends EquipmentFeature {
 		if(effect == null) {
 			return Component.literal(this.effectType);
 		}
-		return effect.getDisplayName().copy();
+		return effect.value().getDisplayName().copy();
 	}
 
 	/**

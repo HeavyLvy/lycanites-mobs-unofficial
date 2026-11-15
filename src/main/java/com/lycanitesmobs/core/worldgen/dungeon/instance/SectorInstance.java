@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.worldgen.dungeon.instance;
 
+import net.minecraft.core.registries.Registries;
 import com.lycanitesmobs.core.block.base.BlockFireBase;
 import com.lycanitesmobs.core.block.cloud.BlockFrostCloud;
 import com.lycanitesmobs.core.block.cloud.BlockPoisonCloud;
@@ -841,7 +842,7 @@ public class SectorInstance {
     private int getPlacementFlags(BlockState blockState) {
         if (blockState.getBlock() == Blocks.AIR
                 || blockState.getBlock() == Blocks.CAVE_AIR
-                || (blockState.liquid() && !blockState.getBlock().getFluidState(blockState).isSource())
+                || (blockState.liquid() && !blockState.getFluidState().isSource())
                 || blockState.getBlock() instanceof FireBlock
                 || blockState.getBlock() instanceof BlockFireBase
                 || blockState.getBlock() instanceof BlockPoisonCloud
@@ -868,7 +869,7 @@ public class SectorInstance {
             if (tileEntity instanceof ChestBlockEntity chest) {
                 var lootTable = this.getRandomDungeonLootTable(random);
                 if (lootTable != null) {
-                    chest.setLootTable(lootTable, Objects.hash(blockPos.hashCode(), random));
+                    chest.setLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTable), Objects.hash(blockPos.hashCode(), random));
                 }
             }
         }

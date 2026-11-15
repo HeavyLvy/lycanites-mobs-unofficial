@@ -77,9 +77,9 @@ public class EntityCryptkeeper extends AgeableCreatureEntity implements Enemy {
             ZombieVillager zombievillagerentity = EntityType.ZOMBIE_VILLAGER.create(this.level());
             zombievillagerentity.copyPosition(villagerentity);
             villagerentity.remove(RemovalReason.DISCARDED);
-            zombievillagerentity.finalizeSpawn((ServerLevelAccessor) this.getCommandSenderWorld(), this.getCommandSenderWorld().getCurrentDifficultyAt(zombievillagerentity.blockPosition()), MobSpawnType.CONVERSION, null, null);
+            zombievillagerentity.finalizeSpawn((ServerLevelAccessor) this.getCommandSenderWorld(), this.getCommandSenderWorld().getCurrentDifficultyAt(zombievillagerentity.blockPosition()), MobSpawnType.CONVERSION, null);
             zombievillagerentity.setVillagerData(villagerentity.getVillagerData());
-            zombievillagerentity.setTradeOffers(villagerentity.getOffers().createTag());
+            zombievillagerentity.setTradeOffers(villagerentity.getOffers().copy());
             zombievillagerentity.setVillagerXp(villagerentity.getVillagerXp());
             zombievillagerentity.setBaby(villagerentity.isBaby());
             zombievillagerentity.setNoAi(villagerentity.isNoAi());

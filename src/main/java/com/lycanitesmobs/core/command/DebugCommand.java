@@ -1,5 +1,8 @@
 package com.lycanitesmobs.core.command;
 
+import net.minecraft.tags.TagKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Registry;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.config.ConfigDebug;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -11,8 +14,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.common.BiomeManager;
-import net.minecraftforge.registries.ForgeRegistries; // TODO(port): datapack registries
 import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
@@ -66,19 +67,18 @@ public class DebugCommand {
         if (!context.getSource().hasPermission(2)) {
             return 0;
         }
+        // Forge's BiomeManager types are gone in NeoForge; these commands now use biome tags (e.g. minecraft:is_forest, c:is_cold).
         String biomeTag = StringArgumentType.getString(context, "biometag").toLowerCase();
-        BiomeManager.BiomeType biomeType = null;
-        try {
-            biomeType = BiomeManager.BiomeType.valueOf(biomeTag);
-        } catch (Exception e) {
+        ResourceLocation tagId = ResourceLocation.tryParse(biomeTag);
+        if (tagId == null) {
             LMHelperClass.logWarningMessage("Unknown biome tag: " + biomeTag + ".");
-        }
-        if (biomeType == null) {
             return 0;
         }
-        for (BiomeManager.BiomeEntry biomeKey : BiomeManager.getBiomes(biomeType)) {
-            context.getSource().sendSuccess(() -> Component.literal(biomeKey.getKey().location().toString()), true); // TODO Figure out how the hell to get a biome display name now...
-        }
+        Registry<Biome> biomes = context.getSource().registryAccess().registryOrThrow(Registries.BIOME);
+        biomes.getTag(TagKey.create(Registries.BIOME, tagId)).ifPresentOrElse(
+                tag -> tag.forEach(holder -> holder.unwrapKey().ifPresent(key ->
+                        context.getSource().sendSuccess(() -> Component.literal(key.location().toString()), true))),
+                () -> LMHelperClass.logWarningMessage("Unknown biome tag: " + biomeTag + "."));
         return 0;
     }
 
@@ -86,9 +86,8 @@ public class DebugCommand {
         if (!context.getSource().hasPermission(2)) {
             return 0;
         }
-        for (BiomeManager.BiomeType biomeType : BiomeManager.BiomeType.values()) {
-            context.getSource().sendSuccess(() -> Component.literal(biomeType.name()), true);
-        }
+        Registry<Biome> biomes = context.getSource().registryAccess().registryOrThrow(Registries.BIOME);
+        biomes.getTagNames().forEach(tag -> context.getSource().sendSuccess(() -> Component.literal(tag.location().toString()), true));
         return 0;
     }
 
@@ -97,20 +96,15 @@ public class DebugCommand {
             return 0;
         }
         String biomeId = StringArgumentType.getString(context, "biome");
-        ResourceLocation biomeResourceLocation = ResourceLocation.parse(biomeId);
-        Biome biome = ForgeRegistries.BIOMES.getValue(biomeResourceLocation);
-        if (biome == null) {
+        ResourceLocation biomeResourceLocation = ResourceLocation.tryParse(biomeId);
+        Registry<Biome> biomes = context.getSource().registryAccess().registryOrThrow(Registries.BIOME);
+        var biome = biomeResourceLocation == null ? java.util.Optional.<net.minecraft.core.Holder.Reference<Biome>>empty() : biomes.getHolder(biomeResourceLocation);
+        if (biome.isEmpty()) {
             context.getSource().sendSuccess(() -> Component.literal("Cannot find a biome with that id."), true);
             return 0;
         }
-        for (BiomeManager.BiomeType biomeType : BiomeManager.BiomeType.values()) {
-            for (BiomeManager.BiomeEntry biomeKey : BiomeManager.getBiomes(biomeType)) {
-                if (biomeKey.getKey().location().toString().equals(biomeId)) {
-                    context.getSource().sendSuccess(() -> Component.literal("Tags for: " + biomeId), true);
-                    return 0;
-                }
-            }
-        }
+        context.getSource().sendSuccess(() -> Component.literal("Tags for: " + biomeId), true);
+        biome.get().tags().forEach(tag -> context.getSource().sendSuccess(() -> Component.literal(tag.location().toString()), true));
         return 0;
     }
 

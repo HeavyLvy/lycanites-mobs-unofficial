@@ -477,7 +477,7 @@ public class TileEntitySummoningPedestal extends TileEntityBase {
         }
 
         // Create the packet using the helper method
-        return ClientboundBlockEntityDataPacket.create(this, (blockEntity) -> syncData);
+        return ClientboundBlockEntityDataPacket.create(this, (blockEntity, registries) -> syncData);
     }
 
 

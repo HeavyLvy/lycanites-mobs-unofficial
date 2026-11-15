@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.spawner;
 
+import net.neoforged.neoforge.common.util.TriState;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -639,7 +640,7 @@ public class Spawner {
         if (!this.ignoreBiomes) {
             Set<Biome> biomeSet = new LinkedHashSet<>();
             for (BlockPos spawnPos : spawnPositions) {
-                Biome biome = world.getBiomeManager().getBiome(spawnPos).get();
+                Biome biome = world.getBiomeManager().getBiome(spawnPos).value();
                 positionBiomeCache.put(spawnPos, biome);
                 biomeSet.add(biome);
             }
@@ -658,7 +659,7 @@ public class Spawner {
                 break;
             }
 
-            Biome spawnBiome = positionBiomeCache.getOrDefault(spawnPos, world.getBiomeManager().getBiome(spawnPos).get());
+            Biome spawnBiome = positionBiomeCache.getOrDefault(spawnPos, world.getBiomeManager().getBiome(spawnPos).value());
             MobSpawn mobSpawn = this.chooseSpawnForBiome(world, availableMobSpawns, spawnBiome);
             if (mobSpawn == null) {
                 continue;
@@ -674,16 +675,16 @@ public class Spawner {
 
             entityLiving.moveTo((double) spawnPos.getX() + 0.5D, (double) spawnPos.getY(), (double) spawnPos.getZ() + 0.5D, world.random.nextFloat() * 360.0F, 0.0F);
 
-            Event.Result canSpawn = this.checkForgeSpawnPlacement(world, entityLiving, spawnPos);
-            if (canSpawn == Event.Result.DENY && !this.ignoreForgeCanSpawnEvent && !mobSpawn.ignoresForgeCanSpawnEvent()) {
+            TriState canSpawn = this.checkForgeSpawnPlacement(world, entityLiving, spawnPos);
+            if (canSpawn.isFalse() && !this.ignoreForgeCanSpawnEvent && !mobSpawn.ignoresForgeCanSpawnEvent()) {
                 continue;
             }
 
-            if (!this.mobInstanceSpawnCheck(entityLiving, mobSpawn, world, player, spawnPos, level, canSpawn == Event.Result.ALLOW)) {
+            if (!this.mobInstanceSpawnCheck(entityLiving, mobSpawn, world, player, spawnPos, level, canSpawn.isTrue())) {
                 continue;
             }
 
-            this.spawnEntity(world, worldExt, entityLiving, spawnPos, level, mobSpawn, player, chain, canSpawn == Event.Result.ALLOW);
+            this.spawnEntity(world, worldExt, entityLiving, spawnPos, level, mobSpawn, player, chain, canSpawn.isTrue());
             mobsSpawned++;
 
             if (mobSpawn.hasCreatureInfo()) {
@@ -736,12 +737,12 @@ public class Spawner {
         return groupMax > 0 && spawnGroupCounts.getOrDefault(creatureName, 0) >= groupMax;
     }
 
-    private Event.Result checkForgeSpawnPlacement(Level world, LivingEntity entityLiving, BlockPos spawnPos) {
+    private TriState checkForgeSpawnPlacement(Level world, LivingEntity entityLiving, BlockPos spawnPos) {
         if (!(entityLiving instanceof Mob)) {
-            return Event.Result.ALLOW;
+            return TriState.TRUE;
         }
-        BlockPos blockPos = new BlockPos(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
-        return new MobSpawnEvent.SpawnPlacementCheck(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, blockPos, world.getRandom(), false).getResult();
+        // The 1.20.1 code built a SpawnPlacementCheck event but never posted it, so its result was always DEFAULT.
+        return TriState.DEFAULT;
     }
 
 
@@ -952,7 +953,7 @@ public class Spawner {
         Runnable afterSpawn = () -> {
             if (callInitialSpawn && entityLiving instanceof Mob mobEntity
                     && EventHooks.checkSpawnPlacements(entityLiving.getType(), (ServerLevelAccessor) world, MobSpawnType.NATURAL, spawnPos, world.getRandom(), false)) {
-                mobEntity.finalizeSpawn((ServerLevelAccessor) world, world.getCurrentDifficultyAt(spawnPos), MobSpawnType.NATURAL, null, null);
+                mobEntity.finalizeSpawn((ServerLevelAccessor) world, world.getCurrentDifficultyAt(spawnPos), MobSpawnType.NATURAL, null);
             }
 
             mobSpawn.onSpawned(entityLiving, player);

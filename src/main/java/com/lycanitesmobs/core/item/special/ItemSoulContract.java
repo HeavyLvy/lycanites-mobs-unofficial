@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.item.special;
 
+import com.lycanitesmobs.core.util.helpers.ItemNbt;
 import net.minecraft.world.item.Item;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
@@ -128,7 +129,7 @@ public class ItemSoulContract extends BaseItem {
             CompoundTag nbt = this.getTagCompound(itemStack);
             nbt.putUUID("ownerUUID", player.getUUID());
             nbt.putUUID("petEntryUUID", creatureEntity.getPetEntry().getPetEntryID());
-            itemStack.setTag(nbt);
+            ItemNbt.setTag(itemStack, nbt);
             player.setItemInHand(hand, itemStack);
             player.displayClientMessage(Component.translatable("message.soul_contract.bound").withStyle(ChatFormatting.GREEN), false);
         }
@@ -155,7 +156,7 @@ public class ItemSoulContract extends BaseItem {
                     CompoundTag nbt = this.getTagCompound(itemStack);
                     nbt.remove("ownerUUID");
                     nbt.remove("petEntryUUID");
-                    itemStack.setTag(nbt);
+                    ItemNbt.setTag(itemStack, nbt);
                     player.setItemInHand(hand, itemStack);
                     player.displayClientMessage(Component.translatable("message.soul_contract.unbound").withStyle(ChatFormatting.LIGHT_PURPLE), false);
                 }

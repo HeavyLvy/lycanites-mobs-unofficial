@@ -199,7 +199,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 
         if (!this.movement) {
             this.setOnGround(false);
-            this.portalTime = this.getDimensionChangingDelay();
+            this.setPortalCooldown(); // was portalTime = delay (keeps it from using portals)
         }
         double initX = this.position().x();
         double initY = this.position().y();
@@ -484,7 +484,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
 
             // Player Damage Event:
             if (owner instanceof Player) {
-                if (NeoForge.EVENT_BUS.post(new AttackEntityEvent((Player) owner, targetEntity))) {
+                if (NeoForge.EVENT_BUS.post(new AttackEntityEvent((Player) owner, targetEntity)).isCanceled()) {
                     return false;
                 }
                 if (targetEntity instanceof TameableCreatureEntity) {

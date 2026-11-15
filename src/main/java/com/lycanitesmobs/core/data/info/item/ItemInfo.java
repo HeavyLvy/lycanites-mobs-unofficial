@@ -65,16 +65,16 @@ public class ItemInfo {
             JsonObject foodJson = json.get("food").getAsJsonObject();
             FoodProperties.Builder foodBuilder = new FoodProperties.Builder();
             foodBuilder.nutrition(foodJson.get("hunger").getAsInt());
-            foodBuilder.saturationMod(foodJson.get("saturation").getAsFloat());
+            foodBuilder.saturationModifier(foodJson.get("saturation").getAsFloat());
 
             if (!foodJson.has("alwaysEdible") || foodJson.get("alwaysEdible").getAsBoolean())
-                foodBuilder.alwaysEat();
+                foodBuilder.alwaysEdible();
 
             if (foodJson.has("fast") && foodJson.get("fast").getAsBoolean())
                 foodBuilder.fast();
 
             if (foodJson.has("meat") && foodJson.get("meat").getAsBoolean())
-                foodBuilder.meat();
+                // FoodProperties#meat was removed in 1.20.5 (wolves now use the minecraft:wolf_food item tag).
 
             if (foodJson.has("effects")) {
                 JsonArray effectsJson = foodJson.getAsJsonArray("effects");

@@ -271,7 +271,7 @@ public class ExtendedEntity {
             // Teleport To Initial Pickup Position:
             if (this.pickedUpByEntity != null && !(this.entity instanceof Player)) {
                 double[] pickupOffset = this.getPickedUpOffset();
-                this.entity.teleportToWithTicket(this.pickedUpByEntity.position().x() + pickupOffset[0], this.pickedUpByEntity.position().y() + pickupOffset[1], this.pickedUpByEntity.position().z() + pickupOffset[2]);
+                this.entity.teleportTo(this.pickedUpByEntity.position().x() + pickupOffset[0], this.pickedUpByEntity.position().y() + pickupOffset[1], this.pickedUpByEntity.position().z() + pickupOffset[2]);
             }
 
             MessageEntityPickedUp message = new MessageEntityPickedUp(this.entity, pickedUpByEntity);

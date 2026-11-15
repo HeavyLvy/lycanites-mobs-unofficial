@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.elemental;
 
+import com.lycanitesmobs.core.util.helpers.LMHelperClass;
+
 import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
@@ -25,7 +27,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
-import net.minecraftforge.common.IPlantable;
 
 public class EntitySpriggan extends TameableCreatureEntity implements Enemy {
     protected int farmingRate = 20;
@@ -90,7 +91,7 @@ public class EntitySpriggan extends TameableCreatureEntity implements Enemy {
                     for (int z = (int) this.position().z() - farmingRange; z <= (int) this.position().z() + farmingRange; z++) {
                         BlockPos pos = new BlockPos(x, y, z);
                         Block farmingBlock = this.getCommandSenderWorld().getBlockState(pos).getBlock();
-                        if (farmingBlock instanceof IPlantable && farmingBlock instanceof BonemealableBlock && farmingBlock != Blocks.TALL_GRASS) {
+                        if (LMHelperClass.Materials.isPlant(farmingBlock) && farmingBlock instanceof BonemealableBlock && farmingBlock != Blocks.TALL_GRASS) {
 
                             // Boost Crops Every X Seconds:
                             if (!this.getCommandSenderWorld().isClientSide && this.getCommandSenderWorld() instanceof ServerLevel && this.farmingTick % (currentFarmingRate) == 0) {
@@ -99,7 +100,7 @@ public class EntitySpriggan extends TameableCreatureEntity implements Enemy {
                                 }*/
 
                                 BonemealableBlock growableBlock = (BonemealableBlock) farmingBlock;
-                                if (growableBlock.isValidBonemealTarget(this.getCommandSenderWorld(), pos, this.getCommandSenderWorld().getBlockState(pos), this.getCommandSenderWorld().isClientSide())) {
+                                if (growableBlock.isValidBonemealTarget(this.getCommandSenderWorld(), pos, this.getCommandSenderWorld().getBlockState(pos))) {
                                     if (growableBlock.isBonemealSuccess(this.getCommandSenderWorld(), this.getRandom(), pos, this.getCommandSenderWorld().getBlockState(pos))) {
                                         growableBlock.performBonemeal((ServerLevel) this.getCommandSenderWorld(), this.getRandom(), pos, this.getCommandSenderWorld().getBlockState(pos));
                                     }

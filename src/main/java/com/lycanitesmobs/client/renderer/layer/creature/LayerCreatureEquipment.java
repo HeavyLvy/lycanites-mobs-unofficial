@@ -1,10 +1,11 @@
 package com.lycanitesmobs.client.renderer.layer.creature;
 
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.core.component.DataComponents;
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.DyeableHorseArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -34,9 +35,9 @@ public class LayerCreatureEquipment extends LayerCreatureBase {
     @Override
     public Vector4f getPartColor(String partName, BaseCreatureEntity entity, boolean trophy) {
         ItemStack equipmentStack = entity.getCreatureInventory().getEquipmentStack("chest");
-        if (equipmentStack != null && equipmentStack.getItem() instanceof DyeableHorseArmorItem) {
-            DyeableHorseArmorItem dyeableEquipment = (DyeableHorseArmorItem) equipmentStack.getItem();
-            int color = dyeableEquipment.getColor(equipmentStack);
+        // 1.20.5: dyeable armour is any item carrying the dyed_color component (DyeableHorseArmorItem was removed).
+        if (equipmentStack != null && equipmentStack.has(DataComponents.DYED_COLOR)) {
+            int color = DyedItemColor.getOrDefault(equipmentStack, -1);
             float r = (float) (color >> 16 & 255) / 255.0F;
             float g = (float) (color >> 8 & 255) / 255.0F;
             float b = (float) (color & 255) / 255.0F;
