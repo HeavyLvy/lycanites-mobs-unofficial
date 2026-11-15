@@ -21,7 +21,7 @@ public class OculusCompat {
 
     /** Call once during mod setup (FMLCommonSetupEvent). */
     public static void init() {
-        oculusLoaded = ModList.get().isLoaded("oculus");
+        oculusLoaded = ModList.get().isLoaded("iris");
         if (oculusLoaded) {
             LMHelperClass.logInfoMessage("Oculus detected - Iris shader compatibility enabled.");
         }

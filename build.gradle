@@ -1,134 +1,159 @@
 plugins {
+    id 'java-library'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version "${forge_gradle_version_range}"
-    id 'org.spongepowered.mixin' version '0.7.+'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
-
-
+    id 'net.neoforged.moddev' version "${moddev_version}"
 }
-version = mod_version
-group = 'com.lycanitesmobs'
-archivesBaseName = 'lycanitesmobs'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+neoForge {
+    version = neo_version
+
+    parchment {
+        mappingsVersion = parchment_mappings_version
+        minecraftVersion = parchment_minecraft_version
+    }
+
+    // Picked up automatically from META-INF/accesstransformer.cfg; listed explicitly for clarity.
+    accessTransformers = files('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
         configureEach {
-            property('terminal.ansi', 'true')
+            systemProperty 'terminal.ansi', 'true'
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
         }
+
         client {
-            workingDirectory project.file('run')
-            args '--mixin.config=lycanitesmobs.mixins.json', '--debug', '--username', "Dev"
-            property 'forge.client.window.title', "Dev"
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'lycanitesmobs'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            //jvmArgs "-Xlog:gc*,safepoint:file=gc-client.log:time,uptime,level,tags"
-
-            mods {
-                lycanitesmobs {
-                    source sourceSets.main
-                }
-            }
+            client()
+            gameDirectory = project.file('run')
+            programArguments.addAll '--username', 'Dev'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
 
         server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            //jvmArgs "-Xlog:gc*,safepoint:file=gc-server.log:time,uptime,level,tags"
-
-            mods {
-                lycanitesmobs {
-                    source sourceSets.main
-                }
-            }
+            server()
+            gameDirectory = project.file('run')
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
 
         data {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            args '--mod', 'lycanitesmobs', '--all', '--output', file('src/generated/resources/')
+            data()
+            gameDirectory = project.file('run')
+            systemProperty 'forge.logging.markers', 'REGISTRIES,REGISTRYDUMP'
+            programArguments.addAll '--mod', mod_id, '--all',
+                    '--output', file('src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+    }
 
-
-            mods {
-                lycanitesmobs {
-                    source sourceSets.main
-                }
-            }
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
         }
     }
 }
 
-
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
 repositories {
     maven {
-        url "https://cursemaven.com"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
+        url = "https://cursemaven.com"
         content {
             includeGroup "curse.maven"
         }
     }
 }
+
 dependencies {
-    minecraft fg.deobf("net.minecraftforge:forge:$minecraft_version-$forge_version")
+    // Iris API for shader compatibility (client/compatibility/IrisHelper). Optional at runtime.
+    compileOnly "maven.modrinth:iris:${iris_version}"
 
-    // Test dependencies
-    implementation fg.deobf("curse.maven:oculus-581495:6020952")
-    implementation fg.deobf("curse.maven:embeddium-908741:5681725")
-    implementation fg.deobf("curse.maven:spark-361579:4738952")
+    // To test with shaders in dev, uncomment (Iris needs Sodium):
+    // runtimeOnly "maven.modrinth:sodium:${sodium_version}"
+    // runtimeOnly "maven.modrinth:iris:${iris_version}"
 
-    // Extra
-    implementation fg.deobf("io.github.llamalad7:mixinextras-common:0.2.1")
+    // MixinExtras is bundled with NeoForge, no dependency needed.
+
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
+// Fill in ${...} placeholders in neoforge.mods.toml from gradle.properties.
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_version            : mod_version,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
 
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "lycanitesmobs",
+                "Specification-Title"     : mod_id,
                 "Specification-Vendor"    : "lycanite",
                 "Specification-Version"   : "1",
                 "Implementation-Title"    : project.name,
-                "Implementation-Version"  : "${minecraft_version}",
+                "Implementation-Version"  : project.version,
                 "Implementation-Vendor"   : "lycanite",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'            : "lycanitesmobs.mixins.json"
         ])
     }
 }
 
-jar.finalizedBy('reobfJar')
-
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            artifact jar
+        register('mavenJava', MavenPublication) {
+            from components.java
         }
     }
     repositories {
         maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
+            url = "file://${project.projectDir}/mcmodsrepo"
         }
     }
 }
 
-mixin {
-    add sourceSets.main, "lycanitesmobs.refmap.json"
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 test {
     useJUnitPlatform()
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }
