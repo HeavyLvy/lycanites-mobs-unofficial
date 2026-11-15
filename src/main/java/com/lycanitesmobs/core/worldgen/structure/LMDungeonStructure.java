@@ -182,6 +182,6 @@ public class LMDungeonStructure extends Structure {
 
     @Override
     public StructureType<?> type() {
-        return ModStructureTypes.LM_DUNGEON;
+        return ModStructureTypes.LM_DUNGEON.get();
     }
 }

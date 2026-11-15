@@ -92,13 +92,16 @@ public class ItemInfo {
                         LMHelperClass.logWarningMessage("Unable to add food effect: " + effectId);
                         continue;
                     }
-                    MobEffectInstance effectInstance = new MobEffectInstance(effect, foodEffectJson.get("duration").getAsInt() * 20, foodEffectJson.get("amplifier").getAsInt());
+                    // Built lazily: mod effect holders aren't bound until effects register, after items are defined.
+                    int effectDuration = foodEffectJson.get("duration").getAsInt() * 20;
+                    int effectAmplifier = foodEffectJson.get("amplifier").getAsInt();
+                    final Holder<MobEffect> foodEffect = effect;
 
                     float chance = 1F;
                     if (foodEffectJson.has("chance"))
                         chance = foodEffectJson.get("chance").getAsFloat();
 
-                    foodBuilder.effect(effectInstance, chance);
+                    foodBuilder.effect(() -> new MobEffectInstance(foodEffect, effectDuration, effectAmplifier), chance);
                 }
             }
 

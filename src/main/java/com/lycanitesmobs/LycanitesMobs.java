@@ -131,6 +131,8 @@ public class LycanitesMobs {
         BLOCKS.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
         WorldGenManager.register(modEventBus);
+        ModStructureTypes.register(modEventBus);
+        ModStructurePieceTypes.register(modEventBus);
         ObjectManager.registerContainers(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
@@ -244,8 +246,6 @@ public class LycanitesMobs {
         loadValues();
 
         event.enqueueWork(() -> {
-            ModStructureTypes.init();
-            ModStructurePieceTypes.init();
 
             WorldGenManager.getInstance().setupFluidFeatures();
             WorldgenJsonDumper.dumpIfDev();

@@ -26,7 +26,7 @@ public class LMDungeonPiece extends StructurePiece {
     private BlockPos originPos;
 
     public LMDungeonPiece(BoundingBox boundingBox, String schematicName, DungeonLayout layout) {
-        super(ModStructurePieceTypes.LM_DUNGEON_PIECE, 0, boundingBox);
+        super(ModStructurePieceTypes.LM_DUNGEON_PIECE.get(), 0, boundingBox);
         this.schematicName = schematicName;
         this.layout = layout;
         this.originPos = layout.getDungeonInstance().getOrigin();
@@ -34,14 +34,14 @@ public class LMDungeonPiece extends StructurePiece {
     }
 
     public LMDungeonPiece(BoundingBox boundingBox, String schematicName, BlockPos originPos, long layoutSeed) {
-        super(ModStructurePieceTypes.LM_DUNGEON_PIECE, 0, boundingBox);
+        super(ModStructurePieceTypes.LM_DUNGEON_PIECE.get(), 0, boundingBox);
         this.schematicName = schematicName;
         this.originPos = originPos;
         this.layoutSeed = layoutSeed;
     }
 
     public LMDungeonPiece(CompoundTag tag) {
-        super(ModStructurePieceTypes.LM_DUNGEON_PIECE, tag);
+        super(ModStructurePieceTypes.LM_DUNGEON_PIECE.get(), tag);
         this.schematicName = tag.getString("SchematicName");
         this.layoutSeed = tag.getLong("LayoutSeed");
         int[] origin = tag.getIntArray("Origin");

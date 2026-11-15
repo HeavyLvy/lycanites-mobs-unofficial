@@ -541,8 +541,10 @@ public class ProjectileInfo {
     public void load() {
         // Charge Item:
         if (!this.noChargeItem) {
-            this.chargeItem = Lazy.of(() -> ObjectManager.getItem(this.chargeItemName));
-            if (this.chargeItem.get() == null) {
+            // NeoForge's Lazy rejects null, so check for an existing charge item by name instead of resolving it now.
+            if (ObjectManager.hasItem(this.chargeItemName)) {
+                this.chargeItem = Lazy.of(() -> ObjectManager.getItem(this.chargeItemName));
+            } else {
                 Item.Properties properties = new Item.Properties();
                 //properties.tab(ItemManager.getInstance().chargesGroup);
                 this.chargeItem = Lazy.of(() -> new ChargeItem(properties, this));
