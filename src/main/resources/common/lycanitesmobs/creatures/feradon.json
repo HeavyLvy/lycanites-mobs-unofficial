@@ -22,7 +22,7 @@
     "ignoreBiome": false,
     "biomeTags": [
       "minecraft:is_plains",
-      "forge:is_savanna",
+      "c:is_savanna",
       "-forge:is_snowy"
     ],
     "spawnWeight": 4,

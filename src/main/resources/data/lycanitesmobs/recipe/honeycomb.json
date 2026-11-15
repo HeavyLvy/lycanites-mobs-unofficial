@@ -1,6 +1,6 @@
 {
   "result": {
-    "item": "minecraft:honeycomb",
+    "id": "minecraft:honeycomb",
     "count": 8
   },
   "type": "minecraft:crafting_shaped",

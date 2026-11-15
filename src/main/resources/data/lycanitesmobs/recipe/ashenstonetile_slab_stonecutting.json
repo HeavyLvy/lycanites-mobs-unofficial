@@ -3,6 +3,8 @@
 	"ingredient": {
 		"item": "lycanitesmobs:ashenstonetile"
 	},
-	"result": "lycanitesmobs:ashenstonetile_slab",
-	"count": 2
+	"result": {
+		"id": "lycanitesmobs:ashenstonetile_slab",
+		"count": 2
+	}
 }

@@ -1,6 +1,6 @@
 {
   "result": {
-    "item": "lycanitesmobs:immunizer",
+    "id": "lycanitesmobs:immunizer",
     "count": 8
   },
   "type": "minecraft:crafting_shaped",

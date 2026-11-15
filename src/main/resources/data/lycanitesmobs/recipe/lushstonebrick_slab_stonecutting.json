@@ -3,6 +3,8 @@
 	"ingredient": {
 		"item": "lycanitesmobs:lushstonebrick"
 	},
-	"result": "lycanitesmobs:lushstonebrick_slab",
-	"count": 2
+	"result": {
+		"id": "lycanitesmobs:lushstonebrick_slab",
+		"count": 2
+	}
 }

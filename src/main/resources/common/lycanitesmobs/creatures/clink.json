@@ -21,8 +21,8 @@
     "dimensionListType": "blacklist",
     "ignoreBiome": false,
     "biomeTags": [
-      "forge:is_sandy",
-      "forge:is_wasteland",
+      "c:is_sandy",
+      "c:is_wasteland",
       "minecraft:is_badlands",
       "-forge:is_cold/overworld",
       "-forge:is_snowy"

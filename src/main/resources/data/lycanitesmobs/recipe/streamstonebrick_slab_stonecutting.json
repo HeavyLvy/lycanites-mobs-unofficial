@@ -3,6 +3,8 @@
 	"ingredient": {
 		"item": "lycanitesmobs:streamstonebrick"
 	},
-	"result": "lycanitesmobs:streamstonebrick_slab",
-	"count": 2
+	"result": {
+		"id": "lycanitesmobs:streamstonebrick_slab",
+		"count": 2
+	}
 }

@@ -17,9 +17,9 @@
       ],
       "dimensionListType": "whitelist",
       "biomeTags": [
-        "forge:is_sandy",
+        "c:is_sandy",
         "minecraft:is_badlands",
-        "forge:is_wasteland",
+        "c:is_wasteland",
         "-forge:is_cold/overworld"
       ],
       "biomeTagListType": "whitelist"

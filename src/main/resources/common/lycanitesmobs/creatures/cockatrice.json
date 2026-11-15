@@ -22,7 +22,7 @@
     "ignoreBiome": false,
     "biomeTags": [
       "minecraft:is_jungle",
-      "forge:is_mountain"
+      "c:is_mountain"
     ],
     "spawnWeight": 1,
     "dungeonWeight": 0,

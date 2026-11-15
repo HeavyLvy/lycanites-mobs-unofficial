@@ -3,6 +3,8 @@
 	"ingredient": {
 		"item": "lycanitesmobs:shadowstonebrick"
 	},
-	"result": "lycanitesmobs:shadowstonebrick_slab",
-	"count": 2
+	"result": {
+		"id": "lycanitesmobs:shadowstonebrick_slab",
+		"count": 2
+	}
 }

@@ -1,11 +1,11 @@
 {
   "result": {
-    "item": "lycanitesmobs:lushstone",
+    "id": "lycanitesmobs:lushstone",
     "count": 9
   },
   "ingredients": [
     {
-      "item": "minecraft:grass"
+      "item": "minecraft:short_grass"
     },
     {
       "item": "minecraft:cobblestone"

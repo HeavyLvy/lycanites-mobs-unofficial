@@ -3,6 +3,8 @@
 	"ingredient": {
 		"item": "lycanitesmobs:aberrantstonebrick"
 	},
-	"result": "lycanitesmobs:aberrantstonebrick_slab",
-	"count": 2
+	"result": {
+		"id": "lycanitesmobs:aberrantstonebrick_slab",
+		"count": 2
+	}
 }

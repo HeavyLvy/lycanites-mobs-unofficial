@@ -670,6 +670,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
         builder.define(VARIANT, (byte) 0);
 
         builder.define(ARENA, Optional.empty());
+        builder.define(BABY, false); // was never defined on 1.20.1 (reads fell back to false); 1.21 requires it
         CreatureInventory.registerData(builder);
 
         this.loadCreatureFlags();

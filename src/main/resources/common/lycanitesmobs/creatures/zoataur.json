@@ -21,10 +21,10 @@
     "dimensionListType": "blacklist",
     "ignoreBiome": false,
     "biomeTags": [
-      "forge:is_plains",
+      "c:is_plains",
       "minecraft:is_savanna",
-      "forge:is_sandy",
-      "forge:is_wasteland",
+      "c:is_sandy",
+      "c:is_wasteland",
       "minecraft:is_badlands",
       "-forge:is_snowy",
       "-forge:is_cold"

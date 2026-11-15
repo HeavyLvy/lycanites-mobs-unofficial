@@ -21,9 +21,9 @@
     "dimensionListType": "blacklist",
     "ignoreBiome": false,
     "biomeTags": [
-      "forge:is_swamp",
-      "forge:is_spooky",
-      "forge:is_mushroom"
+      "c:is_swamp",
+      "c:is_spooky",
+      "c:is_mushroom"
     ],
     "spawnWeight": 16,
     "dungeonWeight": 0,

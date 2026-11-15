@@ -18,9 +18,9 @@
       ],
       "dimensionListType": "whitelist",
       "biomeTags": [
-        "forge:is_spooky",
-        "forge:is_mountain",
-        "forge:is_swamp",
+        "c:is_spooky",
+        "c:is_mountain",
+        "c:is_swamp",
         "minecraft:is_nether",
         "minecraft:is_end"
       ],

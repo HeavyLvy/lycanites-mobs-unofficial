@@ -21,9 +21,9 @@
     "dimensionListType": "blacklist",
     "ignoreBiome": false,
     "biomeTags": [
-      "forge:is_cold",
-      "forge:is_snowy",
-      "forge:is_coniferous",
+      "c:is_cold",
+      "c:is_snowy",
+      "c:is_tree/coniferous",
       "-minecraft:is_end"
     ],
     "spawnWeight": 10,

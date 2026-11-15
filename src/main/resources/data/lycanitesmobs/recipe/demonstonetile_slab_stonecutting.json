@@ -3,6 +3,8 @@
 	"ingredient": {
 		"item": "lycanitesmobs:demonstonetile"
 	},
-	"result": "lycanitesmobs:demonstonetile_slab",
-	"count": 2
+	"result": {
+		"id": "lycanitesmobs:demonstonetile_slab",
+		"count": 2
+	}
 }

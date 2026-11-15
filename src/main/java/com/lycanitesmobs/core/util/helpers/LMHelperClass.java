@@ -542,8 +542,9 @@ public class LMHelperClass {
             for (Field field : classFields) {
                 if (field.getType().equals(double.class)) {
                     field.setAccessible(true);
-                    if ((double) field.get(Attributes.MAX_HEALTH) == 1024.0D) {
-                        field.setDouble(Attributes.MAX_HEALTH, Double.MAX_VALUE);
+                    // Attributes are holders in 1.21; reflect on the underlying RangedAttribute.
+                    if ((double) field.get(Attributes.MAX_HEALTH.value()) == 1024.0D) {
+                        field.setDouble(Attributes.MAX_HEALTH.value(), Double.MAX_VALUE);
                     }
                 }
             }

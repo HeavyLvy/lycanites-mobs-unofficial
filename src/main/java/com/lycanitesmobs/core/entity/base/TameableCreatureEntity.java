@@ -100,6 +100,7 @@ public abstract class TameableCreatureEntity extends AgeableCreatureEntity {
         builder.define(OWNER_ID, Optional.empty());
         builder.define(HUNGER, this.getCreatureHungerMax());
         builder.define(STAMINA, this.getStaminaMax());
+        builder.define(LOYALTY, 0); // 1.21 requires every allocated data id to be defined (was left undefined on 1.20.1)
     }
 
     // ========== Init AI ==========

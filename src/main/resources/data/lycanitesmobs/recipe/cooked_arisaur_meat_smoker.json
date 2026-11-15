@@ -3,7 +3,9 @@
 	"ingredient": {
 		"item": "lycanitesmobs:raw_arisaur_meat"
 	},
-	"result": "lycanitesmobs:cooked_arisaur_meat",
+	"result": {
+		"id": "lycanitesmobs:cooked_arisaur_meat"
+	},
 	"experience": 0.35,
 	"cookingtime": 100
 }

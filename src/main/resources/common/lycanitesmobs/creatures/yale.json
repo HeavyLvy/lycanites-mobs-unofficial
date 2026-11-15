@@ -21,7 +21,7 @@
     "dimensionListType": "blacklist",
     "ignoreBiome": false,
     "biomeTags": [
-      "forge:is_mountain"
+      "c:is_mountain"
     ],
     "spawnWeight": 16,
     "dungeonWeight": 0,

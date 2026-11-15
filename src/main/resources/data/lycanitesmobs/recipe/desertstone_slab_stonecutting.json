@@ -3,6 +3,8 @@
 	"ingredient": {
 		"item": "lycanitesmobs:desertstone"
 	},
-	"result": "lycanitesmobs:desertstone_slab",
-	"count": 2
+	"result": {
+		"id": "lycanitesmobs:desertstone_slab",
+		"count": 2
+	}
 }

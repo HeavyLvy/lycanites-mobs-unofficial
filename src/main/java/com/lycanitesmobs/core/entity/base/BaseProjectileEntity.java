@@ -169,7 +169,7 @@ public class BaseProjectileEntity extends ThrowableProjectile {
     @Override
     public void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(SCALE, this.projectileScale);
-        this.setProjectileScale(this.projectileScale);
+        // (setProjectileScale was called here; entityData doesn't exist until this builder is built in 1.21)
     }
 
     @Override

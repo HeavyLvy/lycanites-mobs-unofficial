@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.data.info.creature;
 
+import com.lycanitesmobs.LycanitesMobs;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.data.info.ModInfo;
@@ -978,7 +979,10 @@ public class CreatureInfo {
         try {
             return this.entityConstructor.newInstance(type, world);
         } catch (Exception e) {
-            LMHelperClass.logWarningMessage("[Creature] Failed to create entity for " + this.getName() + ": " + e.getMessage());
+            // Constructor errors arrive wrapped in InvocationTargetException (message null); log the real cause.
+            Throwable cause = e instanceof java.lang.reflect.InvocationTargetException && e.getCause() != null ? e.getCause() : e;
+            LMHelperClass.logWarningMessage("[Creature] Failed to create entity for " + this.getName() + ": " + cause);
+            LycanitesMobs.LOGGER.debug("Entity creation failure for " + this.getName(), cause);
             return null;
         }
     }

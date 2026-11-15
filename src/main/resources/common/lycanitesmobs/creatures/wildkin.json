@@ -21,9 +21,9 @@
     "dimensionListType": "blacklist",
     "ignoreBiome": false,
     "biomeTags": [
-      "forge:is_mountain",
-      "forge:is_cold",
-      "forge:is_snowy"
+      "c:is_mountain",
+      "c:is_cold",
+      "c:is_snowy"
     ],
     "spawnWeight": 4,
     "dungeonWeight": 200,
