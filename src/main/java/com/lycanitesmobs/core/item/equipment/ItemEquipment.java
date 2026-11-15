@@ -100,10 +100,7 @@ public class ItemEquipment extends BaseItem {
     // ==================================================
     //                 Custom Renderer
     // ==================================================
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(LycanitesMobs.PROXY.createEquipmentItemExtensions());
-    }
+    // Client renderer extensions are registered in ClientManager#registerClientExtensions (RegisterClientExtensionsEvent).
 
     // ==================================================
     //                      Info

@@ -1,5 +1,15 @@
 package com.lycanitesmobs.client.manager;
 
+import net.neoforged.bus.api.SubscribeEvent;
+import com.lycanitesmobs.LycanitesMobs;
+import com.lycanitesmobs.core.block.fluid.type.BaseFluidType;
+import com.lycanitesmobs.core.item.equipment.ItemEquipmentPart;
+import com.lycanitesmobs.core.item.equipment.ItemEquipment;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.minecraft.world.item.Item;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import com.lycanitesmobs.client.event.ClientEventListener;
 import com.lycanitesmobs.client.gui.screen.beastiary.SummoningBeastiaryScreen;
 import com.lycanitesmobs.client.gui.screen.base.BaseOverlayScreen;
@@ -84,6 +94,23 @@ public class ClientManager {
     public void initBlockRenderTypes() {
         for (Block block : ItemManager.getInstance().getCutoutBlocks()) {
             ItemBlockRenderTypes.setRenderLayer(block, RenderType.cutout());
+        }
+    }
+
+    /** Replaces the deprecated Item/FluidType#initializeClient hooks. Fired on the client mod bus after registration. */
+    @SubscribeEvent
+    public void registerClientExtensions(RegisterClientExtensionsEvent event) {
+        for (Item item : BuiltInRegistries.ITEM) {
+            if (item instanceof ItemEquipment) {
+                event.registerItem(LycanitesMobs.PROXY.createEquipmentItemExtensions(), item);
+            } else if (item instanceof ItemEquipmentPart) {
+                event.registerItem(LycanitesMobs.PROXY.createEquipmentPartItemExtensions(), item);
+            }
+        }
+        for (FluidType fluidType : NeoForgeRegistries.FLUID_TYPES) {
+            if (fluidType instanceof BaseFluidType baseFluidType) {
+                event.registerFluidType(baseFluidType.createClientExtensions(), baseFluidType);
+            }
         }
     }
 }

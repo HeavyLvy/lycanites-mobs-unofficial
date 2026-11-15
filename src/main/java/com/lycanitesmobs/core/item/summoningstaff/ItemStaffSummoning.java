@@ -54,12 +54,12 @@ public class ItemStaffSummoning extends BaseItem {
 
     // ========== Prevent Swing ==========
     @Override
-    public boolean onEntitySwing(ItemStack itemStack, LivingEntity entity) {
+    public boolean onEntitySwing(ItemStack itemStack, LivingEntity entity, InteractionHand hand) {
         if (entity instanceof Player) {
             entity.startUsingItem(InteractionHand.MAIN_HAND);
             return true;
         }
-        return super.onEntitySwing(itemStack, entity);
+        return super.onEntitySwing(itemStack, entity, hand);
     }
 
     @Override

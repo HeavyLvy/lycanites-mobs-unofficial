@@ -366,10 +366,7 @@ public class ItemEquipmentPart extends BaseItem {
 		return ClientManager.getInstance().getFontRenderer();
 	}*/
 
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(LycanitesMobs.PROXY.createEquipmentPartItemExtensions());
-    }
+    // Client renderer extensions are registered in ClientManager#registerClientExtensions (RegisterClientExtensionsEvent).
 
     /**
      * Sets up this equipment part, this is called when the provided stack is dropped and needs to have its level randomized, etc.

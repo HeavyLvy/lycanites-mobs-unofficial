@@ -67,13 +67,9 @@ public class BaseFluidType extends FluidType {
         return new Vector3f(fogColor);
     }
 
-    @Override
-    public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer) {
-        ClientExtensionProperties clientProperties = CONSTRUCTING_CLIENT_PROPERTIES.get();
-        if (clientProperties == null) {
-            clientProperties = new ClientExtensionProperties(stillTexture, flowingTexture, overlayTexture, tintColor, fogColor);
-        }
-        consumer.accept(clientProperties.createExtensions());
+    /** Client fluid rendering; registered from ClientManager#registerClientExtensions (RegisterClientExtensionsEvent). */
+    public IClientFluidTypeExtensions createClientExtensions() {
+        return new ClientExtensionProperties(stillTexture, flowingTexture, overlayTexture, tintColor, fogColor).createExtensions();
     }
 
     private record ClientExtensionProperties(ResourceLocation stillTexture, ResourceLocation flowingTexture, @Nullable ResourceLocation overlayTexture,
