@@ -24,8 +24,8 @@
       "c:is_sandy",
       "c:is_wasteland",
       "minecraft:is_badlands",
-      "-forge:is_cold/overworld",
-      "-forge:is_snowy"
+      "-c:is_cold/overworld",
+      "-c:is_snowy"
     ],
     "spawnWeight": 6,
     "dungeonWeight": 200,

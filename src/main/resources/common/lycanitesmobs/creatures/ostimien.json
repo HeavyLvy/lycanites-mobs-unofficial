@@ -24,7 +24,7 @@
       "c:is_swamp",
       "c:is_spooky",
       "minecraft:is_forest",
-      "-forge:is_cold"
+      "-c:is_cold"
     ],
     "spawnWeight": 8,
     "dungeonWeight": 200,

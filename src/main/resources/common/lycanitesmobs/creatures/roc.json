@@ -24,7 +24,7 @@
       "c:is_plains",
       "minecraft:is_savanna",
       "minecraft:is_forest",
-      "-forge:is_snowy"
+      "-c:is_snowy"
     ],
     "spawnWeight": 16,
     "dungeonWeight": 200,

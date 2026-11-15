@@ -25,7 +25,7 @@
     "ignoreBiome": false,
     "biomeTags": [
       "minecraft:is_river",
-      "-forge:is_snowy"
+      "-c:is_snowy"
     ],
     "spawnWeight": 8,
     "dungeonWeight": 0,

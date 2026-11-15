@@ -23,9 +23,9 @@
     "biomeTags": [
       "c:is_sandy",
       "c:is_wasteland",
-      "minecarft:is_badlands",
-      "-forge:is_cold",
-      "-forge:is_snowy"
+      "minecraft:is_badlands",
+      "-c:is_cold",
+      "-c:is_snowy"
     ],
     "spawnWeight": 3,
     "dungeonWeight": 200,

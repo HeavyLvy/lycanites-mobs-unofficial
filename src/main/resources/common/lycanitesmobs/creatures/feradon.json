@@ -23,7 +23,7 @@
     "biomeTags": [
       "minecraft:is_plains",
       "c:is_savanna",
-      "-forge:is_snowy"
+      "-c:is_snowy"
     ],
     "spawnWeight": 4,
     "dungeonWeight": 200,
