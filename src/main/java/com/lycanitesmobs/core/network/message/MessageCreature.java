@@ -4,12 +4,24 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
-public class MessageCreature {
+public class MessageCreature implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessageCreature> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_creature"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessageCreature> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessageCreature::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessageCreature> type() {
+        return TYPE;
+    }
+
     int entityID;
     int playerReputation = 0;
 
@@ -24,12 +36,11 @@ public class MessageCreature {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessageCreature message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
-        if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
+    public static void handle(MessageCreature message, IPayloadContext ctx) {
+        if (ctx.flow() != PacketFlow.CLIENTBOUND)
             return;
 
-        ctx.get().enqueueWork(() ->
+        ctx.enqueueWork(() ->
                 LycanitesMobs.PROXY.applyCreatureReputation(message.entityID, message.playerReputation));
     }
 

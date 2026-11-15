@@ -3,12 +3,24 @@ package com.lycanitesmobs.core.network.message;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
-public class MessagePlayerStats {
+public class MessagePlayerStats implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessagePlayerStats> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_player_stats"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessagePlayerStats> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessagePlayerStats::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessagePlayerStats> type() {
+        return TYPE;
+    }
+
     public int spirit;
     public int summonFocus;
     public int creatureStudyCooldown;
@@ -25,12 +37,11 @@ public class MessagePlayerStats {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessagePlayerStats message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
-        if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
+    public static void handle(MessagePlayerStats message, IPayloadContext ctx) {
+        if (ctx.flow() != PacketFlow.CLIENTBOUND)
             return;
 
-        ctx.get().enqueueWork(() ->
+        ctx.enqueueWork(() ->
                 LycanitesMobs.PROXY.applyPlayerStats(
                         message.spirit,
                         message.summonFocus,

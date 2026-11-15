@@ -5,25 +5,36 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
-public class MessagePlayerLeftClick {
+public class MessagePlayerLeftClick implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessagePlayerLeftClick> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_player_left_click"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessagePlayerLeftClick> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessagePlayerLeftClick::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessagePlayerLeftClick> type() {
+        return TYPE;
+    }
+
     public MessagePlayerLeftClick() {
     }
 
     /**
      * Called when this message is received.
      */
-    public static void handle(MessagePlayerLeftClick message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
-        if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_SERVER)
+    public static void handle(MessagePlayerLeftClick message, IPayloadContext ctx) {
+        if (ctx.flow() != PacketFlow.SERVERBOUND)
             return;
 
-        ctx.get().enqueueWork(() -> {
-            Player player = ctx.get().getSender();
+        ctx.enqueueWork(() -> {
+            Player player = ctx.player();
 
             // Equipment:
             InteractionHand activeHand = player.getUsedItemHand();

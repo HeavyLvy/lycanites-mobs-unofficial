@@ -7,13 +7,25 @@ import com.lycanitesmobs.core.manager.PetManager;
 import com.lycanitesmobs.core.entity.pets.SummonSet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public class MessagePetEntry {
+public class MessagePetEntry implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessagePetEntry> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_pet_entry"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessagePetEntry> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessagePetEntry::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessagePetEntry> type() {
+        return TYPE;
+    }
+
     public UUID petEntryID;
     public String petEntryType;
     public boolean spawningActive;
@@ -55,12 +67,11 @@ public class MessagePetEntry {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessagePetEntry message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
+    public static void handle(MessagePetEntry message, IPayloadContext ctx) {
         // Server Side:
-        if (ctx.get().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
-            ctx.get().enqueueWork(() -> {
-                Player player = ctx.get().getSender();
+        if (ctx.flow() == PacketFlow.SERVERBOUND) {
+            ctx.enqueueWork(() -> {
+                Player player = ctx.player();
                 ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
                 PetManager petManager = playerExt.getPetManager();
                 PetEntry petEntry = petManager.getEntry(message.petEntryID);
@@ -78,7 +89,7 @@ public class MessagePetEntry {
         }
 
         // Client Side:
-        ctx.get().enqueueWork(() -> LycanitesMobs.PROXY.applyPetEntry(message));
+        ctx.enqueueWork(() -> LycanitesMobs.PROXY.applyPetEntry(message));
     }
 
     /**

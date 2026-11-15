@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class ServerProxy implements IProxy {
     @Override
-    public void registerEvents() {
+    public void registerEvents(net.neoforged.bus.api.IEventBus modEventBus) {
 
     }
 

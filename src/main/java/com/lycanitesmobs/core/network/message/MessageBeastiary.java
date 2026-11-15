@@ -5,12 +5,24 @@ import com.lycanitesmobs.core.data.info.gui.Beastiary;
 import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
-public class MessageBeastiary {
+public class MessageBeastiary implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessageBeastiary> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_beastiary"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessageBeastiary> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessageBeastiary::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessageBeastiary> type() {
+        return TYPE;
+    }
+
     public int entryAmount = 0;
     public String[] creatureNames;
     public int[] ranks;
@@ -38,12 +50,11 @@ public class MessageBeastiary {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessageBeastiary message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
-        if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
+    public static void handle(MessageBeastiary message, IPayloadContext ctx) {
+        if (ctx.flow() != PacketFlow.CLIENTBOUND)
             return;
 
-        ctx.get().enqueueWork(() ->
+        ctx.enqueueWork(() ->
                 LycanitesMobs.PROXY.applyBeastiaryEntries(
                         message.creatureNames,
                         message.ranks,

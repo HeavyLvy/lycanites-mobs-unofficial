@@ -28,7 +28,6 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.*;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 
@@ -100,10 +99,6 @@ public class BaseProjectileEntity extends ThrowableProjectile {
         return ProjectileManager.getInstance().getOldProjectileType(this.getClass());
     }
 
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
 
 
     // ========== Setup Projectile ==========

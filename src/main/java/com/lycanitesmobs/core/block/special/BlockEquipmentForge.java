@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 import static com.lycanitesmobs.core.tabs.LMBlocksGroup.blockNames;
@@ -113,7 +112,7 @@ public class BlockEquipmentForge extends BlockBase implements EntityBlock {
         if (!world.isClientSide() && player instanceof ServerPlayer) {
             BlockEntity tileEntity = world.getBlockEntity(pos);
             if (tileEntity instanceof TileEntityEquipmentForge) {
-                NetworkHooks.openScreen((ServerPlayer) player, new EquipmentForgeContainerProvider((TileEntityEquipmentForge) tileEntity), buf -> buf.writeBlockPos(pos));
+                ((ServerPlayer) player).openMenu(new EquipmentForgeContainerProvider((TileEntityEquipmentForge) tileEntity), buf -> buf.writeBlockPos(pos));
             }
         }
         return InteractionResult.SUCCESS;

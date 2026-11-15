@@ -4,13 +4,25 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.util.math.SchismMath;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
 
-public class MessageEntityVelocity {
+public class MessageEntityVelocity implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessageEntityVelocity> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_entity_velocity"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessageEntityVelocity> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessageEntityVelocity::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessageEntityVelocity> type() {
+        return TYPE;
+    }
+
     public int entityID;
     public int motionX;
     public int motionY;
@@ -34,12 +46,11 @@ public class MessageEntityVelocity {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessageEntityVelocity message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
-        if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
+    public static void handle(MessageEntityVelocity message, IPayloadContext ctx) {
+        if (ctx.flow() != PacketFlow.CLIENTBOUND)
             return;
 
-        ctx.get().enqueueWork(() ->
+        ctx.enqueueWork(() ->
                 LycanitesMobs.PROXY.applyEntityVelocity(
                         message.entityID,
                         message.motionX,

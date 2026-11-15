@@ -93,7 +93,6 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.CommonHooks;
-import net.minecraftforge.network.NetworkHooks;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 
@@ -5582,7 +5581,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
      **/
     public void openGUIToPlayer(Player player) {
         if (player instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openScreen(serverPlayer, new CreatureContainerProvider(this), buf -> buf.writeInt(this.getId()));
+            serverPlayer.openMenu(new CreatureContainerProvider(this), buf -> buf.writeInt(this.getId()));
         }
     }
 

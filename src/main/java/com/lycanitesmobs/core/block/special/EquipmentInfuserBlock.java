@@ -25,7 +25,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 
 public class EquipmentInfuserBlock extends BlockBase implements EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -96,7 +95,7 @@ public class EquipmentInfuserBlock extends BlockBase implements EntityBlock {
         if (!world.isClientSide() && player instanceof ServerPlayer) {
             BlockEntity tileEntity = world.getBlockEntity(pos);
             if (tileEntity instanceof EquipmentInfuserTileEntity) {
-                NetworkHooks.openScreen((ServerPlayer) player, new EquipmentInfuserContainerProvider((EquipmentInfuserTileEntity) tileEntity), buf -> buf.writeBlockPos(pos));
+                ((ServerPlayer) player).openMenu(new EquipmentInfuserContainerProvider((EquipmentInfuserTileEntity) tileEntity), buf -> buf.writeBlockPos(pos));
             }
         }
         return InteractionResult.SUCCESS;

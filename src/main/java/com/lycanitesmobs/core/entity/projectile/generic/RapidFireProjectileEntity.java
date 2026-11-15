@@ -14,7 +14,6 @@ import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkHooks;
 
 public class RapidFireProjectileEntity extends BaseProjectileEntity {
     // Properties:
@@ -92,10 +91,6 @@ public class RapidFireProjectileEntity extends BaseProjectileEntity {
         this.noPhysics = true;
     }
 
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
 /*@Override
 	public IPacket<?> getAddEntityPacket() {
 		return new SSpawnObjectPacket(this);

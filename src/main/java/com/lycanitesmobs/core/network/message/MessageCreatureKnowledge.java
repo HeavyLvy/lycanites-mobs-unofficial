@@ -4,13 +4,25 @@ import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
 
-public class MessageCreatureKnowledge {
+public class MessageCreatureKnowledge implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessageCreatureKnowledge> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_creature_knowledge"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessageCreatureKnowledge> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessageCreatureKnowledge::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessageCreatureKnowledge> type() {
+        return TYPE;
+    }
+
     public String creatureName;
     public int rank;
     public int experience;
@@ -27,12 +39,11 @@ public class MessageCreatureKnowledge {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessageCreatureKnowledge message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
-        if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
+    public static void handle(MessageCreatureKnowledge message, IPayloadContext ctx) {
+        if (ctx.flow() != PacketFlow.CLIENTBOUND)
             return;
 
-        ctx.get().enqueueWork(() ->
+        ctx.enqueueWork(() ->
                 LycanitesMobs.PROXY.applyCreatureKnowledge(
                         message.creatureName,
                         message.rank,

@@ -29,14 +29,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
 
 import java.util.UUID;
 
 public class ClientProxy implements IProxy {
     @Override
-    public void registerEvents() {
-        FMLJavaModLoadingContext.get().getModEventBus().register(ClientManager.getInstance());
+    public void registerEvents(IEventBus modEventBus) {
+        modEventBus.register(ClientManager.getInstance());
     }
 
     @Override
@@ -46,7 +46,8 @@ public class ClientProxy implements IProxy {
 
     @Override
     public void addEntityToWorld(int entityId, Entity entity) {
-        Minecraft.getInstance().level.putNonPlayerEntity(entityId, entity);
+        entity.setId(entityId);
+        Minecraft.getInstance().level.addEntity(entity);
     }
 
     @Override

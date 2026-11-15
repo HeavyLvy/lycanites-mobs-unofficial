@@ -4,17 +4,14 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.PlayMessages;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 public class EntityFactory implements EntityType.EntityFactory<Entity> {
     private static EntityFactory INSTANCE;
     private final Map<EntityType, EntityType.EntityFactory<? extends Entity>> entityTypeFactoryMap = new HashMap<>();
     private final Map<String, EntityType> entityTypeNetworkMap = new HashMap<>();
-    private final BiFunction<PlayMessages.SpawnEntity, Level, Entity> createOnClientFunction = this::createOnClient;
 
     /**
      * Returns the main Entity Factory instance or creates it and returns it.
@@ -34,9 +31,6 @@ public class EntityFactory implements EntityType.EntityFactory<Entity> {
         return this.entityTypeNetworkMap.containsKey(networkName);
     }
 
-    public BiFunction<PlayMessages.SpawnEntity, Level, Entity> getCreateOnClientFunction() {
-        return this.createOnClientFunction;
-    }
 
     /**
      * Adds a new Entity Type and factory mapping for this Factory to create.
@@ -72,14 +66,4 @@ public class EntityFactory implements EntityType.EntityFactory<Entity> {
         return factory.create(entityType, world);
     }
 
-    /**
-     * Spawns an entity on the client side from a server packet.
-     *
-     * @param spawnPacket The entity spawn packet.
-     * @param world       The world to spawn in.
-     */
-    public Entity createOnClient(PlayMessages.SpawnEntity spawnPacket, Level world) {
-        LMHelperClass.logDebug("Entity", "Client factory called!");
-        return null;
-    }
 }

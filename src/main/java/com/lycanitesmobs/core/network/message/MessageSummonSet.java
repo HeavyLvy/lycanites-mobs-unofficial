@@ -5,12 +5,24 @@ import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.entity.pets.SummonSet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
-public class MessageSummonSet {
+public class MessageSummonSet implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessageSummonSet> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_summon_set"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessageSummonSet> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessageSummonSet::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessageSummonSet> type() {
+        return TYPE;
+    }
+
     public byte summonSetID;
     public int subpsecies;
     public int variant;
@@ -31,12 +43,11 @@ public class MessageSummonSet {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessageSummonSet message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
+    public static void handle(MessageSummonSet message, IPayloadContext ctx) {
         // Server Side:
-        if (ctx.get().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
-            ctx.get().enqueueWork(() -> {
-                Player player = ctx.get().getSender();
+        if (ctx.flow() == PacketFlow.SERVERBOUND) {
+            ctx.enqueueWork(() -> {
+                Player player = ctx.player();
                 ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
 
                 SummonSet summonSet = playerExt.getSummonSet(message.summonSetID);
@@ -46,7 +57,7 @@ public class MessageSummonSet {
         }
 
         // Client Side:
-        ctx.get().enqueueWork(() -> LycanitesMobs.PROXY.applySummonSet(message));
+        ctx.enqueueWork(() -> LycanitesMobs.PROXY.applySummonSet(message));
     }
 
     /**

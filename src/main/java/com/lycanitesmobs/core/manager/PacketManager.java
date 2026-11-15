@@ -2,23 +2,19 @@ package com.lycanitesmobs.core.manager;
 
 import com.lycanitesmobs.core.network.message.*;
 import com.lycanitesmobs.core.network.packet.MessageScreenRequest;
-import com.lycanitesmobs.core.util.helpers.AssetHelper;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.HandlerThread;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class PacketManager {
     private static final String PROTOCOL_VERSION = "1";
-    private static final SimpleChannel HANDLER = NetworkRegistry.newSimpleChannel(
-            AssetHelper.modResource("main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
 
 
     // ==================================================
@@ -26,33 +22,33 @@ public class PacketManager {
     // ==================================================
 
     /**
-     * Initializes the Packet Handler where Messages are registered.
+     * Registers all payloads. Subscribed to the mod event bus.
+     * Handlers run on the network thread and hand work to the main thread with enqueueWork, as they did on Forge.
      */
-    public void register() {
-        int messageID = 0;
-
-        HANDLER.registerMessage(messageID++, MessageBeastiary.class, MessageBeastiary::encode, MessageBeastiary::decode, MessageBeastiary::handle);
-        HANDLER.registerMessage(messageID++, MessageCreature.class, MessageCreature::encode, MessageCreature::decode, MessageCreature::handle);
-        HANDLER.registerMessage(messageID++, MessageCreatureKnowledge.class, MessageCreatureKnowledge::encode, MessageCreatureKnowledge::decode, MessageCreatureKnowledge::handle);
-        HANDLER.registerMessage(messageID++, MessagePlayerStats.class, MessagePlayerStats::encode, MessagePlayerStats::decode, MessagePlayerStats::handle);
-        HANDLER.registerMessage(messageID++, MessagePetEntry.class, MessagePetEntry::encode, MessagePetEntry::decode, MessagePetEntry::handle);
-        HANDLER.registerMessage(messageID++, MessagePetEntryRemove.class, MessagePetEntryRemove::encode, MessagePetEntryRemove::decode, MessagePetEntryRemove::handle);
-        HANDLER.registerMessage(messageID++, MessageSummonSet.class, MessageSummonSet::encode, MessageSummonSet::decode, MessageSummonSet::handle);
-        HANDLER.registerMessage(messageID++, MessageSummonSetSelection.class, MessageSummonSetSelection::encode, MessageSummonSetSelection::decode, MessageSummonSetSelection::handle);
-        HANDLER.registerMessage(messageID++, MessageEntityPickedUp.class, MessageEntityPickedUp::encode, MessageEntityPickedUp::decode, MessageEntityPickedUp::handle);
-        HANDLER.registerMessage(messageID++, MessageEntityPerched.class, MessageEntityPerched::encode, MessageEntityPerched::decode, MessageEntityPerched::handle);
-        HANDLER.registerMessage(messageID++, MessageWorldEvent.class, MessageWorldEvent::encode, MessageWorldEvent::decode, MessageWorldEvent::handle);
-        HANDLER.registerMessage(messageID++, MessageMobEvent.class, MessageMobEvent::encode, MessageMobEvent::decode, MessageMobEvent::handle);
-        HANDLER.registerMessage(messageID++, MessageSummoningPedestalStats.class, MessageSummoningPedestalStats::encode, MessageSummoningPedestalStats::decode, MessageSummoningPedestalStats::handle);
-        HANDLER.registerMessage(messageID++, MessageEntityVelocity.class, MessageEntityVelocity::encode, MessageEntityVelocity::decode, MessageEntityVelocity::handle);
-        HANDLER.registerMessage(messageID++, MessageEntityGUICommand.class, MessageEntityGUICommand::encode, MessageEntityGUICommand::decode, MessageEntityGUICommand::handle);
-        HANDLER.registerMessage(messageID++, MessageScreenRequest.class, MessageScreenRequest::encode, MessageScreenRequest::decode, MessageScreenRequest::handle);
-        HANDLER.registerMessage(messageID++, MessagePlayerControl.class, MessagePlayerControl::encode, MessagePlayerControl::decode, MessagePlayerControl::handle);
-        HANDLER.registerMessage(messageID++, MessagePlayerLeftClick.class, MessagePlayerLeftClick::encode, MessagePlayerLeftClick::decode, MessagePlayerLeftClick::handle);
-        HANDLER.registerMessage(messageID++, MessageSummoningPedestalSummonSet.class, MessageSummoningPedestalSummonSet::encode, MessageSummoningPedestalSummonSet::decode, MessageSummoningPedestalSummonSet::handle);
-        HANDLER.registerMessage(messageID++, MessageTileEntityButton.class, MessageTileEntityButton::encode, MessageTileEntityButton::decode, MessageTileEntityButton::handle);
-        HANDLER.registerMessage(messageID++, MessageSpawnEntity.class, MessageSpawnEntity::encode, MessageSpawnEntity::decode, MessageSpawnEntity::handle);
-        HANDLER.registerMessage(messageID++, MessageOverlayMessage.class, MessageOverlayMessage::encode, MessageOverlayMessage::decode, MessageOverlayMessage::handle);
+    public void register(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION).executesOn(HandlerThread.NETWORK);
+        registrar.playToClient(MessageBeastiary.TYPE, MessageBeastiary.STREAM_CODEC, MessageBeastiary::handle);
+        registrar.playToClient(MessageCreature.TYPE, MessageCreature.STREAM_CODEC, MessageCreature::handle);
+        registrar.playToClient(MessageCreatureKnowledge.TYPE, MessageCreatureKnowledge.STREAM_CODEC, MessageCreatureKnowledge::handle);
+        registrar.playToClient(MessagePlayerStats.TYPE, MessagePlayerStats.STREAM_CODEC, MessagePlayerStats::handle);
+        registrar.playBidirectional(MessagePetEntry.TYPE, MessagePetEntry.STREAM_CODEC, MessagePetEntry::handle);
+        registrar.playBidirectional(MessagePetEntryRemove.TYPE, MessagePetEntryRemove.STREAM_CODEC, MessagePetEntryRemove::handle);
+        registrar.playBidirectional(MessageSummonSet.TYPE, MessageSummonSet.STREAM_CODEC, MessageSummonSet::handle);
+        registrar.playBidirectional(MessageSummonSetSelection.TYPE, MessageSummonSetSelection.STREAM_CODEC, MessageSummonSetSelection::handle);
+        registrar.playToClient(MessageEntityPickedUp.TYPE, MessageEntityPickedUp.STREAM_CODEC, MessageEntityPickedUp::handle);
+        registrar.playToClient(MessageEntityPerched.TYPE, MessageEntityPerched.STREAM_CODEC, MessageEntityPerched::handle);
+        registrar.playToClient(MessageWorldEvent.TYPE, MessageWorldEvent.STREAM_CODEC, MessageWorldEvent::handle);
+        registrar.playToClient(MessageMobEvent.TYPE, MessageMobEvent.STREAM_CODEC, MessageMobEvent::handle);
+        registrar.playToClient(MessageSummoningPedestalStats.TYPE, MessageSummoningPedestalStats.STREAM_CODEC, MessageSummoningPedestalStats::handle);
+        registrar.playToClient(MessageEntityVelocity.TYPE, MessageEntityVelocity.STREAM_CODEC, MessageEntityVelocity::handle);
+        registrar.playToServer(MessageEntityGUICommand.TYPE, MessageEntityGUICommand.STREAM_CODEC, MessageEntityGUICommand::handle);
+        registrar.playToClient(MessageScreenRequest.TYPE, MessageScreenRequest.STREAM_CODEC, MessageScreenRequest::handle);
+        registrar.playToServer(MessagePlayerControl.TYPE, MessagePlayerControl.STREAM_CODEC, MessagePlayerControl::handle);
+        registrar.playToServer(MessagePlayerLeftClick.TYPE, MessagePlayerLeftClick.STREAM_CODEC, MessagePlayerLeftClick::handle);
+        registrar.playToServer(MessageSummoningPedestalSummonSet.TYPE, MessageSummoningPedestalSummonSet.STREAM_CODEC, MessageSummoningPedestalSummonSet::handle);
+        registrar.playToServer(MessageTileEntityButton.TYPE, MessageTileEntityButton.STREAM_CODEC, MessageTileEntityButton::handle);
+        registrar.playToClient(MessageSpawnEntity.TYPE, MessageSpawnEntity.STREAM_CODEC, MessageSpawnEntity::handle);
+        registrar.playToClient(MessageOverlayMessage.TYPE, MessageOverlayMessage.STREAM_CODEC, MessageOverlayMessage::handle);
     }
 
 
@@ -66,8 +62,8 @@ public class PacketManager {
      * @param message The network packet message to send.
      * @param player  The player to send to.
      */
-    public <MSG> void sendToPlayer(MSG message, ServerPlayer player) {
-        HANDLER.sendTo(message, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+    public void sendToPlayer(CustomPacketPayload message, ServerPlayer player) {
+        PacketDistributor.sendToPlayer(player, message);
     }
 
 
@@ -82,10 +78,9 @@ public class PacketManager {
      * @param pos     The position to find players from.
      * @param range   The range to find players within.
      */
-    public <MSG> void sendToAllAround(MSG message, Level world, Vec3 pos, double range) {
+    public void sendToAllAround(CustomPacketPayload message, Level world, Vec3 pos, double range) {
         for (Player player : world.players()) {
-            if (player instanceof ServerPlayer && player.distanceToSqr(pos) <= (range * range)) {
-                ServerPlayer serverPlayer = (ServerPlayer) player;
+            if (player instanceof ServerPlayer serverPlayer && player.distanceToSqr(pos) <= (range * range)) {
                 this.sendToPlayer(message, serverPlayer);
             }
         }
@@ -102,12 +97,9 @@ public class PacketManager {
      * @param message The network packet message to send.
      * @param world   The world to find players to send packets to.
      */
-    public <MSG> void sendToWorld(MSG message, Level world) {
-        for (Player player : world.players()) {
-            if (player instanceof ServerPlayer) {
-                ServerPlayer serverPlayer = (ServerPlayer) player;
-                HANDLER.sendTo(message, serverPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
-            }
+    public void sendToWorld(CustomPacketPayload message, Level world) {
+        if (world instanceof ServerLevel serverLevel) {
+            PacketDistributor.sendToPlayersInDimension(serverLevel, message);
         }
     }
 
@@ -121,7 +113,7 @@ public class PacketManager {
      *
      * @param message The network packet message to send.
      */
-    public <MSG> void sendToServer(MSG message) {
-        HANDLER.sendToServer(message);
+    public void sendToServer(CustomPacketPayload message) {
+        PacketDistributor.sendToServer(message);
     }
 }

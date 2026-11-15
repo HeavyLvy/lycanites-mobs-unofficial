@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.worldgen.structure;
 
+import net.minecraft.server.packs.PackLocationInfo;
 import com.google.gson.*;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -42,11 +43,11 @@ public class DungeonVirtualPack implements PackResources {
      */
     private static final int COMBINED_SET_SALT = Math.abs("lycanitesmobs:dungeons".hashCode()) % 1000000;
 
-    private final String packId;
+    private final PackLocationInfo location;
     private final Map<ResourceLocation, byte[]> resources = new HashMap<>();
 
-    public DungeonVirtualPack(String packId) {
-        this.packId = packId;
+    public DungeonVirtualPack(PackLocationInfo location) {
+        this.location = location;
         generateResources();
     }
 
@@ -316,8 +317,8 @@ public class DungeonVirtualPack implements PackResources {
     }
 
     @Override
-    public String packId() {
-        return packId;
+    public PackLocationInfo location() {
+        return this.location;
     }
 
     @Nullable

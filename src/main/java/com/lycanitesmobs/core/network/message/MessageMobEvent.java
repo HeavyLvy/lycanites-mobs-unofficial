@@ -3,12 +3,24 @@ package com.lycanitesmobs.core.network.message;
 import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
-public class MessageMobEvent {
+public class MessageMobEvent implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessageMobEvent> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_mob_event"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessageMobEvent> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessageMobEvent::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessageMobEvent> type() {
+        return TYPE;
+    }
+
     public String mobEventName;
     public BlockPos pos;
     public int level = 1;
@@ -27,12 +39,11 @@ public class MessageMobEvent {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessageMobEvent message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
-        if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
+    public static void handle(MessageMobEvent message, IPayloadContext ctx) {
+        if (ctx.flow() != PacketFlow.CLIENTBOUND)
             return;
 
-        ctx.get().enqueueWork(() ->
+        ctx.enqueueWork(() ->
                 LycanitesMobs.PROXY.applyMobEvent(
                         message.mobEventName,
                         message.pos,

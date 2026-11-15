@@ -10,14 +10,26 @@ import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public class MessageSpawnEntity {
+public class MessageSpawnEntity implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessageSpawnEntity> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_spawn_entity"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessageSpawnEntity> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessageSpawnEntity::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessageSpawnEntity> type() {
+        return TYPE;
+    }
+
     public String entityTypeName = "";
     public int entityId = 0;
     public UUID uuid;
@@ -48,12 +60,11 @@ public class MessageSpawnEntity {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessageSpawnEntity message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
-        if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
+    public static void handle(MessageSpawnEntity message, IPayloadContext ctx) {
+        if (ctx.flow() != PacketFlow.CLIENTBOUND)
             return;
 
-        ctx.get().enqueueWork(() -> {
+        ctx.enqueueWork(() -> {
             EntityFactory entityFactory = EntityFactory.getInstance();
             if (!entityFactory.hasEntityTypeNetworkName(message.entityTypeName)) {
                 LMHelperClass.logWarningMessage("Unable to find entity type from packet: " + message.entityTypeName);

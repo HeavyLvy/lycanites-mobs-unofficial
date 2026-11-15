@@ -7,13 +7,25 @@ import com.lycanitesmobs.core.manager.PetManager;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public class MessagePetEntryRemove {
+public class MessagePetEntryRemove implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessagePetEntryRemove> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_pet_entry_remove"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessagePetEntryRemove> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessagePetEntryRemove::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessagePetEntryRemove> type() {
+        return TYPE;
+    }
+
     public UUID petEntryID;
 
 
@@ -30,12 +42,11 @@ public class MessagePetEntryRemove {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessagePetEntryRemove message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
+    public static void handle(MessagePetEntryRemove message, IPayloadContext ctx) {
         // Server Side:
-        if (ctx.get().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
-            ctx.get().enqueueWork(() -> {
-                Player player = ctx.get().getSender();
+        if (ctx.flow() == PacketFlow.SERVERBOUND) {
+            ctx.enqueueWork(() -> {
+                Player player = ctx.player();
                 ExtendedPlayer playerExt = ExtendedPlayer.getForPlayer(player);
 
                 PetManager petManager = playerExt.getPetManager();
@@ -50,7 +61,7 @@ public class MessagePetEntryRemove {
         }
 
         // Client Side:
-        ctx.get().enqueueWork(() -> LycanitesMobs.PROXY.removePetEntry(message.petEntryID));
+        ctx.enqueueWork(() -> LycanitesMobs.PROXY.removePetEntry(message.petEntryID));
     }
 
     /**

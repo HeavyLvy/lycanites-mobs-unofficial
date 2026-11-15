@@ -3,12 +3,24 @@ package com.lycanitesmobs.core.network.message;
 import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
-public class MessageEntityPerched {
+public class MessageEntityPerched implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessageEntityPerched> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_entity_perched"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessageEntityPerched> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessageEntityPerched::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessageEntityPerched> type() {
+        return TYPE;
+    }
+
     public int perchedOnEntityID;
     public int perchedByEntityID;
 
@@ -23,12 +35,11 @@ public class MessageEntityPerched {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessageEntityPerched message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
-        if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
+    public static void handle(MessageEntityPerched message, IPayloadContext ctx) {
+        if (ctx.flow() != PacketFlow.CLIENTBOUND)
             return;
 
-        ctx.get().enqueueWork(() ->
+        ctx.enqueueWork(() ->
                 LycanitesMobs.PROXY.applyEntityPerched(message.perchedOnEntityID, message.perchedByEntityID));
     }
 

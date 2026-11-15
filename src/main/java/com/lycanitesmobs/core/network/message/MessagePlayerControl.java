@@ -5,12 +5,24 @@ import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
-public class MessagePlayerControl {
+public class MessagePlayerControl implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessagePlayerControl> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_player_control"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessagePlayerControl> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessagePlayerControl::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessagePlayerControl> type() {
+        return TYPE;
+    }
+
     public byte controlStates;
 
     public MessagePlayerControl() {
@@ -23,13 +35,12 @@ public class MessagePlayerControl {
     /**
      * Called when this message is received.
      */
-    public static void handle(MessagePlayerControl message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().setPacketHandled(true);
-        if (ctx.get().getDirection() != NetworkDirection.PLAY_TO_SERVER)
+    public static void handle(MessagePlayerControl message, IPayloadContext ctx) {
+        if (ctx.flow() != PacketFlow.SERVERBOUND)
             return;
 
-        ctx.get().enqueueWork(() -> {
-            Player player = ctx.get().getSender();
+        ctx.enqueueWork(() -> {
+            Player player = ctx.player();
             if (player == null) {
                 return;
             }

@@ -3,12 +3,24 @@ package com.lycanitesmobs.core.network.packet;
 import com.lycanitesmobs.LycanitesMobs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
-public class MessageScreenRequest {
+public class MessageScreenRequest implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MessageScreenRequest> TYPE =
+            new CustomPacketPayload.Type<>(com.lycanitesmobs.core.util.helpers.AssetHelper.modResource("message_screen_request"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessageScreenRequest> STREAM_CODEC =
+            StreamCodec.of((buf, message) -> encode(message, buf), MessageScreenRequest::decode);
+
+    @Override
+    public CustomPacketPayload.Type<MessageScreenRequest> type() {
+        return TYPE;
+    }
+
 	public enum GuiRequest {
 		BEASTIARY((byte)0), SUMMONING((byte)1);
 		public byte id;
@@ -25,13 +37,12 @@ public class MessageScreenRequest {
 	/**
 	 * Called when this message is received.
 	 */
-	public static void handle(MessageScreenRequest message, Supplier<NetworkEvent.Context> ctx) {
-		ctx.get().setPacketHandled(true);
-		if(ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT)
+	public static void handle(MessageScreenRequest message, IPayloadContext ctx) {
+		if(ctx.flow() != PacketFlow.CLIENTBOUND)
 			return;
 
-		ctx.get().enqueueWork(() -> {
-			Player player = ctx.get().getSender();
+		ctx.enqueueWork(() -> {
+			Player player = ctx.player();
 			LycanitesMobs.PROXY.openScreen(message.screenId, player);
 		});
 	}

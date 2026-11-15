@@ -13,7 +13,7 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import java.util.UUID;
 
 public interface IProxy {
-    void registerEvents();
+    void registerEvents(net.neoforged.bus.api.IEventBus modEventBus);
 
     Level getWorld();
 

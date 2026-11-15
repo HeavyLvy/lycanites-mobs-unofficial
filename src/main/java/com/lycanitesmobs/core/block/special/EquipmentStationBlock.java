@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 public class EquipmentStationBlock extends BlockBase implements EntityBlock {
@@ -94,7 +93,7 @@ public class EquipmentStationBlock extends BlockBase implements EntityBlock {
         if (!world.isClientSide() && player instanceof ServerPlayer) {
             BlockEntity tileEntity = world.getBlockEntity(pos);
             if (tileEntity instanceof EquipmentStationTileEntity) {
-                NetworkHooks.openScreen((ServerPlayer) player, new EquipmentStationContainerProvider((EquipmentStationTileEntity) tileEntity), buf -> buf.writeBlockPos(pos));
+                ((ServerPlayer) player).openMenu(new EquipmentStationContainerProvider((EquipmentStationTileEntity) tileEntity), buf -> buf.writeBlockPos(pos));
             }
         }
         return InteractionResult.SUCCESS;

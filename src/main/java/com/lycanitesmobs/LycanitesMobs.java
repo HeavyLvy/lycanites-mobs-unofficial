@@ -1,5 +1,10 @@
 package com.lycanitesmobs;
 
+import java.util.Optional;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.minecraft.server.packs.PackSelectionConfig;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.core.registries.Registries;
 
 import com.lycanitesmobs.client.gui.screen.block.EquipmentForgeScreen;
@@ -59,7 +64,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -68,7 +72,8 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
 import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.apache.logging.log4j.LogManager;
@@ -107,22 +112,20 @@ public class LycanitesMobs {
     public static boolean configReady = false;
     public static boolean earlyDebug = false;
     // Proxy:
-    public static IProxy PROXY = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
+    public static IProxy PROXY = FMLEnvironment.dist == Dist.CLIENT ? new ClientProxy() : new ServerProxy();
 
     /**
      * Constructor
      **/
 
-    public LycanitesMobs() {
+    public LycanitesMobs(IEventBus modEventBus, ModContainer modContainer) {
         modInfo = new ModInfo(this, name, 1000);
 
         CoreConfig.buildSpec();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CoreConfig.SPEC);
+        modContainer.registerConfig(ModConfig.Type.COMMON, CoreConfig.SPEC);
 
         FileLoader.initAll(modInfo.modid);
         StreamLoader.initAll(modInfo.modid);
-
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         ITEMS.register(modEventBus);
         BLOCKS.register(modEventBus);
@@ -132,13 +135,16 @@ public class LycanitesMobs {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::clientSetup);
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            modEventBus.addListener(this::registerMenuScreens);
+        }
         modEventBus.addListener(this::addPackFinders);
         modEventBus.addListener(this::enqueueIMC);
         modEventBus.addListener(this::processIMC);
         modEventBus.addListener(GameEventListener::onRegisterCapabilities);
         modEventBus.register(RegistryEvents.getInstance());
 
-        PROXY.registerEvents();
+        PROXY.registerEvents(modEventBus);
         ItemManager.register(modEventBus);
 
         NeoForge.EVENT_BUS.register(SpawnerEventListener.getInstance());
@@ -149,9 +155,9 @@ public class LycanitesMobs {
         NeoForge.EVENT_BUS.register(MobEventListener.getInstance());
         NeoForge.EVENT_BUS.register(StructureSpawnInjector.getInstance());
 
-        PACKET_MANAGER.register();
+        modEventBus.addListener(PACKET_MANAGER::register);
 
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+        if (FMLEnvironment.dist == Dist.CLIENT) {
             try {
                 Class<?> lib = Class.forName("net.liopyu.dyntopolib.DyntopoLib");
                 lib.getMethod("register", IEventBus.class).invoke(null, modEventBus);
@@ -162,7 +168,7 @@ public class LycanitesMobs {
             } catch (ReflectiveOperationException e) {
                 LOGGER.warn("DyntopoLib found but failed to initialize", e);
             }
-        });
+        }
 
         this.loadContent();
     }
@@ -257,16 +263,27 @@ public class LycanitesMobs {
     private void addPackFinders(final AddPackFindersEvent event) {
         if (event.getPackType() == PackType.SERVER_DATA) {
             event.addRepositorySource(consumer -> {
-                Pack.ResourcesSupplier supplier = id -> new DungeonVirtualPack(id);
+                Pack.ResourcesSupplier supplier = new Pack.ResourcesSupplier() {
+                    @Override
+                    public PackResources openPrimary(PackLocationInfo location) {
+                        return new DungeonVirtualPack(location);
+                    }
+
+                    @Override
+                    public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
+                        return new DungeonVirtualPack(location);
+                    }
+                };
 
                 Pack pack = Pack.readMetaAndCreate(
-                        "lycanitesmobs_dynamic_dungeons",
-                        Component.literal("Lycanites Mobs Dynamic Dungeons"),
-                        true,
+                        new PackLocationInfo(
+                                "lycanitesmobs_dynamic_dungeons",
+                                Component.literal("Lycanites Mobs Dynamic Dungeons"),
+                                PackSource.BUILT_IN,
+                                Optional.empty()),
                         supplier,
                         PackType.SERVER_DATA,
-                        Pack.Position.TOP,
-                        PackSource.BUILT_IN
+                        new PackSelectionConfig(true, Pack.Position.TOP, false)
                 );
 
                 if (pack != null) {
@@ -283,16 +300,14 @@ public class LycanitesMobs {
         TextureManager.getInstance().createTextures(modInfo);
         ModelManager.getInstance().createModels();
         ClientManager.getInstance().initBlockRenderTypes();
-        // New menu screen registration
-        event.enqueueWork(
-                () -> {
-                    MenuScreens.register(CreatureContainer.TYPE, CreatureInventoryScreen::new);
-                    MenuScreens.register(SummoningPedestalContainer.TYPE, SummoningPedestalScreen::new);
-                    MenuScreens.register(EquipmentForgeContainer.TYPE, EquipmentForgeScreen::new);
-                    MenuScreens.register(EquipmentInfuserContainer.TYPE, EquipmentInfuserScreen::new);
-                    MenuScreens.register(EquipmentStationContainer.TYPE, EquipmentStationScreen::new);
-                });
+    }
 
+    private void registerMenuScreens(final RegisterMenuScreensEvent event) {
+        event.register(CreatureContainer.TYPE, CreatureInventoryScreen::new);
+        event.register(SummoningPedestalContainer.TYPE, SummoningPedestalScreen::new);
+        event.register(EquipmentForgeContainer.TYPE, EquipmentForgeScreen::new);
+        event.register(EquipmentInfuserContainer.TYPE, EquipmentInfuserScreen::new);
+        event.register(EquipmentStationContainer.TYPE, EquipmentStationScreen::new);
     }
 
     public void loadConfigs() {
