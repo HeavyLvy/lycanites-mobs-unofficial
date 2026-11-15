@@ -61,7 +61,6 @@ import java.util.function.Supplier;
 
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.cast;
 
-@EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class RegistryEvents {
     private static RegistryEvents INSTANCE;
 
@@ -271,22 +270,6 @@ public class RegistryEvents {
     }
 
 
-    // ========== Commands ==========
-    @SubscribeEvent
-    public static void registerCommands(final RegisterCommandsEvent event) {
-        event.getDispatcher().register(
-                Commands.literal("lm")
-                        .then(CreaturesCommand.register())
-                        .then(BeastiaryCommand.register())
-                        .then(SpawnersCommand.register())
-                        .then(SpawnerCommand.register())
-                        .then(MobEventsCommand.register())
-                        .then(MobEventCommand.register())
-                        .then(EquipmentCommand.register())
-                        .then(DungeonsCommand.register())
-                        .then(DebugCommand.register())
-        );
-    }
 
     // ==================================================
     //              Entity Attribute Registration
@@ -329,60 +312,6 @@ public class RegistryEvents {
     //           Debug: Scute Entity Galleries
     // ==================================================
 
-    /**
-     * Right-clicking with a Turtle Scute in the main hand spawns one of every projectile.
-     * Right-clicking with a Turtle Scute in the offhand spawns one of every creature.
-     */
-    @SubscribeEvent
-    public static void onRightClickTurtleScute(PlayerInteractEvent.RightClickItem event) {
-        if (FMLEnvironment.production) return;
-        if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
-        if (event.getItemStack().getItem() != Items.TURTLE_SCUTE) return;
-
-        if (event.getHand() == InteractionHand.OFF_HAND) {
-            spawnCreatureGallery(serverLevel, event.getEntity());
-            event.setCanceled(true);
-            return;
-        }
-        if (event.getHand() != InteractionHand.MAIN_HAND) return;
-
-        var player = event.getEntity();
-        List<ProjectileSpawn> projectileSpawns = collectProjectileSpawns(serverLevel, player);
-        if (projectileSpawns.isEmpty()) {
-            LMHelperClass.logInfoMessageDev("[Debug] No projectiles were available for the scute gallery.");
-            return;
-        }
-
-        final int columns = Math.max(1, (int) Math.ceil(Math.sqrt(projectileSpawns.size())));
-        final double spacing = 5.0D;
-        Vec3 forward = horizontalForward(player.getYRot());
-        Vec3 right = new Vec3(forward.z(), 0, -forward.x()).normalize();
-        Vec3 origin = player.position()
-                .add(forward.scale(8.0D))
-                .add(right.scale(-((columns - 1) * spacing) / 2.0D))
-                .add(0, 1.5D, 0);
-
-        List<TextureCheck> textureChecks = new ArrayList<>();
-        int spawned = 0;
-        for (int index = 0; index < projectileSpawns.size(); index++) {
-            ProjectileSpawn spawn = projectileSpawns.get(index);
-            BaseProjectileEntity projectile = spawn.projectile();
-
-            double col = (index % columns) * spacing;
-            double row = (index / columns) * spacing;
-            Vec3 pos = origin.add(right.scale(col)).add(forward.scale(row));
-            prepareProjectileGalleryEntry(projectile, pos, spawn.name());
-            textureChecks.add(TextureCheck.from(spawn.name(), spawn.kind(), projectile.getClass().getName(), projectile.getTexture()));
-
-            DeferredLevelActionManager.spawnEntity(serverLevel, projectile.blockPosition(), null, projectile);
-            spawned++;
-        }
-
-        Path reportPath = writeProjectileTextureReport(textureChecks);
-        long missing = textureChecks.stream().filter(TextureCheck::missing).count();
-        LMHelperClass.logInfoMessageDev("[Debug] Spawned " + spawned + " projectile gallery entries. Missing textures: " + missing + ". Report: " + reportPath);
-        event.setCanceled(true);
-    }
 
     private static void spawnCreatureGallery(ServerLevel serverLevel, Entity player) {
         List<CreatureInfo> creatureInfos = new ArrayList<>(CreatureManager.getInstance().getCreatures());
@@ -547,6 +476,84 @@ public class RegistryEvents {
                 missing = !Files.exists(checkedPath);
             }
             return new TextureCheck(name, kind, entityClass, texture, checkedPath, missing);
+        }
+    }
+
+    /**
+     * Static game-bus listeners. NeoForge rejects mixing these with the instance listeners registered on the mod bus.
+     */
+    @EventBusSubscriber(modid = LycanitesMobs.MODID)
+    public static class GameBusEvents {
+        // ========== Commands ==========
+        @SubscribeEvent
+        public static void registerCommands(final RegisterCommandsEvent event) {
+            event.getDispatcher().register(
+                    Commands.literal("lm")
+                            .then(CreaturesCommand.register())
+                            .then(BeastiaryCommand.register())
+                            .then(SpawnersCommand.register())
+                            .then(SpawnerCommand.register())
+                            .then(MobEventsCommand.register())
+                            .then(MobEventCommand.register())
+                            .then(EquipmentCommand.register())
+                            .then(DungeonsCommand.register())
+                            .then(DebugCommand.register())
+            );
+        }
+
+        /**
+         * Right-clicking with a Turtle Scute in the main hand spawns one of every projectile.
+         * Right-clicking with a Turtle Scute in the offhand spawns one of every creature.
+         */
+        @SubscribeEvent
+        public static void onRightClickTurtleScute(PlayerInteractEvent.RightClickItem event) {
+            if (FMLEnvironment.production) return;
+            if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
+            if (event.getItemStack().getItem() != Items.TURTLE_SCUTE) return;
+    
+            if (event.getHand() == InteractionHand.OFF_HAND) {
+                spawnCreatureGallery(serverLevel, event.getEntity());
+                event.setCanceled(true);
+                return;
+            }
+            if (event.getHand() != InteractionHand.MAIN_HAND) return;
+    
+            var player = event.getEntity();
+            List<ProjectileSpawn> projectileSpawns = collectProjectileSpawns(serverLevel, player);
+            if (projectileSpawns.isEmpty()) {
+                LMHelperClass.logInfoMessageDev("[Debug] No projectiles were available for the scute gallery.");
+                return;
+            }
+    
+            final int columns = Math.max(1, (int) Math.ceil(Math.sqrt(projectileSpawns.size())));
+            final double spacing = 5.0D;
+            Vec3 forward = horizontalForward(player.getYRot());
+            Vec3 right = new Vec3(forward.z(), 0, -forward.x()).normalize();
+            Vec3 origin = player.position()
+                    .add(forward.scale(8.0D))
+                    .add(right.scale(-((columns - 1) * spacing) / 2.0D))
+                    .add(0, 1.5D, 0);
+    
+            List<TextureCheck> textureChecks = new ArrayList<>();
+            int spawned = 0;
+            for (int index = 0; index < projectileSpawns.size(); index++) {
+                ProjectileSpawn spawn = projectileSpawns.get(index);
+                BaseProjectileEntity projectile = spawn.projectile();
+    
+                double col = (index % columns) * spacing;
+                double row = (index / columns) * spacing;
+                Vec3 pos = origin.add(right.scale(col)).add(forward.scale(row));
+                prepareProjectileGalleryEntry(projectile, pos, spawn.name());
+                textureChecks.add(TextureCheck.from(spawn.name(), spawn.kind(), projectile.getClass().getName(), projectile.getTexture()));
+    
+                DeferredLevelActionManager.spawnEntity(serverLevel, projectile.blockPosition(), null, projectile);
+                spawned++;
+            }
+    
+            Path reportPath = writeProjectileTextureReport(textureChecks);
+            long missing = textureChecks.stream().filter(TextureCheck::missing).count();
+            LMHelperClass.logInfoMessageDev("[Debug] Spawned " + spawned + " projectile gallery entries. Missing textures: " + missing + ". Report: " + reportPath);
+            event.setCanceled(true);
         }
     }
 }

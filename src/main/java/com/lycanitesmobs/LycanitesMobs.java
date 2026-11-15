@@ -83,7 +83,6 @@ import org.apache.logging.log4j.Logger;
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.fixMaxHealth;
 
 @Mod(LycanitesMobs.MODID)
-@EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class LycanitesMobs {
     public static final Logger LOGGER = LogManager.getLogger();
 
@@ -149,8 +148,6 @@ public class LycanitesMobs {
         ItemManager.register(modEventBus);
 
         NeoForge.EVENT_BUS.register(SpawnerEventListener.getInstance());
-        NeoForge.EVENT_BUS.register(this);
-        NeoForge.EVENT_BUS.register(CommandManager.getInstance());
         NeoForge.EVENT_BUS.register(new GameEventListener());
         NeoForge.EVENT_BUS.register(MobEventManager.getInstance());
         NeoForge.EVENT_BUS.register(MobEventListener.getInstance());
@@ -294,7 +291,6 @@ public class LycanitesMobs {
         }
     }
 
-    @SubscribeEvent
     public void clientSetup(final FMLClientSetupEvent event) {
         ClientManager.getInstance().initLanguageManager();
         ClientManager.getInstance().registerEvents();

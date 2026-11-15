@@ -72,136 +72,13 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
-@EventBusSubscriber(
-        modid = LycanitesMobs.MODID,
-        value = Dist.CLIENT
-)
 public class ClientEventListener {
-    @SubscribeEvent
-    public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
-        var colors = event.getItemColors();
-
-        for (CreatureType creatureType : CreatureManager.getInstance().getCreatureTypes()) {
-            Item item = ObjectManager.getItem(creatureType.getSpawnEggName());
-            if (item == null) {
-                continue;
-            }
-
-            ResourceLocation key = BuiltInRegistries.ITEM.getKey(item);
-            if (key == null) {
-                continue;
-            }
-
-            if (!(item instanceof ItemCustomSpawnEgg)) {
-                continue;
-            }
-
-            colors.register(new ItemColorCustomSpawnEgg(), item);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRegisterClientReloadListeners(RegisterClientReloadListenersEvent event) {
-        event.registerReloadListener(LanguageLoader.getInstance());
-        event.registerReloadListener(ModelReloadListener.INSTANCE);
-    }
-
-    @SubscribeEvent
-    public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
-        var rp = event.getResourceProvider();
-        var shader = new ShaderInstance(rp, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "pos_tex_normal"), CustomRenderStates.POS_TEX_NORMAL);
-        event.registerShader(shader, s -> CustomRenderStates.POS_TEX_NORMAL_SHADER = s);
-    }
-
-    @SubscribeEvent
-    public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
-        event.registerLayerDefinition(BalayangBlockyModel.LAYER_LOCATION, BalayangBlockyModel::createBodyLayer);
-        event.registerLayerDefinition(NymphBlockyModel.LAYER_LOCATION, NymphBlockyModel::createBodyLayer);
-        event.registerLayerDefinition(GrueBlockyModel.LAYER_LOCATION, GrueBlockyModel::createBodyLayer);
-        event.registerLayerDefinition(WraithBlockyModel.LAYER_LOCATION, WraithBlockyModel::createBodyLayer);
-        event.registerLayerDefinition(HermaBlockyModel.LAYER_LOCATION, HermaBlockyModel::createBodyLayer);
-    }
-
-    @SubscribeEvent
-    public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
-        LycanitesMobs.LOGGER.info("LycanitesMobs: Registering Renderers!" + CreatureManager.getInstance().getCreatureCount());
-        // Creatures:
-        for (CreatureInfo creatureInfo : CreatureManager.getInstance().getCreatures()) {
-            //LMHelperClass.logInfoMessage("CI Name: " + creatureInfo.getName());
-            var registerBlocky = false;
-            if (creatureInfo.isDummy()) {
-                if ("fear".equals(creatureInfo.getName())) {
-                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), FearRenderer::new);
-                } else {
-                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
-                }
-                continue;
-            } else if (registerBlocky) {
-                if (Objects.equals(creatureInfo.getName(), "nymph")) {
-                    LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
-                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/nymph.png"), new NymphBlockyModel<>(context.bakeLayer(NymphBlockyModel.LAYER_LOCATION))));
-                    continue;
-                } else if (Objects.equals(creatureInfo.getName(), "grue")) {
-                    LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
-                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/grue.png"), new GrueBlockyModel<>(context.bakeLayer(GrueBlockyModel.LAYER_LOCATION))));
-                    continue;
-                } else if (Objects.equals(creatureInfo.getName(), "wraith")) {
-                    LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
-                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/wraith.png"), new WraithBlockyModel<>(context.bakeLayer(WraithBlockyModel.LAYER_LOCATION))));
-                    continue;
-                } else if (Objects.equals(creatureInfo.getName(), "herma")) {
-                    LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
-                    event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/herma_white.png"), new HermaBlockyModel<>(context.bakeLayer(HermaBlockyModel.LAYER_LOCATION))));
-                    continue;
-                }
-            }
-            event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new CreatureRenderer<>(creatureInfo.getName(), dispatcher, (float) creatureInfo.getWidth() / 2));
-        }
-
-        // Projectiles:
-        for (ProjectileInfo projectileInfo : ProjectileManager.getInstance().getProjectiles()) {
-            if (projectileInfo.hasModel()) {
-                //Here we retain the factory since we are choosing the renderer based off the projectileInfo. Later on we can get rid of this and do individual renderers.
-                event.registerEntityRenderer(LMHelperClass.cast(projectileInfo.getEntityType()), (dispatcher) -> new ProjectileRenderFactory<CustomProjectileEntity>(projectileInfo).createRenderFor(dispatcher));
-            } else {
-                event.registerEntityRenderer(LMHelperClass.cast(projectileInfo.getEntityType()), (dispatcher) -> new ProjectileRenderFactory<CustomProjectileEntity>(projectileInfo).createRenderFor(dispatcher));
-            }
-        }
-
-        // Old Sprite Projectiles:
-        for (Map.Entry<String, Class<? extends Entity>> projectileEntry : ProjectileManager.getInstance().getOldSpriteProjectileEntries()) {
-            String projectileName = projectileEntry.getKey();
-            Class<? extends Entity> projectileClass = projectileEntry.getValue();
-            event.registerEntityRenderer(LMHelperClass.cast(ProjectileManager.getInstance().getOldProjectileType(projectileClass)), (dispatcher) -> new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, false).createRenderFor(dispatcher));
-        }
-
-        // Old Model Projectiles:
-        for (Map.Entry<String, Class<? extends Entity>> projectileEntry : ProjectileManager.getInstance().getOldModelProjectileEntries()) {
-            String projectileName = projectileEntry.getKey();
-            Class<? extends Entity> projectileClass = projectileEntry.getValue();
-            event.registerEntityRenderer(ProjectileManager.getInstance().getOldProjectileType(projectileClass), (dispatcher) -> new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, true).createRenderFor(dispatcher));
-        }
-
-        // Special Entities:
-        for (Class<? extends Entity> specialClass : ObjectManager.getSpecialEntityClasses()) {
-            event.registerEntityRenderer(LMHelperClass.cast(ObjectManager.getSpecialEntityType(specialClass)), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
-        }
-
-    }
 
 
-    @SubscribeEvent
-    public static void onKeyRegister(RegisterKeyMappingsEvent event) {
-        event.register(KeyManager.dismount);
-        event.register(KeyManager.descend);
-        event.register(KeyManager.mountAbility);
-        event.register(KeyManager.mountInventory);
-        event.register(KeyManager.index);
-        event.register(KeyManager.beastiary);
-        event.register(KeyManager.pets);
-        event.register(KeyManager.summoning);
-        event.register(KeyManager.minionSelection);
-    }
+
+
+
+
 
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
@@ -400,6 +277,137 @@ public class ClientEventListener {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Static client mod-bus listeners. NeoForge rejects mixing these with the instance listeners registered on the game bus.
+     */
+    @EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT)
+    public static class ModBusEvents {
+        @SubscribeEvent
+        public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+            var colors = event.getItemColors();
+    
+            for (CreatureType creatureType : CreatureManager.getInstance().getCreatureTypes()) {
+                Item item = ObjectManager.getItem(creatureType.getSpawnEggName());
+                if (item == null) {
+                    continue;
+                }
+    
+                ResourceLocation key = BuiltInRegistries.ITEM.getKey(item);
+                if (key == null) {
+                    continue;
+                }
+    
+                if (!(item instanceof ItemCustomSpawnEgg)) {
+                    continue;
+                }
+    
+                colors.register(new ItemColorCustomSpawnEgg(), item);
+            }
+        }
+
+        @SubscribeEvent
+        public static void onRegisterClientReloadListeners(RegisterClientReloadListenersEvent event) {
+            event.registerReloadListener(LanguageLoader.getInstance());
+            event.registerReloadListener(ModelReloadListener.INSTANCE);
+        }
+
+        @SubscribeEvent
+        public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
+            var rp = event.getResourceProvider();
+            var shader = new ShaderInstance(rp, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "pos_tex_normal"), CustomRenderStates.POS_TEX_NORMAL);
+            event.registerShader(shader, s -> CustomRenderStates.POS_TEX_NORMAL_SHADER = s);
+        }
+
+        @SubscribeEvent
+        public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+            event.registerLayerDefinition(BalayangBlockyModel.LAYER_LOCATION, BalayangBlockyModel::createBodyLayer);
+            event.registerLayerDefinition(NymphBlockyModel.LAYER_LOCATION, NymphBlockyModel::createBodyLayer);
+            event.registerLayerDefinition(GrueBlockyModel.LAYER_LOCATION, GrueBlockyModel::createBodyLayer);
+            event.registerLayerDefinition(WraithBlockyModel.LAYER_LOCATION, WraithBlockyModel::createBodyLayer);
+            event.registerLayerDefinition(HermaBlockyModel.LAYER_LOCATION, HermaBlockyModel::createBodyLayer);
+        }
+
+        @SubscribeEvent
+        public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
+            LycanitesMobs.LOGGER.info("LycanitesMobs: Registering Renderers!" + CreatureManager.getInstance().getCreatureCount());
+            // Creatures:
+            for (CreatureInfo creatureInfo : CreatureManager.getInstance().getCreatures()) {
+                //LMHelperClass.logInfoMessage("CI Name: " + creatureInfo.getName());
+                var registerBlocky = false;
+                if (creatureInfo.isDummy()) {
+                    if ("fear".equals(creatureInfo.getName())) {
+                        event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), FearRenderer::new);
+                    } else {
+                        event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
+                    }
+                    continue;
+                } else if (registerBlocky) {
+                    if (Objects.equals(creatureInfo.getName(), "nymph")) {
+                        LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
+                        event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/nymph.png"), new NymphBlockyModel<>(context.bakeLayer(NymphBlockyModel.LAYER_LOCATION))));
+                        continue;
+                    } else if (Objects.equals(creatureInfo.getName(), "grue")) {
+                        LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
+                        event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/grue.png"), new GrueBlockyModel<>(context.bakeLayer(GrueBlockyModel.LAYER_LOCATION))));
+                        continue;
+                    } else if (Objects.equals(creatureInfo.getName(), "wraith")) {
+                        LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
+                        event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/wraith.png"), new WraithBlockyModel<>(context.bakeLayer(WraithBlockyModel.LAYER_LOCATION))));
+                        continue;
+                    } else if (Objects.equals(creatureInfo.getName(), "herma")) {
+                        LogUtils.getLogger().info("Registering renderer for: " + creatureInfo.getName());
+                        event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), context -> new BlockyRenderer(context, ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "textures/entity/blocky/herma_white.png"), new HermaBlockyModel<>(context.bakeLayer(HermaBlockyModel.LAYER_LOCATION))));
+                        continue;
+                    }
+                }
+                event.registerEntityRenderer(LMHelperClass.cast(creatureInfo.getEntityType()), (dispatcher) -> new CreatureRenderer<>(creatureInfo.getName(), dispatcher, (float) creatureInfo.getWidth() / 2));
+            }
+    
+            // Projectiles:
+            for (ProjectileInfo projectileInfo : ProjectileManager.getInstance().getProjectiles()) {
+                if (projectileInfo.hasModel()) {
+                    //Here we retain the factory since we are choosing the renderer based off the projectileInfo. Later on we can get rid of this and do individual renderers.
+                    event.registerEntityRenderer(LMHelperClass.cast(projectileInfo.getEntityType()), (dispatcher) -> new ProjectileRenderFactory<CustomProjectileEntity>(projectileInfo).createRenderFor(dispatcher));
+                } else {
+                    event.registerEntityRenderer(LMHelperClass.cast(projectileInfo.getEntityType()), (dispatcher) -> new ProjectileRenderFactory<CustomProjectileEntity>(projectileInfo).createRenderFor(dispatcher));
+                }
+            }
+    
+            // Old Sprite Projectiles:
+            for (Map.Entry<String, Class<? extends Entity>> projectileEntry : ProjectileManager.getInstance().getOldSpriteProjectileEntries()) {
+                String projectileName = projectileEntry.getKey();
+                Class<? extends Entity> projectileClass = projectileEntry.getValue();
+                event.registerEntityRenderer(LMHelperClass.cast(ProjectileManager.getInstance().getOldProjectileType(projectileClass)), (dispatcher) -> new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, false).createRenderFor(dispatcher));
+            }
+    
+            // Old Model Projectiles:
+            for (Map.Entry<String, Class<? extends Entity>> projectileEntry : ProjectileManager.getInstance().getOldModelProjectileEntries()) {
+                String projectileName = projectileEntry.getKey();
+                Class<? extends Entity> projectileClass = projectileEntry.getValue();
+                event.registerEntityRenderer(ProjectileManager.getInstance().getOldProjectileType(projectileClass), (dispatcher) -> new ProjectileRenderFactory<BaseProjectileEntity>(projectileName, projectileClass, true).createRenderFor(dispatcher));
+            }
+    
+            // Special Entities:
+            for (Class<? extends Entity> specialClass : ObjectManager.getSpecialEntityClasses()) {
+                event.registerEntityRenderer(LMHelperClass.cast(ObjectManager.getSpecialEntityType(specialClass)), (dispatcher) -> new NoneRenderer<BaseProjectileEntity>(dispatcher));
+            }
+    
+        }
+
+        @SubscribeEvent
+        public static void onKeyRegister(RegisterKeyMappingsEvent event) {
+            event.register(KeyManager.dismount);
+            event.register(KeyManager.descend);
+            event.register(KeyManager.mountAbility);
+            event.register(KeyManager.mountInventory);
+            event.register(KeyManager.index);
+            event.register(KeyManager.beastiary);
+            event.register(KeyManager.pets);
+            event.register(KeyManager.summoning);
+            event.register(KeyManager.minionSelection);
         }
     }
 }

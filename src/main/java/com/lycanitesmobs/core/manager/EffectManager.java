@@ -48,7 +48,6 @@ public class EffectManager {
         ObjectManager.addPotionEffect("envenom", false, 0x44DD66, true); // TODO Implement
 
         // Event Listener:
-        NeoForge.EVENT_BUS.register(this);
 
         // Effect Sounds:
         ObjectManager.addSound("effect_fear", "effect.fear");

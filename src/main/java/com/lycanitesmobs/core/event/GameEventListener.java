@@ -66,7 +66,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 
 import static com.lycanitesmobs.core.util.helpers.LMHelperClass.cast;
 
-@EventBusSubscriber(modid = LycanitesMobs.MODID)
 public class GameEventListener {
 
     // ==================================================

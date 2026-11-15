@@ -52,8 +52,6 @@ public class ClientManager {
      */
     public void registerEvents() {
         // Event Listeners:
-        NeoForge.EVENT_BUS.register(KeyManager.getInstance());
-        NeoForge.EVENT_BUS.register(new BaseOverlayScreen(Minecraft.getInstance()));
         NeoForge.EVENT_BUS.register(new ClientEventListener());
     }
 
