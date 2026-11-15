@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.obj.model;
 
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.lycanitesmobs.client.model.creature.base.ModelObjState;
 import com.lycanitesmobs.client.obj.geometry.ObjPart;
 import com.lycanitesmobs.client.obj.geometry.Vertex;
@@ -45,7 +46,8 @@ public class VBOObjModel extends ObjModel {
     public static boolean deferFlush;
 
     private static final Matrix4f IRIS_MV_SCRATCH = new Matrix4f();
-    private static final BufferBuilder IRIS_TEMP_BUFFER = new BufferBuilder(65536);
+    /** Reused vertex memory; 1.21 BufferBuilders are created per draw on top of a ByteBufferBuilder. */
+    private static final ByteBufferBuilder IRIS_TEMP_BYTES = new ByteBufferBuilder(65536);
     private static VertexBuffer irisTempVbo = null;
 
     public float baseR = 1.0F, baseG = 1.0F, baseB = 1.0F, baseRange = 0.1F;
@@ -101,28 +103,28 @@ public class VBOObjModel extends ObjModel {
             float texOX = textureOffset.x * 0.01f;
             float texOY = textureOffset.y * 0.01f;
 
-            IRIS_TEMP_BUFFER.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
+            BufferBuilder irisTempBuffer = new BufferBuilder(IRIS_TEMP_BYTES, VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
             for (int i = 0; i < indices.length; i++) {
                 int idx = indices[i];
                 Vertex v = vertices[idx];
                 Vector3o n = (normals != null && idx < normals.length && normals[idx] != null)
                         ? normals[idx] : new Vector3o(0, 1, 0);
 
-                IRIS_TEMP_BUFFER
-                        .vertex(v.getPos().x(), v.getPos().y(), v.getPos().z())
-                        .color(255, 255, 255, 255)
-                        .uv(v.getTexCoords().x + texOX, 1f - (v.getTexCoords().y + texOY))
-                        .overlayCoords(0, 10 - fade)
-                        .uv2(brightness)
-                        .normal(n.x(), n.y(), n.z())
-                        .endVertex();
+                irisTempBuffer
+                        .addVertex(v.getPos().x(), v.getPos().y(), v.getPos().z())
+                        .setColor(255, 255, 255, 255)
+                        .setUv(v.getTexCoords().x + texOX, 1f - (v.getTexCoords().y + texOY))
+                        .setUv1(0, 10 - fade)
+                        .setLight(brightness)
+                        .setNormal(n.x(), n.y(), n.z())
+                        ;
             }
 
             if (irisTempVbo == null) {
                 irisTempVbo = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
             }
             irisTempVbo.bind();
-            irisTempVbo.upload(IRIS_TEMP_BUFFER.end());
+            irisTempVbo.upload(irisTempBuffer.buildOrThrow());
 
             IRIS_MV_SCRATCH.set(RenderSystem.getModelViewMatrix()).mul(matrix4f);
             RenderSystem.setShaderTexture(0, recoloredTex);

@@ -385,7 +385,7 @@ public class GrueBlockyModel<T extends Entity> extends HierarchicalModel<T> {
         this.Body5.xRot += Mth.sin(ageInTicks * tailFreq + 1.2F) * tailAmp;
 
         int LEFT_OFFSET_TICKS = 2;
-        float pt = Minecraft.getInstance().getFrameTime();
+        float pt = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
         float atk = 0F;
         byte atkType = 0;
 
@@ -500,9 +500,9 @@ public class GrueBlockyModel<T extends Entity> extends HierarchicalModel<T> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-        bone7.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-        All.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
+        bone7.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        All.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
     }
 
     @Override

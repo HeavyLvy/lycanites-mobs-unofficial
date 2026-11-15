@@ -270,8 +270,7 @@ public class GhostTendrilMesh {
         if (!this.needsUpload && this.vbo != null) return this.vbo;
 
         Tesselator tess = Tesselator.getInstance();
-        BufferBuilder buf = tess.getBuilder();
-        buf.begin(VertexFormat.Mode.TRIANGLES, CustomRenderStates.POS_TEX_NORMAL);
+        BufferBuilder buf = tess.begin(VertexFormat.Mode.TRIANGLES, CustomRenderStates.POS_TEX_NORMAL);
 
         this.vertexCount = 0;
 
@@ -323,7 +322,7 @@ public class GhostTendrilMesh {
             this.vbo = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
         }
         this.vbo.bind();
-        this.vbo.upload(buf.end());
+        this.vbo.upload(buf.buildOrThrow());
         VertexBuffer.unbind();
 
         this.needsUpload = false;
@@ -368,7 +367,7 @@ public class GhostTendrilMesh {
 
     private static void emitVertex(BufferBuilder buf, float x, float y, float z,
                                    float u, float v, float nx, float ny, float nz) {
-        buf.vertex(x, y, z).uv(u, v).normal(nx, ny, nz).endVertex();
+        buf.addVertex(x, y, z).setUv(u, v).setNormal(nx, ny, nz);
     }
 
     private static float hash(long seed) {

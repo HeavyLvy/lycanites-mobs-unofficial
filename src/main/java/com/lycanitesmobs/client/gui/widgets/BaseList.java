@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.gui.widgets;
 
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.util.helpers.DrawHelper;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -19,10 +20,11 @@ public abstract class BaseList<S> extends AbstractSelectionList<BaseListEntry> {
     public S screen;
 
     public BaseList(S screen, int width, int height, int top, int bottom, int left, int slotHeight) {
-        super(Minecraft.getInstance(), width, height, top, bottom, slotHeight);
+        // 1.21 lists are positioned widgets: (minecraft, width, listHeight, y, itemHeight).
+        super(Minecraft.getInstance(), width, bottom - top, top, slotHeight);
         Minecraft minecraft = Minecraft.getInstance();
         this.drawHelper = new DrawHelper(minecraft, minecraft.font);
-        this.setLeftPos(left);
+        this.setX(left);
         this.screen = screen;
         this.createEntries();
     }
@@ -71,9 +73,9 @@ public abstract class BaseList<S> extends AbstractSelectionList<BaseListEntry> {
 
             double scaleFactor = Minecraft.getInstance().getWindow().getGuiScale();
             int windowHeight = Minecraft.getInstance().getWindow().getScreenHeight();
-            int scissorLeft = (int) Math.floor(this.getLeft() * scaleFactor);
+            int scissorLeft = (int) Math.floor(this.getX() * scaleFactor);
             int scissorRight = (int) Math.ceil(this.getRight() * scaleFactor);
-            int scissorTop = (int) Math.floor(this.getTop() * scaleFactor);
+            int scissorTop = (int) Math.floor(this.getY() * scaleFactor);
             int scissorBottom = (int) Math.ceil(this.getBottom() * scaleFactor);
             int scissorWidth = scissorRight - scissorLeft;
             int scissorHeight = scissorBottom - scissorTop;
@@ -98,37 +100,36 @@ public abstract class BaseList<S> extends AbstractSelectionList<BaseListEntry> {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
             Tesselator tessellator = Tesselator.getInstance();
-            BufferBuilder bufferbuilder = tessellator.getBuilder();
             Matrix4f matrix = matrixStack.last().pose();
 
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            bufferbuilder.vertex(matrix, (float) this.x0, (float) this.y1, 0.0F).color(0, 0, 0, 64).endVertex();
-            bufferbuilder.vertex(matrix, (float) this.x1, (float) this.y1, 0.0F).color(0, 0, 0, 64).endVertex();
-            bufferbuilder.vertex(matrix, (float) this.x1, (float) this.y0, 0.0F).color(0, 0, 0, 64).endVertex();
-            bufferbuilder.vertex(matrix, (float) this.x0, (float) this.y0, 0.0F).color(0, 0, 0, 64).endVertex();
-            tessellator.end();
+            BufferBuilder bufferbuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            bufferbuilder.addVertex(matrix, (float) this.getX(), (float) this.getBottom(), 0.0F).setColor(0, 0, 0, 64);
+            bufferbuilder.addVertex(matrix, (float) this.getRight(), (float) this.getBottom(), 0.0F).setColor(0, 0, 0, 64);
+            bufferbuilder.addVertex(matrix, (float) this.getRight(), (float) this.getY(), 0.0F).setColor(0, 0, 0, 64);
+            bufferbuilder.addVertex(matrix, (float) this.getX(), (float) this.getY(), 0.0F).setColor(0, 0, 0, 64);
+            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
             int listLeft = this.getRowLeft();
-            int listTop = this.y0 + 4 - (int) this.getScrollAmount();
+            int listTop = this.getY() + 4 - (int) this.getScrollAmount();
             if (this.isFocused()) {
                 this.renderHeader(guiGraphics, listLeft, listTop);
             }
 
             try {
-                this.renderList(guiGraphics, mouseX, mouseY, partialTicks);
+                this.renderListItems(guiGraphics, mouseX, mouseY, partialTicks);
             } catch (Exception e) {
                 LMHelperClass.logError("BaseList renderList error: " + e.getMessage());
             }
 
             int maxScroll = this.getMaxScroll();
             if (maxScroll > 0) {
-                int trackHeight = this.y1 - this.y0;
+                int trackHeight = this.getBottom() - this.getY();
                 int handleHeight = (int) ((float) trackHeight * trackHeight / (float) this.getMaxPosition());
                 handleHeight = LMHelperClass.convertToInteger(LMHelperClass.clamp(handleHeight, 32, trackHeight - 8));
-                int handleY = (int) this.getScrollAmount() * (trackHeight - handleHeight) / maxScroll + this.y0;
-                if (handleY < this.y0) {
-                    handleY = this.y0;
+                int handleY = (int) this.getScrollAmount() * (trackHeight - handleHeight) / maxScroll + this.getY();
+                if (handleY < this.getY()) {
+                    handleY = this.getY();
                 }
 
                 int scrollbarLeft = this.getScrollbarPosition();
@@ -136,26 +137,26 @@ public abstract class BaseList<S> extends AbstractSelectionList<BaseListEntry> {
 
                 RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
-                bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) this.y1, 0.0F).color(0, 0, 0, 255).endVertex();
-                bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) this.y1, 0.0F).color(0, 0, 0, 255).endVertex();
-                bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) this.y0, 0.0F).color(0, 0, 0, 255).endVertex();
-                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) this.y0, 0.0F).color(0, 0, 0, 255).endVertex();
-                tessellator.end();
+                bufferbuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                bufferbuilder.addVertex(matrix, (float) scrollbarLeft, (float) this.getBottom(), 0.0F).setColor(0, 0, 0, 255);
+                bufferbuilder.addVertex(matrix, (float) scrollbarRight, (float) this.getBottom(), 0.0F).setColor(0, 0, 0, 255);
+                bufferbuilder.addVertex(matrix, (float) scrollbarRight, (float) this.getY(), 0.0F).setColor(0, 0, 0, 255);
+                bufferbuilder.addVertex(matrix, (float) scrollbarLeft, (float) this.getY(), 0.0F).setColor(0, 0, 0, 255);
+                BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
-                bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) (handleY + handleHeight), 0.0F).color(128, 128, 128, 255).endVertex();
-                bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) (handleY + handleHeight), 0.0F).color(128, 128, 128, 255).endVertex();
-                bufferbuilder.vertex(matrix, (float) scrollbarRight, (float) handleY, 0.0F).color(128, 128, 128, 255).endVertex();
-                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) handleY, 0.0F).color(128, 128, 128, 255).endVertex();
-                tessellator.end();
+                bufferbuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                bufferbuilder.addVertex(matrix, (float) scrollbarLeft, (float) (handleY + handleHeight), 0.0F).setColor(128, 128, 128, 255);
+                bufferbuilder.addVertex(matrix, (float) scrollbarRight, (float) (handleY + handleHeight), 0.0F).setColor(128, 128, 128, 255);
+                bufferbuilder.addVertex(matrix, (float) scrollbarRight, (float) handleY, 0.0F).setColor(128, 128, 128, 255);
+                bufferbuilder.addVertex(matrix, (float) scrollbarLeft, (float) handleY, 0.0F).setColor(128, 128, 128, 255);
+                BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
-                bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) (handleY + handleHeight - 1), 0.0F).color(192, 192, 192, 255).endVertex();
-                bufferbuilder.vertex(matrix, (float) (scrollbarRight - 1), (float) (handleY + handleHeight - 1), 0.0F).color(192, 192, 192, 255).endVertex();
-                bufferbuilder.vertex(matrix, (float) (scrollbarRight - 1), (float) handleY, 0.0F).color(192, 192, 192, 255).endVertex();
-                bufferbuilder.vertex(matrix, (float) scrollbarLeft, (float) handleY, 0.0F).color(192, 192, 192, 255).endVertex();
-                tessellator.end();
+                bufferbuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                bufferbuilder.addVertex(matrix, (float) scrollbarLeft, (float) (handleY + handleHeight - 1), 0.0F).setColor(192, 192, 192, 255);
+                bufferbuilder.addVertex(matrix, (float) (scrollbarRight - 1), (float) (handleY + handleHeight - 1), 0.0F).setColor(192, 192, 192, 255);
+                bufferbuilder.addVertex(matrix, (float) (scrollbarRight - 1), (float) handleY, 0.0F).setColor(192, 192, 192, 255);
+                bufferbuilder.addVertex(matrix, (float) scrollbarLeft, (float) handleY, 0.0F).setColor(192, 192, 192, 255);
+                BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
             }
 
             this.renderDecorations(guiGraphics, mouseX, mouseY);
@@ -169,7 +170,7 @@ public abstract class BaseList<S> extends AbstractSelectionList<BaseListEntry> {
 
 
     public int getMaxScroll() {
-        return Math.max(0, this.getMaxPosition() - (this.y1 - this.y0 - 4));
+        return Math.max(0, this.getMaxPosition() - (this.getBottom() - this.getY() - 4));
     }
 
     @Override

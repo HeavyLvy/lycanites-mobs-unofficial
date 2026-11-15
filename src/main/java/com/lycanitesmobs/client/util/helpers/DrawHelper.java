@@ -1,5 +1,8 @@
 package com.lycanitesmobs.client.util.helpers;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
+
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -86,13 +89,12 @@ public class DrawHelper {
 
         Matrix4f m = g.pose().last().pose();
         Tesselator t = Tesselator.getInstance();
-        var buf = t.getBuilder();
-        buf.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buf.vertex(m, x, y + height, z).uv(0f, v).endVertex();
-        buf.vertex(m, x + width, y + height, z).uv(u, v).endVertex();
-        buf.vertex(m, x + width, y, z).uv(u, 0f).endVertex();
-        buf.vertex(m, x, y, z).uv(0f, 0f).endVertex();
-        t.end();
+        BufferBuilder buf = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buf.addVertex(m, x, y + height, z).setUv(0f, v);
+        buf.addVertex(m, x + width, y + height, z).setUv(u, v);
+        buf.addVertex(m, x + width, y, z).setUv(u, 0f);
+        buf.addVertex(m, x, y, z).setUv(0f, 0f);
+        BufferUploader.drawWithShader(buf.buildOrThrow());
 
         RenderSystem.disableBlend();
     }
@@ -102,13 +104,12 @@ public class DrawHelper {
         this.getMinecraft().getTextureManager().bindForSetup(texture);
         float scale = 0.00390625F * resolution;
         Tesselator tesselator = Tesselator.getInstance();
-        var buffer = tesselator.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.vertex(x, y + height, z).uv((u + 0) * scale, (v + height) * scale).endVertex();
-        buffer.vertex(x + width, y + height, z).uv((u + width) * scale, (v + height) * scale).endVertex();
-        buffer.vertex(x + width, y, z).uv((u + width) * scale, (v + 0) * scale).endVertex();
-        buffer.vertex(x, y, z).uv((u + 0) * scale, (v + 0) * scale).endVertex();
-        tesselator.end();
+        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buffer.addVertex(x, y + height, z).setUv((u + 0) * scale, (v + height) * scale);
+        buffer.addVertex(x + width, y + height, z).setUv((u + width) * scale, (v + height) * scale);
+        buffer.addVertex(x + width, y, z).setUv((u + width) * scale, (v + 0) * scale);
+        buffer.addVertex(x, y, z).setUv((u + 0) * scale, (v + 0) * scale);
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
         this.postDraw();
     }
 
@@ -152,13 +153,12 @@ public class DrawHelper {
         Matrix3f normal = guiGraphics.pose().last().normal();
         Matrix4f matrix = guiGraphics.pose().last().pose();
         Tesselator tesselator = Tesselator.getInstance();
-        var buffer = tesselator.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.vertex(matrix, x, y + height, 0).uv(u * scale, (v + height) * scale).endVertex();
-        buffer.vertex(matrix, x + width, y + height, 0).uv((u + width) * scale, (v + height) * scale).endVertex();
-        buffer.vertex(matrix, x + width, y, 0).uv((u + width) * scale, v * scale).endVertex();
-        buffer.vertex(matrix, x, y, 0).uv(u * scale, v * scale).endVertex();
-        tesselator.end();
+        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buffer.addVertex(matrix, x, y + height, 0).setUv(u * scale, (v + height) * scale);
+        buffer.addVertex(matrix, x + width, y + height, 0).setUv((u + width) * scale, (v + height) * scale);
+        buffer.addVertex(matrix, x + width, y, 0).setUv((u + width) * scale, v * scale);
+        buffer.addVertex(matrix, x, y, 0).setUv(u * scale, v * scale);
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
         this.postDraw();
     }
 }

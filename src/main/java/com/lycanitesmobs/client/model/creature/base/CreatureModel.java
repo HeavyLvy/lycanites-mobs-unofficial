@@ -40,7 +40,7 @@ public abstract class CreatureModel<T extends BaseCreatureEntity> extends Entity
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrixStack, VertexConsumer vertexBuilder, int someIntA, int someIntB, float someFloatA, float someFloatB, float someFloatC, float someFloatD) {
+    public void renderToBuffer(PoseStack matrixStack, VertexConsumer vertexBuilder, int someIntA, int someIntB, int color) {
     }
 
     /**

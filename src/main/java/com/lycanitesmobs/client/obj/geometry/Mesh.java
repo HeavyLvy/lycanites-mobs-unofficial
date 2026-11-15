@@ -31,8 +31,7 @@ public class Mesh {
                 computeVertexNormalsIfNeeded();
 
                 Tesselator tess = Tesselator.getInstance();
-                BufferBuilder buf = tess.getBuilder();
-                buf.begin(VertexFormat.Mode.TRIANGLES, CustomRenderStates.POS_TEX_NORMAL);
+                BufferBuilder buf = tess.begin(VertexFormat.Mode.TRIANGLES, CustomRenderStates.POS_TEX_NORMAL);
 
                 for (int i = 0; i < this.indices.length; i++) {
                     int idx = this.indices[i];
@@ -55,15 +54,15 @@ public class Mesh {
                         normal = new Vector3o(0, 0, 0);
                     }
 
-                    buf.vertex(px, py, pz)
-                            .uv(u, v)
-                            .normal(normal.x(), normal.y(), normal.z())
-                            .endVertex();
+                    buf.addVertex(px, py, pz)
+                            .setUv(u, v)
+                            .setNormal(normal.x(), normal.y(), normal.z())
+                            ;
                 }
 
                 VertexBuffer vb = new VertexBuffer(VertexBuffer.Usage.STATIC);
                 vb.bind();
-                vb.upload(buf.end());
+                vb.upload(buf.buildOrThrow());
                 VertexBuffer.unbind();
 
                 this.vbo = vb;

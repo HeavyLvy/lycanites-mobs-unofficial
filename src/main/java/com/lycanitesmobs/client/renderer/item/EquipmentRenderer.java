@@ -74,11 +74,11 @@ public class EquipmentRenderer extends BlockEntityWithoutLevelRenderer implement
     }
 
     protected void drawBar(VertexConsumer vertexBuilder, int x, int y, int width, int height, int r, int g, int b, int a) {
-        double z = 1D;
-        vertexBuilder.vertex(x, y, z).color(r, g, b, a).endVertex();
-        vertexBuilder.vertex(x, y + height, z).color(r, g, b, a).endVertex();
-        vertexBuilder.vertex(x + width, y + height, z).color(r, g, b, a).endVertex();
-        vertexBuilder.vertex(x + width, y, z).color(r, g, b, a).endVertex();
+        float z = 1F;
+        vertexBuilder.addVertex(x, y, z).setColor(r, g, b, a);
+        vertexBuilder.addVertex(x, y + height, z).setColor(r, g, b, a);
+        vertexBuilder.addVertex(x + width, y + height, z).setColor(r, g, b, a);
+        vertexBuilder.addVertex(x + width, y, z).setColor(r, g, b, a);
     }
 
     @Override

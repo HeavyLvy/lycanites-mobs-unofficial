@@ -171,13 +171,12 @@ public class VBOBatcher {
 
         private static Supplier<ShaderInstance> pickShaderForFormat(VertexFormat fmt) {
             if (fmt == DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL)
-                return GameRenderer::getPositionTexColorNormalShader;
+                // 1.21 dropped the position_tex_color_normal shader; the clouds shader uses this exact layout.
+                return GameRenderer::getRendertypeCloudsShader;
             if (fmt == DefaultVertexFormat.POSITION_COLOR)
                 return GameRenderer::getPositionColorShader;
             if (fmt == DefaultVertexFormat.POSITION_TEX)
                 return GameRenderer::getPositionTexShader;
-            if (fmt == DefaultVertexFormat.POSITION_COLOR_TEX)
-                return GameRenderer::getPositionColorTexShader;
             if (fmt == DefaultVertexFormat.POSITION_TEX_COLOR)
                 return GameRenderer::getPositionTexColorShader;
             if (fmt == DefaultVertexFormat.POSITION)
@@ -354,7 +353,7 @@ public class VBOBatcher {
         VBODrawCommand.frameNvScale = 0.0F;
         if (cam instanceof LivingEntity le && mc.level != null
                 && (le.hasEffect(MobEffects.NIGHT_VISION) || le.hasEffect(MobEffects.CONDUIT_POWER))) {
-            VBODrawCommand.frameNvScale = GameRenderer.getNightVisionScale(le, mc.getFrameTime());
+            VBODrawCommand.frameNvScale = GameRenderer.getNightVisionScale(le, mc.getTimer().getGameTimeDeltaPartialTick(true));
         }
         VBODrawCommand.frameMinLightU = LightTexture.block(VBODrawCommand.minimumBrightness) << 4;
         VBODrawCommand.frameMinLightV = LightTexture.sky(VBODrawCommand.minimumBrightness) << 4;

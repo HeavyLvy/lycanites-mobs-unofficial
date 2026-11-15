@@ -78,29 +78,29 @@ public class ProjectileSpriteRenderer extends EntityRenderer<BaseProjectileEntit
         VertexConsumer vertexBuilder = renderTypeBuffer.getBuffer(rendertype);
 
         vertexBuilder
-                .vertex(matrix4f, -textureWidth, -textureHeight + (textureHeight / 2), 0.0F) // pos
-                .color(255, 255, 255, 255) // color
-                .uv(minU, maxV) // texture
-                .normal(0.0F, 1.0F, 0.0F) // normal
-                .endVertex();
+                .addVertex(matrix4f, -textureWidth, -textureHeight + (textureHeight / 2), 0.0F) // pos
+                .setColor(255, 255, 255, 255) // color
+                .setUv(minU, maxV) // texture
+                .setNormal(0.0F, 1.0F, 0.0F) // normal
+                ;
         vertexBuilder
-                .vertex(matrix4f, textureWidth, -textureHeight + (textureHeight / 2), 0.0F)
-                .color(255, 255, 255, 255) // color
-                .uv(maxU, maxV)
-                .normal(0.0F, 1.0F, 0.0F)
-                .endVertex();
+                .addVertex(matrix4f, textureWidth, -textureHeight + (textureHeight / 2), 0.0F)
+                .setColor(255, 255, 255, 255) // color
+                .setUv(maxU, maxV)
+                .setNormal(0.0F, 1.0F, 0.0F)
+                ;
         vertexBuilder
-                .vertex(matrix4f, textureWidth, textureHeight + (textureHeight / 2), 0.0F)
-                .color(255, 255, 255, 255) // color
-                .uv(maxU, minV)
-                .normal(0.0F, 1.0F, 0.0F)
-                .endVertex();
+                .addVertex(matrix4f, textureWidth, textureHeight + (textureHeight / 2), 0.0F)
+                .setColor(255, 255, 255, 255) // color
+                .setUv(maxU, minV)
+                .setNormal(0.0F, 1.0F, 0.0F)
+                ;
         vertexBuilder
-                .vertex(matrix4f, -textureWidth, textureHeight + (textureHeight / 2), 0.0F)
-                .color(255, 255, 255, 255) // color
-                .uv(minU, minV)
-                .normal(0.0F, 1.0F, 0.0F)
-                .endVertex();
+                .addVertex(matrix4f, -textureWidth, textureHeight + (textureHeight / 2), 0.0F)
+                .setColor(255, 255, 255, 255) // color
+                .setUv(minU, minV)
+                .setNormal(0.0F, 1.0F, 0.0F)
+                ;
     }
 
     public void renderLaser(CustomProjectileEntity entity, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, float scale, float loop) {

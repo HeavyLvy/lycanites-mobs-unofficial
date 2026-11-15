@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.renderer.layer.creature;
 
+import net.minecraft.util.FastColor;
 import com.lycanitesmobs.client.renderer.entity.creature.CreatureRenderer;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.creature.aberration.EntityYale;
@@ -46,7 +47,8 @@ public class LayerCreatureDye extends LayerCreatureBase {
     @Override
     public Vector4f getPartColor(String partName, BaseCreatureEntity entity, boolean trophy) {
         DyeColor color = entity.getColor();
-        return new Vector4f(color.getTextureDiffuseColors()[0], color.getTextureDiffuseColors()[1], color.getTextureDiffuseColors()[2], 1.0F);
+        int diffuse = color.getTextureDiffuseColor(); // 1.21: packed ARGB instead of a float[3]
+        return new Vector4f(FastColor.ARGB32.red(diffuse) / 255.0F, FastColor.ARGB32.green(diffuse) / 255.0F, FastColor.ARGB32.blue(diffuse) / 255.0F, 1.0F);
     }
 
     @Override

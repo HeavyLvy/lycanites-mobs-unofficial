@@ -179,14 +179,16 @@ public class ObjModel {
                     normal = fallbackNormal;
                 }
 
+                // 1.21 setNormal takes a PoseStack.Pose; transform by the normal matrix like 1.20's normal(Matrix3f, ...) did.
+                Vector3f transformedNormal = matrix3f.transform(new Vector3f(normal.x(), normal.y(), normal.z()));
                 vertexBuilder
-                        .vertex(matrix4f, v.getPos().x(), v.getPos().y(), v.getPos().z())
-                        .color(color.x(), color.y(), color.z(), color.w())
-                        .uv(v.getTexCoords().x + (textureOffset.x * 0.01f), 1f - (v.getTexCoords().y + (textureOffset.y * 0.01f)))
-                        .overlayCoords(0, 10 - fade)
-                        .uv2(brightness)
-                        .normal(matrix3f, normal.x(), normal.y(), normal.z())
-                        .endVertex();
+                        .addVertex(matrix4f, v.getPos().x(), v.getPos().y(), v.getPos().z())
+                        .setColor(color.x(), color.y(), color.z(), color.w())
+                        .setUv(v.getTexCoords().x + (textureOffset.x * 0.01f), 1f - (v.getTexCoords().y + (textureOffset.y * 0.01f)))
+                        .setUv1(0, 10 - fade)
+                        .setLight(brightness)
+                        .setNormal(transformedNormal.x(), transformedNormal.y(), transformedNormal.z())
+                        ;
             }
         }
     }

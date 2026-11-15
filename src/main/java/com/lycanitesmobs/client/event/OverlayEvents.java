@@ -31,8 +31,9 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
@@ -46,14 +47,14 @@ public class OverlayEvents {
     //                  Draw Game Overlay
     // ==================================================
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onRenderExperienceBar(RenderGuiOverlayEvent event) {
+    public static void onRenderExperienceBar(RenderGuiLayerEvent.Post event) {
         if (ClientManager.getInstance().getClientPlayer() == null)
             return;
         Player player = ClientManager.getInstance().getClientPlayer();
         var minecraft = Minecraft.getInstance();
         var drawhelper = OverlayManager.getInstance().drawHelper;
         var baseOverlayScreen = BaseOverlayScreen.newInstance();
-        if (event.isCancelable() || event.getOverlay() != VanillaGuiOverlay.EXPERIENCE_BAR.type()) {
+        if (!VanillaGuiLayers.EXPERIENCE_BAR.equals(event.getName())) {
             return;
         }
         PoseStack matrixStack = event.getGuiGraphics().pose();
@@ -195,7 +196,7 @@ public class OverlayEvents {
     // ==================================================
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void onGameOverlay(OverlayManager.Text event) {
+    public static void onGameOverlay(CustomizeGuiOverlayEvent.DebugText event) {
         if (!ConfigDebug.INSTANCE.creatureOverlay.get()) {
             return;
         }

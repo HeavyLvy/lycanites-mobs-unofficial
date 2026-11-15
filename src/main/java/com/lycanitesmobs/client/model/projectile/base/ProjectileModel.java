@@ -34,7 +34,7 @@ public class ProjectileModel extends EntityModel<BaseProjectileEntity> implement
     }
 
     @Override
-    public void renderToBuffer(PoseStack matrixStack, VertexConsumer iVertexBuilder, int i, int i1, float v, float v1, float v2, float v3) {
+    public void renderToBuffer(PoseStack matrixStack, VertexConsumer iVertexBuilder, int i, int i1, int color) {
     }
 
     /**

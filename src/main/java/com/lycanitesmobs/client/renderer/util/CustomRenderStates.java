@@ -1,6 +1,5 @@
 package com.lycanitesmobs.client.renderer.util;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -29,14 +28,7 @@ public class CustomRenderStates extends RenderStateShard {
     public static LightmapStateShard NO_DIFFUSE_LIGHTING = new LightmapStateShard(false);
     public static VertexFormat POS_COL_TEX_LIGHT_FADE_NORMAL;
     public static VertexFormat POS_COL_TEX_NORMAL;
-    public static final VertexFormat POS_TEX_NORMAL = new VertexFormat(
-            ImmutableMap.<String, VertexFormatElement>builder()
-                    .put("Position", DefaultVertexFormat.ELEMENT_POSITION)
-                    .put("UV0", DefaultVertexFormat.ELEMENT_UV0)
-                    .put("Normal", DefaultVertexFormat.ELEMENT_NORMAL)
-                    .put("Padding", DefaultVertexFormat.ELEMENT_PADDING)
-                    .build()
-    );
+    public static final VertexFormat POS_TEX_NORMAL = VertexFormat.builder().add("Position", VertexFormatElement.POSITION).add("UV0", VertexFormatElement.UV0).add("Normal", VertexFormatElement.NORMAL).padding(1).build();
 
 
     public enum BLEND {
@@ -255,15 +247,7 @@ public class CustomRenderStates extends RenderStateShard {
 
     public static RenderType getObjRenderType(ResourceLocation texture, int blending, boolean glow) {
         if (POS_COL_TEX_LIGHT_FADE_NORMAL == null) {
-            ImmutableMap.Builder<String, VertexFormatElement> vertexFormatMapBuilder = ImmutableMap.builder();
-            vertexFormatMapBuilder.put("Position", DefaultVertexFormat.ELEMENT_POSITION);
-            vertexFormatMapBuilder.put("Color", DefaultVertexFormat.ELEMENT_COLOR);
-            vertexFormatMapBuilder.put("UV0", DefaultVertexFormat.ELEMENT_UV0);
-            vertexFormatMapBuilder.put("UV1", DefaultVertexFormat.ELEMENT_UV1);
-            vertexFormatMapBuilder.put("UV2", DefaultVertexFormat.ELEMENT_UV2);
-            vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
-            vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
-            POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
+            POS_COL_TEX_LIGHT_FADE_NORMAL = VertexFormat.builder().add("Position", VertexFormatElement.POSITION).add("Color", VertexFormatElement.COLOR).add("UV0", VertexFormatElement.UV0).add("UV1", VertexFormatElement.UV1).add("UV2", VertexFormatElement.UV2).add("Normal", VertexFormatElement.NORMAL).padding(1).build();
         }
 
         RenderStateShard.TransparencyStateShard transparencyState = TRANSLUCENT_TRANSPARENCY;
@@ -295,12 +279,7 @@ public class CustomRenderStates extends RenderStateShard {
 
     public static RenderType getObjColorOnlyRenderType(ResourceLocation texture, int blending, boolean glow) {
         if (POS_COL_TEX_LIGHT_FADE_NORMAL == null) {
-            ImmutableMap.Builder<String, VertexFormatElement> vertexFormatMapBuilder = ImmutableMap.builder();
-            vertexFormatMapBuilder.put("Position", DefaultVertexFormat.ELEMENT_POSITION);
-            vertexFormatMapBuilder.put("Color", DefaultVertexFormat.ELEMENT_COLOR);
-            vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
-            vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
-            POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
+            POS_COL_TEX_LIGHT_FADE_NORMAL = VertexFormat.builder().add("Position", VertexFormatElement.POSITION).add("Color", VertexFormatElement.COLOR).add("Normal", VertexFormatElement.NORMAL).padding(1).build();
         }
 
         RenderStateShard.TransparencyStateShard transparencyState = TRANSLUCENT_TRANSPARENCY;
@@ -332,19 +311,11 @@ public class CustomRenderStates extends RenderStateShard {
 
     public static RenderType getObjOutlineRenderType(ResourceLocation texture) {
         if (POS_COL_TEX_LIGHT_FADE_NORMAL == null) {
-            ImmutableMap.Builder<String, VertexFormatElement> vertexFormatMapBuilder = ImmutableMap.builder();
-            vertexFormatMapBuilder.put("Position", DefaultVertexFormat.ELEMENT_POSITION);
-            vertexFormatMapBuilder.put("Color", DefaultVertexFormat.ELEMENT_COLOR);
-            vertexFormatMapBuilder.put("UV0", DefaultVertexFormat.ELEMENT_UV0);
-            vertexFormatMapBuilder.put("UV1", DefaultVertexFormat.ELEMENT_UV1);
-            vertexFormatMapBuilder.put("UV2", DefaultVertexFormat.ELEMENT_UV2);
-            vertexFormatMapBuilder.put("Normal", DefaultVertexFormat.ELEMENT_NORMAL);
-            vertexFormatMapBuilder.put("Padding", DefaultVertexFormat.ELEMENT_PADDING);
-            POS_COL_TEX_LIGHT_FADE_NORMAL = new VertexFormat(vertexFormatMapBuilder.build());
+            POS_COL_TEX_LIGHT_FADE_NORMAL = VertexFormat.builder().add("Position", VertexFormatElement.POSITION).add("Color", VertexFormatElement.COLOR).add("UV0", VertexFormatElement.UV0).add("UV1", VertexFormatElement.UV1).add("UV2", VertexFormatElement.UV2).add("Normal", VertexFormatElement.NORMAL).padding(1).build();
         }
 
         RenderType.CompositeState renderTypeState = RenderType.CompositeState.builder()
-                .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorTexShader))
+                .setShaderState(new ShaderStateShard(GameRenderer::getPositionTexColorShader))
                 .setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
                 .setCullState(NO_CULL)
                 .setDepthTestState(NO_DEPTH_TEST)
@@ -367,7 +338,7 @@ public class CustomRenderStates extends RenderStateShard {
     public static RenderType getSpriteRenderType(@Nullable ResourceLocation texture) {
         if (texture == null) texture = MissingTextureAtlasSprite.getLocation();
         RenderType.CompositeState state = RenderType.CompositeState.builder()
-                .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorTexShader))
+                .setShaderState(new ShaderStateShard(GameRenderer::getPositionTexColorShader))
                 .setTextureState(new TextureStateShard(texture, false, false))
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                 .setLightmapState(LIGHTMAP)
@@ -377,7 +348,7 @@ public class CustomRenderStates extends RenderStateShard {
 
         return RenderType.create(
                 "lm_sprite",
-                DefaultVertexFormat.POSITION_COLOR_TEX,
+                DefaultVertexFormat.POSITION_TEX_COLOR,
                 VertexFormat.Mode.QUADS,
                 256, true, false, state
         );

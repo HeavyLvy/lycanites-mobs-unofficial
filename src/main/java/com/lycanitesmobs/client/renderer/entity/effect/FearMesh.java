@@ -308,8 +308,7 @@ public class FearMesh {
         if (!needsUpload && vbo != null) return vbo;
 
         Tesselator tess = Tesselator.getInstance();
-        BufferBuilder buf = tess.getBuilder();
-        buf.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+        BufferBuilder buf = tess.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
 
         vertexCount = 0;
 
@@ -439,7 +438,7 @@ public class FearMesh {
             vbo = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
         }
         vbo.bind();
-        vbo.upload(buf.end());
+        vbo.upload(buf.buildOrThrow());
         VertexBuffer.unbind();
 
         needsUpload = false;
@@ -486,7 +485,7 @@ public class FearMesh {
     private static void emitVertex(BufferBuilder buf, float x, float y, float z,
                                    float u, float v, float alpha,
                                    float nx, float ny, float nz) {
-        buf.vertex(x, y, z).uv(u, v).color(255, 255, 255, (int) (alpha * 255.0f)).normal(nx, ny, nz).endVertex();
+        buf.addVertex(x, y, z).setUv(u, v).setColor(255, 255, 255, (int) (alpha * 255.0f)).setNormal(nx, ny, nz);
     }
 
     private static float hash(long seed) {
