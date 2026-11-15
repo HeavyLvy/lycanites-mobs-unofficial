@@ -29,6 +29,6 @@ Notes from porting Lycanites Mobs (schism fork) from Forge 1.20.1 to NeoForge 1.
 - **Renamed vanilla IDs:** `minecraft:grass` → `short_grass`, `minecraft:scute` → `turtle_scute`.
 - **Folders:** data folders use the 1.21 singular names (`recipe`, `loot_table`, `tags/item`, and so on), and `assets/.../modelParts` was renamed to `modelparts` because resource paths must be lowercase.
 
-## Open questions
+## Verified in-game
 
-- **Nether spawns:** reported as not seen in-game. The configs look right: the demons (Apollyon, Behemophet, Belphegor, Grell, Grigori, Malwrath, Vorach) spawn through the Nether/End `land_deadly` / `sky_deadly` world spawners, which fire every 800 ticks with a 50% chance, 24–48 blocks from a player. They're limited to specific Nether biomes. To investigate, run `/lm debug log jsonspawner` and `/lm debug log mobspawns` in the Nether and watch `run/logs/latest.log`.
+- **Nether and End spawns work.** Confirmed by speeding up the tick rate: creatures spawn in both dimensions. They're just rare at normal speed, by design. Lycanites uses its own timed spawners, not vanilla per-chunk spawning. The demons (Apollyon, Behemophet, Belphegor, Grell, Grigori, Malwrath, Vorach) come from the `land_deadly` / `sky_deadly` world spawners, which fire every 800 ticks with a 50% chance, 24–48 blocks from a player. They're limited to specific Nether biomes. Fire spawns (`fire_nether`, Cinders) trigger near regular `minecraft:fire`, not soul fire. To trace spawning, run `/lm debug log jsonspawner` and `/lm debug log mobspawns`.
