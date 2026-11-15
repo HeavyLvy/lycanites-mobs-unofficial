@@ -260,7 +260,7 @@ public class ClientEventListener {
      * Player 'mouse' events, these are actually events based on attack or item use actions and are still triggered if the key binding is no longer a mouse click.
      **/
     @SubscribeEvent
-    public void onMouseEvent(InputEvent.MouseButton event) {
+    public void onMouseEvent(InputEvent.MouseButton.Post event) { // MouseButton is abstract in NeoForge; Forge fired this for both Pre and Post
         var mc = Minecraft.getInstance();
         if (mc.player == null || mc.hitResult == null)
             return;
