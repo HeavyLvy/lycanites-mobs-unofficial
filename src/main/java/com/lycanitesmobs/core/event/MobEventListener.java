@@ -599,7 +599,9 @@ public class MobEventListener {
         if (penetration != null && target.hasEffect(penetration)) {
             float damage = event.getAmount();
             float multiplier = 0.25F * (target.getEffect(penetration).getAmplifier() + 1);
-            event.setAmount(damage + (damage * multiplier));
+            // Clamp: scaling huge damage (e.g. /kill's Float.MAX_VALUE) overflows to Infinity, which NeoForge's
+            // damage reductions turn into NaN health.
+            event.setAmount(Math.min(damage + (damage * multiplier), Float.MAX_VALUE));
         }
     }
 

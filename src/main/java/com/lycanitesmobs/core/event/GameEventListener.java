@@ -176,6 +176,15 @@ public class GameEventListener {
     @SubscribeEvent
     public void onEntityUpdate(EntityTickEvent.Pre event) {
         if (!(event.getEntity() instanceof LivingEntity entity)) return;
+
+        // Repair NaN health/absorption (see clampIncomingDamage): an entity in this state can never die. Kill it properly instead.
+        if (!entity.level().isClientSide && (Float.isNaN(entity.getHealth()) || Float.isNaN(entity.getAbsorptionAmount()))) {
+            LycanitesMobs.LOGGER.warn("Repairing NaN health on {} (was health={}, absorption={})", entity, entity.getHealth(), entity.getAbsorptionAmount());
+            entity.setAbsorptionAmount(0);
+            entity.setHealth(0);
+            entity.die(entity.damageSources().generic());
+            return;
+        }
         if (entity == null) return;
 
         // ========== Extended Entity ==========
@@ -285,6 +294,20 @@ public class GameEventListener {
     // ==================================================
     //                 Living Hurt Event
     // ==================================================
+    /**
+     * Safety net: damage must stay finite. Infinity (e.g. a handler scaling /kill's Float.MAX_VALUE) becomes NaN in
+     * NeoForge's damage reductions (Infinity - Infinity), which leaves entities at NaN health: alive, unkillable, no hearts.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void clampIncomingDamage(LivingIncomingDamageEvent event) {
+        float amount = event.getAmount();
+        if (Float.isNaN(amount)) {
+            event.setAmount(0);
+        } else if (Float.isInfinite(amount)) {
+            event.setAmount(amount > 0 ? Float.MAX_VALUE : 0);
+        }
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onLivingHurt(LivingIncomingDamageEvent event) {
         if (event.isCanceled())

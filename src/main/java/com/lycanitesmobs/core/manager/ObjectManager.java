@@ -236,9 +236,16 @@ public class ObjectManager {
 
     // ========== Potion Effect ==========
     /** Returns a holder for a Lycanites effect (1.21 effect APIs take Holder<MobEffect>); .value() gives the EffectBase. */
-    public static DeferredHolder<MobEffect, EffectBase> getEffect(String name) {
+    public static Holder<MobEffect> getEffect(String name) {
         name = name.toLowerCase();
-        return effectHolders.get(name);
+        DeferredHolder<MobEffect, EffectBase> holder = effectHolders.get(name);
+        if (holder == null) {
+            return null;
+        }
+        // Once registered, hand out the registry's own Holder.Reference. Entity effect maps are hash maps keyed by
+        // holder, and a DeferredHolder hashes differently from the Reference vanilla uses (e.g. for /effect or
+        // potions), so hasEffect/getEffect would miss effects applied outside the mod.
+        return holder.isBound() ? holder.getDelegate() : holder;
     }
 
     // ========== Damage Source ==========
