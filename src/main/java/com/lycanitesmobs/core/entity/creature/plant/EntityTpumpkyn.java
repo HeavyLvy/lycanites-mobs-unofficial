@@ -1,9 +1,9 @@
 package com.lycanitesmobs.core.entity.creature.plant;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.level.Level;
 
 public class EntityTpumpkyn extends TameableCreatureEntity {
@@ -12,7 +12,7 @@ public class EntityTpumpkyn extends TameableCreatureEntity {
         super(entityType, world);
         
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = true;
         this.setupMob();
     }

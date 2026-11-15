@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.capabilities.entity;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.data.config.ConfigAdmin;
@@ -217,7 +218,7 @@ public class ExtendedEntity {
                     return;
                 }
             }
-            MobEffect weight = ObjectManager.getEffect("weight");
+            Holder<MobEffect> weight = ObjectManager.getEffect("weight");
             if (weight != null) {
                 if (this.entity.hasEffect(weight)) {
                     this.setPickedUpByEntity(null);
@@ -307,7 +308,7 @@ public class ExtendedEntity {
 
     public boolean isFeared() {
         if (this.entity == null) return false;
-        MobEffect fear = ObjectManager.getEffect("fear");
+        Holder<MobEffect> fear = ObjectManager.getEffect("fear");
         return fear != null && this.entity.hasEffect(fear);
     }
 

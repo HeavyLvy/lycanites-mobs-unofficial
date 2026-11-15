@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.aberration;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.IGroupBoss;
 import com.lycanitesmobs.core.entity.IGroupHeavy;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
@@ -97,7 +98,7 @@ public class EntityAsmodeus extends BaseCreatureEntity implements Enemy, IGroupH
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = true;
         this.setAttackCooldownMax(30);
         this.hasJumpSound = true;

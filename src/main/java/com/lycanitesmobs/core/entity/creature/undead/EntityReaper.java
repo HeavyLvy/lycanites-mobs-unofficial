@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.undead;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
@@ -13,7 +14,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -29,7 +29,7 @@ public class EntityReaper extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEAD;
+        this.attribute = CreatureAttribute.UNDEAD;
         this.hasAttackSound = false;
         this.setupMob();
 

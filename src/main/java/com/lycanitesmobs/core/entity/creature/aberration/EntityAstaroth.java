@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.aberration;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
@@ -26,7 +27,7 @@ public class EntityAstaroth extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = false;
         this.solidCollision = false;
         this.setupMob();

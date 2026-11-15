@@ -1,12 +1,12 @@
 package com.lycanitesmobs.core.entity.creature.avian;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -22,7 +22,7 @@ public class EntityVentoraptor extends RideableCreatureEntity {
         super(entityType, world);
         
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.spawnsUnderground = false;
         this.hasAttackSound = true;
         this.hasJumpSound = true;

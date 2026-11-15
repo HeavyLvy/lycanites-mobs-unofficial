@@ -3,6 +3,7 @@ package com.lycanitesmobs.core.data.info;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import com.lycanitesmobs.core.manager.ObjectManager;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -22,8 +23,8 @@ public class ObjectLists {
 	// Maps:
 	private static final Map<String, List<ItemStack>> itemLists = new HashMap<>();
 	private static final Map<String, List<EntityType>> entityLists = new HashMap<>();
-	private static final Map<String, List<MobEffect>> effectLists = new HashMap<>();
-	private static final Map<String, MobEffect> allEffects = new HashMap<>();
+	private static final Map<String, List<Holder<MobEffect>>> effectLists = new HashMap<>();
+	private static final Map<String, Holder<MobEffect>> allEffects = new HashMap<>();
 	
 	
     // ==================================================
@@ -73,7 +74,7 @@ public class ObjectLists {
 		}
 	}
 
-	public static void addEffect(String list, MobEffect effect, String effectName) {
+	public static void addEffect(String list, Holder<MobEffect> effect, String effectName) {
 		if(effect == null)
 			return;
 		allEffects.put(effectName, effect);
@@ -101,14 +102,14 @@ public class ObjectLists {
 		return Collections.unmodifiableList(entityLists.get(list));
 	}
 
-	public static List<MobEffect> getEffects(String list) {
+	public static List<Holder<MobEffect>> getEffects(String list) {
 		list = list.toLowerCase();
 		if(!effectLists.containsKey(list))
 			return Collections.emptyList();
 		return Collections.unmodifiableList(effectLists.get(list));
 	}
 
-	public static MobEffect getVanillaEffect(String name) {
+	public static Holder<MobEffect> getVanillaEffect(String name) {
 		return allEffects.get(name);
 	}
 	
@@ -136,11 +137,16 @@ public class ObjectLists {
 		return false;
 	}
 
-	public static boolean inEffectList(String list, MobEffect effect) {
+	public static boolean inEffectList(String list, Holder<MobEffect> effect) {
 		list = list.toLowerCase();
-		if(!effectLists.containsKey(list))
+		if(effect == null || !effectLists.containsKey(list))
 			return false;
-		return effectLists.get(list).contains(effect);
+		// Compare by registry key: mod effects are DeferredHolders, vanilla ones are Reference holders.
+		for (Holder<MobEffect> listed : effectLists.get(list)) {
+			if (listed.is(effect))
+				return true;
+		}
+		return false;
 	}
 	
 	

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.effect;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractSoundInstance;
@@ -64,7 +65,7 @@ public class FearHeartbeatSound extends AbstractSoundInstance implements Tickabl
             return;
         }
 
-        MobEffect fear = ObjectManager.getEffect("fear");
+        Holder<MobEffect> fear = ObjectManager.getEffect("fear");
         if (fear == null || !player.hasEffect(fear)) {
             stopped = true;
         }

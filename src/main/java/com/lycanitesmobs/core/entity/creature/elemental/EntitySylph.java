@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.elemental;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
@@ -8,7 +9,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import org.joml.Vector3d;
@@ -24,7 +24,7 @@ public class EntitySylph extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = false;
         this.setupMob();
 

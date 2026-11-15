@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.elemental;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.IFusable;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
@@ -25,7 +26,7 @@ public class EntityJengu extends TameableCreatureEntity implements Enemy, IFusab
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.spawnsInWater = true;
         this.hasAttackSound = false;
         this.setupMob();

@@ -1,5 +1,8 @@
 package com.lycanitesmobs.core.entity.creature.insect;
 
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.Holder;
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.effect.EffectBase;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
@@ -8,7 +11,6 @@ import com.lycanitesmobs.core.entity.goals.actions.abilities.StealthGoal;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +27,7 @@ public class EntityOstimien extends TameableCreatureEntity {
         super(entityType, world);
         
         // Setup:
-        this.attribute = MobType.ARTHROPOD;
+        this.attribute = CreatureAttribute.ARTHROPOD;
         this.hasAttackSound = true;
         this.setupMob();
     }
@@ -49,7 +51,7 @@ public class EntityOstimien extends TameableCreatureEntity {
         
         // Lurker Blind Stalking:
         if(this.getTarget() != null) {
-        	EffectBase stalkingEffect = ObjectManager.getEffect("plague");
+        	Holder<MobEffect> stalkingEffect = ObjectManager.getEffect("plague");
         	if(stalkingEffect != null && this.getTarget().hasEffect(stalkingEffect))
         		this.setAvoidTarget(this.getTarget());
         	else
@@ -82,7 +84,7 @@ public class EntityOstimien extends TameableCreatureEntity {
 	    			if(this.isTamingItem(itemstack))
 	    				return false;
 	    		}
-				EffectBase stalkingEffect = ObjectManager.getEffect("instability");
+				Holder<MobEffect> stalkingEffect = ObjectManager.getEffect("instability");
 	    		if(stalkingEffect != null) {
 					if(!this.getTarget().hasEffect(stalkingEffect))
 						return false;

@@ -1,10 +1,10 @@
 package com.lycanitesmobs.core.entity.creature.undead;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.targeting.FindAttackTargetGoal;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.Level;
 
@@ -12,7 +12,7 @@ public class EntityNecrovore extends TameableCreatureEntity {
     public EntityNecrovore(EntityType<? extends EntityNecrovore> entityType, Level world) {
         super(entityType, world);
 
-        this.attribute = MobType.UNDEAD;
+        this.attribute = CreatureAttribute.UNDEAD;
         this.hasAttackSound = true;
         this.spreadFire = true;
 

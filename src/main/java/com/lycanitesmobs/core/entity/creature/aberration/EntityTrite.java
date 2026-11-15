@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.aberration;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
@@ -7,7 +8,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 
@@ -20,7 +20,7 @@ public class EntityTrite extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
         
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = true;
         this.setupMob();
     }
@@ -77,10 +77,10 @@ public class EntityTrite extends TameableCreatureEntity implements Enemy {
   	// ==================================================
     @Override
     public boolean canBeAffected(MobEffectInstance potionEffect) {
-		if(potionEffect.getEffect() == MobEffects.WITHER)
+		if(potionEffect.is(MobEffects.WITHER))
 			return false;
 		if(ObjectManager.getEffect("decay") != null)
-			if(potionEffect.getEffect() == ObjectManager.getEffect("decay")) return false;
+			if(potionEffect.is(ObjectManager.getEffect("decay"))) return false;
         super.canBeAffected(potionEffect);
         return true;
     }

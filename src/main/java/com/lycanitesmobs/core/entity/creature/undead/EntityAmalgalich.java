@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.undead;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.IGroupBoss;
 import com.lycanitesmobs.core.entity.IGroupHeavy;
@@ -16,7 +17,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
@@ -41,7 +41,7 @@ public class EntityAmalgalich extends BaseCreatureEntity implements Enemy, IGrou
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEAD;
+        this.attribute = CreatureAttribute.UNDEAD;
         this.hasAttackSound = true;
         this.setAttackCooldownMax(30);
         this.hasJumpSound = false;

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block.fire;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.block.base.BlockFireBase;
 import com.lycanitesmobs.core.manager.ItemManager;
@@ -50,7 +51,7 @@ public class BlockSmitefire extends BlockFireBase {
         super.entityInside(blockState, world, pos, entity);
 
         if (entity instanceof LivingEntity) {
-            MobEffect effect = ObjectManager.getEffect("smited");
+            Holder<MobEffect> effect = ObjectManager.getEffect("smited");
             if (effect != null) {
                 MobEffectInstance effectInstance = new MobEffectInstance(effect, 10 * 20, 0);
                 LivingEntity entityLiving = (LivingEntity) entity;

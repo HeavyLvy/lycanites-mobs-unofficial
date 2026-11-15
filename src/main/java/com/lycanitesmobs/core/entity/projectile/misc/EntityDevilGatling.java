@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.projectile.misc;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
@@ -86,10 +87,10 @@ public class EntityDevilGatling extends BaseProjectileEntity {
 
         // Remove Buffs:
         if (this.random.nextBoolean()) {
-            List<MobEffect> goodEffects = new ArrayList<>();
+            List<Holder<MobEffect>> goodEffects = new ArrayList<>();
             for (Object potionEffectObj : target.getActiveEffects()) {
                 if (potionEffectObj instanceof MobEffectInstance) {
-                    MobEffect effect = ((MobEffectInstance) potionEffectObj).getEffect();
+                    Holder<MobEffect> effect = ((MobEffectInstance) potionEffectObj).getEffect();
                     if (effect != null) {
                         if (ObjectLists.inEffectList("buffs", effect))
                             goodEffects.add(effect);

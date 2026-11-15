@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.spawner.trigger;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -7,7 +8,6 @@ import com.lycanitesmobs.core.entity.spawner.Spawner;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public abstract class EntitySpawnTrigger extends SpawnTrigger {
 	/** A list of creature attributes that match this trigger. **/
-	protected List<MobType> creatureAttributes = new ArrayList<>();
+	protected List<CreatureAttribute> creatureAttributes = new ArrayList<>();
 
 	/** Determines if the entity types list is a blacklist or whitelist. **/
 	protected String entityTypesListType = "whitelist";
@@ -39,22 +39,22 @@ public abstract class EntitySpawnTrigger extends SpawnTrigger {
 			JsonArray jsonArray = json.get("entityTypes").getAsJsonArray();
 			Iterator<JsonElement> jsonIterator = jsonArray.iterator();
 			while (jsonIterator.hasNext()) {
-				MobType creatureAttribute = null;
+				CreatureAttribute creatureAttribute = null;
 				String creatureAttributeName = jsonIterator.next().getAsString();
 				if("undead".equals(creatureAttributeName)) {
-					creatureAttribute = MobType.UNDEAD;
+					creatureAttribute = CreatureAttribute.UNDEAD;
 				}
 				else if("arthropod".equals(creatureAttributeName)) {
-					creatureAttribute = MobType.ARTHROPOD;
+					creatureAttribute = CreatureAttribute.ARTHROPOD;
 				}
 				else if("water".equals(creatureAttributeName)) {
-					creatureAttribute = MobType.WATER;
+					creatureAttribute = CreatureAttribute.WATER;
 				}
 				else if("illager".equals(creatureAttributeName)) {
-					creatureAttribute = MobType.ILLAGER;
+					creatureAttribute = CreatureAttribute.ILLAGER;
 				}
 				else if("undefined".equals(creatureAttributeName)) {
-					creatureAttribute = MobType.UNDEFINED;
+					creatureAttribute = CreatureAttribute.UNDEFINED;
 				}
 				if(creatureAttribute != null) {
 					this.creatureAttributes.add(creatureAttribute);
@@ -88,7 +88,7 @@ public abstract class EntitySpawnTrigger extends SpawnTrigger {
 
 		// Check Entity Type:
 		if(!this.creatureAttributes.isEmpty()) {
-			if (this.creatureAttributes.contains(killedEntity.getMobType())) {
+			if (this.creatureAttributes.contains(CreatureAttribute.of(killedEntity))) {
 				if ("blacklist".equalsIgnoreCase(this.entityTypesListType)) {
 					return false;
 				}

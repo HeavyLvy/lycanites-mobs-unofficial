@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.data.info.item;
 
+import net.minecraft.core.Holder;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.util.helpers.LMHelperClass;
@@ -339,7 +340,7 @@ public class ItemDrop {
 
             for (Object potionEffect : entity.getActiveEffects()) {
                 if (potionEffect instanceof MobEffectInstance) {
-                    int effectId = MobEffect.getId(((MobEffectInstance) potionEffect).getEffect());
+                    int effectId = BuiltInRegistries.MOB_EFFECT.getId(((MobEffectInstance) potionEffect).getEffect().value());
                     ItemStack effectStack = this.getEffectItemStack(effectId);
                     if (!effectStack.isEmpty())
                         itemStack = effectStack;

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.insect;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
@@ -39,7 +40,7 @@ public class EntityDarkling extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEAD;
+        this.attribute = CreatureAttribute.UNDEAD;
         this.hasAttackSound = true;
         this.setupMob();
     }

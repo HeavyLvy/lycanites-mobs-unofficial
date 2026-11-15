@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.demon;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
@@ -30,7 +31,7 @@ public class EntityMalwrath extends RideableCreatureEntity {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEAD;
+        this.attribute = CreatureAttribute.UNDEAD;
         this.hasAttackSound = false;
 
         this.setupMob();

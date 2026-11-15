@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.effect;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.network.message.MessageEntityVelocity;
@@ -97,7 +98,7 @@ public class FearHandler {
             return true;
         }
 
-        MobEffect fear = ObjectManager.getEffect("fear");
+        Holder<MobEffect> fear = ObjectManager.getEffect("fear");
         if (fear == null || !entity.hasEffect(fear)) {
             removeStepHeightBoost(entity);
             return false;

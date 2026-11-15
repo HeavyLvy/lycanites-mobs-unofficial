@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.worm;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.IGroupHeavy;
 import com.lycanitesmobs.core.entity.projectile.generic.RapidFireProjectileEntity;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
@@ -17,7 +18,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -35,7 +35,7 @@ public class EntitySerpix extends TameableCreatureEntity implements IGroupHeavy 
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.ARTHROPOD;
+        this.attribute = CreatureAttribute.ARTHROPOD;
         this.spawnsOnLand = true;
         this.spawnsInWater = true;
         this.hasAttackSound = false;

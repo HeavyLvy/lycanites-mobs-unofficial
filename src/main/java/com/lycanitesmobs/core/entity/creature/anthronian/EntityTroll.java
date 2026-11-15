@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.anthronian;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.actions.BreakDoorGoal;
@@ -26,7 +27,7 @@ public class EntityTroll extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
         
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = false;
 
         //this.canGrow = false;

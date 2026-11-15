@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.aberration;
 
+import net.minecraft.core.Holder;
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
@@ -30,7 +32,7 @@ public class EntityNaxiris extends RideableCreatureEntity {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = false;
 
         this.setAttackCooldownMax(20);
@@ -81,7 +83,7 @@ public class EntityNaxiris extends RideableCreatureEntity {
             // Eat Buffs:
             if (damageEntity instanceof LivingEntity) {
                 LivingEntity targetLiving = (LivingEntity) damageEntity;
-                List<MobEffect> goodEffects = new ArrayList<>();
+                List<Holder<MobEffect>> goodEffects = new ArrayList<>();
                 for (MobEffectInstance effect : targetLiving.getActiveEffects()) {
                     if (ObjectLists.inEffectList("buffs", effect.getEffect()))
                         goodEffects.add(effect.getEffect());

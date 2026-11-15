@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.dragon;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.IGroupHeavy;
 import com.lycanitesmobs.core.entity.projectile.generic.RapidFireProjectileEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
@@ -30,7 +31,7 @@ public class EntityIgnibus extends RideableCreatureEntity implements IGroupHeavy
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.spawnsOnLand = true;
         this.spawnsInWater = true;
         this.isLavaCreature = true;

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.insect;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
@@ -10,7 +11,6 @@ import com.lycanitesmobs.core.manager.ProjectileManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.level.Level;
 
 public class EntityEyewig extends RideableCreatureEntity {
@@ -22,7 +22,7 @@ public class EntityEyewig extends RideableCreatureEntity {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.ARTHROPOD;
+        this.attribute = CreatureAttribute.ARTHROPOD;
         this.hasAttackSound = true;
         this.setupMob();
         this.setMaxUpStep(1.0F);

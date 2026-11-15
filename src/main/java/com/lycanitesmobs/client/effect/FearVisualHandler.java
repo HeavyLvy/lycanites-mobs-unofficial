@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.effect;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.core.data.config.ConfigClient;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -64,7 +65,7 @@ public class FearVisualHandler {
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         if (player != null) {
-            MobEffect fear = ObjectManager.getEffect("fear");
+            Holder<MobEffect> fear = ObjectManager.getEffect("fear");
             if (fear != null && player.hasEffect(fear)) {
                 MobEffectInstance instance = player.getEffect(fear);
                 int amplifier = instance != null ? instance.getAmplifier() : 0;

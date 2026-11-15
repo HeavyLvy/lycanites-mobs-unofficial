@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.demon;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.actions.BreakDoorGoal;
@@ -31,7 +32,7 @@ public class EntityBelphegor extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
         
         // Setup:
-        this.attribute = MobType.UNDEAD;
+        this.attribute = CreatureAttribute.UNDEAD;
         this.hasAttackSound = false;
         this.setupMob();
     }

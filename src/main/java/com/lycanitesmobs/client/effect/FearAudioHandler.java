@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.effect;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.core.data.config.ConfigClient;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import net.minecraft.client.Minecraft;
@@ -65,7 +66,7 @@ public class FearAudioHandler {
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         if (player != null) {
-            MobEffect fear = ObjectManager.getEffect("fear");
+            Holder<MobEffect> fear = ObjectManager.getEffect("fear");
             if (fear != null && player.hasEffect(fear)) {
                 hasFear = true;
                 MobEffectInstance instance = player.getEffect(fear);

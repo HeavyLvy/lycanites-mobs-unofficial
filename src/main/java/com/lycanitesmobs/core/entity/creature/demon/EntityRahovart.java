@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.demon;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.IGroupBoss;
 import com.lycanitesmobs.core.entity.IGroupHeavy;
@@ -74,7 +75,7 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEAD;
+        this.attribute = CreatureAttribute.UNDEAD;
         this.hasAttackSound = false;
         this.setAttackCooldownMax(40);
         this.solidCollision = true;
@@ -626,10 +627,10 @@ public class EntityRahovart extends BaseCreatureEntity implements Enemy, IGroupH
     // ==================================================
     @Override
     public boolean canBeAffected(MobEffectInstance potionEffect) {
-        if (potionEffect.getEffect() == MobEffects.WITHER)
+        if (potionEffect.is(MobEffects.WITHER))
             return false;
         if (ObjectManager.getEffect("decay") != null)
-            if (potionEffect.getEffect() == ObjectManager.getEffect("decay")) return false;
+            if (potionEffect.is(ObjectManager.getEffect("decay"))) return false;
         super.canBeAffected(potionEffect);
         return true;
     }

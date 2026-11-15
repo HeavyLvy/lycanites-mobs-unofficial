@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.aberration;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.fear.FearMoveGoal;
 import com.lycanitesmobs.core.entity.goals.actions.fear.HauntPlayerGoal;
@@ -53,7 +54,7 @@ public class EntityFear extends BaseCreatureEntity {
         Level world = player.getCommandSenderWorld();
         if (world.isClientSide) return;
 
-        MobEffect fear = ObjectManager.getEffect("fear");
+        Holder<MobEffect> fear = ObjectManager.getEffect("fear");
         if (fear == null || !player.hasEffect(fear)) return;
 
         // Expected count = amplitude + 1 (fear 0 → 1 entity, fear 1 → 2, etc.)
@@ -159,7 +160,7 @@ public class EntityFear extends BaseCreatureEntity {
             this.discard();
             return;
         }
-        MobEffect fear = ObjectManager.getEffect("fear");
+        Holder<MobEffect> fear = ObjectManager.getEffect("fear");
         if (fear == null || !this.hauntTarget.hasEffect(fear)) {
             spawnCooldowns.remove(this.hauntTarget.getUUID());
             this.discard();
@@ -177,7 +178,7 @@ public class EntityFear extends BaseCreatureEntity {
      * Returns a list of players within haunt range that have the fear effect.
      */
     public List<Player> getFearedPlayersNearby(double range) {
-        MobEffect fear = ObjectManager.getEffect("fear");
+        Holder<MobEffect> fear = ObjectManager.getEffect("fear");
         AABB box = this.getBoundingBox().inflate(range);
         return this.getCommandSenderWorld().getEntitiesOfClass(Player.class, box, p -> {
             if (!p.isAlive()) return false;

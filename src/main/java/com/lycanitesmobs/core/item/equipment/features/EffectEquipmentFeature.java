@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.item.equipment.features;
 
+import net.minecraft.core.Holder;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -81,7 +82,7 @@ public class EffectEquipmentFeature extends EquipmentFeature {
 		if("burning".equals(this.effectType)) {
 			return Component.translatable("effect.burning");
 		}
-		MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(this.effectType));
+		Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(this.effectType)).orElse(null);
 		if(effect == null) {
 			return Component.literal(this.effectType);
 		}
@@ -111,7 +112,7 @@ public class EffectEquipmentFeature extends EquipmentFeature {
 		}
 
 		// Potion Effects:
-		MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(this.effectType));
+		Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(this.effectType)).orElse(null);
 		if(effect != null && this.effectStrength > 0) {
 			effectTarget.addEffect(new MobEffectInstance(effect, this.effectDuration, this.effectStrength - 1));
 		}

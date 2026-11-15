@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.imp;
 
+import net.minecraft.core.Holder;
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackRangedGoal;
 import com.lycanitesmobs.core.entity.goals.actions.TemptGoal;
@@ -10,7 +12,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -43,7 +44,7 @@ public class EntityPixen extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
         
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.spawnsOnLand = true;
         this.spawnsInWater = true;
         this.hasAttackSound = false;
@@ -106,7 +107,7 @@ public class EntityPixen extends TameableCreatureEntity implements Enemy {
                     LivingEntity target = (LivingEntity) entityObj;
                     if (target != this && !(target instanceof EntityPixen) && target != this.getTarget() && target != this.getAvoidTarget()) {
                         int randomIndex = this.getRandom().nextInt(this.auraEffects.size());
-                        MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(this.auraEffects.get(randomIndex)));
+                        Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(this.auraEffects.get(randomIndex))).orElse(null);
                         if(effect != null) {
                             target.addEffect(new MobEffectInstance(effect, this.auraDuration, this.auraAmplifier));
                         }

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.goals.actions.fear;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.creature.aberration.EntityFear;
 import com.lycanitesmobs.core.manager.ObjectManager;
@@ -90,7 +91,7 @@ public class FearMoveGoal extends Goal {
             activeIds.add(player.getUUID());
             applyStepHeightBoost(player);
 
-            MobEffect fear = ObjectManager.getEffect("fear");
+            Holder<MobEffect> fear = ObjectManager.getEffect("fear");
             MobEffectInstance inst = fear != null ? player.getEffect(fear) : null;
             int amplifier = inst != null ? inst.getAmplifier() : 0;
             float scale = SchismMath.clamp(amplifier / MAX_AMPLIFIER, 0.0F, 1.0F);

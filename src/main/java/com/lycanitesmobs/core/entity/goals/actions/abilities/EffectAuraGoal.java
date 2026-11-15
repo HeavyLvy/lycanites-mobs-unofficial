@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.goals.actions.abilities;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public class EffectAuraGoal extends BaseGoal {
     // Properties:
-	protected MobEffect effect;
+	protected Holder<MobEffect> effect;
 	protected float auraRange = 10F;
 	protected int effectSeconds = 5;
 	protected int effectAmplifier = 0;
@@ -73,7 +74,7 @@ public class EffectAuraGoal extends BaseGoal {
 	 * @param effect The effect to apply.
 	 * @return This goal for chaining.
 	 */
-	public EffectAuraGoal setEffect(MobEffect effect) {
+	public EffectAuraGoal setEffect(Holder<MobEffect> effect) {
 		this.effect = effect;
 		return this;
 	}

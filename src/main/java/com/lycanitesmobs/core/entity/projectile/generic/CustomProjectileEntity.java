@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.projectile.generic;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
@@ -324,7 +325,7 @@ public class CustomProjectileEntity extends BaseProjectileEntity {
                 int duration = this.projectileInfo.getEffectDuration() * 20;
                 int amplifier = this.projectileInfo.getEffectAmplifier();
                 for (String debuff : this.projectileInfo.getDebuffsOverride()) {
-                    MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(debuff));
+                    Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(debuff)).orElse(null);
                     if (effect != null) {
                         target.addEffect(new MobEffectInstance(effect, duration, amplifier));
                     }

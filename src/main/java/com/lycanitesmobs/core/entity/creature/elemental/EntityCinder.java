@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.elemental;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.IFusable;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
 import com.lycanitesmobs.core.entity.projectile.generic.RapidFireProjectileEntity;
@@ -34,7 +35,7 @@ public class EntityCinder extends TameableCreatureEntity implements Enemy, IFusa
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.spawnsInBlock = false;
         this.hasAttackSound = false;
         this.setupMob();

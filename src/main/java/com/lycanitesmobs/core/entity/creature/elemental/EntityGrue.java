@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.elemental;
 
+import net.minecraft.core.Holder;
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import com.lycanitesmobs.core.entity.goals.actions.abilities.StealthGoal;
@@ -38,7 +40,7 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = true;
         this.spawnsInWater = true;
         this.setupMob();
@@ -135,7 +137,7 @@ public class EntityGrue extends TameableCreatureEntity implements Enemy {
         // Leech:
         if (this.isRareVariant() && target instanceof LivingEntity) {
             LivingEntity targetLiving = (LivingEntity) target;
-            List<MobEffect> goodEffects = new ArrayList<>();
+            List<Holder<MobEffect>> goodEffects = new ArrayList<>();
             for (MobEffectInstance effectInstance : targetLiving.getActiveEffects()) {
                 if (ObjectLists.inEffectList("buffs", effectInstance.getEffect()))
                     goodEffects.add(effectInstance.getEffect());

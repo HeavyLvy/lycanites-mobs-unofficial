@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.entity.creature.beast;
 
+import net.minecraft.core.Holder;
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
@@ -25,7 +27,7 @@ public class EntityWarg extends RideableCreatureEntity {
         super(entityType, world);
         
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = true;
         this.spreadFire = false;
 
@@ -81,7 +83,7 @@ public class EntityWarg extends RideableCreatureEntity {
 
 				return true;
 			});
-            MobEffect effect = ObjectManager.getEffect("paralysis");
+            Holder<MobEffect> effect = ObjectManager.getEffect("paralysis");
             if(!possibleTargets.isEmpty() && effect != null) {
                 for(LivingEntity possibleTarget : possibleTargets) {
                     boolean doDamage = true;

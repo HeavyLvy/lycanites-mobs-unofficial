@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.insect;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.DungeonManager;
 import com.lycanitesmobs.core.data.info.creature.CreatureType;
 import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
@@ -21,7 +22,6 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -35,7 +35,7 @@ public class EntityVespidQueen extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.ARTHROPOD;
+        this.attribute = CreatureAttribute.ARTHROPOD;
         this.hasAttackSound = true;
         this.solidCollision = true;
         this.setupMob();

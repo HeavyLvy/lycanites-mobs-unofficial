@@ -1,5 +1,8 @@
 package com.lycanitesmobs.core.entity.creature.elemental;
 
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.Holder;
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.effect.EffectBase;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
@@ -30,7 +33,7 @@ public class EntityEechetik extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.ARTHROPOD;
+        this.attribute = CreatureAttribute.ARTHROPOD;
         this.hasAttackSound = true;
 
         this.setupMob();
@@ -60,7 +63,7 @@ public class EntityEechetik extends TameableCreatureEntity implements Enemy {
 
         // Plague Aura Attack:
         if (!this.getCommandSenderWorld().isClientSide && this.updateTick % 40 == 0 && this.hasAttackTarget()) {
-            EffectBase plague = ObjectManager.getEffect("plague");
+            Holder<MobEffect> plague = ObjectManager.getEffect("plague");
             if (plague != null) {
                 MobEffectInstance potionEffect = new MobEffectInstance(plague, this.getEffectDuration(2), 1);
                 List aoeTargets = this.getNearbyEntities(LivingEntity.class, null, 2);

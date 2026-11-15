@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.beast;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.base.AgeableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
@@ -13,7 +14,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,7 +30,7 @@ public class EntityBobeko extends AgeableCreatureEntity {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = false;
         this.fleeHealthPercent = 1.0F;
         this.isAggressiveByDefault = false;
@@ -103,8 +103,8 @@ public class EntityBobeko extends AgeableCreatureEntity {
 
     @Override
     public boolean canBeAffected(MobEffectInstance potionEffect) {
-        if (potionEffect.getEffect() == MobEffects.MOVEMENT_SLOWDOWN) return false;
-        if (potionEffect.getEffect() == MobEffects.HUNGER) return false;
+        if (potionEffect.is(MobEffects.MOVEMENT_SLOWDOWN)) return false;
+        if (potionEffect.is(MobEffects.HUNGER)) return false;
         return super.canBeAffected(potionEffect);
     }
 

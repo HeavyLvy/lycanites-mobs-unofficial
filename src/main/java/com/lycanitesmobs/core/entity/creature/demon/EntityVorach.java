@@ -1,10 +1,10 @@
 package com.lycanitesmobs.core.entity.creature.demon;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 
@@ -12,7 +12,7 @@ public class EntityVorach extends TameableCreatureEntity implements Enemy {
 
 	public EntityVorach(EntityType<? extends EntityVorach> entityType, Level world) {
 		super(entityType, world);
-		this.attribute = MobType.UNDEAD;
+		this.attribute = CreatureAttribute.UNDEAD;
 		this.hasAttackSound = true;
 		this.spreadFire = true;
 		this.setupMob();

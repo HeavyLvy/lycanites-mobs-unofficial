@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.block.liquid;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.data.info.element.ElementInfo;
 import net.minecraft.core.BlockPos;
@@ -50,7 +51,7 @@ public class AcidLiquidBlock extends BaseLiquidBlock {
 
         // Effects:
         if (entity instanceof LivingEntity) {
-            MobEffect effect = ObjectManager.getEffect("penetration");
+            Holder<MobEffect> effect = ObjectManager.getEffect("penetration");
             if (effect != null) {
                 ((LivingEntity) entity).addEffect(new MobEffectInstance(effect, 5 * 20, 0));
             }

@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.base;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.google.common.base.Predicate;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.block.Material;
@@ -213,7 +214,7 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     /**
      * What attribute is this creature, used for effects such as Bane of Arthropods.
      **/
-    protected MobType attribute = MobType.UNDEAD;
+    protected CreatureAttribute attribute = CreatureAttribute.UNDEAD;
     /**
      * The Creature's relationships, for advanced memory and taming.
      **/
@@ -6258,9 +6259,14 @@ public abstract class BaseCreatureEntity extends PathfinderMob {
     /**
      * Returns this creature's attribute.
      **/
-    @Override
-    public MobType getMobType() {
+    public CreatureAttribute getCreatureAttribute() {
         return this.attribute;
+    }
+
+    /** Undead creatures are healed by Harming and hurt by Healing (vanilla now checks the undead tag). */
+    @Override
+    public boolean isInvertedHealAndHarm() {
+        return this.attribute == CreatureAttribute.UNDEAD || super.isInvertedHealAndHarm();
     }
 
     /**

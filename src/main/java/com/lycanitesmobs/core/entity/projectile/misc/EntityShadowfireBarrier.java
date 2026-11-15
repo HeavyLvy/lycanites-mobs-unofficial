@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.projectile.misc;
 
+import net.minecraft.core.Holder;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.IGroupBoss;
@@ -92,7 +93,7 @@ public class EntityShadowfireBarrier extends BaseProjectileEntity {
     //========== Entity Living Collision ==========
     @Override
     public boolean onEntityLivingDamage(LivingEntity livingEntity) {
-        MobEffect decay = ObjectManager.getEffect("decay");
+        Holder<MobEffect> decay = ObjectManager.getEffect("decay");
         if (decay != null) {
             MobEffectInstance effect = new MobEffectInstance(decay, 5 * 20, 0);
             if (livingEntity.canBeAffected(effect))

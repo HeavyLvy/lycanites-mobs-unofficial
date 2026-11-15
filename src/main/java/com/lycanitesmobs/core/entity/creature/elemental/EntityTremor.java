@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.elemental;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.lycanitesmobs.core.entity.base.TameableCreatureEntity;
 import com.lycanitesmobs.core.entity.goals.actions.AttackMeleeGoal;
 import net.minecraft.core.particles.ParticleTypes;
@@ -20,7 +21,7 @@ public class EntityTremor extends TameableCreatureEntity implements Enemy {
         super(entityType, world);
 
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.hasAttackSound = true;
 
         this.setupMob();
@@ -100,7 +101,7 @@ public class EntityTremor extends TameableCreatureEntity implements Enemy {
 
     @Override
     public boolean canBeAffected(MobEffectInstance effectInstance) {
-        if (effectInstance.getEffect() == MobEffects.WITHER) {
+        if (effectInstance.is(MobEffects.WITHER)) {
             return false;
         }
         return super.canBeAffected(effectInstance);

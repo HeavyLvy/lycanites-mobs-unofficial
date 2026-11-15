@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.data.info.element;
 
+import net.minecraft.core.Holder;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.manager.ElementManager;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
@@ -202,7 +203,7 @@ public class ElementInfo {
         }
         duration = Math.round((float) duration * (float) this.buffDurationMultiplier);
         for (String buff : this.buffs) {
-            MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(buff));
+            Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(buff)).orElse(null);
             if (effect != null) {
                 targetEntity.addEffect(new MobEffectInstance(effect, duration, amplifier));
             }
@@ -227,7 +228,7 @@ public class ElementInfo {
                 targetEntity.igniteForSeconds(duration / 20);
                 continue;
             }
-            MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(debuff));
+            Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(debuff)).orElse(null);
             if (effect != null) {
                 targetEntity.addEffect(new MobEffectInstance(effect, duration, amplifier));
             }
@@ -245,7 +246,7 @@ public class ElementInfo {
         if (effect == null || effect.getEffect() == null) {
             return false;
         }
-        ResourceLocation effectKey = BuiltInRegistries.MOB_EFFECT.getKey(effect.getEffect());
+        ResourceLocation effectKey = BuiltInRegistries.MOB_EFFECT.getKey(effect.getEffect().value());
         String effectName = effectKey != null ? effectKey.toString() : "";
         if (this.debuffs.contains(effectName)) {
             return false;

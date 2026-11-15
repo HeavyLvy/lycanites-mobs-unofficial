@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.amphibian;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.google.common.base.Predicate;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.entity.item.CustomItemEntity;
@@ -29,7 +30,7 @@ public class EntitySalamander extends RideableCreatureEntity implements Enemy {
         super(entityType, world);
         
         // Setup:
-        this.attribute = MobType.UNDEFINED;
+        this.attribute = CreatureAttribute.UNDEFINED;
         this.spawnsOnLand = true;
         this.spawnsInWater = true;
         this.isLavaCreature = true;

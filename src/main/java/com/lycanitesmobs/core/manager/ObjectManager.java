@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.manager;
 
+import net.minecraft.world.effect.MobEffect;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.entity.effect.EffectBase;
 import com.lycanitesmobs.core.container.block.EquipmentForgeContainer;
@@ -68,6 +69,7 @@ public class ObjectManager {
     private static final Map<Item, ModInfo> itemGroups = new HashMap<>();
     // ========== Damage Sources/Effects ==========
     private static final Map<String, EffectBase> effects = new HashMap<>();
+    private static final Map<String, DeferredHolder<MobEffect, EffectBase>> effectHolders = new HashMap<>();
     // ========== Sounds ==========
     private static final Map<String, ResourceLocation> soundNames = new HashMap<>();
     private static final Map<String, Lazy<? extends SoundEvent>> sounds = new HashMap<>();
@@ -145,7 +147,9 @@ public class ObjectManager {
     public static EffectBase addPotionEffect(String name, boolean isBad, int color, boolean goodEffect) {
         EffectBase effect = new EffectBase(name, isBad, color);
         effects.put(name, effect);
-        ObjectLists.addEffect(goodEffect ? "buffs" : "debuffs", effect, name);
+        DeferredHolder<MobEffect, EffectBase> holder = DeferredHolder.create(Registries.MOB_EFFECT, effect.getRegistryName());
+        effectHolders.put(name, holder);
+        ObjectLists.addEffect(goodEffect ? "buffs" : "debuffs", holder, name);
 
         return effect;
     }
@@ -231,10 +235,10 @@ public class ObjectManager {
     }
 
     // ========== Potion Effect ==========
-    public static EffectBase getEffect(String name) {
+    /** Returns a holder for a Lycanites effect (1.21 effect APIs take Holder<MobEffect>); .value() gives the EffectBase. */
+    public static DeferredHolder<MobEffect, EffectBase> getEffect(String name) {
         name = name.toLowerCase();
-        if (!effects.containsKey(name)) return null;
-        return effects.get(name);
+        return effectHolders.get(name);
     }
 
     // ========== Damage Source ==========

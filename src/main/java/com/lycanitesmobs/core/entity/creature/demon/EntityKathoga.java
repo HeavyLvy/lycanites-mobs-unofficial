@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.entity.creature.demon;
 
+import com.lycanitesmobs.core.entity.CreatureAttribute;
 import com.google.common.base.Predicate;
 import com.lycanitesmobs.core.entity.base.BaseCreatureEntity;
 import com.lycanitesmobs.core.entity.base.RideableCreatureEntity;
@@ -29,7 +30,7 @@ public class EntityKathoga extends RideableCreatureEntity {
         super(entityType, world);
         
         // Setup:
-        this.attribute = MobType.UNDEAD;
+        this.attribute = CreatureAttribute.UNDEAD;
         this.hasAttackSound = true;
         this.spreadFire = true;
         this.setupMob();

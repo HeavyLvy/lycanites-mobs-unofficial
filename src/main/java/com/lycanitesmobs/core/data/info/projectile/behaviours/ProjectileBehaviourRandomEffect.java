@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.data.info.projectile.behaviours;
 
+import net.minecraft.core.Holder;
 import com.google.gson.JsonObject;
 import com.lycanitesmobs.core.entity.base.BaseProjectileEntity;
 import com.lycanitesmobs.core.util.helpers.JSONHelper;
@@ -46,7 +47,7 @@ public class ProjectileBehaviourRandomEffect extends ProjectileBehaviour {
         }
 
         int randomIndex = world.random.nextInt(this.effects.size());
-        MobEffect effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(this.effects.get(randomIndex)));
+        Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(this.effects.get(randomIndex))).orElse(null);
         if (effect != null) {
             target.addEffect(new MobEffectInstance(effect, this.duration, this.amplifier));
         }

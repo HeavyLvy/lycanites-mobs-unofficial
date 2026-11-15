@@ -1,5 +1,7 @@
 package com.lycanitesmobs.core.event;
 
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.Holder;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.lycanitesmobs.core.capabilities.level.ExtendedWorld;
@@ -256,12 +258,12 @@ public class MobEventListener {
             return;
         }
 
-        EffectBase paralysis = ObjectManager.getEffect("paralysis");
+        Holder<MobEffect> paralysis = ObjectManager.getEffect("paralysis");
         if (paralysis != null && entity.hasEffect(paralysis) && event.isCancelable()) {
             event.setCanceled(true);
         }
 
-        EffectBase weight = ObjectManager.getEffect("weight");
+        Holder<MobEffect> weight = ObjectManager.getEffect("weight");
         if (weight != null && entity.hasEffect(weight) && event.isCancelable()) {
             event.setCanceled(true);
         }
@@ -283,7 +285,7 @@ public class MobEventListener {
             return;
         }
 
-        EffectBase lifeleak = ObjectManager.getEffect("lifeleak");
+        Holder<MobEffect> lifeleak = ObjectManager.getEffect("lifeleak");
         if (lifeleak != null && !target.getCommandSenderWorld().isClientSide && attacker.hasEffect(lifeleak)) {
             if (event.isCancelable()) {
                 event.setCanceled(true);
@@ -319,12 +321,12 @@ public class MobEventListener {
             return;
         }
 
-        EffectBase rejuvenation = ObjectManager.getEffect("rejuvenation");
+        Holder<MobEffect> rejuvenation = ObjectManager.getEffect("rejuvenation");
         if (rejuvenation != null && entity.hasEffect(rejuvenation)) {
             event.setAmount((float) Math.ceil(event.getAmount() * (2 * (1 + entity.getEffect(rejuvenation).getAmplifier()))));
         }
 
-        EffectBase decay = ObjectManager.getEffect("decay");
+        Holder<MobEffect> decay = ObjectManager.getEffect("decay");
         if (decay != null && entity.hasEffect(decay)) {
             event.setAmount((float) Math.floor(event.getAmount() / (2 * (1 + entity.getEffect(decay).getAmplifier()))));
         }
@@ -337,7 +339,7 @@ public class MobEventListener {
             return;
         }
 
-        EffectBase insomnia = ObjectManager.getEffect("insomnia");
+        Holder<MobEffect> insomnia = ObjectManager.getEffect("insomnia");
         if (insomnia != null && player.hasEffect(insomnia)) {
             event.setResult(Player.BedSleepingProblem.NOT_SAFE);
         }
@@ -354,7 +356,7 @@ public class MobEventListener {
             return;
         }
 
-        EffectBase aphagia = ObjectManager.getEffect("aphagia");
+        Holder<MobEffect> aphagia = ObjectManager.getEffect("aphagia");
         if (aphagia != null && !entity.getCommandSenderWorld().isClientSide && entity.hasEffect(aphagia) && event.isCancelable()) {
             event.setCanceled(true);
         }
@@ -391,7 +393,7 @@ public class MobEventListener {
     }
 
     private void handleParalysis(LivingEntity entity, boolean invulnerable) {
-        EffectBase paralysis = ObjectManager.getEffect("paralysis");
+        Holder<MobEffect> paralysis = ObjectManager.getEffect("paralysis");
         if (paralysis != null && !invulnerable && entity.hasEffect(paralysis)) {
             entity.setDeltaMovement(0, entity.getDeltaMovement().y() > 0 ? 0 : entity.getDeltaMovement().y(), 0);
             entity.setOnGround(false);
@@ -399,7 +401,7 @@ public class MobEventListener {
     }
 
     private void handleWeight(LivingEntity entity, boolean invulnerable) {
-        EffectBase weight = ObjectManager.getEffect("weight");
+        Holder<MobEffect> weight = ObjectManager.getEffect("weight");
         if (weight != null && !invulnerable && entity.hasEffect(weight) && !entity.hasEffect(MobEffects.DAMAGE_BOOST)) {
             if (entity.getDeltaMovement().y() > -0.2D) {
                 entity.setDeltaMovement(entity.getDeltaMovement().add(0, -0.2D, 0));
@@ -408,14 +410,14 @@ public class MobEventListener {
     }
 
     private void handleFear(LivingEntity entity, boolean invulnerable) {
-        EffectBase fear = ObjectManager.getEffect("fear");
+        Holder<MobEffect> fear = ObjectManager.getEffect("fear");
         if (fear != null && !entity.getCommandSenderWorld().isClientSide && !invulnerable && entity.hasEffect(fear) && entity instanceof Player player) {
             EntityFear.spawnForPlayer(player, null);
         }
     }
 
     private void handleInstability(LivingEntity entity, boolean invulnerable) {
-        EffectBase instability = ObjectManager.getEffect("instability");
+        Holder<MobEffect> instability = ObjectManager.getEffect("instability");
         if (instability == null || entity.getCommandSenderWorld().isClientSide || entity instanceof IGroupBoss) {
             return;
         }
@@ -446,7 +448,7 @@ public class MobEventListener {
     }
 
     private void handlePlague(LivingEntity entity, boolean invulnerable) {
-        EffectBase plague = ObjectManager.getEffect("plague");
+        Holder<MobEffect> plague = ObjectManager.getEffect("plague");
         if (plague == null || entity.getCommandSenderWorld().isClientSide || invulnerable || !entity.hasEffect(plague)) {
             return;
         }
@@ -484,7 +486,7 @@ public class MobEventListener {
     }
 
     private void handleSmited(LivingEntity entity, boolean invulnerable) {
-        EffectBase smited = ObjectManager.getEffect("smited");
+        Holder<MobEffect> smited = ObjectManager.getEffect("smited");
         if (smited != null && !entity.getCommandSenderWorld().isClientSide && !invulnerable && entity.hasEffect(smited) && entity.getCommandSenderWorld().getGameTime() % 20 == 0) {
             float brightness = LMHelperClass.getBrightness(entity);
             if (brightness > 0.5F && entity.getCommandSenderWorld().canSeeSkyFromBelowWater(entity.blockPosition())) {
@@ -494,7 +496,7 @@ public class MobEventListener {
     }
 
     private void handleBleed(EntityTickEvent.Pre event, LivingEntity entity, boolean invulnerable) {
-        EffectBase bleed = ObjectManager.getEffect("bleed");
+        Holder<MobEffect> bleed = ObjectManager.getEffect("bleed");
         if (bleed != null && !entity.getCommandSenderWorld().isClientSide && !invulnerable && entity.hasEffect(bleed) && entity.getCommandSenderWorld().getGameTime() % 20 == 0 && entity.getVehicle() == null) {
             if (entity.walkDistO != entity.walkDist) {
                 entity.hurt(event.getEntity().level().damageSources().magic(), entity.getEffect(bleed).getAmplifier() + 1);
@@ -503,7 +505,7 @@ public class MobEventListener {
     }
 
     private void handleSmouldering(LivingEntity entity, boolean invulnerable) {
-        EffectBase smouldering = ObjectManager.getEffect("smouldering");
+        Holder<MobEffect> smouldering = ObjectManager.getEffect("smouldering");
         if (smouldering != null && !entity.getCommandSenderWorld().isClientSide && !invulnerable && entity.hasEffect(smouldering) && entity.getCommandSenderWorld().getGameTime() % 20 == 0) {
             entity.igniteForSeconds(4 + (4 * entity.getEffect(smouldering).getAmplifier()));
         }
@@ -514,7 +516,7 @@ public class MobEventListener {
             return;
         }
 
-        EffectBase swiftswimming = ObjectManager.getEffect("swiftswimming");
+        Holder<MobEffect> swiftswimming = ObjectManager.getEffect("swiftswimming");
         if (swiftswimming == null) {
             return;
         }
@@ -544,7 +546,7 @@ public class MobEventListener {
     }
 
     private void handleImmunization(LivingEntity entity) {
-        EffectBase immunization = ObjectManager.getEffect("immunization");
+        Holder<MobEffect> immunization = ObjectManager.getEffect("immunization");
         if (immunization == null || entity.getCommandSenderWorld().isClientSide || !entity.hasEffect(immunization)) {
             return;
         }
@@ -562,14 +564,14 @@ public class MobEventListener {
             entity.removeEffect(MobEffects.CONFUSION);
         }
 
-        EffectBase paralysis = ObjectManager.getEffect("paralysis");
+        Holder<MobEffect> paralysis = ObjectManager.getEffect("paralysis");
         if (paralysis != null && entity.hasEffect(paralysis)) {
             entity.removeEffect(paralysis);
         }
     }
 
     private void handleCleansed(LivingEntity entity) {
-        EffectBase cleansed = ObjectManager.getEffect("cleansed");
+        Holder<MobEffect> cleansed = ObjectManager.getEffect("cleansed");
         if (cleansed == null || entity.getCommandSenderWorld().isClientSide || !entity.hasEffect(cleansed)) {
             return;
         }
@@ -581,19 +583,19 @@ public class MobEventListener {
             entity.removeEffect(MobEffects.UNLUCK);
         }
 
-        EffectBase fear = ObjectManager.getEffect("fear");
+        Holder<MobEffect> fear = ObjectManager.getEffect("fear");
         if (fear != null && entity.hasEffect(fear)) {
             entity.removeEffect(fear);
         }
 
-        EffectBase insomnia = ObjectManager.getEffect("insomnia");
+        Holder<MobEffect> insomnia = ObjectManager.getEffect("insomnia");
         if (insomnia != null && entity.hasEffect(insomnia)) {
             entity.removeEffect(insomnia);
         }
     }
 
     private void handleFallResistance(LivingHurtEvent event, LivingEntity target) {
-        EffectBase fallresist = ObjectManager.getEffect("fallresist");
+        Holder<MobEffect> fallresist = ObjectManager.getEffect("fallresist");
         if (fallresist != null && target.hasEffect(fallresist) && "fall".equals(event.getSource().getMsgId())) {
             event.setAmount(0);
             event.setCanceled(true);
@@ -601,7 +603,7 @@ public class MobEventListener {
     }
 
     private void handlePenetration(LivingHurtEvent event, LivingEntity target) {
-        EffectBase penetration = ObjectManager.getEffect("penetration");
+        Holder<MobEffect> penetration = ObjectManager.getEffect("penetration");
         if (penetration != null && target.hasEffect(penetration)) {
             float damage = event.getAmount();
             float multiplier = 0.25F * (target.getEffect(penetration).getAmplifier() + 1);
@@ -610,7 +612,7 @@ public class MobEventListener {
     }
 
     private void handleFearWallCollision(LivingHurtEvent event, LivingEntity target) {
-        EffectBase fear = ObjectManager.getEffect("fear");
+        Holder<MobEffect> fear = ObjectManager.getEffect("fear");
         if (fear != null && target.hasEffect(fear) && "inWall".equals(event.getSource().getMsgId())) {
             event.setAmount(0);
             event.setCanceled(true);
@@ -618,7 +620,7 @@ public class MobEventListener {
     }
 
     private void handleLeech(LivingHurtEvent event) {
-        EffectBase leech = ObjectManager.getEffect("leech");
+        Holder<MobEffect> leech = ObjectManager.getEffect("leech");
         if (leech == null || event.getSource().getEntity() == null) {
             return;
         }
@@ -637,7 +639,7 @@ public class MobEventListener {
     }
 
     private void handleRepulsion(LivingEntity target, Entity attacker) {
-        EffectBase repulsion = ObjectManager.getEffect("repulsion");
+        Holder<MobEffect> repulsion = ObjectManager.getEffect("repulsion");
         if (repulsion == null) {
             return;
         }

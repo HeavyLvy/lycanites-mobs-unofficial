@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.data.info.item;
 
+import net.minecraft.core.Holder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -82,7 +83,7 @@ public class ItemInfo {
                     JsonObject foodEffectJson = jsonIterator.next().getAsJsonObject();
                     String effectId = foodEffectJson.get("effectId").getAsString();
                     String[] effectIds = effectId.split(":"); // Can't get effects from registry yet, this means no effects from other mods. :(
-                    MobEffect effect;
+                    Holder<MobEffect> effect;
                     if ("minecraft".equals(effectIds[0]))
                         effect = ObjectLists.getVanillaEffect(effectIds[1]);
                     else
