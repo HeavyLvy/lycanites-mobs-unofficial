@@ -12,8 +12,9 @@ import net.minecraft.resources.ResourceLocation;
 public class EquipmentSlotRowClientTooltipComponent implements ClientTooltipComponent {
     private final EquipmentSlotRowTooltipComponent data;
     private int tooltipWidth;
-    private static final ResourceLocation GUI_ICONS =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/icons.png");
+    // 1.20.2 replaced textures/gui/icons.png with HUD sprites; these are the vanilla XP bar sprites it used.
+    private static final ResourceLocation XP_BAR_BACKGROUND = ResourceLocation.withDefaultNamespace("hud/experience_bar_background");
+    private static final ResourceLocation XP_BAR_PROGRESS = ResourceLocation.withDefaultNamespace("hud/experience_bar_progress");
 
     public EquipmentSlotRowClientTooltipComponent(EquipmentSlotRowTooltipComponent data) {
         this.data = data;
@@ -97,13 +98,11 @@ public class EquipmentSlotRowClientTooltipComponent implements ClientTooltipComp
             pose.scale(scale, 1F, 1F);
 
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, GUI_ICONS);
-
-            graphics.blit(GUI_ICONS, 0, 0, 0, 64, xpBarTexWidth, xpBarTexHeight);
+            graphics.blitSprite(XP_BAR_BACKGROUND, 0, 0, xpBarTexWidth, xpBarTexHeight);
 
             int filledTexWidth = (int) (xpBarTexWidth * ratio);
             if (filledTexWidth > 0) {
-                graphics.blit(GUI_ICONS, 0, 0, 0, 69, filledTexWidth, xpBarTexHeight);
+                graphics.blitSprite(XP_BAR_PROGRESS, xpBarTexWidth, xpBarTexHeight, 0, 0, 0, 0, filledTexWidth, xpBarTexHeight);
             }
 
             pose.popPose();

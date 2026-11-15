@@ -20,6 +20,5 @@ public class BaseOverlayScreen extends BaseGui {
         return new BaseOverlayScreen(Minecraft.getInstance());
     }
 
-    public static final ResourceLocation GUI_ICONS_LOCATION = ResourceLocation.parse("textures/gui/icons.png");
 
 }

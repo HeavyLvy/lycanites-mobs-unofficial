@@ -1,5 +1,6 @@
 package com.lycanitesmobs.client.event;
 
+import net.minecraft.resources.ResourceLocation;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.client.event.mobevent.ClientMobEventEvents;
 import com.lycanitesmobs.client.event.mobevent.MobEventPlayerClient;
@@ -39,7 +40,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.common.EventBusSubscriber;
 
-import static com.lycanitesmobs.client.gui.screen.base.BaseOverlayScreen.GUI_ICONS_LOCATION;
 
 @EventBusSubscriber(modid = LycanitesMobs.MODID, value = Dist.CLIENT)
 public class OverlayEvents {
@@ -139,7 +139,6 @@ public class OverlayEvents {
 
             // Mount Ability Stamina Bar:
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            minecraft.getTextureManager().bindForSetup(GUI_ICONS_LOCATION);
             int staminaBarWidth = 182;
             int staminaBarHeight = 5;
             int staminaEnergyWidth = (int) ((float) (staminaBarWidth + 1) * mountStamina);
@@ -150,9 +149,12 @@ public class OverlayEvents {
                 staminaTextureY -= staminaBarHeight * 2;
             int staminaEnergyY = staminaTextureY + staminaBarHeight;
 
-            drawhelper.drawTexturedModalRect(event.getGuiGraphics(), staminaBarX, staminaBarY, 0, staminaTextureY, staminaBarWidth, staminaBarHeight);
+            // 1.20.2 replaced textures/gui/icons.png with HUD sprites; these are the vanilla jump bar sprites it used.
+            ResourceLocation staminaBackground = ResourceLocation.withDefaultNamespace("toggle".equals(mount.getStaminaType()) ? "hud/jump_bar_cooldown" : "hud/jump_bar_background");
+            ResourceLocation staminaProgress = ResourceLocation.withDefaultNamespace("hud/jump_bar_progress");
+            event.getGuiGraphics().blitSprite(staminaBackground, staminaBarX, staminaBarY, staminaBarWidth, staminaBarHeight);
             if (staminaEnergyWidth > 0)
-                drawhelper.drawTexturedModalRect(event.getGuiGraphics(), staminaBarX, staminaBarY, 0, staminaEnergyY, staminaEnergyWidth, staminaBarHeight);
+                event.getGuiGraphics().blitSprite(staminaProgress, staminaBarWidth, staminaBarHeight, 0, 0, staminaBarX, staminaBarY, Math.min(staminaEnergyWidth, staminaBarWidth), staminaBarHeight);
 
             if (baseOverlayScreen.mountMessageTime > 0)
                 baseOverlayScreen.mountMessageTime--;
@@ -188,7 +190,6 @@ public class OverlayEvents {
         }
 
         matrixStack.popPose();
-        minecraft.getTextureManager().bindForSetup(GUI_ICONS_LOCATION);
     }
 
     // ==================================================
