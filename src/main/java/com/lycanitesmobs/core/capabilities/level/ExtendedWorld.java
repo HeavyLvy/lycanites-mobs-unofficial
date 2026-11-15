@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.capabilities.level;
 
+import net.minecraft.core.HolderLookup;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.worldgen.dungeon.instance.DungeonInstance;
 import com.lycanitesmobs.core.capabilities.util.BossEntry;
@@ -78,7 +79,9 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
         if (world instanceof ServerLevel) {
             ServerLevel serverWorld = (ServerLevel) world;
             world.increaseMaxEntityRadius(25);
-            ExtendedWorld worldSavedData = serverWorld.getDataStorage().get(tag -> new ExtendedWorld(), EXT_PROP_NAME);
+            // NOTE: as on 1.20.1, the stored tag is not read back here (the deserializer ignores it).
+            ExtendedWorld worldSavedData = serverWorld.getDataStorage().get(
+                    new SavedData.Factory<>(ExtendedWorld::new, (tag, registries) -> new ExtendedWorld(), null), EXT_PROP_NAME);
             if (worldSavedData != null) {
                 worldExt = worldSavedData;
                 worldExt.world = world;
@@ -605,7 +608,7 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
     //                    Write To NBT
     // ==================================================
     @Override
-    public CompoundTag save(CompoundTag nbtTagCompound) {
+    public CompoundTag save(CompoundTag nbtTagCompound, HolderLookup.Provider registries) {
         this.saveMobEventState(nbtTagCompound);
         this.saveDungeonState(nbtTagCompound);
         return nbtTagCompound;
@@ -632,13 +635,13 @@ public class ExtendedWorld extends SavedData implements INBTSerializable<Compoun
     }
 
     @Override
-    public void deserializeNBT(CompoundTag p_deserializeNBT_1_) {
+    public void deserializeNBT(HolderLookup.Provider registries, CompoundTag p_deserializeNBT_1_) {
         this.load(p_deserializeNBT_1_);
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        return this.save(new CompoundTag());
+    public CompoundTag serializeNBT(HolderLookup.Provider registries) {
+        return this.save(new CompoundTag(), registries);
     }
 
     public long getWorldSeed() {

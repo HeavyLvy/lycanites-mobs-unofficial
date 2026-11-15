@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.capabilities.entity;
 
+import com.lycanitesmobs.core.capabilities.ModAttachments;
 import net.minecraft.core.Holder;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
@@ -80,7 +81,7 @@ public class ExtendedEntity {
         }
 
         // Server Side:
-        ExtendedEntity iExtendedEntity = entity.getCapability(CapabilityProviderEntity.EXTENDED_ENTITY).orElse(new ExtendedEntity());
+        ExtendedEntity iExtendedEntity = entity.getData(ModAttachments.EXTENDED_ENTITY);
         if (iExtendedEntity.getEntity() != entity)
             iExtendedEntity.setEntity(entity);
         return iExtendedEntity;

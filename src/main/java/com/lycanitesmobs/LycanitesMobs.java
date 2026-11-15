@@ -1,5 +1,6 @@
 package com.lycanitesmobs;
 
+import com.lycanitesmobs.core.capabilities.ModAttachments;
 import java.util.Optional;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.minecraft.server.packs.PackSelectionConfig;
@@ -141,7 +142,7 @@ public class LycanitesMobs {
         modEventBus.addListener(this::addPackFinders);
         modEventBus.addListener(this::enqueueIMC);
         modEventBus.addListener(this::processIMC);
-        modEventBus.addListener(GameEventListener::onRegisterCapabilities);
+        ModAttachments.register(modEventBus);
         modEventBus.register(RegistryEvents.getInstance());
 
         PROXY.registerEvents(modEventBus);

@@ -7,8 +7,6 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.manager.ObjectManager;
 import com.lycanitesmobs.core.block.base.BlockFireBase;
-import com.lycanitesmobs.core.capabilities.entity.CapabilityProviderEntity;
-import com.lycanitesmobs.core.capabilities.entity.CapabilityProviderPlayer;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedEntity;
 import com.lycanitesmobs.core.capabilities.entity.ExtendedPlayer;
 import com.lycanitesmobs.core.data.config.ConfigExtra;
@@ -44,12 +42,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.manager.CreatureManager;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.EntityEvent.EntityConstructing;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
@@ -102,34 +98,13 @@ public class GameEventListener {
     // ==================================================
     @SubscribeEvent
     public void onPlayerClone(PlayerEvent.Clone event) {
-        event.getOriginal().reviveCaps();
         ExtendedPlayer extendedPlayer = ExtendedPlayer.getForPlayer(event.getOriginal());
         if (extendedPlayer != null) {
             extendedPlayer.backupPlayer();
         }
-        event.getOriginal().invalidateCaps();
     }
 
-    // ==================================================
-    //                Attach Capabilities
-    // ==================================================
-    @SubscribeEvent
-    public void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof Player) {
-            event.addCapability(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "player"), new CapabilityProviderPlayer());
-        }
-        if (!event.getObject().getCapability(CapabilityProviderEntity.EXTENDED_ENTITY).isPresent()) {
-            event.addCapability(ResourceLocation.fromNamespaceAndPath(LycanitesMobs.MODID, "entity"), new CapabilityProviderEntity());
-        }
-    }
 
-    // ==================================================
-    //                Register Capabilities
-    // ==================================================
-    public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
-        event.register(ExtendedEntity.class);
-        event.register(ExtendedPlayer.class);
-    }
 
     // ==================================================
     //                Entity Constructing

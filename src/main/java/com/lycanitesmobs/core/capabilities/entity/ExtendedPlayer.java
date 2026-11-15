@@ -1,5 +1,6 @@
 package com.lycanitesmobs.core.capabilities.entity;
 
+import com.lycanitesmobs.core.capabilities.ModAttachments;
 import com.lycanitesmobs.LycanitesMobs;
 import com.lycanitesmobs.core.data.info.creature.CreatureInfo;
 import com.lycanitesmobs.core.data.info.creature.CreatureKnowledge;
@@ -137,7 +138,7 @@ public class ExtendedPlayer {
         }
 
         // Server Side:
-        ExtendedPlayer iExtendedPlayer = player.getCapability(CapabilityProviderPlayer.EXTENDED_PLAYER).orElse(new ExtendedPlayer());
+        ExtendedPlayer iExtendedPlayer = player.getData(ModAttachments.EXTENDED_PLAYER);
         serverExtendedPlayers.put(player, iExtendedPlayer);
         if (iExtendedPlayer.getPlayer() != player)
             iExtendedPlayer.setPlayer(player);
